@@ -4,7 +4,7 @@ import shutil
 
 folder = r'E:\Storage\Coding\Flipper_Zero\Firmware\build-src'
 Build_path = folder + "\\dist\\f7-C\\"
-Firmware_base = rf"E:\\Storage\\Coding\\Flipper-Zero\\Firmware\\"
+Firmware_base = rf"E:\\Storage\\Coding\\Flipper_Zero\\Firmware\\"
 settings = folder + r"\fbt_options.py"
 commit = input("Whats your commit message?\nCommit Message: ")
 
