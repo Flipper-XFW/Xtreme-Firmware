@@ -43,6 +43,6 @@ def main():
     os.system(f"cd {Firmware_base} && ren {old_build} {ren}")
     os.system(f'git add * && git commit -m "{commit}"')
     zipfile = shutil.make_archive(os.path.join(Firmware_base, ren), 'zip', os.path.join(Firmware_base, ren))
-    print(zipfile)
     os.system(f'''gh release create {release} -R "ClaraCrazy/flipper-firmware" --generate-notes {zipfile}''')
+    os.remove(zipfile)
 main()
