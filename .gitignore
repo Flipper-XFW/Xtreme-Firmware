@@ -49,6 +49,9 @@ build/
 # Toolchain
 /toolchain
 
+# automate
+automate.py
+
 # openocd output file
 openocd.log
 
