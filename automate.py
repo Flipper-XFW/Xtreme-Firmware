@@ -24,7 +24,7 @@ def push_number(line):
     with open(os.path.join(settings), "r+") as src:
         file = src.read()
         src.seek(0)
-        newnum = int(line.split("-")[1].replace('"', "").replace("0", "", 3)) + 1
+        newnum = int(line.split("-")[1].replace('"', "", 2)) + 1
         newline = 'DIST_SUFFIX = "CC_CL-' + "0" * (4 -len(str(newnum))) + str(newnum) + '"'
         print(f"New Version: {newline}")
         src.write(file.replace(line, newline))
@@ -37,9 +37,9 @@ def main():
     print(ren)
     os.system(f' cd "{folder}" && powershell -command "./fbt updater_package"')
     os.system(f'move {os.path.join(Build_path + f"f7-update-{ren}")} {Firmware_base}')
-    old_build = Firmware_base + f"f7-update-{ren}"
-    new_build = Firmware_base + ren
-    os.system(f"ren {old_build} {new_build}")
+    old_build = f"f7-update-{ren}"
+    new_build = ren
+    os.system(f"cd {Firmware_base} && ren {old_build} {new_build}")
     os.system(f'git add * && git commit -m "{commit}"')
     zipfile = shutil.make_archive(ren, 'zip', new_build)
     print(zipfile)
