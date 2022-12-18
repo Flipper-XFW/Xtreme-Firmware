@@ -3,6 +3,8 @@ import re
 import shutil
 
 folder = r'E:\Storage\Coding\Flipper Zero\Firmware\build-src'
+Build_path = folder + "\\dist\\f7-C\\"
+Firmware_base = rf"E:\\Storage\\Coding\\Flipper-Zero\\Firmware\\"
 settings = folder + r"\fbt_options.py"
 commit = input("Whats your commit message?\nCommit Message: ")
 
@@ -32,10 +34,15 @@ def push_number(line):
 
 def main():
     ren = push_number(find_number())
+    print(ren)
     os.system(f' cd "{folder}" && powershell -command "./fbt updater_package"')
-    newfolder = rf"E:\\Storage\\Coding\\Flipper-Zero\\Firmware\\{ren}"
-    shutil.move(os.path.join(folder + f"\\dist\\f7-C\\f7-update-{ren}"), newfolder)
+    os.system(f'move {os.path.join(Build_path + f"f7-update-{ren}")} {Firmware_base}')
+    old_build = Firmware_base + f"f7-update-{ren}"
+    new_build = Firmware_base + ren
+    os.system(f"ren {old_build} {new_build}")
     os.system(f'git add * && git commit -m "{commit}"')
-    shutil.make_archive(ren, 'zip', newfolder)
-    os.system(f'''gh release create {ren.split('"')[1].split('"')[0]} -R "ClaraCrazy/flipper-firmware" --generate-notes {ren}.zip''')
+    zipfile = shutil.make_archive(ren, 'zip', new_build)
+    print(zipfile)
+    input()
+    os.system(f'''gh release create {ren.split('"')[1].split('"')[0]} -R "ClaraCrazy/flipper-firmware" --generate-notes {zipfile}''')
 main()
