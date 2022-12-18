@@ -60,3 +60,4 @@ openocd.log
 PVS-Studio.log
 
 .gdbinit
+buildReleasePATREON.sh
