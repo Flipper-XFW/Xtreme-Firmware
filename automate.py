@@ -30,18 +30,19 @@ def push_number(line):
         src.write(file.replace(line, newline))
         src.truncate()
         src.close()
-        return newline.split('"')[1].split('"')[0]
+        return newline.split('"')[1].split('"')[0], newnum
 
 def main():
-    ren = push_number(find_number())
+    numbers = push_number(find_number())
+    ren = numbers[0]
+    release = numbers[1]
     print(ren)
     os.system(f' cd "{folder}" && powershell -command "./fbt updater_package"')
     os.system(f'move {os.path.join(Build_path + f"f7-update-{ren}")} {Firmware_base}')
     old_build = f"f7-update-{ren}"
     os.system(f"cd {Firmware_base} && ren {old_build} {ren}")
     os.system(f'git add * && git commit -m "{commit}"')
-    zipfile = shutil.make_archive(ren, 'zip', os.path.join(Firmware_base, ren))
+    zipfile = shutil.make_archive(os.path.join(Firmware_base, ren), 'zip', os.path.join(Firmware_base, ren))
     print(zipfile)
-    input()
-    os.system(f'''gh release create {ren.split('"')[1].split('"')[0]} -R "ClaraCrazy/flipper-firmware" --generate-notes {zipfile}''')
+    os.system(f'''gh release create {release} -R "ClaraCrazy/flipper-firmware" --generate-notes {zipfile}''')
 main()
