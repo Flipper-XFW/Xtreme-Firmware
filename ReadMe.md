@@ -1,3 +1,6 @@
+## Custom Firmware, based on the RogueMaster fork.
+Mainly changing icons, animations & some other minor things. :)
+
 ## Build
 ```bash
 $ git clone --recursive https://github.com/ClaraCrazy/flipper-firmware.git
