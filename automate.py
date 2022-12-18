@@ -38,10 +38,9 @@ def main():
     os.system(f' cd "{folder}" && powershell -command "./fbt updater_package"')
     os.system(f'move {os.path.join(Build_path + f"f7-update-{ren}")} {Firmware_base}')
     old_build = f"f7-update-{ren}"
-    new_build = ren
-    os.system(f"cd {Firmware_base} && ren {old_build} {new_build}")
+    os.system(f"cd {Firmware_base} && ren {old_build} {ren}")
     os.system(f'git add * && git commit -m "{commit}"')
-    zipfile = shutil.make_archive(os.path.join(Firmware_base, ren), 'zip', new_build)
+    zipfile = shutil.make_archive(ren, 'zip', os.path.join(Firmware_base, ren))
     print(zipfile)
     input()
     os.system(f'''gh release create {ren.split('"')[1].split('"')[0]} -R "ClaraCrazy/flipper-firmware" --generate-notes {zipfile}''')
