@@ -10,7 +10,7 @@ This Firmware is a modified version of RM with some of my own Ideas added to it 
 ## List of changes:
 
 ```txt
-- Removed broken apps (bad apple, chess)
+- Removed broken apps (bad apple, chess, etc.)
 
 - Added multiple Animation profiles to fit your style
 - Added new API Routes for Locale settings
