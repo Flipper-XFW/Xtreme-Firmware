@@ -12,7 +12,6 @@ This Firmware is a modified version of RM with some of my own Ideas added to it 
 ```txt
 - Removed lots of animations due to personal choice
 - Removed broken apps (bad apple, chess)
-- Removed gpio apps I dont own modules for
 
 - Added new API Routes for Locale settings
 - Added scrolling view for long file names in browser
