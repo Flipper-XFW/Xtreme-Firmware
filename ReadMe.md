@@ -5,12 +5,16 @@
 
 This Firmware is a modified version of RM with some of my own Ideas added to it and some ignored stuff from the official one brought into it as well. Probably more bleeding edge than RM, but will always remove things that crash the flipper
 
+This might have some NSFW content, but since its a super tiny display dont expect too much.
+
 -----
 
 ## List of changes:
 
 ```txt
-- Removed broken apps (bad apple, chess)
+- Removed broken apps (bad apple, chess, etc.)
+
+- Updated some NFC stuff
 
 - Added multiple Animation profiles to fit your style
 - Added new API Routes for Locale settings
