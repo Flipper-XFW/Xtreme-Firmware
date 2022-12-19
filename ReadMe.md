@@ -1,6 +1,14 @@
 ## Custom Firmware, based on the RogueMaster fork.
+![3a369eda-33b5-492e-a3d8-19425ca83a8a](https://user-images.githubusercontent.com/55334727/208327285-07abf8e9-7f11-491e-8c17-6fbbae4a5752.png)
 
-List of changes:
+[RogueMaster Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins) | [Official Version](https://github.com/flipperdevices/flipperzero-firmware)
+
+This Firmware is a modified version of RM with some of my own Ideas added to it and some ignored stuff from the official one brought into it as well. Probably more bleeding edge than RM, but will always remove things that crash the flipper
+
+-----
+
+## List of changes:
+
 ```txt
 - Removed lots of animations due to personal choice
 - Removed broken apps (bad apple, chess)
