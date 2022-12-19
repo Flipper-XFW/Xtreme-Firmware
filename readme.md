@@ -18,6 +18,7 @@ I'm currently working on getting my own custom animation style done. This is goi
 ```txt
 - Removed broken apps (bad apple, chess, etc.)
 
+- Updated Compiler to now handle all non-compiled faps during build, accept WIP projects and just stfu about non-fatal problems
 - Updated some NFC stuff
 
 - Added multiple Animation profiles to fit your style
