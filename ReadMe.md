@@ -20,7 +20,7 @@ This Firmware is a modified version of RM with some of my own Ideas added to it 
 ## Build
 
 ```bash
-$ git clone --recursive https://github.com/ClaraCrazy/flipper-firmware.git
+$ git clone --recursive https://github.com/ClaraCrazy/Flipper-Xtreme.git
 $ cd flipperzero-firmware-wPlugins/
 $ ./fbt updater_package
 
