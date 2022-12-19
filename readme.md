@@ -22,9 +22,12 @@ I'm currently working on getting my own custom animation style done. This is goi
 - Updated Compiler to accept WIP SDK 
 - Updated Compiler to just stfu about non-fatal problems
 - Updated some NFC stuff
+- Updated Weather App
+- Updated 
 
 - Added multiple Animation profiles to fit your style
 - Added new API Routes for Locale settings
+- Added Applications to new Locale setting
 - Added scrolling view for long file names in browser
 ```
 
