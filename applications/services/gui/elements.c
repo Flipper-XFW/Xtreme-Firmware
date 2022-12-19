@@ -532,6 +532,20 @@ void elements_bubble_str(
     canvas_draw_line(canvas, x2, y2, x3, y3);
 }
 
+void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width) {
+    furi_assert(canvas);
+    furi_assert(string);
+
+    uint16_t len_px = canvas_string_width(canvas, furi_string_get_cstr(string));
+    if(len_px > width) {
+        width -= canvas_string_width(canvas, "...");
+        do {
+            furi_string_left(string, furi_string_size(string) - 1);
+            len_px = canvas_string_width(canvas, furi_string_get_cstr(string));
+        } while(len_px > width);
+        furi_string_cat(string, "...");
+    }
+}
 
 void elements_string_fit_width_trunc(Canvas* canvas, FuriString* string, uint8_t width) {
     furi_assert(canvas);
@@ -545,7 +559,6 @@ void elements_string_fit_width_trunc(Canvas* canvas, FuriString* string, uint8_t
         } while(len_px > width);
     }
 }
-
 
 void elements_text_box(
     Canvas* canvas,
