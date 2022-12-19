@@ -200,7 +200,6 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
  */
 void elements_string_fit_width_trunc(Canvas* canvas, FuriString* string, uint8_t width);
 
-
 /** Draw text box element
  *
  * @param       canvas          Canvas instance
