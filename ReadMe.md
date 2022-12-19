@@ -10,9 +10,9 @@ This Firmware is a modified version of RM with some of my own Ideas added to it 
 ## List of changes:
 
 ```txt
-- Removed lots of animations due to personal choice
 - Removed broken apps (bad apple, chess)
 
+- Added multiple Animation profiles to fit your style
 - Added new API Routes for Locale settings
 - Added scrolling view for long file names in browser
 ```
