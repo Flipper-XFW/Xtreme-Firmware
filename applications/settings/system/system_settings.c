@@ -77,8 +77,8 @@ const char* const mesurement_units_text[] = {
 };
 
 const uint32_t mesurement_units_value[] = {
-    LocaleMeasurementUnitMetric,
-    LocaleMeasurementUnitImperial,
+    LocaleMeasurementUnitsMetric,
+    LocaleMeasurementUnitsImperial,
 };
 
 static void mesurement_units_changed(VariableItem* item) {
@@ -145,7 +145,7 @@ SystemSettings* system_settings_alloc() {
     uint8_t value_index;
     app->var_item_list = variable_item_list_alloc();
 
-  item = variable_item_list_add(
+    item = variable_item_list_add(
         app->var_item_list,
         "Units",
         COUNT_OF(mesurement_units_text),
