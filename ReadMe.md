@@ -1,7 +1,17 @@
 ## Custom Firmware, based on the RogueMaster fork.
-Mainly changing icons, animations & some other minor things. :)
+
+List of changes:
+```txt
+- Removed lots of animations due to personal choice
+- Removed broken apps (bad apple, chess)
+- Removed gpio apps I dont own modules for
+
+- Added new API Routes for Locale settings
+- Added scrolling view for long file names in browser
+```
 
 ## Build
+
 ```bash
 $ git clone --recursive https://github.com/ClaraCrazy/flipper-firmware.git
 $ cd flipperzero-firmware-wPlugins/
