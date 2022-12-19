@@ -107,6 +107,7 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
                 temp_x2 = 40;
             }
         }
+
         canvas_draw_str_aligned(canvas, temp_x1, 47, AlignRight, AlignTop, buffer);
         canvas_draw_circle(canvas, temp_x2, 46, 1);
     }
