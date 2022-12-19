@@ -1362,7 +1362,7 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             break;
         }
         furi_string_free(folder);
-
+        // First remove nfc device file if it was saved
         // Open file
         if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
         // Write header
@@ -1611,7 +1611,11 @@ bool nfc_device_delete(NfcDevice* dev, bool use_load_path) {
             furi_string_set(file_path, dev->load_path);
         } else {
             furi_string_printf(
-                file_path, "%s/%s%s", NFC_APP_FOLDER, dev->dev_name, NFC_APP_EXTENSION);
+                file_path,
+                "%s/%s%s",
+                furi_string_get_cstr(dev->folder),
+                dev->dev_name,
+                NFC_APP_EXTENSION);
         }
         if(!storage_simply_remove(dev->storage, furi_string_get_cstr(file_path))) break;
         // Delete shadow file if it exists
