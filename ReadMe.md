@@ -5,7 +5,11 @@
 
 This Firmware is a modified version of RM with some of my own Ideas added to it and some ignored stuff from the official one brought into it as well. Probably more bleeding edge than RM, but will always remove things that crash the flipper
 
-This might have some NSFW content, but since its a super tiny display dont expect too much.
+-----
+
+Note:
+
+I'm currently working on getting my own custom animation style done. This is going to be nsfw, as that suits me quite well. If you wanna help, lmk!
 
 -----
 
@@ -14,14 +18,32 @@ This might have some NSFW content, but since its a super tiny display dont expec
 ```txt
 - Removed broken apps (bad apple, chess, etc.)
 
+- Updated Compiler to now handle all non-compiled faps during build
+- Updated Compiler to accept WIP SDK 
+- Updated Compiler to just stfu about non-fatal problems
 - Updated some NFC stuff
+- Updated Weather App
+- Updated 
 
 - Added multiple Animation profiles to fit your style
 - Added new API Routes for Locale settings
+- Added Applications to new Locale setting
 - Added scrolling view for long file names in browser
 ```
 
-## Build
+----
+
+## Known Bugs:
+
+```txt
+- Clock not yet synced with locale
+- Wii EC can crash due to Null Pointer
+- subghz brutemap not working
+```
+
+----
+
+## Build it yourself:
 
 ```bash
 $ git clone --recursive https://github.com/ClaraCrazy/Flipper-Xtreme.git
