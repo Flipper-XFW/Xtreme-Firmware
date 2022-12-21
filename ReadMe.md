@@ -46,7 +46,6 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 - Honda Keys (CVE-2022-27254)
 - Multiple Animation profiles to fit your style
 - New API Routes for Locale settings
-- Applications now use the new Locale setting
 - Scrolling view for long file names in browser
 - Tamagotchi rom
 ```
@@ -54,6 +53,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 [Updated]
 
 - All graphics
+- Applications now use the new Locale setting
 - Compiler now handles all non-compiled faps during build
 - Compiler now accepts WIP SDK 
 - Compiler just stfu about non-fatal problems
