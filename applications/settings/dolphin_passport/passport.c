@@ -9,40 +9,27 @@
 #include "../desktop_settings/desktop_settings_app.h"
 #include "math.h"
 
-#define MOODS_TOTAL 1
-#define BUTTHURT_MAX 14
+#define MOODS_TOTAL 3
+#define BUTTHURT_MAX 3
 
-static const Icon* const portrait_happy[7] = {
+static const Icon* const portrait_happy[BUTTHURT_MAX] = {
     &I_flipper};
-// static const Icon* const portrait_ok[MOODS_TOTAL] = {
+// &I_passport_happy1_46x49,
+// &I_passport_happy2_46x49,
+// &I_passport_happy3_46x49};
+static const Icon* const portrait_ok[BUTTHURT_MAX] = {
+    &I_flipper};
 // &I_passport_okay1_46x49,
 // &I_passport_okay2_46x49,
 // &I_passport_okay3_46x49};
-// static const Icon* const portrait_bad[MOODS_TOTAL] = {
+static const Icon* const portrait_bad[BUTTHURT_MAX] = {
+    &I_flipper};
 // &I_passport_bad1_46x49,
 // &I_passport_bad2_46x49,
 // &I_passport_bad3_46x49};
 
-// static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
-static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
-
-static const char* const moods[16] = {
-    "Stoned",
-    "Baked",
-    "Ripped",
-    "Joyful",
-    "Happy",
-    "Satisfied",
-    "Relaxed",
-    "Nostalgic",
-    "Okay",
-    "Tired",
-    "Bored",
-    "Sad",
-    "Annoyed",
-    "Upset",
-    "Angry",
-    "Furious"};
+static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
+// static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
 
 static void input_callback(InputEvent* input, void* ctx) {
     FuriSemaphore* semaphore = ctx;
@@ -54,17 +41,21 @@ static void input_callback(InputEvent* input, void* ctx) {
 
 static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
-    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(desktop_settings);
 
-    char level_str[12];
-    char xp_str[12];
-    char mood_str[20];
+    char level_str[20];
+    char mood_str[32];
     uint8_t mood = 0;
-    uint8_t moodStrIndex = stats->butthurt;
-    if(desktop_settings->is_dumbmode) moodStrIndex = moodStrIndex + 4;
-    snprintf(mood_str, 20, "Mood: %s", moods[moodStrIndex]);
-    mood = 0; // DONT NEED DIFFERENT PICS BASED ON MOOD
+
+    if(stats->butthurt <= 4) {
+        mood = 0;
+        snprintf(mood_str, 20, "Mood: Wet");
+    } else if(stats->butthurt <= 9) {
+        mood = 1;
+        snprintf(mood_str, 20, "Mood: Horny");
+    } else {
+        mood = 2;
+        snprintf(mood_str, 20, "Mood: Desperate");
+    }
 
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
