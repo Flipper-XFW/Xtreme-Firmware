@@ -43,18 +43,19 @@ static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
 
     char level_str[20];
+    char xp_str[12];
     char mood_str[32];
     uint8_t mood = 0;
 
     if(stats->butthurt <= 4) {
         mood = 0;
-        snprintf(mood_str, 20, "Mood: Wet");
+        snprintf(mood_str, 20, "Status: Wet");
     } else if(stats->butthurt <= 9) {
         mood = 1;
-        snprintf(mood_str, 20, "Mood: Horny");
+        snprintf(mood_str, 20, "Status: Horny");
     } else {
         mood = 2;
-        snprintf(mood_str, 20, "Mood: Desperate");
+        snprintf(mood_str, 20, "Status: Desperate");
     }
 
     uint32_t xp_progress = 0;
@@ -89,6 +90,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 22, mood_str);
     canvas_set_color(canvas, ColorBlack);
+
     canvas_draw_str(canvas, 58, 34, level_str);
     canvas_set_font(canvas, FontBatteryPercent);
     canvas_draw_str(canvas, 58, 42, xp_str);
