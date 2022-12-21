@@ -285,7 +285,54 @@ type: parsed
 protocol: NECext
 address: 10 E7 00 00
 command: 41 BE 00 00
-
+#
+name: POWER
+type: parsed
+protocol: NECext
+address: 02 A0 00 00
+command: 80 7F 00 00
+#
+name: VOL+
+type: parsed
+protocol: NECext
+address: 02 A0 00 00
+command: AA 55 00 00
+#
+name: VOL-
+type: parsed
+protocol: NECext
+address: 02 A0 00 00
+command: 6A 95 00 00
+#
+name: MUTE
+type: parsed
+protocol: NECext
+address: 02 A0 00 00
+command: EA 15 00 00
+# Standby
+name: POWER
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 16 00 00 00
+# 
+name: VOL+
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 13 00 00 00
+# 
+name: VOL-
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 0B 00 00 00
+# 
+name: MUTE
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 06 00 00 00
 #
 name: POWER
 type: parsed
