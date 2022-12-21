@@ -42,6 +42,9 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 - Removed broken apps (bad apple, chess, etc.)
 - Removed unused code from FAPs and system calls
 
+- Fixed leveling system
+- Fixed Mood system
+
 - Updated all graphics
 - Updated Compiler to now handle all non-compiled faps during build
 - Updated Compiler to accept WIP SDK 
