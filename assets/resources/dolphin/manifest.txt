@@ -120,7 +120,7 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: lvl_27
+Name: lvl_29
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
