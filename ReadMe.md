@@ -61,7 +61,6 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ## Known Bugs:
 
 ```txt
-- Clock not yet synced with locale
 - Wii EC can crash due to Null Pointer
 - subghz brutemap not working
 ```
