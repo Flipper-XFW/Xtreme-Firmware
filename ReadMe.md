@@ -64,14 +64,14 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ```txt
 [Fixed]
 
-- Fixed leveling system
-- Fixed Mood system
+- Leveling system
+- Mood system
 ```
 ```txt
 [REMOVED]
 
-- Removed broken apps (bad apple, chess, etc.)
-- Removed unused code from FAPs and system calls
+- Broken apps (bad apple, chess, etc.)
+- Unused code from FAPs and system calls
 ```
 
 ----
