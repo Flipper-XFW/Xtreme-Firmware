@@ -38,25 +38,40 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mention all those here. I will only mention **MY** changes
 
 ```txt
+[Added]
 
-- Removed broken apps (bad apple, chess, etc.)
-- Removed unused code from FAPs and system calls
+- Jamming Files
+- Custom subghz presets
+- Subghz and IR signal replication via gpio (allows using external antenas and emitters)
+- Honda Keys (CVE-2022-27254)
+- Multiple Animation profiles to fit your style
+- New API Routes for Locale settings
+- Applications now use the new Locale setting
+- Scrolling view for long file names in browser
+- Tamagotchi rom
+```
+```txt
+[Updated]
+
+- All graphics
+- Compiler now handles all non-compiled faps during build
+- Compiler now accepts WIP SDK 
+- Compiler just stfu about non-fatal problems
+- Some further NFC stuff
+- Weather App
+- Applications now use below mentioned API Routes
+```
+```txt
+[Fixed]
 
 - Fixed leveling system
 - Fixed Mood system
+```
+```txt
+[REMOVED]
 
-- Updated all graphics
-- Updated Compiler to now handle all non-compiled faps during build
-- Updated Compiler to accept WIP SDK 
-- Updated Compiler to just stfu about non-fatal problems
-- Updated some further NFC stuff
-- Updated Weather App
-- Updated Applications to use below mentioned API Routes
-
-- Added multiple Animation profiles to fit your style
-- Added new API Routes for Locale settings
-- Added Applications to new Locale setting
-- Added scrolling view for long file names in browser
+- Removed broken apps (bad apple, chess, etc.)
+- Removed unused code from FAPs and system calls
 ```
 
 ----
