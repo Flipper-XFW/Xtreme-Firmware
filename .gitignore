@@ -60,4 +60,8 @@ openocd.log
 PVS-Studio.log
 
 .gdbinit
+
 PATREONbuildRelease.sh
+RM*-*.tgz
+RM*-*.zip
+RM*-*-*/
