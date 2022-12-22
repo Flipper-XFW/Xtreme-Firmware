@@ -14,7 +14,7 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "CC_CL-0022_12222022"
+DIST_SUFFIX = "CC_CL-0023_12222022"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
