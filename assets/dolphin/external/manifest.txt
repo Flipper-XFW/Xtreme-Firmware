@@ -81,21 +81,21 @@ Weight: 7
 Name: lvl_12
 Min butthurt: 0
 Max butthurt: 3
-Min level: 1
+Min level: 12
 Max level: 30
 Weight: 7
 
 Name: lvl_13
 Min butthurt: 0
 Max butthurt: 3
-Min level: 1
+Min level: 13
 Max level: 30
 Weight: 7
 
 Name: lvl_14
 Min butthurt: 0
 Max butthurt: 3
-Min level: 12
+Min level: 14
 Max level: 30
 Weight: 7
 
