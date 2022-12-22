@@ -14,10 +14,13 @@ This firmware is a complete overhaul of "RM" (RogueMaster), with changes on all 
 <h2 align="center">What makes it special?</h2>
 
 This firmware is based on RogueMaster (I know, should have forked unleashed, too late now). It combines the bleeding-edge PRs of Rogues firmware with actual understanding of whats going on, fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned in RM.
-
+<br><br>
 - The focus of this firmware is functionality & stability: If an App doesnt work, its gone
+
 - Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
+
 - Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. The last messy file I have to get around to clean would be `applications\system\dolphin\helpers\dolphin-state.c`, in case anyone wants to help
+
 - Up2Date: This firmware receives updates from a few repositories, not just from its Upstream. If there are functional, but yet un-merged Pull requests on another flipper firmware that are good, they will be in here!
 
 
