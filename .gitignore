@@ -63,5 +63,6 @@ PVS-Studio.log
 
 RM*-*.tgz
 RM*-*.zip
+RM*-*.txt
 RM*-*-*/
 PATREONbuildRelease.sh
