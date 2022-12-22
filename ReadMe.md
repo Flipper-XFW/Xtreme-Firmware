@@ -107,19 +107,19 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 <h2 align="center">Build it yourself:</h2>
 
 ```bash
-$ To download the needed tools:
+To download the needed tools:
 $ git clone --recursive https://github.com/ClaraCrazy/Flipper-Xtreme.git
-$ cd flipperzero-firmware-wPlugins/
+$ cd Flipper-Xtreme/
 
-$ To flash directly to the Flipper (Needs to be connected via USB, qFlipper closed)
-% ./fbt flash_usb
+To flash directly to the Flipper (Needs to be connected via USB, qFlipper closed)
+$ ./fbt flash_usb
 
-$ To just compile firmware
+To just compile firmware
 $ ./fbt updater_package
 
-# If building FAPS:
+If building FAPS:
 $ ./fbt fap_dist
 
-# If building image assets:
+If building image assets:
 $ ./fbt resources icons dolphin_ext
 ```
