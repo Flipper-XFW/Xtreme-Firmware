@@ -1031,6 +1031,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                         deactivated = true;
                     }
                     furi_hal_nfc_sleep();
+                    deactivated = true;
                 }
                 if(!is_key_b_found) {
                     is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
