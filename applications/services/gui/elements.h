@@ -192,13 +192,24 @@ void elements_bubble_str(
  */
 void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width);
 
-/** Trim string buffer to fit width in pixels. If the string is longer it truncates without ellipsis (...)
+/** Draw scrollable text line
  *
- * @param   canvas  Canvas instance
- * @param   string  string to trim
- * @param   width   max width
+ * @param      canvas    The canvas
+ * @param[in]  x         X coordinate
+ * @param[in]  y         Y coordinate
+ * @param[in]  width     The width
+ * @param      string    The string
+ * @param[in]  scroll    The scroll counter: 0 - no scroll, any other number - scroll. Just count up, everything else will be calculated on the inside.
+ * @param[in]  ellipsis  The ellipsis flag: true to add ellipse
  */
-void elements_string_fit_width_trunc(Canvas* canvas, FuriString* string, uint8_t width);
+void elements_scrollable_text_line(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    FuriString* string,
+    size_t scroll,
+    bool ellipsis);
 
 /** Draw text box element
  *
