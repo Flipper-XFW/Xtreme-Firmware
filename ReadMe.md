@@ -1,14 +1,17 @@
-## XFW - `Xtrme Firmware` for the Flipper Zero
-![3a369eda-33b5-492e-a3d8-19425ca83a8a](https://user-images.githubusercontent.com/55334727/208327285-07abf8e9-7f11-491e-8c17-6fbbae4a5752.png)
+<h1 align="center">XFW - <code>Xtrme Firmware</code> for the Flipper Zero</h1>
 
-[Official Version](https://github.com/flipperdevices/flipperzero-firmware)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/55334727/209031152-efbca66c-3fe0-41b5-a860-e0d7522a9279.png">
+</p>
 
+[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself)
+-----
 
 This firmware is a complete overhaul of "RM" (RogueMaster), with changes on all graphics, `disgusting` code and more. Xtreme brings you the most for your little flipper companion.
 
 -----
-
-## What makes it special?
+<br>
+<h2 align="center">What makes it special?</h2>
 
 This firmware is based on RogueMaster (I know, should have forked unleashed, too late now). It combines the bleeding-edge PRs of Rogues firmware with actual understanding of whats going on, fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned in RM.
 
@@ -19,8 +22,8 @@ This firmware is based on RogueMaster (I know, should have forked unleashed, too
 
 
 -----
-
-## Animations:
+<br>
+<h2 align="center">Animations:</h2>
 
 This firmware contains NSFW animations. No, actually it consisnts purely of those in stock configuration. If you dont like that, There will also be an SFW version soon.
 
@@ -31,9 +34,10 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 | 1-10  | Try harder. Just sexy clothes |
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
------
 
-## List of changes:
+-----
+<br>
+<h2 align="center">List of changes:</h2>
 
 Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mention all those here. I will only mention **MY** changes
 
@@ -75,8 +79,8 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ```
 
 ----
-
-## Known Bugs:
+<br>
+<h2 align="center">Known Bugs:</h2>
 
 ```txt
 - Wii EC can crash due to Null Pointer
@@ -84,12 +88,30 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ```
 
 ----
+<br>
+<h2 align="center">Install:</h2>
 
-## Build it yourself:
+- Download the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases)
+- Extract the archive. Inside you will find a readme, alternate animations in a folder labelled "Animations" and a folder for your Firmware
+- Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
+- On the Flipper, hit the `Arrow Down` button, this will get you to the file menu. Hit `Arrow Left` once, and then simply search for your updates folder
+- Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called `Update`
+
+- Enjoy!
+
+----
+<br>
+<h2 align="center">Build it yourself:</h2>
 
 ```bash
+$ To download the needed tools:
 $ git clone --recursive https://github.com/ClaraCrazy/Flipper-Xtreme.git
 $ cd flipperzero-firmware-wPlugins/
+
+$ To flash directly to the Flipper (Needs to be connected via USB, qFlipper closed)
+% ./fbt flash_usb
+
+$ To just compile firmware
 $ ./fbt updater_package
 
 # If building FAPS:
