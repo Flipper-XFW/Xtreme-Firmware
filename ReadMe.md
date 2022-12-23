@@ -49,11 +49,12 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ```txt
 [Added]
 
+- SFW Mode
 - Jamming Files
 - Custom subghz presets
 - Subghz and IR signal replication via gpio (allows using external antenas and emitters)
 - Honda Keys (CVE-2022-27254)
-- Multiple Animation profiles to fit your style
+- NSFW Animations tied to the level system. Read more above
 - New API Routes for Locale settings
 - Scrolling view for long file names in browser
 - Tamagotchi rom
@@ -79,6 +80,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ```txt
 [REMOVED]
 
+- Unused Dummy Mode
 - Broken apps (bad apple, chess, etc.)
 - Unused code from FAPs and system calls
 ```
