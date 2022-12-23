@@ -1,0 +1,33 @@
+[submodule "lib/mlib"]
+	path = lib/mlib
+	url = https://github.com/P-p-H-d/mlib.git
+[submodule "lib/STM32CubeWB"]
+	path = lib/STM32CubeWB
+	url = https://github.com/Flipper-Zero/STM32CubeWB.git
+[submodule "lib/littlefs"]
+	path = lib/littlefs
+	url = https://github.com/littlefs-project/littlefs.git
+[submodule "lib/nanopb"]
+	path = lib/nanopb
+	url = https://github.com/nanopb/nanopb.git
+[submodule "assets/protobuf"]
+	path = assets/protobuf
+	url = https://github.com/flipperdevices/flipperzero-protobuf.git
+[submodule "lib/libusb_stm32"]
+	path = lib/libusb_stm32
+	url = https://github.com/flipperdevices/libusb_stm32.git
+[submodule "lib/FreeRTOS-Kernel"]
+	path = lib/FreeRTOS-Kernel
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git
+[submodule "lib/microtar"]
+	path = lib/microtar
+	url = https://github.com/amachronic/microtar.git
+[submodule "lib/mbedtls"]
+	path = lib/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git
+[submodule "lib/cxxheaderparser"]
+	path = lib/cxxheaderparser
+	url = https://github.com/robotpy/cxxheaderparser.git
+[submodule "applications/plugins/dap_link/lib/free-dap"]
+	path = applications/plugins/dap_link/lib/free-dap
+	url = https://github.com/ataradov/free-dap.git
