@@ -14,36 +14,10 @@
 #define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-int level_array[] = {100, 200, 300, 450, 600, 750, 950, 1150, 1350, 1600, 1850, 2100, 2400, 2700, 3000, 3350, 3700, 4050, 4450, 4850, 5250, 5700, 6150, 6600, 7100, 7600, 8100, 8650, 9200};
-#define LEVEL2_THRESHOLD 100
-#define LEVEL3_THRESHOLD 200
-#define LEVEL4_THRESHOLD 300
-#define LEVEL5_THRESHOLD 450
-#define LEVEL6_THRESHOLD 600
-#define LEVEL7_THRESHOLD 750
-#define LEVEL8_THRESHOLD 950
-#define LEVEL9_THRESHOLD 1150
-#define LEVEL10_THRESHOLD 1350
-#define LEVEL11_THRESHOLD 1600
-#define LEVEL12_THRESHOLD 1850
-#define LEVEL13_THRESHOLD 2100
-#define LEVEL14_THRESHOLD 2400
-#define LEVEL15_THRESHOLD 2700
-#define LEVEL16_THRESHOLD 3000
-#define LEVEL17_THRESHOLD 3350
-#define LEVEL18_THRESHOLD 3700
-#define LEVEL19_THRESHOLD 4050
-#define LEVEL20_THRESHOLD 4450
-#define LEVEL21_THRESHOLD 4850
-#define LEVEL22_THRESHOLD 5250
-#define LEVEL23_THRESHOLD 5700
-#define LEVEL24_THRESHOLD 6150
-#define LEVEL25_THRESHOLD 6600
-#define LEVEL26_THRESHOLD 7100
-#define LEVEL27_THRESHOLD 7600
-#define LEVEL28_THRESHOLD 8100
-#define LEVEL29_THRESHOLD 8650
-#define LEVEL30_THRESHOLD 9200
+int level_array[30] = {100,  200,  300,  450,  600,  750,  950,  1150, 1350, 1600,
+                       1850, 2100, 2400, 2700, 3000, 3350, 3700, 4050, 4450, 4850,
+                       5250, 5700, 6150, 6600, 7100, 7600, 8100, 8650, 9200};
+
 #define BUTTHURT_MAX 14
 #define BUTTHURT_MIN 0
 
@@ -108,8 +82,8 @@ uint64_t dolphin_state_timestamp() {
 }
 
 bool dolphin_state_is_levelup(uint32_t icounter) {
-    for (int i = 0; i < 29; ++i) {
-        if ((icounter == level_array[i])) {
+    for (int i = 0; i<30; ++i) {
+        if ((icounter = level_array[i])) {
             return true;
         }
     };
@@ -117,34 +91,32 @@ bool dolphin_state_is_levelup(uint32_t icounter) {
 }
 
 uint8_t dolphin_get_level(uint32_t icounter) {
-    uint32_t threshold = 0;
-    for (int i = 0; i < 29; ++i) {
-        if (icounter <= level_array[i]) {
-            return i;
-        }
-    };
-    return 30;
+for (int i = 0; i < 29; ++i) {
+    if (icounter <= level_array[i]) {
+        return i + 1;
+    }
+}
+return 30;
 }
 
 uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
-if (level_array[0] <= icounter){
-    return icounter;
-}else{
-    for (int i = 1; i < 29; ++i) {
-        if (icounter <= level_array[i]) {
-            return level_array[i] - icounter + 1;
+    if(level_array[0] > icounter) {
+        for(int i = 1; i < 29; ++i) {
+            if(icounter <= level_array[i]) {
+                return level_array[i] - icounter + 1;
+            }
         }
     }
-}
+    return icounter;
 }
 
 uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
-for (int i = 0; i < 29; ++i) {
-    if (icounter <= level_array[i]) {
-        return level_array[i] - icounter;
+    for(int i = 0; i < 29; ++i) {
+        if(icounter <= level_array[i]) {
+            return level_array[i] - icounter;
+        }
     }
-}
-return (uint32_t)-1 - icounter;
+    return (uint32_t)-1 - icounter;
 }
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
