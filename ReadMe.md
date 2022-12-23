@@ -19,7 +19,7 @@ This firmware is based on RogueMaster (I know, should have forked unleashed, too
 
 - Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
 
-- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. The last messy file I have to get around to clean would be `applications\system\dolphin\helpers\dolphin-state.c`, in case anyone wants to help
+- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. I invite you all to compare the `applications\services\dolphin\helpers\dolphin-state.c`, in case anyone wants to help
 
 - Up2Date: This firmware receives updates from a few repositories, not just from its Upstream. If there are functional, but yet un-merged Pull requests on another flipper firmware that are good, they will be in here!
 
