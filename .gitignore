@@ -49,9 +49,6 @@ build/
 # Toolchain
 /toolchain
 
-# automate
-automate.py
-
 # openocd output file
 openocd.log
 
@@ -61,8 +58,8 @@ PVS-Studio.log
 
 .gdbinit
 
-RM*-*.tgz
-RM*-*.zip
-RM*-*.txt
-RM*-*-*/
-PATREONbuildRelease.sh
+
+# XFW-specific:
+
+# Automate files, etc
+automate.py
