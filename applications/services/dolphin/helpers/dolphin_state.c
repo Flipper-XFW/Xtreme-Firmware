@@ -83,7 +83,7 @@ uint64_t dolphin_state_timestamp() {
 
 bool dolphin_state_is_levelup(uint32_t icounter) {
     for (int i = 0; i<30; ++i) {
-        if ((icounter = level_array[i])) {
+        if ((icounter == level_array[i])) {
             return true;
         }
     };
