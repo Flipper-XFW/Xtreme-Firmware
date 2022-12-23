@@ -28,7 +28,7 @@ This firmware is based on RogueMaster (I know, should have forked unleashed, too
 <br>
 <h2 align="center">Animations:</h2>
 
-This firmware contains NSFW animations. No, actually it consisnts purely of those in stock configuration. If you dont like that, we removed the "Dummy mode" as it serves no purpose, and switched with an SFW toggle. From the main menu, hit `Arrow UP` and select SFW mode. (This is a temporary solution and a proper FAP for handling SFW mode with multiple animations is in the making)
+This firmware contains NSFW animations. No, actually it consisnts purely of those in stock configuration. 
 
 The animations are tied to the level system. Each level you reach, unlocks a new animation. The higher your level, the more lewd it will become. Rumors have it, I'm  to be found in at least one of those too
 
@@ -37,6 +37,8 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 | 1-10  | Try harder. Just sexy clothes |
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
+
+If you dont like that, we removed the "Dummy mode" as it serves no purpose, and switched with an SFW toggle. From the main menu, hit `Arrow UP` and select SFW mode. (This is a temporary solution and a proper FAP for handling SFW mode with multiple animations is in the making)
 
 -----
 <br>
