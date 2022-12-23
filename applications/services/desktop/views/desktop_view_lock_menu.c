@@ -87,9 +87,9 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             // str = "Games Mode";
         } else if(i == DesktopLockMenuIndexDummy) {
             if(m->dummy_mode) {
-                str = "Brainiac Mode";
+                str = "NSFW Mode";
             } else {
-                str = "Dummy Mode";
+                str = "SFW Mode";
             }
         }
 
