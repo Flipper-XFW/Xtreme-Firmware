@@ -13,7 +13,10 @@ class GitVersion:
         self.source_dir = source_dir
 
     def get_version_info(self):
-        commit = self._exec_git("rev-parse --short HEAD") or "unknown"
+        try:        
+            commit = self._exec_git("rev-parse --short HEAD")
+        except:
+            commit == "Unknown"
 
         dirty = False
         try:
