@@ -11,12 +11,20 @@ from datetime import date, datetime
 class GitVersion:
     def __init__(self, source_dir):
         self.source_dir = source_dir
+        self.gitlist = [("commit", "rev-parse --short HEAD"), ("branch", "rev-parse --abbrev-ref") , ("branch_num", "rev-list -count HEAD")]
 
     def get_version_info(self):
-        try:        
-            commit = self._exec_git("rev-parse --short HEAD")
-        except:
-            commit == "Unknown"
+        commit = branch = branch_num = "Unknown"
+
+        # We dont use an `or` in commands that we expect to fail. It will serve no function.
+        # We also dont try;exept an entire block of code. This is bad practise. We only try the single part that we expect to fail!
+        # Furthermore, traceback.format_exc() is a thing. Fucking use it. JFC
+
+        for git_tuple in self.gitlist:
+            try:
+                exec(f"{git_tuple[0]} = {self._exec_git(git_tuple[1])}")
+            except:
+                exec(f"{git_tuple[0]} = Unknown")
 
         dirty = False
         try:
@@ -27,18 +35,6 @@ class GitVersion:
 
         # If WORKFLOW_BRANCH_OR_TAG is set in environment, is has precedence
         # (set by CI)
-        branch = (
-            os.environ.get("WORKFLOW_BRANCH_OR_TAG", None)
-            or self._exec_git("rev-parse --abbrev-ref HEAD")
-            or "unknown"
-        )
-
-        branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
-
-        version = (
-            os.environ.get("DIST_SUFFIX", None)
-            or "unknown"
-        )
 
         custom_fz_name = (
             os.environ.get("CUSTOM_FLIPPER_NAME", None)
