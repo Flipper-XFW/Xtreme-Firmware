@@ -58,7 +58,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
         } else if(event->key == InputKeyDown) {
             main_view->callback(DesktopMainEventOpenArchive, main_view->context);
         } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
+            main_view->callback(DesktopMainEventOpenClock, main_view->context);
         }
         // Right key is handled by animation manager
         } else if(event->type == InputTypeLong) {
