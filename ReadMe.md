@@ -1,10 +1,10 @@
-<h1 align="center">XFW - <code>Xtrme Firmware</code> for the Flipper Zero</h1>
+<h1 align="center">XFW - <code>Xtreme Firmware</code> for the Flipper Zero</h1>
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/55334727/209031152-efbca66c-3fe0-41b5-a860-e0d7522a9279.png">
 </p>
 
-[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself)
+[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/mC2FxbYSMr)
 -----
 
 This firmware is a complete overhaul of "RM" (RogueMaster), with changes on all graphics, `disgusting` code and more. Xtreme brings you the most for your little flipper companion.
@@ -19,7 +19,7 @@ This firmware is based on RogueMaster (I know, should have forked unleashed, too
 
 - Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
 
-- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. The last messy file I have to get around to clean would be `applications\system\dolphin\helpers\dolphin-state.c`, in case anyone wants to help
+- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. I invite you all to compare the `applications\services\dolphin\helpers\dolphin-state.c`, in case anyone wants to help
 
 - Up2Date: This firmware receives updates from a few repositories, not just from its Upstream. If there are functional, but yet un-merged Pull requests on another flipper firmware that are good, they will be in here!
 
@@ -28,7 +28,7 @@ This firmware is based on RogueMaster (I know, should have forked unleashed, too
 <br>
 <h2 align="center">Animations:</h2>
 
-This firmware contains NSFW animations. No, actually it consisnts purely of those in stock configuration. If you dont like that, There will also be an SFW version soon.
+This firmware contains NSFW animations. No, actually it consisnts purely of those in stock configuration. 
 
 The animations are tied to the level system. Each level you reach, unlocks a new animation. The higher your level, the more lewd it will become. Rumors have it, I'm  to be found in at least one of those too
 
@@ -37,6 +37,8 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 | 1-10  | Try harder. Just sexy clothes |
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
+
+If you dont like that, we removed the "Dummy mode" as it serves no purpose, and switched with an SFW toggle. From the main menu, hit `Arrow UP` and select SFW mode. (This is a temporary solution and a proper FAP for handling SFW mode with multiple animations is in the making)
 
 -----
 <br>
@@ -47,11 +49,12 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ```txt
 [Added]
 
+- SFW Mode
 - Jamming Files
 - Custom subghz presets
 - Subghz and IR signal replication via gpio (allows using external antenas and emitters)
 - Honda Keys (CVE-2022-27254)
-- Multiple Animation profiles to fit your style
+- NSFW Animations tied to the level system. Read more above
 - New API Routes for Locale settings
 - Scrolling view for long file names in browser
 - Tamagotchi rom
@@ -77,6 +80,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 ```txt
 [REMOVED]
 
+- Unused Dummy Mode
 - Broken apps (bad apple, chess, etc.)
 - Unused code from FAPs and system calls
 ```
