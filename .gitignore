@@ -64,3 +64,4 @@ PVS-Studio.log
 # Automate files, etc
 automate.py
 fbt_options.py
+commitnotes.md
