@@ -30,6 +30,9 @@ Brewfile.lock.json
 # Visual Studio Code
 .vscode/
 
+# Visual Studio
+.vs/
+
 # legendary cmake's
 build
 CMakeLists.txt
