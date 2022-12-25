@@ -127,5 +127,6 @@ $ ./fbt fap_dist
 If building image assets:
 $ ./fbt resources icons dolphin_ext
 ```
+
 ----
 <p align="center"> We're not waiting for a war... We bring the war to them! </p>
