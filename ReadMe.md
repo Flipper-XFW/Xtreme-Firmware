@@ -98,6 +98,8 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 <br>
 <h2 align="center">Install:</h2>
 
+`Note:` If you are coming from a different FW, it is recommended to delete / clear your "apps" folder on the SD card prior to updating. This folder houses all the .fap files, which do not update to the correct API versions by default if old ones are present (Thanks flipper devs). This does **NOT** remove any of your saved files!
+<br><br>
 - Download the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases)
 - Extract the archive. Inside you will find a readme, alternate animations in a folder labelled "Animations" and a folder for your Firmware
 - Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
