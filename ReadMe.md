@@ -63,6 +63,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 [Updated]
 
 - All graphics
+- Folder handling for empty ones (Now indicate they are empty)
 - Applications now use the new Locale setting
 - Compiler now handles all non-compiled faps during build
 - Compiler now accepts WIP SDK 
