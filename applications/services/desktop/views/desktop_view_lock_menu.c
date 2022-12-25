@@ -156,7 +156,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             // DOLPHIN_DEED(getRandomDeed());
             // lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         } else if(idx == DesktopLockMenuIndexDummy) {
-            DOLPHIN_DEED(getRandomDeed());
+            // DOLPHIN_DEED(getRandomDeed());
             if((dummy_mode == false) && (event->type == InputTypeShort)) {
                 lock_menu->callback(DesktopLockMenuEventDummyModeOn, lock_menu->context);
             } else if((dummy_mode == true) && (event->type == InputTypeShort)) {
