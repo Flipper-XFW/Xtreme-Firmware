@@ -90,8 +90,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 <h2 align="center">Known Bugs:</h2>
 
 ```txt
-- Wii EC can crash due to Null Pointer
-- subghz brutemap not working
+- Name Changer app crashes when you close it without using it
 ```
 
 ----
