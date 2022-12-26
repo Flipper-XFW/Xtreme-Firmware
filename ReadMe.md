@@ -117,7 +117,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 <h3> Manual Update </h3>
 
 - Download the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Extract the archive. Inside you will find a readme, alternate animations in a folder labelled "Animations" and a folder for your Firmware
+- Extract the archive. This is now your new Firmware folder
 - Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
 - On the Flipper, hit the `Arrow Down` button, this will get you to the file menu. Hit `Arrow Left` once, and then simply search for your updates folder
 - Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called `Update`
