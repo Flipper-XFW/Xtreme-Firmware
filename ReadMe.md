@@ -103,10 +103,11 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 **NOTE: If you are coming from a different FW, it is recommended to delete / clear your "apps" folder on the SD card prior to updating. This folder houses all the .fap files, which do not update to the correct API versions by default if old ones are present (Thanks flipper devs). This does `NOT` remove any of your saved files!**
 <br><br>
 
-<h3> Web Updater / Mobile App </h3>
+<h3> Web Updater / Mobile App / Automatic qFlipper Update</h3>
 
 - Go to the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Scroll down & hit the `Web Updater` button. This will either open your Flipper Companion App on mobile, or open a new browser Window on PC to run the Web Update
+- Download the .tgz file
+- Run your updater of choice with it
 
 - Enjoy!
 <br>
@@ -116,7 +117,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 
 <h3> Manual Update </h3>
 
-- Download the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
+- Download the latest release (.zip) from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
 - Extract the archive. This is now your new Firmware folder
 - Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
 - On the Flipper, hit the `Arrow Down` button, this will get you to the file menu. Hit `Arrow Left` once, and then simply search for your updates folder
