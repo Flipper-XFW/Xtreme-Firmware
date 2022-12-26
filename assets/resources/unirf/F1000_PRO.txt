@@ -1,0 +1,10 @@
+Filetype: Flipper SubGhz RAW File
+Version: 1
+UP: /any/subghz/Misc/Boomtone_DJ/A.sub
+DOWN: /any/subghz/Misc/Boomtone_DJ/B.sub
+LEFT: /any/subghz/Misc/Boomtone_DJ/C.sub
+RIGHT: /any/subghz/Misc/Boomtone_DJ/D.sub
+ULABEL: A button
+DLABEL: B button
+LLABEL: C Button
+RLABEL: D Button
