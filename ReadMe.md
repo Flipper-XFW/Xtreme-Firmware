@@ -38,7 +38,7 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
 
-If you dont like that, we removed the "Dummy mode" as it serves no purpose, and switched with an SFW toggle. From the main menu, hit `Arrow UP` and select SFW mode. (This is a temporary solution and a proper FAP for handling SFW mode with multiple animations is in the making)
+If you dont like that, we removed the "Dummy mode" as it serves no purpose, and switched with an SFW toggle. From the main menu, hit `Arrow UP` and select SFW mode.
 
 -----
 <br>
