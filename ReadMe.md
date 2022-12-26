@@ -115,7 +115,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 -----
 <br>
 
-<h3> Manual Update </h3>
+<h3> Manual Update (Because qFlipper loves to break every now and then for no reason at all)</h3>
 
 - Download the latest release (.zip) from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
 - Extract the archive. This is now your new Firmware folder
