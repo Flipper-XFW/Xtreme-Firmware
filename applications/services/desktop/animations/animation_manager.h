@@ -164,4 +164,4 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
  * @animation_manager    instance
  * @enabled              bool
  */
-void animation_manager_set_dummy_mode_state(AnimationManager* animation_manager, bool enabled);
+void animation_manager_set_sfw_mode_state(AnimationManager* animation_manager, bool enabled);

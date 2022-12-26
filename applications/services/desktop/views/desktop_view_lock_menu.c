@@ -9,10 +9,10 @@
 
 #define LOCK_MENU_ITEMS_NB 5
 
-static void desktop_view_lock_menu_dumbmode_changed(bool isThisGameMode) {
+static void desktop_view_lock_menu_sfwmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
     DESKTOP_SETTINGS_LOAD(&app->settings);
-    app->settings.is_dumbmode = isThisGameMode;
+    app->settings.is_sfwmode = isThisGameMode;
     DESKTOP_SETTINGS_SAVE(&app->settings);
 }
 
@@ -44,11 +44,11 @@ void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is
         true);
 }
 
-void desktop_lock_menu_set_dummy_mode_state(DesktopLockMenuView* lock_menu, bool dummy_mode) {
+void desktop_lock_menu_set_sfw_mode_state(DesktopLockMenuView* lock_menu, bool sfw_mode) {
     with_view_model(
         lock_menu->view,
         DesktopLockMenuViewModel * model,
-        { model->dummy_mode = dummy_mode; },
+        { model->sfw_mode = sfw_mode; },
         true);
 }
 
@@ -86,7 +86,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             // } else if(i == DesktopLockMenuIndexGameMode) {
             // str = "Games Mode";
         } else if(i == DesktopLockMenuIndexDummy) {
-            if(m->dummy_mode) {
+            if(m->sfw_mode) {
                 str = "NSFW Mode";
             } else {
                 str = "SFW Mode";
@@ -113,7 +113,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     DesktopLockMenuView* lock_menu = context;
     uint8_t idx = 0;
     bool consumed = false;
-    bool dummy_mode = false;
+    bool sfw_mode = false;
     bool update = false;
 
     with_view_model(
@@ -140,7 +140,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 }
             }
             idx = model->idx;
-            dummy_mode = model->dummy_mode;
+            sfw_mode = model->sfw_mode;
         },
         update);
 
@@ -152,14 +152,14 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
         } else if((idx == DesktopLockMenuIndexPinLockShutdown) && (event->type == InputTypeShort)) {
             lock_menu->callback(DesktopLockMenuEventPinLockShutdown, lock_menu->context);
             // } else if((idx == DesktopLockMenuIndexGameMode) && (event->type == InputTypeShort)) {
-            // desktop_view_lock_menu_dumbmode_changed(1);
+            // desktop_view_lock_menu_sfwmode_changed(1);
             // DOLPHIN_DEED(getRandomDeed());
             // lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         } else if(idx == DesktopLockMenuIndexDummy) {
             // DOLPHIN_DEED(getRandomDeed());
-            if((dummy_mode == false) && (event->type == InputTypeShort)) {
+            if((sfw_mode == false) && (event->type == InputTypeShort)) {
                 lock_menu->callback(DesktopLockMenuEventDummyModeOn, lock_menu->context);
-            } else if((dummy_mode == true) && (event->type == InputTypeShort)) {
+            } else if((sfw_mode == true) && (event->type == InputTypeShort)) {
                 lock_menu->callback(DesktopLockMenuEventDummyModeOff, lock_menu->context);
             }
         }

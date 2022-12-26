@@ -52,7 +52,7 @@ struct AnimationManager {
     FuriString* freezed_animation_name;
     int32_t freezed_animation_time_left;
     ViewStack* view_stack;
-    bool dummy_mode;
+    bool sfw_mode;
 };
 
 static StorageAnimation*
@@ -94,9 +94,9 @@ void animation_manager_set_interact_callback(
     animation_manager->interact_callback = callback;
 }
 
-void animation_manager_set_dummy_mode_state(AnimationManager* animation_manager, bool enabled) {
+void animation_manager_set_sfw_mode_state(AnimationManager* animation_manager, bool enabled) {
     furi_assert(animation_manager);
-    animation_manager->dummy_mode = enabled;
+    animation_manager->sfw_mode = enabled;
     animation_manager_start_new_idle(animation_manager);
 }
 
@@ -370,7 +370,7 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    if(animation_manager->dummy_mode) {
+    if(animation_manager->sfw_mode) {
         return animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
     }
     StorageAnimationList_t animation_list;

@@ -14,7 +14,7 @@ struct DesktopMainView {
     DesktopMainViewCallback callback;
     void* context;
     TimerHandle_t poweroff_timer;
-    bool dummy_mode;
+    bool sfw_mode;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
@@ -39,9 +39,9 @@ View* desktop_main_get_view(DesktopMainView* main_view) {
     return main_view->view;
 }
 
-void desktop_main_set_dummy_mode_state(DesktopMainView* main_view, bool dummy_mode) {
+void desktop_main_set_sfw_mode_state(DesktopMainView* main_view, bool sfw_mode) {
     furi_assert(main_view);
-    main_view->dummy_mode = dummy_mode;
+    main_view->sfw_mode = sfw_mode;
 }
 
 bool desktop_main_input_callback(InputEvent* event, void* context) {
