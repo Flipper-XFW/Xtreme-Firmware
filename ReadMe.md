@@ -52,7 +52,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 - SFW Mode
 - Jamming Files
 - Custom subghz presets
-- Subghz and IR signal replication via gpio (allows using external antenas and emitters)
+- Subghz and IR signal replication via gpio | Credits to @ankris812, exact commit lost to time as of rn
 - Honda Keys (CVE-2022-27254)
 - NSFW Animations tied to the level system. Read more above
 - New API Routes for Locale settings
