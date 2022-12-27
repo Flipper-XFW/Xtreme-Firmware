@@ -3,7 +3,7 @@ Filetype: Flipper SubGhz Setting File
 Version: 1
 
 # Add Standard frequencies for your region
-Add_standard_frequencies: false
+Add_standard_frequencies: true
 
 # Default Frequency: used as default for "Read" and "Read Raw"
 Default_frequency: 433920000
