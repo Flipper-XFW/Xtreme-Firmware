@@ -24,7 +24,7 @@ class GitVersion:
             try:
                 exec(f"{git_tuple[0]} = {self._exec_git(git_tuple[1])}")
             except:
-                exec(f"{git_tuple[0]} = 'Unknown'")
+                exec(f'{git_tuple[0]} = "XFW-0034_12262022"')
 
         dirty = False
         try:
