@@ -7,19 +7,19 @@
 [Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/mC2FxbYSMr)
 -----
 
-This firmware is a complete overhaul of "RM" (RogueMaster), with changes on all graphics, `disgusting` code and more. Xtreme brings you the most for your little flipper companion.
+This firmware is a complete overhaul of the Official Firmware in combination with RM (RogueMaster), with changes on all graphics, `disgusting` code and more. Xtreme brings you the most for your little flipper companion.
 
 -----
 <br>
 <h2 align="center">What makes it special?</h2>
 
-This firmware is based on RogueMaster (I know, should have forked unleashed, too late now). It combines the bleeding-edge PRs of Rogues firmware with actual understanding of whats going on, fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned in RM.
+This firmware is based on the Official Firmware, with some tweaks from RogueMaster, before he stole my code. The goal of this is to regularly bring out updates with an actual understanding of whats going on, fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned everywhere else.
 <br><br>
 - The focus of this firmware is functionality & stability: If an App doesnt work, its gone
 
 - Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
 
-- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. I invite you all to compare the `applications\services\dolphin\helpers\dolphin-state.c`, lol
+- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. I invite you all to compare the `applications\services\dolphin\helpers\dolphin-state.c`, lol. [Disgusting code](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/51286c21ddd2f42124e05f11240bbce267e349ba/applications/services/dolphin/helpers/dolphin_state.c)
 
 - Up2Date: This firmware receives updates from a few repositories, not just from its Upstream. If there are functional, but yet un-merged Pull requests on another flipper firmware that are good, they will be in here!
 
@@ -52,7 +52,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 - SFW Mode
 - Jamming Files
 - Custom subghz presets
-- Subghz and IR signal replication via gpio (allows using external antenas and emitters)
+- Subghz and IR signal replication via gpio | Credits to @ankris812, exact commit lost to time as of rn
 - Honda Keys (CVE-2022-27254)
 - NSFW Animations tied to the level system. Read more above
 - New API Routes for Locale settings
