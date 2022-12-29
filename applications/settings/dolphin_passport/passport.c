@@ -42,7 +42,7 @@ static void input_callback(InputEvent* input, void* ctx) {
 static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
 
-    DesktopSettings* Settings = malloc(sizeof(DesktopSettings));
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings)
 
     char level_str[20];
@@ -109,6 +109,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
     canvas_set_color(canvas, ColorBlack);
+    
+    free(settings);
 }
 
 int32_t passport_app(void* p) {
