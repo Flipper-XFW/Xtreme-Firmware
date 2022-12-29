@@ -68,3 +68,4 @@ PVS-Studio.log
 automate.py
 fbt_options.py
 commitnotes.md
+lib/STM32CubeWB
