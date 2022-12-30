@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 #define NFC_MF_UL_DATA_NOT_CHANGED (0UL)
 #define NFC_MF_UL_DATA_CHANGED (1UL)
@@ -14,6 +15,8 @@ bool nfc_mf_ultralight_emulate_worker_callback(NfcWorkerEvent event, void* conte
 
 void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     Nfc* nfc = context;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     // Setup view
     MfUltralightType type = nfc->dev->dev_data.mf_ul_data.type;
@@ -28,7 +31,12 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     } else {
         nfc_text_store_set(nfc, "MIFARE\nNTAG");
     }
-    popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
+    if (settings->sfw_mode) {
+        popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
+    }
+    else {
+        popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
+    }
     popup_set_text(popup, nfc->text_store, 90, 28, AlignCenter, AlignTop);
 
     // Setup and start worker
@@ -40,6 +48,7 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
         nfc_mf_ultralight_emulate_worker_callback,
         nfc);
     nfc_blink_emulate_start(nfc);
+    free(settings);
 }
 
 bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent event) {
