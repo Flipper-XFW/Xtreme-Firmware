@@ -3,6 +3,7 @@
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <bad_usb_icons.h>
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 #define MAX_NAME_LEN 64
 
@@ -27,6 +28,8 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 8, furi_string_get_cstr(disp_str));
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     if(strlen(model->layout) == 0) {
         furi_string_set(disp_str, "(default)");
@@ -47,7 +50,12 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
 
     if((model->state.state == BadUsbStateIdle) || (model->state.state == BadUsbStateDone) ||
        (model->state.state == BadUsbStateNotConnected)) {
-        elements_button_center(canvas, "Cum");
+        if (settings->sfw_mode) {
+            elements_button_center(canvas, "Start");
+        }
+        else {
+            elements_button_center(canvas, "Cum");
+        }
     } else if((model->state.state == BadUsbStateRunning) || (model->state.state == BadUsbStateDelay)) {
         elements_button_center(canvas, "Stop");
     } else if(model->state.state == BadUsbStateWillRun) {
@@ -62,12 +70,23 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     if(model->state.state == BadUsbStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Plug me");
-        canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "in, Daddy");
+        if (settings->sfw_mode) {
+            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect me");
+            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "to a computer");
+        }
+        else {
+            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Plug me");
+            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "in, Daddy");
+        }
     } else if(model->state.state == BadUsbStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will cum");
+        if (settings->sfw_mode) {
+            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
+        }
+        else {
+            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will cum");
+        }
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "on connect");
     } else if(model->state.state == BadUsbStateFileError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
@@ -131,6 +150,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     }
 
     furi_string_free(disp_str);
+    free(settings);
 }
 
 static bool bad_usb_input_callback(InputEvent* event, void* context) {
