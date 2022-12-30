@@ -1,11 +1,19 @@
 #include "../lfrfid_i.h"
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 void lfrfid_scene_write_success_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "Successfully\nwritten!", 94, 3, AlignCenter, AlignTop);
-    popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57);
+    if (settings->sfw_mode) {
+        popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57_sfw);
+    }
+    else {
+        popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57);
+    }
     popup_set_context(popup, app);
     popup_set_callback(popup, lfrfid_popup_timeout_callback);
     popup_set_timeout(popup, 1500);
@@ -13,6 +21,7 @@ void lfrfid_scene_write_success_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
     notification_message_block(app->notifications, &sequence_set_green_255);
+    free(settings);
 }
 
 bool lfrfid_scene_write_success_on_event(void* context, SceneManagerEvent event) {

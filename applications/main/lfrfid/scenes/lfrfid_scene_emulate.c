@@ -1,8 +1,11 @@
 #include "../lfrfid_i.h"
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 void lfrfid_scene_emulate_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "Emulating", 89, 30, AlignCenter, AlignTop);
     if(!furi_string_empty(app->file_name)) {
@@ -16,13 +19,19 @@ void lfrfid_scene_emulate_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
+    if (settings->sfw_mode) {
+        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
+    }
+    else {
+        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
+    }
 
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_emulate_start(app->lfworker, (LFRFIDProtocol)app->protocol_id);
     notification_message(app->notifications, &sequence_blink_start_magenta);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
+    free(settings);
 }
 
 bool lfrfid_scene_emulate_on_event(void* context, SceneManagerEvent event) {
