@@ -81,7 +81,7 @@ uint64_t dolphin_state_timestamp() {
     return furi_hal_rtc_datetime_to_timestamp(&datetime);
 }
 
-bool dolphin_state_is_levelup(uint32_t icounter) {
+bool dolphin_state_is_levelup(int icounter) {
     for (int i = 0; i<30; ++i) {
         if ((icounter == level_array[i])) {
             return true;
@@ -90,7 +90,7 @@ bool dolphin_state_is_levelup(uint32_t icounter) {
     return false;
 }
 
-uint8_t dolphin_get_level(uint32_t icounter) {
+uint8_t dolphin_get_level(int icounter) {
 for (int i = 0; i < 29; ++i) {
     if (icounter <= level_array[i]) {
         return i + 1;
@@ -99,7 +99,7 @@ for (int i = 0; i < 29; ++i) {
 return 30;
 }
 
-uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
+uint32_t dolphin_state_xp_above_last_levelup(int icounter) {
     if(level_array[0] > icounter) {
         for(int i = 1; i < 29; ++i) {
             if(icounter <= level_array[i]) {
@@ -110,7 +110,7 @@ uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
     return icounter;
 }
 
-uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
+uint32_t dolphin_state_xp_to_levelup(int icounter) {
     for(int i = 0; i < 29; ++i) {
         if(icounter <= level_array[i]) {
             return level_array[i] - icounter;

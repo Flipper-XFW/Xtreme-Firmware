@@ -48,18 +48,13 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
 
     furi_assert(application->app);
     furi_assert(application->name);
-    furi_assert(application->link);
 
-    if(strcmp(application->link, "NULL") != 0) {
-        LoaderStatus status = loader_start(NULL, "Applications", application->link);
-    } else {
-        if(!loader_lock(loader_instance)) {
-            FURI_LOG_E(TAG, "Loader is locked");
-            return;
-        }
-
-        loader_start_application(application, NULL);
+    if(!loader_lock(loader_instance)) {
+        FURI_LOG_E(TAG, "Loader is locked");
+        return;
     }
+
+    loader_start_application(application, NULL);
 }
 
 static void loader_submenu_callback(void* context, uint32_t index) {

@@ -12,18 +12,15 @@
 #define MOODS_TOTAL 3
 #define BUTTHURT_MAX 3
 
-static const Icon* const portrait_happy[BUTTHURT_MAX] = {
-    &I_flipper};
+static const Icon* const portrait_happy[BUTTHURT_MAX] = {&I_flipper};
 // &I_passport_happy1_46x49,
 // &I_passport_happy2_46x49,
 // &I_passport_happy3_46x49};
-static const Icon* const portrait_ok[BUTTHURT_MAX] = {
-    &I_flipper};
+static const Icon* const portrait_ok[BUTTHURT_MAX] = {&I_flipper};
 // &I_passport_okay1_46x49,
 // &I_passport_okay2_46x49,
 // &I_passport_okay3_46x49};
-static const Icon* const portrait_bad[BUTTHURT_MAX] = {
-    &I_flipper};
+static const Icon* const portrait_bad[BUTTHURT_MAX] = {&I_flipper};
 // &I_passport_bad1_46x49,
 // &I_passport_bad2_46x49,
 // &I_passport_bad3_46x49};
@@ -43,37 +40,39 @@ static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
 
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings)
+    DESKTOP_SETTINGS_LOAD(settings);
 
     char level_str[20];
     char xp_str[12];
     char mood_str[32];
     uint8_t mood = 0;
 
-    if(Settings->sfw_mode) (
-        if(stats->butthurt <= 4) {
-            mood = 0;
-            snprintf(mood_str, 20, "Mood: Happy");
-        } else if(stats->butthurt <= 9) {
-            mood = 1;
-            snprintf(mood_str, 20, "Mood: Okay");
-        } else {
-            mood = 2;
-            snprintf(mood_str, 20, "Mood: Angry");
-        }
-    ) else (
-        if(stats->butthurt <= 4) {
-            mood = 0;
-            snprintf(mood_str, 20, "Status: Wet");
-        } else if(stats->butthurt <= 9) {
-            mood = 1;
-            snprintf(mood_str, 20, "Status: Horny");
-        } else {
-            mood = 2;
-            snprintf(mood_str, 20, "Status: Desperate");
-        }
+    if(settings->sfw_mode)
+        {
+            if(stats->butthurt <= 4) {
+                mood = 0;
+                snprintf(mood_str, 20, "Mood: Happy");
+            } else if(stats->butthurt <= 9) {
+                mood = 1;
+                snprintf(mood_str, 20, "Mood: Okay");
+            } else {
+                mood = 2;
+                snprintf(mood_str, 20, "Mood: Angry");
+            }}
+    else
+        {
+            if(stats->butthurt <= 4) {
+                mood = 0;
+                snprintf(mood_str, 20, "Status: Wet");
+            } else if(stats->butthurt <= 9) {
+                mood = 1;
+                snprintf(mood_str, 20, "Status: Horny");
+            } else {
+                mood = 2;
+                snprintf(mood_str, 20, "Status: Desperate");
+            }
 
-    )
+        };
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
@@ -109,7 +108,6 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
     canvas_set_color(canvas, ColorBlack);
-    
     free(settings);
 }
 
