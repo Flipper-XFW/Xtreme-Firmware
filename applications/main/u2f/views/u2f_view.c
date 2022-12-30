@@ -1,6 +1,7 @@
 #include "u2f_view.h"
 #include <gui/elements.h>
 #include <u2f_icons.h>
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 struct U2fView {
     View* view;
@@ -14,34 +15,73 @@ typedef struct {
 
 static void u2f_view_draw_callback(Canvas* canvas, void* _model) {
     U2fModel* model = _model;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+
 
     canvas_draw_icon(canvas, 8, 14, &I_Drive_112x35);
     canvas_set_font(canvas, FontSecondary);
 
-    if(model->display_msg == U2fMsgNotConnected) {
-        canvas_draw_icon(canvas, 22, 15, &I_Connect_me_62x31);
+    if (model->display_msg == U2fMsgNotConnected) {
+        if (settings->sfw_mode) {
+            canvas_draw_icon(canvas, 22, 15, &I_Connect_me_62x31_sfw);
+        }
+        else {
+            canvas_draw_icon(canvas, 22, 15, &I_Connect_me_62x31);
+        }
         canvas_draw_str_aligned(
             canvas, 128 / 2, 3, AlignCenter, AlignTop, "Connect me to computer");
-    } else if(model->display_msg == U2fMsgIdle) {
-        canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31);
+    }
+    else if (model->display_msg == U2fMsgIdle) {
+        if (settings->sfw_mode) {
+            canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31_sfw);
+        }
+        else {
+            canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31);
+        }
         canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Connected!");
-    } else if(model->display_msg == U2fMsgRegister) {
+    }
+    else if (model->display_msg == U2fMsgRegister) {
         elements_button_center(canvas, "OK");
-        canvas_draw_icon(canvas, 22, 15, &I_Auth_62x31);
+        if (settings->sfw_mode) {
+            canvas_draw_icon(canvas, 22, 15, &I_Auth_62x31_sfw);
+        }
+        else {
+            canvas_draw_icon(canvas, 22, 15, &I_Auth_62x31);
+        }
         canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Press OK to register");
-    } else if(model->display_msg == U2fMsgAuth) {
+    }
+    else if (model->display_msg == U2fMsgAuth) {
         elements_button_center(canvas, "OK");
-        canvas_draw_icon(canvas, 22, 15, &I_Auth_62x31);
+        if (settings->sfw_mode) {
+            canvas_draw_icon(canvas, 22, 15, &I_Auth_62x31_sfw);
+        }
+        else {
+            canvas_draw_icon(canvas, 22, 15, &I_Auth_62x31);
+        }
         canvas_draw_str_aligned(
             canvas, 128 / 2, 3, AlignCenter, AlignTop, "Press OK to authenticate");
-    } else if(model->display_msg == U2fMsgSuccess) {
-        canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31);
+    }
+    else if (model->display_msg == U2fMsgSuccess) {
+        if (settings->sfw_mode) {
+            canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31_sfw);
+        }
+        else {
+            canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31);
+        }
         canvas_draw_str_aligned(
             canvas, 128 / 2, 3, AlignCenter, AlignTop, "Authentication successful!");
-    } else if(model->display_msg == U2fMsgError) {
-        canvas_draw_icon(canvas, 22, 15, &I_Error_62x31);
+    }
+    else if (model->display_msg == U2fMsgError) {
+        if (settings->sfw_mode) {
+            canvas_draw_icon(canvas, 22, 15, &I_Error_62x31_sfw);
+        }
+        else {
+            canvas_draw_icon(canvas, 22, 15, &I_Error_62x31);
+        }
         canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Certificate error");
     }
+    free(settings);
 }
 
 static bool u2f_view_input_callback(InputEvent* event, void* context) {
@@ -49,10 +89,10 @@ static bool u2f_view_input_callback(InputEvent* event, void* context) {
     U2fView* u2f = context;
     bool consumed = false;
 
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyOk) {
+    if (event->type == InputTypeShort) {
+        if (event->key == InputKeyOk) {
             consumed = true;
-            if(u2f->callback != NULL) u2f->callback(InputTypeShort, u2f->context);
+            if (u2f->callback != NULL) u2f->callback(InputTypeShort, u2f->context);
         }
     }
 
