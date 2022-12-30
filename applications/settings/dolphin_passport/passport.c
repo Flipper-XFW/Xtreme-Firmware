@@ -12,19 +12,15 @@
 #define MOODS_TOTAL 3
 #define BUTTHURT_MAX 3
 
-static const Icon* const portrait_happy[BUTTHURT_MAX] = {&I_flipper};
-// &I_passport_happy1_46x49,
-// &I_passport_happy2_46x49,
-// &I_passport_happy3_46x49};
-static const Icon* const portrait_ok[BUTTHURT_MAX] = {&I_flipper};
-// &I_passport_okay1_46x49,
-// &I_passport_okay2_46x49,
-// &I_passport_okay3_46x49};
-static const Icon* const portrait_bad[BUTTHURT_MAX] = {&I_flipper};
-// &I_passport_bad1_46x49,
-// &I_passport_bad2_46x49,
-// &I_passport_bad3_46x49};
+static const Icon* const portrait_happy_sfw[BUTTHURT_MAX] = {&I_flipper_sfw};
+static const Icon* const portrait_ok_sfw[BUTTHURT_MAX] = {&I_flipper_sfw};
+static const Icon* const portrait_bad_sfw[BUTTHURT_MAX] = {&I_flipper_sfw};
 
+static const Icon* const portrait_happy[BUTTHURT_MAX] = {&I_flipper};
+static const Icon* const portrait_ok[BUTTHURT_MAX] = {&I_flipper};
+static const Icon* const portrait_bad[BUTTHURT_MAX] = {&I_flipper};
+
+static const Icon* const* portraits_sfw[MOODS_TOTAL] = {portrait_happy_sfw, portrait_ok_sfw, portrait_bad_sfw};
 static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
 // static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
 
@@ -83,12 +79,22 @@ static void render_callback(Canvas* canvas, void* ctx) {
     }
 
     // multipass
-    canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
+    if (settings->sfw_mode) {
+        canvas_draw_icon(canvas, 0, 0, &I_passport_DB_sfw);
+    }
+    else {
+        canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
+    }
 
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= 30));
     uint16_t tmpLvl = 0;
-    canvas_draw_icon(canvas, 11, 2, portraits[mood][tmpLvl]);
+    if (settings->sfw_mode) {
+        canvas_draw_icon(canvas, 11, 2, portraits_sfw[mood][tmpLvl]);
+    }
+    else {
+        canvas_draw_icon(canvas, 11, 2, portraits[mood][tmpLvl]);
+    }
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
