@@ -43,14 +43,14 @@ static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
 
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings)
+    DESKTOP_SETTINGS_LOAD(settings);
 
     char level_str[20];
     char xp_str[12];
     char mood_str[32];
     uint8_t mood = 0;
 
-    if(Settings->sfw_mode) (
+    if(settings->sfw_mode) {
         if(stats->butthurt <= 4) {
             mood = 0;
             snprintf(mood_str, 20, "Mood: Happy");
@@ -61,7 +61,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
             mood = 2;
             snprintf(mood_str, 20, "Mood: Angry");
         }
-    ) else (
+    } else {
         if(stats->butthurt <= 4) {
             mood = 0;
             snprintf(mood_str, 20, "Status: Wet");
@@ -73,7 +73,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
             snprintf(mood_str, 20, "Status: Desperate");
         }
 
-    )
+    }
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
