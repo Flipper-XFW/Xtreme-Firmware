@@ -1,4 +1,5 @@
 #include "../ibutton_i.h"
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 static void ibutton_scene_write_success_popup_callback(void* context) {
     iButton* ibutton = context;
@@ -9,8 +10,15 @@ static void ibutton_scene_write_success_popup_callback(void* context) {
 void ibutton_scene_write_success_on_enter(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
-    popup_set_icon(popup, 0, 12, &I_iButtonDolphinVerySuccess_108x52);
+    if (settings->sfw_mode) {
+        popup_set_icon(popup, 0, 12, &I_iButtonDolphinVerySuccess_108x52_sfw);
+    }
+    else {
+        popup_set_icon(popup, 0, 12, &I_iButtonDolphinVerySuccess_108x52);
+    }
     popup_set_text(popup, "Successfully written!", 40, 12, AlignLeft, AlignBottom);
 
     popup_set_callback(popup, ibutton_scene_write_success_popup_callback);
@@ -21,6 +29,7 @@ void ibutton_scene_write_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewPopup);
     ibutton_notification_message(ibutton, iButtonNotificationMessageSuccess);
     ibutton_notification_message(ibutton, iButtonNotificationMessageGreenOn);
+    free(settings);
 }
 
 bool ibutton_scene_write_success_on_event(void* context, SceneManagerEvent event) {
