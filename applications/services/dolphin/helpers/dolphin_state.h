@@ -37,12 +37,12 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed);
 
 void dolphin_state_butthurted(DolphinState* dolphin_state);
 
-uint32_t dolphin_state_xp_to_levelup(uint32_t icounter);
+uint32_t dolphin_state_xp_to_levelup(int icounter);
 
-uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter);
+uint32_t dolphin_state_xp_above_last_levelup(int icounter);
 
-bool dolphin_state_is_levelup(uint32_t icounter);
+bool dolphin_state_is_levelup(int icounter);
 
 void dolphin_state_increase_level(DolphinState* dolphin_state);
 
-uint8_t dolphin_get_level(uint32_t icounter);
+uint8_t dolphin_get_level(int icounter);

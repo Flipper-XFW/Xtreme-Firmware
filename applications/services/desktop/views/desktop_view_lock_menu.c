@@ -9,19 +9,11 @@
 
 #define LOCK_MENU_ITEMS_NB 5
 
-static void desktop_view_lock_menu_sfwmode_changed(bool isThisGameMode) {
-    DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    DESKTOP_SETTINGS_LOAD(&app->settings);
-    app->settings.is_sfwmode = isThisGameMode;
-    DESKTOP_SETTINGS_SAVE(&app->settings);
-}
-
 typedef enum {
     DesktopLockMenuIndexLock,
     DesktopLockMenuIndexPinLock,
     DesktopLockMenuIndexPinLockShutdown,
-    // DesktopLockMenuIndexGameMode,
-    DesktopLockMenuIndexDummy,
+    DesktopLockMenuIndexSFW,
 
     DesktopLockMenuIndexTotalCount
 } DesktopLockMenuIndex;
@@ -83,9 +75,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             } else {
                 str = "Set PIN + Off";
             }
-            // } else if(i == DesktopLockMenuIndexGameMode) {
-            // str = "Games Mode";
-        } else if(i == DesktopLockMenuIndexDummy) {
+        } else if(i == DesktopLockMenuIndexSFW) {
             if(m->sfw_mode) {
                 str = "NSFW Mode";
             } else {
@@ -155,12 +145,12 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             // desktop_view_lock_menu_sfwmode_changed(1);
             // DOLPHIN_DEED(getRandomDeed());
             // lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
-        } else if(idx == DesktopLockMenuIndexDummy) {
+        } else if(idx == DesktopLockMenuIndexSFW) {
             // DOLPHIN_DEED(getRandomDeed());
             if((sfw_mode == false) && (event->type == InputTypeShort)) {
-                lock_menu->callback(DesktopLockMenuEventDummyModeOn, lock_menu->context);
+                lock_menu->callback(DesktopLockMenuEventSFWModeOn, lock_menu->context);
             } else if((sfw_mode == true) && (event->type == InputTypeShort)) {
-                lock_menu->callback(DesktopLockMenuEventDummyModeOff, lock_menu->context);
+                lock_menu->callback(DesktopLockMenuEventSFWModeOff, lock_menu->context);
             }
         }
         consumed = true;
