@@ -47,32 +47,30 @@ static void render_callback(Canvas* canvas, void* ctx) {
     char mood_str[32];
     uint8_t mood = 0;
 
-    if(settings->sfw_mode)
-        {
-            if(stats->butthurt <= 4) {
-                mood = 0;
-                snprintf(mood_str, 20, "Mood: Happy");
-            } else if(stats->butthurt <= 9) {
-                mood = 1;
-                snprintf(mood_str, 20, "Mood: Okay");
-            } else {
-                mood = 2;
-                snprintf(mood_str, 20, "Mood: Angry");
-            }}
-    else
-        {
-            if(stats->butthurt <= 4) {
-                mood = 0;
-                snprintf(mood_str, 20, "Status: Wet");
-            } else if(stats->butthurt <= 9) {
-                mood = 1;
-                snprintf(mood_str, 20, "Status: Horny");
-            } else {
-                mood = 2;
-                snprintf(mood_str, 20, "Status: Desperate");
-            }
+    if(settings->sfw_mode) {
+        if(stats->butthurt <= 4) {
+            mood = 0;
+            snprintf(mood_str, 20, "Mood: Happy");
+        } else if(stats->butthurt <= 9) {
+            mood = 1;
+            snprintf(mood_str, 20, "Mood: Okay");
+        } else {
+            mood = 2;
+            snprintf(mood_str, 20, "Mood: Angry");
+        }
+    } else {
+        if(stats->butthurt <= 4) {
+            mood = 0;
+            snprintf(mood_str, 20, "Status: Wet");
+        } else if(stats->butthurt <= 9) {
+            mood = 1;
+            snprintf(mood_str, 20, "Status: Horny");
+        } else {
+            mood = 2;
+            snprintf(mood_str, 20, "Status: Desperate");
+        }
 
-        };
+    }
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
