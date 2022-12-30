@@ -12,9 +12,9 @@
 #define MOODS_TOTAL 3
 #define BUTTHURT_MAX 3
 
-static const Icon* const portrait_happy_sfw[BUTTHURT_MAX] = {&I_flipper_sfw};
-static const Icon* const portrait_ok_sfw[BUTTHURT_MAX] = {&I_flipper_sfw};
-static const Icon* const portrait_bad_sfw[BUTTHURT_MAX] = {&I_flipper_sfw};
+static const Icon* const portrait_happy_sfw[BUTTHURT_MAX] = {&I_passport_happy1_46x49_sfw, &I_passport_happy2_46x49_sfw, &I_passport_happy3_46x49_sfw};
+static const Icon* const portrait_ok_sfw[BUTTHURT_MAX] = {&I_passport_okay1_46x49_sfw, &I_passport_okay2_46x49_sfw, &I_passport_okay3_46x49_sfw};
+static const Icon* const portrait_bad_sfw[BUTTHURT_MAX] = {&I_passport_bad1_46x49_sfw, &I_passport_bad2_46x49_sfw, &I_passport_bad3_46x49_sfw};
 
 static const Icon* const portrait_happy[BUTTHURT_MAX] = {&I_flipper};
 static const Icon* const portrait_ok[BUTTHURT_MAX] = {&I_flipper};
