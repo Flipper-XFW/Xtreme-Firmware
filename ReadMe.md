@@ -44,7 +44,7 @@ If you dont like that, we removed the "Dummy mode" as it serves no purpose, and 
 <br>
 <h2 align="center">List of changes:</h2>
 
-Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mention all those here. I will only mention **MY** changes
+Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mention all those here. We will only mention **our** changes
 
 ```txt
 [Added]
