@@ -51,7 +51,7 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
     furi_assert(application->link);
 
     if(strcmp(application->link, "NULL") != 0) {
-        LoaderStatus status = loader_start(NULL, "Applications", application->link);
+        loader_start(NULL, "Applications", application->link);
     } else {
         if(!loader_lock(loader_instance)) {
             FURI_LOG_E(TAG, "Loader is locked");

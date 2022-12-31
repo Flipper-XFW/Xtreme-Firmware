@@ -145,7 +145,7 @@ static double e(void) {
     return 2.71828182845904523536;
 }
 static double fac(double a) { /* simplest version of fac */
-    if(a < 0.0) return NAN;
+    if(a < (double)0.0) return NAN;
     if(a > UINT_MAX) return INFINITY;
     unsigned int ua = (unsigned int)(a);
     unsigned long int result = 1, i;
@@ -156,7 +156,7 @@ static double fac(double a) { /* simplest version of fac */
     return (double)result;
 }
 static double ncr(double n, double r) {
-    if(n < 0.0 || r < 0.0 || n < r) return NAN;
+    if(n < (double)0.0 || r < (double)0.0 || n < r) return NAN;
     if(n > UINT_MAX || r > UINT_MAX) return INFINITY;
     unsigned long int un = (unsigned int)(n), ur = (unsigned int)(r), i;
     unsigned long int result = 1;
