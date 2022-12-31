@@ -36,7 +36,7 @@ static bool_t tama_p1_hal_is_log_enabled(log_level_t level) {
 static void tama_p1_hal_log(log_level_t level, char* buff, ...) {
     if(!tama_p1_hal_is_log_enabled(level)) return;
 
-    FuriString* string;
+    FuriString* string = NULL;
     va_list args;
     va_start(args, buff);
     furi_string_cat_vprintf(string, buff, args);
