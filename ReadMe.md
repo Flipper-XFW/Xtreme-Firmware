@@ -4,7 +4,7 @@
   <img src="https://user-images.githubusercontent.com/55334727/209031152-efbca66c-3fe0-41b5-a860-e0d7522a9279.png">
 </p>
 
-[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
+[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/main/documentation) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
 -----
 
 This firmware is a complete overhaul of the Official Firmware in combination with tons of modifications from RogueMaster (He used UL code too), with changes on all graphics, `disgusting` code and more. Xtreme brings you the most for your little flipper companion.
@@ -44,7 +44,7 @@ If you dont like that, we removed the "Dummy mode" as it serves no purpose, and 
 <br>
 <h2 align="center">List of changes:</h2>
 
-Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mention all those here. I will only mention **MY** changes
+Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mention all those here. We will only mention **our** changes that we can actually be credited for, unlike *others*
 
 ```txt
 [Added]
