@@ -1,7 +1,7 @@
 # PLUGIN BY eugene-kirzhanov
 App(
     appid="2048_improved",
-    name="2048 (Improved)",
+    name="2048",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="game_2048_app",
     cdefines=["APP_GAME_2048"],
