@@ -106,8 +106,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 <h3> Web Updater / Mobile App / Automatic qFlipper Update</h3>
 
 - Go to the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Download the .tgz file
-- Run your updater of choice with it
+- Click the "Web Updater" Button
 
 - Enjoy!
 <br>
