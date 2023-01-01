@@ -70,7 +70,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Compiler just stfu about non-fatal problems
 - Some further NFC stuff
 - Weather App
-- Applications now use below mentioned API Routes
+- Applications now use above mentioned API Routes
 ```
 ```txt
 [Fixed]
