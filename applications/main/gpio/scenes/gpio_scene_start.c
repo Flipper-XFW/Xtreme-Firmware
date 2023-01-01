@@ -1,3 +1,6 @@
+#ifndef __GPIO_SCENE_START_H__
+#define __GPIO_SCENE_START_H__
+
 #include "../gpio_app_i.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
@@ -35,7 +38,8 @@ static void gpio_scene_start_var_list_enter_callback(void* context, uint32_t ind
     }
 }
 
-static void gpio_scene_start_var_list_change_callback(VariableItem* item) {
+static void 
+gpio_scene_start_var_list_change_callback(VariableItem* item) {
     GpioApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
@@ -117,3 +121,5 @@ void gpio_scene_start_on_exit(void* context) {
     GpioApp* app = context;
     variable_item_list_reset(app->var_item_list);
 }
+
+#endif // __GPIO_SCENE_START_H__

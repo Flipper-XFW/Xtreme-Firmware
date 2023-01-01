@@ -73,7 +73,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                             .supervisor_timeout = 0,
                         },
                 },
-        },
+        }
 };
 FuriHalBtProfileConfig* current_profile = NULL;
 

@@ -29,6 +29,8 @@ typedef struct {
     char error[64];
 } BadUsbState;
 
+typedef enum { BadUsbModeUSB, BadUsbModeBLE, BadUsbModeUART, BadUsbModeNb } BadUsbMode;
+
 BadUsbScript* bad_usb_script_open(FuriString* file_path);
 
 void bad_usb_script_close(BadUsbScript* bad_usb);
@@ -39,9 +41,7 @@ void bad_usb_script_start(BadUsbScript* bad_usb);
 
 void bad_usb_script_stop(BadUsbScript* bad_usb);
 
-void bad_usb_script_toggle(BadUsbScript* bad_usb);
-
-BadUsbState* bad_usb_script_get_state(BadUsbScript* bad_usb);
+void bad_usb_script_toggle(BadUsbScript* bad_usb, BadUsbMode mode);
 
 #ifdef __cplusplus
 }

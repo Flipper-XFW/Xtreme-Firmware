@@ -5,7 +5,13 @@
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 
+// ble hid
+#include <bt/bt_service/bt.h>
+#include <applications/plugins/hid_app/hid.h>
+
 #define BAD_USB_SETTINGS_PATH BAD_USB_APP_BASE_FOLDER "/" BAD_USB_SETTINGS_FILE_NAME
+
+#define BAD_USB_LOGFILE_PATH BAD_USB_APP_BASE_FOLDER "/debug.log"
 
 static bool bad_usb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -54,6 +60,16 @@ static void bad_usb_save_settings(BadUsbApp* app) {
 BadUsbApp* bad_usb_app_alloc(char* arg) {
     BadUsbApp* app = malloc(sizeof(BadUsbApp));
 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+    if(!storage_file_open(file, BAD_USB_LOGFILE_PATH, FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        FURI_LOG_E("BadUsbApp", "Can't open debug log file");
+        storage_file_close(file);
+        app->debug_file = NULL;
+    } else {
+        app->debug_file = file;
+    }
+
     app->bad_usb_script = NULL;
 
     app->file_path = furi_string_alloc();
@@ -86,15 +102,29 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewError, widget_get_view(app->widget));
 
-    app->submenu = submenu_alloc();
+    // app->submenu = submenu_alloc();
+    // view_dispatcher_add_view(
+    //     app->view_dispatcher, BadUsbAppViewConfig, submenu_get_view(app->submenu));
+
+    app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadUsbAppViewConfig, submenu_get_view(app->submenu));
+        app->view_dispatcher,
+        BadUsbAppViewConfig,
+        variable_item_list_get_view(app->variable_item_list));
+    app->menu_idx = 0;
+    for(int i = 0; i < NUM_CONF_OPT; i++) {
+        app->menu_opt_idx[i] = 0;
+    }
 
     app->bad_usb_view = bad_usb_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewWork, bad_usb_get_view(app->bad_usb_view));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+
+    // default injection mode is USB
+    app->mode = BadUsbModeUSB;
+    F_DEBUG(app, "Starting BadUSB app\r\n");
 
     if(furi_hal_usb_is_locked()) {
         app->error = BadUsbAppErrorCloseRpc;
@@ -121,6 +151,10 @@ void bad_usb_app_free(BadUsbApp* app) {
         app->bad_usb_script = NULL;
     }
 
+    // BLE HID
+    F_DEBUG(app, "Stopping BLE HID");
+    furi_hal_bt_hid_stop();
+
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewWork);
     bad_usb_free(app->bad_usb_view);
@@ -130,8 +164,12 @@ void bad_usb_app_free(BadUsbApp* app) {
     widget_free(app->widget);
 
     // Submenu
+    // view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfig);
+    // submenu_free(app->submenu);
+
+    // Variable Item List
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfig);
-    submenu_free(app->submenu);
+    variable_item_list_free(app->variable_item_list);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -146,6 +184,12 @@ void bad_usb_app_free(BadUsbApp* app) {
 
     furi_string_free(app->file_path);
     furi_string_free(app->keyboard_layout);
+
+    if(app->debug_file) {
+        storage_file_close(app->debug_file);
+        storage_file_free(app->debug_file);
+    }
+    furi_record_close(RECORD_STORAGE);
 
     free(app);
 }

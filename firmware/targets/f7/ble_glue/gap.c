@@ -313,7 +313,7 @@ static void gap_init_svc(Gap* gap) {
     // Initialize GATT interface
     aci_gatt_init();
     // Initialize GAP interface
-    // Skip fist symbol AD_TYPE_COMPLETE_LOCAL_NAME
+    // Skip first symbol AD_TYPE_COMPLETE_LOCAL_NAME
     char* name = gap->service.adv_name + 1;
     aci_gap_init(
         GAP_PERIPHERAL_ROLE,

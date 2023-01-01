@@ -19,7 +19,7 @@ bool bad_usb_scene_work_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, BadUsbSceneConfig);
             consumed = true;
         } else if(event.event == InputKeyOk) {
-            bad_usb_script_toggle(app->bad_usb_script);
+            bad_usb_script_toggle(app->bad_usb_script, app->mode);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

@@ -139,9 +139,24 @@ void furi_hal_bt_hid_start() {
         hid_svc_start();
     }
     // Configure HID Keyboard
-    kb_report = malloc(sizeof(FuriHalBtHidKbReport));
-    mouse_report = malloc(sizeof(FuriHalBtHidMouseReport));
-    consumer_report = malloc(sizeof(FuriHalBtHidConsumerReport));
+    //
+    // this will also be called by Bad-usb now, so we need to prevent memory leak
+    // I dont know for now, how apps and mains interacts together, so lets add some 
+    // protection in case a crash in one doesn't affect the other
+    if(kb_report)
+        memset(kb_report, 0, sizeof(FuriHalBtHidKbReport));
+    else
+        kb_report = malloc(sizeof(FuriHalBtHidKbReport));
+
+    if(mouse_report)
+        memset(mouse_report, 0, sizeof(FuriHalBtHidMouseReport));
+    else
+        mouse_report = malloc(sizeof(FuriHalBtHidMouseReport));
+    if(consumer_report)
+        memset(consumer_report, 0, sizeof(FuriHalBtHidConsumerReport));
+    else
+        consumer_report = malloc(sizeof(FuriHalBtHidConsumerReport));
+
     // Configure Report Map characteristic
     hid_svc_update_report_map(
         furi_hal_bt_hid_report_map_data, sizeof(furi_hal_bt_hid_report_map_data));

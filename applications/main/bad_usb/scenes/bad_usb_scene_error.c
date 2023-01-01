@@ -1,8 +1,8 @@
 #include "../bad_usb_app_i.h"
 
-typedef enum {
-    BadUsbCustomEventErrorBack,
-} BadUsbCustomEvent;
+// typedef enum {
+//     BadUsbCustomEventErrorBack,
+// } BadUsbCustomEvent;
 
 static void
     bad_usb_scene_error_event_callback(GuiButtonType result, InputType type, void* context) {

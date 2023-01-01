@@ -8,6 +8,10 @@
 #include "bad_usb_script.h"
 #include <dolphin/dolphin.h>
 
+
+#include <furi_hal_bt_hid.h>
+#include <furi_hal_bt.h>
+
 #define TAG "BadUSB"
 #define WORKER_TAG TAG "Worker"
 #define FILE_BUFFER_LEN 16
@@ -720,7 +724,7 @@ void bad_usb_script_set_keyboard_layout(BadUsbScript* bad_usb, FuriString* layou
     storage_file_free(layout_file);
 }
 
-void bad_usb_script_toggle(BadUsbScript* bad_usb) {
+void bad_usb_script_toggle(BadUsbScript* bad_usb, BadUsbMode mode) {
     furi_assert(bad_usb);
     furi_thread_flags_set(furi_thread_get_id(bad_usb->thread), WorkerEvtToggle);
 }
