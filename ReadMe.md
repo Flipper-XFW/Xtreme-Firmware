@@ -148,4 +148,10 @@ $ ./fbt resources icons dolphin_ext
 ```
 
 ----
-<p align="center"> We're not waiting for a war... We bring the war to them! </p>
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/ClaraCrazy/Flipper-Xtreme.svg)](https://starchart.cc/ClaraCrazy/Flipper-Xtreme)
+
+
+----
+<p align="center"> "What we do for ourselves dies with us. What we do for others and the world remains and is immortal.” ― Albert Pike </p>
