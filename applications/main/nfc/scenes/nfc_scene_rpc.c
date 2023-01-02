@@ -1,25 +1,17 @@
 #include "../nfc_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 void nfc_scene_rpc_on_enter(void* context) {
     Nfc* nfc = context;
     Popup* popup = nfc->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "NFC", 89, 42, AlignCenter, AlignBottom);
     popup_set_text(popup, "RPC mode", 89, 44, AlignCenter, AlignTop);
-    if (settings->sfw_mode) {
-        popup_set_icon(popup, 0, 12, &I_NFC_dolphin_emulation_47x61_sfw);
-    }
-    else {
-        popup_set_icon(popup, 0, 12, &I_NFC_dolphin_emulation_47x61);
-    }
+
+    popup_set_icon(popup, 0, 12, &I_NFC_dolphin_emulation_47x61);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 
     notification_message(nfc->notifications, &sequence_display_backlight_on);
-    free(settings);
 }
 
 static bool nfc_scene_rpc_emulate_callback(NfcWorkerEvent event, void* context) {
@@ -60,6 +52,13 @@ bool nfc_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         nfc_worker_start(
                             nfc->worker,
                             NfcWorkerStateMfClassicEmulate,
+                            &nfc->dev->dev_data,
+                            nfc_scene_rpc_emulate_callback,
+                            nfc);
+                    } else if(nfc->dev->format == NfcDeviceSaveFormatNfcV) {
+                        nfc_worker_start(
+                            nfc->worker,
+                            NfcWorkerStateNfcVEmulate,
                             &nfc->dev->dev_data,
                             nfc_scene_rpc_emulate_callback,
                             nfc);
