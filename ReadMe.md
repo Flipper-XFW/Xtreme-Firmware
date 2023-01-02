@@ -1,7 +1,7 @@
 <h1 align="center">XFW - <code>Xtreme Firmware</code> for the Flipper Zero</h1>
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/55334727/209031152-efbca66c-3fe0-41b5-a860-e0d7522a9279.png">
+  <img src="https://user-images.githubusercontent.com/55334727/210262328-2b860b42-0cfc-4d01-9003-12b7bb04a903.PNG">
 </p>
 
 [Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/main/documentation) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
