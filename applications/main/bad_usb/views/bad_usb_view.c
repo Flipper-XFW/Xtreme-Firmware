@@ -71,8 +71,8 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         if (settings->sfw_mode) {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect me");
-            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "to a computer");
+            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
+            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
         }
         else {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Plug me");
