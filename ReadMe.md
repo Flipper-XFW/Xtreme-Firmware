@@ -1,7 +1,7 @@
 <h1 align="center">XFW - <code>Xtreme Firmware</code> for the Flipper Zero</h1>
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/55334727/210262328-2b860b42-0cfc-4d01-9003-12b7bb04a903.PNG">
+  <img src="https://user-images.githubusercontent.com/55334727/210267703-bf9a4181-30a6-4735-a288-431d5d2d66db.png">
 </p>
 
 [Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/main/documentation) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
@@ -38,7 +38,7 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
 
-If you dont like that, we removed the "Dummy mode" as it serves no purpose, and switched with an SFW toggle. From the main menu, hit `Arrow UP` and select SFW mode.
+If you dont like that, we added an SFW mode to the Firmware. From the main menu, hit `Arrow UP` and select SFW mode and now all assets will be stock.
 
 -----
 <br>
