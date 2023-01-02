@@ -44,7 +44,7 @@ If you dont like that, we removed the "Dummy mode" as it serves no purpose, and 
 <br>
 <h2 align="center">List of changes:</h2>
 
-Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mention all those here. We will only mention **our** changes that we can actually be credited for, unlike *others*
+Note: This repo is always updated with OFW & Unleashed. No need to mention all those here. We will only mention **our** changes that we can actually be credited for, unlike *others*
 
 ```txt
 [Added]
@@ -70,7 +70,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 - Compiler just stfu about non-fatal problems
 - Some further NFC stuff
 - Weather App
-- Applications now use below mentioned API Routes
+- Applications now use above mentioned API Routes
 ```
 ```txt
 [Fixed]
@@ -106,8 +106,7 @@ Note: This repo is always updated with OFW, Unleashed & Rogue. No need to mentio
 <h3> Web Updater / Mobile App / Automatic qFlipper Update</h3>
 
 - Go to the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Download the .tgz file
-- Run your updater of choice with it
+- Click the "Web Updater" Button
 
 - Enjoy!
 <br>
@@ -148,4 +147,10 @@ $ ./fbt resources icons dolphin_ext
 ```
 
 ----
-<p align="center"> We're not waiting for a war... We bring the war to them! </p>
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/ClaraCrazy/Flipper-Xtreme.svg)](https://starchart.cc/ClaraCrazy/Flipper-Xtreme)
+
+
+----
+<p align="center"> "What we do for ourselves dies with us. What we do for others and the world remains and is immortal.” ― Albert Pike </p>
