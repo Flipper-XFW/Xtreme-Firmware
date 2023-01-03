@@ -1,5 +1,5 @@
 App(
-    appid="Temp_Sensors_Reader",
+    appid="unitemp",
     name="Unitemp",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="unitemp_app",
@@ -16,5 +16,4 @@ App(
     fap_icon="icon.png",
     fap_icon_assets="assets",
     fap_libs=["assets"],
-    fap_icon_assets_symbol="unitemp",
 )

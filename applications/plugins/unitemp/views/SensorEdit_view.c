@@ -214,9 +214,9 @@ static void _gpio_change_callback(VariableItem* item) {
 static void _i2caddr_change_callback(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     ((I2CSensor*)editable_sensor->instance)->currentI2CAdr =
-        ((I2CSensor*)editable_sensor->instance)->minI2CAdr + index * 2;
+        ((I2CSensor*)editable_sensor->instance)->minI2CAdr + index;
     char buff[5];
-    snprintf(buff, 5, "0x%2X", ((I2CSensor*)editable_sensor->instance)->currentI2CAdr >> 1);
+    snprintf(buff, 5, "0x%2X", ((I2CSensor*)editable_sensor->instance)->currentI2CAdr);
     variable_item_set_current_value_text(item, buff);
 }
 /**
@@ -335,15 +335,11 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
         VariableItem* item = variable_item_list_add(
             variable_item_list,
             "I2C address",
-            (((I2CSensor*)sensor->instance)->maxI2CAdr >> 1) -
-                (((I2CSensor*)sensor->instance)->minI2CAdr >> 1) + 1,
+            ((I2CSensor*)sensor->instance)->maxI2CAdr - ((I2CSensor*)sensor->instance)->minI2CAdr +
+                1,
             _i2caddr_change_callback,
             app);
-        snprintf(app->buff, 5, "0x%2X", ((I2CSensor*)sensor->instance)->currentI2CAdr >> 1);
-        variable_item_set_current_value_index(
-            item,
-            (((I2CSensor*)sensor->instance)->currentI2CAdr >> 1) -
-                (((I2CSensor*)sensor->instance)->minI2CAdr >> 1));
+        snprintf(app->buff, 5, "0x%2X", ((I2CSensor*)sensor->instance)->currentI2CAdr);
         variable_item_set_current_value_text(item, app->buff);
     }
 
