@@ -1,25 +1,27 @@
 <h1 align="center">XFW - <code>Xtreme Firmware</code> for the Flipper Zero</h1>
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/55334727/209031152-efbca66c-3fe0-41b5-a860-e0d7522a9279.png">
+  <img src="https://user-images.githubusercontent.com/55334727/210267703-bf9a4181-30a6-4735-a288-431d5d2d66db.png">
 </p>
 
-[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/main/documentation) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
+[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
 -----
 
-This firmware is a complete overhaul of the Official Firmware in combination with tons of modifications from RogueMaster (He used UL code too), with changes on all graphics, `disgusting` code and more. Xtreme brings you the most for your little flipper companion.
+This firmware is a complete overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), it also features some of the badly implemented ideas from RogueMaster, and lots of awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
 
 -----
 <br>
 <h2 align="center">What makes it special?</h2>
 
-This firmware is based on the Official Firmware, with some tweaks from RogueMaster, before he stole my code. The goal of this is to regularly bring out updates with an actual understanding of whats going on, fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned everywhere else.
+I have spent many hours perfecting this code even further, and getting the most out of it.
+
+The goal of this Firmware is to regularly bring out amazing updates based on what the community wants, with an actual understanding of whats going on. Fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned everywhere else.
 <br><br>
 - The focus of this firmware is functionality & stability: If an App doesnt work, its gone
 
 - Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
 
-- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all rewritten and cleaned up. I invite you all to compare the `applications\services\dolphin\helpers\dolphin-state.c`, lol. [Disgusting code](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/51286c21ddd2f42124e05f11240bbce267e349ba/applications/services/dolphin/helpers/dolphin_state.c)
+- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all built with perfection in mind and integrated in a mostly clean way. I invite you all to compare the code with theirs.
 
 - Up2Date: This firmware receives updates from a few repositories, not just from its Upstream. If there are functional, but yet un-merged Pull requests on another flipper firmware that are good, they will be in here!
 
@@ -28,7 +30,7 @@ This firmware is based on the Official Firmware, with some tweaks from RogueMast
 <br>
 <h2 align="center">Animations:</h2>
 
-This firmware contains NSFW animations. No, actually it consisnts purely of those in stock configuration. 
+This firmware contains NSFW animations and uses these in stock (NSFW) mode.
 
 The animations are tied to the level system. Each level you reach, unlocks a new animation. The higher your level, the more lewd it will become. Rumors have it, I'm  to be found in at least one of those too
 
@@ -38,7 +40,7 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
 
-If you dont like that, we removed the "Dummy mode" as it serves no purpose, and switched with an SFW toggle. From the main menu, hit `Arrow UP` and select SFW mode.
+If you dont like that, we added an SFW mode to the Firmware. From the main menu, hit `Arrow UP` and select SFW mode and now all assets will be stock.
 
 -----
 <br>
@@ -93,7 +95,8 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 <h2 align="center">Known Bugs:</h2>
 
 ```txt
-- Name Changer app crashes when you close it without using it
+- Name Changer app crashes 50% of the time
+- Some apps dont allow to be set as Favorite
 ```
 
 ----
