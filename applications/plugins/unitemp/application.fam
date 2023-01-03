@@ -1,6 +1,6 @@
 App(
     appid="Temp_Sensors_Reader",
-    name="Temp Sensors Reader",
+    name="Unitemp",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="unitemp_app",
     cdefines=["UNITEMP_APP"],
