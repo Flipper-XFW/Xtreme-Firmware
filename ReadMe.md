@@ -13,7 +13,7 @@ This firmware is a complete overhaul of the [Official Firmware](https://github.c
 <br>
 <h2 align="center">What makes it special?</h2>
 
-I have spent many hours perfecting this code even further, and getting the most out of it. Its also heavily NSFW themed by default, as am I, haha. 
+I have spent many hours perfecting this code even further, and getting the most out of it.
 
 The goal of this Firmware is to regularly bring out amazing updates based on what the community wants, with an actual understanding of whats going on. Fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned everywhere else.
 <br><br>
@@ -30,7 +30,7 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 <br>
 <h2 align="center">Animations:</h2>
 
-This firmware contains NSFW animations. No, actually it consisnts purely of those in stock configuration. 
+This firmware contains NSFW animations and uses these in stock (NSFW) mode.
 
 The animations are tied to the level system. Each level you reach, unlocks a new animation. The higher your level, the more lewd it will become. Rumors have it, I'm  to be found in at least one of those too
 
