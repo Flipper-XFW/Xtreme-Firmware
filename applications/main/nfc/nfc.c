@@ -305,7 +305,7 @@ int32_t nfc_app(void* p) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateNfcV);
                     DOLPHIN_DEED(DolphinDeedNfcEmulate);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
-                    scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
                 } else {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
                     DOLPHIN_DEED(DolphinDeedNfcEmulate);
