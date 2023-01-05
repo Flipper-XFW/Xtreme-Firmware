@@ -76,7 +76,7 @@ Min butthurt: 0
 Max butthurt: 14
 Min level: 11
 Max level: 30
-Weight: 7
+Weight: 9
 
 Name: lvl_12
 Min butthurt: 0
@@ -105,13 +105,6 @@ Max butthurt: 14
 Min level: 15
 Max level: 30
 Weight: 7
-
-Name: PaxGod_TikTok_Marketing
-Min butthurt: 0
-Max butthurt: 14
-Min level: 11
-Max level: 30
-Weight: 3
 
 Name: lvl_16
 Min butthurt: 0
@@ -153,7 +146,7 @@ Min butthurt: 0
 Max butthurt: 14
 Min level: 21
 Max level: 30
-Weight: 7
+Weight: 9
 
 Name: lvl_22
 Min butthurt: 0
@@ -216,4 +209,4 @@ Min butthurt: 0
 Max butthurt: 14
 Min level: 30
 Max level: 30
-Weight: 7
+Weight: 9
