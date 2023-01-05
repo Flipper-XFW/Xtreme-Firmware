@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.3,,
+Version,v,12.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -572,7 +572,7 @@ Function,+,bt_disconnect,void,Bt*
 Function,+,bt_forget_bonded_devices,void,Bt*
 Function,+,bt_keys_storage_set_default_path,void,Bt*
 Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
-Function,+,bt_set_profile,_Bool,"Bt*, BtProfile"
+Function,?,bt_set_profile,_Bool,"Bt*, BtProfile"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
@@ -1000,6 +1000,7 @@ Function,+,furi_hal_bt_get_transmitted_packets,uint32_t,
 Function,+,furi_hal_bt_hid_consumer_key_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release_all,_Bool,
+Function,?,furi_hal_bt_hid_kb_free_slots,_Bool,uint8_t
 Function,+,furi_hal_bt_hid_kb_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_kb_release,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_kb_release_all,_Bool,
@@ -1016,6 +1017,7 @@ Function,+,furi_hal_bt_is_alive,_Bool,
 Function,+,furi_hal_bt_is_ble_gatt_gap_supported,_Bool,
 Function,+,furi_hal_bt_is_testing_supported,_Bool,
 Function,+,furi_hal_bt_lock_core2,void,
+Function,?,furi_hal_bt_modify_profile_adv_name,void,"const char*, FuriHalBtProfile"
 Function,+,furi_hal_bt_nvm_sram_sem_acquire,void,
 Function,+,furi_hal_bt_nvm_sram_sem_release,void,
 Function,+,furi_hal_bt_reinit,void,

@@ -224,6 +224,8 @@ uint32_t furi_hal_bt_get_transmitted_packets();
  */
 bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode);
 
+void furi_hal_bt_modify_profile_adv_name(const char* name, FuriHalBtProfile profile);
+
 #ifdef __cplusplus
 }
 #endif

@@ -219,8 +219,10 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             // Change MAC address for HID profile
             config->mac_address[2]++;
             // Change name Flipper -> Control
-            const char* clicker_str = "Control";
-            memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
+            if (strlen(&config->adv_name[1]) > 1) {
+                const char* clicker_str = "Control";
+                memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
+            }
         }
         if(!gap_init(config, event_cb, context)) {
             gap_thread_stop();
@@ -443,4 +445,12 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
     FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
     return false;
+}
+
+void furi_hal_bt_modify_profile_adv_name(const char* name, FuriHalBtProfile profile) {
+    furi_assert(name);
+    furi_assert(strlen(name) < FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
+    furi_assert(profile < FuriHalBtProfileNumber);
+
+    strncpy(profile_config[profile].config.adv_name, name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
 }

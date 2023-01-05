@@ -138,24 +138,10 @@ void furi_hal_bt_hid_start() {
     if(!hid_svc_is_started()) {
         hid_svc_start();
     }
-    // Configure HID Keyboard
-    //
-    // this will also be called by Bad-usb now, so we need to prevent memory leak
-    // I dont know for now, how apps and mains interacts together, so lets add some 
-    // protection in case a crash in one doesn't affect the other
-    if(kb_report)
-        memset(kb_report, 0, sizeof(FuriHalBtHidKbReport));
-    else
-        kb_report = malloc(sizeof(FuriHalBtHidKbReport));
 
-    if(mouse_report)
-        memset(mouse_report, 0, sizeof(FuriHalBtHidMouseReport));
-    else
-        mouse_report = malloc(sizeof(FuriHalBtHidMouseReport));
-    if(consumer_report)
-        memset(consumer_report, 0, sizeof(FuriHalBtHidConsumerReport));
-    else
-        consumer_report = malloc(sizeof(FuriHalBtHidConsumerReport));
+    kb_report = malloc(sizeof(FuriHalBtHidKbReport));
+    mouse_report = malloc(sizeof(FuriHalBtHidMouseReport));
+    consumer_report = malloc(sizeof(FuriHalBtHidConsumerReport));
 
     // Configure Report Map characteristic
     hid_svc_update_report_map(
@@ -195,15 +181,28 @@ void furi_hal_bt_hid_stop() {
 
 bool furi_hal_bt_hid_kb_press(uint16_t button) {
     furi_assert(kb_report);
-    for(uint8_t i = 0; i < FURI_HAL_BT_HID_KB_MAX_KEYS; i++) {
+    uint8_t i;
+    for(i = 0; i < FURI_HAL_BT_HID_KB_MAX_KEYS; i++) {
         if(kb_report->key[i] == 0) {
             kb_report->key[i] = button & 0xFF;
             break;
         }
     }
+    if(i == FURI_HAL_BT_HID_KB_MAX_KEYS) {
+        return false;
+    }
     kb_report->mods |= (button >> 8);
     return hid_svc_update_input_report(
         ReportNumberKeyboard, (uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
+}
+
+bool furi_hal_bt_hid_kb_free_slots(uint8_t n_empty_slots) {
+    furi_assert(kb_report);
+    for(uint8_t i = 0; n_empty_slots > 0 && i < FURI_HAL_BT_HID_KB_MAX_KEYS; i++) {
+        if(kb_report->key[i] == 0) 
+            n_empty_slots--;
+    }
+    return (n_empty_slots == 0);
 }
 
 bool furi_hal_bt_hid_kb_release(uint16_t button) {
