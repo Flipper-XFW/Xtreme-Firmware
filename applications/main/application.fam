@@ -14,6 +14,7 @@ App(
         # "lfrfid_loader",
         "nfc",
         "subghz",
+        "sub_playlist_loader",
         #"bad_usb",
         "bad_usb_loader",
         # "u2f",
