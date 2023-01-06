@@ -8,4 +8,5 @@ App(
     stack_size=2 * 1024,
     order=12,
     fap_icon="playlist_10px.png",
+    icon="A_Sub_Playlist_14",
 )
