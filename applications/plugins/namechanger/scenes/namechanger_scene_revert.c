@@ -13,7 +13,6 @@ void namechanger_scene_revert_on_enter(void* context) {
     Widget* widget = namechanger->widget;
     widget_add_text_box_element(
         widget, 0, 0, 128, 25, AlignCenter, AlignCenter, "\e#Revert Name?\e#", false);
-    widget_add_icon_element(widget, 48, 20, &I_MarioBlock);
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Cancel", namechanger_scene_revert_widget_callback, namechanger);
     widget_add_button_element(

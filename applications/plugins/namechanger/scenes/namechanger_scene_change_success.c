@@ -9,7 +9,6 @@ void namechanger_scene_change_success_on_enter(void* context) {
     NameChanger* namechanger = context;
     Popup* popup = namechanger->popup;
 
-    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     popup_set_header(popup, "Saved!", 5, 5, AlignLeft, AlignTop);
     popup_set_text(popup, "Rebooting...", 5, 17, AlignLeft, AlignTop);
 
