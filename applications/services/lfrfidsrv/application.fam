@@ -1,7 +1,0 @@
-App(
-    appid="lfrfidsrv",
-    apptype=FlipperAppType.STARTUP,
-    entry_point="lfrfid_on_system_start",
-    requires=["lfrfid"],
-    order=50,
-)

@@ -13,8 +13,6 @@
 
 #define TAG "DesktopSrv"
 
-#define CLOCK_APP EXT_PATH("/apps/Main/Clock.fap")
-
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -221,6 +219,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Zombiez.fap"));
             break;
         }
+        case DesktopMainEventOpenClock: {
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Main/Clock.fap"));
+            break;
+        }
         case DesktopMainEventOpenTetris: {
             desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Tetris.fap"));
             break;
@@ -245,10 +247,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         case DesktopMainEventOpenSubRemote: {
             desktop_scene_main_open_app_or_profile(
                 desktop, EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
-            break;
-        }
-        case DesktopMainEventOpenClock: {
-            desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
             break;
         }
         case DesktopLockedEventUpdate:
