@@ -9,7 +9,6 @@ void namechanger_scene_revert_success_on_enter(void* context) {
     NameChanger* namechanger = context;
     Popup* popup = namechanger->popup;
 
-    popup_set_icon(popup, 0, 2, &I_DolphinMafia_115x62);
     popup_set_header(popup, "Reverted!", 70, 5, AlignLeft, AlignTop);
     popup_set_text(popup, "Rebooting...", 70, 16, AlignLeft, AlignTop);
 

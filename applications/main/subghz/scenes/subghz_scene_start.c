@@ -7,10 +7,30 @@ enum SubmenuIndex {
     SubmenuIndexRead = 10,
     SubmenuIndexSaved,
     SubmenuIndexTest,
-    SubmenuIndexAddManualy,
+    SubmenuIndexAddManually,
     SubmenuIndexFrequencyAnalyzer,
     SubmenuIndexReadRAW,
+    SubmenuIndexShowRegionInfo
 };
+
+void subghz_scene_start_remove_advanced_preset(SubGhz* subghz) {
+    // delete operation is harmless
+    subghz_setting_delete_custom_preset(subghz->setting, ADVANCED_AM_PRESET_NAME);
+}
+
+void subghz_scene_start_load_advanced_preset(SubGhz* subghz) {
+    for(uint8_t i = 0; i < subghz_setting_get_preset_count(subghz->setting); i++) {
+        if(!strcmp(subghz_setting_get_preset_name(subghz->setting, i), ADVANCED_AM_PRESET_NAME)) {
+            return; // already exists
+        }
+    }
+
+    // Load custom advanced AM preset with configurable CFGMDM settings
+    FlipperFormat* advanced_am_preset = subghz_preset_custom_advanced_am_preset_alloc();
+    subghz_setting_load_custom_preset(
+        subghz->setting, ADVANCED_AM_PRESET_NAME, advanced_am_preset);
+    flipper_format_free(advanced_am_preset);
+}
 
 void subghz_scene_start_submenu_callback(void* context, uint32_t index) {
     SubGhz* subghz = context;
@@ -45,13 +65,19 @@ void subghz_scene_start_on_enter(void* context) {
     submenu_add_item(
         subghz->submenu,
         "Add Manually",
-        SubmenuIndexAddManualy,
+        SubmenuIndexAddManually,
         subghz_scene_start_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
         "Frequency Analyzer",
         SubmenuIndexFrequencyAnalyzer,
+        subghz_scene_start_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Region Information",
+        SubmenuIndexShowRegionInfo,
         subghz_scene_start_submenu_callback,
         subghz);
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -73,12 +99,14 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexReadRAW) {
+            subghz_scene_start_load_advanced_preset(subghz);
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexReadRAW);
             subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
             return true;
         } else if(event.event == SubmenuIndexRead) {
+            subghz_scene_start_remove_advanced_preset(subghz);
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexRead);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
@@ -88,9 +116,9 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexSaved);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
             return true;
-        } else if(event.event == SubmenuIndexAddManualy) {
+        } else if(event.event == SubmenuIndexAddManually) {
             scene_manager_set_scene_state(
-                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexAddManualy);
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexAddManually);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetType);
             return true;
         } else if(event.event == SubmenuIndexFrequencyAnalyzer) {
@@ -104,6 +132,11 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexTest);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTest);
+            return true;
+        } else if(event.event == SubmenuIndexShowRegionInfo) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexShowRegionInfo);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneRegionInfo);
             return true;
         }
     }

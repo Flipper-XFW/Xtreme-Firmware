@@ -1,6 +1,6 @@
 #include "u2f_view.h"
 #include <gui/elements.h>
-#include <u2f_icons.h>
+#include <assets_icons.h>
 #include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 struct U2fView {

@@ -1,20 +1,10 @@
-# Adding additional frequencies (TX/RX) [By UberGuidoZ](https://github.com/UberGuidoZ/Flipper/blob/main/Sub-GHz/Settings/ReadMe.md)
-
-Some changes I made to the available frequency settings (including unlocking them all). The file is found here:
-
-![Sub-Ghz_Changes](https://user-images.githubusercontent.com/57457139/174948988-f6955976-2318-4e3e-b658-93f0465bb22e.png)
+#Sub-Ghz Frequencies in Xtreme 
 
 Officially supported frequencies: 300-348 MHz, 387-464 MHz, and 779-928 MHz (from [CC1101 chip docs](https://www.ti.com/product/CC1101))<br>
-Unofficially supported frequencies: 281-361 MHz, 378-481 MHz, and 749-962 MHz (from [YARD Stick One](https://greatscottgadgets.com/yardstickone/) CC1111 docs)
+Unofficially supported frequencies: 281-361 MHz, 378-481 MHz, and 749-962 MHz (from [YARD Stick One/CC1111 Docs](https://greatscottgadgets.com/yardstickone/))
 
-Official & Unleashed currently do not allow anything outside of the officially supported CC1101 specs.
-RogueMaster allows unofficially supported frequencies with the extend_range.txt file
+Currently no other Flipper firmware allows anything outside of the officially supported CC1101 specs without editing files that get overwritten with every update.
+Xtreme has these frequencies enabled by default and regional restrictions disabled.
 
-**NOTE: Going outside the supported frequencies may DAMAGE YOUR FLIPPER AMP.<br>
-Please understand what you're doing if trying to break out of official frequencies.**
-
-You'll need to edit the [extended range file](https://github.com/ClaraCrazy/Flipper-Xtreme/blob/main/documentation/DangerousSettings.md) to enable frequencies outside of the Official above.
-
-# CAUTION within 402-408 range!<br>Medical devices can operate here.
-
-This range is purposefully not included in my file above.
+**NOTE: Operating outside supported frequencies can damage your amp and may not provide the same results as supported frequencies.<br>
+Please understand what you're doing if you transmit on unsupported frequencies as medical devices are licensed to operate there.** 

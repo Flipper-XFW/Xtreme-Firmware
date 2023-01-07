@@ -13,8 +13,6 @@
 
 #define TAG "DesktopSrv"
 
-#define CLOCK_APP EXT_PATH("/apps/Main/Clock.fap")
-
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -208,47 +206,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             }
             break;
         }
-        case DesktopMainEventOpenSnake: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Snake.fap"));
-            break;
-        }
-        case DesktopMainEventOpen2048: {
-            desktop_scene_main_open_app_or_profile(
-                desktop, EXT_PATH("/apps/Games/2048_improved.fap"));
-            break;
-        }
-        case DesktopMainEventOpenZombiez: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Zombiez.fap"));
-            break;
-        }
-        case DesktopMainEventOpenTetris: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Tetris.fap"));
-            break;
-        }
-        case DesktopMainEventOpenDOOM: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/DOOM.fap"));
-            break;
-        }
-        case DesktopMainEventOpenDice: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Dice.fap"));
-            break;
-        }
-        case DesktopMainEventOpenArkanoid: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Arkanoid.fap"));
-            break;
-        }
-        case DesktopMainEventOpenHeap: {
-            desktop_scene_main_open_app_or_profile(
-                desktop, EXT_PATH("/apps/Games/Heap_Defence.fap"));
-            break;
-        }
-        case DesktopMainEventOpenSubRemote: {
-            desktop_scene_main_open_app_or_profile(
-                desktop, EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
-            break;
-        }
         case DesktopMainEventOpenClock: {
-            desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Tools/Clock.fap"));
             break;
         }
         case DesktopLockedEventUpdate:
