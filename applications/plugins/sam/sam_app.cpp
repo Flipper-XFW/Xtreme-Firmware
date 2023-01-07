@@ -44,3 +44,13 @@ extern "C" int32_t sam_app_wtf(void* p) {
     }
     return 0;
 }
+
+extern "C" int32_t sam_app_xfw(void* p) {
+    UNUSED(p);
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        voice.begin();
+        voice.say("This firmware is, the best!");
+        furi_hal_speaker_release();
+    }
+    return 0;
+}
