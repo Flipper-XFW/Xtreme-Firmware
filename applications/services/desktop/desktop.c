@@ -153,6 +153,7 @@ void desktop_set_sfw_mode_state(Desktop* desktop, bool enabled) {
     desktop_main_set_sfw_mode_state(desktop->main_view, enabled);
     animation_manager_set_sfw_mode_state(desktop->animation_manager, enabled);
     desktop->settings.sfw_mode = enabled;
+    DESKTOP_SETTINGS_SAVE(&desktop->settings);
 }
 
 Desktop* desktop_alloc() {
