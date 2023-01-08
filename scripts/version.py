@@ -5,18 +5,8 @@ from flipper.app import App
 import subprocess
 import os
 import json
-import zipfile
 from datetime import date, datetime
-import requests
-
-url = "TBA"
-
-if not os.isdir("assets/dolphin/external/lvl_1"):
-    zipr = requests.get(url, allow_redirects=True)
-    open('assets.zip', 'wb').write(zipr.content)
-    with zipfile.ZipFile("assets.zip", 'r') as zip_ref:
-        zip_ref.extractall("assets/dolphin/external")
-
+       
 class GitVersion:
     def __init__(self, source_dir):
         self.source_dir = source_dir
