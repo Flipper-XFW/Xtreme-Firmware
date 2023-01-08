@@ -94,12 +94,6 @@ void animation_manager_set_interact_callback(
     animation_manager->interact_callback = callback;
 }
 
-void animation_manager_set_sfw_mode_state(AnimationManager* animation_manager, bool enabled) {
-    furi_assert(animation_manager);
-    animation_manager->sfw_mode = enabled;
-    animation_manager_start_new_idle(animation_manager);
-}
-
 static void animation_manager_check_blocking_callback(const void* message, void* context) {
     const StorageEvent* storage_event = message;
 
@@ -368,9 +362,8 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    if(animation_manager->sfw_mode) {
-        return animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
-    }
+    UNUSED(animation_manager);
+    
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
     animation_storage_fill_animation_list(&animation_list);

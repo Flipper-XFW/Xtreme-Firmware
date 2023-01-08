@@ -258,46 +258,47 @@ class DolphinManifest:
         self.logger = logging.getLogger("DolphinManifest")
 
     def load(self, source_directory: str):
-        manifest_filename = os.path.join(source_directory, "manifest.txt")
+        for i in ["sfw", "nsfw"]:
+            manifest_filename = os.path.join(source_directory, f"{i}/manifest.txt")
 
-        file = FlipperFormatFile()
-        file.load(manifest_filename)
+            file = FlipperFormatFile()
+            file.load(manifest_filename)
 
-        # Check file header
-        filetype, version = file.getHeader()
-        assert filetype == self.FILE_TYPE
-        assert version == self.FILE_VERSION
+            # Check file header
+            filetype, version = file.getHeader()
+            assert filetype == self.FILE_TYPE
+            assert version == self.FILE_VERSION
 
-        # Load animation data
-        while True:
-            try:
-                # Read animation spcification
-                name = file.readKey("Name")
-                min_butthurt = file.readKeyInt("Min butthurt")
-                max_butthurt = file.readKeyInt("Max butthurt")
-                min_level = file.readKeyInt("Min level")
-                max_level = file.readKeyInt("Max level")
-                weight = file.readKeyInt("Weight")
+            # Load animation data
+            while True:
+                try:
+                    # Read animation spcification
+                    name = file.readKey("Name")
+                    min_butthurt = file.readKeyInt("Min butthurt")
+                    max_butthurt = file.readKeyInt("Max butthurt")
+                    min_level = file.readKeyInt("Min level")
+                    max_level = file.readKeyInt("Max level")
+                    weight = file.readKeyInt("Weight")
 
-                assert len(name) > 0
-                assert min_butthurt >= 0
-                assert max_butthurt >= 0 and max_butthurt >= min_butthurt
-                assert min_level >= 0
-                assert max_level >= 0 and max_level >= min_level
-                assert weight >= 0
+                    assert len(name) > 0
+                    assert min_butthurt >= 0
+                    assert max_butthurt >= 0 and max_butthurt >= min_butthurt
+                    assert min_level >= 0
+                    assert max_level >= 0 and max_level >= min_level
+                    assert weight >= 0
 
-                # Initialize animation
-                animation = DolphinBubbleAnimation(
-                    name, min_butthurt, max_butthurt, min_level, max_level, weight
-                )
+                    # Initialize animation
+                    animation = DolphinBubbleAnimation(
+                        name, min_butthurt, max_butthurt, min_level, max_level, weight
+                    )
 
-                # Load Animation meta and frames
-                animation.load(os.path.join(source_directory, name))
+                    # Load Animation meta and frames
+                    animation.load(os.path.join(source_directory, name))
 
-                # Add to array
-                self.animations.append(animation)
-            except EOFError:
-                break
+                    # Add to array
+                    self.animations.append(animation)
+                except EOFError:
+                    break
 
     def _renderTemplate(self, template_filename: str, output_filename: str, **kwargs):
         template = Templite(filename=template_filename)
