@@ -6,10 +6,8 @@ import struct
 from flipper.app import App
 from flipper.assets.icon import file2image
 
-
 import requests
 import zipfile
-
      
 class Main(App):
     MAGIC = 0x72676468
