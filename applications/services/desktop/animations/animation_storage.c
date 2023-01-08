@@ -34,10 +34,12 @@ void animation_handler_beta()
 
     if (settings->sfw_mode) {
 		snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
-		strcat(ANIMATION_MANIFEST_FILE,"/sfw/manifest2.txt");
+        FURI_LOG_I(TAG, "SFW Manifest selected");
+		strcat(ANIMATION_MANIFEST_FILE,"/sfw/manifest.txt");
     }
     else {
 		snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
+        FURI_LOG_I(TAG, "NSFW Manifest selected");
 		strcat(ANIMATION_MANIFEST_FILE,"/nsfw/manifest.txt");
     }
 
