@@ -1,4 +1,5 @@
 #include "../infrared_i.h"
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 static void
     infrared_scene_learn_success_dialog_result_callback(DialogExResult result, void* context) {
@@ -10,6 +11,8 @@ void infrared_scene_learn_success_on_enter(void* context) {
     Infrared* infrared = context;
     DialogEx* dialog_ex = infrared->dialog_ex;
     InfraredSignal* signal = infrared->received_signal;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOn);
 
@@ -47,12 +50,18 @@ void infrared_scene_learn_success_on_enter(void* context) {
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "Save");
     dialog_ex_set_center_button_text(dialog_ex, "Send");
-    dialog_ex_set_icon(dialog_ex, 0, 1, &I_DolphinReadingSuccess_59x63);
+    if (settings->sfw_mode) {
+        dialog_ex_set_icon(dialog_ex, 0, 1, &I_DolphinReadingSuccess_59x63_sfw);
+    }
+    else {
+        dialog_ex_set_icon(dialog_ex, 0, 1, &I_DolphinReadingSuccess_59x63);
+    }
     dialog_ex_set_result_callback(dialog_ex, infrared_scene_learn_success_dialog_result_callback);
     dialog_ex_set_context(dialog_ex, context);
     dialog_ex_enable_extended_events(dialog_ex);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewDialogEx);
+    free(settings);
 }
 
 bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent event) {

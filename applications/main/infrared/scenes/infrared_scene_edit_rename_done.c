@@ -1,10 +1,18 @@
 #include "../infrared_i.h"
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 void infrared_scene_edit_rename_done_on_enter(void* context) {
     Infrared* infrared = context;
     Popup* popup = infrared->popup;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
-    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
+    if (settings->sfw_mode) {
+        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
+    }
+    else {
+        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
+    }
     popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
 
     popup_set_callback(popup, infrared_popup_closed_callback);
@@ -13,6 +21,7 @@ void infrared_scene_edit_rename_done_on_enter(void* context) {
     popup_enable_timeout(popup);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewPopup);
+    free(settings);
 }
 
 bool infrared_scene_edit_rename_done_on_event(void* context, SceneManagerEvent event) {
