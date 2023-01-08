@@ -124,6 +124,8 @@ $ ./fbt resources icons dolphin_ext
 - [Tamagotchi(By GMMan)](https://github.com/GMMan/flipperzero-tamagotch-p1)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
+- [Pong (By [nmrr])](https://github.com/nmrr/flipperzero-pong)
+- [Asteroids (By [antirez])](https://github.com/antirez/flipper-asteroids)
 
 
 ## Misc
