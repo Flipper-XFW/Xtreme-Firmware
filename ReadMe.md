@@ -96,8 +96,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 <h2 align="center">Known Bugs:</h2>
 
 ```txt
-- Name Changer app crashes 50% of the time
-- Some apps dont allow to be set as Favorite
+- Nothing rn. Hopefully that wont change
 ```
 
 ----
