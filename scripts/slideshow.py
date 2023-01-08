@@ -7,10 +7,25 @@ from flipper.app import App
 from flipper.assets.icon import file2image
 
 
+import requests
+import zipfile
+
+     
 class Main(App):
     MAGIC = 0x72676468
     VERSION = 1
 
+    url = "TBA"
+    if not os.isdir("assets/dolphin/external/lvl_1"):
+    check = input("We noticed that you do not have the original XFW animations downloaded. Would you like to do that? (y/n)")
+    if check.lower() == "y":
+        zipr = requests.get(url, allow_redirects=True)
+        open('assets.zip', 'wb').write(zipr.content)
+        with zipfile.ZipFile("assets.zip", 'r') as zip_ref:
+            zip_ref.extractall("assets/dolphin/external")
+            print("Finished downloading assets.")
+
+    
     def init(self):
         self.parser.add_argument("-i", "--input", help="input folder", required=True)
         self.parser.add_argument("-o", "--output", help="output file", required=True)
