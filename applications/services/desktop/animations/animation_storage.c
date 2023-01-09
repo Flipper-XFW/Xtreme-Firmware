@@ -42,7 +42,7 @@ void animation_handler_beta()
         FURI_LOG_I(TAG, "NSFW Manifest selected");
 		strcat(ANIMATION_MANIFEST_FILE,"/nsfw/manifest.txt");
     }
-
+    free(settings);
 }
 
 static bool animation_storage_load_single_manifest_info(
