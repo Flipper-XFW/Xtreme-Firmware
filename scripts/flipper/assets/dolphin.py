@@ -257,48 +257,54 @@ class DolphinManifest:
         self.animations = []
         self.logger = logging.getLogger("DolphinManifest")
 
-    def load(self, source_directory: str):
-        for i in ["sfw", "nsfw"]:
-            manifest_filename = os.path.join(source_directory, f"{i}/manifest.txt")
+    def load(self, loc: str):
+        manifest_filename = os.path.join(loc, "manifest.txt")
 
-            file = FlipperFormatFile()
-            file.load(manifest_filename)
+        file = FlipperFormatFile()
+        file.load(manifest_filename)
 
-            # Check file header
-            filetype, version = file.getHeader()
-            assert filetype == self.FILE_TYPE
-            assert version == self.FILE_VERSION
+        # Check file header
+        filetype, version = file.getHeader()
+        assert filetype == self.FILE_TYPE
+        assert version == self.FILE_VERSION
 
-            # Load animation data
-            while True:
-                try:
-                    # Read animation spcification
-                    name = file.readKey("Name")
-                    min_butthurt = file.readKeyInt("Min butthurt")
-                    max_butthurt = file.readKeyInt("Max butthurt")
-                    min_level = file.readKeyInt("Min level")
-                    max_level = file.readKeyInt("Max level")
-                    weight = file.readKeyInt("Weight")
+        # Load animation data
+        while True:
+            try:
+                # Read animation spcification
+                name = file.readKey("Name")
+                min_butthurt = file.readKeyInt("Min butthurt")
+                max_butthurt = file.readKeyInt("Max butthurt")
+                min_level = file.readKeyInt("Min level")
+                max_level = file.readKeyInt("Max level")
+                weight = file.readKeyInt("Weight")
 
-                    assert len(name) > 0
-                    assert min_butthurt >= 0
-                    assert max_butthurt >= 0 and max_butthurt >= min_butthurt
-                    assert min_level >= 0
-                    assert max_level >= 0 and max_level >= min_level
-                    assert weight >= 0
+                assert len(name) > 0
+                assert min_butthurt >= 0
+                assert max_butthurt >= 0 and max_butthurt >= min_butthurt
+                assert min_level >= 0
+                assert max_level >= 0 and max_level >= min_level
+                assert weight >= 0
 
-                    # Initialize animation
-                    animation = DolphinBubbleAnimation(
-                        name, min_butthurt, max_butthurt, min_level, max_level, weight
-                    )
+                # Initialize animation
+                animation = DolphinBubbleAnimation(
+                    name, min_butthurt, max_butthurt, min_level, max_level, weight
+                )
 
-                    # Load Animation meta and frames
-                    animation.load(os.path.join(source_directory, name))
+                # Load Animation meta and frames
 
-                    # Add to array
-                    self.animations.append(animation)
-                except EOFError:
-                    break
+                # handle both slash types bc we can
+                newname = name.split("\\")
+                if len(newname) < 2:
+                    newname = name.split("/")
+
+                newname = str(newname[1])
+                animation.load(os.path.join(loc, newname))
+
+                # Add to array
+                self.animations.append(animation)
+            except EOFError:
+                break
 
     def _renderTemplate(self, template_filename: str, output_filename: str, **kwargs):
         template = Templite(filename=template_filename)
@@ -362,11 +368,12 @@ class Dolphin:
         self.manifest = DolphinManifest()
         self.logger = logging.getLogger("Dolphin")
 
-    def load(self, source_directory: str):
-        assert os.path.isdir(source_directory)
-        # Load Manifest
-        self.logger.info(f"Loading directory {source_directory}")
-        self.manifest.load(source_directory)
+    def load(self, valid_dirs: list):
+        for loc in valid_dirs:
+            assert os.path.isdir(loc)
+            # Load Manifest
+            self.logger.info(f"Loading directory {loc}")
+            self.manifest.load(loc)
 
     def pack(self, output_directory: str, symbol_name: str = None):
         self.manifest.save(output_directory, symbol_name)
