@@ -152,6 +152,7 @@ void desktop_set_sfw_mode_state(Desktop* desktop, bool enabled) {
     view_port_enabled_set(desktop->sfw_mode_icon_viewport, enabled);
     desktop->settings.sfw_mode = enabled;
     DESKTOP_SETTINGS_SAVE(&desktop->settings);
+    furi_hal_power_reset();
 }
 
 Desktop* desktop_alloc() {
