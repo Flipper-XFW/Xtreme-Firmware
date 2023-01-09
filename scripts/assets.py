@@ -261,7 +261,6 @@ class Main(App):
         global valid_dirs # access our global variable
         for i in valid_dirs: # We can copy the manifest for all of the valid dirs!
             i = i.split("/")[-1]
-            print(f"assets\dolphin\external\{i}\manifest.txt")
             shutil.copyfile(fr"assets\dolphin\external\{i}\manifest.txt", fr"assets\resources\dolphin\{i}\manifest.txt")
         os.remove(r"assets\resources\dolphin\manifest.txt")
 
@@ -293,7 +292,7 @@ class Main(App):
         self.logger.info(f"Processing Dolphin sources")
         dolphin = Dolphin()
         self.logger.info(f"Loading data")
-        if not "external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
+        if not "dolphin\external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
             dolphin.load(self.args.input_directory)
         else:
             dolphin.load(valid_dirs)

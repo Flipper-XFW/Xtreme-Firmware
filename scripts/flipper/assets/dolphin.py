@@ -298,10 +298,7 @@ class DolphinManifest:
                 if len(newname) < 2:
                     newname = name.split("/")
 
-                try: # Flipper Zero moment. loading all assets in one script, lol.
-                    newname = str(newname[1]) # external shit we modified
-                except:
-                    newname = str(newname[0]) # everything else... smh
+                newname = str(newname[-1])
 
                 animation.load(os.path.join(loc, newname))
 
@@ -372,18 +369,21 @@ class Dolphin:
         self.manifest = DolphinManifest()
         self.logger = logging.getLogger("Dolphin")
 
-    def load(self, valid_dirs: list):
-        if not "external" in str(valid_dirs):
-                assert os.path.isdir(valid_dirs)
+    def load(self, valid_dirs: list or str):
+        
+        if type(valid_dirs) == list:
+            for path in valid_dirs:
+                assert os.path.isdir(path)
                 # Load Manifest
-                self.logger.info(f"Loading directory {valid_dirs}")
-                self.manifest.load(valid_dirs)
+                self.logger.info(f"Loading directory {path}")
+                self.manifest.load(path)
         else:
-            for loc in valid_dirs:
-                assert os.path.isdir(loc)
-                # Load Manifest
-                self.logger.info(f"Loading directory {loc}")
-                self.manifest.load(loc)
+            assert os.path.isdir(valid_dirs)
+            # Load Manifest
+            self.logger.info(f"Loading directory {valid_dirs}")
+            self.manifest.load(valid_dirs)
+            
+
 
     def pack(self, output_directory: str, symbol_name: str = None):
         self.manifest.save(output_directory, symbol_name)
