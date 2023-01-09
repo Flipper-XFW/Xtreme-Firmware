@@ -293,7 +293,10 @@ class Main(App):
         self.logger.info(f"Processing Dolphin sources")
         dolphin = Dolphin()
         self.logger.info(f"Loading data")
-        dolphin.load(valid_dirs)
+        if not "external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
+            dolphin.load(self.args.input_directory)
+        else:
+            dolphin.load(valid_dirs)
         self.logger.info(f"Packing")
         dolphin.pack(self.args.output_directory, self.args.symbol_name)
         self.logger.info(f"Complete")
