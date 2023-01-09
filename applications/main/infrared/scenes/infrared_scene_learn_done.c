@@ -9,15 +9,15 @@ void infrared_scene_learn_done_on_enter(void* context) {
 
     if (settings->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
+        if (infrared->app_state.is_learning_new_remote) {
+            popup_set_header(popup, "New remote\ncreated!", 0, 0, AlignLeft, AlignTop);
+        }
+        else {
+            popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
+        }
     }
     else {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    }
-
-    if(infrared->app_state.is_learning_new_remote) {
-        popup_set_header(popup, "New remote\ncreated!", 0, 0, AlignLeft, AlignTop);
-    } else {
-        popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
     }
 
     popup_set_callback(popup, infrared_popup_closed_callback);
