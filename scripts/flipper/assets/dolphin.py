@@ -370,8 +370,6 @@ class Dolphin:
         self.logger = logging.getLogger("Dolphin")
 
     def load(self, valid_dirs: list):
-        print(valid_dirs)
-        input()
         for path in valid_dirs:
             assert os.path.isdir(path)
             # Load Manifest
