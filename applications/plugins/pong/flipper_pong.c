@@ -6,7 +6,6 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <notification/notification_messages.h>
 #include <furi_hal_random.h>
 
 #define SCREEN_SIZE_X 128
@@ -127,10 +126,6 @@ int32_t flipper_pong_app()
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-    if (players.ball_X_direction == 0) notification_message(notification, &sequence_set_only_red_255);
-    else notification_message(notification, &sequence_set_only_blue_255);
-
     FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, 1000/FPS);
 
@@ -146,7 +141,6 @@ int32_t flipper_pong_app()
                 if(event.input.key == InputKeyBack) 
                 {
                     release_mutex(&state_mutex, playersMutex);
-                    notification_message(notification, &sequence_set_only_green_255);
                     break;
                 }
                 else if(event.input.key == InputKeyUp) 
@@ -202,7 +196,6 @@ int32_t flipper_pong_app()
                     playersMutex->ball_X -= playersMutex->ball_X_speed;
                     playersMutex->ball_X_speed = changeSpeed();
                     playersMutex->ball_Y_speed = changeSpeed();
-                    notification_message(notification, &sequence_set_only_red_255);
                 }
                 else if (insidePlayer2 == true)
                 {
@@ -210,7 +203,6 @@ int32_t flipper_pong_app()
                     playersMutex->ball_X += playersMutex->ball_X_speed;
                     playersMutex->ball_X_speed = changeSpeed();
                     playersMutex->ball_Y_speed = changeSpeed();
-                    notification_message(notification, &sequence_set_only_blue_255);
                 }
                 else
                 {
@@ -229,7 +221,6 @@ int32_t flipper_pong_app()
                             playersMutex->ball_Y_speed = 1;
                             playersMutex->ball_X_direction = 0;
                             playersMutex->player2_score++;
-                            notification_message(notification, &sequence_set_only_red_255);
                         }
                     }
                     else
@@ -246,7 +237,6 @@ int32_t flipper_pong_app()
                             playersMutex->ball_Y_speed = 1;
                             playersMutex->ball_X_direction = 1;
                             playersMutex->player1_score++;
-                            notification_message(notification, &sequence_set_only_blue_255);
                         }
                     }
                 }
@@ -292,7 +282,6 @@ int32_t flipper_pong_app()
     view_port_free(view_port);
     furi_timer_free(timer);
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_NOTIFICATION);
 
     return 0;
 }
