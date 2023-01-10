@@ -369,21 +369,14 @@ class Dolphin:
         self.manifest = DolphinManifest()
         self.logger = logging.getLogger("Dolphin")
 
-    def load(self, valid_dirs: list or str):
-        
-        if type(valid_dirs) == list:
-            for path in valid_dirs:
-                assert os.path.isdir(path)
-                # Load Manifest
-                self.logger.info(f"Loading directory {path}")
-                self.manifest.load(path)
-        else:
-            assert os.path.isdir(valid_dirs)
+    def load(self, valid_dirs: list):
+        print(valid_dirs)
+        input()
+        for path in valid_dirs:
+            assert os.path.isdir(path)
             # Load Manifest
-            self.logger.info(f"Loading directory {valid_dirs}")
-            self.manifest.load(valid_dirs)
-            
-
+            self.logger.info(f"Loading directory {path}")
+            self.manifest.load(path)            
 
     def pack(self, output_directory: str, symbol_name: str = None):
         self.manifest.save(output_directory, symbol_name)
