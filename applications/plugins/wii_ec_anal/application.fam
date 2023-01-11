@@ -2,7 +2,7 @@
 
 App(
 	# --- App Info
-	appid="Wii_EC_Analyser",
+	appid="wii_ec_anal",
 	name="Wii EC Analyser",
 
 	# --- Entry point
@@ -32,5 +32,5 @@ App(
 #	fap_version=(1,0),
 
 	fap_icon="WiiEC.png",
-	fap_category="Misc",
+	fap_category="GPIO",
 )

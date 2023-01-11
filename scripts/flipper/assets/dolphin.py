@@ -257,8 +257,8 @@ class DolphinManifest:
         self.animations = []
         self.logger = logging.getLogger("DolphinManifest")
 
-    def load(self, source_directory: str):
-        manifest_filename = os.path.join(source_directory, "manifest.txt")
+    def load(self, loc: str):
+        manifest_filename = os.path.join(loc, "manifest.txt")
 
         file = FlipperFormatFile()
         file.load(manifest_filename)
@@ -292,7 +292,15 @@ class DolphinManifest:
                 )
 
                 # Load Animation meta and frames
-                animation.load(os.path.join(source_directory, name))
+
+                # handle both slash types bc we can
+                newname = name.split("\\")
+                if len(newname) < 2:
+                    newname = name.split("/")
+
+                newname = str(newname[-1])
+
+                animation.load(os.path.join(loc, newname))
 
                 # Add to array
                 self.animations.append(animation)
@@ -361,11 +369,12 @@ class Dolphin:
         self.manifest = DolphinManifest()
         self.logger = logging.getLogger("Dolphin")
 
-    def load(self, source_directory: str):
-        assert os.path.isdir(source_directory)
-        # Load Manifest
-        self.logger.info(f"Loading directory {source_directory}")
-        self.manifest.load(source_directory)
+    def load(self, valid_dirs: list):
+        for path in valid_dirs:
+            assert os.path.isdir(path)
+            # Load Manifest
+            self.logger.info(f"Loading directory {path}")
+            self.manifest.load(path)            
 
     def pack(self, output_directory: str, symbol_name: str = None):
         self.manifest.save(output_directory, symbol_name)

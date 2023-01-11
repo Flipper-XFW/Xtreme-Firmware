@@ -54,7 +54,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - SFW Mode
 - Jamming Files
 - Custom subghz presets
-- Subghz and IR signal replication via gpio | Credits to @ankris812, exact commit lost to time as of rn
+- Subghz and IR signal replication via gpio | Credits to @ankris812
 - Honda Keys (CVE-2022-27254)
 - NSFW Animations tied to the level system. Read more above
 - New API Routes for Locale settings
@@ -65,6 +65,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 [Updated]
 
 - All graphics
+- About 1k files to speed things up a lot
 - Folder handling for empty ones (Now indicate they are empty)
 - Applications now use the new Locale setting
 - Compiler now handles all non-compiled faps during build
@@ -95,8 +96,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 <h2 align="center">Known Bugs:</h2>
 
 ```txt
-- Name Changer app crashes 50% of the time
-- Some apps dont allow to be set as Favorite
+- Nothing rn. Hopefully that wont change
 ```
 
 ----

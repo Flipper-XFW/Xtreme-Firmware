@@ -13,9 +13,11 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
+
 #define TAG "AnimationManager"
 
-#define HARDCODED_ANIMATION_NAME "sfw_128x64"
+#define HARDCODED_ANIMATION_NAME "thank_you_128x64"
 #define NO_SD_ANIMATION_NAME "L1_NoSd_128x49"
 #define BAD_BATTERY_ANIMATION_NAME "L1_BadBattery_128x47"
 
@@ -92,12 +94,6 @@ void animation_manager_set_interact_callback(
     AnimationManagerInteractCallback callback) {
     furi_assert(animation_manager);
     animation_manager->interact_callback = callback;
-}
-
-void animation_manager_set_sfw_mode_state(AnimationManager* animation_manager, bool enabled) {
-    furi_assert(animation_manager);
-    animation_manager->sfw_mode = enabled;
-    animation_manager_start_new_idle(animation_manager);
 }
 
 static void animation_manager_check_blocking_callback(const void* message, void* context) {
@@ -368,9 +364,8 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    if(animation_manager->sfw_mode) {
-        return animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
-    }
+    UNUSED(animation_manager);
+    
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
     animation_storage_fill_animation_list(&animation_list);
@@ -551,6 +546,8 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
     furi_record_close(RECORD_DOLPHIN);
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     animation_manager->one_shot_view = one_shot_view_alloc();
     one_shot_view_set_interact_callback(
@@ -559,13 +556,20 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    if(stats.level <= 20) {
+    if (settings->sfw_mode) {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
-    } else if(stats.level >= 21) {
-        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup2_128x64);
-    } else {
-        furi_assert(0);
+    }else {
+        if (stats.level <= 20) {
+            one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
+        }
+        else if (stats.level >= 21) {
+            one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup2_128x64_sfw);
+        }
+        else {
+            furi_assert(0);
+        }
     }
+    free(settings);
 }
 
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager) {

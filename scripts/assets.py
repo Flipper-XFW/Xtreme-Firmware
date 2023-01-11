@@ -4,6 +4,8 @@ from flipper.app import App
 from flipper.assets.icon import file2image
 
 import os
+import sys
+import shutil
 
 ICONS_SUPPORTED_FORMATS = ["png"]
 
@@ -23,6 +25,15 @@ ICONS_TEMPLATE_C_FRAME = "const uint8_t {name}[] = {data};\n"
 ICONS_TEMPLATE_C_DATA = "const uint8_t* const {name}[] = {data};\n"
 ICONS_TEMPLATE_C_ICONS = "const Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
 
+valid_dirs = list()
+# This will not stay, dont worry! This is temp code until we got time to rewrite this all
+we_are_here = "\\".join(os.path.abspath(__file__).split("\\")[:-2])
+dolphin_external = os.path.join(we_are_here, r"assets\dolphin\external/")
+potential_directories = [d for d in os.listdir(dolphin_external) if os.path.isdir(os.path.join(dolphin_external, d))] # Get all animation directories
+
+for i in potential_directories: # loop through all of them
+    if os.path.exists(os.path.join(dolphin_external, f"{i}\manifest.txt")): # check if they contain a manifest.txt TODO: This code should be moved to wherever manifest.txt files are validated! 
+        valid_dirs.append(os.path.join(dolphin_external, f"{i}")) # append valid directory to list
 
 class Main(App):
     def init(self):
@@ -246,6 +257,13 @@ class Main(App):
         else:
             self.logger.info("Manifest is up-to-date!")
 
+        # This will not stay, dont worry! This is temp code until we got time to rewrite this all
+        global valid_dirs # access our global variable
+        for i in valid_dirs: # We can copy the manifest for all of the valid dirs!
+            i = i.split("/")[-1]
+            shutil.copyfile(fr"assets\dolphin\external\{i}\manifest.txt", fr"assets\resources\dolphin\{i}\manifest.txt")
+        os.remove(r"assets\resources\dolphin\manifest.txt")
+
         self.logger.info(f"Complete")
 
         return 0
@@ -274,10 +292,14 @@ class Main(App):
         self.logger.info(f"Processing Dolphin sources")
         dolphin = Dolphin()
         self.logger.info(f"Loading data")
-        dolphin.load(self.args.input_directory)
+        if not "dolphin\external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
+            dolphin.load([self.args.input_directory])
+        else:
+            dolphin.load(valid_dirs)
         self.logger.info(f"Packing")
         dolphin.pack(self.args.output_directory, self.args.symbol_name)
         self.logger.info(f"Complete")
+        __import__("time").sleep(2)
 
         return 0
 

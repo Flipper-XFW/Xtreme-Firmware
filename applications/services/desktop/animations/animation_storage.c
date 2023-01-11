@@ -11,22 +11,45 @@
 #include "animation_storage_i.h"
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
-
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR EXT_PATH("dolphin")
-#define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 #define TAG "AnimationStorage"
+/* Unused old code, for safe-keeping
+
+#define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
+
+*/
+char ANIMATION_MANIFEST_FILE[30];
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);
 static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
+void animation_handler_beta()
+{
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+
+    if (settings->sfw_mode) {
+		snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
+        FURI_LOG_I(TAG, "SFW Manifest selected");
+		strcat(ANIMATION_MANIFEST_FILE,"/sfw/manifest.txt");
+    }
+    else {
+		snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
+        FURI_LOG_I(TAG, "NSFW Manifest selected");
+		strcat(ANIMATION_MANIFEST_FILE,"/nsfw/manifest.txt");
+    }
+    free(settings);
+}
+
 static bool animation_storage_load_single_manifest_info(
     StorageAnimationManifestInfo* manifest_info,
     const char* name) {
     furi_assert(manifest_info);
-
+    animation_handler_beta();
     bool result = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -82,6 +105,7 @@ static bool animation_storage_load_single_manifest_info(
 void animation_storage_fill_animation_list(StorageAnimationList_t* animation_list) {
     furi_assert(sizeof(StorageAnimationList_t) == sizeof(void*));
     furi_assert(!StorageAnimationList_size(*animation_list));
+    animation_handler_beta();
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
