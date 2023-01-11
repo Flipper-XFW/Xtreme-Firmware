@@ -13,6 +13,8 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
+
 #define TAG "AnimationManager"
 
 #define HARDCODED_ANIMATION_NAME "thank_you_128x64"
@@ -544,6 +546,8 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
     furi_record_close(RECORD_DOLPHIN);
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     animation_manager->one_shot_view = one_shot_view_alloc();
     one_shot_view_set_interact_callback(
@@ -552,13 +556,20 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    if(stats.level <= 20) {
+    if (settings->sfw_mode) {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
-    } else if(stats.level >= 21) {
-        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup2_128x64);
-    } else {
-        furi_assert(0);
+    }else {
+        if (stats.level <= 20) {
+            one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
+        }
+        else if (stats.level >= 21) {
+            one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup2_128x64_sfw);
+        }
+        else {
+            furi_assert(0);
+        }
     }
+    free(settings);
 }
 
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager) {
