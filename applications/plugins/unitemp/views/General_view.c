@@ -19,6 +19,7 @@
 #include "unitemp_icons.h"
 
 #include <assets_icons.h>
+#include "../../../settings/desktop_settings/desktop_settings_app.h"
 
 static View* view;
 
@@ -169,7 +170,14 @@ static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos
 }
 
 static void _draw_view_noSensors(Canvas* canvas) {
-    canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x45);
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+    if (settings->sfw_mode) {
+        canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x45_sfw);
+    }
+    else {
+        canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x45);
+    }
     //Рисование рамки
     canvas_draw_rframe(canvas, 0, 0, 128, 63, 7);
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 7);
@@ -184,6 +192,7 @@ static void _draw_view_noSensors(Canvas* canvas) {
     canvas_draw_str(canvas, x, y + 18, "press OK");
 
     canvas_draw_icon(canvas, x + 37, y + 10, &I_Ok_btn_9x9);
+    free(settings);
 }
 
 static void _draw_view_sensorsList(Canvas* canvas) {
