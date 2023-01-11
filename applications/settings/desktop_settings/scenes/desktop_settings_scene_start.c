@@ -33,6 +33,7 @@ const char* const battery_view_count_text[BATTERY_VIEW_COUNT] = {
     "Inv. %",
     "Retro 3",
     "Retro 5",
+    "Bar %"
 };
 const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {
     DISPLAY_BATTERY_BAR,
