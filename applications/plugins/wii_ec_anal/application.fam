@@ -32,5 +32,5 @@ App(
 #	fap_version=(1,0),
 
 	fap_icon="WiiEC.png",
-	fap_category="Cyborg Systems",
+	fap_category="GPIO",
 )
