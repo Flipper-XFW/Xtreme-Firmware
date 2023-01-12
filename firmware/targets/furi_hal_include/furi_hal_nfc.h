@@ -154,6 +154,7 @@ bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid);
 /** NFC listen
  *
  * @param      uid                 pointer to uid buffer
+ * @param      nfc_data            pointer to FuriHalNfcDevData
  * @param      uid_len             uid length
  * @param      atqa                pointer to atqa
  * @param      sak                 sak
@@ -163,10 +164,7 @@ bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid);
  * @return     true on success
  */
 bool furi_hal_nfc_listen(
-    uint8_t* uid,
-    uint8_t uid_len,
-    uint8_t* atqa,
-    uint8_t sak,
+    FuriHalNfcDevData* nfc_data,
     bool activate_after_sak,
     uint32_t timeout);
 
