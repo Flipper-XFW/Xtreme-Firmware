@@ -1,21 +1,22 @@
 # Flipper Zero SUB-GHZ Playlist Generator
 import os
+from easygui import fileopenbox, diropenbox
 
-
-def windows():
-    folder_path = str(input("Enter the path for the folder: "))
+def main():
+    folder_path = diropenbox("Select the folder with Subghz files", "Subghz selector")
+    output_path = diropenbox("Select your output location", "Output location")
     playlist_name = str(input("Enter a name for the playlist: "))
-    playlist_file = open((r"C:\Users\\fisch\\Downloads\\" + playlist_name.lower() + ".txt"), "w")
+    playlist_file = open((output_path + playlist_name.lower() + ".txt"), "w")
     playlist_file.write("# " + playlist_name + "\n")
     for root, dirs, files in os.walk(folder_path, topdown=True):
         for file in files:
             if file.endswith(".sub"):
                 file_path = os.path.join(root, file)
                 file_path = file_path.replace("\\", "/")
-                file_path = file_path.replace("E:", "ext")
+                file_path = file_path.replace(f"{folder_path.split(':')[0]}:", "ext")
                 playlist_file.write(f"sub: {file_path}\n")
     playlist_file.close()
     print("Done!")
 
-
-windows()
+if __name__ == '__main__':
+    main()
