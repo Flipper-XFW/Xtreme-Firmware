@@ -1,6 +1,11 @@
 # Flipper Zero SUB-GHZ Playlist Generator
 import os
-from easygui import fileopenbox, diropenbox
+import pip
+try:
+    from easygui import fileopenbox, diropenbox
+except ImportError:
+    pip.main(['Install'], "easygui")
+    from easygui import fileopenbox, diropenbox
 
 def main():
     folder_path = diropenbox("Select the folder with Subghz files", "Subghz selector")
