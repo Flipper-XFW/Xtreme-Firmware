@@ -766,7 +766,7 @@ void subghz_on_system_start() {
     Cli* cli = furi_record_open(RECORD_CLI);
 
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
-
+    cli_add_command(cli, "chat", CliCommandFlagDefault, subghz_cli_command_chat, NULL);	
     furi_record_close(RECORD_CLI);
 #else
     UNUSED(subghz_cli_command);
