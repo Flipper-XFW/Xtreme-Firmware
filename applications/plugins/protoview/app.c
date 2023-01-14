@@ -89,6 +89,12 @@ static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
     /* Call the enter/exit view callbacks if needed. */
     if (old == ViewDirectSampling) view_exit_direct_sampling(app);
     if (new == ViewDirectSampling) view_enter_direct_sampling(app);
+    /* The frequency/modulation settings are actually a single view:
+     * as long as the user stays between the two modes of this view we
+     * don't need to call the exit-view callback. */
+    if ((old == ViewFrequencySettings && new != ViewModulationSettings) ||
+        (old == ViewModulationSettings && new != ViewFrequencySettings))
+        view_exit_settings(app);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -112,9 +118,11 @@ ProtoViewApp* protoview_app_alloc() {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->current_view = ViewRawPulses;
+    app->direct_sampling_enabled = false;
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
+    app->signal_last_scan_idx = 0;
     app->signal_decoded = false;
     app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
@@ -123,20 +131,24 @@ ProtoViewApp* protoview_app_alloc() {
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
     /* Setup rx worker and environment. */
+    app->txrx->freq_mod_changed = false;
+    app->txrx->debug_timer_sampling = false;
+    app->txrx->last_g0_change_time = DWT->CYCCNT;
+    app->txrx->last_g0_value = false;
     app->txrx->worker = subghz_worker_alloc();
-
 #ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
     app->txrx->worker->filter_running = 0;
 #endif
-
     app->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&protoview_protocol_registry);
-    app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
-
-    subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
+    app->txrx->receiver =
+        subghz_receiver_alloc_init(app->txrx->environment);
+    subghz_receiver_set_filter(app->txrx->receiver,
+                               SubGhzProtocolFlag_Decodable);
     subghz_worker_set_overrun_callback(
-        app->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
+        app->txrx->worker,
+        (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
     subghz_worker_set_pair_callback(
         app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
@@ -171,9 +183,11 @@ void protoview_app_free(ProtoViewApp *app) {
     subghz_setting_free(app->setting);
 
     // Worker stuff.
-    subghz_receiver_free(app->txrx->receiver);
-    subghz_environment_free(app->txrx->environment);
-    subghz_worker_free(app->txrx->worker);
+    if (!app->txrx->debug_timer_sampling) {
+        subghz_receiver_free(app->txrx->receiver);
+        subghz_environment_free(app->txrx->environment);
+        subghz_worker_free(app->txrx->worker);
+    }
     free(app->txrx);
 
     // Raw samples buffers.
@@ -189,6 +203,20 @@ void protoview_app_free(ProtoViewApp *app) {
  * function is to scan for signals and set DetectedSamples. */
 static void timer_callback(void *ctx) {
     ProtoViewApp *app = ctx;
+    uint32_t delta, lastidx = app->signal_last_scan_idx;
+
+    /* scan_for_signal(), called by this function, deals with a
+     * circular buffer. To never miss anything, even if a signal spawns
+     * cross-boundaries, it is enough if we scan each time the buffer fills
+     * for 50% more compared to the last scan. Thanks to this check we
+     * can avoid scanning too many times to just find the same data. */
+    if (lastidx < RawSamples->idx) {
+        delta = RawSamples->idx - lastidx;
+    } else {
+        delta = RawSamples->total - lastidx + RawSamples->idx;
+    }
+    if (delta < RawSamples->total/2) return;
+    app->signal_last_scan_idx = RawSamples->idx;
     scan_for_signal(app);
 }
 
@@ -198,7 +226,7 @@ int32_t protoview_app_entry(void* p) {
 
     /* Create a timer. We do data analysis in the callback. */
     FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
-    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
 
     /* Start listening to signals immediately. */
     radio_begin(app);
