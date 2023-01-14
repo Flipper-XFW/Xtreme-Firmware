@@ -163,7 +163,7 @@ int32_t passport_app(void* p) {
     ctx->stats = &stats;
     ctx->view_port = view_port;
     ctx->semaphore = semaphore;
-    ctx->progress_total = true;
+    ctx->progress_total = false;
     furi_record_close(RECORD_DOLPHIN);
     view_port_draw_callback_set(view_port, render_callback, ctx);
     view_port_input_callback_set(view_port, input_callback, ctx);
