@@ -2,10 +2,10 @@
 import os
 import pip
 try:
-    from easygui import fileopenbox, diropenbox
+    from easygui import diropenbox
 except ImportError:
     pip.main(['Install'], "easygui")
-    from easygui import fileopenbox, diropenbox
+    from easygui import diropenbox
 
 def main():
     folder_path = diropenbox("Select the folder with Subghz files", "Subghz selector")
