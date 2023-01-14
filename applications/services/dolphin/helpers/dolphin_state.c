@@ -100,11 +100,9 @@ uint8_t dolphin_get_level(int icounter) {
 }
 
 uint32_t dolphin_state_xp_above_last_levelup(int icounter) {
-    if(level_array[0] > icounter) {
-        for(int i = 1; i < 29; ++i) {
-            if(icounter <= level_array[i]) {
-                return level_array[i] - icounter + 1;
-            }
+    for(int i = 1; i < 29; ++i) {
+        if (icounter <= level_array[i]) {
+            return icounter - level_array[i - 1];
         }
     }
     return icounter;
