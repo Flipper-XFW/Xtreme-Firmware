@@ -60,10 +60,7 @@ class ImageTools:
         with Image.open(file) as im:
             with io.BytesIO() as output:
                 bw = im.convert("1")
-                try:
-                    bw = ImageOps.invert(bw)
-                except OSError:
-                    bw = bw.point(lambda x: 255 - x)
+                bw = ImageOps.invert(bw)
                 bw.save(output, format="XBM")
                 return output.getvalue()
 

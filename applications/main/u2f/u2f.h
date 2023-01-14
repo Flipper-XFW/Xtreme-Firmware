@@ -6,14 +6,6 @@ extern "C" {
 
 #include <furi.h>
 
-typedef struct {
-    uint8_t cla;
-    uint8_t ins;
-    uint8_t p1;
-    uint8_t p2;
-    uint8_t len[];
-} __attribute__((packed)) U2fApduCommand;
-
 typedef enum {
     U2fNotifyRegister,
     U2fNotifyAuth,
@@ -38,7 +30,7 @@ void u2f_set_event_callback(U2fData* instance, U2fEvtCallback callback, void* co
 
 void u2f_confirm_user_present(U2fData* instance);
 
-uint16_t u2f_msg_parse(U2fData* instance, const uint8_t* in_buf, uint16_t len, uint8_t* out_buf);
+uint16_t u2f_msg_parse(U2fData* instance, uint8_t* buf, uint16_t len);
 
 void u2f_wink(U2fData* instance);
 

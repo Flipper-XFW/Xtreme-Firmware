@@ -16,7 +16,6 @@
 #define U2F_CMD_REGISTER 0x01
 #define U2F_CMD_AUTHENTICATE 0x02
 #define U2F_CMD_VERSION 0x03
-#define U2F_CMD_APPLET_SELECTION 0xA4
 
 typedef enum {
     U2fCheckOnly = 0x07, // "check-only" - only check key handle, don't send auth response
@@ -38,6 +37,11 @@ typedef struct {
 } __attribute__((packed)) U2fKeyHandle;
 
 typedef struct {
+    uint8_t cla;
+    uint8_t ins;
+    uint8_t p1;
+    uint8_t p2;
+    uint8_t len[3];
     uint8_t challenge[32];
     uint8_t app_id[32];
 } __attribute__((packed)) U2fRegisterReq;
@@ -50,6 +54,11 @@ typedef struct {
 } __attribute__((packed)) U2fRegisterResp;
 
 typedef struct {
+    uint8_t cla;
+    uint8_t ins;
+    uint8_t p1;
+    uint8_t p2;
+    uint8_t len[3];
     uint8_t challenge[32];
     uint8_t app_id[32];
     U2fKeyHandle key_handle;
@@ -63,14 +72,10 @@ typedef struct {
 
 static const uint8_t ver_str[] = {"U2F_V2"};
 
-// NFC applet selection fields
-static const uint8_t rid_ac_ax[] = {0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01};
-
 static const uint8_t state_no_error[] = {0x90, 0x00};
 static const uint8_t state_not_supported[] = {0x6D, 0x00};
 static const uint8_t state_user_missing[] = {0x69, 0x85};
 static const uint8_t state_wrong_data[] = {0x6A, 0x80};
-static const uint8_t state_app_not_found[] = {0x6A, 0x82};
 
 struct U2fData {
     uint8_t device_key[32];
@@ -82,16 +87,6 @@ struct U2fData {
     U2fEvtCallback callback;
     void* context;
 };
-
-static void* apdu_command_data(U2fApduCommand* cmd) {
-    // Short encoding is a single byte.
-    // Extended length encoding is 0 byte followed by MSB and LSB bytes.
-    if(cmd->len[0] == 0) {
-        return cmd->len + 3;
-    } else {
-        return cmd->len + 1;
-    }
-}
 
 static int u2f_uecc_random(uint8_t* dest, unsigned size) {
     furi_hal_random_fill_buf(dest, size);
@@ -183,10 +178,9 @@ static uint8_t u2f_der_encode_signature(uint8_t* der, uint8_t* sig) {
     return len;
 }
 
-static uint16_t u2f_register(U2fData* U2F, const uint8_t* in_buf, uint8_t* out_buf) {
-    U2fApduCommand* cmd = (U2fApduCommand*)in_buf;
-    U2fRegisterReq* req = apdu_command_data(cmd);
-    U2fRegisterResp* resp = (U2fRegisterResp*)out_buf;
+static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
+    U2fRegisterReq* req = (U2fRegisterReq*)buf;
+    U2fRegisterResp* resp = (U2fRegisterResp*)buf;
     U2fKeyHandle handle;
     uint8_t private[32];
     U2fPubKey pub_key;
@@ -196,13 +190,13 @@ static uint16_t u2f_register(U2fData* U2F, const uint8_t* in_buf, uint8_t* out_b
     if(u2f_data_check(false) == false) {
         U2F->ready = false;
         if(U2F->callback != NULL) U2F->callback(U2fNotifyError, U2F->context);
-        memcpy(&out_buf[0], state_not_supported, 2);
+        memcpy(&buf[0], state_not_supported, 2);
         return 2;
     }
 
     if(U2F->callback != NULL) U2F->callback(U2fNotifyRegister, U2F->context);
     if(U2F->user_present == false) {
-        memcpy(&out_buf[0], state_user_missing, 2);
+        memcpy(&buf[0], state_user_missing, 2);
         return 2;
     }
     U2F->user_present = false;
@@ -253,10 +247,9 @@ static uint16_t u2f_register(U2fData* U2F, const uint8_t* in_buf, uint8_t* out_b
     return (sizeof(U2fRegisterResp) + cert_len + signature_len + 2);
 }
 
-static uint16_t u2f_authenticate(U2fData* U2F, const uint8_t* in_buf, uint8_t* out_buf) {
-    U2fApduCommand* cmd = (U2fApduCommand*)in_buf;
-    U2fAuthReq* req = apdu_command_data(cmd);
-    U2fAuthResp* resp = (U2fAuthResp*)out_buf;
+static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
+    U2fAuthReq* req = (U2fAuthReq*)buf;
+    U2fAuthResp* resp = (U2fAuthResp*)buf;
     uint8_t priv_key[32];
     uint8_t mac_control[32];
     hmac_sha256_context hmac_ctx;
@@ -269,7 +262,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, const uint8_t* in_buf, uint8_t* o
     if(u2f_data_check(false) == false) {
         U2F->ready = false;
         if(U2F->callback != NULL) U2F->callback(U2fNotifyError, U2F->context);
-        memcpy(&out_buf[0], state_not_supported, 2);
+        memcpy(&buf[0], state_not_supported, 2);
         return 2;
     }
 
@@ -277,8 +270,8 @@ static uint16_t u2f_authenticate(U2fData* U2F, const uint8_t* in_buf, uint8_t* o
     if(U2F->user_present == true) {
         flags |= 1;
     } else {
-        if(cmd->p1 == U2fEnforce) {
-            memcpy(&out_buf[0], state_user_missing, 2);
+        if(req->p1 == U2fEnforce) {
+            memcpy(&buf[0], state_user_missing, 2);
             return 2;
         }
     }
@@ -309,12 +302,12 @@ static uint16_t u2f_authenticate(U2fData* U2F, const uint8_t* in_buf, uint8_t* o
 
     if(memcmp(req->key_handle.hash, mac_control, 32) != 0) {
         FURI_LOG_W(TAG, "Wrong handle!");
-        memcpy(&out_buf[0], state_wrong_data, 2);
+        memcpy(&buf[0], state_wrong_data, 2);
         return 2;
     }
 
-    if(cmd->p1 == U2fCheckOnly) { // Check-only: don't need to send full response
-        memcpy(&out_buf[0], state_user_missing, 2);
+    if(req->p1 == U2fCheckOnly) { // Check-only: don't need to send full response
+        memcpy(&buf[0], state_user_missing, 2);
         return 2;
     }
 
@@ -334,50 +327,22 @@ static uint16_t u2f_authenticate(U2fData* U2F, const uint8_t* in_buf, uint8_t* o
     return (sizeof(U2fAuthResp) + signature_len + 2);
 }
 
-uint16_t u2f_applet_selection(const uint8_t* in_buf, uint8_t* out_buf) {
-    U2fApduCommand* cmd = (U2fApduCommand*)in_buf;
-    uint8_t* data = apdu_command_data(cmd);
-
-    FURI_LOG_D(
-        TAG,
-        "len=%d %02x%02x%02x%02x%02x%02x%02x%02x",
-        cmd->len[0],
-        data[0],
-        data[1],
-        data[2],
-        data[3],
-        data[4],
-        data[5],
-        data[6],
-        data[7]);
-
-    if(cmd->len[0] != 8 || memcmp(rid_ac_ax, data, 8) != 0) {
-        memcpy(&out_buf[0], state_app_not_found, 2);
-        return 2;
-    }
-
-    memcpy(&out_buf[0], ver_str, 6);
-    memcpy(&out_buf[6], state_no_error, 2);
-    return 8;
-}
-
-uint16_t u2f_msg_parse(U2fData* U2F, const uint8_t* in_buf, uint16_t in_len, uint8_t* out_buf) {
+uint16_t u2f_msg_parse(U2fData* U2F, uint8_t* buf, uint16_t len) {
     furi_assert(U2F);
     if(!U2F->ready) return 0;
-    if((in_buf[0] != 0x00) && (in_len < 5)) return 0;
-    FURI_LOG_D(TAG, "ins=0x%02x", in_buf[1]);
-    if(in_buf[1] == U2F_CMD_REGISTER) { // Register request
-        return u2f_register(U2F, in_buf, out_buf);
-    } else if(in_buf[1] == U2F_CMD_AUTHENTICATE) { // Authenticate request
-        return u2f_authenticate(U2F, in_buf, out_buf);
-    } else if(in_buf[1] == U2F_CMD_VERSION) { // Get U2F version string
-        memcpy(&out_buf[0], ver_str, 6);
-        memcpy(&out_buf[6], state_no_error, 2);
+    if((buf[0] != 0x00) && (len < 5)) return 0;
+    if(buf[1] == U2F_CMD_REGISTER) { // Register request
+        return u2f_register(U2F, buf);
+
+    } else if(buf[1] == U2F_CMD_AUTHENTICATE) { // Authenticate request
+        return u2f_authenticate(U2F, buf);
+
+    } else if(buf[1] == U2F_CMD_VERSION) { // Get U2F version string
+        memcpy(&buf[0], ver_str, 6);
+        memcpy(&buf[6], state_no_error, 2);
         return 8;
-    } else if(in_buf[1] == U2F_CMD_APPLET_SELECTION) {
-        return u2f_applet_selection(in_buf, out_buf);
     } else {
-        memcpy(&out_buf[0], state_not_supported, 2);
+        memcpy(&buf[0], state_not_supported, 2);
         return 2;
     }
     return 0;
