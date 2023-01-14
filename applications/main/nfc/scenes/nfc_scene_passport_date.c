@@ -31,7 +31,6 @@ void nfc_scene_passport_date_on_enter(void* context) {
     date_value.month = 0;
     date_value.day = 0;
 
-
     switch(date_type) {
     case NFC_PASSPORT_DATE_BIRTH:
         text_input_set_header_text(text_input, "Birth Date");

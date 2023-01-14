@@ -16,10 +16,9 @@ void storage_settings_scene_unmounted_on_enter(void* context) {
     DESKTOP_SETTINGS_LOAD(settings);
 
     dialog_ex_set_center_button_text(dialog_ex, "OK");
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48_sfw);
-    }
-    else {
+    } else {
         dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48);
     }
 

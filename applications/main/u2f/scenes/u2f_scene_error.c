@@ -29,7 +29,7 @@ void u2f_scene_error_on_enter(void* context) {
             app->widget, GuiButtonTypeLeft, "Back", u2f_scene_error_event_callback, app);
     } else if(app->error == U2fAppErrorCloseRpc) {
         widget_add_icon_element(app->widget, 78, 0, &I_ActiveConnection_50x64);
-        if (settings->sfw_mode) {
+        if(settings->sfw_mode) {
             widget_add_string_multiline_element(
                 app->widget, 3, 2, AlignLeft, AlignTop, FontPrimary, "Connection\nis active!");
             widget_add_string_multiline_element(
@@ -40,8 +40,7 @@ void u2f_scene_error_on_enter(void* context) {
                 AlignTop,
                 FontSecondary,
                 "Disconnect from\nPC or phone to\nuse this function.");
-        }
-        else {
+        } else {
             widget_add_string_multiline_element(
                 app->widget, 3, 2, AlignLeft, AlignTop, FontPrimary, "I am not\na whore!");
             widget_add_string_multiline_element(

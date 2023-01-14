@@ -659,18 +659,14 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
                 notification_message(notification, &sequence_single_vibro);
                 break;
             case SubGhzChatEventUserEntrance:
-                furi_string_printf(
-                    sysmsg,
-                    "%s joined chat.\r\n",
-                    furi_hal_version_get_name_ptr());
+                furi_string_printf(sysmsg, "%s joined chat.\r\n", furi_hal_version_get_name_ptr());
                 subghz_chat_worker_write(
                     subghz_chat,
                     (uint8_t*)furi_string_get_cstr(sysmsg),
                     strlen(furi_string_get_cstr(sysmsg)));
                 break;
             case SubGhzChatEventUserExit:
-                furi_string_printf(
-                    sysmsg, "%s left chat.\r\n", furi_hal_version_get_name_ptr());
+                furi_string_printf(sysmsg, "%s left chat.\r\n", furi_hal_version_get_name_ptr());
                 subghz_chat_worker_write(
                     subghz_chat,
                     (uint8_t*)furi_string_get_cstr(sysmsg),
@@ -768,7 +764,7 @@ void subghz_on_system_start() {
 
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
     // psst RM... i know you dont care much about errors, but if you ever see this... incompatible pointer type :3
-    cli_add_command(cli, "chat", CliCommandFlagDefault, subghz_cli_command_chat, NULL);	
+    cli_add_command(cli, "chat", CliCommandFlagDefault, subghz_cli_command_chat, NULL);
 
     furi_record_close(RECORD_CLI);
 #else

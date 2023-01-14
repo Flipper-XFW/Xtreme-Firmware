@@ -9,10 +9,9 @@ void lfrfid_scene_rpc_on_enter(void* context) {
 
     popup_set_header(popup, "LF RFID", 89, 42, AlignCenter, AlignBottom);
     popup_set_text(popup, "RPC mode", 89, 44, AlignCenter, AlignTop);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 12, &I_RFIDDolphinSend_97x61_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 12, &I_RFIDDolphinSend_97x61);
     }
 

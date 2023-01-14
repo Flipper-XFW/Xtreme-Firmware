@@ -18,10 +18,10 @@ struct U2fNfc {
 };
 
 static uint16_t
-u2f_callback(U2fNfc* u2f_nfc, const uint8_t* buff_rx, uint16_t buff_rx_len, uint8_t* buff_tx) {
+    u2f_callback(U2fNfc* u2f_nfc, const uint8_t* buff_rx, uint16_t buff_rx_len, uint8_t* buff_tx) {
     U2fApduCommand* cmd = (U2fApduCommand*)buff_rx;
-    if (cmd->ins == 0xC0) {
-        if (u2f_nfc->payload_len == 0) {
+    if(cmd->ins == 0xC0) {
+        if(u2f_nfc->payload_len == 0) {
             FURI_LOG_E(TAG, "requested block but not chaining");
             buff_tx[0] = 0x69;
             buff_tx[1] = 0x00;
@@ -31,25 +31,23 @@ u2f_callback(U2fNfc* u2f_nfc, const uint8_t* buff_rx, uint16_t buff_rx_len, uint
         FURI_LOG_T(TAG, "continued chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
 
         uint16_t max_resp_len = cmd->len[0];
-        if (max_resp_len == 0) {
+        if(max_resp_len == 0) {
             max_resp_len = 256;
         }
 
         uint16_t remaining_len = (u2f_nfc->payload_len - 2) - u2f_nfc->payload_cursor;
-        if (remaining_len > max_resp_len) {
+        if(remaining_len > max_resp_len) {
             memcpy(buff_tx, &u2f_nfc->payload[u2f_nfc->payload_cursor], max_resp_len);
             remaining_len -= max_resp_len;
             buff_tx[max_resp_len] = 0x61;
-            if (remaining_len >= 256) {
+            if(remaining_len >= 256) {
                 buff_tx[max_resp_len + 1] = 0x00;
-            }
-            else {
+            } else {
                 buff_tx[max_resp_len + 1] = remaining_len;
             }
             u2f_nfc->payload_cursor += max_resp_len;
             return max_resp_len + 2;
-        }
-        else {
+        } else {
             memcpy(
                 buff_tx,
                 &u2f_nfc->payload[u2f_nfc->payload_cursor],
@@ -66,7 +64,7 @@ u2f_callback(U2fNfc* u2f_nfc, const uint8_t* buff_rx, uint16_t buff_rx_len, uint
         u2f_msg_parse(u2f_nfc->u2f_instance, buff_rx, buff_rx_len, u2f_nfc->payload);
 
     // If this is extended format, send entire response at once
-    if (cmd->len[0] == 0) {
+    if(cmd->len[0] == 0) {
         FURI_LOG_T(TAG, "single extended response");
         memcpy(&buff_tx, u2f_nfc->payload, u2f_nfc->payload_len);
         uint16_t len = u2f_nfc->payload_len;
@@ -78,21 +76,19 @@ u2f_callback(U2fNfc* u2f_nfc, const uint8_t* buff_rx, uint16_t buff_rx_len, uint
     uint16_t max_resp_len = 256;
 
     // If this message happens to be less than the chaining size, send it all at once.
-    if ((u2f_nfc->payload_len - 2) <= max_resp_len) {
+    if((u2f_nfc->payload_len - 2) <= max_resp_len) {
         FURI_LOG_T(TAG, "single short response");
         memcpy(buff_tx, u2f_nfc->payload, u2f_nfc->payload_len);
         uint16_t len = u2f_nfc->payload_len;
         u2f_nfc->payload_len = 0;
         return len;
-    }
-    else {
+    } else {
         memcpy(buff_tx, u2f_nfc->payload, max_resp_len);
         buff_tx[max_resp_len] = 0x61;
         uint16_t remaining_len = (u2f_nfc->payload_len - 2) - max_resp_len;
-        if (remaining_len >= max_resp_len) {
+        if(remaining_len >= max_resp_len) {
             buff_tx[max_resp_len + 1] = 0x00;
-        }
-        else {
+        } else {
             buff_tx[max_resp_len + 1] = remaining_len;
         }
         u2f_nfc->payload_cursor = max_resp_len;
@@ -105,7 +101,7 @@ u2f_callback(U2fNfc* u2f_nfc, const uint8_t* buff_rx, uint16_t buff_rx_len, uint
 static int32_t u2f_nfc_worker(void* context) {
     U2fNfc* u2f_nfc = context;
     FURI_LOG_D(TAG, "Init");
-    while (furi_hal_nfc_is_busy()) {
+    while(furi_hal_nfc_is_busy()) {
         furi_delay_ms(10);
     }
     FuriHalNfcDevData params = {
@@ -122,36 +118,35 @@ static int32_t u2f_nfc_worker(void* context) {
 
     FURI_LOG_D(TAG, "Start");
 
-    while (1) {
+    while(1) {
         uint32_t flags = furi_thread_flags_wait(WorkerEvtStop, FuriFlagWaitAny, 10);
-        if (flags != FuriFlagErrorTimeout) {
+        if(flags != FuriFlagErrorTimeout) {
             furi_check((flags & FuriFlagError) == 0);
-            if (flags & WorkerEvtStop) break;
+            if(flags & WorkerEvtStop) break;
         }
-        if (!furi_hal_nfc_listen(&params, false, 200)) {
+        if(!furi_hal_nfc_listen(&params, false, 200)) {
             FURI_LOG_T(TAG, "wtf");
             continue;
         }
         FuriHalNfcTxRxContext tx_rx = {};
         tx_rx.tx_bits = 0;
         tx_rx.tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if (!furi_hal_nfc_tx_rx(&tx_rx, 300)) continue;
-        if (tx_rx.rx_bits == 0) continue;
+        if(!furi_hal_nfc_tx_rx(&tx_rx, 300)) continue;
+        if(tx_rx.rx_bits == 0) continue;
         u2f_nfc->payload_len = 0;
         u2f_nfc->payload_cursor = 0;
-        while (true) {
+        while(true) {
             uint16_t payload_len =
                 u2f_callback(u2f_nfc, tx_rx.rx_data, tx_rx.rx_bits / 8, tx_rx.tx_data);
             tx_rx.rx_bits = 0;
             FURI_LOG_T(TAG, "payload_len=%d", payload_len);
-            if (payload_len == 0) {
+            if(payload_len == 0) {
                 break;
-            }
-            else {
+            } else {
                 tx_rx.tx_bits = payload_len * 8;
                 tx_rx.tx_rx_type = FuriHalNfcTxRxTypeDefault;
-                if (!furi_hal_nfc_tx_rx(&tx_rx, 300)) break;
-                if (tx_rx.rx_bits == 0) break;
+                if(!furi_hal_nfc_tx_rx(&tx_rx, 300)) break;
+                if(tx_rx.rx_bits == 0) break;
             }
         }
     }

@@ -163,10 +163,7 @@ bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid);
  *
  * @return     true on success
  */
-bool furi_hal_nfc_listen(
-    FuriHalNfcDevData* nfc_data,
-    bool activate_after_sak,
-    uint32_t timeout);
+bool furi_hal_nfc_listen(FuriHalNfcDevData* nfc_data, bool activate_after_sak, uint32_t timeout);
 
 /** Start Target Listen mode
  * @note RFAL free implementation

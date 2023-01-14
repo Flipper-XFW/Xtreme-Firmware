@@ -12,15 +12,27 @@
 #define MOODS_TOTAL 3
 #define BUTTHURT_MAX 3
 
-static const Icon* const portrait_happy_sfw[BUTTHURT_MAX] = {&I_passport_happy1_46x49_sfw, &I_passport_happy2_46x49_sfw, &I_passport_happy3_46x49_sfw};
-static const Icon* const portrait_ok_sfw[BUTTHURT_MAX] = {&I_passport_okay1_46x49_sfw, &I_passport_okay2_46x49_sfw, &I_passport_okay3_46x49_sfw};
-static const Icon* const portrait_bad_sfw[BUTTHURT_MAX] = {&I_passport_bad1_46x49_sfw, &I_passport_bad2_46x49_sfw, &I_passport_bad3_46x49_sfw};
+static const Icon* const portrait_happy_sfw[BUTTHURT_MAX] = {
+    &I_passport_happy1_46x49_sfw,
+    &I_passport_happy2_46x49_sfw,
+    &I_passport_happy3_46x49_sfw};
+static const Icon* const portrait_ok_sfw[BUTTHURT_MAX] = {
+    &I_passport_okay1_46x49_sfw,
+    &I_passport_okay2_46x49_sfw,
+    &I_passport_okay3_46x49_sfw};
+static const Icon* const portrait_bad_sfw[BUTTHURT_MAX] = {
+    &I_passport_bad1_46x49_sfw,
+    &I_passport_bad2_46x49_sfw,
+    &I_passport_bad3_46x49_sfw};
 
 static const Icon* const portrait_happy[BUTTHURT_MAX] = {&I_flipper};
 static const Icon* const portrait_ok[BUTTHURT_MAX] = {&I_flipper};
 static const Icon* const portrait_bad[BUTTHURT_MAX] = {&I_flipper};
 
-static const Icon* const* portraits_sfw[MOODS_TOTAL] = {portrait_happy_sfw, portrait_ok_sfw, portrait_bad_sfw};
+static const Icon* const* portraits_sfw[MOODS_TOTAL] = {
+    portrait_happy_sfw,
+    portrait_ok_sfw,
+    portrait_bad_sfw};
 static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
 // static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
 
@@ -65,7 +77,6 @@ static void render_callback(Canvas* canvas, void* ctx) {
             mood = 2;
             snprintf(mood_str, 20, "Status: Desperate");
         }
-
     }
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
@@ -79,20 +90,18 @@ static void render_callback(Canvas* canvas, void* ctx) {
     }
 
     // multipass
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         canvas_draw_icon(canvas, 0, 0, &I_passport_DB_sfw);
-    }
-    else {
+    } else {
         canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
     }
 
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= 30));
     uint16_t tmpLvl = 0;
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         canvas_draw_icon(canvas, 11, 2, portraits_sfw[mood][tmpLvl]);
-    }
-    else {
+    } else {
         canvas_draw_icon(canvas, 11, 2, portraits[mood][tmpLvl]);
     }
 

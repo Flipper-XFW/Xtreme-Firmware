@@ -116,7 +116,6 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             canvas_height(gui->canvas) - 4);
     }
 
-
     // Extra notification
     if(need_attention) {
         width = icon_get_width(&I_Hidden_window_9x8);

@@ -683,7 +683,8 @@ int32_t playlist_app(void* p) {
         dialog_file_browser_set_basic_options(&browser_options, PLAYLIST_EXT, &I_sub1_10px);
         browser_options.base_path = PLAYLIST_FOLDER;
 
-        bool res = dialog_file_browser_show(dialogs, app->file_path, app->file_path, &browser_options);
+        bool res =
+            dialog_file_browser_show(dialogs, app->file_path, app->file_path, &browser_options);
 
         furi_record_close(RECORD_DIALOGS);
         // check if a file was selected

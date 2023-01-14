@@ -26,10 +26,9 @@ void desktop_settings_scene_pin_disable_on_enter(void* context) {
 
     popup_set_context(app->popup, app);
     popup_set_callback(app->popup, pin_disable_back_callback);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(app->popup, 0, 2, &I_DolphinMafia_115x62_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(app->popup, 0, 2, &I_DolphinMafia_115x62);
     }
     popup_set_header(app->popup, "PIN\nDeleted!", 95, 9, AlignCenter, AlignCenter);

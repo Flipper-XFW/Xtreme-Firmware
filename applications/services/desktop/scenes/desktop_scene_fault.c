@@ -18,7 +18,7 @@ void desktop_scene_fault_on_enter(void* context) {
 
     Popup* popup = desktop->hw_mismatch_popup;
     popup_set_context(popup, desktop);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_header(
             popup,
             "Flipper crashed\n but has been rebooted",
@@ -26,8 +26,7 @@ void desktop_scene_fault_on_enter(void* context) {
             14 + STATUS_BAR_Y_SHIFT,
             AlignCenter,
             AlignCenter);
-    }
-    else {
+    } else {
         popup_set_header(
             popup,
             "Slut passed out\n but is now back",
@@ -36,7 +35,6 @@ void desktop_scene_fault_on_enter(void* context) {
             AlignCenter,
             AlignCenter);
     }
-
 
     char* message = (char*)furi_hal_rtc_get_fault_data();
     popup_set_text(popup, message, 60, 37 + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter);

@@ -107,7 +107,7 @@ void nfc_scene_passport_auth_on_enter(void* context) {
     item = variable_item_list_add(variable_item_list, "Document Nr.", 1, NULL, NULL);
 
     strncpy(temp_str, mrtd_data->auth.doc_number, temp_str_size);
-    temp_str[temp_str_size -1] = '\x00';
+    temp_str[temp_str_size - 1] = '\x00';
     if(strlen(temp_str) > 8) {
         temp_str[8] = '.';
         temp_str[9] = '.';

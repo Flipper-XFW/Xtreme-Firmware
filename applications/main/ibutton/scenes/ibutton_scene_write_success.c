@@ -13,10 +13,9 @@ void ibutton_scene_write_success_on_enter(void* context) {
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
 
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 12, &I_iButtonDolphinVerySuccess_108x52_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 12, &I_iButtonDolphinVerySuccess_108x52);
     }
     popup_set_text(popup, "Successfully written!", 40, 12, AlignLeft, AlignBottom);

@@ -8,10 +8,9 @@ void lfrfid_scene_write_success_on_enter(void* context) {
     DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "Successfully\nwritten!", 94, 3, AlignCenter, AlignTop);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57);
     }
     popup_set_context(popup, app);

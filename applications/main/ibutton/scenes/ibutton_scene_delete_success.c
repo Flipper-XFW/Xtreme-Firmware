@@ -12,10 +12,9 @@ void ibutton_scene_delete_success_on_enter(void* context) {
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
 
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 2, &I_DolphinMafia_115x62_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 2, &I_DolphinMafia_115x62);
     }
     popup_set_header(popup, "Deleted", 83, 19, AlignLeft, AlignBottom);

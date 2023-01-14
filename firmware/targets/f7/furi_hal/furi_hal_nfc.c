@@ -205,10 +205,7 @@ bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid) {
     return true;
 }
 
-bool furi_hal_nfc_listen(
-    FuriHalNfcDevData* nfc_data,
-    bool activate_after_sak,
-    uint32_t timeout) {
+bool furi_hal_nfc_listen(FuriHalNfcDevData* nfc_data, bool activate_after_sak, uint32_t timeout) {
     rfalNfcState state = rfalNfcGetState();
     if(state == RFAL_NFC_STATE_NOTINIT) {
         rfalNfcInitialize();
@@ -229,10 +226,9 @@ bool furi_hal_nfc_listen(
         .notifyCb = NULL,
         .activate_after_sak = activate_after_sak,
     };
-    if (nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
+    if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
         params.compMode = RFAL_COMPLIANCE_MODE_ISO;
-    }
-    else if (FURI_BIT(nfc_data->sak, 5)) {
+    } else if(FURI_BIT(nfc_data->sak, 5)) {
         params.compMode = RFAL_COMPLIANCE_MODE_EMV;
     } else {
         params.compMode = RFAL_COMPLIANCE_MODE_NFC;

@@ -27,20 +27,18 @@ static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
-void animation_handler_beta()
-{
+void animation_handler_beta() {
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
 
-    if (settings->sfw_mode) {
-		snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
+    if(settings->sfw_mode) {
+        snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
         FURI_LOG_I(TAG, "SFW Manifest selected");
-		strcat(ANIMATION_MANIFEST_FILE,"/sfw/manifest.txt");
-    }
-    else {
-		snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
+        strcat(ANIMATION_MANIFEST_FILE, "/sfw/manifest.txt");
+    } else {
+        snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
         FURI_LOG_I(TAG, "NSFW Manifest selected");
-		strcat(ANIMATION_MANIFEST_FILE,"/nsfw/manifest.txt");
+        strcat(ANIMATION_MANIFEST_FILE, "/nsfw/manifest.txt");
     }
     free(settings);
 }

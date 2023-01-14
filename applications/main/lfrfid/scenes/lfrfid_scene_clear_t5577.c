@@ -45,10 +45,9 @@ static void lfrfid_clear_t5577_password_and_config_to_EM(LfRfid* app) {
     writer_initialize(t55xxtiming);
 
     popup_set_header(popup, "Removing\npassword", 90, 36, AlignCenter, AlignCenter);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
     }
     popup_set_text(popup, curr_buf, 90, 56, AlignCenter, AlignCenter);
@@ -81,10 +80,9 @@ void lfrfid_scene_clear_t5577_on_enter(void* context) {
 
     notification_message(app->notifications, &sequence_success);
     popup_set_header(popup, "Done!", 94, 10, AlignCenter, AlignTop);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 7, &I_RFIDDolphinSuccess_108x57_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 7, &I_RFIDDolphinSuccess_108x57);
     }
     popup_set_context(popup, app);

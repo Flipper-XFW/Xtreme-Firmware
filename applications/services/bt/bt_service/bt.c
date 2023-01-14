@@ -38,10 +38,9 @@ static void bt_pin_code_view_port_draw_callback(Canvas* canvas, void* context) {
     char pin_code_info[24];
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         canvas_draw_icon(canvas, 0, 0, &I_BLE_Pairing_128x64_sfw);
-    }
-    else {
+    } else {
         canvas_draw_icon(canvas, 0, 0, &I_BLE_Pairing_128x64);
     }
     snprintf(pin_code_info, sizeof(pin_code_info), "Pairing code\n%06lu", bt->pin_code);
@@ -89,10 +88,9 @@ static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
 
     notification_message(bt->notification, &sequence_display_backlight_on);
     FuriString* pin_str;
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64_sfw, 0, 0);
-    }
-    else {
+    } else {
         dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
     }
     pin_str = furi_string_alloc_printf("Verify code\n%06lu", pin);

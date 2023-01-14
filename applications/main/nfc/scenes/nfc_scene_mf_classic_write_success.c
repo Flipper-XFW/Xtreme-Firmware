@@ -16,10 +16,9 @@ void nfc_scene_mf_classic_write_success_on_enter(void* context) {
     notification_message(nfc->notifications, &sequence_success);
 
     Popup* popup = nfc->popup;
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     }
     popup_set_header(popup, "Successfully\nwritten", 13, 22, AlignLeft, AlignBottom);

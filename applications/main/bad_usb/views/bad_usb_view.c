@@ -50,10 +50,9 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
 
     if((model->state.state == BadUsbStateIdle) || (model->state.state == BadUsbStateDone) ||
        (model->state.state == BadUsbStateNotConnected)) {
-        if (settings->sfw_mode) {
+        if(settings->sfw_mode) {
             elements_button_center(canvas, "Start");
-        }
-        else {
+        } else {
             elements_button_center(canvas, "Cum");
         }
     } else if((model->state.state == BadUsbStateRunning) || (model->state.state == BadUsbStateDelay)) {
@@ -70,21 +69,19 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     if(model->state.state == BadUsbStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if (settings->sfw_mode) {
+        if(settings->sfw_mode) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
             canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
-        }
-        else {
+        } else {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Plug me");
             canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "in, Daddy");
         }
     } else if(model->state.state == BadUsbStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if (settings->sfw_mode) {
+        if(settings->sfw_mode) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
-        }
-        else {
+        } else {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will cum");
         }
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "on connect");

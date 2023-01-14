@@ -35,10 +35,9 @@ void lfrfid_scene_raw_read_on_enter(void* context) {
     LfRfidReadRawState* state = malloc(sizeof(LfRfidReadRawState));
     scene_manager_set_scene_state(app->scene_manager, LfRfidSceneRawRead, (uint32_t)state);
     state->string_file_name = furi_string_alloc();
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
     }
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);

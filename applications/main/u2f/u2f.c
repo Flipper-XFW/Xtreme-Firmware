@@ -64,13 +64,13 @@ typedef struct {
 static const uint8_t ver_str[] = {"U2F_V2"};
 
 // NFC applet selection fields
-static const uint8_t rid_ac_ax[] = { 0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01 };
+static const uint8_t rid_ac_ax[] = {0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01};
 
 static const uint8_t state_no_error[] = {0x90, 0x00};
 static const uint8_t state_not_supported[] = {0x6D, 0x00};
 static const uint8_t state_user_missing[] = {0x69, 0x85};
 static const uint8_t state_wrong_data[] = {0x6A, 0x80};
-static const uint8_t state_app_not_found[] = { 0x6A, 0x82 };
+static const uint8_t state_app_not_found[] = {0x6A, 0x82};
 
 struct U2fData {
     uint8_t device_key[32];
@@ -86,10 +86,9 @@ struct U2fData {
 static void* apdu_command_data(U2fApduCommand* cmd) {
     // Short encoding is a single byte.
     // Extended length encoding is 0 byte followed by MSB and LSB bytes.
-    if (cmd->len[0] == 0) {
+    if(cmd->len[0] == 0) {
         return cmd->len + 3;
-    }
-    else {
+    } else {
         return cmd->len + 1;
     }
 }
@@ -278,7 +277,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, const uint8_t* in_buf, uint8_t* o
     if(U2F->user_present == true) {
         flags |= 1;
     } else {
-        if (cmd->p1 == U2fEnforce) {
+        if(cmd->p1 == U2fEnforce) {
             memcpy(&out_buf[0], state_user_missing, 2);
             return 2;
         }
@@ -314,7 +313,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, const uint8_t* in_buf, uint8_t* o
         return 2;
     }
 
-    if (cmd->p1 == U2fCheckOnly) { // Check-only: don't need to send full response
+    if(cmd->p1 == U2fCheckOnly) { // Check-only: don't need to send full response
         memcpy(&out_buf[0], state_user_missing, 2);
         return 2;
     }
@@ -352,7 +351,7 @@ uint16_t u2f_applet_selection(const uint8_t* in_buf, uint8_t* out_buf) {
         data[6],
         data[7]);
 
-    if (cmd->len[0] != 8 || memcmp(rid_ac_ax, data, 8) != 0) {
+    if(cmd->len[0] != 8 || memcmp(rid_ac_ax, data, 8) != 0) {
         memcpy(&out_buf[0], state_app_not_found, 2);
         return 2;
     }
@@ -364,24 +363,20 @@ uint16_t u2f_applet_selection(const uint8_t* in_buf, uint8_t* out_buf) {
 
 uint16_t u2f_msg_parse(U2fData* U2F, const uint8_t* in_buf, uint16_t in_len, uint8_t* out_buf) {
     furi_assert(U2F);
-    if (!U2F->ready) return 0;
-    if ((in_buf[0] != 0x00) && (in_len < 5)) return 0;
+    if(!U2F->ready) return 0;
+    if((in_buf[0] != 0x00) && (in_len < 5)) return 0;
     FURI_LOG_D(TAG, "ins=0x%02x", in_buf[1]);
-    if (in_buf[1] == U2F_CMD_REGISTER) { // Register request
+    if(in_buf[1] == U2F_CMD_REGISTER) { // Register request
         return u2f_register(U2F, in_buf, out_buf);
-    }
-    else if (in_buf[1] == U2F_CMD_AUTHENTICATE) { // Authenticate request
+    } else if(in_buf[1] == U2F_CMD_AUTHENTICATE) { // Authenticate request
         return u2f_authenticate(U2F, in_buf, out_buf);
-    }
-    else if (in_buf[1] == U2F_CMD_VERSION) { // Get U2F version string
+    } else if(in_buf[1] == U2F_CMD_VERSION) { // Get U2F version string
         memcpy(&out_buf[0], ver_str, 6);
         memcpy(&out_buf[6], state_no_error, 2);
         return 8;
-    }
-    else if (in_buf[1] == U2F_CMD_APPLET_SELECTION) {
+    } else if(in_buf[1] == U2F_CMD_APPLET_SELECTION) {
         return u2f_applet_selection(in_buf, out_buf);
-    }
-    else {
+    } else {
         memcpy(&out_buf[0], state_not_supported, 2);
         return 2;
     }
@@ -389,15 +384,14 @@ uint16_t u2f_msg_parse(U2fData* U2F, const uint8_t* in_buf, uint16_t in_len, uin
 }
 
 void u2f_wink(U2fData* U2F) {
-    if (U2F->callback != NULL) U2F->callback(U2fNotifyWink, U2F->context);
+    if(U2F->callback != NULL) U2F->callback(U2fNotifyWink, U2F->context);
 }
 
 void u2f_set_state(U2fData* U2F, uint8_t state) {
-    if (state == 0) {
-        if (U2F->callback != NULL) U2F->callback(U2fNotifyDisconnect, U2F->context);
-    }
-    else {
-        if (U2F->callback != NULL) U2F->callback(U2fNotifyConnect, U2F->context);
+    if(state == 0) {
+        if(U2F->callback != NULL) U2F->callback(U2fNotifyDisconnect, U2F->context);
+    } else {
+        if(U2F->callback != NULL) U2F->callback(U2fNotifyConnect, U2F->context);
     }
     U2F->user_present = false;
 }

@@ -38,10 +38,7 @@ void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is
 
 void desktop_lock_menu_set_sfw_mode_state(DesktopLockMenuView* lock_menu, bool sfw_mode) {
     with_view_model(
-        lock_menu->view,
-        DesktopLockMenuViewModel * model,
-        { model->sfw_mode = sfw_mode; },
-        true);
+        lock_menu->view, DesktopLockMenuViewModel * model, { model->sfw_mode = sfw_mode; }, true);
 }
 
 void desktop_lock_menu_set_idx(DesktopLockMenuView* lock_menu, uint8_t idx) {

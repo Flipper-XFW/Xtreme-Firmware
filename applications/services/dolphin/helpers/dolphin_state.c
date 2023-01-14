@@ -82,8 +82,8 @@ uint64_t dolphin_state_timestamp() {
 }
 
 bool dolphin_state_is_levelup(int icounter) {
-    for (int i = 0; i<30; ++i) {
-        if ((icounter == level_array[i])) {
+    for(int i = 0; i < 30; ++i) {
+        if((icounter == level_array[i])) {
             return true;
         }
     };
@@ -91,12 +91,12 @@ bool dolphin_state_is_levelup(int icounter) {
 }
 
 uint8_t dolphin_get_level(int icounter) {
-for (int i = 0; i < 29; ++i) {
-    if (icounter <= level_array[i]) {
-        return i + 1;
+    for(int i = 0; i < 29; ++i) {
+        if(icounter <= level_array[i]) {
+            return i + 1;
+        }
     }
-}
-return 30;
+    return 30;
 }
 
 uint32_t dolphin_state_xp_above_last_levelup(int icounter) {
