@@ -4,8 +4,8 @@ from flipper.app import App
 from flipper.assets.icon import file2image
 
 import os
-import sys
 import shutil
+import pathlib
 
 ICONS_SUPPORTED_FORMATS = ["png"]
 
@@ -27,13 +27,13 @@ ICONS_TEMPLATE_C_ICONS = "const Icon {name} = {{.width={width},.height={height},
 
 valid_dirs = list()
 # This will not stay, dont worry! This is temp code until we got time to rewrite this all
-we_are_here = "\\".join(os.path.abspath(__file__).split("\\")[:-2])
-dolphin_external = os.path.join(we_are_here, r"assets\dolphin\external/")
-potential_directories = [d for d in os.listdir(dolphin_external) if os.path.isdir(os.path.join(dolphin_external, d))] # Get all animation directories
+root_dir = pathlib.Path(__file__).absolute().parent.parent
+dolphin_external = root_dir / "assets/dolphin/external/"
+potential_directories = [item for item in dolphin_external.iterdir() if item.is_dir()] # Get all animation directories
 
-for i in potential_directories: # loop through all of them
-    if os.path.exists(os.path.join(dolphin_external, f"{i}\manifest.txt")): # check if they contain a manifest.txt TODO: This code should be moved to wherever manifest.txt files are validated! 
-        valid_dirs.append(os.path.join(dolphin_external, f"{i}")) # append valid directory to list
+for directory in potential_directories: # loop through all of them
+    if (directory / "manifest.txt").exists(): # check if they contain a manifest.txt TODO: This code should be moved to wherever manifest.txt files are validated! 
+        valid_dirs.append(directory) # append valid directory to list
 
 class Main(App):
     def init(self):
@@ -259,10 +259,9 @@ class Main(App):
 
         # This will not stay, dont worry! This is temp code until we got time to rewrite this all
         global valid_dirs # access our global variable
-        for i in valid_dirs: # We can copy the manifest for all of the valid dirs!
-            i = i.split("/")[-1]
-            shutil.copyfile(fr"assets\dolphin\external\{i}\manifest.txt", fr"assets\resources\dolphin\{i}\manifest.txt")
-        os.remove(r"assets\resources\dolphin\manifest.txt")
+        for valid_dir in valid_dirs: # We can copy the manifest for all of the valid dirs!
+            shutil.copyfile(valid_dir / "manifest.txt", root_dir / f"assets/resources/dolphin/{valid_dir.name}/manifest.txt")
+        (root_dir / "assets/resources/dolphin/manifest.txt").unlink()
 
         self.logger.info(f"Complete")
 
@@ -292,7 +291,7 @@ class Main(App):
         self.logger.info(f"Processing Dolphin sources")
         dolphin = Dolphin()
         self.logger.info(f"Loading data")
-        if not "dolphin\external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
+        if not f"dolphin{os.sep}external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
             dolphin.load([self.args.input_directory])
         else:
             dolphin.load(valid_dirs)
