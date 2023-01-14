@@ -58,7 +58,6 @@ struct Desktop {
     DesktopViewPinInput* pin_input_view;
 
     ViewPort* lock_icon_viewport;
-    ViewPort* sfw_mode_icon_viewport;
 
     AnimationManager* animation_manager;
 

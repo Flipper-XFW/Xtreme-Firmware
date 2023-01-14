@@ -39,12 +39,6 @@ static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Lock_8x8);
 }
 
-static void desktop_sfw_mode_icon_draw_callback(Canvas* canvas, void* context) {
-    UNUSED(context);
-    furi_assert(canvas);
-    canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
-}
-
 static bool desktop_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Desktop* desktop = (Desktop*)context;
@@ -149,7 +143,6 @@ void desktop_unlock(Desktop* desktop) {
 }
 
 void desktop_set_sfw_mode_state(Desktop* desktop, bool enabled) {
-    view_port_enabled_set(desktop->sfw_mode_icon_viewport, enabled);
     desktop->settings.sfw_mode = enabled;
     DESKTOP_SETTINGS_SAVE(&desktop->settings);
     animation_manager_new_idle_process(desktop->animation_manager);
@@ -237,14 +230,6 @@ Desktop* desktop_alloc() {
         desktop->lock_icon_viewport, desktop_lock_icon_draw_callback, desktop);
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     gui_add_view_port(desktop->gui, desktop->lock_icon_viewport, GuiLayerStatusBarLeft);
-
-    // Dummy mode icon
-    desktop->sfw_mode_icon_viewport = view_port_alloc();
-    view_port_set_width(desktop->sfw_mode_icon_viewport, icon_get_width(&I_GameMode_11x8));
-    view_port_draw_callback_set(
-        desktop->sfw_mode_icon_viewport, desktop_sfw_mode_icon_draw_callback, desktop);
-    view_port_enabled_set(desktop->sfw_mode_icon_viewport, false);
-    gui_add_view_port(desktop->gui, desktop->sfw_mode_icon_viewport, GuiLayerStatusBarLeft);
 
     // Special case: autostart application is already running
     desktop->loader = furi_record_open(RECORD_LOADER);
@@ -342,7 +327,6 @@ int32_t desktop_srv(void* p) {
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
 
-        view_port_enabled_set(desktop->sfw_mode_icon_viewport, desktop->settings.sfw_mode);
         desktop_main_set_sfw_mode_state(desktop->main_view, desktop->settings.sfw_mode);
 
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
