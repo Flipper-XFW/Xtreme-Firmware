@@ -46,7 +46,7 @@ If you dont like that, we added an SFW mode to the Firmware. From the main menu,
 <br>
 <h2 align="center">List of changes:</h2>
 
-Note: This repo is always updated with OFW & Unleashed. No need to mention all those here. We will only mention **our** changes that we can actually be credited for, unlike *others*
+Note: This repo is always updated with OFW & Unleashed. No need to mention all those here. We will only mention **our** changes that we can actually be credited for.
 
 ```txt
 [Added]
@@ -54,8 +54,9 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - SFW Mode
 - Jamming Files
 - Custom subghz presets
+- Added new Battery display-type
 - Subghz and IR signal replication via gpio | Credits to @ankris812
-- Honda Keys (CVE-2022-27254)
+- Honda Keys (CVE-2022-27254) & Ford blockers
 - NSFW Animations tied to the level system. Read more above
 - New API Routes for Locale settings
 - Scrolling view for long file names in browser
@@ -106,19 +107,6 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 **NOTE: If you are coming from a different FW, it is recommended to delete / clear your "apps" folder on the SD card prior to updating. This folder houses all the .fap files, which do not update to the correct API versions by default if old ones are present (Thanks flipper devs). This does `NOT` remove any of your saved files!**
 <br><br>
 
-<h3> Web Updater / Mobile App / Automatic qFlipper Update</h3>
-
-- Go to the latest release from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Click the "Web Updater" Button
-
-- Enjoy!
-<br>
-
------
-<br>
-
-<h3> Manual Update (Because qFlipper loves to break every now and then for no reason at all)</h3>
-
 - Download the latest release (.zip) from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
 - Extract the archive. This is now your new Firmware folder
 - Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
@@ -150,10 +138,15 @@ $ ./fbt resources icons dolphin_ext
 ```
 
 ----
-## Stargazers over time
+<h2 align="center">Stargazers over time</h2>
 
 [![Stargazers over time](https://starchart.cc/ClaraCrazy/Flipper-Xtreme.svg)](https://starchart.cc/ClaraCrazy/Flipper-Xtreme)
 
+----
+<h2 align="center">Contributors</h2>
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/55334727/212134625-21383102-02f3-453f-b1d7-8a9c65b27612.svg">
+</p>
 
 ----
 <p align="center"> "What we do for ourselves dies with us. What we do for others and the world remains and is immortal.” ― Albert Pike </p>
