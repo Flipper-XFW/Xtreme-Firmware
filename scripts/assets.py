@@ -2,6 +2,7 @@
 
 from flipper.app import App
 from flipper.assets.icon import file2image
+from pathlib import Path
 
 import os
 import sys
@@ -26,14 +27,13 @@ ICONS_TEMPLATE_C_DATA = "const uint8_t* const {name}[] = {data};\n"
 ICONS_TEMPLATE_C_ICONS = "const Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
 
 valid_dirs = list()
-# This will not stay, dont worry! This is temp code until we got time to rewrite this all
-we_are_here = "\\".join(os.path.abspath(__file__).split("\\")[:-2])
-dolphin_external = os.path.join(we_are_here, r"assets\dolphin\external/")
-potential_directories = [d for d in os.listdir(dolphin_external) if os.path.isdir(os.path.join(dolphin_external, d))] # Get all animation directories
+we_are_here = Path(__file__).parent.parent
+dolphin_external = we_are_here / "assets" / "dolphin" / "external"
+potential_directories = [d for d in dolphin_external.iterdir() if d.is_dir()]
 
-for i in potential_directories: # loop through all of them
-    if os.path.exists(os.path.join(dolphin_external, f"{i}\manifest.txt")): # check if they contain a manifest.txt TODO: This code should be moved to wherever manifest.txt files are validated! 
-        valid_dirs.append(os.path.join(dolphin_external, f"{i}")) # append valid directory to list
+for i in potential_directories:
+    if (dolphin_external / i / "manifest.txt").exists():
+        valid_dirs.append(i)
 
 class Main(App):
     def init(self):
