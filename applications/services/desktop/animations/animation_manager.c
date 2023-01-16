@@ -118,12 +118,9 @@ static void animation_manager_check_blocking_callback(const void* message, void*
 static void animation_manager_timer_callback(void* context) {
     furi_assert(context);
     AnimationManager* animation_manager = context;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-    if(!settings->dont_cycle_animations && animation_manager->new_idle_callback) {
+    if(animation_manager->new_idle_callback) {
         animation_manager->new_idle_callback(animation_manager->context);
     }
-    free(settings);
 }
 
 static void animation_manager_interact_callback(void* context) {
@@ -203,7 +200,10 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    furi_timer_start(animation_manager->idle_animation_timer, bubble_animation->duration * 1000);
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+    furi_timer_start(animation_manager->idle_animation_timer, (settings->cycle_animations_s - 1) * 1000);
+    free(settings);
 }
 
 static bool animation_manager_check_blocking(AnimationManager* animation_manager) {
@@ -513,8 +513,11 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                     } else {
                         const BubbleAnimation* animation = animation_storage_get_bubble_animation(
                             animation_manager->current_animation);
+                        DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+                        DESKTOP_SETTINGS_LOAD(settings);
                         furi_timer_start(
-                            animation_manager->idle_animation_timer, animation->duration * 1000);
+                            animation_manager->idle_animation_timer, (settings->cycle_animations_s - 1) * 1000);
+                        free(settings);
                     }
                 }
             } else {
