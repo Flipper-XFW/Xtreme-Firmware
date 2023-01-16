@@ -1,6 +1,6 @@
 App(
     appid="cli_gui",
-    name="CLI-GUI Bridge",
+    name="CLI (subghz chat)",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="cligui_main",
     requires=["gui","cli"],
