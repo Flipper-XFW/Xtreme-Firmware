@@ -137,7 +137,6 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
         left_used += (width + 2);
         x += (width + 2);
     }
-    // Draw frame around icons on the left
 }
 
 static bool gui_redraw_window(Gui* gui) {
