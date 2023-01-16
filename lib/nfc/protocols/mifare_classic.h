@@ -8,6 +8,7 @@
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
 #define MF_CLASSIC_1K_TOTAL_SECTORS_NUM (16)
 #define MF_CLASSIC_4K_TOTAL_SECTORS_NUM (40)
+#define MF_MINI_TOTAL_SECTORS_NUM (5)
 
 #define MF_CLASSIC_SECTORS_MAX (40)
 #define MF_CLASSIC_BLOCKS_IN_SECTOR_MAX (16)
@@ -18,6 +19,7 @@
 #define MF_CLASSIC_ACCESS_BYTES_SIZE (4)
 
 typedef enum {
+    MfClassicTypeMini,
     MfClassicType1k,
     MfClassicType4k,
 } MfClassicType;
@@ -94,7 +96,7 @@ const char* mf_classic_get_type_str(MfClassicType type);
 
 bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
-MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
+MfClassicType mf_classic_get_classic_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 
