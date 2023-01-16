@@ -92,19 +92,20 @@ static void render_callback(Canvas* canvas, void* _ctx) {
         }
     }
     uint32_t xp_progress = 0;
-    uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
+    uint32_t xp_need = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
-    uint32_t xp_for_current_level = xp_to_levelup + xp_above_last_levelup;
-    uint32_t xp_next_level = stats->icounter + xp_to_levelup;
+    uint32_t xp_levelup = 0;
+    if (ctx->progress_total) {
+        xp_levelup = xp_need + stats->icounter;
+    } else {
+        xp_levelup = xp_need + xp_above_last_levelup;
+    }
+    uint32_t xp_have = xp_levelup - xp_need;
 
     if(stats->level == 30) {
         xp_progress = 0;
     } else {
-        if(ctx->progress_total) {
-            xp_progress = stats->icounter * 64 / xp_next_level;
-        } else {
-            xp_progress = xp_to_levelup * 64 / xp_for_current_level;
-        }
+        xp_progress = xp_need * 64 / xp_levelup;
     }
 
     // multipass
@@ -125,11 +126,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
-    if(ctx->progress_total) {
-        snprintf(xp_str, 12, "%lu/%lu", stats->icounter, xp_next_level);
-    } else {
-        snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
-    }
+    snprintf(xp_str, 12, "%lu/%lu", xp_have, xp_levelup);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 22, mood_str);
