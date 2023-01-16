@@ -100,7 +100,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     if(stats->level == 30) {
         xp_progress = 0;
     } else {
-        if (ctx->progress_total) {
+        if(ctx->progress_total) {
             xp_progress = stats->icounter * 64 / xp_next_level;
         } else {
             xp_progress = xp_to_levelup * 64 / xp_for_current_level;
@@ -125,7 +125,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
-    if (ctx->progress_total) {
+    if(ctx->progress_total) {
         snprintf(xp_str, 12, "%lu/%lu", stats->icounter, xp_next_level);
     } else {
         snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
@@ -145,7 +145,8 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     canvas_set_color(canvas, ColorBlack);
 
     canvas_draw_icon(canvas, 52, 51, &I_Ok_btn_9x9);
-    canvas_draw_str(canvas, ctx->progress_total ? 37 : 36, 59, ctx->progress_total ? "Lvl" : "Tot");
+    canvas_draw_str(
+        canvas, ctx->progress_total ? 37 : 36, 59, ctx->progress_total ? "Lvl" : "Tot");
 
     free(settings);
 }

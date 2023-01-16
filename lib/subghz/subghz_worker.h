@@ -75,7 +75,6 @@ bool subghz_worker_is_running(SubGhzWorker* instance);
  */
 void subghz_worker_set_filter(SubGhzWorker* instance, uint16_t timeout);
 
-
 #ifdef __cplusplus
 }
 #endif
