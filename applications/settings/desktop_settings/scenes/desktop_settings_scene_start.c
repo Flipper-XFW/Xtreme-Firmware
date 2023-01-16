@@ -39,6 +39,14 @@ const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {
 
 uint8_t origBattDisp_value = 0;
 
+#define CYCLE_ANIMATIONS_COUNT 2
+const char* const cycle_animations_text[CYCLE_ANIMATIONS_COUNT] = {
+    "ON",
+    "OFF",
+};
+const uint32_t cycle_animations_value[CYCLE_ANIMATIONS_COUNT] =
+    {0, 1};
+
 static void desktop_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -58,6 +66,14 @@ static void desktop_settings_scene_start_battery_view_changed(VariableItem* item
 
     variable_item_set_current_value_text(item, battery_view_count_text[index]);
     app->settings.displayBatteryPercentage = index;
+}
+
+static void desktop_settings_scene_start_cycle_animations_changed(VariableItem* item) {
+    DesktopSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, cycle_animations_text[index]);
+    app->settings.dont_cycle_animations = auto_lock_delay_value[index];
 }
 
 void desktop_settings_scene_start_on_enter(void* context) {
@@ -101,6 +117,18 @@ void desktop_settings_scene_start_on_enter(void* context) {
         BATTERY_VIEW_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, battery_view_count_text[value_index]);
+
+    item = variable_item_list_add(
+        variable_item_list,
+        "Cycle animations",
+        CYCLE_ANIMATIONS_COUNT,
+        desktop_settings_scene_start_cycle_animations_changed,
+        app);
+
+    value_index = value_index_uint32(
+        app->settings.dont_cycle_animations, cycle_animations_value, CYCLE_ANIMATIONS_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, cycle_animations_text[value_index]);
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);

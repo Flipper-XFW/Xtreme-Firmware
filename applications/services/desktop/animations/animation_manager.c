@@ -118,9 +118,12 @@ static void animation_manager_check_blocking_callback(const void* message, void*
 static void animation_manager_timer_callback(void* context) {
     furi_assert(context);
     AnimationManager* animation_manager = context;
-    if(animation_manager->new_idle_callback) {
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+    if(!settings->dont_cycle_animations && animation_manager->new_idle_callback) {
         animation_manager->new_idle_callback(animation_manager->context);
     }
+    free(settings);
 }
 
 static void animation_manager_interact_callback(void* context) {
