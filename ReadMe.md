@@ -149,4 +149,11 @@ $ ./fbt resources icons dolphin_ext
 </p>
 
 ----
+## SAST Tools
+
+This helps us a lot, thanks for the free license for this project!
+
+[PVS-Studio](https://pvs-studio.com/en/pvs-studio/?utm_source=github&utm_medium=organic&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
+
+----
 <p align="center"> "What we do for ourselves dies with us. What we do for others and the world remains and is immortal.” ― Albert Pike </p>
