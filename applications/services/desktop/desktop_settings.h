@@ -64,4 +64,5 @@ typedef struct {
     uint8_t displayBatteryPercentage;
     bool is_sfwmode;
     uint8_t sfw_mode;
+    uint32_t cycle_animations_s;
 } DesktopSettings;

@@ -197,10 +197,13 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
 
     StorageAnimation* new_animation = animation_manager_select_idle_animation(animation_manager);
     animation_manager_replace_current_animation(animation_manager, new_animation);
-    const BubbleAnimation* bubble_animation =
-        animation_storage_get_bubble_animation(animation_manager->current_animation);
+    // const BubbleAnimation* bubble_animation =
+    //     animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    furi_timer_start(animation_manager->idle_animation_timer, bubble_animation->duration * 1000);
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+    furi_timer_start(animation_manager->idle_animation_timer, (settings->cycle_animations_s - 1) * 1000);
+    free(settings);
 }
 
 static bool animation_manager_check_blocking(AnimationManager* animation_manager) {
@@ -508,10 +511,13 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                             animation_manager->idle_animation_timer,
                             animation_manager->freezed_animation_time_left);
                     } else {
-                        const BubbleAnimation* animation = animation_storage_get_bubble_animation(
-                            animation_manager->current_animation);
+                        // const BubbleAnimation* animation = animation_storage_get_bubble_animation(
+                        //     animation_manager->current_animation);
+                        DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+                        DESKTOP_SETTINGS_LOAD(settings);
                         furi_timer_start(
-                            animation_manager->idle_animation_timer, animation->duration * 1000);
+                            animation_manager->idle_animation_timer, (settings->cycle_animations_s - 1) * 1000);
+                        free(settings);
                     }
                 }
             } else {
