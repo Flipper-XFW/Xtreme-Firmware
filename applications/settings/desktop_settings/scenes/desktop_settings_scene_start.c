@@ -129,7 +129,7 @@ void desktop_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         variable_item_list,
-        "Cycle Animations",
+        "Cycle Animation",
         CYCLE_ANIMATIONS_COUNT,
         desktop_settings_scene_start_cycle_animations_changed,
         app);
