@@ -67,7 +67,8 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
 static bool animation_manager_check_blocking(AnimationManager* animation_manager);
 static bool animation_manager_is_valid_idle_animation(
     const StorageAnimationManifestInfo* info,
-    const DolphinStats* stats);
+    const DolphinStats* stats,
+    const bool unlock);
 static void animation_manager_switch_to_one_shot_view(AnimationManager* animation_manager);
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager);
 
@@ -146,7 +147,7 @@ void animation_manager_check_blocking_process(AnimationManager* animation_manage
 
             const StorageAnimationManifestInfo* manifest_info =
                 animation_storage_get_meta(animation_manager->current_animation);
-            bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
+            bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, XTREME_SETTINGS()->unlock_anims);
 
             if(!valid) {
                 animation_manager_start_new_idle(animation_manager);
@@ -340,7 +341,8 @@ View* animation_manager_get_animation_view(AnimationManager* animation_manager) 
 
 static bool animation_manager_is_valid_idle_animation(
     const StorageAnimationManifestInfo* info,
-    const DolphinStats* stats) {
+    const DolphinStats* stats,
+    const bool unlock) {
     furi_assert(info);
     furi_assert(info->name);
 
@@ -360,11 +362,13 @@ static bool animation_manager_is_valid_idle_animation(
 
         result = (sd_status == FSE_NOT_READY);
     }
-    if((stats->butthurt < info->min_butthurt) || (stats->butthurt > info->max_butthurt)) {
-        result = false;
-    }
-    if((stats->level < info->min_level) || (stats->level > info->max_level)) {
-        result = false;
+    if (!unlock) {
+        if((stats->butthurt < info->min_butthurt) || (stats->butthurt > info->max_butthurt)) {
+            result = false;
+        }
+        if((stats->level < info->min_level) || (stats->level > info->max_level)) {
+            result = false;
+        }
     }
 
     return result;
@@ -384,11 +388,12 @@ static StorageAnimation*
     uint32_t whole_weight = 0;
 
     StorageAnimationList_it_t it;
+    bool unlock = XTREME_SETTINGS()->unlock_anims;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationManifestInfo* manifest_info =
             animation_storage_get_meta(storage_animation);
-        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
+        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
 
         if(valid) {
             whole_weight += manifest_info->weight;
@@ -505,7 +510,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                 furi_record_close(RECORD_DOLPHIN);
                 const StorageAnimationManifestInfo* manifest_info =
                     animation_storage_get_meta(restore_animation);
-                bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
+                bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, XTREME_SETTINGS()->unlock_anims);
                 if(valid) {
                     animation_manager_replace_current_animation(
                         animation_manager, restore_animation);

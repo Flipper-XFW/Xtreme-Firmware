@@ -28,6 +28,13 @@ static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) 
     XTREME_SETTINGS_SAVE();
 }
 
+static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item) {
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->unlock_anims = value;
+    XTREME_SETTINGS_SAVE();
+}
+
 void xtreme_settings_scene_start_on_enter(void* context) {
     XtremeSettingsApp* app = context;
     XtremeSettings* xtreme = XTREME_SETTINGS();
@@ -45,6 +52,15 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         xtreme->cycle_anims, cycle_anims_values, CYCLE_ANIMS_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, cycle_anims_names[value_index]);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Unlock Anims",
+        2,
+        xtreme_settings_scene_start_unlock_anims_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme->unlock_anims);
+    variable_item_set_current_value_text(item, xtreme->unlock_anims ? "ON" : "OFF");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeSettingsAppViewVarItemList);
 }
