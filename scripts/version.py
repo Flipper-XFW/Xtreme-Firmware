@@ -14,7 +14,7 @@ class GitVersion:
         self.gitlist = [("commit", "rev-parse --short HEAD"), ("branch", "rev-parse --abbrev-ref") , ("branch_num", "rev-list -count HEAD")]
 
     def get_version_info(self):
-        commit = branch = branch_num = "XFW-0037"
+        commit = branch = branch_num = "XFW-0039"
 
         # We dont use an `or` in commands that we expect to fail. It will serve no function.
         # We also dont try;exept an entire block of code. This is bad practise. We only try the single part that we expect to fail!
@@ -40,7 +40,15 @@ class GitVersion:
             os.environ.get("CUSTOM_FLIPPER_NAME", None)
             or ""
         )
-        
+
+        force_no_dirty = (
+            os.environ.get("FORCE_NO_DIRTY", None)
+            or ""
+        )
+
+        if (force_no_dirty != ""):
+            dirty = False
+
         if (custom_fz_name != "") and (len(custom_fz_name) <= 8) and (custom_fz_name.isalnum()) and (custom_fz_name.isascii()):
             return {
                 "GIT_COMMIT": commit,

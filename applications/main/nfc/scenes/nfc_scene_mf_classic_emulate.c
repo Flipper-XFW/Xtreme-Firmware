@@ -26,10 +26,9 @@ void nfc_scene_mf_classic_emulate_on_enter(void* context) {
     } else {
         nfc_text_store_set(nfc, "MIFARE\nClassic");
     }
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
     }
     popup_set_text(popup, nfc->text_store, 90, 28, AlignCenter, AlignTop);

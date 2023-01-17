@@ -13,10 +13,9 @@ void bt_settings_scene_forget_dev_success_on_enter(void* context) {
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
 
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     }
     popup_set_header(popup, "Done", 14, 15, AlignLeft, AlignTop);

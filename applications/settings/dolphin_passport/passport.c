@@ -12,28 +12,53 @@
 #define MOODS_TOTAL 3
 #define BUTTHURT_MAX 3
 
-static const Icon* const portrait_happy_sfw[BUTTHURT_MAX] = {&I_passport_happy1_46x49_sfw, &I_passport_happy2_46x49_sfw, &I_passport_happy3_46x49_sfw};
-static const Icon* const portrait_ok_sfw[BUTTHURT_MAX] = {&I_passport_okay1_46x49_sfw, &I_passport_okay2_46x49_sfw, &I_passport_okay3_46x49_sfw};
-static const Icon* const portrait_bad_sfw[BUTTHURT_MAX] = {&I_passport_bad1_46x49_sfw, &I_passport_bad2_46x49_sfw, &I_passport_bad3_46x49_sfw};
+static const Icon* const portrait_happy_sfw[BUTTHURT_MAX] = {
+    &I_passport_happy1_46x49_sfw,
+    &I_passport_happy2_46x49_sfw,
+    &I_passport_happy3_46x49_sfw};
+static const Icon* const portrait_ok_sfw[BUTTHURT_MAX] = {
+    &I_passport_okay1_46x49_sfw,
+    &I_passport_okay2_46x49_sfw,
+    &I_passport_okay3_46x49_sfw};
+static const Icon* const portrait_bad_sfw[BUTTHURT_MAX] = {
+    &I_passport_bad1_46x49_sfw,
+    &I_passport_bad2_46x49_sfw,
+    &I_passport_bad3_46x49_sfw};
 
 static const Icon* const portrait_happy[BUTTHURT_MAX] = {&I_flipper};
 static const Icon* const portrait_ok[BUTTHURT_MAX] = {&I_flipper};
 static const Icon* const portrait_bad[BUTTHURT_MAX] = {&I_flipper};
 
-static const Icon* const* portraits_sfw[MOODS_TOTAL] = {portrait_happy_sfw, portrait_ok_sfw, portrait_bad_sfw};
+static const Icon* const* portraits_sfw[MOODS_TOTAL] = {
+    portrait_happy_sfw,
+    portrait_ok_sfw,
+    portrait_bad_sfw};
 static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
 // static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
 
-static void input_callback(InputEvent* input, void* ctx) {
-    FuriSemaphore* semaphore = ctx;
+typedef struct {
+    FuriSemaphore* semaphore;
+    DolphinStats* stats;
+    ViewPort* view_port;
+    bool progress_total;
+} PassportContext;
+
+static void input_callback(InputEvent* input, void* _ctx) {
+    PassportContext* ctx = _ctx;
+
+    if((input->type == InputTypeShort) && (input->key == InputKeyOk)) {
+        ctx->progress_total = !ctx->progress_total;
+        view_port_update(ctx->view_port);
+    }
 
     if((input->type == InputTypeShort) && (input->key == InputKeyBack)) {
-        furi_semaphore_release(semaphore);
+        furi_semaphore_release(ctx->semaphore);
     }
 }
 
-static void render_callback(Canvas* canvas, void* ctx) {
-    DolphinStats* stats = ctx;
+static void render_callback(Canvas* canvas, void* _ctx) {
+    PassportContext* ctx = _ctx;
+    DolphinStats* stats = ctx->stats;
 
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
@@ -65,40 +90,43 @@ static void render_callback(Canvas* canvas, void* ctx) {
             mood = 2;
             snprintf(mood_str, 20, "Status: Desperate");
         }
-
     }
     uint32_t xp_progress = 0;
-    uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
+    uint32_t xp_need = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
-    uint32_t xp_for_current_level = xp_to_levelup + xp_above_last_levelup;
+    uint32_t xp_levelup = 0;
+    if (ctx->progress_total) {
+        xp_levelup = xp_need + stats->icounter;
+    } else {
+        xp_levelup = xp_need + xp_above_last_levelup;
+    }
+    uint32_t xp_have = xp_levelup - xp_need;
 
     if(stats->level == 30) {
         xp_progress = 0;
     } else {
-        xp_progress = xp_to_levelup * 64 / xp_for_current_level;
+        xp_progress = xp_need * 64 / xp_levelup;
     }
 
     // multipass
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         canvas_draw_icon(canvas, 0, 0, &I_passport_DB_sfw);
-    }
-    else {
+    } else {
         canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
     }
 
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= 30));
     uint16_t tmpLvl = 0;
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         canvas_draw_icon(canvas, 11, 2, portraits_sfw[mood][tmpLvl]);
-    }
-    else {
+    } else {
         canvas_draw_icon(canvas, 11, 2, portraits[mood][tmpLvl]);
     }
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
-    snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
+    snprintf(xp_str, 12, "%lu/%lu", xp_have, xp_levelup);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 22, mood_str);
@@ -112,6 +140,11 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
     canvas_set_color(canvas, ColorBlack);
+
+    canvas_draw_icon(canvas, 52, 51, &I_Ok_btn_9x9);
+    canvas_draw_str(
+        canvas, ctx->progress_total ? 37 : 36, 59, ctx->progress_total ? "Lvl" : "Tot");
+
     free(settings);
 }
 
@@ -124,9 +157,14 @@ int32_t passport_app(void* p) {
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
+    PassportContext* ctx = malloc(sizeof(PassportContext));
+    ctx->stats = &stats;
+    ctx->view_port = view_port;
+    ctx->semaphore = semaphore;
+    ctx->progress_total = false;
     furi_record_close(RECORD_DOLPHIN);
-    view_port_draw_callback_set(view_port, render_callback, &stats);
-    view_port_input_callback_set(view_port, input_callback, semaphore);
+    view_port_draw_callback_set(view_port, render_callback, ctx);
+    view_port_input_callback_set(view_port, input_callback, ctx);
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     view_port_update(view_port);
@@ -137,6 +175,7 @@ int32_t passport_app(void* p) {
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
     furi_semaphore_free(semaphore);
+    free(ctx);
 
     return 0;
 }

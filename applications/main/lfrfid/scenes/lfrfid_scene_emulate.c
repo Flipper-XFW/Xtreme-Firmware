@@ -19,10 +19,9 @@ void lfrfid_scene_emulate_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
     }
 

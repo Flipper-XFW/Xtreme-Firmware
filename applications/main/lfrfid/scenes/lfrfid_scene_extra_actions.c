@@ -20,7 +20,7 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Read ASK (FDX,Regular)",
+        "Read ASK (Animal, FDX)",
         SubmenuIndexASK,
         lfrfid_scene_extra_actions_submenu_callback,
         app);

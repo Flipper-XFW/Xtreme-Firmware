@@ -1,4 +1,5 @@
 #include "../storage_settings.h"
+#include "../../desktop_settings/desktop_settings_app.h"
 
 static void
     storage_settings_scene_unmounted_dialog_callback(DialogExResult result, void* context) {
@@ -11,9 +12,15 @@ void storage_settings_scene_unmounted_on_enter(void* context) {
     StorageSettings* app = context;
     FS_Error error = storage_sd_unmount(app->fs_api);
     DialogEx* dialog_ex = app->dialog_ex;
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
 
     dialog_ex_set_center_button_text(dialog_ex, "OK");
-    dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48);
+    if(settings->sfw_mode) {
+        dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48_sfw);
+    } else {
+        dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48);
+    }
 
     if(error == FSE_OK) {
         dialog_ex_set_header(dialog_ex, "SD Card Unmounted", 64, 3, AlignCenter, AlignTop);
@@ -29,6 +36,7 @@ void storage_settings_scene_unmounted_on_enter(void* context) {
     dialog_ex_set_result_callback(dialog_ex, storage_settings_scene_unmounted_dialog_callback);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, StorageSettingsViewDialogEx);
+    free(settings);
 }
 
 bool storage_settings_scene_unmounted_on_event(void* context, SceneManagerEvent event) {

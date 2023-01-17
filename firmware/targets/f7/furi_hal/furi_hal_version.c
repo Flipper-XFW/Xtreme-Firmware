@@ -94,7 +94,10 @@ void furi_hal_version_set_custom_name(const char* name) {
     if((name != NULL) && ((strlen(name) >= 1) && (strlen(name) <= 8))) {
         strlcpy(furi_hal_version.name, name, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
         snprintf(
-            furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper %s", name);
+            furi_hal_version.device_name,
+            FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
+            "x%s", // Someone tell me why that X is needed
+            name);
 
         furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
     }
@@ -106,7 +109,7 @@ static void furi_hal_version_set_name(const char* name) {
         snprintf(
             furi_hal_version.device_name,
             FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-            "xFlipper %s",
+            "x%s", // Someone tell me why that X is needed
             furi_hal_version.name);
     } else {
         snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper");

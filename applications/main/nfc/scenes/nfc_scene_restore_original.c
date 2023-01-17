@@ -13,10 +13,9 @@ void nfc_scene_restore_original_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     }
     popup_set_header(popup, "Original file\nrestored", 13, 22, AlignLeft, AlignBottom);

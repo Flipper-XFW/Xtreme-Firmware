@@ -209,10 +209,9 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(model->history_item == 0) {
-        if (settings->sfw_mode) {
+        if(settings->sfw_mode) {
             canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52_sfw);
-        }
-        else {
+        } else {
             canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
         }
         canvas_set_font(canvas, FontPrimary);
@@ -236,10 +235,9 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
         canvas_draw_icon(canvas, 65, 42, &I_Pin_back_arrow_10x8);
         canvas_draw_icon(canvas, 80, 42, &I_Pin_back_arrow_10x8);
         canvas_draw_icon(canvas, 95, 42, &I_Pin_back_arrow_10x8);
-        if (settings->sfw_mode) {
+        if(settings->sfw_mode) {
             canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42_sfw);
-        }
-        else {
+        } else {
             canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42);
         }
         canvas_draw_dot(canvas, 17, 61);

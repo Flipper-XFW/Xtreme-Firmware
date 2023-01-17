@@ -26,10 +26,9 @@ static void desktop_loader_callback(const void* message, void* context) {
     Desktop* desktop = context;
     const LoaderEvent* event = message;
 
-    if (event->type == LoaderEventTypeApplicationStarted) {
+    if(event->type == LoaderEventTypeApplicationStarted) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalBeforeAppStarted);
-    }
-    else if (event->type == LoaderEventTypeApplicationStopped) {
+    } else if(event->type == LoaderEventTypeApplicationStopped) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalAfterAppFinished);
     }
 }
@@ -39,17 +38,11 @@ static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Lock_8x8);
 }
 
-static void desktop_sfw_mode_icon_draw_callback(Canvas* canvas, void* context) {
-    UNUSED(context);
-    furi_assert(canvas);
-    canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
-}
-
 static bool desktop_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Desktop* desktop = (Desktop*)context;
 
-    switch (event) {
+    switch(event) {
     case DesktopGlobalBeforeAppStarted:
         animation_manager_unload_and_stall_animation(desktop->animation_manager);
         desktop_auto_lock_inhibit(desktop);
@@ -62,12 +55,11 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         desktop_auto_lock_arm(desktop);
         return true;
     case DesktopGlobalAutoLock:
-        if (!loader_is_locked(desktop->loader)) {
-            if (desktop->settings.pin_code.length > 0) {
+        if(!loader_is_locked(desktop->loader)) {
+            if(desktop->settings.pin_code.length > 0) {
                 desktop_pin_lock(&desktop->settings);
                 desktop_lock(desktop);
-            }
-            else {
+            } else {
                 desktop_lock(desktop);
             }
         }
@@ -94,7 +86,7 @@ static void desktop_input_event_callback(const void* value, void* context) {
     furi_assert(context);
     const InputEvent* event = value;
     Desktop* desktop = context;
-    if (event->type == InputTypePress) {
+    if(event->type == InputTypePress) {
         desktop_start_auto_lock_timer(desktop);
     }
 }
@@ -115,7 +107,7 @@ static void desktop_stop_auto_lock_timer(Desktop* desktop) {
 }
 
 static void desktop_auto_lock_arm(Desktop* desktop) {
-    if (desktop->settings.auto_lock_delay_ms) {
+    if(desktop->settings.auto_lock_delay_ms) {
         desktop->input_events_subscription = furi_pubsub_subscribe(
             desktop->input_events_pubsub, desktop_input_event_callback, desktop);
         desktop_start_auto_lock_timer(desktop);
@@ -124,7 +116,7 @@ static void desktop_auto_lock_arm(Desktop* desktop) {
 
 static void desktop_auto_lock_inhibit(Desktop* desktop) {
     desktop_stop_auto_lock_timer(desktop);
-    if (desktop->input_events_subscription) {
+    if(desktop->input_events_subscription) {
         furi_pubsub_unsubscribe(desktop->input_events_pubsub, desktop->input_events_subscription);
         desktop->input_events_subscription = NULL;
     }
@@ -149,7 +141,6 @@ void desktop_unlock(Desktop* desktop) {
 }
 
 void desktop_set_sfw_mode_state(Desktop* desktop, bool enabled) {
-    view_port_enabled_set(desktop->sfw_mode_icon_viewport, enabled);
     desktop->settings.sfw_mode = enabled;
     DESKTOP_SETTINGS_SAVE(&desktop->settings);
     animation_manager_new_idle_process(desktop->animation_manager);
@@ -238,18 +229,10 @@ Desktop* desktop_alloc() {
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     gui_add_view_port(desktop->gui, desktop->lock_icon_viewport, GuiLayerStatusBarLeft);
 
-    // Dummy mode icon
-    desktop->sfw_mode_icon_viewport = view_port_alloc();
-    view_port_set_width(desktop->sfw_mode_icon_viewport, icon_get_width(&I_GameMode_11x8));
-    view_port_draw_callback_set(
-        desktop->sfw_mode_icon_viewport, desktop_sfw_mode_icon_draw_callback, desktop);
-    view_port_enabled_set(desktop->sfw_mode_icon_viewport, false);
-    gui_add_view_port(desktop->gui, desktop->sfw_mode_icon_viewport, GuiLayerStatusBarLeft);
-
     // Special case: autostart application is already running
     desktop->loader = furi_record_open(RECORD_LOADER);
-    if (loader_is_locked(desktop->loader) &&
-        animation_manager_is_animation_loaded(desktop->animation_manager)) {
+    if(loader_is_locked(desktop->loader) &&
+       animation_manager_is_animation_loaded(desktop->animation_manager)) {
         animation_manager_unload_and_stall_animation(desktop->animation_manager);
     }
 
@@ -272,7 +255,7 @@ void desktop_free(Desktop* desktop) {
     furi_pubsub_unsubscribe(
         loader_get_pubsub(desktop->loader), desktop->app_start_stop_subscription);
 
-    if (desktop->input_events_subscription) {
+    if(desktop->input_events_subscription) {
         furi_pubsub_unsubscribe(desktop->input_events_pubsub, desktop->input_events_subscription);
         desktop->input_events_subscription = NULL;
     }
@@ -328,45 +311,45 @@ static bool desktop_check_file_flag(const char* flag_path) {
 int32_t desktop_srv(void* p) {
     UNUSED(p);
 
-    if (furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal)
-    {
+    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W("Desktop", "Desktop load skipped. Device is in special startup mode.");
-    }
-    else
-    {
+    } else {
         Desktop* desktop = desktop_alloc();
 
         bool loaded = DESKTOP_SETTINGS_LOAD(&desktop->settings);
-        if (!loaded) {
+        if(!loaded) {
             memset(&desktop->settings, 0, sizeof(desktop->settings));
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
 
-        view_port_enabled_set(desktop->sfw_mode_icon_viewport, desktop->settings.sfw_mode);
+        if(!desktop->settings.cycle_animation_s) {
+            desktop->settings.cycle_animation_s = -1;
+            DESKTOP_SETTINGS_SAVE(&desktop->settings);
+        }
+
         desktop_main_set_sfw_mode_state(desktop->main_view, desktop->settings.sfw_mode);
 
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
         desktop_pin_lock_init(&desktop->settings);
 
-        if (!desktop_pin_lock_is_locked()) {
-            if (!loader_is_locked(desktop->loader)) {
+        if(!desktop_pin_lock_is_locked()) {
+            if(!loader_is_locked(desktop->loader)) {
                 desktop_auto_lock_arm(desktop);
             }
-        }
-        else {
+        } else {
             desktop_lock(desktop);
         }
 
-        if (desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
+        if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneSlideshow);
         }
 
-        if (!furi_hal_version_do_i_belong_here()) {
+        if(!furi_hal_version_do_i_belong_here()) {
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneHwMismatch);
         }
 
-        if (furi_hal_rtc_get_fault_data()) {
+        if(furi_hal_rtc_get_fault_data()) {
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneFault);
         }
 

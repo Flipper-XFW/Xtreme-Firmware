@@ -66,7 +66,15 @@ void nfc_scene_mf_ultralight_emulate_widget_config(Nfc* nfc, bool auth_attempted
     FuriString* info_str;
     info_str = furi_string_alloc();
 
-    widget_add_icon_element(widget, 0, 3, &I_RFIDDolphinSend_97x61);
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+
+    if(settings->sfw_mode) {
+        widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
+    } else {
+        widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61);
+    }
+
     if(strcmp(nfc->dev->dev_name, "")) {
         furi_string_printf(info_str, "Emulating\n%s", nfc->dev->dev_name);
     } else {
@@ -84,6 +92,7 @@ void nfc_scene_mf_ultralight_emulate_widget_config(Nfc* nfc, bool auth_attempted
             nfc_scene_mf_ultralight_emulate_widget_callback,
             nfc);
     }
+    free(settings);
 }
 
 void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
@@ -114,10 +123,9 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     } else {
         nfc_text_store_set(nfc, "MIFARE\nNTAG");
     }
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
-    }
-    else {
+    } else {
         popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
     }
     popup_set_text(popup, nfc->text_store, 90, 28, AlignCenter, AlignTop);

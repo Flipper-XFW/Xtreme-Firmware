@@ -136,7 +136,13 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
     }
 
     dialog_message_set_header(message, "Firmware Info:", 0, 0, AlignLeft, AlignTop);
-    dialog_message_set_text(message, "XFW - Xtreme Firmware\nGithub.com/ClaraCrazy/Flipper-Xtreme", 0, 13, AlignLeft, AlignTop);
+    dialog_message_set_text(
+        message,
+        "XFW - Xtreme Firmware\nGithub.com/ClaraCrazy/Flipper-Xtreme",
+        0,
+        13,
+        AlignLeft,
+        AlignTop);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
     dialog_message_set_header(message, NULL, 0, 0, AlignLeft, AlignTop);
@@ -153,7 +159,6 @@ const AboutDialogScreen about_screens[] = {
     icon2_screen,
     compliance_screen,
     address_screen};
-
 
 const size_t about_screens_count = sizeof(about_screens) / sizeof(AboutDialogScreen);
 

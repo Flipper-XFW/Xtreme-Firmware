@@ -1,16 +1,16 @@
 /* Renault tires TPMS. Usually 443.92 Mhz FSK.
  *
- * Preamble + marshal-encoded bits. 9 Bytes in total if we don't
- * count the preamble. */
+ * Preamble + sync + Manchester bits. ~48us short pulse.
+ * 9 Bytes in total not counting the preamble. */
 
-#include "../app.h"
+#include "../../app.h"
 
 #define USE_TEST_VECTOR 0
 static const char *test_vector =
-    "10101010" "10101010" "10101010" "10101001" // Preamble + sync.
+    "...01010101010101010110" // Preamble + sync
 
-    /* The following is marshal encoded, so each two characters are
-     * actaully one bit. 01 = 1, 10 = 0. */
+    /* The following is Marshal encoded, so each two characters are
+     * actaully one bit. 01 = 0, 10 = 1. */
     "010110010110" // Flags.
     "10011001101010011001" // Pressure, multiply by 0.75 to obtain kpa.
                            // 244 kpa here.
@@ -29,22 +29,23 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         numbits = strlen(test_vector);
     }
 
-    if (numbits < 13*8) return false;
+    if (numbits-12 < 9*8) return false;
 
-    const char *sync_pattern = "10101010" "10101010" "10101010" "10101001";
+    const char *sync_pattern = "01010101010101010110";
     uint64_t off = bitmap_seek_bits(bits,numbytes,0,numbits,sync_pattern);
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Renault TPMS preamble+sync found");
 
-    off += 32; /* Skip preamble. */
+    off += 20; /* Skip preamble. */
 
     uint8_t raw[9];
     uint32_t decoded =
         convert_from_line_code(raw,sizeof(raw),bits,numbytes,off,
-            "10","01"); /* Manchester. */
+            "01","10"); /* Manchester. */
     FURI_LOG_E(TAG, "Renault TPMS decoded bits: %lu", decoded);
 
     if (decoded < 8*9) return false; /* Require the full 9 bytes. */
+    if (crc8(raw,8,0,7) != raw[8]) return false; /* Require sane CRC. */
 
     float kpa = 0.75 *((uint32_t)((raw[0]&3)<<8) | raw[1]);
     int temp = raw[2]-30;
@@ -53,8 +54,10 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X%02X",
         raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
         raw[6],raw[7],raw[8]);
-    snprintf(info->info1,sizeof(info->info1),"Pressure %.2f kpa", (double)kpa);
-    snprintf(info->info2,sizeof(info->info2),"Temperature %d C", temp);
+    snprintf(info->info1,sizeof(info->info1),"Tire ID %02X%02X%02X",
+        raw[3],raw[4],raw[5]);
+    snprintf(info->info2,sizeof(info->info2),"Pressure %.2f kpa", (double)kpa);
+    snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp);
     return true;
 }
 

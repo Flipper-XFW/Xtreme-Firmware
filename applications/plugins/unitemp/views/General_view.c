@@ -172,10 +172,9 @@ static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos
 static void _draw_view_noSensors(Canvas* canvas) {
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x45_sfw);
-    }
-    else {
+    } else {
         canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x45);
     }
     //Рисование рамки

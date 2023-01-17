@@ -27,24 +27,37 @@ const uint32_t auto_lock_delay_value[AUTO_LOCK_DELAY_COUNT] =
     {0, 10000, 15000, 30000, 60000, 90000, 120000, 300000, 600000};
 
 #define BATTERY_VIEW_COUNT 6
-const char* const battery_view_count_text[BATTERY_VIEW_COUNT] = {
-    "Bar",
-    "%",
-    "Inv. %",
-    "Retro 3",
-    "Retro 5",
-    "Bar %"
-};
+const char* const battery_view_count_text[BATTERY_VIEW_COUNT] =
+    {"Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
 const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {
     DISPLAY_BATTERY_BAR,
     DISPLAY_BATTERY_PERCENT,
     DISPLAY_BATTERY_INVERTED_PERCENT,
     DISPLAY_BATTERY_RETRO_3,
     DISPLAY_BATTERY_RETRO_5,
-    DISPLAY_BATTERY_BAR_PERCENT
-};
+    DISPLAY_BATTERY_BAR_PERCENT};
 
 uint8_t origBattDisp_value = 0;
+
+#define CYCLE_ANIMATION_COUNT 13
+const char* const cycle_animation_text[CYCLE_ANIMATION_COUNT] = {
+    "OFF",
+    "Manifest",
+    "30 S",
+    "1 M",
+    "5 M",
+    "10 M",
+    "15 M",
+    "30 M",
+    "1 H",
+    "2 H",
+    "6 H",
+    "12 H",
+    "24 H",
+};
+// Values are offset by 1 so that 0 is not a valid value and desktop.c can detect this to set a default value (3601 / 1 H)
+const int32_t cycle_animation_value[CYCLE_ANIMATION_COUNT] =
+    {1, -1, 31, 61, 301, 601, 901, 1801, 3601, 7201, 21601, 43201, 86401};
 
 static void desktop_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
@@ -65,6 +78,14 @@ static void desktop_settings_scene_start_battery_view_changed(VariableItem* item
 
     variable_item_set_current_value_text(item, battery_view_count_text[index]);
     app->settings.displayBatteryPercentage = index;
+}
+
+static void desktop_settings_scene_start_cycle_animation_changed(VariableItem* item) {
+    DesktopSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, cycle_animation_text[index]);
+    app->settings.cycle_animation_s = cycle_animation_value[index];
 }
 
 void desktop_settings_scene_start_on_enter(void* context) {
@@ -108,6 +129,18 @@ void desktop_settings_scene_start_on_enter(void* context) {
         BATTERY_VIEW_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, battery_view_count_text[value_index]);
+
+    item = variable_item_list_add(
+        variable_item_list,
+        "Cycle Animation",
+        CYCLE_ANIMATION_COUNT,
+        desktop_settings_scene_start_cycle_animation_changed,
+        app);
+
+    value_index = value_index_int32(
+        app->settings.cycle_animation_s, cycle_animation_value, CYCLE_ANIMATION_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, cycle_animation_text[value_index]);
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);

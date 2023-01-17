@@ -9,7 +9,14 @@
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
-    canvas_draw_icon(canvas, 0, 0, &I_Battery_26x8);
+    canvas_draw_icon(canvas, 0, 0, &I_Battery_25x8);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, -1, 0, 1, 8);
+    canvas_draw_box(canvas, 0, -1, 24, 1);
+    canvas_draw_box(canvas, 0, 8, 24, 1);
+    canvas_draw_box(canvas, 25, 1, 2, 6);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_box(canvas, 25, 2, 1, 4);
 
     if(power->info.gauge_is_ok) {
         char batteryPercentile[4];
@@ -62,8 +69,9 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         } else if(
             (power->displayBatteryPercentage == DISPLAY_BATTERY_BAR_PERCENT) &&
             (power->state != PowerStateCharging) && // Default bar display with percentage
-            (power->info.voltage_battery_charging >= 4.2)) { // not looking nice with low voltage indicator
-            canvas_set_font(canvas, FontBatteryPercent);            
+            (power->info.voltage_battery_charging >=
+             4.2)) { // not looking nice with low voltage indicator
+            canvas_set_font(canvas, FontBatteryPercent);
 
             // align charge dispaly value with digits to draw
             uint8_t bar_charge = power->info.charge;
@@ -167,7 +175,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
 
 static ViewPort* power_battery_view_port_alloc(Power* power) {
     ViewPort* battery_view_port = view_port_alloc();
-    view_port_set_width(battery_view_port, icon_get_width(&I_Battery_26x8));
+    view_port_set_width(battery_view_port, icon_get_width(&I_Battery_25x8));
     view_port_draw_callback_set(battery_view_port, power_draw_battery_callback, power);
     gui_add_view_port(power->gui, battery_view_port, GuiLayerStatusBarRight);
     return battery_view_port;

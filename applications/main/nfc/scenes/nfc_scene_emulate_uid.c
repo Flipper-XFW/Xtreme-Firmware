@@ -40,10 +40,9 @@ static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
 
-    if (settings->sfw_mode) {
+    if(settings->sfw_mode) {
         widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
-    }
-    else {
+    } else {
         widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61);
     }
     widget_add_string_element(widget, 57, 13, AlignLeft, AlignTop, FontPrimary, "Emulating UID");

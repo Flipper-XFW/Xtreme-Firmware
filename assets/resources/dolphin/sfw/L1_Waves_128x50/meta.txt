@@ -8,7 +8,7 @@ Active frames: 4
 Frames order: 0 1 2 3 2 3
 Active cycles: 2
 Frame rate: 2
-Duration: 3600
+Duration: 360
 Active cooldown: 5
 
 Bubble slots: 3

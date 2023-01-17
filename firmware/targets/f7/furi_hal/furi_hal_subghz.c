@@ -354,7 +354,7 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
            !(value >= 915000000 && value <= 928000000)) {
         } else {
             if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-                if((value >= 304100000 && value <= 321950000) &&
+                if(value <= 321950000 &&
                    ((furi_hal_subghz.preset == FuriHalSubGhzPresetOok270Async) ||
                     (furi_hal_subghz.preset == FuriHalSubGhzPresetOok650Async))) {
                     furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);

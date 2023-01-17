@@ -200,7 +200,11 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    furi_timer_start(animation_manager->idle_animation_timer, bubble_animation->duration * 1000);
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    DESKTOP_SETTINGS_LOAD(settings);
+    int32_t duration_s = settings->cycle_animation_s == -1 ? bubble_animation->duration : (settings->cycle_animation_s - 1);
+    furi_timer_start(animation_manager->idle_animation_timer, duration_s * 1000);
+    free(settings);
 }
 
 static bool animation_manager_check_blocking(AnimationManager* animation_manager) {
@@ -365,7 +369,7 @@ static bool animation_manager_is_valid_idle_animation(
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
     UNUSED(animation_manager);
-    
+
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
     animation_storage_fill_animation_list(&animation_list);
@@ -510,8 +514,12 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                     } else {
                         const BubbleAnimation* animation = animation_storage_get_bubble_animation(
                             animation_manager->current_animation);
+                        DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+                        DESKTOP_SETTINGS_LOAD(settings);
+                        int32_t duration_s = settings->cycle_animation_s == -1 ? animation->duration : (settings->cycle_animation_s - 1);
                         furi_timer_start(
-                            animation_manager->idle_animation_timer, animation->duration * 1000);
+                            animation_manager->idle_animation_timer, duration_s * 1000);
+                        free(settings);
                     }
                 }
             } else {
@@ -556,18 +564,18 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    if (settings->sfw_mode) {
-        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
-    }else {
-        if (stats.level <= 20) {
-            one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
-        }
-        else if (stats.level >= 21) {
-            one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup2_128x64_sfw);
-        }
-        else {
+    if(settings->sfw_mode) {
+        if(stats.level <= 20) {
+            one_shot_view_start_animation(
+                animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
+        } else if(stats.level >= 21) {
+            one_shot_view_start_animation(
+                animation_manager->one_shot_view, &A_Levelup2_128x64_sfw);
+        } else {
             furi_assert(0);
         }
+    } else {
+        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
     }
     free(settings);
 }

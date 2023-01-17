@@ -234,10 +234,9 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
 
     if(model->history_item == 0) {
         if(model->mode == SubGhzViewReceiverModeLive) {
-            if (settings->sfw_mode) {
+            if(settings->sfw_mode) {
                 canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52_sfw);
-            }
-            else {
+            } else {
                 canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
             }
             canvas_set_font(canvas, FontPrimary);
@@ -245,10 +244,9 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
             canvas_draw_line(canvas, 46, 51, 125, 51);
             canvas_set_font(canvas, FontSecondary);
         } else {
-            if (settings->sfw_mode) {
+            if(settings->sfw_mode) {
                 canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52_sfw);
-            }
-            else {
+            } else {
                 canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
             }
             canvas_set_font(canvas, FontPrimary);

@@ -490,8 +490,9 @@ int32_t dap_link_app(void* p) {
     if(furi_hal_usb_is_locked()) {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
-        if (settings->sfw_mode) {
-            dialog_message_set_header(message, "Connection\nis active!", 3, 2, AlignLeft, AlignTop);
+        if(settings->sfw_mode) {
+            dialog_message_set_header(
+                message, "Connection\nis active!", 3, 2, AlignLeft, AlignTop);
             dialog_message_set_text(
                 message,
                 "Disconnect from\nPC or phone to\nuse this function.",
@@ -499,8 +500,7 @@ int32_t dap_link_app(void* p) {
                 30,
                 AlignLeft,
                 AlignTop);
-        }
-        else {
+        } else {
             dialog_message_set_header(message, "I am not\na whore!", 3, 2, AlignLeft, AlignTop);
             dialog_message_set_text(
                 message,

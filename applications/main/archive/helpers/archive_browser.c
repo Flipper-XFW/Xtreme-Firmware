@@ -64,7 +64,13 @@ static void
         archive_add_file_item(browser, is_folder, furi_string_get_cstr(item_path));
     } else {
         with_view_model(
-            browser->view, ArchiveBrowserViewModel * model, { files_array_sort(model->files); model->list_loading = false; }, true);
+            browser->view,
+            ArchiveBrowserViewModel * model,
+            {
+                files_array_sort(model->files);
+                model->list_loading = false;
+            },
+            true);
     }
 }
 
@@ -139,7 +145,7 @@ void archive_update_focus(ArchiveBrowserView* browser, const char* target) {
     archive_get_items(browser, furi_string_get_cstr(browser->path));
 
     if(!archive_file_get_array_size(browser) && archive_is_home(browser)) {
-        archive_switch_tab(browser, TAB_RIGHT);
+        archive_switch_tab(browser, TAB_LEFT);
     } else {
         with_view_model(
             browser->view,
@@ -206,7 +212,7 @@ void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
         false);
 
     if((items_cnt == 0) && (archive_is_home(browser))) {
-        archive_switch_tab(browser, TAB_RIGHT);
+        archive_switch_tab(browser, TAB_LEFT);
     }
 
     archive_update_offset(browser);
