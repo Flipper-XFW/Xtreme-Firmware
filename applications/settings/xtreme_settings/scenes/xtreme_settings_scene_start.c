@@ -22,14 +22,15 @@ const int32_t cycle_animation_values[CYCLE_ANIMATION_COUNT] =
     {-1, 0, 30, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400};
 
 static void xtreme_settings_scene_start_cycle_animation_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cycle_animation_names[index]);
-    app->settings.cycle_animation = cycle_animation_values[index];
+    XTREME_SETTINGS()->cycle_animation = cycle_animation_values[index];
+    XTREME_SETTINGS_SAVE();
 }
 
 void xtreme_settings_scene_start_on_enter(void* context) {
     XtremeSettingsApp* app = context;
+    XtremeSettings* xtreme = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
     uint8_t value_index;
@@ -40,9 +41,8 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         CYCLE_ANIMATION_COUNT,
         xtreme_settings_scene_start_cycle_animation_changed,
         app);
-
     value_index = value_index_int32(
-        app->settings.cycle_animation, cycle_animation_values, CYCLE_ANIMATION_COUNT);
+        xtreme->unlock_animations, cycle_animation_values, CYCLE_ANIMATION_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, cycle_animation_names[value_index]);
 

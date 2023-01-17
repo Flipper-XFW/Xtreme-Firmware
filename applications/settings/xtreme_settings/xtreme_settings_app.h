@@ -11,7 +11,6 @@
 #include "scenes/xtreme_settings_scene.h"
 
 typedef struct {
-    XtremeSettings settings;
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;

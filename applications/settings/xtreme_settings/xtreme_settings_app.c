@@ -14,9 +14,6 @@ static bool xtreme_settings_back_event_callback(void* context) {
 
 XtremeSettingsApp* xtreme_settings_app_alloc() {
     XtremeSettingsApp* app = malloc(sizeof(XtremeSettingsApp));
-
-    // Load settings
-    XTREME_SETTINGS_LOAD(&app->settings);
     app->gui = furi_record_open(RECORD_GUI);
 
     // View Dispatcher and Scene Manager
@@ -46,7 +43,7 @@ XtremeSettingsApp* xtreme_settings_app_alloc() {
 
 void xtreme_settings_app_free(XtremeSettingsApp* app) {
     furi_assert(app);
-    XTREME_SETTINGS_SAVE(&app->settings);
+
     // Gui modules
     view_dispatcher_remove_view(app->view_dispatcher, XtremeSettingsAppViewVarItemList);
     variable_item_list_free(app->var_item_list);

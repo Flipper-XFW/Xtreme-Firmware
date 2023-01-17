@@ -201,8 +201,7 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    XtremeSettings* xtreme = malloc(sizeof(XtremeSettings));
-    XTREME_SETTINGS_LOAD(xtreme);
+    XtremeSettings* xtreme = XTREME_SETTINGS();
     int32_t duration = 0;
     if (xtreme->cycle_animation == 0) {
         duration = bubble_animation->duration;
@@ -210,7 +209,6 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
         duration = xtreme->cycle_animation;
     }
     furi_timer_start(animation_manager->idle_animation_timer, duration * 1000);
-    free(xtreme);
 }
 
 static bool animation_manager_check_blocking(AnimationManager* animation_manager) {
@@ -520,8 +518,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                     } else {
                         const BubbleAnimation* bubble_animation = animation_storage_get_bubble_animation(
                             animation_manager->current_animation);
-                        XtremeSettings* xtreme = malloc(sizeof(XtremeSettings));
-                        XTREME_SETTINGS_LOAD(xtreme);
+                        XtremeSettings* xtreme = XTREME_SETTINGS();
                         int32_t duration = 0;
                         if (xtreme->cycle_animation == 0) {
                             duration = bubble_animation->duration;
@@ -530,7 +527,6 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                         }
                         furi_timer_start(
                             animation_manager->idle_animation_timer, duration * 1000);
-                        free(xtreme);
                     }
                 }
             } else {
