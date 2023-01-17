@@ -203,10 +203,10 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     animation_manager->state = AnimationManagerStateIdle;
     XtremeSettings* xtreme = XTREME_SETTINGS();
     int32_t duration = 0;
-    if (xtreme->cycle_animation == 0) {
+    if (xtreme->cycle_anims == 0) {
         duration = bubble_animation->duration;
-    } else if (xtreme->cycle_animation != -1) {
-        duration = xtreme->cycle_animation;
+    } else if (xtreme->cycle_anims != -1) {
+        duration = xtreme->cycle_anims;
     }
     furi_timer_start(animation_manager->idle_animation_timer, duration * 1000);
 }
@@ -520,10 +520,10 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                             animation_manager->current_animation);
                         XtremeSettings* xtreme = XTREME_SETTINGS();
                         int32_t duration = 0;
-                        if (xtreme->cycle_animation == 0) {
+                        if (xtreme->cycle_anims == 0) {
                             duration = bubble_animation->duration;
-                        } else if (xtreme->cycle_animation != -1) {
-                            duration = xtreme->cycle_animation;
+                        } else if (xtreme->cycle_anims != -1) {
+                            duration = xtreme->cycle_anims;
                         }
                         furi_timer_start(
                             animation_manager->idle_animation_timer, duration * 1000);

@@ -1,8 +1,8 @@
 #include "../xtreme_settings_app.h"
 #include <lib/toolbox/value_index.h>
 
-#define CYCLE_ANIMATION_COUNT 13
-const char* const cycle_animation_names[CYCLE_ANIMATION_COUNT] = {
+#define CYCLE_ANIMS_COUNT 13
+const char* const cycle_anims_names[CYCLE_ANIMS_COUNT] = {
     "OFF",
     "Manifest",
     "30 S",
@@ -18,13 +18,13 @@ const char* const cycle_animation_names[CYCLE_ANIMATION_COUNT] = {
     "24 H",
 };
 
-const int32_t cycle_animation_values[CYCLE_ANIMATION_COUNT] =
+const int32_t cycle_anims_values[CYCLE_ANIMS_COUNT] =
     {-1, 0, 30, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400};
 
-static void xtreme_settings_scene_start_cycle_animation_changed(VariableItem* item) {
+static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, cycle_animation_names[index]);
-    XTREME_SETTINGS()->cycle_animation = cycle_animation_values[index];
+    variable_item_set_current_value_text(item, cycle_anims_names[index]);
+    XTREME_SETTINGS()->cycle_anims = cycle_anims_values[index];
     XTREME_SETTINGS_SAVE();
 }
 
@@ -37,14 +37,14 @@ void xtreme_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Cycle Animation",
-        CYCLE_ANIMATION_COUNT,
-        xtreme_settings_scene_start_cycle_animation_changed,
+        "Cycle Anims",
+        CYCLE_ANIMS_COUNT,
+        xtreme_settings_scene_start_cycle_anims_changed,
         app);
     value_index = value_index_int32(
-        xtreme->unlock_animations, cycle_animation_values, CYCLE_ANIMATION_COUNT);
+        xtreme->cycle_anims, cycle_anims_values, CYCLE_ANIMS_COUNT);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, cycle_animation_names[value_index]);
+    variable_item_set_current_value_text(item, cycle_anims_names[value_index]);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeSettingsAppViewVarItemList);
 }

@@ -13,8 +13,8 @@
 #define XTREME_SETTINGS_MAGIC (0x69)
 
 typedef struct {
-    int32_t cycle_animation;
-    bool unlock_animations;
+    int32_t cycle_anims;
+    bool unlock_anims;
     // uint8_t sfw_mode;
 } XtremeSettings;
 
