@@ -90,7 +90,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopLockMenuEventXtremeSettings:
-            break;  // TODO: open settings app
+            loader_start(desktop->loader, "Xtreme FW", NULL);
+            break;
         default:
             break;
         }
