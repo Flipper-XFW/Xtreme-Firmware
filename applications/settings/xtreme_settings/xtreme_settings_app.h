@@ -9,12 +9,17 @@
 #include <gui/modules/variable_item_list.h>
 #include "xtreme_settings.h"
 #include "scenes/xtreme_settings_scene.h"
+#include "dolphin/helpers/dolphin_state.h"
+#include "dolphin/dolphin.h"
+#include "dolphin/dolphin_i.h"
 
 typedef struct {
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
+    Dolphin* dolphin;
+    DolphinStats dolphin_stats;
 } XtremeSettingsApp;
 
 typedef enum {

@@ -15,6 +15,8 @@ static bool xtreme_settings_back_event_callback(void* context) {
 XtremeSettingsApp* xtreme_settings_app_alloc() {
     XtremeSettingsApp* app = malloc(sizeof(XtremeSettingsApp));
     app->gui = furi_record_open(RECORD_GUI);
+    app->dolphin = furi_record_open(RECORD_DOLPHIN);
+    app->dolphin_stats = dolphin_stats(app->dolphin);
 
     // View Dispatcher and Scene Manager
     app->view_dispatcher = view_dispatcher_alloc();
@@ -54,6 +56,7 @@ void xtreme_settings_app_free(XtremeSettingsApp* app) {
 
     // Records
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_DOLPHIN);
     free(app);
 }
 
