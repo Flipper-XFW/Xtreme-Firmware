@@ -1,6 +1,6 @@
 #include "../bt_settings_app.h"
 #include "furi_hal_bt.h"
-#include "../../desktop_settings/desktop_settings_app.h"
+#include "../../xtreme_settings/xtreme_settings.h"
 
 void bt_settings_app_scene_forget_dev_success_popup_callback(void* context) {
     BtSettingsApp* app = context;
@@ -10,10 +10,8 @@ void bt_settings_app_scene_forget_dev_success_popup_callback(void* context) {
 void bt_settings_scene_forget_dev_success_on_enter(void* context) {
     BtSettingsApp* app = context;
     Popup* popup = app->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
     } else {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
@@ -24,7 +22,6 @@ void bt_settings_scene_forget_dev_success_on_enter(void* context) {
     popup_set_callback(popup, bt_settings_app_scene_forget_dev_success_popup_callback);
     popup_enable_timeout(popup);
     view_dispatcher_switch_to_view(app->view_dispatcher, BtSettingsAppViewPopup);
-    free(settings);
 }
 
 bool bt_settings_scene_forget_dev_success_on_event(void* context, SceneManagerEvent event) {

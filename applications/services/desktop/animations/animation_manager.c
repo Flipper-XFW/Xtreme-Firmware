@@ -13,7 +13,6 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
 #include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define TAG "AnimationManager"
@@ -55,7 +54,6 @@ struct AnimationManager {
     FuriString* freezed_animation_name;
     int32_t freezed_animation_time_left;
     ViewStack* view_stack;
-    bool sfw_mode;
 };
 
 static StorageAnimation*
@@ -566,8 +564,6 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
     furi_record_close(RECORD_DOLPHIN);
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     animation_manager->one_shot_view = one_shot_view_alloc();
     one_shot_view_set_interact_callback(
@@ -576,7 +572,7 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         if(stats.level <= 20) {
             one_shot_view_start_animation(
                 animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
@@ -589,7 +585,6 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     } else {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
     }
-    free(settings);
 }
 
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager) {

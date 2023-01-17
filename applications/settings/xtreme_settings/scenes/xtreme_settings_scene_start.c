@@ -2,6 +2,13 @@
 #include <lib/toolbox/value_index.h>
 #include <lib/flipper_format/flipper_format.h>
 
+static void xtreme_settings_scene_start_base_mode_changed(VariableItem* item) {
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "SFW" : "NSFW");
+    XTREME_SETTINGS()->sfw_mode = value;
+    XTREME_SETTINGS_SAVE();
+}
+
 #define CYCLE_ANIMS_COUNT 13
 const char* const cycle_anims_names[CYCLE_ANIMS_COUNT] = {
     "OFF",
@@ -98,6 +105,15 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     }
     flipper_format_free(subghz_range);
     furi_record_close(RECORD_STORAGE);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Graphics",
+        2,
+        xtreme_settings_scene_start_base_mode_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme->sfw_mode);
+    variable_item_set_current_value_text(item, xtreme->sfw_mode ? "SFW" : "NSFW");
 
     item = variable_item_list_add(
         var_item_list,

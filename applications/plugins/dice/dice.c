@@ -5,7 +5,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
-#include "applications/settings/desktop_settings/desktop_settings_app.h"
+#include "applications/settings/xtreme_settings/xtreme_settings.h"
 
 #define TAG "Dice Roller"
 
@@ -480,6 +480,8 @@ int32_t dice_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
+    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+
     // Main loop
     PluginEvent event;
     for(bool processing = true; processing;) {
@@ -510,7 +512,7 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 20) {
                             plugin_state->diceSelect = 100;
                         } else if(plugin_state->diceSelect == 100) {
-                            if(plugin_state->desktop_settings->is_sfwmode) {
+                            if(xtreme_settings->sfw_mode) {
                                 plugin_state->diceSelect = 231;
                             } else {
                                 plugin_state->diceSelect = 230;
@@ -524,7 +526,7 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 229) {
                             plugin_state->diceSelect = 228;
                         } else if(plugin_state->diceSelect == 228) {
-                            if(plugin_state->desktop_settings->is_sfwmode) {
+                            if(xtreme_settings->sfw_mode) {
                                 plugin_state->diceSelect = 59;
                             } else {
                                 plugin_state->diceSelect = 232;

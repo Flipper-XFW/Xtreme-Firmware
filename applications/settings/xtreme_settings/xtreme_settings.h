@@ -15,7 +15,7 @@
 typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
-    // uint8_t sfw_mode;
+    uint8_t sfw_mode;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();

@@ -1,13 +1,11 @@
 #include "../infrared_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 void infrared_scene_learn_done_on_enter(void* context) {
     Infrared* infrared = context;
     Popup* popup = infrared->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
         if(infrared->app_state.is_learning_new_remote) {
             popup_set_header(popup, "New remote\ncreated!", 0, 0, AlignLeft, AlignTop);
@@ -24,7 +22,6 @@ void infrared_scene_learn_done_on_enter(void* context) {
     popup_enable_timeout(popup);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewPopup);
-    free(settings);
 }
 
 bool infrared_scene_learn_done_on_event(void* context, SceneManagerEvent event) {

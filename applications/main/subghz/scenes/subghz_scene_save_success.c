@@ -1,6 +1,6 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 void subghz_scene_save_success_popup_callback(void* context) {
     SubGhz* subghz = context;
@@ -9,12 +9,10 @@ void subghz_scene_save_success_popup_callback(void* context) {
 
 void subghz_scene_save_success_on_enter(void* context) {
     SubGhz* subghz = context;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     // Setup view
     Popup* popup = subghz->popup;
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
     } else {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
@@ -25,7 +23,6 @@ void subghz_scene_save_success_on_enter(void* context) {
     popup_set_callback(popup, subghz_scene_save_success_popup_callback);
     popup_enable_timeout(popup);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdPopup);
-    free(settings);
 }
 
 bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) {

@@ -7,7 +7,7 @@
 #include <gui/elements.h>
 #include <m-array.h>
 
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 112
@@ -178,8 +178,7 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
+    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
 
     WSReceiverMenuItem* item_menu;
 
@@ -205,7 +204,7 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(model->history_item == 0) {
-        if(settings->sfw_mode) {
+        if(xtreme_settings->sfw_mode) {
             canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52_sfw);
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
@@ -231,7 +230,7 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
         canvas_draw_icon(canvas, 65, 42, &I_Pin_back_arrow_10x8);
         canvas_draw_icon(canvas, 80, 42, &I_Pin_back_arrow_10x8);
         canvas_draw_icon(canvas, 95, 42, &I_Pin_back_arrow_10x8);
-        if(settings->sfw_mode) {
+        if(xtreme_settings->sfw_mode) {
             canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42_sfw);
         } else {
             canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42);
@@ -248,7 +247,6 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
         canvas_draw_str(canvas, 96, 62, furi_string_get_cstr(model->history_stat_str));
         break;
     }
-    free(settings);
 }
 
 static void ws_view_receiver_timer_callback(void* context) {

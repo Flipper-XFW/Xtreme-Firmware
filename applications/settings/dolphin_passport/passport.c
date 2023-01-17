@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
-#include "../desktop_settings/desktop_settings_app.h"
+#include "../xtreme_settings/xtreme_settings.h"
 #include "math.h"
 
 #define MOODS_TOTAL 3
@@ -60,15 +60,14 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     PassportContext* ctx = _ctx;
     DolphinStats* stats = ctx->stats;
 
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
+    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
 
     char level_str[20];
     char xp_str[12];
     char mood_str[32];
     uint8_t mood = 0;
 
-    if(settings->sfw_mode) {
+    if(xtreme_settings->sfw_mode) {
         if(stats->butthurt <= 4) {
             mood = 0;
             snprintf(mood_str, 20, "Mood: Happy");
@@ -109,7 +108,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     }
 
     // multipass
-    if(settings->sfw_mode) {
+    if(xtreme_settings->sfw_mode) {
         canvas_draw_icon(canvas, 0, 0, &I_passport_DB_sfw);
     } else {
         canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
@@ -118,7 +117,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= DOLPHIN_LEVEL_COUNT + 1));
     uint16_t tmpLvl = 0;
-    if(settings->sfw_mode) {
+    if(xtreme_settings->sfw_mode) {
         canvas_draw_icon(canvas, 11, 2, portraits_sfw[mood][tmpLvl]);
     } else {
         canvas_draw_icon(canvas, 11, 2, portraits[mood][tmpLvl]);
@@ -148,8 +147,6 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     canvas_draw_icon(canvas, 52, 51, &I_Ok_btn_9x9);
     canvas_draw_str(
         canvas, ctx->progress_total ? 37 : 36, 59, ctx->progress_total ? "Lvl" : "Tot");
-
-    free(settings);
 }
 
 int32_t passport_app(void* p) {

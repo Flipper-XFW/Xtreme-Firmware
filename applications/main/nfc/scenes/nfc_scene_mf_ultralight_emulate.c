@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 #include <lib/nfc/protocols/mifare_ultralight.h>
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define NFC_SCENE_MF_ULTRALIGHT_EMULATE_LOG_SIZE_MAX (200)
 
@@ -66,10 +66,7 @@ void nfc_scene_mf_ultralight_emulate_widget_config(Nfc* nfc, bool auth_attempted
     FuriString* info_str;
     info_str = furi_string_alloc();
 
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
     } else {
         widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61);
@@ -92,15 +89,12 @@ void nfc_scene_mf_ultralight_emulate_widget_config(Nfc* nfc, bool auth_attempted
             nfc_scene_mf_ultralight_emulate_widget_callback,
             nfc);
     }
-    free(settings);
 }
 
 void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     Nfc* nfc = context;
     uint32_t state =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     // Setup Widget
     nfc_scene_mf_ultralight_emulate_widget_config(nfc, false);
@@ -123,7 +117,7 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     } else {
         nfc_text_store_set(nfc, "MIFARE\nNTAG");
     }
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
     } else {
         popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
@@ -143,7 +137,6 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
         nfc_mf_ultralight_emulate_worker_callback,
         nfc);
     nfc_blink_emulate_start(nfc);
-    free(settings);
 }
 
 bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent event) {

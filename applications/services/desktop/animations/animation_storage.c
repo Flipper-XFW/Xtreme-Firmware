@@ -11,7 +11,7 @@
 #include "animation_storage_i.h"
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR EXT_PATH("dolphin")
 #define TAG "AnimationStorage"
@@ -28,10 +28,7 @@ static void animation_storage_free_animation(BubbleAnimation** storage_animation
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
 void animation_handler_beta() {
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
         FURI_LOG_I(TAG, "SFW Manifest selected");
         strcat(ANIMATION_MANIFEST_FILE, "/sfw/manifest.txt");
@@ -40,7 +37,6 @@ void animation_handler_beta() {
         FURI_LOG_I(TAG, "NSFW Manifest selected");
         strcat(ANIMATION_MANIFEST_FILE, "/nsfw/manifest.txt");
     }
-    free(settings);
 }
 
 static bool animation_storage_load_single_manifest_info(

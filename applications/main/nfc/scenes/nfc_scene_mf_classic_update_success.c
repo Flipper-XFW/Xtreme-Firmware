@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 void nfc_scene_mf_classic_update_success_popup_callback(void* context) {
     Nfc* nfc = context;
@@ -10,13 +10,11 @@ void nfc_scene_mf_classic_update_success_popup_callback(void* context) {
 void nfc_scene_mf_classic_update_success_on_enter(void* context) {
     Nfc* nfc = context;
     DOLPHIN_DEED(DolphinDeedNfcSave);
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     notification_message(nfc->notifications, &sequence_success);
 
     Popup* popup = nfc->popup;
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
     } else {
         popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
@@ -28,7 +26,6 @@ void nfc_scene_mf_classic_update_success_on_enter(void* context) {
     popup_enable_timeout(popup);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
-    free(settings);
 }
 
 bool nfc_scene_mf_classic_update_success_on_event(void* context, SceneManagerEvent event) {
