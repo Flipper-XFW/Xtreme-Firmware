@@ -322,11 +322,6 @@ int32_t desktop_srv(void* p) {
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
 
-        if(!desktop->settings.cycle_animation_s) {
-            desktop->settings.cycle_animation_s = -1;
-            DESKTOP_SETTINGS_SAVE(&desktop->settings);
-        }
-
         desktop_main_set_sfw_mode_state(desktop->main_view, desktop->settings.sfw_mode);
 
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);

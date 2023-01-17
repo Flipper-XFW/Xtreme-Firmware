@@ -5,6 +5,7 @@ App(
     provides=[
         "passport",
         "system_settings",
+        "xtreme_settings",
         "about",
     ],
 )

@@ -14,6 +14,7 @@
 #include "animation_manager.h"
 
 #include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define TAG "AnimationManager"
 
@@ -200,11 +201,16 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-    int32_t duration_s = settings->cycle_animation_s == -1 ? bubble_animation->duration : (settings->cycle_animation_s - 1);
-    furi_timer_start(animation_manager->idle_animation_timer, duration_s * 1000);
-    free(settings);
+    XtremeSettings* xtreme = malloc(sizeof(XtremeSettings));
+    XTREME_SETTINGS_LOAD(xtreme);
+    int32_t duration = 0;
+    if (xtreme->cycle_animation == 0) {
+        duration = bubble_animation->duration;
+    } else if (xtreme->cycle_animation != -1) {
+        duration = xtreme->cycle_animation;
+    }
+    furi_timer_start(animation_manager->idle_animation_timer, duration * 1000);
+    free(xtreme);
 }
 
 static bool animation_manager_check_blocking(AnimationManager* animation_manager) {
@@ -512,14 +518,19 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                             animation_manager->idle_animation_timer,
                             animation_manager->freezed_animation_time_left);
                     } else {
-                        const BubbleAnimation* animation = animation_storage_get_bubble_animation(
+                        const BubbleAnimation* bubble_animation = animation_storage_get_bubble_animation(
                             animation_manager->current_animation);
-                        DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-                        DESKTOP_SETTINGS_LOAD(settings);
-                        int32_t duration_s = settings->cycle_animation_s == -1 ? animation->duration : (settings->cycle_animation_s - 1);
+                        XtremeSettings* xtreme = malloc(sizeof(XtremeSettings));
+                        XTREME_SETTINGS_LOAD(xtreme);
+                        int32_t duration = 0;
+                        if (xtreme->cycle_animation == 0) {
+                            duration = bubble_animation->duration;
+                        } else if (xtreme->cycle_animation != -1) {
+                            duration = xtreme->cycle_animation;
+                        }
                         furi_timer_start(
-                            animation_manager->idle_animation_timer, duration_s * 1000);
-                        free(settings);
+                            animation_manager->idle_animation_timer, duration * 1000);
+                        free(xtreme);
                     }
                 }
             } else {
