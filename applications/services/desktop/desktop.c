@@ -322,8 +322,8 @@ int32_t desktop_srv(void* p) {
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
 
-        if(!desktop->settings.cycle_animations_s) {
-            desktop->settings.cycle_animations_s = 3601;
+        if(!desktop->settings.cycle_animation_s) {
+            desktop->settings.cycle_animation_s = 3601;
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
 
