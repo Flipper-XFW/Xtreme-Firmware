@@ -15,7 +15,7 @@ typedef struct {
 
 static void u2f_view_draw_callback(Canvas* canvas, void* _model) {
     U2fModel* model = _model;
-    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     canvas_draw_icon(canvas, 8, 14, &I_Drive_112x35);
     canvas_set_font(canvas, FontSecondary);

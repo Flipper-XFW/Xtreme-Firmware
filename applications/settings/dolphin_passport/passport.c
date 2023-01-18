@@ -60,7 +60,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     PassportContext* ctx = _ctx;
     DolphinStats* stats = ctx->stats;
 
-    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     char level_str[20];
     char xp_str[12];

@@ -477,7 +477,7 @@ int32_t dice_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
-    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     // Main loop
     PluginEvent event;

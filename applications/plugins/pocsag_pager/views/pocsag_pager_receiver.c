@@ -181,7 +181,7 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     PCSGReceiverMenuItem* item_menu;
 

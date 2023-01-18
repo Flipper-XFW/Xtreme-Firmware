@@ -195,7 +195,7 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     if(model->mode == SubGhzViewReceiverModeLive) {
         elements_button_left(canvas, "Config");

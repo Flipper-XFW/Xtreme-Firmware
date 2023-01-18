@@ -28,7 +28,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 8, furi_string_get_cstr(disp_str));
-    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     if(strlen(model->layout) == 0) {
         furi_string_set(disp_str, "(default)");

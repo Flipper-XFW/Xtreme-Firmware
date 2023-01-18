@@ -81,7 +81,7 @@ static void xtreme_settings_scene_start_subghz_bypass_changed(VariableItem* item
 
 void xtreme_settings_scene_start_on_enter(void* context) {
     XtremeSettingsApp* app = context;
-    XtremeSettings* xtreme = XTREME_SETTINGS();
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
     uint8_t value_index;
@@ -108,8 +108,8 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         2,
         xtreme_settings_scene_start_base_mode_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme->sfw_mode);
-    variable_item_set_current_value_text(item, xtreme->sfw_mode ? "SFW" : "NSFW");
+    variable_item_set_current_value_index(item, xtreme_settings->sfw_mode);
+    variable_item_set_current_value_text(item, xtreme_settings->sfw_mode ? "SFW" : "NSFW");
 
     item = variable_item_list_add(
         var_item_list,
@@ -118,7 +118,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         xtreme_settings_scene_start_cycle_anims_changed,
         app);
     value_index = value_index_int32(
-        xtreme->cycle_anims, cycle_anims_values, CYCLE_ANIMS_COUNT);
+        xtreme_settings->cycle_anims, cycle_anims_values, CYCLE_ANIMS_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, cycle_anims_names[value_index]);
 
@@ -128,8 +128,8 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         2,
         xtreme_settings_scene_start_unlock_anims_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme->unlock_anims);
-    variable_item_set_current_value_text(item, xtreme->unlock_anims ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings->unlock_anims);
+    variable_item_set_current_value_text(item, xtreme_settings->unlock_anims ? "ON" : "OFF");
 
     char level_str[4];
     snprintf(level_str, 4, "%i", app->dolphin_level);

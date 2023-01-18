@@ -178,7 +178,7 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    XtremeSettings* xtreme_settings = malloc(sizeof(XtremeSettings));
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     WSReceiverMenuItem* item_menu;
 
