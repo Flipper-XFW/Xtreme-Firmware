@@ -22,7 +22,6 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
-    DesktopSettings* desktop_settings;
     FuriHalRtcDateTime datetime;
     uint8_t diceSelect;
     uint8_t diceQty;
@@ -430,7 +429,6 @@ static void dice_state_init(DiceState* const state) {
     state->playerOneScore = 0;
     state->playerTwoScore = 0;
     state->letsRoll = false;
-    state->desktop_settings = malloc(sizeof(DesktopSettings));
 }
 
 static void dice_tick(void* ctx) {
@@ -470,7 +468,6 @@ int32_t dice_app(void* p) {
         return 255;
     }
 
-    DESKTOP_SETTINGS_LOAD(plugin_state->desktop_settings);
 
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, plugin_state);
@@ -573,7 +570,7 @@ int32_t dice_app(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(plugin_state->event_queue);
     furi_mutex_free(plugin_state->mutex);
-    free(plugin_state->desktop_settings);
+    free(xtreme_settings);
     free(plugin_state);
     return 0;
 }
