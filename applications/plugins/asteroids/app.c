@@ -23,8 +23,8 @@
 #define MAXBUL 5 /* Max bullets on the screen. */
 #define MAXAST 32 /* Max asteroids on the screen. */
 #define SHIP_HIT_ANIMATION_LEN 15
-#define SAVING_DIRECTORY "/ext/apps/Games"
-#define SAVING_FILENAME "/ext/apps_data/asteroids/game_asteroids.save"
+#define SAVING_DIRECTORY "/ext/apps_data/asteroids"
+#define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
 #ifndef PI
 #define PI 3.14159265358979f
 #endif
