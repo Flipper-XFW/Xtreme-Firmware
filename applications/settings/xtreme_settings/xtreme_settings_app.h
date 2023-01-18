@@ -18,8 +18,7 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
-    Dolphin* dolphin;
-    DolphinStats dolphin_stats;
+    int dolphin_level;
 } XtremeSettingsApp;
 
 typedef enum {

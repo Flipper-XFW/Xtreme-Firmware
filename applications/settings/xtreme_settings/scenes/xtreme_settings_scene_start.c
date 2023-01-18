@@ -45,18 +45,9 @@ static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item)
 
 static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
-    uint8_t level = variable_item_get_current_value_index(item) + 1;
-    uint32_t xp = app->dolphin->state->data.icounter;
-    if (level > app->dolphin_stats.level) {
-        app->dolphin->state->data.icounter = xp + dolphin_state_xp_to_levelup(xp) + 1;
-    } else {
-        xp = xp - dolphin_state_xp_above_last_levelup(xp) - 1;  // Get to top of previous level
-        app->dolphin->state->data.icounter = xp - dolphin_state_xp_above_last_levelup(xp) + 1;  // Get to bottom of it
-    }
-    app->dolphin->state->dirty = true;
-    dolphin_state_save(app->dolphin->state);
+    app->dolphin_level = variable_item_get_current_value_index(item) + 1;
     char level_str[4];
-    snprintf(level_str, 4, "%i", level);
+    snprintf(level_str, 4, "%i", app->dolphin_level);
     variable_item_set_current_value_text(item, level_str);
 }
 
@@ -94,6 +85,11 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
     uint8_t value_index;
+
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinStats stats = dolphin_stats(dolphin);
+    furi_record_close(RECORD_DOLPHIN);
+    app->dolphin_level = stats.level;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
@@ -136,14 +132,14 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_text(item, xtreme->unlock_anims ? "ON" : "OFF");
 
     char level_str[4];
-    snprintf(level_str, 4, "%i", app->dolphin_stats.level);
+    snprintf(level_str, 4, "%i", app->dolphin_level);
     item = variable_item_list_add(
         var_item_list,
         "XP Level",
         DOLPHIN_LEVEL_COUNT + 1,
         xtreme_settings_scene_start_xp_level_changed,
         app);
-    variable_item_set_current_value_index(item, app->dolphin_stats.level - 1);
+    variable_item_set_current_value_index(item, app->dolphin_level - 1);
     variable_item_set_current_value_text(item, level_str);
 
     item = variable_item_list_add(
@@ -176,5 +172,16 @@ bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event
 
 void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
+
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinStats stats = dolphin_stats(dolphin);
+    if (app->dolphin_level != stats.level) {
+        int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+        dolphin->state->data.icounter = xp + 1;
+        dolphin->state->dirty = true;
+        dolphin_state_save(dolphin->state);
+    }
+    furi_record_close(RECORD_DOLPHIN);
+
     variable_item_list_reset(app->var_item_list);
 }
