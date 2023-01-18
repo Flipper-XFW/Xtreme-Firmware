@@ -43,6 +43,8 @@ uint32_t dolphin_state_xp_to_levelup(int icounter);
 
 uint32_t dolphin_state_xp_above_last_levelup(int icounter);
 
+const int* dolphin_get_levels();
+
 bool dolphin_state_is_levelup(int icounter);
 
 void dolphin_state_increase_level(DolphinState* dolphin_state);
