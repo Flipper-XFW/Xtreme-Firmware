@@ -14,9 +14,10 @@
 #define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-int level_array[30] = {100,  200,  300,  450,  600,  750,  950,  1150, 1350, 1600,
-                       1850, 2100, 2400, 2700, 3000, 3350, 3700, 4050, 4450, 4850,
-                       5250, 5700, 6150, 6600, 7100, 7600, 8100, 8650, 9200};
+
+const int DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT] = {100,  200,  300,  450,  600,  750,  950,  1150, 1350, 1600,
+                                                1850, 2100, 2400, 2700, 3000, 3350, 3700,  4050, 4450, 4850,
+                                                5250, 5700, 6150, 6600, 7100, 7600, 8100,  8650, 9200};
 
 #define BUTTHURT_MAX 14
 #define BUTTHURT_MIN 0
@@ -82,39 +83,43 @@ uint64_t dolphin_state_timestamp() {
 }
 
 bool dolphin_state_is_levelup(int icounter) {
-    for(int i = 0; i < 30; ++i) {
-        if((icounter == level_array[i])) {
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if((icounter == DOLPHIN_LEVELS[i])) {
             return true;
         }
     };
     return false;
 }
 
+const int* dolphin_get_levels() {
+    return DOLPHIN_LEVELS;
+}
+
 uint8_t dolphin_get_level(int icounter) {
-    for(int i = 0; i < 29; ++i) {
-        if(icounter <= level_array[i]) {
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if(icounter <= DOLPHIN_LEVELS[i]) {
             return i + 1;
         }
     }
-    return 30;
+    return DOLPHIN_LEVEL_COUNT + 1;
 }
 
 uint32_t dolphin_state_xp_above_last_levelup(int icounter) {
-    for(int i = 1; i < 29; ++i) {
-        if(icounter <= level_array[i]) {
-            return icounter - level_array[i - 1];
+    for(int i = DOLPHIN_LEVEL_COUNT; i >= 0; --i) {
+        if(icounter >= DOLPHIN_LEVELS[i]) {
+            return icounter - DOLPHIN_LEVELS[i];
         }
     }
     return icounter;
 }
 
 uint32_t dolphin_state_xp_to_levelup(int icounter) {
-    for(int i = 0; i < 29; ++i) {
-        if(icounter <= level_array[i]) {
-            return level_array[i] - icounter;
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if(icounter <= DOLPHIN_LEVELS[i]) {
+            return DOLPHIN_LEVELS[i] - icounter;
         }
     }
-    return (uint32_t)-1 - icounter;
+    return (uint32_t)-1;
 }
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {

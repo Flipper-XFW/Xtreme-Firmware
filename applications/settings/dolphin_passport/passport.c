@@ -102,7 +102,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     }
     uint32_t xp_have = xp_levelup - xp_need;
 
-    if(stats->level == 30) {
+    if(stats->level == DOLPHIN_LEVEL_COUNT + 1) {
         xp_progress = 0;
     } else {
         xp_progress = xp_need * 64 / xp_levelup;
@@ -116,7 +116,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     }
 
     // portrait
-    furi_assert((stats->level > 0) && (stats->level <= 30));
+    furi_assert((stats->level > 0) && (stats->level <= DOLPHIN_LEVEL_COUNT + 1));
     uint16_t tmpLvl = 0;
     if(settings->sfw_mode) {
         canvas_draw_icon(canvas, 11, 2, portraits_sfw[mood][tmpLvl]);
@@ -126,7 +126,11 @@ static void render_callback(Canvas* canvas, void* _ctx) {
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
-    snprintf(xp_str, 12, "%lu/%lu", xp_have, xp_levelup);
+    if(stats->level == DOLPHIN_LEVEL_COUNT + 1) {
+        snprintf(xp_str, 12, "Max Level!");
+    } else {
+        snprintf(xp_str, 12, "%lu/%lu", xp_have, xp_levelup);
+    }
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 22, mood_str);
@@ -138,7 +142,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     canvas_set_font(canvas, FontSecondary);
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
+    canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + (xp_progress > 0), 5);
     canvas_set_color(canvas, ColorBlack);
 
     canvas_draw_icon(canvas, 52, 51, &I_Ok_btn_9x9);
