@@ -8,6 +8,13 @@ static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item
     XTREME_SETTINGS()->sfw_mode = value;
 }
 
+static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, index == 0 ? "OFF" : *asset_packs_get(app->asset_packs, index - 1));
+    strlcpy(XTREME_SETTINGS()->asset_pack, index == 0 ? "" : *asset_packs_get(app->asset_packs, index - 1), MAX_PACK_NAME_LEN);
+}
+
 #define CYCLE_ANIMS_COUNT 13
 const char* const cycle_anims_names[CYCLE_ANIMS_COUNT] = {
     "OFF",
@@ -97,6 +104,26 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         flipper_format_read_bool(subghz_range, "ignore_default_tx_region", &subghz_bypass, 1);
     }
     flipper_format_free(subghz_range);
+
+    uint current_pack = 0;
+    asset_packs_init(app->asset_packs);
+    File* folder = storage_file_alloc(storage);
+    FileInfo info;
+    char* name = malloc(MAX_PACK_NAME_LEN);
+    do {
+        if (!storage_dir_open(folder, PACKS_DIR)) break;
+        while(true) {
+            if (!storage_dir_read(folder, &info, name, MAX_PACK_NAME_LEN)) break;
+            if(info.flags & FSF_DIRECTORY) {
+                char* copy = malloc(MAX_PACK_NAME_LEN);
+                strlcpy(copy, name, MAX_PACK_NAME_LEN);
+                asset_packs_push_back(app->asset_packs, copy);
+                if (strcmp(name, xtreme_settings->asset_pack) == 0) current_pack = asset_packs_size(app->asset_packs);
+            }
+        }
+    } while(false);
+    free(name);
+    storage_file_free(folder);
     furi_record_close(RECORD_STORAGE);
 
     item = variable_item_list_add(
@@ -107,6 +134,15 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, xtreme_settings->sfw_mode);
     variable_item_set_current_value_text(item, xtreme_settings->sfw_mode ? "SFW" : "NSFW");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Asset Pack",
+        asset_packs_size(app->asset_packs) + 1,
+        xtreme_settings_scene_start_asset_pack_changed,
+        app);
+    variable_item_set_current_value_index(item, current_pack);
+    variable_item_set_current_value_text(item, current_pack == 0 ? "OFF" : *asset_packs_get(app->asset_packs, current_pack - 1));
 
     item = variable_item_list_add(
         var_item_list,
@@ -171,6 +207,7 @@ void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
 
     XTREME_SETTINGS_SAVE();
+    XTREME_ASSETS_UPDATE();
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
@@ -182,5 +219,10 @@ void xtreme_settings_scene_start_on_exit(void* context) {
     }
     furi_record_close(RECORD_DOLPHIN);
 
+    asset_packs_it_t it;
+    for (asset_packs_it(it, app->asset_packs); !asset_packs_end_p(it); asset_packs_next(it)) {
+        free(*asset_packs_cref(it));
+    }
+    asset_packs_clear(app->asset_packs);
     variable_item_list_reset(app->var_item_list);
 }

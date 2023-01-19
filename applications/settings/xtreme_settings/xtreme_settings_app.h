@@ -8,10 +8,14 @@
 #include <assets_icons.h>
 #include <gui/modules/variable_item_list.h>
 #include "xtreme_settings.h"
+#include "xtreme_assets.h"
 #include "scenes/xtreme_settings_scene.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"
 #include "dolphin/dolphin_i.h"
+#include <m-array.h>
+
+ARRAY_DEF(asset_packs, char*)
 
 typedef struct {
     Gui* gui;
@@ -19,6 +23,7 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
     int dolphin_level;
+    asset_packs_t asset_packs;
 } XtremeSettingsApp;
 
 typedef enum {

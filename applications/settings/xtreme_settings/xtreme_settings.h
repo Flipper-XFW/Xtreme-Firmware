@@ -8,6 +8,8 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 
+#define MAX_PACK_NAME_LEN 32
+
 #define XTREME_SETTINGS_VERSION (1)
 #define XTREME_SETTINGS_PATH INT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
@@ -15,7 +17,8 @@
 typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
-    uint8_t sfw_mode;
+    bool sfw_mode;
+    char asset_pack[MAX_PACK_NAME_LEN];
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();
