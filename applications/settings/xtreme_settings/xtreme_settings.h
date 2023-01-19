@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
+#include <power/power_service/power.h>
 
 #define MAX_PACK_NAME_LEN 32
 
@@ -19,6 +20,7 @@ typedef struct {
     bool unlock_anims;
     bool sfw_mode;
     char asset_pack[MAX_PACK_NAME_LEN];
+    BatteryStyle battery_style;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();

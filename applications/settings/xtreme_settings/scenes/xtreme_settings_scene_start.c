@@ -31,10 +31,8 @@ const char* const cycle_anims_names[CYCLE_ANIMS_COUNT] = {
     "12 H",
     "24 H",
 };
-
 const int32_t cycle_anims_values[CYCLE_ANIMS_COUNT] =
     {-1, 0, 30, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400};
-
 static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cycle_anims_names[index]);
@@ -45,6 +43,24 @@ static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item)
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->unlock_anims = value;
+}
+
+#define BATTERY_STYLE_COUNT 7
+const char* const battery_style_names[BATTERY_STYLE_COUNT] =
+    {"OFF", "Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
+const uint32_t battery_style_values[BATTERY_STYLE_COUNT] = {
+    BatteryStyleOff,
+    BatteryStyleBar,
+    BatteryStylePercent,
+    BatteryStyleInvertedPercent,
+    BatteryStyleRetro3,
+    BatteryStyleRetro5,
+    BatteryStyleBarPercent
+};
+static void xtreme_settings_scene_start_battery_style_changed(VariableItem* item) {
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, battery_style_names[index]);
+    XTREME_SETTINGS()->battery_style = battery_style_values[index];
 }
 
 static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
@@ -163,6 +179,17 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, xtreme_settings->unlock_anims);
     variable_item_set_current_value_text(item, xtreme_settings->unlock_anims ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Battery Style",
+        BATTERY_STYLE_COUNT,
+        xtreme_settings_scene_start_battery_style_changed,
+        app);
+    value_index = value_index_uint32(
+        xtreme_settings->battery_style, battery_style_values, BATTERY_STYLE_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, battery_style_names[value_index]);
 
     char level_str[4];
     snprintf(level_str, 4, "%i", app->dolphin_level);
