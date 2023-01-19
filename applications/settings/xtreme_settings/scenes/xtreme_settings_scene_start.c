@@ -2,11 +2,10 @@
 #include <lib/toolbox/value_index.h>
 #include <lib/flipper_format/flipper_format.h>
 
-static void xtreme_settings_scene_start_base_mode_changed(VariableItem* item) {
+static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item) {
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "SFW" : "NSFW");
     XTREME_SETTINGS()->sfw_mode = value;
-    XTREME_SETTINGS_SAVE();
 }
 
 #define CYCLE_ANIMS_COUNT 13
@@ -33,14 +32,12 @@ static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) 
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cycle_anims_names[index]);
     XTREME_SETTINGS()->cycle_anims = cycle_anims_values[index];
-    XTREME_SETTINGS_SAVE();
 }
 
 static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item) {
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->unlock_anims = value;
-    XTREME_SETTINGS_SAVE();
 }
 
 static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
@@ -104,9 +101,9 @@ void xtreme_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Graphics",
+        "Base Graphics",
         2,
-        xtreme_settings_scene_start_base_mode_changed,
+        xtreme_settings_scene_start_base_graphics_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->sfw_mode);
     variable_item_set_current_value_text(item, xtreme_settings->sfw_mode ? "SFW" : "NSFW");
@@ -172,6 +169,8 @@ bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event
 
 void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
+
+    XTREME_SETTINGS_SAVE();
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
