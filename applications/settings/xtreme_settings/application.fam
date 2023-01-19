@@ -9,11 +9,3 @@ App(
     ],
     order=90,
 )
-
-App(
-    appid="xtreme_setup",
-    apptype=FlipperAppType.STARTUP,
-    entry_point="xtreme_on_system_start",
-    requires=["storage"],
-    order=11,
-)
