@@ -20,8 +20,6 @@ typedef struct {
 
 XtremeSettings* XTREME_SETTINGS();
 
+bool XTREME_SETTINGS_LOAD();
+
 bool XTREME_SETTINGS_SAVE();
-
-bool _XTREME_SETTINGS_LOAD(XtremeSettings* xtreme_settings);
-
-bool _XTREME_SETTINGS_SAVE(XtremeSettings* xtreme_settings);
