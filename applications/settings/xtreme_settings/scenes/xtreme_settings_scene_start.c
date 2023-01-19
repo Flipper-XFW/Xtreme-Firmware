@@ -2,17 +2,23 @@
 #include <lib/toolbox/value_index.h>
 #include <lib/flipper_format/flipper_format.h>
 
+bool settings_changed;
+
 static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item) {
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "SFW" : "NSFW");
     XTREME_SETTINGS()->sfw_mode = value;
+    settings_changed = true;
 }
 
+bool asset_pack_changed;
 static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, index == 0 ? "OFF" : *asset_packs_get(app->asset_packs, index - 1));
     strlcpy(XTREME_SETTINGS()->asset_pack, index == 0 ? "" : *asset_packs_get(app->asset_packs, index - 1), MAX_PACK_NAME_LEN);
+    asset_pack_changed = true;
+    settings_changed = true;
 }
 
 #define CYCLE_ANIMS_COUNT 13
@@ -37,12 +43,14 @@ static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) 
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cycle_anims_names[index]);
     XTREME_SETTINGS()->cycle_anims = cycle_anims_values[index];
+    settings_changed = true;
 }
 
 static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item) {
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->unlock_anims = value;
+    settings_changed = true;
 }
 
 #define BATTERY_STYLE_COUNT 7
@@ -61,6 +69,7 @@ static void xtreme_settings_scene_start_battery_style_changed(VariableItem* item
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, battery_style_names[index]);
     XTREME_SETTINGS()->battery_style = battery_style_values[index];
+    settings_changed = true;
 }
 
 static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
@@ -101,6 +110,7 @@ static void xtreme_settings_scene_start_subghz_bypass_changed(VariableItem* item
 
 void xtreme_settings_scene_start_on_enter(void* context) {
     XtremeSettingsApp* app = context;
+    settings_changed = false;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
@@ -121,6 +131,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     }
     flipper_format_free(subghz_range);
 
+    asset_pack_changed = false;
     uint current_pack = 0;
     asset_packs_init(app->asset_packs);
     File* folder = storage_file_alloc(storage);
@@ -233,8 +244,8 @@ bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event
 void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
 
-    XTREME_SETTINGS_SAVE();
-    XTREME_ASSETS_UPDATE();
+    if (settings_changed) XTREME_SETTINGS_SAVE();
+    if (asset_pack_changed) XTREME_ASSETS_UPDATE();
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
