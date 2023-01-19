@@ -26,10 +26,11 @@ const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
 const uint32_t auto_lock_delay_value[AUTO_LOCK_DELAY_COUNT] =
     {0, 10000, 15000, 30000, 60000, 90000, 120000, 300000, 600000};
 
-#define BATTERY_VIEW_COUNT 6
+#define BATTERY_VIEW_COUNT 7
 const char* const battery_view_count_text[BATTERY_VIEW_COUNT] =
-    {"Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
+    {"Off", "Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
 const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {
+    DISPLAY_BATTERY_NO,
     DISPLAY_BATTERY_BAR,
     DISPLAY_BATTERY_PERCENT,
     DISPLAY_BATTERY_INVERTED_PERCENT,
