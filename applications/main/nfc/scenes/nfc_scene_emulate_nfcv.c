@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (100)
 
@@ -38,11 +38,7 @@ static void nfc_scene_emulate_nfcv_widget_config(Nfc* nfc, bool data_received) {
     FuriString* info_str;
     info_str = furi_string_alloc();
 
-    if(XTREME_SETTINGS()->sfw_mode) {
-        widget_add_icon_element(widget, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
-    } else {
-        widget_add_icon_element(widget, 0, 3, &I_RFIDDolphinSend_97x61);
-    }
+    widget_add_icon_element(widget, 0, 3, XTREME_ASSETS()->rfid_send);
 
     widget_add_string_element(
         widget, 89, 32, AlignCenter, AlignTop, FontPrimary, "Emulating NfcV");

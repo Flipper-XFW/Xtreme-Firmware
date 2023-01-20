@@ -1,5 +1,5 @@
 #include "../lfrfid_i.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 void lfrfid_scene_emulate_on_enter(void* context) {
     LfRfid* app = context;
@@ -17,11 +17,7 @@ void lfrfid_scene_emulate_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    if(XTREME_SETTINGS()->sfw_mode) {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
-    } else {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
-    }
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->rfid_send);
 
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_emulate_start(app->lfworker, (LFRFIDProtocol)app->protocol_id);

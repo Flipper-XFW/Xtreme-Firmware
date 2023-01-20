@@ -1,5 +1,5 @@
 #include "../ibutton_i.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 static void ibutton_scene_write_success_popup_callback(void* context) {
     iButton* ibutton = context;
@@ -11,11 +11,7 @@ void ibutton_scene_write_success_on_enter(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
 
-    if(XTREME_SETTINGS()->sfw_mode) {
-        popup_set_icon(popup, 0, 12, &I_iButtonDolphinVerySuccess_108x52_sfw);
-    } else {
-        popup_set_icon(popup, 0, 12, &I_iButtonDolphinVerySuccess_108x52);
-    }
+    popup_set_icon(popup, 0, 12, XTREME_ASSETS()->ibutton_success);
     popup_set_text(popup, "Successfully written!", 40, 12, AlignLeft, AlignBottom);
 
     popup_set_callback(popup, ibutton_scene_write_success_popup_callback);

@@ -7,9 +7,28 @@
 #define PACKS_DIR EXT_PATH("dolphin_custom")
 
 typedef struct {
+    const Icon* authenticate;
+    const Icon* bt_pairing;
+    const Icon* connect_me;
+    const Icon* connected;
+    const Icon* dolphin_common;
+    const Icon* dolphin_cry;
+    const Icon* dolphin_mafia;
+    const Icon* dolphin_nice;
+    const Icon* dolphin_wait;
+    const Icon* error;
+    const Icon* ibutton_success;
+    const Icon* ir_success;
+    const Icon* nfc_emulation;
+    const Icon* rfid_receive;
+    const Icon* rfid_send;
+    const Icon* rfid_success;
+    const Icon* subghz_scanning;
+
+    const Icon* passport_angry;
+    const Icon* passport_background;
     const Icon* passport_happy;
     const Icon* passport_okay;
-    const Icon* passport_angry;
 } XtremeAssets;
 
 XtremeAssets* XTREME_ASSETS();

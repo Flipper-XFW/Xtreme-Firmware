@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define NFC_MF_CLASSIC_DATA_NOT_CHANGED (0UL)
 #define NFC_MF_CLASSIC_DATA_CHANGED (1UL)
@@ -24,11 +24,7 @@ void nfc_scene_mf_classic_emulate_on_enter(void* context) {
     } else {
         nfc_text_store_set(nfc, "MIFARE\nClassic");
     }
-    if(XTREME_SETTINGS()->sfw_mode) {
-        popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61_sfw);
-    } else {
-        popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
-    }
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->nfc_emulation);
     popup_set_text(popup, nfc->text_store, 90, 28, AlignCenter, AlignTop);
 
     // Setup and start worker

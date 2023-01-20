@@ -1,5 +1,5 @@
 #include "../lfrfid_i.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define RAW_READ_TIME 5000
 
@@ -33,11 +33,7 @@ void lfrfid_scene_raw_read_on_enter(void* context) {
     LfRfidReadRawState* state = malloc(sizeof(LfRfidReadRawState));
     scene_manager_set_scene_state(app->scene_manager, LfRfidSceneRawRead, (uint32_t)state);
     state->string_file_name = furi_string_alloc();
-    if(XTREME_SETTINGS()->sfw_mode) {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61_sfw);
-    } else {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
-    }
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->rfid_receive);
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_make_app_folder(app);

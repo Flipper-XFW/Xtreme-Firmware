@@ -7,7 +7,7 @@
 #include <gui/elements.h>
 #include <m-array.h>
 
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 112
@@ -181,8 +181,6 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-
     PCSGReceiverMenuItem* item_menu;
 
     for(size_t i = 0; i < MIN(model->history_item, MENU_ITEMS); ++i) {
@@ -208,11 +206,7 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(model->history_item == 0) {
-        if(xtreme_settings->sfw_mode) {
-            canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52_sfw);
-        } else {
-            canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
-        }
+        canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->subghz_scanning);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 63, 46, "Scanning...");
         canvas_draw_line(canvas, 46, 51, 125, 51);
@@ -234,7 +228,7 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
         canvas_draw_icon(canvas, 65, 42, &I_Pin_back_arrow_10x8);
         canvas_draw_icon(canvas, 80, 42, &I_Pin_back_arrow_10x8);
         canvas_draw_icon(canvas, 95, 42, &I_Pin_back_arrow_10x8);
-        if(xtreme_settings->sfw_mode) {
+        if(XTREME_SETTINGS()->sfw_mode) {
             canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42_sfw);
         } else {
             canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42);

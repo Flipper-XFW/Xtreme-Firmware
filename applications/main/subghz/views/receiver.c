@@ -7,7 +7,7 @@
 #include <assets_icons.h>
 #include <m-array.h>
 
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 111
@@ -195,7 +195,6 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     if(model->mode == SubGhzViewReceiverModeLive) {
         elements_button_left(canvas, "Config");
@@ -233,21 +232,13 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
 
     if(model->history_item == 0) {
         if(model->mode == SubGhzViewReceiverModeLive) {
-            if(xtreme_settings->sfw_mode) {
-                canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52_sfw);
-            } else {
-                canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
-            }
+            canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->subghz_scanning);
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 63, 46, "Scanning...");
             canvas_draw_line(canvas, 46, 51, 125, 51);
             canvas_set_font(canvas, FontSecondary);
         } else {
-            if(xtreme_settings->sfw_mode) {
-                canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52_sfw);
-            } else {
-                canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
-            }
+            canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->subghz_scanning);
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 63, 46, "Decoding...");
             canvas_set_font(canvas, FontSecondary);

@@ -6,7 +6,7 @@
 #include "../desktop_settings_app.h"
 #include <desktop/desktop_settings.h>
 #include "desktop_settings_scene.h"
-#include "../../xtreme_settings/xtreme_settings.h"
+#include "../../xtreme_settings/xtreme_assets.h"
 
 #define SCENE_EVENT_EXIT (0U)
 
@@ -25,11 +25,7 @@ void desktop_settings_scene_pin_disable_on_enter(void* context) {
 
     popup_set_context(app->popup, app);
     popup_set_callback(app->popup, pin_disable_back_callback);
-    if(XTREME_SETTINGS()->sfw_mode) {
-        popup_set_icon(app->popup, 0, 2, &I_DolphinMafia_115x62_sfw);
-    } else {
-        popup_set_icon(app->popup, 0, 2, &I_DolphinMafia_115x62);
-    }
+    popup_set_icon(app->popup, 0, 2, XTREME_ASSETS()->dolphin_mafia);
     popup_set_header(app->popup, "PIN\nDeleted!", 95, 9, AlignCenter, AlignCenter);
     popup_set_timeout(app->popup, 1500);
     popup_enable_timeout(app->popup);

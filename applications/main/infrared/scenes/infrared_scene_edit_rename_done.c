@@ -1,15 +1,11 @@
 #include "../infrared_i.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 void infrared_scene_edit_rename_done_on_enter(void* context) {
     Infrared* infrared = context;
     Popup* popup = infrared->popup;
 
-    if(XTREME_SETTINGS()->sfw_mode) {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
-    } else {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    }
+    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->dolphin_nice);
     popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
 
     popup_set_callback(popup, infrared_popup_closed_callback);

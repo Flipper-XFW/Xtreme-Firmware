@@ -6,7 +6,6 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
-#include "../xtreme_settings/xtreme_settings.h"
 #include "../xtreme_settings/xtreme_assets.h"
 #include "math.h"
 
@@ -34,33 +33,33 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     PassportContext* ctx = _ctx;
     DolphinStats* stats = ctx->stats;
 
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
+    XtremeAssets* xtreme_assets = XTREME_ASSETS();
 
     char level_str[20];
     char xp_str[12];
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
 
-    if(xtreme_settings->sfw_mode) {
+    if(XTREME_SETTINGS()->sfw_mode) {
         if(stats->butthurt <= 4) {
-            portrait = XTREME_ASSETS()->passport_happy;
+            portrait = xtreme_assets->passport_happy;
             mood_str = "Mood: Happy";
         } else if(stats->butthurt <= 9) {
-            portrait = XTREME_ASSETS()->passport_okay;
+            portrait = xtreme_assets->passport_okay;
             mood_str = "Mood: Okay";
         } else {
-            portrait = XTREME_ASSETS()->passport_angry;
+            portrait = xtreme_assets->passport_angry;
             mood_str = "Mood: Angry";
         }
     } else {
         if(stats->butthurt <= 4) {
-            portrait = XTREME_ASSETS()->passport_happy;
+            portrait = xtreme_assets->passport_happy;
             mood_str = "Status: Wet";
         } else if(stats->butthurt <= 9) {
-            portrait = XTREME_ASSETS()->passport_okay;
+            portrait = xtreme_assets->passport_okay;
             mood_str = "Status: Horny";
         } else {
-            portrait = XTREME_ASSETS()->passport_angry;
+            portrait = xtreme_assets->passport_angry;
             mood_str = "Status: Desperate";
         }
     }
@@ -82,11 +81,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     }
 
     // multipass
-    if(xtreme_settings->sfw_mode) {
-        canvas_draw_icon(canvas, 0, 0, &I_passport_DB_sfw);
-    } else {
-        canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
-    }
+    canvas_draw_icon(canvas, 0, 0, xtreme_assets->passport_background);
 
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= DOLPHIN_LEVEL_COUNT + 1));

@@ -1,16 +1,12 @@
 #include "../lfrfid_i.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 void lfrfid_scene_write_success_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
 
     popup_set_header(popup, "Successfully\nwritten!", 94, 3, AlignCenter, AlignTop);
-    if(XTREME_SETTINGS()->sfw_mode) {
-        popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57_sfw);
-    } else {
-        popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57);
-    }
+    popup_set_icon(popup, 0, 6, XTREME_ASSETS()->rfid_success);
     popup_set_context(popup, app);
     popup_set_callback(popup, lfrfid_popup_timeout_callback);
     popup_set_timeout(popup, 1500);
