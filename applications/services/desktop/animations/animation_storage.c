@@ -12,6 +12,7 @@
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
 #include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR EXT_PATH("dolphin")
 #define TAG "AnimationStorage"
@@ -20,30 +21,40 @@
 #define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 
 */
-char ANIMATION_MANIFEST_FILE[30];
+// 66 Max length = strlen("/ext/dolphin_custom//Anims/manifest.txt") + MAX_PACK_NAME_LEN + 1 (Null terminator)
+char ANIMATION_MANIFEST_FILE[72];
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);
 static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
-void animation_handler_beta() {
-    if(XTREME_SETTINGS()->sfw_mode) {
-        snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
-        FURI_LOG_I(TAG, "SFW Manifest selected");
-        strcat(ANIMATION_MANIFEST_FILE, "/sfw/manifest.txt");
+void animation_handler_select_manifest() {
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
+    if (xtreme_settings->asset_pack[0] != '\0') {
+        snprintf(ANIMATION_MANIFEST_FILE, sizeof(PACKS_DIR), "%s", PACKS_DIR);
+        FURI_LOG_I(TAG, "Custom Manifest selected");
+        strcat(ANIMATION_MANIFEST_FILE, "/");
+        strcat(ANIMATION_MANIFEST_FILE, xtreme_settings->asset_pack);
+        strcat(ANIMATION_MANIFEST_FILE, "/Anims");
     } else {
         snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
-        FURI_LOG_I(TAG, "NSFW Manifest selected");
-        strcat(ANIMATION_MANIFEST_FILE, "/nsfw/manifest.txt");
+        if(xtreme_settings->sfw_mode) {
+            FURI_LOG_I(TAG, "SFW Manifest selected");
+            strcat(ANIMATION_MANIFEST_FILE, "/sfw");
+        } else {
+            FURI_LOG_I(TAG, "NSFW Manifest selected");
+            strcat(ANIMATION_MANIFEST_FILE, "/nsfw");
+        }
     }
+    strcat(ANIMATION_MANIFEST_FILE, "/manifest.txt");
 }
 
 static bool animation_storage_load_single_manifest_info(
     StorageAnimationManifestInfo* manifest_info,
     const char* name) {
     furi_assert(manifest_info);
-    animation_handler_beta();
+    animation_handler_select_manifest();
     bool result = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -99,7 +110,7 @@ static bool animation_storage_load_single_manifest_info(
 void animation_storage_fill_animation_list(StorageAnimationList_t* animation_list) {
     furi_assert(sizeof(StorageAnimationList_t) == sizeof(void*));
     furi_assert(!StorageAnimationList_size(*animation_list));
-    animation_handler_beta();
+    animation_handler_select_manifest();
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
