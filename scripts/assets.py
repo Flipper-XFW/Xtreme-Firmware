@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asset_packer
 from flipper.app import App
 from flipper.assets.icon import file2image
 
@@ -263,6 +264,8 @@ class Main(App):
             (root_dir / f"assets/resources/dolphin/{valid_dir.name}").mkdir(parents=True, exist_ok=True)
             shutil.copyfile(valid_dir / "manifest.txt", root_dir / f"assets/resources/dolphin/{valid_dir.name}/manifest.txt")
         (root_dir / "assets/resources/dolphin/manifest.txt").unlink()
+        self.logger.info("Packing custom asset packs")
+        asset_packer.pack(root_dir / "assets/dolphin/custom", root_dir / f"assets/resources/dolphin_custom", self.logger.info)
 
         self.logger.info(f"Complete")
 
