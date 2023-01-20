@@ -89,7 +89,7 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
             for icon in (source / "Icons").iterdir():
                 if not icon.is_file():
                     continue
-                (packed / "Icons" / icon.name).write_bytes(convert_bmx(icon))
+                (packed / "Icons" / icon.with_suffix(".bmx").name).write_bytes(convert_bmx(icon))
 
         if (source / "Passport").is_dir():
             for icon in (source / "Passport").iterdir():
