@@ -6,9 +6,27 @@ static bool xtreme_settings_custom_event_callback(void* context, uint32_t event)
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
+void xtreme_settings_reboot(void* context) {
+    UNUSED(context);
+    power_reboot(PowerBootModeNormal);
+}
+
 static bool xtreme_settings_back_event_callback(void* context) {
     furi_assert(context);
     XtremeSettingsApp* app = context;
+    if (app->settings_changed) {
+        XTREME_SETTINGS_SAVE();
+        if (app->assets_changed) {
+            popup_set_header(app->popup, "Rebooting...", 64, 24, AlignCenter, AlignCenter);
+            popup_set_text(app->popup, "Swapping assets...", 64, 42, AlignCenter, AlignCenter);
+            popup_set_callback(app->popup, xtreme_settings_reboot);
+            popup_set_context(app->popup, app);
+            popup_set_timeout(app->popup, 1000);
+            popup_enable_timeout(app->popup);
+            view_dispatcher_switch_to_view(app->view_dispatcher, XtremeSettingsAppViewPopup);
+            return true;
+        }
+    }
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
@@ -36,6 +54,12 @@ XtremeSettingsApp* xtreme_settings_app_alloc() {
         XtremeSettingsAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        XtremeSettingsAppViewPopup,
+        popup_get_view(app->popup));
+
     // Set first scene
     scene_manager_next_scene(app->scene_manager, XtremeSettingsAppSceneStart);
     return app;
@@ -47,6 +71,8 @@ void xtreme_settings_app_free(XtremeSettingsApp* app) {
     // Gui modules
     view_dispatcher_remove_view(app->view_dispatcher, XtremeSettingsAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, XtremeSettingsAppViewPopup);
+    popup_free(app->popup);
 
     // View Dispatcher and Scene Manager
     view_dispatcher_free(app->view_dispatcher);

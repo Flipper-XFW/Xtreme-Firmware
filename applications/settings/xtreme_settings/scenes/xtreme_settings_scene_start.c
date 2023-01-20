@@ -3,15 +3,13 @@
 #include <power/power_service/power.h>
 #include <lib/flipper_format/flipper_format.h>
 
-bool settings_changed;
-bool assets_changed;
-
 static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "SFW" : "NSFW");
     XTREME_SETTINGS()->sfw_mode = value;
-    settings_changed = true;
-    assets_changed = true;
+    app->settings_changed = true;
+    app->assets_changed = true;
 }
 
 static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
@@ -19,8 +17,8 @@ static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, index == 0 ? "OFF" : *asset_packs_get(app->asset_packs, index - 1));
     strlcpy(XTREME_SETTINGS()->asset_pack, index == 0 ? "" : *asset_packs_get(app->asset_packs, index - 1), MAX_PACK_NAME_LEN);
-    settings_changed = true;
-    assets_changed = true;
+    app->settings_changed = true;
+    app->assets_changed = true;
 }
 
 #define CYCLE_ANIMS_COUNT 13
@@ -42,17 +40,19 @@ const char* const cycle_anims_names[CYCLE_ANIMS_COUNT] = {
 const int32_t cycle_anims_values[CYCLE_ANIMS_COUNT] =
     {-1, 0, 30, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400};
 static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cycle_anims_names[index]);
     XTREME_SETTINGS()->cycle_anims = cycle_anims_values[index];
-    settings_changed = true;
+    app->settings_changed = true;
 }
 
 static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->unlock_anims = value;
-    settings_changed = true;
+    app->settings_changed = true;
 }
 
 #define BATTERY_STYLE_COUNT 7
@@ -68,10 +68,11 @@ const uint32_t battery_style_values[BATTERY_STYLE_COUNT] = {
     BatteryStyleBarPercent
 };
 static void xtreme_settings_scene_start_battery_style_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, battery_style_names[index]);
     XTREME_SETTINGS()->battery_style = battery_style_values[index];
-    settings_changed = true;
+    app->settings_changed = true;
 }
 
 static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
@@ -112,8 +113,6 @@ static void xtreme_settings_scene_start_subghz_bypass_changed(VariableItem* item
 
 void xtreme_settings_scene_start_on_enter(void* context) {
     XtremeSettingsApp* app = context;
-    settings_changed = false;
-    assets_changed = false;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
@@ -245,13 +244,6 @@ bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event
 
 void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
-
-    if (settings_changed) {
-        XTREME_SETTINGS_SAVE();
-        if (assets_changed) {
-            power_reboot(PowerBootModeNormal);
-        }
-    }
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);

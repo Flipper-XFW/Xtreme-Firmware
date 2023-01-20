@@ -7,6 +7,7 @@
 #include <gui/scene_manager.h>
 #include <assets_icons.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/popup.h>
 #include "xtreme_settings.h"
 #include "xtreme_assets.h"
 #include "scenes/xtreme_settings_scene.h"
@@ -22,10 +23,14 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
+    Popup* popup;
     int dolphin_level;
+    bool settings_changed;
+    bool assets_changed;
     asset_packs_t asset_packs;
 } XtremeSettingsApp;
 
 typedef enum {
     XtremeSettingsAppViewVarItemList,
+    XtremeSettingsAppViewPopup,
 } XtremeSettingsAppView;
