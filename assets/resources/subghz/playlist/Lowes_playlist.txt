@@ -5,3 +5,4 @@ sub: /ext/subghz/Stores/Lowes/Flooring_Desk.sub
 sub: /ext/subghz/Stores/Lowes/Electrical.sub
 sub: /ext/subghz/Stores/Lowes/Blind_Cutting.sub
 sub: /ext/subghz/Stores/Lowes/Appliance_Desk.sub
+sub: /ext/subghz/Stores/Lowes/Wirecutting.sub
