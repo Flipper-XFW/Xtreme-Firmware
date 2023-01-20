@@ -2,22 +2,19 @@
 #include "assets_icons.h"
 #include <core/dangerous_defines.h>
 
-#define XTREME_ASSETS_COUNT 21
-Icon* loaded_icons[XTREME_ASSETS_COUNT];
-
 XtremeAssets* xtreme_assets = NULL;
 
 XtremeAssets* XTREME_ASSETS() {
     if (xtreme_assets == NULL) {
-        XTREME_ASSETS_UPDATE();
+        XTREME_ASSETS_LOAD();
     }
     return xtreme_assets;
 }
 
-void XTREME_ASSETS_UPDATE() {
-    if (xtreme_assets == NULL) {
-        xtreme_assets = malloc(sizeof(XtremeAssets));
-    }
+void XTREME_ASSETS_LOAD() {
+    if (xtreme_assets != NULL) return;
+
+    xtreme_assets = malloc(sizeof(XtremeAssets));
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     if (xtreme_settings->sfw_mode) {
@@ -68,10 +65,6 @@ void XTREME_ASSETS_UPDATE() {
         xtreme_assets->passport_okay       = &I_flipper;
     }
 
-    for (int i = 0; i < XTREME_ASSETS_COUNT; i++) {
-        free_bmx_icon(loaded_icons[i]);
-    }
-
     if (xtreme_settings->asset_pack[0] == '\0') return;
     FileInfo info;
     FuriString* path = furi_string_alloc();
@@ -80,30 +73,29 @@ void XTREME_ASSETS_UPDATE() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if (storage_common_stat(storage, furi_string_get_cstr(path), &info) == FSE_OK && info.flags & FSF_DIRECTORY) {
         File* file = storage_file_alloc(storage);
-        int i = 0;
 
-        swap_bmx_icon(&xtreme_assets->authenticate,        pack, "Icons/authenticate.bmx",    path, file, i++);
-        swap_bmx_icon(&xtreme_assets->bt_pairing,          pack, "Icons/bt_pairing.bmx",      path, file, i++);
-        swap_bmx_icon(&xtreme_assets->connect_me,          pack, "Icons/connect_me.bmx",      path, file, i++);
-        swap_bmx_icon(&xtreme_assets->connected,           pack, "Icons/connected.bmx",       path, file, i++);
-        swap_bmx_icon(&xtreme_assets->dolphin_common,      pack, "Icons/dolphin_common.bmx",  path, file, i++);
-        swap_bmx_icon(&xtreme_assets->dolphin_cry,         pack, "Icons/dolphin_cry.bmx",     path, file, i++);
-        swap_bmx_icon(&xtreme_assets->dolphin_mafia,       pack, "Icons/dolphin_mafia.bmx",   path, file, i++);
-        swap_bmx_icon(&xtreme_assets->dolphin_nice,        pack, "Icons/dolphin_nice.bmx",    path, file, i++);
-        swap_bmx_icon(&xtreme_assets->dolphin_wait,        pack, "Icons/dolphin_wait.bmx",    path, file, i++);
-        swap_bmx_icon(&xtreme_assets->error,               pack, "Icons/error.bmx",           path, file, i++);
-        swap_bmx_icon(&xtreme_assets->ibutton_success,     pack, "Icons/ibutton_success.bmx", path, file, i++);
-        swap_bmx_icon(&xtreme_assets->ir_success,          pack, "Icons/ir_success.bmx",      path, file, i++);
-        swap_bmx_icon(&xtreme_assets->nfc_emulation,       pack, "Icons/nfc_emulation.bmx",   path, file, i++);
-        swap_bmx_icon(&xtreme_assets->rfid_receive,        pack, "Icons/rfid_receive.bmx",    path, file, i++);
-        swap_bmx_icon(&xtreme_assets->rfid_send,           pack, "Icons/rfid_send.bmx",       path, file, i++);
-        swap_bmx_icon(&xtreme_assets->rfid_success,        pack, "Icons/rfid_success.bmx",    path, file, i++);
-        swap_bmx_icon(&xtreme_assets->subghz_scanning,     pack, "Icons/subghz_scanning.bmx", path, file, i++);
+        swap_bmx_icon(&xtreme_assets->authenticate,        pack, "Icons/authenticate.bmx",    path, file);
+        swap_bmx_icon(&xtreme_assets->bt_pairing,          pack, "Icons/bt_pairing.bmx",      path, file);
+        swap_bmx_icon(&xtreme_assets->connect_me,          pack, "Icons/connect_me.bmx",      path, file);
+        swap_bmx_icon(&xtreme_assets->connected,           pack, "Icons/connected.bmx",       path, file);
+        swap_bmx_icon(&xtreme_assets->dolphin_common,      pack, "Icons/dolphin_common.bmx",  path, file);
+        swap_bmx_icon(&xtreme_assets->dolphin_cry,         pack, "Icons/dolphin_cry.bmx",     path, file);
+        swap_bmx_icon(&xtreme_assets->dolphin_mafia,       pack, "Icons/dolphin_mafia.bmx",   path, file);
+        swap_bmx_icon(&xtreme_assets->dolphin_nice,        pack, "Icons/dolphin_nice.bmx",    path, file);
+        swap_bmx_icon(&xtreme_assets->dolphin_wait,        pack, "Icons/dolphin_wait.bmx",    path, file);
+        swap_bmx_icon(&xtreme_assets->error,               pack, "Icons/error.bmx",           path, file);
+        swap_bmx_icon(&xtreme_assets->ibutton_success,     pack, "Icons/ibutton_success.bmx", path, file);
+        swap_bmx_icon(&xtreme_assets->ir_success,          pack, "Icons/ir_success.bmx",      path, file);
+        swap_bmx_icon(&xtreme_assets->nfc_emulation,       pack, "Icons/nfc_emulation.bmx",   path, file);
+        swap_bmx_icon(&xtreme_assets->rfid_receive,        pack, "Icons/rfid_receive.bmx",    path, file);
+        swap_bmx_icon(&xtreme_assets->rfid_send,           pack, "Icons/rfid_send.bmx",       path, file);
+        swap_bmx_icon(&xtreme_assets->rfid_success,        pack, "Icons/rfid_success.bmx",    path, file);
+        swap_bmx_icon(&xtreme_assets->subghz_scanning,     pack, "Icons/subghz_scanning.bmx", path, file);
 
-        swap_bmx_icon(&xtreme_assets->passport_angry,      pack, "Passport/angry.bmx",        path, file, i++);
-        swap_bmx_icon(&xtreme_assets->passport_background, pack, "Passport/background.bmx",   path, file, i++);
-        swap_bmx_icon(&xtreme_assets->passport_happy,      pack, "Passport/happy.bmx",        path, file, i++);
-        swap_bmx_icon(&xtreme_assets->passport_okay,       pack, "Passport/okay.bmx",         path, file, i++);
+        swap_bmx_icon(&xtreme_assets->passport_angry,      pack, "Passport/angry.bmx",        path, file);
+        swap_bmx_icon(&xtreme_assets->passport_background, pack, "Passport/background.bmx",   path, file);
+        swap_bmx_icon(&xtreme_assets->passport_happy,      pack, "Passport/happy.bmx",        path, file);
+        swap_bmx_icon(&xtreme_assets->passport_okay,       pack, "Passport/okay.bmx",         path, file);
 
         storage_file_free(file);
     }
@@ -111,8 +103,7 @@ void XTREME_ASSETS_UPDATE() {
     furi_string_free(path);
 }
 
-void swap_bmx_icon(const Icon** replace, const char* pack, const char* name, FuriString* path, File* file, int i) {
-    loaded_icons[i] = NULL;
+void swap_bmx_icon(const Icon** replace, const char* pack, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, PACKS_DIR "/%s/%s", pack, name);
     if (storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
@@ -128,17 +119,8 @@ void swap_bmx_icon(const Icon** replace, const char* pack, const char* name, Fur
         icon->frames = malloc(sizeof(const uint8_t*));
         FURI_CONST_ASSIGN_PTR(icon->frames[0], malloc(size));
         storage_file_read(file, (void*)icon->frames[0], size);
-        loaded_icons[i] = icon;
         *replace = icon;
 
         storage_file_close(file);
-    }
-}
-
-void free_bmx_icon(Icon* icon) {
-    if (icon != NULL) {
-        free((void*)icon->frames[0]);
-        free((void*)icon->frames);
-        free(icon);
     }
 }

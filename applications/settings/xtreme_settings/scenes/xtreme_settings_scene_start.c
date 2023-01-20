@@ -1,14 +1,17 @@
 #include "../xtreme_settings_app.h"
 #include <lib/toolbox/value_index.h>
+#include <power/power_service/power.h>
 #include <lib/flipper_format/flipper_format.h>
 
 bool settings_changed;
+bool assets_changed;
 
 static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item) {
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "SFW" : "NSFW");
     XTREME_SETTINGS()->sfw_mode = value;
     settings_changed = true;
+    assets_changed = true;
 }
 
 static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
@@ -17,6 +20,7 @@ static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     variable_item_set_current_value_text(item, index == 0 ? "OFF" : *asset_packs_get(app->asset_packs, index - 1));
     strlcpy(XTREME_SETTINGS()->asset_pack, index == 0 ? "" : *asset_packs_get(app->asset_packs, index - 1), MAX_PACK_NAME_LEN);
     settings_changed = true;
+    assets_changed = true;
 }
 
 #define CYCLE_ANIMS_COUNT 13
@@ -109,6 +113,7 @@ static void xtreme_settings_scene_start_subghz_bypass_changed(VariableItem* item
 void xtreme_settings_scene_start_on_enter(void* context) {
     XtremeSettingsApp* app = context;
     settings_changed = false;
+    assets_changed = false;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
@@ -243,7 +248,9 @@ void xtreme_settings_scene_start_on_exit(void* context) {
 
     if (settings_changed) {
         XTREME_SETTINGS_SAVE();
-        XTREME_ASSETS_UPDATE();
+        if (assets_changed) {
+            power_reboot(PowerBootModeNormal);
+        }
     }
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
