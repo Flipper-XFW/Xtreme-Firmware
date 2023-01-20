@@ -32,23 +32,24 @@ static BubbleAnimation* animation_storage_load_animation(const char* name);
 
 void animation_handler_select_manifest() {
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
+    FuriString* anim_dir = furi_string_alloc();
     if (xtreme_settings->asset_pack[0] != '\0') {
-        snprintf(ANIMATION_DIR, sizeof(PACKS_DIR), "%s", PACKS_DIR);
+        furi_string_printf(anim_dir, "%s/%s/Anims", PACKS_DIR, xtreme_settings->asset_pack);
         FURI_LOG_I(TAG, "Custom Manifest selected");
-        strcat(ANIMATION_DIR, "/");
-        strcat(ANIMATION_DIR, xtreme_settings->asset_pack);
-        strcat(ANIMATION_DIR, "/Anims");
     } else {
-        snprintf(ANIMATION_DIR, sizeof(BASE_ANIMATION_DIR), "%s", BASE_ANIMATION_DIR);
+        furi_string_cat_str(anim_dir, BASE_ANIMATION_DIR);
         if(xtreme_settings->sfw_mode) {
+            furi_string_cat_str(anim_dir, "/sfw");
             FURI_LOG_I(TAG, "SFW Manifest selected");
-            strcat(ANIMATION_DIR, "/sfw");
         } else {
+            furi_string_cat_str(anim_dir, "/nsfw");
             FURI_LOG_I(TAG, "NSFW Manifest selected");
-            strcat(ANIMATION_DIR, "/nsfw");
         }
     }
-    snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_MANIFEST_FILE), "%s/manifest.txt", ANIMATION_DIR);
+    strlcpy(ANIMATION_DIR, furi_string_get_cstr(anim_dir), sizeof(ANIMATION_DIR));
+    furi_string_cat_str(anim_dir, "/manifest.txt");
+    strlcpy(ANIMATION_MANIFEST_FILE, furi_string_get_cstr(anim_dir), sizeof(ANIMATION_MANIFEST_FILE));
+    furi_string_free(anim_dir);
 }
 
 static bool animation_storage_load_single_manifest_info(
