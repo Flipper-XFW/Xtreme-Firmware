@@ -44,9 +44,9 @@ void XTREME_ASSETS_UPDATE() {
         File* file = storage_file_alloc(storage);
         int i = 0;
 
-        swap_bmx_icon(&xtreme_assets->passport_happy, pack, "passport_happy.bmx", path, file, i++);
-        swap_bmx_icon(&xtreme_assets->passport_okay,  pack, "passport_okay.bmx",  path, file, i++);
-        swap_bmx_icon(&xtreme_assets->passport_angry, pack, "passport_angry.bmx", path, file, i++);
+        swap_bmx_icon(&xtreme_assets->passport_happy, pack, "Passport/happy.bmx", path, file, i++);
+        swap_bmx_icon(&xtreme_assets->passport_okay,  pack, "Passport/okay.bmx",  path, file, i++);
+        swap_bmx_icon(&xtreme_assets->passport_angry, pack, "Passport/angry.bmx", path, file, i++);
 
         storage_file_free(file);
     }
