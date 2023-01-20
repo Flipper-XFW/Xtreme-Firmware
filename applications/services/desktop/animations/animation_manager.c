@@ -70,8 +70,6 @@ static bool animation_manager_is_valid_idle_animation(
 static void animation_manager_switch_to_one_shot_view(AnimationManager* animation_manager);
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager);
 
-bool select_idle_animation_failed;
-
 void animation_manager_set_context(AnimationManager* animation_manager, void* context) {
     furi_assert(animation_manager);
     animation_manager->context = context;
@@ -197,18 +195,7 @@ bool animation_manager_interact_process(AnimationManager* animation_manager) {
 static void animation_manager_start_new_idle(AnimationManager* animation_manager) {
     furi_assert(animation_manager);
 
-    StorageAnimation* old_animation = animation_manager->current_animation;
-    StorageAnimation* new_animation;
-    while (true) {
-        new_animation = animation_manager_select_idle_animation(animation_manager);
-        if (select_idle_animation_failed || !old_animation) {
-            break;
-        }
-        if (strcmp(animation_storage_get_meta(new_animation)->name, animation_storage_get_meta(old_animation)->name) != 0) {
-            break;
-        }
-        animation_storage_free_storage_animation(&new_animation);
-    }
+    StorageAnimation* new_animation = animation_manager_select_idle_animation(animation_manager);
     animation_manager_replace_current_animation(animation_manager, new_animation);
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
@@ -382,8 +369,10 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    UNUSED(animation_manager);
-    select_idle_animation_failed = false;
+    const char* old_animation_name = NULL;
+    if (animation_manager->current_animation) {
+        old_animation_name = animation_storage_get_meta(animation_manager->current_animation)->name;
+    }
 
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
@@ -401,6 +390,12 @@ static StorageAnimation*
         const StorageAnimationManifestInfo* manifest_info =
             animation_storage_get_meta(storage_animation);
         bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
+
+        if (old_animation_name != NULL) {
+            if (strcmp(manifest_info->name, old_animation_name) == 0) {
+                valid = false;
+            }
+        }
 
         if(valid) {
             whole_weight += manifest_info->weight;
@@ -440,7 +435,6 @@ static StorageAnimation*
         FURI_LOG_E(TAG, "Can't upload animation described in manifest: \'%s\'", name);
         animation_storage_free_storage_animation(&selected);
         selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
-        select_idle_animation_failed = true;
     }
 
     furi_assert(selected);
