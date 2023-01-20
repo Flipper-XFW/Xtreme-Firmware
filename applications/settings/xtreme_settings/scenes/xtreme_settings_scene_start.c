@@ -11,13 +11,11 @@ static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item
     settings_changed = true;
 }
 
-bool asset_pack_changed;
 static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, index == 0 ? "OFF" : *asset_packs_get(app->asset_packs, index - 1));
     strlcpy(XTREME_SETTINGS()->asset_pack, index == 0 ? "" : *asset_packs_get(app->asset_packs, index - 1), MAX_PACK_NAME_LEN);
-    asset_pack_changed = true;
     settings_changed = true;
 }
 
@@ -131,7 +129,6 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     }
     flipper_format_free(subghz_range);
 
-    asset_pack_changed = false;
     uint current_pack = 0;
     asset_packs_init(app->asset_packs);
     File* folder = storage_file_alloc(storage);
@@ -244,8 +241,10 @@ bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event
 void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
 
-    if (settings_changed) XTREME_SETTINGS_SAVE();
-    if (asset_pack_changed) XTREME_ASSETS_UPDATE();
+    if (settings_changed) {
+        XTREME_SETTINGS_SAVE();
+        XTREME_ASSETS_UPDATE();
+    }
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
