@@ -75,4 +75,3 @@ Desktop* desktop_alloc();
 void desktop_free(Desktop* desktop);
 void desktop_lock(Desktop* desktop);
 void desktop_unlock(Desktop* desktop);
-void desktop_set_sfw_mode_state(Desktop* desktop, bool enabled);

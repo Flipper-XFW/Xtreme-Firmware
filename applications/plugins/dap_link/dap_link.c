@@ -16,7 +16,7 @@
 #include <dialogs/dialogs.h>
 #include "DAP_Link_icons.h"
 
-#include "../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../settings/xtreme_settings/xtreme_settings.h"
 
 /***************************************************************************/
 /****************************** DAP COMMON *********************************/
@@ -484,13 +484,11 @@ DapConfig* dap_app_get_config(DapApp* app) {
 
 int32_t dap_link_app(void* p) {
     UNUSED(p);
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     if(furi_hal_usb_is_locked()) {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
-        if(settings->sfw_mode) {
+        if(XTREME_SETTINGS()->sfw_mode) {
             dialog_message_set_header(
                 message, "Connection\nis active!", 3, 2, AlignLeft, AlignTop);
             dialog_message_set_text(
@@ -514,7 +512,6 @@ int32_t dap_link_app(void* p) {
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
-        free(settings);
         return -1;
     }
 

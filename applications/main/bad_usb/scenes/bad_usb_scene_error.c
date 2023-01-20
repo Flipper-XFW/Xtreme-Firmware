@@ -1,5 +1,5 @@
 #include "../bad_usb_app_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 typedef enum {
     BadUsbCustomEventErrorBack,
@@ -17,8 +17,6 @@ static void
 
 void bad_usb_scene_error_on_enter(void* context) {
     BadUsbApp* app = context;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     if(app->error == BadUsbAppErrorNoFiles) {
         widget_add_icon_element(app->widget, 0, 0, &I_SDQuestion_35x43);
@@ -34,7 +32,7 @@ void bad_usb_scene_error_on_enter(void* context) {
             app->widget, GuiButtonTypeLeft, "Back", bad_usb_scene_error_event_callback, app);
     } else if(app->error == BadUsbAppErrorCloseRpc) {
         widget_add_icon_element(app->widget, 78, 0, &I_ActiveConnection_50x64);
-        if(settings->sfw_mode) {
+        if(XTREME_SETTINGS()->sfw_mode) {
             widget_add_string_multiline_element(
                 app->widget, 3, 2, AlignLeft, AlignTop, FontPrimary, "Connection\nis active!");
             widget_add_string_multiline_element(
@@ -60,7 +58,6 @@ void bad_usb_scene_error_on_enter(void* context) {
     }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, BadUsbAppViewError);
-    free(settings);
 }
 
 bool bad_usb_scene_error_on_event(void* context, SceneManagerEvent event) {
