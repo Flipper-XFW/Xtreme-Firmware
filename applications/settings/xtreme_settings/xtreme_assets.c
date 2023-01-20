@@ -75,10 +75,10 @@ void XTREME_ASSETS_UPDATE() {
     if (xtreme_settings->asset_pack[0] == '\0') return;
     FileInfo info;
     FuriString* path = furi_string_alloc();
+    const char* pack = xtreme_settings->asset_pack;
+    furi_string_printf(path, PACKS_DIR "/%s", pack);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    path_concat(PACKS_DIR, xtreme_settings->asset_pack, path);
-    const char* pack = furi_string_get_cstr(path);
-    if (storage_common_stat(storage, pack, &info) == FSE_OK && info.flags & FSF_DIRECTORY) {
+    if (storage_common_stat(storage, furi_string_get_cstr(path), &info) == FSE_OK && info.flags & FSF_DIRECTORY) {
         File* file = storage_file_alloc(storage);
         int i = 0;
 
@@ -111,13 +111,9 @@ void XTREME_ASSETS_UPDATE() {
     furi_string_free(path);
 }
 
-void swap_bmx_icon(const Icon** replace, const char* base, const char* name, FuriString* path, File* file, int i) {
+void swap_bmx_icon(const Icon** replace, const char* pack, const char* name, FuriString* path, File* file, int i) {
     loaded_icons[i] = NULL;
-    path_concat(base, name, path);
-    FURI_LOG_E(
-        "XtremeAssets",
-        "Loading \'%s\'",
-        furi_string_get_cstr(path));
+    furi_string_printf(path, PACKS_DIR "/%s/%s", pack, name);
     if (storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
         int32_t width, height;
