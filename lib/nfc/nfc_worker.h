@@ -21,6 +21,7 @@ typedef enum {
     NfcWorkerStateNfcVEmulate,
     NfcWorkerStateNfcVUnlock,
     NfcWorkerStateNfcVUnlockAndSave,
+    NfcWorkerStateNfcVSniff,
     // Debug
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
@@ -97,3 +98,4 @@ void nfc_worker_start(
 void nfc_worker_stop(NfcWorker* nfc_worker);
 void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker);
 void nfc_worker_nfcv_emulate(NfcWorker* nfc_worker);
+void nfc_worker_nfcv_sniff(NfcWorker* nfc_worker);
