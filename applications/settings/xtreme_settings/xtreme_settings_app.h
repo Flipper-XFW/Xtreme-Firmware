@@ -14,6 +14,7 @@
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"
 #include "dolphin/dolphin_i.h"
+#include <lib/flipper_format/flipper_format.h>
 #include <m-array.h>
 
 ARRAY_DEF(asset_packs, char*)

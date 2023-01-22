@@ -14,11 +14,35 @@ void xtreme_settings_reboot(void* context) {
 static bool xtreme_settings_back_event_callback(void* context) {
     furi_assert(context);
     XtremeSettingsApp* app = context;
+
+    if (app->level_changed) {
+        Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+        DolphinStats stats = dolphin_stats(dolphin);
+        if (app->dolphin_level != stats.level) {
+            int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+            dolphin->state->data.icounter = xp + 1;
+            dolphin->state->dirty = true;
+            dolphin_state_save(dolphin->state);
+        }
+        furi_record_close(RECORD_DOLPHIN);
+    }
+
+    if (app->subghz_changed) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
+        if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
+            flipper_format_insert_or_update_bool(subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+            flipper_format_insert_or_update_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+        }
+        flipper_format_free(subghz_range);
+        furi_record_close(RECORD_STORAGE);
+    }
+
     if (app->settings_changed) {
         XTREME_SETTINGS_SAVE();
         if (app->assets_changed) {
-            popup_set_header(app->popup, "Rebooting...", 64, 24, AlignCenter, AlignCenter);
-            popup_set_text(app->popup, "Swapping assets...", 64, 42, AlignCenter, AlignCenter);
+            popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
+            popup_set_text(app->popup, "Swapping assets...", 64, 40, AlignCenter, AlignCenter);
             popup_set_callback(app->popup, xtreme_settings_reboot);
             popup_set_context(app->popup, app);
             popup_set_timeout(app->popup, 1000);
@@ -27,6 +51,7 @@ static bool xtreme_settings_back_event_callback(void* context) {
             return true;
         }
     }
+
     return scene_manager_handle_back_event(app->scene_manager);
 }
 

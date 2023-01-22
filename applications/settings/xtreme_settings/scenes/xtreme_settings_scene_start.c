@@ -1,7 +1,6 @@
 #include "../xtreme_settings_app.h"
 #include <lib/toolbox/value_index.h>
 #include <power/power_service/power.h>
-#include <lib/flipper_format/flipper_format.h>
 
 static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
@@ -216,30 +215,6 @@ bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event
 
 void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
-
-    if (app->level_changed) {
-        Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-        DolphinStats stats = dolphin_stats(dolphin);
-        if (app->dolphin_level != stats.level) {
-            int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
-            dolphin->state->data.icounter = xp + 1;
-            dolphin->state->dirty = true;
-            dolphin_state_save(dolphin->state);
-        }
-        furi_record_close(RECORD_DOLPHIN);
-    }
-
-    if (app->subghz_changed) {
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-        if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-            flipper_format_insert_or_update_bool(subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
-            flipper_format_insert_or_update_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
-        }
-        flipper_format_free(subghz_range);
-        furi_record_close(RECORD_STORAGE);
-    }
-
     asset_packs_it_t it;
     for (asset_packs_it(it, app->asset_packs); !asset_packs_end_p(it); asset_packs_next(it)) {
         free(*asset_packs_cref(it));
