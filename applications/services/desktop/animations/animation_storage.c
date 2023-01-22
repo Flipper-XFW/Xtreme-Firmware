@@ -514,6 +514,11 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         if(!flipper_format_read_uint32(ff, "Active cycles", &u32value, 1)) break; //-V779
         animation->active_cycles = u32value;
         if(!flipper_format_read_uint32(ff, "Frame rate", &u32value, 1)) break;
+        uint16_t anim_speed = XTREME_SETTINGS()->anim_speed;
+        anim_speed = (anim_speed == 0 ? 100 : anim_speed);
+        u32value = (u32value * anim_speed) / 100;
+        u32value = u32value < 1 ? 1 : u32value;
+        u32value = u32value > 10 ? 10 : u32value;
         FURI_CONST_ASSIGN(animation->icon_animation.frame_rate, u32value);
         if(!flipper_format_read_uint32(ff, "Duration", &u32value, 1)) break;
         animation->duration = u32value;

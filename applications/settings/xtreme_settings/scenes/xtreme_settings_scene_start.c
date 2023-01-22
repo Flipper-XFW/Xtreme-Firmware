@@ -20,6 +20,18 @@ static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     app->assets_changed = true;
 }
 
+const char* const anim_speed_names[] =
+    {"25%", "50%", "75%", "100%", "125%", "150%", "175%", "200%", "225%", "250%", "275%", "300%"};
+const int32_t anim_speed_values[COUNT_OF(anim_speed_names)] =
+    {25, 50, 75, 0, 125, 150, 175, 200, 225, 250, 275, 300};
+static void xtreme_settings_scene_start_anim_speed_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, anim_speed_names[index]);
+    XTREME_SETTINGS()->anim_speed = anim_speed_values[index];
+    app->settings_changed = true;
+}
+
 const char* const cycle_anims_names[] =
     {"OFF", "Meta.txt", "30 S", "1 M", "5 M", "10 M", "15 M", "30 M", "1 H", "2 H", "6 H", "12 H", "24 H"};
 const int32_t cycle_anims_values[COUNT_OF(cycle_anims_names)] =
@@ -142,6 +154,17 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, current_pack);
     variable_item_set_current_value_text(item, current_pack == 0 ? "OFF" : *asset_packs_get(app->asset_packs, current_pack - 1));
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Anim Speed",
+        COUNT_OF(anim_speed_names),
+        xtreme_settings_scene_start_anim_speed_changed,
+        app);
+    value_index = value_index_int32(
+        xtreme_settings->anim_speed, anim_speed_values, COUNT_OF(anim_speed_names));
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, anim_speed_names[value_index]);
 
     item = variable_item_list_add(
         var_item_list,

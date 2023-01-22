@@ -21,6 +21,7 @@ typedef struct {
     bool sfw_mode;
     char asset_pack[MAX_PACK_NAME_LEN];
     BatteryStyle battery_style;
+    uint16_t anim_speed;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();
