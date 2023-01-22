@@ -260,6 +260,7 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
     draw_stat(canvas, 72, 28, &I_Voltage_16x16, voltage);
     draw_stat(canvas, 104, 28, &I_Health_16x16, health);
 
+    elements_button_left(canvas, "Back");
     elements_button_right(canvas, "Next");
 }
 
