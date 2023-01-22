@@ -5,7 +5,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
-#include "applications/settings/xtreme_settings/xtreme_settings.h"
 
 #define TAG "Dice Roller"
 
@@ -477,8 +476,6 @@ int32_t dice_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-
     // Main loop
     PluginEvent event;
     for(bool processing = true; processing;) {
@@ -509,11 +506,7 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 20) {
                             plugin_state->diceSelect = 100;
                         } else if(plugin_state->diceSelect == 100) {
-                            if(xtreme_settings->sfw_mode) {
-                                plugin_state->diceSelect = 231;
-                            } else {
-                                plugin_state->diceSelect = 230;
-                            }
+                            plugin_state->diceSelect = 230;
                         } else if(plugin_state->diceSelect == 230) {
                             plugin_state->playerOneScore = 0;
                             plugin_state->playerTwoScore = 0;
@@ -523,11 +516,7 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 229) {
                             plugin_state->diceSelect = 228;
                         } else if(plugin_state->diceSelect == 228) {
-                            if(xtreme_settings->sfw_mode) {
-                                plugin_state->diceSelect = 59;
-                            } else {
-                                plugin_state->diceSelect = 232;
-                            }
+                            plugin_state->diceSelect = 232;
                         } else if(plugin_state->diceSelect == 232) {
                             plugin_state->diceSelect = 59;
                         } else if(plugin_state->diceSelect == 59) {
