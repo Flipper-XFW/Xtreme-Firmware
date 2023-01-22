@@ -21,23 +21,9 @@ static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     app->assets_changed = true;
 }
 
-#define CYCLE_ANIMS_COUNT 13
-const char* const cycle_anims_names[CYCLE_ANIMS_COUNT] = {
-    "OFF",
-    "Manifest",
-    "30 S",
-    "1 M",
-    "5 M",
-    "10 M",
-    "15 M",
-    "30 M",
-    "1 H",
-    "2 H",
-    "6 H",
-    "12 H",
-    "24 H",
-};
-const int32_t cycle_anims_values[CYCLE_ANIMS_COUNT] =
+const char* const cycle_anims_names[] =
+    {"OFF", "Meta.txt", "30 S", "1 M", "5 M", "10 M", "15 M", "30 M", "1 H", "2 H", "6 H", "12 H", "24 H"};
+const int32_t cycle_anims_values[COUNT_OF(cycle_anims_names)] =
     {-1, 0, 30, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400};
 static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
@@ -55,10 +41,9 @@ static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item)
     app->settings_changed = true;
 }
 
-#define BATTERY_STYLE_COUNT 7
-const char* const battery_style_names[BATTERY_STYLE_COUNT] =
+const char* const battery_style_names[] =
     {"OFF", "Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
-const uint32_t battery_style_values[BATTERY_STYLE_COUNT] = {
+const uint32_t battery_style_values[COUNT_OF(battery_style_names)] = {
     BatteryStyleOff,
     BatteryStyleBar,
     BatteryStylePercent,
@@ -81,34 +66,21 @@ static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
     char level_str[4];
     snprintf(level_str, 4, "%i", app->dolphin_level);
     variable_item_set_current_value_text(item, level_str);
+    app->level_changed = true;
 }
 
 static void xtreme_settings_scene_start_subghz_extend_changed(VariableItem* item) {
-    bool value = variable_item_get_current_value_index(item);
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-    if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt") &&
-    flipper_format_insert_or_update_bool(subghz_range, "use_ext_range_at_own_risk", &value, 1)) {
-        variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    } else {
-        variable_item_set_current_value_index(item, !value);
-    }
-    flipper_format_free(subghz_range);
-    furi_record_close(RECORD_STORAGE);
+    XtremeSettingsApp* app = variable_item_get_context(item);
+    app->subghz_extend = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
+    app->subghz_changed = true;
 }
 
 static void xtreme_settings_scene_start_subghz_bypass_changed(VariableItem* item) {
-    bool value = variable_item_get_current_value_index(item);
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-    if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt") &&
-    flipper_format_insert_or_update_bool(subghz_range, "ignore_default_tx_region", &value, 1)) {
-        variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    } else {
-        variable_item_set_current_value_index(item, !value);
-    }
-    flipper_format_free(subghz_range);
-    furi_record_close(RECORD_STORAGE);
+    XtremeSettingsApp* app = variable_item_get_context(item);
+    app->subghz_bypass = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
+    app->subghz_changed = true;
 }
 
 void xtreme_settings_scene_start_on_enter(void* context) {
@@ -125,11 +97,11 @@ void xtreme_settings_scene_start_on_enter(void* context) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-    bool subghz_extend = false;
-    bool subghz_bypass = false;
+    app->subghz_extend = false;
+    app->subghz_bypass = false;
     if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(subghz_range, "use_ext_range_at_own_risk", &subghz_extend, 1);
-        flipper_format_read_bool(subghz_range, "ignore_default_tx_region", &subghz_bypass, 1);
+        flipper_format_read_bool(subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+        flipper_format_read_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
     }
     flipper_format_free(subghz_range);
 
@@ -175,11 +147,11 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list,
         "Cycle Anims",
-        CYCLE_ANIMS_COUNT,
+        COUNT_OF(cycle_anims_names),
         xtreme_settings_scene_start_cycle_anims_changed,
         app);
     value_index = value_index_int32(
-        xtreme_settings->cycle_anims, cycle_anims_values, CYCLE_ANIMS_COUNT);
+        xtreme_settings->cycle_anims, cycle_anims_values, COUNT_OF(cycle_anims_names));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, cycle_anims_names[value_index]);
 
@@ -195,11 +167,11 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list,
         "Battery Style",
-        BATTERY_STYLE_COUNT,
+        COUNT_OF(battery_style_names),
         xtreme_settings_scene_start_battery_style_changed,
         app);
     value_index = value_index_uint32(
-        xtreme_settings->battery_style, battery_style_values, BATTERY_STYLE_COUNT);
+        xtreme_settings->battery_style, battery_style_values, COUNT_OF(battery_style_names));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, battery_style_names[value_index]);
 
@@ -220,8 +192,8 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         2,
         xtreme_settings_scene_start_subghz_extend_changed,
         app);
-    variable_item_set_current_value_index(item, subghz_extend);
-    variable_item_set_current_value_text(item, subghz_extend ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, app->subghz_extend);
+    variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
@@ -229,8 +201,8 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         2,
         xtreme_settings_scene_start_subghz_bypass_changed,
         app);
-    variable_item_set_current_value_index(item, subghz_bypass);
-    variable_item_set_current_value_text(item, subghz_bypass ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, app->subghz_bypass);
+    variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeSettingsAppViewVarItemList);
 }
@@ -245,15 +217,28 @@ bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event
 void xtreme_settings_scene_start_on_exit(void* context) {
     XtremeSettingsApp* app = context;
 
-    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-    DolphinStats stats = dolphin_stats(dolphin);
-    if (app->dolphin_level != stats.level) {
-        int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
-        dolphin->state->data.icounter = xp + 1;
-        dolphin->state->dirty = true;
-        dolphin_state_save(dolphin->state);
+    if (app->level_changed) {
+        Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+        DolphinStats stats = dolphin_stats(dolphin);
+        if (app->dolphin_level != stats.level) {
+            int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+            dolphin->state->data.icounter = xp + 1;
+            dolphin->state->dirty = true;
+            dolphin_state_save(dolphin->state);
+        }
+        furi_record_close(RECORD_DOLPHIN);
     }
-    furi_record_close(RECORD_DOLPHIN);
+
+    if (app->subghz_changed) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
+        if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
+            flipper_format_insert_or_update_bool(subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+            flipper_format_insert_or_update_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+        }
+        flipper_format_free(subghz_range);
+        furi_record_close(RECORD_STORAGE);
+    }
 
     asset_packs_it_t it;
     for (asset_packs_it(it, app->asset_packs); !asset_packs_end_p(it); asset_packs_next(it)) {

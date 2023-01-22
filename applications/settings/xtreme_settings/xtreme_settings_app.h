@@ -25,8 +25,12 @@ typedef struct {
     VariableItemList* var_item_list;
     Popup* popup;
     int dolphin_level;
+    bool subghz_extend;
+    bool subghz_bypass;
     bool settings_changed;
     bool assets_changed;
+    bool subghz_changed;
+    bool level_changed;
     asset_packs_t asset_packs;
 } XtremeSettingsApp;
 
