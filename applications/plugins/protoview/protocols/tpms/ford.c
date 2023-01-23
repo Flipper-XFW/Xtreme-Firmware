@@ -20,6 +20,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Fort TPMS preamble+sync found");
 
+    info->start_off = off;
     off += sync_len; /* Skip preamble and sync. */
 
     uint8_t raw[8];
@@ -35,6 +36,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     for (int j = 0; j < 7; j++) crc += raw[j];
     if (crc != raw[7]) return false; /* Require sane CRC. */
 
+    info->pulses_count = (off+8*8*2) - info->start_off;
+
     float psi = 0.25 * (((raw[6]&0x20)<<3)|raw[4]);
 
     /* Temperature apperas to be valid only if the most significant
@@ -44,21 +47,17 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     int flags = raw[5] & 0x7f;
     int car_moving = (raw[6] & 0x44) == 0x44;
 
-    snprintf(info->name,sizeof(info->name),"%s","Ford TPMS");
-    snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X",
-        raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
-        raw[6],raw[7]);
-    snprintf(info->info1,sizeof(info->info1),"Tire ID %02X%02X%02X%02X",
-        raw[0],raw[1],raw[2],raw[3]);
-    snprintf(info->info2,sizeof(info->info2),"Pressure %.2f psi", (double)psi);
-    if (temp)
-        snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp);
-    else
-        snprintf(info->info3,sizeof(info->info3),"Flags %d", flags);
-    snprintf(info->info4,sizeof(info->info4),"Moving %s", car_moving ? "yes" : "no");
+    fieldset_add_bytes(info->fieldset,"Tire ID",raw,4*2);
+    fieldset_add_float(info->fieldset,"Pressure psi",psi,2);
+    fieldset_add_int(info->fieldset,"Temperature C",temp,8);
+    fieldset_add_hex(info->fieldset,"Flags",flags,7);
+    fieldset_add_uint(info->fieldset,"Moving",car_moving,1);
     return true;
 }
 
 ProtoViewDecoder FordTPMSDecoder = {
-    "Ford TPMS", decode
+    .name = "Ford TPMS",
+    .decode = decode,
+    .get_fields = NULL,
+    .build_message = NULL
 };
