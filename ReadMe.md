@@ -61,7 +61,7 @@ The idle_animations are tied to the level system. Each level you reach, unlocks 
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
 
-If you dont like that, we added an SFW mode to the Firmware. From the main menu, hit `Arrow UP` and select SFW mode and now all assets will be stock.
+By default, SFW mode is selected, but if you want to enable all of the above simply hit `Arrow UP` from the main menu, select `Xtreme Settings` and change to NSFW graphics.
 
 -----
 <br>
