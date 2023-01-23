@@ -16,8 +16,6 @@
 #include <dialogs/dialogs.h>
 #include "DAP_Link_icons.h"
 
-#include "../../settings/xtreme_settings/xtreme_settings.h"
-
 /***************************************************************************/
 /****************************** DAP COMMON *********************************/
 /***************************************************************************/
@@ -488,26 +486,15 @@ int32_t dap_link_app(void* p) {
     if(furi_hal_usb_is_locked()) {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
-        if(XTREME_SETTINGS()->sfw_mode) {
-            dialog_message_set_header(
-                message, "Connection\nis active!", 3, 2, AlignLeft, AlignTop);
-            dialog_message_set_text(
-                message,
-                "Disconnect from\nPC or phone to\nuse this function.",
-                3,
-                30,
-                AlignLeft,
-                AlignTop);
-        } else {
-            dialog_message_set_header(message, "I am not\na whore!", 3, 2, AlignLeft, AlignTop);
-            dialog_message_set_text(
-                message,
-                "Pull out from\nPC or phone to\nuse me like this.",
-                3,
-                30,
-                AlignLeft,
-                AlignTop);
-        }
+        dialog_message_set_header(
+            message, "Connection\nis active!", 3, 2, AlignLeft, AlignTop);
+        dialog_message_set_text(
+            message,
+            "Disconnect from\nPC or phone to\nuse this function.",
+            3,
+            30,
+            AlignLeft,
+            AlignTop);
         dialog_message_set_icon(message, &I_ActiveConnection_50x64, 78, 0);
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
