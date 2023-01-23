@@ -17,30 +17,7 @@ void XTREME_ASSETS_LOAD() {
     xtreme_assets = malloc(sizeof(XtremeAssets));
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
-    if (xtreme_settings->sfw_mode) {
-        xtreme_assets->authenticate        = &I_Auth_62x31_sfw;
-        xtreme_assets->bt_pairing          = &I_BLE_Pairing_128x64_sfw;
-        xtreme_assets->connect_me          = &I_Connect_me_62x31_sfw;
-        xtreme_assets->connected           = &I_Connected_62x31_sfw;
-        xtreme_assets->dolphin_common      = &I_DolphinCommon_56x48_sfw;
-        xtreme_assets->dolphin_cry         = &I_Cry_dolph_55x52_sfw;
-        xtreme_assets->dolphin_mafia       = &I_DolphinMafia_115x62_sfw;
-        xtreme_assets->dolphin_nice        = &I_DolphinNice_96x59_sfw;
-        xtreme_assets->dolphin_wait        = &I_DolphinWait_61x59_sfw;
-        xtreme_assets->error               = &I_Error_62x31_sfw;
-        xtreme_assets->ibutton_success     = &I_iButtonDolphinVerySuccess_108x52_sfw;
-        xtreme_assets->ir_success          = &I_DolphinReadingSuccess_59x63_sfw;
-        xtreme_assets->nfc_emulation       = &I_NFC_dolphin_emulation_47x61_sfw;
-        xtreme_assets->rfid_receive        = &I_RFIDDolphinReceive_97x61_sfw;
-        xtreme_assets->rfid_send           = &I_RFIDDolphinSend_97x61_sfw;
-        xtreme_assets->rfid_success        = &I_RFIDDolphinSuccess_108x57_sfw;
-        xtreme_assets->subghz_scanning     = &I_Scanning_123x52_sfw;
-
-        xtreme_assets->passport_angry      = &I_passport_bad1_46x49_sfw;
-        xtreme_assets->passport_background = &I_passport_DB_sfw;
-        xtreme_assets->passport_happy      = &I_passport_happy1_46x49_sfw;
-        xtreme_assets->passport_okay       = &I_passport_okay1_46x49_sfw;
-    } else {
+    if (xtreme_settings->nsfw_mode) {
         xtreme_assets->authenticate        = &I_Auth_62x31;
         xtreme_assets->bt_pairing          = &I_BLE_Pairing_128x64;
         xtreme_assets->connect_me          = &I_Connect_me_62x31;
@@ -63,6 +40,29 @@ void XTREME_ASSETS_LOAD() {
         xtreme_assets->passport_background = &I_passport_DB;
         xtreme_assets->passport_happy      = &I_flipper;
         xtreme_assets->passport_okay       = &I_flipper;
+    } else {
+        xtreme_assets->authenticate        = &I_Auth_62x31_sfw;
+        xtreme_assets->bt_pairing          = &I_BLE_Pairing_128x64_sfw;
+        xtreme_assets->connect_me          = &I_Connect_me_62x31_sfw;
+        xtreme_assets->connected           = &I_Connected_62x31_sfw;
+        xtreme_assets->dolphin_common      = &I_DolphinCommon_56x48_sfw;
+        xtreme_assets->dolphin_cry         = &I_Cry_dolph_55x52_sfw;
+        xtreme_assets->dolphin_mafia       = &I_DolphinMafia_115x62_sfw;
+        xtreme_assets->dolphin_nice        = &I_DolphinNice_96x59_sfw;
+        xtreme_assets->dolphin_wait        = &I_DolphinWait_61x59_sfw;
+        xtreme_assets->error               = &I_Error_62x31_sfw;
+        xtreme_assets->ibutton_success     = &I_iButtonDolphinVerySuccess_108x52_sfw;
+        xtreme_assets->ir_success          = &I_DolphinReadingSuccess_59x63_sfw;
+        xtreme_assets->nfc_emulation       = &I_NFC_dolphin_emulation_47x61_sfw;
+        xtreme_assets->rfid_receive        = &I_RFIDDolphinReceive_97x61_sfw;
+        xtreme_assets->rfid_send           = &I_RFIDDolphinSend_97x61_sfw;
+        xtreme_assets->rfid_success        = &I_RFIDDolphinSuccess_108x57_sfw;
+        xtreme_assets->subghz_scanning     = &I_Scanning_123x52_sfw;
+
+        xtreme_assets->passport_angry      = &I_passport_bad1_46x49_sfw;
+        xtreme_assets->passport_background = &I_passport_DB_sfw;
+        xtreme_assets->passport_happy      = &I_passport_happy1_46x49_sfw;
+        xtreme_assets->passport_okay       = &I_passport_okay1_46x49_sfw;
     }
 
     if (xtreme_settings->asset_pack[0] == '\0') return;

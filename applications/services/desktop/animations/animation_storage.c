@@ -38,12 +38,12 @@ void animation_handler_select_manifest() {
         FURI_LOG_I(TAG, "Custom Manifest selected");
     } else {
         furi_string_cat_str(anim_dir, BASE_ANIMATION_DIR);
-        if(xtreme_settings->sfw_mode) {
-            furi_string_cat_str(anim_dir, "/sfw");
-            FURI_LOG_I(TAG, "SFW Manifest selected");
-        } else {
+        if(xtreme_settings->nsfw_mode) {
             furi_string_cat_str(anim_dir, "/nsfw");
             FURI_LOG_I(TAG, "NSFW Manifest selected");
+        } else {
+            furi_string_cat_str(anim_dir, "/sfw");
+            FURI_LOG_I(TAG, "SFW Manifest selected");
         }
     }
     strlcpy(ANIMATION_DIR, furi_string_get_cstr(anim_dir), sizeof(ANIMATION_DIR));

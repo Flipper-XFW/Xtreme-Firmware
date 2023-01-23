@@ -571,7 +571,9 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    if(XTREME_SETTINGS()->sfw_mode) {
+    if(XTREME_SETTINGS()->nsfw_mode) {
+        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
+    } else {
         if(stats.level <= 20) {
             one_shot_view_start_animation(
                 animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
@@ -581,8 +583,6 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
         } else {
             furi_assert(0);
         }
-    } else {
-        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
     }
 }
 

@@ -40,18 +40,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
 
-    if(XTREME_SETTINGS()->sfw_mode) {
-        if(stats->butthurt <= 4) {
-            portrait = xtreme_assets->passport_happy;
-            mood_str = "Mood: Happy";
-        } else if(stats->butthurt <= 9) {
-            portrait = xtreme_assets->passport_okay;
-            mood_str = "Mood: Okay";
-        } else {
-            portrait = xtreme_assets->passport_angry;
-            mood_str = "Mood: Angry";
-        }
-    } else {
+    if(XTREME_SETTINGS()->nsfw_mode) {
         if(stats->butthurt <= 4) {
             portrait = xtreme_assets->passport_happy;
             mood_str = "Status: Wet";
@@ -61,6 +50,17 @@ static void render_callback(Canvas* canvas, void* _ctx) {
         } else {
             portrait = xtreme_assets->passport_angry;
             mood_str = "Status: Desperate";
+        }
+    } else {
+        if(stats->butthurt <= 4) {
+            portrait = xtreme_assets->passport_happy;
+            mood_str = "Mood: Happy";
+        } else if(stats->butthurt <= 9) {
+            portrait = xtreme_assets->passport_okay;
+            mood_str = "Mood: Okay";
+        } else {
+            portrait = xtreme_assets->passport_angry;
+            mood_str = "Mood: Angry";
         }
     }
     uint32_t xp_progress = 0;
