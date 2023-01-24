@@ -54,7 +54,7 @@ static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item)
 
 const char* const battery_style_names[] =
     {"OFF", "Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
-const uint32_t battery_style_values[COUNT_OF(battery_style_names)] = {
+const int32_t battery_style_values[COUNT_OF(battery_style_names)] = {
     BatteryStyleOff,
     BatteryStyleBar,
     BatteryStylePercent,
@@ -192,7 +192,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         COUNT_OF(battery_style_names),
         xtreme_settings_scene_start_battery_style_changed,
         app);
-    value_index = value_index_uint32(
+    value_index = value_index_int32(
         xtreme_settings->battery_style, battery_style_values, COUNT_OF(battery_style_names));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, battery_style_names[value_index]);
