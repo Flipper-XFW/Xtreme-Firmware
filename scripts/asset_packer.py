@@ -43,9 +43,7 @@ def convert_bmx(img: "Image.Image | pathlib.Path") -> bytes:
     return data
 
 
-def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typing.Callable = None):
-    if logger:
-        print = logger
+def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typing.Callable):
     input = pathlib.Path(input)
     output = pathlib.Path(output)
     output.mkdir(parents=True, exist_ok=True)
@@ -55,7 +53,7 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
         if not source.is_dir():
             continue
 
-        print(f"Packing {source.name}... ")
+        logger(f"Packing {source.name}... ")
         packed = output / source.name
         if packed.exists():
             try:
@@ -100,7 +98,7 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
 
 if __name__ == "__main__":
     input(
-        "This will look through all the subfolders in next to this file and try to pack them\n"
+        "This will look through all the subfolders next to this file and try to pack them\n"
         "The resulting asset packs will be saved to 'dolphin_custom' in this folder\n"
         "Press [Enter] if you wish to continue"
     )
@@ -108,7 +106,7 @@ if __name__ == "__main__":
     here = pathlib.Path(__file__).absolute().parent
     start = time.perf_counter()
 
-    pack(here, here / "dolphin_custom")
+    pack(here, here / "dolphin_custom", logger=print)
 
     end = time.perf_counter()
     input(
