@@ -18,51 +18,49 @@ void XTREME_ASSETS_LOAD() {
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     if (xtreme_settings->nsfw_mode) {
-        xtreme_assets->authenticate        = &I_Auth_62x31;
-        xtreme_assets->bt_pairing          = &I_BLE_Pairing_128x64;
-        xtreme_assets->connect_me          = &I_Connect_me_62x31;
-        xtreme_assets->connected           = &I_Connected_62x31;
-        xtreme_assets->dolphin_common      = &I_DolphinCommon_56x48;
-        xtreme_assets->dolphin_cry         = &I_Cry_dolph_55x52;
-        xtreme_assets->dolphin_mafia       = &I_DolphinMafia_115x62;
-        xtreme_assets->dolphin_nice        = &I_DolphinNice_96x59;
-        xtreme_assets->dolphin_wait        = &I_DolphinWait_61x59;
-        xtreme_assets->error               = &I_Error_62x31;
-        xtreme_assets->ibutton_success     = &I_iButtonDolphinVerySuccess_108x52;
-        xtreme_assets->ir_success          = &I_DolphinReadingSuccess_59x63;
-        xtreme_assets->nfc_emulation       = &I_NFC_dolphin_emulation_47x61;
-        xtreme_assets->rfid_receive        = &I_RFIDDolphinReceive_97x61;
-        xtreme_assets->rfid_send           = &I_RFIDDolphinSend_97x61;
-        xtreme_assets->rfid_success        = &I_RFIDDolphinSuccess_108x57;
-        xtreme_assets->subghz_scanning     = &I_Scanning_123x52;
-
-        xtreme_assets->passport_angry      = &I_flipper;
-        xtreme_assets->passport_background = &I_passport_DB;
-        xtreme_assets->passport_happy      = &I_flipper;
-        xtreme_assets->passport_okay       = &I_flipper;
+        xtreme_assets->I_BLE_Pairing_128x64               = &I_BLE_Pairing_128x64;
+        xtreme_assets->I_DolphinCommon_56x48              = &I_DolphinCommon_56x48;
+        xtreme_assets->I_DolphinMafia_115x62              = &I_DolphinMafia_115x62;
+        xtreme_assets->I_DolphinNice_96x59                = &I_DolphinNice_96x59;
+        xtreme_assets->I_DolphinWait_61x59                = &I_DolphinWait_61x59;
+        xtreme_assets->I_iButtonDolphinVerySuccess_108x52 = &I_iButtonDolphinVerySuccess_108x52;
+        xtreme_assets->I_DolphinReadingSuccess_59x63      = &I_DolphinReadingSuccess_59x63;
+        xtreme_assets->I_NFC_dolphin_emulation_47x61      = &I_NFC_dolphin_emulation_47x61;
+        xtreme_assets->I_passport_bad_46x49               = &I_flipper;
+        xtreme_assets->I_passport_DB                      = &I_passport_DB;
+        xtreme_assets->I_passport_happy_46x49             = &I_flipper;
+        xtreme_assets->I_passport_okay_46x49              = &I_flipper;
+        xtreme_assets->I_RFIDDolphinReceive_97x61         = &I_RFIDDolphinReceive_97x61;
+        xtreme_assets->I_RFIDDolphinSend_97x61            = &I_RFIDDolphinSend_97x61;
+        xtreme_assets->I_RFIDDolphinSuccess_108x57        = &I_RFIDDolphinSuccess_108x57;
+        xtreme_assets->I_Cry_dolph_55x52                  = &I_Cry_dolph_55x52;
+        xtreme_assets->I_Scanning_123x52                  = &I_Scanning_123x52;
+        xtreme_assets->I_Auth_62x31                       = &I_Auth_62x31;
+        xtreme_assets->I_Connect_me_62x31                 = &I_Connect_me_62x31;
+        xtreme_assets->I_Connected_62x31                  = &I_Connected_62x31;
+        xtreme_assets->I_Error_62x31                      = &I_Error_62x31;
     } else {
-        xtreme_assets->authenticate        = &I_Auth_62x31_sfw;
-        xtreme_assets->bt_pairing          = &I_BLE_Pairing_128x64_sfw;
-        xtreme_assets->connect_me          = &I_Connect_me_62x31_sfw;
-        xtreme_assets->connected           = &I_Connected_62x31_sfw;
-        xtreme_assets->dolphin_common      = &I_DolphinCommon_56x48_sfw;
-        xtreme_assets->dolphin_cry         = &I_Cry_dolph_55x52_sfw;
-        xtreme_assets->dolphin_mafia       = &I_DolphinMafia_115x62_sfw;
-        xtreme_assets->dolphin_nice        = &I_DolphinNice_96x59_sfw;
-        xtreme_assets->dolphin_wait        = &I_DolphinWait_61x59_sfw;
-        xtreme_assets->error               = &I_Error_62x31_sfw;
-        xtreme_assets->ibutton_success     = &I_iButtonDolphinVerySuccess_108x52_sfw;
-        xtreme_assets->ir_success          = &I_DolphinReadingSuccess_59x63_sfw;
-        xtreme_assets->nfc_emulation       = &I_NFC_dolphin_emulation_47x61_sfw;
-        xtreme_assets->rfid_receive        = &I_RFIDDolphinReceive_97x61_sfw;
-        xtreme_assets->rfid_send           = &I_RFIDDolphinSend_97x61_sfw;
-        xtreme_assets->rfid_success        = &I_RFIDDolphinSuccess_108x57_sfw;
-        xtreme_assets->subghz_scanning     = &I_Scanning_123x52_sfw;
-
-        xtreme_assets->passport_angry      = &I_passport_bad1_46x49_sfw;
-        xtreme_assets->passport_background = &I_passport_DB_sfw;
-        xtreme_assets->passport_happy      = &I_passport_happy1_46x49_sfw;
-        xtreme_assets->passport_okay       = &I_passport_okay1_46x49_sfw;
+        xtreme_assets->I_BLE_Pairing_128x64               = &I_BLE_Pairing_128x64_sfw;
+        xtreme_assets->I_DolphinCommon_56x48              = &I_DolphinCommon_56x48_sfw;
+        xtreme_assets->I_DolphinMafia_115x62              = &I_DolphinMafia_115x62_sfw;
+        xtreme_assets->I_DolphinNice_96x59                = &I_DolphinNice_96x59_sfw;
+        xtreme_assets->I_DolphinWait_61x59                = &I_DolphinWait_61x59_sfw;
+        xtreme_assets->I_iButtonDolphinVerySuccess_108x52 = &I_iButtonDolphinVerySuccess_108x52_sfw;
+        xtreme_assets->I_DolphinReadingSuccess_59x63      = &I_DolphinReadingSuccess_59x63_sfw;
+        xtreme_assets->I_NFC_dolphin_emulation_47x61      = &I_NFC_dolphin_emulation_47x61_sfw;
+        xtreme_assets->I_passport_bad_46x49               = &I_passport_bad1_46x49_sfw;
+        xtreme_assets->I_passport_DB                      = &I_passport_DB_sfw;
+        xtreme_assets->I_passport_happy_46x49             = &I_passport_happy1_46x49_sfw;
+        xtreme_assets->I_passport_okay_46x49              = &I_passport_okay1_46x49_sfw;
+        xtreme_assets->I_RFIDDolphinReceive_97x61         = &I_RFIDDolphinReceive_97x61_sfw;
+        xtreme_assets->I_RFIDDolphinSend_97x61            = &I_RFIDDolphinSend_97x61_sfw;
+        xtreme_assets->I_RFIDDolphinSuccess_108x57        = &I_RFIDDolphinSuccess_108x57_sfw;
+        xtreme_assets->I_Cry_dolph_55x52                  = &I_Cry_dolph_55x52_sfw;
+        xtreme_assets->I_Scanning_123x52                  = &I_Scanning_123x52_sfw;
+        xtreme_assets->I_Auth_62x31                       = &I_Auth_62x31_sfw;
+        xtreme_assets->I_Connect_me_62x31                 = &I_Connect_me_62x31_sfw;
+        xtreme_assets->I_Connected_62x31                  = &I_Connected_62x31_sfw;
+        xtreme_assets->I_Error_62x31                      = &I_Error_62x31_sfw;
     }
 
     if (xtreme_settings->asset_pack[0] == '\0') return;
@@ -74,28 +72,27 @@ void XTREME_ASSETS_LOAD() {
     if (storage_common_stat(storage, furi_string_get_cstr(path), &info) == FSE_OK && info.flags & FSF_DIRECTORY) {
         File* file = storage_file_alloc(storage);
 
-        swap_bmx_icon(&xtreme_assets->authenticate,        pack, "Icons/authenticate.bmx",    path, file);
-        swap_bmx_icon(&xtreme_assets->bt_pairing,          pack, "Icons/bt_pairing.bmx",      path, file);
-        swap_bmx_icon(&xtreme_assets->connect_me,          pack, "Icons/connect_me.bmx",      path, file);
-        swap_bmx_icon(&xtreme_assets->connected,           pack, "Icons/connected.bmx",       path, file);
-        swap_bmx_icon(&xtreme_assets->dolphin_common,      pack, "Icons/dolphin_common.bmx",  path, file);
-        swap_bmx_icon(&xtreme_assets->dolphin_cry,         pack, "Icons/dolphin_cry.bmx",     path, file);
-        swap_bmx_icon(&xtreme_assets->dolphin_mafia,       pack, "Icons/dolphin_mafia.bmx",   path, file);
-        swap_bmx_icon(&xtreme_assets->dolphin_nice,        pack, "Icons/dolphin_nice.bmx",    path, file);
-        swap_bmx_icon(&xtreme_assets->dolphin_wait,        pack, "Icons/dolphin_wait.bmx",    path, file);
-        swap_bmx_icon(&xtreme_assets->error,               pack, "Icons/error.bmx",           path, file);
-        swap_bmx_icon(&xtreme_assets->ibutton_success,     pack, "Icons/ibutton_success.bmx", path, file);
-        swap_bmx_icon(&xtreme_assets->ir_success,          pack, "Icons/ir_success.bmx",      path, file);
-        swap_bmx_icon(&xtreme_assets->nfc_emulation,       pack, "Icons/nfc_emulation.bmx",   path, file);
-        swap_bmx_icon(&xtreme_assets->rfid_receive,        pack, "Icons/rfid_receive.bmx",    path, file);
-        swap_bmx_icon(&xtreme_assets->rfid_send,           pack, "Icons/rfid_send.bmx",       path, file);
-        swap_bmx_icon(&xtreme_assets->rfid_success,        pack, "Icons/rfid_success.bmx",    path, file);
-        swap_bmx_icon(&xtreme_assets->subghz_scanning,     pack, "Icons/subghz_scanning.bmx", path, file);
-
-        swap_bmx_icon(&xtreme_assets->passport_angry,      pack, "Passport/angry.bmx",        path, file);
-        swap_bmx_icon(&xtreme_assets->passport_background, pack, "Passport/background.bmx",   path, file);
-        swap_bmx_icon(&xtreme_assets->passport_happy,      pack, "Passport/happy.bmx",        path, file);
-        swap_bmx_icon(&xtreme_assets->passport_okay,       pack, "Passport/okay.bmx",         path, file);
+        swap_bmx_icon(&xtreme_assets->I_BLE_Pairing_128x64,               pack, "BLE/BLE_Pairing_128x64.bmx",                   path, file);
+        swap_bmx_icon(&xtreme_assets->I_DolphinCommon_56x48,              pack, "Dolphin/DolphinCommon_56x48.bmx",              path, file);
+        swap_bmx_icon(&xtreme_assets->I_DolphinMafia_115x62,              pack, "iButton/DolphinMafia_115x62.bmx",              path, file);
+        swap_bmx_icon(&xtreme_assets->I_DolphinNice_96x59,                pack, "iButton/DolphinNice_96x59.bmx",                path, file);
+        swap_bmx_icon(&xtreme_assets->I_DolphinWait_61x59,                pack, "iButton/DolphinWait_61x59.bmx",                path, file);
+        swap_bmx_icon(&xtreme_assets->I_iButtonDolphinVerySuccess_108x52, pack, "iButton/iButtonDolphinVerySuccess_108x52.bmx", path, file);
+        swap_bmx_icon(&xtreme_assets->I_DolphinReadingSuccess_59x63,      pack, "Infrared/DolphinReadingSuccess_59x63.bmx",     path, file);
+        swap_bmx_icon(&xtreme_assets->I_NFC_dolphin_emulation_47x61,      pack, "NFC/NFC_dolphin_emulation_47x61.bmx",          path, file);
+        swap_bmx_icon(&xtreme_assets->I_passport_bad_46x49,               pack, "Passport/passport_bad_46x49.bmx",              path, file);
+        swap_bmx_icon(&xtreme_assets->I_passport_DB,                      pack, "Passport/passport_DB.bmx",                     path, file);
+        swap_bmx_icon(&xtreme_assets->I_passport_happy_46x49,             pack, "Passport/passport_happy_46x49.bmx",            path, file);
+        swap_bmx_icon(&xtreme_assets->I_passport_okay_46x49,              pack, "Passport/passport_okay_46x49.bmx",             path, file);
+        swap_bmx_icon(&xtreme_assets->I_RFIDDolphinReceive_97x61,         pack, "RFID/RFIDDolphinReceive_97x61.bmx",            path, file);
+        swap_bmx_icon(&xtreme_assets->I_RFIDDolphinSend_97x61,            pack, "RFID/RFIDDolphinSend_97x61.bmx",               path, file);
+        swap_bmx_icon(&xtreme_assets->I_RFIDDolphinSuccess_108x57,        pack, "RFID/RFIDDolphinSuccess_108x57.bmx",           path, file);
+        swap_bmx_icon(&xtreme_assets->I_Cry_dolph_55x52,                  pack, "Settings/Cry_dolph_55x52.bmx",                 path, file);
+        swap_bmx_icon(&xtreme_assets->I_Scanning_123x52,                  pack, "SubGhz/Scanning_123x52.bmx",                   path, file);
+        swap_bmx_icon(&xtreme_assets->I_Auth_62x31,                       pack, "U2F/Auth_62x31.bmx",                           path, file);
+        swap_bmx_icon(&xtreme_assets->I_Connect_me_62x31,                 pack, "U2F/Connect_me_62x31.bmx",                     path, file);
+        swap_bmx_icon(&xtreme_assets->I_Connected_62x31,                  pack, "U2F/Connected_62x31.bmx",                      path, file);
+        swap_bmx_icon(&xtreme_assets->I_Error_62x31,                      pack, "U2F/Error_62x31.bmx",                          path, file);
 
         storage_file_free(file);
     }
@@ -104,7 +101,7 @@ void XTREME_ASSETS_LOAD() {
 }
 
 void swap_bmx_icon(const Icon** replace, const char* pack, const char* name, FuriString* path, File* file) {
-    furi_string_printf(path, PACKS_DIR "/%s/%s", pack, name);
+    furi_string_printf(path, PACKS_DIR "/%s/Icons/%s", pack, name);
     if (storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
         int32_t width, height;

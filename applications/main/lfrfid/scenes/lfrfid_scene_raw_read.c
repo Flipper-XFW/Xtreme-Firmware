@@ -33,7 +33,7 @@ void lfrfid_scene_raw_read_on_enter(void* context) {
     LfRfidReadRawState* state = malloc(sizeof(LfRfidReadRawState));
     scene_manager_set_scene_state(app->scene_manager, LfRfidSceneRawRead, (uint32_t)state);
     state->string_file_name = furi_string_alloc();
-    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->rfid_receive);
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_RFIDDolphinReceive_97x61);
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_make_app_folder(app);

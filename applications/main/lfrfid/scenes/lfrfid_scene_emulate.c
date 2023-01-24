@@ -17,7 +17,7 @@ void lfrfid_scene_emulate_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->rfid_send);
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
 
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_emulate_start(app->lfworker, (LFRFIDProtocol)app->protocol_id);

@@ -38,7 +38,7 @@ static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
     FuriString* info_str;
     info_str = furi_string_alloc();
 
-    widget_add_icon_element(widget, 0, 3, XTREME_ASSETS()->nfc_emulation);
+    widget_add_icon_element(widget, 0, 3, XTREME_ASSETS()->I_NFC_dolphin_emulation_47x61);
     widget_add_string_element(widget, 57, 13, AlignLeft, AlignTop, FontPrimary, "Emulating UID");
     if(strcmp(nfc->dev->dev_name, "") != 0) {
         furi_string_printf(info_str, "%s", nfc->dev->dev_name);

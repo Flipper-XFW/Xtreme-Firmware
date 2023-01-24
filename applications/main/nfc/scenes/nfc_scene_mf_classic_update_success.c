@@ -14,7 +14,7 @@ void nfc_scene_mf_classic_update_success_on_enter(void* context) {
     notification_message(nfc->notifications, &sequence_success);
 
     Popup* popup = nfc->popup;
-    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->dolphin_nice);
+    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->I_DolphinNice_96x59);
     popup_set_header(popup, "Updated!", 11, 20, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, nfc);

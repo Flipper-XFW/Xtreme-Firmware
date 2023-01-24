@@ -5,7 +5,7 @@ void lfrfid_scene_delete_success_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
 
-    popup_set_icon(popup, 0, 2, XTREME_ASSETS()->dolphin_mafia);
+    popup_set_icon(popup, 0, 2, XTREME_ASSETS()->I_DolphinMafia_115x62);
     popup_set_header(popup, "Deleted", 83, 19, AlignLeft, AlignBottom);
     popup_set_context(popup, app);
     popup_set_callback(popup, lfrfid_popup_timeout_callback);

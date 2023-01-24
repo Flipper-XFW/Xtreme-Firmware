@@ -14,7 +14,7 @@ void subghz_scene_rpc_on_enter(void* context) {
 
     popup_set_header(popup, "Sub-GHz", 89, 42, AlignCenter, AlignBottom);
     popup_set_text(popup, "RPC mode", 89, 44, AlignCenter, AlignTop);
-    popup_set_icon(popup, 0, 12, XTREME_ASSETS()->rfid_send);
+    popup_set_icon(popup, 0, 12, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdPopup);
 

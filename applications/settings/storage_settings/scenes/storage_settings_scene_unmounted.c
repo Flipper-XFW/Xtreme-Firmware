@@ -14,7 +14,7 @@ void storage_settings_scene_unmounted_on_enter(void* context) {
     DialogEx* dialog_ex = app->dialog_ex;
 
     dialog_ex_set_center_button_text(dialog_ex, "OK");
-    dialog_ex_set_icon(dialog_ex, 72, 17, XTREME_ASSETS()->dolphin_common);
+    dialog_ex_set_icon(dialog_ex, 72, 17, XTREME_ASSETS()->I_DolphinCommon_56x48);
 
     if(error == FSE_OK) {
         dialog_ex_set_header(dialog_ex, "SD Card Unmounted", 64, 3, AlignCenter, AlignTop);

@@ -66,7 +66,7 @@ void nfc_scene_mf_ultralight_emulate_widget_config(Nfc* nfc, bool auth_attempted
     FuriString* info_str;
     info_str = furi_string_alloc();
 
-    widget_add_icon_element(widget, 0, 3, XTREME_ASSETS()->nfc_emulation);
+    widget_add_icon_element(widget, 0, 3, XTREME_ASSETS()->I_NFC_dolphin_emulation_47x61);
 
     if(strcmp(nfc->dev->dev_name, "")) {
         furi_string_printf(info_str, "Emulating\n%s", nfc->dev->dev_name);
@@ -113,7 +113,7 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     } else {
         nfc_text_store_set(nfc, "MIFARE\nNTAG");
     }
-    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->nfc_emulation);
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_NFC_dolphin_emulation_47x61);
     popup_set_text(popup, nfc->text_store, 90, 28, AlignCenter, AlignTop);
 
     // Set Widget state and view

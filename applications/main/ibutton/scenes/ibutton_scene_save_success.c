@@ -10,7 +10,7 @@ void ibutton_scene_save_success_on_enter(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
 
-    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->dolphin_nice);
+    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->I_DolphinNice_96x59);
     popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
 
     popup_set_callback(popup, ibutton_scene_save_success_popup_callback);

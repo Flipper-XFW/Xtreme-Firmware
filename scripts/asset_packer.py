@@ -65,11 +65,9 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
                 pass
 
         packed.mkdir(parents=True, exist_ok=True)
-        (packed / "Anims").mkdir(parents=True, exist_ok=True)
-        (packed / "Icons").mkdir(parents=True, exist_ok=True)
-        (packed / "Passport").mkdir(parents=True, exist_ok=True)
 
         if (source / "Anims/manifest.txt").exists():
+            (packed / "Anims").mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source / "Anims/manifest.txt", packed / "Anims/manifest.txt")
             for anim in (source / "Anims").iterdir():
                 if not anim.is_dir():
@@ -84,16 +82,14 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
                         (packed / "Anims" / anim.name / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
 
         if (source / "Icons").is_dir():
-            for icon in (source / "Icons").iterdir():
-                if not icon.is_file():
+            for icons in (source / "Icons").iterdir():
+                if not icons.is_dir():
                     continue
-                (packed / "Icons" / icon.with_suffix(".bmx").name).write_bytes(convert_bmx(icon))
-
-        if (source / "Passport").is_dir():
-            for icon in (source / "Passport").iterdir():
-                if not icon.is_file():
-                    continue
-                (packed / "Passport" / icon.with_suffix(".bmx").name).write_bytes(convert_bmx(icon))
+                (packed / "Icons" / icons.name).mkdir(parents=True, exist_ok=True)
+                for icon in icons.iterdir():
+                    if not icon.is_file():
+                        continue
+                    (packed / "Icons" / icons.name / icon.with_suffix(".bmx").name).write_bytes(convert_bmx(icon))
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ void lfrfid_scene_write_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->rfid_send);
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
 

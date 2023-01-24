@@ -20,7 +20,7 @@ static void u2f_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontSecondary);
 
     if(model->display_msg == U2fMsgNotConnected) {
-        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->connect_me);
+        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Connect_me_62x31);
         if(XTREME_SETTINGS()->nsfw_mode) {
             canvas_draw_str_aligned(
                 canvas, 128 / 2, 3, AlignCenter, AlignTop, "Plug me in d-daddy");
@@ -29,34 +29,34 @@ static void u2f_view_draw_callback(Canvas* canvas, void* _model) {
                 canvas, 128 / 2, 3, AlignCenter, AlignTop, "Connect to a device");
         }
     } else if(model->display_msg == U2fMsgIdle) {
-        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->connected);
+        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Connected_62x31);
         canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Connected!");
     } else if(model->display_msg == U2fMsgRegister) {
         if(XTREME_SETTINGS()->nsfw_mode) {
             elements_button_center(canvas, "CUM");
-            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->authenticate);
+            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Auth_62x31);
             canvas_draw_str_aligned(
                 canvas, 128 / 2, 3, AlignCenter, AlignTop, "Press CUM to register");
         } else {
             elements_button_center(canvas, "OK");
-            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->authenticate);
+            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Auth_62x31);
             canvas_draw_str_aligned(
                 canvas, 128 / 2, 3, AlignCenter, AlignTop, "Press OK to register");
         }
     } else if(model->display_msg == U2fMsgAuth) {
         if(XTREME_SETTINGS()->nsfw_mode) {
             elements_button_center(canvas, "CUM");
-            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->authenticate);
+            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Auth_62x31);
             canvas_draw_str_aligned(
                 canvas, 128 / 2, 3, AlignCenter, AlignTop, "Press CUM to authenticate");
         } else {
             elements_button_center(canvas, "OK");
-            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->authenticate);
+            canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Auth_62x31);
             canvas_draw_str_aligned(
                 canvas, 128 / 2, 3, AlignCenter, AlignTop, "Press OK to authenticate");
         }
     } else if(model->display_msg == U2fMsgSuccess) {
-        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->connected);
+        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Connected_62x31);
         if(XTREME_SETTINGS()->nsfw_mode) {
             canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Cum released~");
         } else {
@@ -64,7 +64,7 @@ static void u2f_view_draw_callback(Canvas* canvas, void* _model) {
                 canvas, 128 / 2, 3, AlignCenter, AlignTop, "Authentication successful!");
         }
     } else if(model->display_msg == U2fMsgError) {
-        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->error);
+        canvas_draw_icon(canvas, 22, 15, XTREME_ASSETS()->I_Error_62x31);
         if(XTREME_SETTINGS()->nsfw_mode) {
             canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Unable to cum");
         } else {

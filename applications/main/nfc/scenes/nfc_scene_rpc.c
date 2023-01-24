@@ -8,7 +8,7 @@ void nfc_scene_rpc_on_enter(void* context) {
     popup_set_header(popup, "NFC", 89, 42, AlignCenter, AlignBottom);
     popup_set_text(popup, "RPC mode", 89, 44, AlignCenter, AlignTop);
 
-    popup_set_icon(popup, 0, 12, XTREME_ASSETS()->nfc_emulation);
+    popup_set_icon(popup, 0, 12, XTREME_ASSETS()->I_NFC_dolphin_emulation_47x61);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 

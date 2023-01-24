@@ -48,7 +48,7 @@ void infrared_scene_learn_success_on_enter(void* context) {
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "Save");
     dialog_ex_set_center_button_text(dialog_ex, "Send");
-    dialog_ex_set_icon(dialog_ex, 0, 1, XTREME_ASSETS()->ir_success);
+    dialog_ex_set_icon(dialog_ex, 0, 1, XTREME_ASSETS()->I_DolphinReadingSuccess_59x63);
     dialog_ex_set_result_callback(dialog_ex, infrared_scene_learn_success_dialog_result_callback);
     dialog_ex_set_context(dialog_ex, context);
     dialog_ex_enable_extended_events(dialog_ex);
