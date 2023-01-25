@@ -140,12 +140,6 @@ void desktop_unlock(Desktop* desktop) {
     desktop_auto_lock_arm(desktop);
 }
 
-void desktop_set_sfw_mode_state(Desktop* desktop, bool enabled) {
-    desktop->settings.sfw_mode = enabled;
-    DESKTOP_SETTINGS_SAVE(&desktop->settings);
-    animation_manager_new_idle_process(desktop->animation_manager);
-}
-
 Desktop* desktop_alloc() {
     Desktop* desktop = malloc(sizeof(Desktop));
 
@@ -321,13 +315,6 @@ int32_t desktop_srv(void* p) {
             memset(&desktop->settings, 0, sizeof(desktop->settings));
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
-
-        if(!desktop->settings.cycle_animation_s) {
-            desktop->settings.cycle_animation_s = -1;
-            DESKTOP_SETTINGS_SAVE(&desktop->settings);
-        }
-
-        desktop_main_set_sfw_mode_state(desktop->main_view, desktop->settings.sfw_mode);
 
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 

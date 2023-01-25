@@ -1,6 +1,6 @@
 #include "../lfrfid_i.h"
 #include "../helpers/rfid_writer.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 static void writer_initialize(T55xxTiming* t55xxtiming) {
     t55xxtiming->wait_time = 400;
@@ -15,8 +15,6 @@ static void lfrfid_clear_t5577_password_and_config_to_EM(LfRfid* app) {
     T55xxTiming* t55xxtiming = malloc(sizeof(T55xxTiming));
     Popup* popup = app->popup;
     char curr_buf[32] = {};
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     //TODO: use .txt file in resourses for passwords.
     const uint32_t default_passwords[] = {
@@ -45,11 +43,7 @@ static void lfrfid_clear_t5577_password_and_config_to_EM(LfRfid* app) {
     writer_initialize(t55xxtiming);
 
     popup_set_header(popup, "Removing\npassword", 90, 36, AlignCenter, AlignCenter);
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
-    } else {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
-    }
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
     popup_set_text(popup, curr_buf, 90, 56, AlignCenter, AlignCenter);
     notification_message(app->notifications, &sequence_blink_start_magenta);
 
@@ -67,24 +61,17 @@ static void lfrfid_clear_t5577_password_and_config_to_EM(LfRfid* app) {
     notification_message(app->notifications, &sequence_blink_stop);
     popup_reset(app->popup);
     free(t55xxtiming);
-    free(settings);
 }
 
 void lfrfid_scene_clear_t5577_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     lfrfid_clear_t5577_password_and_config_to_EM(app);
 
     notification_message(app->notifications, &sequence_success);
     popup_set_header(popup, "Done!", 94, 10, AlignCenter, AlignTop);
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 0, 7, &I_RFIDDolphinSuccess_108x57_sfw);
-    } else {
-        popup_set_icon(popup, 0, 7, &I_RFIDDolphinSuccess_108x57);
-    }
+    popup_set_icon(popup, 0, 7, XTREME_ASSETS()->I_RFIDDolphinSuccess_108x57);
     popup_set_context(popup, app);
     popup_set_callback(popup, lfrfid_popup_timeout_callback);
     popup_set_timeout(popup, 1500);
@@ -92,7 +79,6 @@ void lfrfid_scene_clear_t5577_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
     notification_message_block(app->notifications, &sequence_set_green_255);
-    free(settings);
 }
 
 bool lfrfid_scene_clear_t5577_on_event(void* context, SceneManagerEvent event) {

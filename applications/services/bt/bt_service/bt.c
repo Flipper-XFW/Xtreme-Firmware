@@ -5,7 +5,7 @@
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define TAG "BtSrv"
 
@@ -36,17 +36,10 @@ static void bt_pin_code_view_port_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Bt* bt = context;
     char pin_code_info[24];
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-    if(settings->sfw_mode) {
-        canvas_draw_icon(canvas, 0, 0, &I_BLE_Pairing_128x64_sfw);
-    } else {
-        canvas_draw_icon(canvas, 0, 0, &I_BLE_Pairing_128x64);
-    }
+    canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->I_BLE_Pairing_128x64);
     snprintf(pin_code_info, sizeof(pin_code_info), "Pairing code\n%06lu", bt->pin_code);
     elements_multiline_text_aligned(canvas, 64, 4, AlignCenter, AlignTop, pin_code_info);
     elements_button_left(canvas, "Quit");
-    free(settings);
 }
 
 static void bt_pin_code_view_port_input_callback(InputEvent* event, void* context) {
@@ -83,16 +76,10 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     notification_message(bt->notification, &sequence_display_backlight_on);
     FuriString* pin_str;
-    if(settings->sfw_mode) {
-        dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64_sfw, 0, 0);
-    } else {
-        dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
-    }
+    dialog_message_set_icon(bt->dialog_message, XTREME_ASSETS()->I_BLE_Pairing_128x64, 0, 0);
     pin_str = furi_string_alloc_printf("Verify code\n%06lu", pin);
     dialog_message_set_text(
         bt->dialog_message, furi_string_get_cstr(pin_str), 64, 4, AlignCenter, AlignTop);
@@ -100,7 +87,6 @@ static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     DialogMessageButton button = dialog_message_show(bt->dialogs, bt->dialog_message);
     furi_string_free(pin_str);
     return button == DialogMessageButtonCenter;
-    free(settings);
 }
 
 static void bt_battery_level_changed_callback(const void* _event, void* context) {

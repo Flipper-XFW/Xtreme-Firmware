@@ -43,8 +43,7 @@ typedef enum {
     DesktopLockMenuEventPinLock,
     DesktopLockMenuEventPinLockShutdown,
     DesktopLockMenuEventExit,
-    DesktopLockMenuEventSFWModeOn,
-    DesktopLockMenuEventSFWModeOff,
+    DesktopLockMenuEventXtremeSettings,
 
     DesktopAnimationEventCheckAnimation,
     DesktopAnimationEventNewIdleAnimation,

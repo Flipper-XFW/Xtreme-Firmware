@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asset_packer
 from flipper.app import App
 from flipper.assets.icon import file2image
 
@@ -260,8 +261,11 @@ class Main(App):
         # This will not stay, dont worry! This is temp code until we got time to rewrite this all
         global valid_dirs # access our global variable
         for valid_dir in valid_dirs: # We can copy the manifest for all of the valid dirs!
+            (root_dir / f"assets/resources/dolphin/{valid_dir.name}").mkdir(parents=True, exist_ok=True)
             shutil.copyfile(valid_dir / "manifest.txt", root_dir / f"assets/resources/dolphin/{valid_dir.name}/manifest.txt")
         (root_dir / "assets/resources/dolphin/manifest.txt").unlink()
+        self.logger.info("Packing custom asset packs")
+        asset_packer.pack(root_dir / "assets/dolphin/custom", root_dir / f"assets/resources/dolphin_custom", self.logger.info)
 
         self.logger.info(f"Complete")
 
@@ -291,10 +295,10 @@ class Main(App):
         self.logger.info(f"Processing Dolphin sources")
         dolphin = Dolphin()
         self.logger.info(f"Loading data")
-        if not f"dolphin{os.sep}external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
-            dolphin.load([self.args.input_directory])
+        if f"dolphin{os.sep}external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
+            dolphin.load(self.args.input_directory, valid_dirs)
         else:
-            dolphin.load(valid_dirs)
+            dolphin.load(self.args.input_directory)
         self.logger.info(f"Packing")
         dolphin.pack(self.args.output_directory, self.args.symbol_name)
         self.logger.info(f"Complete")

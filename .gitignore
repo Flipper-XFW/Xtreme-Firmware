@@ -67,6 +67,8 @@ PVS-Studio.log
 # Automate files, etc
 automate.py
 deployments/
+assets/dolphin/custom/
+assets/resources/dolphin_custom/
 fbt_options.py
 commitnotes.md
 lib/STM32CubeWB

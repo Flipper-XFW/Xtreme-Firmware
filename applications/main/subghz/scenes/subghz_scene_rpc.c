@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 typedef enum {
     SubGhzRpcStateIdle,
@@ -11,23 +11,16 @@ typedef enum {
 void subghz_scene_rpc_on_enter(void* context) {
     SubGhz* subghz = context;
     Popup* popup = subghz->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "Sub-GHz", 89, 42, AlignCenter, AlignBottom);
     popup_set_text(popup, "RPC mode", 89, 44, AlignCenter, AlignTop);
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 0, 12, &I_RFIDDolphinSend_97x61_sfw);
-    } else {
-        popup_set_icon(popup, 0, 12, &I_RFIDDolphinSend_97x61);
-    }
+    popup_set_icon(popup, 0, 12, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdPopup);
 
     scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateIdle);
 
     notification_message(subghz->notifications, &sequence_display_backlight_on);
-    free(settings);
 }
 
 bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {

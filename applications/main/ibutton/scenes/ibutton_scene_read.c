@@ -1,6 +1,6 @@
 #include "../ibutton_i.h"
 #include <dolphin/dolphin.h>
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 static void ibutton_scene_read_callback(void* context) {
     iButton* ibutton = context;
@@ -12,16 +12,10 @@ void ibutton_scene_read_on_enter(void* context) {
     Popup* popup = ibutton->popup;
     iButtonKey* key = ibutton->key;
     iButtonWorker* worker = ibutton->key_worker;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "iButton", 95, 26, AlignCenter, AlignBottom);
     popup_set_text(popup, "Waiting\nfor key ...", 95, 30, AlignCenter, AlignTop);
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 0, 5, &I_DolphinWait_61x59_sfw);
-    } else {
-        popup_set_icon(popup, 0, 5, &I_DolphinWait_61x59);
-    }
+    popup_set_icon(popup, 0, 5, XTREME_ASSETS()->I_DolphinWait_61x59);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewPopup);
     furi_string_set(ibutton->file_path, IBUTTON_APP_FOLDER);
@@ -30,7 +24,6 @@ void ibutton_scene_read_on_enter(void* context) {
     ibutton_worker_read_start(worker, key);
 
     ibutton_notification_message(ibutton, iButtonNotificationMessageReadStart);
-    free(settings);
 }
 
 bool ibutton_scene_read_on_event(void* context, SceneManagerEvent event) {

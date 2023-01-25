@@ -1,5 +1,5 @@
 #include "../ibutton_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 static void ibutton_scene_save_success_popup_callback(void* context) {
     iButton* ibutton = context;
@@ -9,14 +9,8 @@ static void ibutton_scene_save_success_popup_callback(void* context) {
 void ibutton_scene_save_success_on_enter(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
-    } else {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    }
+    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->I_DolphinNice_96x59);
     popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
 
     popup_set_callback(popup, ibutton_scene_save_success_popup_callback);
@@ -25,7 +19,6 @@ void ibutton_scene_save_success_on_enter(void* context) {
     popup_enable_timeout(popup);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewPopup);
-    free(settings);
 }
 
 bool ibutton_scene_save_success_on_event(void* context, SceneManagerEvent event) {

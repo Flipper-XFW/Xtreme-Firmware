@@ -14,7 +14,6 @@ struct DesktopMainView {
     DesktopMainViewCallback callback;
     void* context;
     TimerHandle_t poweroff_timer;
-    bool sfw_mode;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 2000
@@ -37,11 +36,6 @@ void desktop_main_set_callback(
 View* desktop_main_get_view(DesktopMainView* main_view) {
     furi_assert(main_view);
     return main_view->view;
-}
-
-void desktop_main_set_sfw_mode_state(DesktopMainView* main_view, bool sfw_mode) {
-    furi_assert(main_view);
-    main_view->sfw_mode = sfw_mode;
 }
 
 bool desktop_main_input_callback(InputEvent* event, void* context) {
@@ -69,7 +63,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
         } else if(event->key == InputKeyDown) {
             main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
         } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventLock, main_view->context); // OPENS SUBGHZ REMOTE
+            main_view->callback(DesktopMainEventLock, main_view->context);
         }
     }
 

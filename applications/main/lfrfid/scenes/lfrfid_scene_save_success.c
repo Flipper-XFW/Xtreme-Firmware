@@ -1,19 +1,13 @@
 #include "../lfrfid_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 void lfrfid_scene_save_success_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     // Clear state of data enter scene
     scene_manager_set_scene_state(app->scene_manager, LfRfidSceneSaveData, 0);
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
-    } else {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    }
+    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->I_DolphinNice_96x59);
     popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
     popup_set_context(popup, app);
     popup_set_callback(popup, lfrfid_popup_timeout_callback);
@@ -21,7 +15,6 @@ void lfrfid_scene_save_success_on_enter(void* context) {
     popup_enable_timeout(popup);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
-    free(settings);
 }
 
 bool lfrfid_scene_save_success_on_event(void* context, SceneManagerEvent event) {

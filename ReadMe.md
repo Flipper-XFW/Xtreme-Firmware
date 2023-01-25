@@ -4,7 +4,7 @@
   <img src="https://user-images.githubusercontent.com/55334727/210267703-bf9a4181-30a6-4735-a288-431d5d2d66db.png">
 </p>
 
-[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
+[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations--Asset-Packs) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
 -----
 
 This firmware is a complete overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), it also features some of the badly implemented ideas from RogueMaster, and lots of awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
@@ -28,11 +28,33 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 
 -----
 <br>
-<h2 align="center">Animations:</h2>
+<h2 align="center">Animations / Asset Packs:</h2>
 
-This firmware contains NSFW animations and uses these in stock (NSFW) mode.
+We created our own, new & improved Animation / Asset system, that we can finally reveal. It lets you to create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations and Icons like never before.
 
-The animations are tied to the level system. Each level you reach, unlocks a new animation. The higher your level, the more lewd it will become. Rumors have it, I'm  to be found in at least one of those too
+<img src="https://user-images.githubusercontent.com/55334727/214010675-9eddb8f5-1dd6-4cf4-a0ee-e37af8b6c933.PNG" align="left" width="200px"/>
+You can easily create your own pack, or find some user made ones in the discord channel. Check <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/1.-File-Formats">here</a> for a tutorial on creating your own. Essentially, we got our own <code>Anims</code> & <code>Icons</code> folders, inside each <code>Asset Pack</code>.
+
+<br clear="left"/>
+
+<img src="https://user-images.githubusercontent.com/55334727/214016338-95a619c7-88d2-4db5-bb7a-75282d9082b8.png" align="left" width="200px"/>
+Once you have some packs, upload them to your Flipper in <code>SD/dolphin_custom</code> (if you did this right you should see <code>SD/dolphin_custom/PackName/Anims</code> and/or <code>SD/dolphin_custom/PackName/Icons</code>).
+
+
+<br clear="left"/>
+
+<img src="https://user-images.githubusercontent.com/55334727/214013624-25dad48e-72ea-4a90-9060-66e137e0d61a.png" align="left" width="200px"/>
+After installing the packs to Flipper, hit the <code>Arrow UP</code> button on the main menu and go to <code>Xtreme Settings</code>. Here choose which pack you want and tweak the other settings how you prefer, then press back to reboot and enjoy your new assets & animations!
+
+<br clear="left"/>
+
+-----
+<br>
+<h2 align="center">Levels:</h2>
+
+This firmware contains some NSFW animations to bring a twist to the boring community, and added a fun leveling-system around them, that you can easily add to your own `Asset Packs`.
+
+The idle_animations are tied to the level system. Each level you reach, unlocks a new animation. The higher your level, the more lewd it will become. Rumors have it, I'm  to be found in at least one of those too
 
 | Level  | Animations |
 | ------------- | ------------- |
@@ -40,7 +62,7 @@ The animations are tied to the level system. Each level you reach, unlocks a new
 | 11-20 | Some tits, maybe an ass |
 | 21-30 | Fully NSFW, graphic scenes |
 
-If you dont like that, we added an SFW mode to the Firmware. From the main menu, hit `Arrow UP` and select SFW mode and now all assets will be stock.
+By default, SFW mode is selected, but if you want to enable all of the above simply hit `Arrow UP` from the main menu, select `Xtreme Settings` and change to NSFW graphics.
 
 -----
 <br>
@@ -51,30 +73,31 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 ```txt
 [Added]
 
-- SFW Mode
+- Xtreme App
+- Asset Packs
+- More UI options
+- A new battery display-type
+- Scrolling view for long file names in browser
+- NSFW Animations tied to the level system. Read more above
+- Folder handling for empty ones (Now indicate they are empty)
+
 - Jamming Files
 - Custom subghz presets
-- Added new Battery display-type
+- Multiple NFC protocols
 - Subghz and IR signal replication via gpio | Credits to @ankris812
 - Honda Keys (CVE-2022-27254) & Ford blockers
-- NSFW Animations tied to the level system. Read more above
+
 - New API Routes for Locale settings
-- Scrolling view for long file names in browser
-- Tamagotchi rom
 ```
 ```txt
 [Updated]
 
-- All graphics
+- All Assets
+
+- Tons of apps
+- Massive compiler re-do
 - About 1k files to speed things up a lot
-- Folder handling for empty ones (Now indicate they are empty)
-- Applications now use the new Locale setting
-- Compiler now handles all non-compiled faps during build
-- Compiler now accepts WIP SDK 
-- Compiler just stfu about non-fatal problems
-- Some further NFC stuff
-- Weather App
-- Applications now use above mentioned API Routes
+- Applications to now use the new Locale setting
 ```
 ```txt
 [Fixed]
@@ -89,7 +112,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 
 - Unused Dummy Mode
 - Broken apps (bad apple, chess, etc.)
-- Unused code from FAPs and system calls
+- Tons of unused code from FAPs and system calls
 ```
 
 ----

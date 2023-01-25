@@ -20,6 +20,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Renault TPMS preamble+sync found");
 
+    info->start_off = off;
     off += sync_len; /* Skip preamble + sync. */
 
     uint8_t raw[10];
@@ -37,24 +38,24 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     for (int j = 1; j < 10; j++) crc ^= raw[j];
     if (crc != 0) return false; /* Require sane checksum. */
 
+    info->pulses_count = (off+8*10*2) - info->start_off;
+
     int repeat = raw[5] & 0xf;
     float kpa = (float)raw[6]*1.364;
     int temp = raw[7]-50;
     int battery = raw[8]; /* This may be the battery. It's not clear. */
 
-    snprintf(info->name,sizeof(info->name),"%s","Citroen TPMS");
-    snprintf(info->raw,sizeof(info->raw),
-        "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-        raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
-        raw[6],raw[7],raw[8],raw[9]);
-    snprintf(info->info1,sizeof(info->info1),"Tire ID %02X%02X%02X%02X",
-        raw[1],raw[2],raw[3],raw[4]);
-    snprintf(info->info2,sizeof(info->info2),"Pressure %.2f kpa", (double)kpa);
-    snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp);
-    snprintf(info->info4,sizeof(info->info4),"Repeat %d, Bat %d", repeat, battery);
+    fieldset_add_bytes(info->fieldset,"Tire ID",raw+1,4*2);
+    fieldset_add_float(info->fieldset,"Pressure kpa",kpa,2);
+    fieldset_add_int(info->fieldset,"Temperature C",temp,8);
+    fieldset_add_uint(info->fieldset,"Repeat",repeat,4);
+    fieldset_add_uint(info->fieldset,"Battery",battery,8);
     return true;
 }
 
 ProtoViewDecoder CitroenTPMSDecoder = {
-    "Citroen TPMS", decode
+    .name = "Citroen TPMS",
+    .decode = decode,
+    .get_fields = NULL,
+    .build_message = NULL
 };

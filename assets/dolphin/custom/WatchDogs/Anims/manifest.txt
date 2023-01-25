@@ -1,0 +1,142 @@
+Filetype: Flipper Animation Manifest
+Version: 1
+
+Name: BOTTY_CALL
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: DEDSEC_AD
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: DEDSEC_ANIM
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: DEDSEC_ASCII
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: DEDSEC_LOGO
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: DEDSEC_OLD
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: DEDSEC_TALK
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: DEDSEC_WAVE
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: FINGER
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: GUNS_CAR
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: HANDS
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: JOIN_US
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: LOGO_WD2
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: MARCUS
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: MUMMY
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: REAPER
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: REAPER_ALT
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: SKULL
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: SKULL_SPIN
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: SPIRAL
+Min butthurt: 0
+Max butthurt: 18
+Min level: 1
+Max level: 30
+Weight: 3
