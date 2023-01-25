@@ -1,6 +1,7 @@
 #include "../xtreme_settings_app.h"
 #include <lib/toolbox/value_index.h>
 #include <power/power_service/power.h>
+#include <lib/toolbox/version.h>
 
 static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
@@ -225,6 +226,14 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, app->subghz_bypass);
     variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
+
+    FuriString* version_tag = furi_string_alloc_printf("%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
+    item = variable_item_list_add(
+        var_item_list,
+        furi_string_get_cstr(version_tag),
+        0,
+        NULL,
+        app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeSettingsAppViewVarItemList);
 }
