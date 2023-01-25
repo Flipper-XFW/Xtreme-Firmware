@@ -5,7 +5,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
-#include "applications/settings/desktop_settings/desktop_settings_app.h"
 
 #define TAG "Dice Roller"
 
@@ -22,7 +21,6 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
-    DesktopSettings* desktop_settings;
     FuriHalRtcDateTime datetime;
     uint8_t diceSelect;
     uint8_t diceQty;
@@ -430,7 +428,6 @@ static void dice_state_init(DiceState* const state) {
     state->playerOneScore = 0;
     state->playerTwoScore = 0;
     state->letsRoll = false;
-    state->desktop_settings = malloc(sizeof(DesktopSettings));
 }
 
 static void dice_tick(void* ctx) {
@@ -470,7 +467,6 @@ int32_t dice_app(void* p) {
         return 255;
     }
 
-    DESKTOP_SETTINGS_LOAD(plugin_state->desktop_settings);
 
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, plugin_state);
@@ -510,11 +506,7 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 20) {
                             plugin_state->diceSelect = 100;
                         } else if(plugin_state->diceSelect == 100) {
-                            if(plugin_state->desktop_settings->is_sfwmode) {
-                                plugin_state->diceSelect = 231;
-                            } else {
-                                plugin_state->diceSelect = 230;
-                            }
+                            plugin_state->diceSelect = 230;
                         } else if(plugin_state->diceSelect == 230) {
                             plugin_state->playerOneScore = 0;
                             plugin_state->playerTwoScore = 0;
@@ -524,11 +516,7 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 229) {
                             plugin_state->diceSelect = 228;
                         } else if(plugin_state->diceSelect == 228) {
-                            if(plugin_state->desktop_settings->is_sfwmode) {
-                                plugin_state->diceSelect = 59;
-                            } else {
-                                plugin_state->diceSelect = 232;
-                            }
+                            plugin_state->diceSelect = 232;
                         } else if(plugin_state->diceSelect == 232) {
                             plugin_state->diceSelect = 59;
                         } else if(plugin_state->diceSelect == 59) {
@@ -571,7 +559,6 @@ int32_t dice_app(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(plugin_state->event_queue);
     furi_mutex_free(plugin_state->mutex);
-    free(plugin_state->desktop_settings);
     free(plugin_state);
     return 0;
 }

@@ -1,5 +1,5 @@
 #include "../lfrfid_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 static void lfrfid_write_callback(LFRFIDWorkerWriteResult result, void* context) {
     LfRfid* app = context;
@@ -21,8 +21,6 @@ static void lfrfid_write_callback(LFRFIDWorkerWriteResult result, void* context)
 void lfrfid_scene_write_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "Writing", 89, 30, AlignCenter, AlignTop);
     if(!furi_string_empty(app->file_name)) {
@@ -36,11 +34,7 @@ void lfrfid_scene_write_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
-    } else {
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
-    }
+    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
 
@@ -51,7 +45,6 @@ void lfrfid_scene_write_on_enter(void* context) {
     lfrfid_worker_write_start(
         app->lfworker, (LFRFIDProtocol)app->protocol_id, lfrfid_write_callback, app);
     notification_message(app->notifications, &sequence_blink_start_magenta);
-    free(settings);
 }
 
 bool lfrfid_scene_write_on_event(void* context, SceneManagerEvent event) {

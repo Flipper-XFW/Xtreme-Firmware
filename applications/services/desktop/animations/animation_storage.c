@@ -11,43 +11,63 @@
 #include "animation_storage_i.h"
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 #define ANIMATION_META_FILE "meta.txt"
-#define ANIMATION_DIR EXT_PATH("dolphin")
+#define BASE_ANIMATION_DIR EXT_PATH("dolphin")
 #define TAG "AnimationStorage"
 /* Unused old code, for safe-keeping
 
 #define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 
 */
-char ANIMATION_MANIFEST_FILE[30];
+// 59 Max length = strlen("/ext/dolphin_custom//Anims") + MAX_PACK_NAME_LEN + 1 (Null terminator)
+char ANIMATION_DIR[59];
+// 72 Max length = ANIMATION_DIR + strlen("/manifest.txt")
+char ANIMATION_MANIFEST_FILE[72];
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);
 static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
-void animation_handler_beta() {
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-
-    if(settings->sfw_mode) {
-        snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
-        FURI_LOG_I(TAG, "SFW Manifest selected");
-        strcat(ANIMATION_MANIFEST_FILE, "/sfw/manifest.txt");
-    } else {
-        snprintf(ANIMATION_MANIFEST_FILE, sizeof(ANIMATION_DIR), "%s", ANIMATION_DIR);
-        FURI_LOG_I(TAG, "NSFW Manifest selected");
-        strcat(ANIMATION_MANIFEST_FILE, "/nsfw/manifest.txt");
+void animation_handler_select_manifest() {
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
+    FuriString* anim_dir = furi_string_alloc();
+    FuriString* manifest = furi_string_alloc();
+    bool use_asset_pack = xtreme_settings->asset_pack[0] != '\0';
+    if (use_asset_pack) {
+        furi_string_printf(anim_dir, "%s/%s/Anims", PACKS_DIR, xtreme_settings->asset_pack);
+        furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        if (storage_common_stat(storage, furi_string_get_cstr(manifest), NULL) == FSE_OK) {
+            FURI_LOG_I(TAG, "Custom Manifest selected");
+        } else {
+            use_asset_pack = false;
+        }
+        furi_record_close(RECORD_STORAGE);
     }
-    free(settings);
+    if (!use_asset_pack) {
+        furi_string_set(anim_dir, BASE_ANIMATION_DIR);
+        if(xtreme_settings->nsfw_mode) {
+            furi_string_cat_str(anim_dir, "/nsfw");
+            FURI_LOG_I(TAG, "NSFW Manifest selected");
+        } else {
+            furi_string_cat_str(anim_dir, "/sfw");
+            FURI_LOG_I(TAG, "SFW Manifest selected");
+        }
+        furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
+    }
+    strlcpy(ANIMATION_DIR, furi_string_get_cstr(anim_dir), sizeof(ANIMATION_DIR));
+    strlcpy(ANIMATION_MANIFEST_FILE, furi_string_get_cstr(manifest), sizeof(ANIMATION_MANIFEST_FILE));
+    furi_string_free(manifest);
+    furi_string_free(anim_dir);
 }
 
 static bool animation_storage_load_single_manifest_info(
     StorageAnimationManifestInfo* manifest_info,
     const char* name) {
     furi_assert(manifest_info);
-    animation_handler_beta();
+    animation_handler_select_manifest();
     bool result = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -103,7 +123,7 @@ static bool animation_storage_load_single_manifest_info(
 void animation_storage_fill_animation_list(StorageAnimationList_t* animation_list) {
     furi_assert(sizeof(StorageAnimationList_t) == sizeof(void*));
     furi_assert(!StorageAnimationList_size(*animation_list));
-    animation_handler_beta();
+    animation_handler_select_manifest();
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -319,7 +339,7 @@ static bool animation_storage_load_frames(
 
     for(int i = 0; i < icon->frame_count; ++i) {
         frames_ok = false;
-        furi_string_printf(filename, ANIMATION_DIR "/%s/frame_%d.bm", name, i);
+        furi_string_printf(filename, "%s/%s/frame_%d.bm", ANIMATION_DIR, name, i);
 
         if(storage_common_stat(storage, furi_string_get_cstr(filename), &file_info) != FSE_OK)
             break;
@@ -471,7 +491,7 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
 
         if(FSE_OK != storage_sd_status(storage)) break;
 
-        furi_string_printf(str, ANIMATION_DIR "/%s/" ANIMATION_META_FILE, name);
+        furi_string_printf(str, "%s/%s/" ANIMATION_META_FILE, ANIMATION_DIR, name);
         if(!flipper_format_file_open_existing(ff, furi_string_get_cstr(str))) break;
         if(!flipper_format_read_header(ff, str, &u32value)) break;
         if(furi_string_cmp_str(str, "Flipper Animation")) break;
@@ -505,6 +525,11 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         if(!flipper_format_read_uint32(ff, "Active cycles", &u32value, 1)) break; //-V779
         animation->active_cycles = u32value;
         if(!flipper_format_read_uint32(ff, "Frame rate", &u32value, 1)) break;
+        uint16_t anim_speed = XTREME_SETTINGS()->anim_speed;
+        anim_speed = (anim_speed == 0 ? 100 : anim_speed);
+        u32value = (u32value * anim_speed) / 100;
+        u32value = u32value < 1 ? 1 : u32value;
+        u32value = u32value > 10 ? 10 : u32value;
         FURI_CONST_ASSIGN(animation->icon_animation.frame_rate, u32value);
         if(!flipper_format_read_uint32(ff, "Duration", &u32value, 1)) break;
         animation->duration = u32value;

@@ -13,7 +13,7 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define TAG "AnimationManager"
 
@@ -54,7 +54,6 @@ struct AnimationManager {
     FuriString* freezed_animation_name;
     int32_t freezed_animation_time_left;
     ViewStack* view_stack;
-    bool sfw_mode;
 };
 
 static StorageAnimation*
@@ -66,7 +65,8 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
 static bool animation_manager_check_blocking(AnimationManager* animation_manager);
 static bool animation_manager_is_valid_idle_animation(
     const StorageAnimationManifestInfo* info,
-    const DolphinStats* stats);
+    const DolphinStats* stats,
+    const bool unlock);
 static void animation_manager_switch_to_one_shot_view(AnimationManager* animation_manager);
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager);
 
@@ -145,7 +145,7 @@ void animation_manager_check_blocking_process(AnimationManager* animation_manage
 
             const StorageAnimationManifestInfo* manifest_info =
                 animation_storage_get_meta(animation_manager->current_animation);
-            bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
+            bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, XTREME_SETTINGS()->unlock_anims);
 
             if(!valid) {
                 animation_manager_start_new_idle(animation_manager);
@@ -200,11 +200,9 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-    int32_t duration_s = settings->cycle_animation_s == -1 ? bubble_animation->duration : (settings->cycle_animation_s - 1);
-    furi_timer_start(animation_manager->idle_animation_timer, duration_s * 1000);
-    free(settings);
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
+    int32_t duration = (xtreme_settings->cycle_anims == 0) ? (bubble_animation->duration) : (xtreme_settings->cycle_anims);
+    furi_timer_start(animation_manager->idle_animation_timer, (duration > 0) ? (duration * 1000) : 0);
 }
 
 static bool animation_manager_check_blocking(AnimationManager* animation_manager) {
@@ -336,7 +334,8 @@ View* animation_manager_get_animation_view(AnimationManager* animation_manager) 
 
 static bool animation_manager_is_valid_idle_animation(
     const StorageAnimationManifestInfo* info,
-    const DolphinStats* stats) {
+    const DolphinStats* stats,
+    const bool unlock) {
     furi_assert(info);
     furi_assert(info->name);
 
@@ -356,11 +355,13 @@ static bool animation_manager_is_valid_idle_animation(
 
         result = (sd_status == FSE_NOT_READY);
     }
-    if((stats->butthurt < info->min_butthurt) || (stats->butthurt > info->max_butthurt)) {
-        result = false;
-    }
-    if((stats->level < info->min_level) || (stats->level > info->max_level)) {
-        result = false;
+    if (!unlock) {
+        if((stats->butthurt < info->min_butthurt) || (stats->butthurt > info->max_butthurt)) {
+            result = false;
+        }
+        if((stats->level < info->min_level) || (stats->level > info->max_level)) {
+            result = false;
+        }
     }
 
     return result;
@@ -368,7 +369,10 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    UNUSED(animation_manager);
+    const char* old_animation_name = NULL;
+    if (animation_manager->current_animation) {
+        old_animation_name = animation_storage_get_meta(animation_manager->current_animation)->name;
+    }
 
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
@@ -380,11 +384,18 @@ static StorageAnimation*
     uint32_t whole_weight = 0;
 
     StorageAnimationList_it_t it;
+    bool unlock = XTREME_SETTINGS()->unlock_anims;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationManifestInfo* manifest_info =
             animation_storage_get_meta(storage_animation);
-        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
+        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
+
+        if (old_animation_name != NULL) {
+            if (strcmp(manifest_info->name, old_animation_name) == 0) {
+                valid = false;
+            }
+        }
 
         if(valid) {
             whole_weight += manifest_info->weight;
@@ -396,7 +407,7 @@ static StorageAnimation*
         }
     }
 
-    uint32_t lucky_number = furi_hal_random_get() % whole_weight;
+    uint32_t lucky_number = furi_hal_random_get() % (whole_weight != 0 ? whole_weight : 1);
     uint32_t weight = 0;
 
     StorageAnimation* selected = NULL;
@@ -501,7 +512,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                 furi_record_close(RECORD_DOLPHIN);
                 const StorageAnimationManifestInfo* manifest_info =
                     animation_storage_get_meta(restore_animation);
-                bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
+                bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, XTREME_SETTINGS()->unlock_anims);
                 if(valid) {
                     animation_manager_replace_current_animation(
                         animation_manager, restore_animation);
@@ -512,14 +523,12 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                             animation_manager->idle_animation_timer,
                             animation_manager->freezed_animation_time_left);
                     } else {
-                        const BubbleAnimation* animation = animation_storage_get_bubble_animation(
+                        const BubbleAnimation* bubble_animation = animation_storage_get_bubble_animation(
                             animation_manager->current_animation);
-                        DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-                        DESKTOP_SETTINGS_LOAD(settings);
-                        int32_t duration_s = settings->cycle_animation_s == -1 ? animation->duration : (settings->cycle_animation_s - 1);
+                        XtremeSettings* xtreme_settings = XTREME_SETTINGS();
+                        int32_t duration = (xtreme_settings->cycle_anims == 0) ? (bubble_animation->duration) : (xtreme_settings->cycle_anims);
                         furi_timer_start(
-                            animation_manager->idle_animation_timer, duration_s * 1000);
-                        free(settings);
+                            animation_manager->idle_animation_timer, (duration > 0) ? (duration * 1000) : 0);
                     }
                 }
             } else {
@@ -554,8 +563,6 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
     furi_record_close(RECORD_DOLPHIN);
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     animation_manager->one_shot_view = one_shot_view_alloc();
     one_shot_view_set_interact_callback(
@@ -564,7 +571,9 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    if(settings->sfw_mode) {
+    if(XTREME_SETTINGS()->nsfw_mode) {
+        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
+    } else {
         if(stats.level <= 20) {
             one_shot_view_start_animation(
                 animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
@@ -574,10 +583,7 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
         } else {
             furi_assert(0);
         }
-    } else {
-        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
     }
-    free(settings);
 }
 
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager) {

@@ -1,5 +1,5 @@
 #include "../power_settings_app.h"
-#include "../../desktop_settings/desktop_settings_app.h"
+#include "../../xtreme_settings/xtreme_assets.h"
 
 void power_settings_scene_power_off_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
@@ -11,26 +11,21 @@ void power_settings_scene_power_off_on_enter(void* context) {
     PowerSettingsApp* app = context;
     DialogEx* dialog = app->dialog;
 
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-
     dialog_ex_set_header(dialog, "Turn Off Device?", 64, 2, AlignCenter, AlignTop);
-    if(settings->sfw_mode) {
-        dialog_ex_set_text(
-            dialog, "   I will be\nwaiting for\n you here", 78, 16, AlignLeft, AlignTop);
-        dialog_ex_set_icon(dialog, 21, 13, &I_Cry_dolph_55x52_sfw);
-    } else {
+    if(XTREME_SETTINGS()->nsfw_mode) {
         dialog_ex_set_text(
             dialog, "   I will be\nwaiting for\n you master", 78, 16, AlignLeft, AlignTop);
-        dialog_ex_set_icon(dialog, 21, 13, &I_Cry_dolph_55x52);
+    } else {
+        dialog_ex_set_text(
+            dialog, "   I will be\nwaiting for\n you here", 78, 16, AlignLeft, AlignTop);
     }
+    dialog_ex_set_icon(dialog, 21, 13, XTREME_ASSETS()->I_Cry_dolph_55x52);
     dialog_ex_set_left_button_text(dialog, "Back");
     dialog_ex_set_right_button_text(dialog, "OFF");
     dialog_ex_set_result_callback(dialog, power_settings_scene_power_off_dialog_callback);
     dialog_ex_set_context(dialog, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, PowerSettingsAppViewDialog);
-    free(settings);
 }
 
 bool power_settings_scene_power_off_on_event(void* context, SceneManagerEvent event) {

@@ -5,7 +5,7 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
-#include "applications/settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define LOCK_MENU_ITEMS_NB 5
 
@@ -13,7 +13,7 @@ typedef enum {
     DesktopLockMenuIndexLock,
     DesktopLockMenuIndexPinLock,
     DesktopLockMenuIndexPinLockShutdown,
-    DesktopLockMenuIndexSFW,
+    DesktopLockMenuIndexXtremeSettings,
 
     DesktopLockMenuIndexTotalCount
 } DesktopLockMenuIndex;
@@ -34,11 +34,6 @@ void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is
         DesktopLockMenuViewModel * model,
         { model->pin_is_set = pin_is_set; },
         true);
-}
-
-void desktop_lock_menu_set_sfw_mode_state(DesktopLockMenuView* lock_menu, bool sfw_mode) {
-    with_view_model(
-        lock_menu->view, DesktopLockMenuViewModel * model, { model->sfw_mode = sfw_mode; }, true);
 }
 
 void desktop_lock_menu_set_idx(DesktopLockMenuView* lock_menu, uint8_t idx) {
@@ -72,12 +67,8 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             } else {
                 str = "Set PIN + Off";
             }
-        } else if(i == DesktopLockMenuIndexSFW) {
-            if(m->sfw_mode) {
-                str = "NSFW Mode";
-            } else {
-                str = "SFW Mode";
-            }
+        } else if(i == DesktopLockMenuIndexXtremeSettings) {
+                str = "Xtreme Settings";
         }
 
         if(str) //-V547
@@ -100,7 +91,6 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     DesktopLockMenuView* lock_menu = context;
     uint8_t idx = 0;
     bool consumed = false;
-    bool sfw_mode = false;
     bool update = false;
 
     with_view_model(
@@ -127,7 +117,6 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 }
             }
             idx = model->idx;
-            sfw_mode = model->sfw_mode;
         },
         update);
 
@@ -138,17 +127,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
         } else if((idx == DesktopLockMenuIndexPinLockShutdown) && (event->type == InputTypeShort)) {
             lock_menu->callback(DesktopLockMenuEventPinLockShutdown, lock_menu->context);
-            // } else if((idx == DesktopLockMenuIndexGameMode) && (event->type == InputTypeShort)) {
-            // desktop_view_lock_menu_sfwmode_changed(1);
-            // DOLPHIN_DEED(getRandomDeed());
-            // lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
-        } else if(idx == DesktopLockMenuIndexSFW) {
-            // DOLPHIN_DEED(getRandomDeed());
-            if((sfw_mode == false) && (event->type == InputTypeShort)) {
-                lock_menu->callback(DesktopLockMenuEventSFWModeOn, lock_menu->context);
-            } else if((sfw_mode == true) && (event->type == InputTypeShort)) {
-                lock_menu->callback(DesktopLockMenuEventSFWModeOff, lock_menu->context);
-            }
+        } else if((idx == DesktopLockMenuIndexXtremeSettings) && (event->type == InputTypeShort)) {
+            lock_menu->callback(DesktopLockMenuEventXtremeSettings, lock_menu->context);
         }
         consumed = true;
     }

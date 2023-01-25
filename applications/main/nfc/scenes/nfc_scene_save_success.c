@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 void nfc_scene_save_success_popup_callback(void* context) {
     Nfc* nfc = context;
@@ -8,23 +8,16 @@ void nfc_scene_save_success_popup_callback(void* context) {
 
 void nfc_scene_save_success_on_enter(void* context) {
     Nfc* nfc = context;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     // Setup view
     Popup* popup = nfc->popup;
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59_sfw);
-    } else {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    }
+    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->I_DolphinNice_96x59);
     popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, nfc);
     popup_set_callback(popup, nfc_scene_save_success_popup_callback);
     popup_enable_timeout(popup);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
-    free(settings);
 }
 
 bool nfc_scene_save_success_on_event(void* context, SceneManagerEvent event) {

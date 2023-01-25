@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (100)
 
@@ -38,14 +38,7 @@ static void nfc_scene_emulate_nfcv_widget_config(Nfc* nfc, bool data_received) {
     FuriString* info_str;
     info_str = furi_string_alloc();
 
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
-
-    if(settings->sfw_mode) {
-        widget_add_icon_element(widget, 0, 3, &I_RFIDDolphinSend_97x61_sfw);
-    } else {
-        widget_add_icon_element(widget, 0, 3, &I_RFIDDolphinSend_97x61);
-    }
+    widget_add_icon_element(widget, 0, 3, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
 
     widget_add_string_element(
         widget, 89, 32, AlignCenter, AlignTop, FontPrimary, "Emulating NfcV");
@@ -64,7 +57,6 @@ static void nfc_scene_emulate_nfcv_widget_config(Nfc* nfc, bool data_received) {
         widget_add_button_element(
             widget, GuiButtonTypeCenter, "Log", nfc_scene_emulate_nfcv_widget_callback, nfc);
     }
-    free(settings);
 }
 
 void nfc_scene_emulate_nfcv_on_enter(void* context) {

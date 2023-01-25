@@ -36,13 +36,6 @@
 #define MIN_PIN_SIZE 4
 #define MAX_APP_LENGTH 128
 
-#define DISPLAY_BATTERY_BAR 0
-#define DISPLAY_BATTERY_PERCENT 1
-#define DISPLAY_BATTERY_INVERTED_PERCENT 2
-#define DISPLAY_BATTERY_RETRO_3 3
-#define DISPLAY_BATTERY_RETRO_5 4
-#define DISPLAY_BATTERY_BAR_PERCENT 5
-
 #define FAP_LOADER_APP_NAME "Applications"
 
 typedef struct {
@@ -61,8 +54,4 @@ typedef struct {
     PinCode pin_code;
     uint8_t is_locked;
     uint32_t auto_lock_delay_ms;
-    uint8_t displayBatteryPercentage;
-    bool is_sfwmode;
-    uint8_t sfw_mode;
-    int32_t cycle_animation_s;
 } DesktopSettings;

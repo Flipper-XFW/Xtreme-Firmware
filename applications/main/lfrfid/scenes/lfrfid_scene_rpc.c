@@ -1,26 +1,19 @@
 #include "../lfrfid_i.h"
-#include "../../../settings/desktop_settings/desktop_settings_app.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 void lfrfid_scene_rpc_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    DESKTOP_SETTINGS_LOAD(settings);
 
     popup_set_header(popup, "LF RFID", 89, 42, AlignCenter, AlignBottom);
     popup_set_text(popup, "RPC mode", 89, 44, AlignCenter, AlignTop);
-    if(settings->sfw_mode) {
-        popup_set_icon(popup, 0, 12, &I_RFIDDolphinSend_97x61_sfw);
-    } else {
-        popup_set_icon(popup, 0, 12, &I_RFIDDolphinSend_97x61);
-    }
+    popup_set_icon(popup, 0, 12, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
 
     notification_message(app->notifications, &sequence_display_backlight_on);
 
     app->rpc_state = LfRfidRpcStateIdle;
-    free(settings);
 }
 
 bool lfrfid_scene_rpc_on_event(void* context, SceneManagerEvent event) {
