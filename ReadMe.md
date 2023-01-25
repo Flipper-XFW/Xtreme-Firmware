@@ -19,6 +19,8 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 <br><br>
 - The focus of this firmware is functionality & stability: If an App doesnt work, its gone
 
+- Asset Packs: Are you tired of having to remake your custom animations after every update, switching manifests and having a hard time sharing them, especially once you modify scanning assets too? Those times are over. Scroll down to learn more
+
 - Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
 
 - Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all built with perfection in mind and integrated in a mostly clean way. I invite you all to compare the code with theirs.
