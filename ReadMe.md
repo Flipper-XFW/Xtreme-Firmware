@@ -30,20 +30,21 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 <br>
 <h2 align="center">Animations / Asset Packs:</h2>
 
-We created our own, new & improved Animation / Asset system, that we can finally reveal. It allows you to create and cycle through your own `Asset Packs` with only a few button presses, and by using a toggle in the firmware. 
+We created our own, new & improved Animation / Asset system, that we can finally reveal. It lets you to create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations and Icons like never before.
 
 <img src="https://user-images.githubusercontent.com/55334727/214010675-9eddb8f5-1dd6-4cf4-a0ee-e37af8b6c933.PNG" align="left" width="200px"/>
-First, you create your new Pack. For a in-depth tutorial on how to do this, go [here](https://wikilink.com). Essentially, we got our own <code>Anims, Passport & Icons</code> folder, inside each <code>Asset Pack</code>.
+You can easily create your own pack, or find some user made ones in the discord channel. Check <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/1.-File-Formats">here</a> for a tutorial on creating your own. Essentially, we got our own <code>Anims</code> & <code>Icons</code> folders, inside each <code>Asset Pack</code>.
 
 <br clear="left"/>
 
 <img src="https://user-images.githubusercontent.com/55334727/214016338-95a619c7-88d2-4db5-bb7a-75282d9082b8.png" align="left" width="200px"/>
-After you have created these / copied them to the flipper, hit the <code>Arrow UP</code> button on the main Menu and hit <code>Xtreme Settings</code> to find the settings. Then simply select the desired folder & do any other wanted modifications to the flipper device and exit the App to apply changes and restart the device
+Once you have some packs, upload them to your Flipper in <code>SD/dolphin_custom</code> (if you did this right you should see <code>SD/dolphin_custom/PackName/Anims</code> and/or <code>SD/dolphin_custom/PackName/Icons</code>).
+
 
 <br clear="left"/>
 
 <img src="https://user-images.githubusercontent.com/55334727/214013624-25dad48e-72ea-4a90-9060-66e137e0d61a.png" align="left" width="200px"/>
-Now its time to enjoy your new assets & animations!
+After installing the packs to Flipper, hit the <code>Arrow UP</code> button on the main menu and go to <code>Xtreme Settings</code>. Here choose which pack you want and tweak the other settings how you prefer, then press back to reboot and enjoy your new assets & animations!
 
 <br clear="left"/>
 
