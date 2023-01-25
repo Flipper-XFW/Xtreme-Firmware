@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,12.3,,
+Version,v,12.7,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -571,9 +571,13 @@ Function,+,ble_glue_wait_for_c2_start,_Bool,int32_t
 Function,-,bsearch,void*,"const void*, const void*, size_t, size_t, __compar_fn_t"
 Function,+,bt_disconnect,void,Bt*
 Function,+,bt_forget_bonded_devices,void,Bt*
+Function,?,bt_get_profile_adv_name,const char*,Bt*
+Function,?,bt_get_profile_mac_address,const uint8_t*,Bt*
 Function,+,bt_keys_storage_set_default_path,void,Bt*
 Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
-Function,+,bt_set_profile,_Bool,"Bt*, BtProfile"
+Function,?,bt_set_profile,_Bool,"Bt*, BtProfile"
+Function,?,bt_set_profile_adv_name,void,"Bt*, const char*, ..."
+Function,?,bt_set_profile_mac_address,void,"Bt*, const uint8_t[6]"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
@@ -603,15 +607,7 @@ Function,+,byte_input_set_result_callback,void,"ByteInput*, ByteInputCallback, B
 Function,-,bzero,void,"void*, size_t"
 Function,-,calloc,void*,"size_t, size_t"
 Function,+,canvas_clear,void,Canvas*
-<<<<<<< HEAD
-Function,+,canvas_commit,void,Canvas*
-=======
-<<<<<<< HEAD
 Function,-,canvas_commit,void,Canvas*
-=======
-Function,+,canvas_commit,void,Canvas*
->>>>>>> b11b9f1b3 (Gui: Direct Draw API (#2215))
->>>>>>> e04f2b4ce (api_symbols)
 Function,+,canvas_current_font_height,uint8_t,Canvas*
 Function,+,canvas_draw_bitmap,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, const uint8_t*"
 Function,+,canvas_draw_box,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
@@ -640,15 +636,7 @@ Function,+,canvas_glyph_width,uint8_t,"Canvas*, char"
 Function,+,canvas_height,uint8_t,Canvas*
 Function,-,canvas_init,Canvas*,
 Function,+,canvas_invert_color,void,Canvas*
-<<<<<<< HEAD
-Function,+,canvas_reset,void,Canvas*
-=======
-<<<<<<< HEAD
 Function,-,canvas_reset,void,Canvas*
-=======
-Function,+,canvas_reset,void,Canvas*
->>>>>>> b11b9f1b3 (Gui: Direct Draw API (#2215))
->>>>>>> e04f2b4ce (api_symbols)
 Function,+,canvas_set_bitmap_mode,void,"Canvas*, _Bool"
 Function,+,canvas_set_color,void,"Canvas*, Color"
 Function,+,canvas_set_font,void,"Canvas*, Font"
@@ -1012,12 +1000,15 @@ Function,+,furi_hal_bt_clear_white_list,_Bool,
 Function,+,furi_hal_bt_dump_state,void,FuriString*
 Function,+,furi_hal_bt_ensure_c2_mode,_Bool,BleGlueC2Mode
 Function,+,furi_hal_bt_get_key_storage_buff,void,"uint8_t**, uint16_t*"
+Function,?,furi_hal_bt_get_profile_adv_name,const char*,FuriHalBtProfile
+Function,?,furi_hal_bt_get_profile_mac_addr,const uint8_t*,FuriHalBtProfile
 Function,+,furi_hal_bt_get_radio_stack,FuriHalBtStack,
 Function,+,furi_hal_bt_get_rssi,float,
 Function,+,furi_hal_bt_get_transmitted_packets,uint32_t,
 Function,+,furi_hal_bt_hid_consumer_key_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release_all,_Bool,
+Function,?,furi_hal_bt_hid_kb_free_slots,_Bool,uint8_t
 Function,+,furi_hal_bt_hid_kb_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_kb_release,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_kb_release_all,_Bool,
@@ -1044,6 +1035,8 @@ Function,+,furi_hal_bt_serial_start,void,
 Function,+,furi_hal_bt_serial_stop,void,
 Function,+,furi_hal_bt_serial_tx,_Bool,"uint8_t*, uint16_t"
 Function,+,furi_hal_bt_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
+Function,?,furi_hal_bt_set_profile_adv_name,void,"FuriHalBtProfile, const char[( 1 + 8 + ( 8 + 1 ) )]"
+Function,?,furi_hal_bt_set_profile_mac_addr,void,"FuriHalBtProfile, const uint8_t[( 6 )]"
 Function,+,furi_hal_bt_start_advertising,void,
 Function,+,furi_hal_bt_start_app,_Bool,"FuriHalBtProfile, GapEventCallback, void*"
 Function,+,furi_hal_bt_start_packet_rx,void,"uint8_t, uint8_t"

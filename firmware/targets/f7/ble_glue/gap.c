@@ -313,7 +313,7 @@ static void gap_init_svc(Gap* gap) {
     // Initialize GATT interface
     aci_gatt_init();
     // Initialize GAP interface
-    // Skip fist symbol AD_TYPE_COMPLETE_LOCAL_NAME
+    // Skip first symbol AD_TYPE_COMPLETE_LOCAL_NAME
     char* name = gap->service.adv_name + 1;
     aci_gap_init(
         GAP_PERIPHERAL_ROLE,
@@ -362,7 +362,7 @@ static void gap_init_svc(Gap* gap) {
         keypress_supported,
         CFG_ENCRYPTION_KEY_SIZE_MIN,
         CFG_ENCRYPTION_KEY_SIZE_MAX,
-        CFG_USED_FIXED_PIN,
+        CFG_USED_FIXED_PIN,                 // 0x0 for no pin
         0,
         PUBLIC_ADDR);
     // Configure whitelist
@@ -482,6 +482,10 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     gap->advertise_timer = furi_timer_alloc(gap_advetise_timer_callback, FuriTimerTypeOnce, NULL);
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
+    FURI_LOG_I(TAG, "Advertising name: %s", &(gap->service.adv_name[1]));
+    FURI_LOG_I(TAG, "MAC @ : %02X:%02X:%02X:%02X:%02X:%02X",
+        config->mac_address[0], config->mac_address[1], config->mac_address[2],
+        config->mac_address[3], config->mac_address[4], config->mac_address[5]);
     gap_init_svc(gap);
     // Initialization of the BLE Services
     SVCCTL_Init();
