@@ -38,14 +38,15 @@ typedef enum {
     LevelRssi59_40,
     LevelRssi39_0,
     LevelRssiNum,
-} LevelRssiDelays;
+    LevelRssiError = 0xFF,
+} LevelRssiRange;
 
 const uint8_t bt_hid_delays[LevelRssiNum] = {
-    45,  // LevelRssi122_100
-    41,  // LevelRssi99_80
-    37,  // LevelRssi79_60
-    33,  // LevelRssi59_40
-    30,  // LevelRssi39_0
+    30,  // LevelRssi122_100
+    25,  // LevelRssi99_80
+    20,  // LevelRssi79_60
+    17,  // LevelRssi59_40
+    14,  // LevelRssi39_0
 };
 
 struct BadBleScript {
@@ -158,6 +159,37 @@ static const uint8_t numpad_keys[10] = {
     HID_KEYPAD_9,
 };
 
+uint8_t bt_timeout = 0;
+
+static LevelRssiRange bt_remote_rssi_range(Bt *bt) {
+
+    BtRssi rssi_data = { 0 };
+
+    if (!bt_remote_rssi(bt, &rssi_data))
+        return LevelRssiError;
+
+    if (rssi_data.rssi <= 39)
+        return LevelRssi39_0;
+    else if (rssi_data.rssi <= 59)
+        return LevelRssi59_40;
+    else if (rssi_data.rssi <= 79)
+        return LevelRssi79_60;
+    else if (rssi_data.rssi <= 99)
+        return LevelRssi99_80;
+    else if (rssi_data.rssi <= 122)
+        return LevelRssi122_100;
+    
+    return LevelRssiError;
+}
+
+static inline void update_bt_timeout(Bt *bt) {
+    
+    LevelRssiRange r = bt_remote_rssi_range(bt);
+    if (r < LevelRssiNum) {
+        bt_timeout = bt_hid_delays[r];
+    }
+}
+
 /**
  *  @brief  Wait until there are enough free slots in the keyboard buffer
  * 
@@ -200,8 +232,8 @@ static void ducky_numlock_on() {
     if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) {
         bt_hid_hold_while_keyboard_buffer_full(1, -1);
         furi_hal_bt_hid_kb_press(HID_KEYBOARD_LOCK_NUM_LOCK);
-        FURI_LOG_I(WORKER_TAG, "BT RSSI: %f\r", (double)furi_hal_bt_get_rssi());
-        furi_delay_ms(25);
+
+        furi_delay_ms(bt_timeout);
         furi_hal_bt_hid_kb_release(HID_KEYBOARD_LOCK_NUM_LOCK);
     }
 }
@@ -212,10 +244,8 @@ static bool ducky_numpad_press(const char num) {
     uint16_t key = numpad_keys[num - '0'];
     bt_hid_hold_while_keyboard_buffer_full(1, -1);
     FURI_LOG_I(WORKER_TAG, "Pressing %c\r\n", num);
-
     furi_hal_bt_hid_kb_press(key);
-    FURI_LOG_I(WORKER_TAG, "BT RSSI: %f\r", (double)furi_hal_bt_get_rssi());
-    furi_delay_ms(25);
+    furi_delay_ms(bt_timeout);
     furi_hal_bt_hid_kb_release(key);
 
     return true;
@@ -267,8 +297,8 @@ static bool ducky_string(BadBleScript* bad_ble, const char* param) {
         if(keycode != HID_KEYBOARD_NONE) {
             bt_hid_hold_while_keyboard_buffer_full(1, -1);
             furi_hal_bt_hid_kb_press(keycode);
-            FURI_LOG_I(WORKER_TAG, "BT RSSI: %f\r", (double)furi_hal_bt_get_rssi());
-            furi_delay_ms(25);
+    
+            furi_delay_ms(bt_timeout);
             furi_hal_bt_hid_kb_release(keycode);
         }
         i++;
@@ -377,8 +407,8 @@ static int32_t
         bt_hid_hold_while_keyboard_buffer_full(1, -1);
         furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
         furi_hal_bt_hid_kb_press(key);
-        FURI_LOG_I(WORKER_TAG, "BT RSSI: %f\r", (double)furi_hal_bt_get_rssi());
-        furi_delay_ms(25);
+
+        furi_delay_ms(bt_timeout);
         furi_hal_bt_hid_kb_release(key);
         furi_hal_bt_hid_kb_release(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
         return (0);
@@ -398,8 +428,8 @@ static int32_t
         }
         FURI_LOG_I(WORKER_TAG, "Special key pressed %x\r\n", key);
         furi_hal_bt_hid_kb_press(key);
-        FURI_LOG_I(WORKER_TAG, "BT RSSI: %f\r", (double)furi_hal_bt_get_rssi());
-        furi_delay_ms(25);
+
+        furi_delay_ms(bt_timeout);
         furi_hal_bt_hid_kb_release(key);
         return (0);
     }
@@ -513,9 +543,13 @@ static void bad_ble_hid_state_callback(BtStatus status, void* context) {
     BadBleScript* bad_ble = (BadBleScript*)context;
     bool state = (status == BtStatusConnected);
 
-    if(state == true)
+    if(state == true) {
+        LevelRssiRange r = bt_remote_rssi_range(bad_ble->bt);
+        if (r != LevelRssiError) {
+            bt_timeout = bt_hid_delays[r];
+        }
         furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtConnect);
-    else
+    } else
         furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtDisconnect);
 }
 
@@ -524,6 +558,8 @@ static int32_t bad_ble_worker(void* context) {
 
     BadBleWorkerState worker_state = BadBleStateInit;
     int32_t delay_val = 0;
+
+    bt_timeout = bt_hid_delays[LevelRssi39_0];
 
     // init ble hid
     bt_disconnect(bad_ble->bt);
@@ -625,6 +661,10 @@ static int32_t bad_ble_worker(void* context) {
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
                 furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
+
+                update_bt_timeout(bad_ble->bt);
+                FURI_LOG_I(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
+
                 worker_state = BadBleStateRunning;
             } else if(flags & WorkerEvtToggle) { // Cancel scheduled execution
                 worker_state = BadBleStateNotConnected;
@@ -685,6 +725,9 @@ static int32_t bad_ble_worker(void* context) {
                 break;
             }
         }
+
+        update_bt_timeout(bad_ble->bt);
+        FURI_LOG_I(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
     }
 
     // release all keys

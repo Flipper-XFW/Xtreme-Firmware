@@ -200,14 +200,14 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             break;
         }
         GapConfig* config = &profile_config[profile].config;
-        if (strlen(&(profile_config[profile].config.adv_name[1])) == 0) {
+        if(strlen(&(profile_config[profile].config.adv_name[1])) == 0) {
             // Set advertise name
             strlcpy(
                 profile_config[profile].config.adv_name,
                 furi_hal_version_get_ble_local_device_name_ptr(),
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
         }
-       // Configure GAP
+        // Configure GAP
         if(profile == FuriHalBtProfileSerial) {
             // Set mac address
             memcpy(
@@ -425,6 +425,23 @@ float furi_hal_bt_get_rssi() {
     return val;
 }
 
+/** fill the RSSI of the remote host of the bt connection and returns the time since
+ * the beginning of the connection 
+ * 
+*/
+uint32_t furi_hal_bt_get_conn_rssi(uint8_t *rssi) {
+
+    int8_t ret_rssi = 0;
+    uint32_t since = gap_get_remote_conn_rssi(&ret_rssi);
+
+    if (ret_rssi == 127 || since == 0)
+        return 0;
+
+    *rssi = (uint8_t) abs(ret_rssi);
+
+    return since;
+}
+
 uint32_t furi_hal_bt_get_transmitted_packets() {
     uint32_t packets = 0;
     aci_hal_le_tx_test_packet_number(&packets);
@@ -450,13 +467,14 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
     return false;
 }
 
-void furi_hal_bt_set_profile_adv_name(FuriHalBtProfile profile, const char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH]) {
+void furi_hal_bt_set_profile_adv_name(
+    FuriHalBtProfile profile,
+    const char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH-1]) {
     furi_assert(profile < FuriHalBtProfileNumber);
     furi_assert(name);
 
-    memcpy(&(profile_config[profile].config.adv_name[1]),
-     name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
-
+    memcpy(
+        &(profile_config[profile].config.adv_name[1]), name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH-1);
 }
 
 const char* furi_hal_bt_get_profile_adv_name(FuriHalBtProfile profile) {
@@ -471,7 +489,6 @@ void furi_hal_bt_set_profile_mac_addr(
     furi_assert(mac_addr);
 
     memcpy(profile_config[profile].config.mac_address, mac_addr, GAP_MAC_ADDR_SIZE);
-
 }
 
 const uint8_t* furi_hal_bt_get_profile_mac_addr(FuriHalBtProfile profile) {

@@ -428,6 +428,22 @@ const uint8_t *bt_get_profile_mac_address(Bt *bt) {
     }
 }
 
+bool bt_remote_rssi(Bt *bt, BtRssi *rssi) {
+    furi_assert(bt);
+    UNUSED(rssi);
+
+    uint8_t rssi_val;
+    uint32_t since = furi_hal_bt_get_conn_rssi(&rssi_val);
+
+    if (since == 0)
+        return false;
+
+    rssi->rssi = rssi_val;
+    rssi->since = since;
+
+    return true;
+}
+
 int32_t bt_srv(void* p) {
     UNUSED(p);
     Bt* bt = bt_alloc();

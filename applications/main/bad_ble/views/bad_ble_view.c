@@ -50,12 +50,7 @@ static void bad_ble_draw_callback(Canvas* canvas, void* _model) {
 
     if((model->state.state == BadBleStateIdle) || (model->state.state == BadBleStateDone) ||
        (model->state.state == BadBleStateNotConnected)) {
-        if (settings->sfw_mode) {
-            elements_button_center(canvas, "Start");
-        }
-        else {
-            elements_button_center(canvas, "Cum");
-        }
+        elements_button_center(canvas, "Start");
     } else if((model->state.state == BadBleStateRunning) || (model->state.state == BadBleStateDelay)) {
         elements_button_center(canvas, "Stop");
     } else if(model->state.state == BadBleStateWillRun) {
@@ -70,23 +65,12 @@ static void bad_ble_draw_callback(Canvas* canvas, void* _model) {
     if(model->state.state == BadBleStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if (settings->sfw_mode) {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect me");
-            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "to a computer");
-        }
-        else {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Plug me");
-            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "in, Daddy");
-        }
+        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect me");
+        canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "to a computer");
     } else if(model->state.state == BadBleStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if (settings->sfw_mode) {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
-        }
-        else {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will cum");
-        }
+        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "on connect");
     } else if(model->state.state == BadBleStateFileError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
