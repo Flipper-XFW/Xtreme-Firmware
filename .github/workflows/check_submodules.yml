@@ -11,7 +11,7 @@ on:
 
 jobs:
   check_protobuf:
-    runs-on: [self-hosted, FlipperZeroShell]
+    runs-on: ubuntu-latest
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
