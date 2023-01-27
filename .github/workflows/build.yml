@@ -80,12 +80,45 @@ jobs:
         run: |
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
           
-      - name: 'Archive artifacts'
+      - name: 'Updater artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: updater
+          path: |
+            artifacts/f7-*
+          
+      - name: 'Firmware artifact'
         uses: actions/upload-artifact@v3
         with:
           name: firmware
           path: |
             artifacts
+
+      - name: 'Find Previous Comment'
+        if: ${{ github.event.pull_request }}
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Compiled firmware for commit'
+          
+      - name: Artifact info
+        id: artifact-info
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          dry_run: true
+
+      - name: 'Create or update comment'
+        if: ${{ github.event.pull_request}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **Compiled firmware for commit `${{steps.names.outputs.commit_sha}}`:**
+            - [📦 Update package](${{steps.artifact-info.outputs.artifacts[0].archive_download_url}})
+          edit-mode: replace
 
   compact:
     if: ${{ !startsWith(github.ref, 'refs/tags') }}

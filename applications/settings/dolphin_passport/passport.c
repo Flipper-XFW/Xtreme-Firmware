@@ -67,7 +67,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     uint32_t xp_need = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
     uint32_t xp_levelup = 0;
-    if (ctx->progress_total) {
+    if(ctx->progress_total) {
         xp_levelup = xp_need + stats->icounter;
     } else {
         xp_levelup = xp_need + xp_above_last_levelup;

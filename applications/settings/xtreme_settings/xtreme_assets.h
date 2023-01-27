@@ -34,6 +34,11 @@ XtremeAssets* XTREME_ASSETS();
 
 void XTREME_ASSETS_LOAD();
 
-void swap_bmx_icon(const Icon** replace, const char* base, const char* name, FuriString* path, File* file);
+void swap_bmx_icon(
+    const Icon** replace,
+    const char* base,
+    const char* name,
+    FuriString* path,
+    File* file);
 
 void free_bmx_icon(Icon* icon);
