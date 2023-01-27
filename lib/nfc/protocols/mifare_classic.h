@@ -23,7 +23,6 @@ typedef enum {
     MfClassicTypeMini,
     MfClassicType1k,
     MfClassicType4k,
-    MfClassicTypeMini,
 } MfClassicType;
 
 typedef enum {
