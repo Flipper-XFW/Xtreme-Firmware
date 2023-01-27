@@ -52,9 +52,9 @@ bool bad_ble_scene_config_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         if(event.event == SubmenuIndexKeyboardLayout) {
             scene_manager_next_scene(bad_ble->scene_manager, BadBleSceneConfigLayout);
-        } else if (event.event == SubmenuIndexAdvertisementName) {
+        } else if(event.event == SubmenuIndexAdvertisementName) {
             scene_manager_next_scene(bad_ble->scene_manager, BadBleSceneConfigName);
-        } else if (event.event == SubmenuIndexMacAddress) {
+        } else if(event.event == SubmenuIndexMacAddress) {
             scene_manager_next_scene(bad_ble->scene_manager, BadBleSceneConfigMac);
         } else {
             furi_crash("Unknown key type");

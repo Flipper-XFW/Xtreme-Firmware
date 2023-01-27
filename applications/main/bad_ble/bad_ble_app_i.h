@@ -23,8 +23,8 @@
 #define BAD_BLE_APP_SCRIPT_EXTENSION ".txt"
 #define BAD_BLE_APP_LAYOUT_EXTENSION ".kl"
 
-#define BAD_BLE_MAC_ADDRESS_LEN     6   // need replace with MAC size maccro
-#define BAD_BLE_ADV_NAME_MAX_LEN    18
+#define BAD_BLE_MAC_ADDRESS_LEN 6 // need replace with MAC size maccro
+#define BAD_BLE_ADV_NAME_MAX_LEN 18
 
 typedef enum {
     BadBleAppErrorNoFiles,
@@ -40,11 +40,10 @@ struct BadBleApp {
     Widget* widget;
     Submenu* submenu;
 
-    TextInput *text_input;
-    ByteInput *byte_input;
+    TextInput* text_input;
+    ByteInput* byte_input;
     uint8_t mac[BAD_BLE_MAC_ADDRESS_LEN];
     char name[BAD_BLE_ADV_NAME_MAX_LEN + 1];
-
 
     BadBleAppError error;
     FuriString* file_path;

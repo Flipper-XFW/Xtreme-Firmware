@@ -199,8 +199,7 @@ bool furi_hal_bt_hid_kb_press(uint16_t button) {
 bool furi_hal_bt_hid_kb_free_slots(uint8_t n_empty_slots) {
     furi_assert(kb_report);
     for(uint8_t i = 0; n_empty_slots > 0 && i < FURI_HAL_BT_HID_KB_MAX_KEYS; i++) {
-        if(kb_report->key[i] == 0) 
-            n_empty_slots--;
+        if(kb_report->key[i] == 0) n_empty_slots--;
     }
     return (n_empty_slots == 0);
 }

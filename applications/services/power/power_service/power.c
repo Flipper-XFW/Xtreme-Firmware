@@ -26,7 +26,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         snprintf(batteryPercentile, sizeof(batteryPercentile), "%d", power->info.charge);
 
         if((battery_style == BatteryStylePercent) &&
-        (power->state !=
+           (power->state !=
             PowerStateCharging)) { //if display battery percentage, black background white text
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_set_color(canvas, ColorBlack);
@@ -36,7 +36,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         } else if(
             (battery_style == BatteryStyleInvertedPercent) &&
             (power->state !=
-            PowerStateCharging)) { //if display inverted percentage, white background black text
+             PowerStateCharging)) { //if display inverted percentage, white background black text
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_str_aligned(canvas, 11, 4, AlignCenter, AlignCenter, batteryPercentile);
@@ -74,7 +74,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
             (battery_style == BatteryStyleBarPercent) &&
             (power->state != PowerStateCharging) && // Default bar display with percentage
             (power->info.voltage_battery_charging >=
-            4.2)) { // not looking nice with low voltage indicator
+             4.2)) { // not looking nice with low voltage indicator
             canvas_set_font(canvas, FontBatteryPercent);
 
             // align charge dispaly value with digits to draw
@@ -145,8 +145,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         if(power->state == PowerStateCharging) {
             canvas_set_bitmap_mode(canvas, 1);
             // TODO: replace -1 magic for uint8_t with re-framing
-            if(battery_style == BatteryStylePercent ||
-            battery_style == BatteryStyleBarPercent) {
+            if(battery_style == BatteryStylePercent || battery_style == BatteryStyleBarPercent) {
                 canvas_set_color(canvas, ColorBlack);
                 canvas_draw_box(canvas, 1, 1, 22, 6);
                 canvas_draw_icon(canvas, 2, -1, &I_Charging_lightning_9x10);

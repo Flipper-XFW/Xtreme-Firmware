@@ -370,8 +370,8 @@ static void bt_close_connection(Bt* bt) {
     furi_event_flag_set(bt->api_event, BT_API_UNLOCK_EVENT);
 }
 
-static void bt_restart(Bt *bt) {
-    if (bt->profile == BtProfileHidKeyboard) {
+static void bt_restart(Bt* bt) {
+    if(bt->profile == BtProfileHidKeyboard) {
         furi_hal_bt_change_app(FuriHalBtProfileHidKeyboard, bt_on_gap_event_callback, bt);
     } else {
         furi_hal_bt_change_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt);
@@ -379,7 +379,7 @@ static void bt_restart(Bt *bt) {
     furi_hal_bt_start_advertising();
 }
 
-void bt_set_profile_adv_name(Bt *bt, const char* fmt, ...) {
+void bt_set_profile_adv_name(Bt* bt, const char* fmt, ...) {
     furi_assert(bt);
     furi_assert(fmt);
 
@@ -388,7 +388,7 @@ void bt_set_profile_adv_name(Bt *bt, const char* fmt, ...) {
     va_start(args, fmt);
     vsnprintf(name, sizeof(name), fmt, args);
     va_end(args);
-    if (bt->profile == BtProfileHidKeyboard) {
+    if(bt->profile == BtProfileHidKeyboard) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, name);
     } else {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileSerial, name);
@@ -397,46 +397,45 @@ void bt_set_profile_adv_name(Bt *bt, const char* fmt, ...) {
     bt_restart(bt);
 }
 
-const char *bt_get_profile_adv_name(Bt *bt) {
+const char* bt_get_profile_adv_name(Bt* bt) {
     furi_assert(bt);
-    if (bt->profile == BtProfileHidKeyboard) {
+    if(bt->profile == BtProfileHidKeyboard) {
         return furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard);
     } else {
         return furi_hal_bt_get_profile_adv_name(FuriHalBtProfileSerial);
     }
 }
 
-void bt_set_profile_mac_address(Bt *bt, const uint8_t mac[6]) {
+void bt_set_profile_mac_address(Bt* bt, const uint8_t mac[6]) {
     furi_assert(bt);
     furi_assert(mac);
 
-    if (bt->profile == BtProfileHidKeyboard) {
+    if(bt->profile == BtProfileHidKeyboard) {
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, mac);
     } else {
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileSerial, mac);
     }
- 
+
     bt_restart(bt);
 }
 
-const uint8_t *bt_get_profile_mac_address(Bt *bt) {
+const uint8_t* bt_get_profile_mac_address(Bt* bt) {
     furi_assert(bt);
-    if (bt->profile == BtProfileHidKeyboard) {
+    if(bt->profile == BtProfileHidKeyboard) {
         return furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard);
     } else {
         return furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileSerial);
     }
 }
 
-bool bt_remote_rssi(Bt *bt, BtRssi *rssi) {
+bool bt_remote_rssi(Bt* bt, BtRssi* rssi) {
     furi_assert(bt);
     UNUSED(rssi);
 
     uint8_t rssi_val;
     uint32_t since = furi_hal_bt_get_conn_rssi(&rssi_val);
 
-    if (since == 0)
-        return false;
+    if(since == 0) return false;
 
     rssi->rssi = rssi_val;
     rssi->since = since;

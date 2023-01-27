@@ -30,7 +30,7 @@ typedef struct {
     char error[64];
 } BadBleState;
 
-BadBleScript* bad_ble_script_open(FuriString* file_path, Bt *bt);
+BadBleScript* bad_ble_script_open(FuriString* file_path, Bt* bt);
 
 void bad_ble_script_close(BadBleScript* bad_ble);
 

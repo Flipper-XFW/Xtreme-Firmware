@@ -15,10 +15,10 @@ static bool xtreme_settings_back_event_callback(void* context) {
     furi_assert(context);
     XtremeSettingsApp* app = context;
 
-    if (app->level_changed) {
+    if(app->level_changed) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         DolphinStats stats = dolphin_stats(dolphin);
-        if (app->dolphin_level != stats.level) {
+        if(app->dolphin_level != stats.level) {
             int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
             dolphin->state->data.icounter = xp + 1;
             dolphin->state->dirty = true;
@@ -27,20 +27,22 @@ static bool xtreme_settings_back_event_callback(void* context) {
         furi_record_close(RECORD_DOLPHIN);
     }
 
-    if (app->subghz_changed) {
+    if(app->subghz_changed) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
         FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
         if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-            flipper_format_insert_or_update_bool(subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
-            flipper_format_insert_or_update_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+            flipper_format_insert_or_update_bool(
+                subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+            flipper_format_insert_or_update_bool(
+                subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
         }
         flipper_format_free(subghz_range);
         furi_record_close(RECORD_STORAGE);
     }
 
-    if (app->settings_changed) {
+    if(app->settings_changed) {
         XTREME_SETTINGS_SAVE();
-        if (app->assets_changed) {
+        if(app->assets_changed) {
             popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
             popup_set_text(app->popup, "Swapping assets...", 64, 40, AlignCenter, AlignCenter);
             popup_set_callback(app->popup, xtreme_settings_reboot);
@@ -81,9 +83,7 @@ XtremeSettingsApp* xtreme_settings_app_alloc() {
 
     app->popup = popup_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        XtremeSettingsAppViewPopup,
-        popup_get_view(app->popup));
+        app->view_dispatcher, XtremeSettingsAppViewPopup, popup_get_view(app->popup));
 
     // Set first scene
     scene_manager_next_scene(app->scene_manager, XtremeSettingsAppSceneStart);

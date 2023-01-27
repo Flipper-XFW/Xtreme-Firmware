@@ -56,8 +56,8 @@ static Gap* gap = NULL;
 
 static inline void fetch_rssi() {
     uint8_t ret_rssi = 127;
-    if (hci_read_rssi(gap->service.connection_handle, &ret_rssi) == BLE_STATUS_SUCCESS) {
-        gap->conn_rssi = (int8_t) ret_rssi;
+    if(hci_read_rssi(gap->service.connection_handle, &ret_rssi) == BLE_STATUS_SUCCESS) {
+        gap->conn_rssi = (int8_t)ret_rssi;
         gap->time_rssi_sample = furi_get_tick();
         return;
     }
@@ -165,7 +165,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             gap->connection_params.conn_interval = event->Conn_Interval;
             gap->connection_params.slave_latency = event->Conn_Latency;
             gap->connection_params.supervisor_timeout = event->Supervision_Timeout;
-
 
             // Stop advertising as connection completed
             furi_timer_stop(gap->advertise_timer);
@@ -383,7 +382,7 @@ static void gap_init_svc(Gap* gap) {
         keypress_supported,
         CFG_ENCRYPTION_KEY_SIZE_MIN,
         CFG_ENCRYPTION_KEY_SIZE_MAX,
-        CFG_USED_FIXED_PIN,                 // 0x0 for no pin
+        CFG_USED_FIXED_PIN, // 0x0 for no pin
         0,
         PUBLIC_ADDR);
     // Configure whitelist
@@ -504,9 +503,15 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
     FURI_LOG_I(TAG, "Advertising name: %s", &(gap->service.adv_name[1]));
-    FURI_LOG_I(TAG, "MAC @ : %02X:%02X:%02X:%02X:%02X:%02X",
-        config->mac_address[0], config->mac_address[1], config->mac_address[2],
-        config->mac_address[3], config->mac_address[4], config->mac_address[5]);
+    FURI_LOG_I(
+        TAG,
+        "MAC @ : %02X:%02X:%02X:%02X:%02X:%02X",
+        config->mac_address[0],
+        config->mac_address[1],
+        config->mac_address[2],
+        config->mac_address[3],
+        config->mac_address[4],
+        config->mac_address[5]);
     gap_init_svc(gap);
     // Initialization of the BLE Services
     SVCCTL_Init();
@@ -538,15 +543,12 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     return true;
 }
 
-uint32_t gap_get_remote_conn_rssi(int8_t *rssi) {
-    if (gap && gap->state == GapStateConnected) {
+uint32_t gap_get_remote_conn_rssi(int8_t* rssi) {
+    if(gap && gap->state == GapStateConnected) {
         fetch_rssi();
         *rssi = gap->conn_rssi;
 
-        FURI_LOG_D(TAG, "RSSI: %d", *rssi);
-
-        if (gap->time_rssi_sample)
-            return furi_get_tick() - gap->time_rssi_sample;
+        if(gap->time_rssi_sample) return furi_get_tick() - gap->time_rssi_sample;
     }
     return 0;
 }

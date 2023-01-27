@@ -6,7 +6,7 @@ extern "C" {
 
 typedef struct BadBleApp BadBleApp;
 
-void bad_ble_set_name(BadBleApp *app, const char* fmt, ...);
+void bad_ble_set_name(BadBleApp* app, const char* fmt, ...);
 
 #ifdef __cplusplus
 }

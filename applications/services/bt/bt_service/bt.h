@@ -28,7 +28,6 @@ typedef struct {
     uint32_t since;
 } BtRssi;
 
-
 typedef void (*BtStatusChangedCallback)(BtStatus status, void* context);
 
 /** Change BLE Profile
@@ -41,15 +40,13 @@ typedef void (*BtStatusChangedCallback)(BtStatus status, void* context);
  */
 bool bt_set_profile(Bt* bt, BtProfile profile);
 
+void bt_set_profile_adv_name(Bt* bt, const char* fmt, ...);
+const char* bt_get_profile_adv_name(Bt* bt);
 
-void bt_set_profile_adv_name(Bt *bt, const char* fmt, ...);
-const char *bt_get_profile_adv_name(Bt *bt);
+void bt_set_profile_mac_address(Bt* bt, const uint8_t mac[6]);
+const uint8_t* bt_get_profile_mac_address(Bt* bt);
 
-void bt_set_profile_mac_address(Bt *bt, const uint8_t mac[6]);
-const uint8_t *bt_get_profile_mac_address(Bt *bt);
-
-bool bt_remote_rssi(Bt *bt, BtRssi *rssi);
-
+bool bt_remote_rssi(Bt* bt, BtRssi* rssi);
 
 /** Disconnect from Central
  *

@@ -33,8 +33,7 @@ bool bad_ble_scene_config_name_on_event(void* context, SceneManagerEvent event) 
         if(event.event == BadBleAppCustomEventTextEditResult) {
             bt_set_profile_adv_name(bad_ble->bt, bad_ble->name);
         }
-        scene_manager_previous_scene(
-            bad_ble->scene_manager);
+        scene_manager_previous_scene(bad_ble->scene_manager);
     }
     return consumed;
 }

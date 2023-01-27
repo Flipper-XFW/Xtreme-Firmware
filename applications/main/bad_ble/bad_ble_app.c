@@ -95,14 +95,13 @@ BadBleApp* bad_ble_app_alloc(char* arg) {
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, bad_ble_app_back_event_callback);
 
-
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
-    const char *adv_name = bt_get_profile_adv_name(bt);
+    const char* adv_name = bt_get_profile_adv_name(bt);
     memcpy(app->name, adv_name, BAD_BLE_ADV_NAME_MAX_LEN);
 
-    const uint8_t *mac_addr = bt_get_profile_mac_address(bt);
-    memcpy(app->mac, mac_addr, BAD_BLE_MAC_ADDRESS_LEN); 
+    const uint8_t* mac_addr = bt_get_profile_mac_address(bt);
+    memcpy(app->mac, mac_addr, BAD_BLE_MAC_ADDRESS_LEN);
 
     // Custom Widget
     app->widget = widget_alloc();

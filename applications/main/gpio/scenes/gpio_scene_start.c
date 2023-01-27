@@ -38,8 +38,7 @@ static void gpio_scene_start_var_list_enter_callback(void* context, uint32_t ind
     }
 }
 
-static void 
-gpio_scene_start_var_list_change_callback(VariableItem* item) {
+static void gpio_scene_start_var_list_change_callback(VariableItem* item) {
     GpioApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 

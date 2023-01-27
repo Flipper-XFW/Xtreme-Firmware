@@ -429,15 +429,13 @@ float furi_hal_bt_get_rssi() {
  * the beginning of the connection 
  * 
 */
-uint32_t furi_hal_bt_get_conn_rssi(uint8_t *rssi) {
-
+uint32_t furi_hal_bt_get_conn_rssi(uint8_t* rssi) {
     int8_t ret_rssi = 0;
     uint32_t since = gap_get_remote_conn_rssi(&ret_rssi);
 
-    if (ret_rssi == 127 || since == 0)
-        return 0;
+    if(ret_rssi == 127 || since == 0) return 0;
 
-    *rssi = (uint8_t) abs(ret_rssi);
+    *rssi = (uint8_t)abs(ret_rssi);
 
     return since;
 }
@@ -469,12 +467,14 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
 void furi_hal_bt_set_profile_adv_name(
     FuriHalBtProfile profile,
-    const char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH-1]) {
+    const char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1]) {
     furi_assert(profile < FuriHalBtProfileNumber);
     furi_assert(name);
 
     memcpy(
-        &(profile_config[profile].config.adv_name[1]), name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH-1);
+        &(profile_config[profile].config.adv_name[1]),
+        name,
+        FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1);
 }
 
 const char* furi_hal_bt_get_profile_adv_name(FuriHalBtProfile profile) {

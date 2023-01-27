@@ -30,7 +30,6 @@ typedef enum {
     WorkerEvtDisconnect = (1 << 3),
 } WorkerEvtFlags;
 
-
 typedef enum {
     LevelRssi122_100,
     LevelRssi99_80,
@@ -41,12 +40,15 @@ typedef enum {
     LevelRssiError = 0xFF,
 } LevelRssiRange;
 
+/**
+ * Delays for waiting between HID key press and key release
+*/
 const uint8_t bt_hid_delays[LevelRssiNum] = {
-    30,  // LevelRssi122_100
-    25,  // LevelRssi99_80
-    20,  // LevelRssi79_60
-    17,  // LevelRssi59_40
-    14,  // LevelRssi39_0
+    30, // LevelRssi122_100
+    25, // LevelRssi99_80
+    20, // LevelRssi79_60
+    17, // LevelRssi59_40
+    14, // LevelRssi39_0
 };
 
 struct BadBleScript {
@@ -161,31 +163,28 @@ static const uint8_t numpad_keys[10] = {
 
 uint8_t bt_timeout = 0;
 
-static LevelRssiRange bt_remote_rssi_range(Bt *bt) {
+static LevelRssiRange bt_remote_rssi_range(Bt* bt) {
+    BtRssi rssi_data = {0};
 
-    BtRssi rssi_data = { 0 };
+    if(!bt_remote_rssi(bt, &rssi_data)) return LevelRssiError;
 
-    if (!bt_remote_rssi(bt, &rssi_data))
-        return LevelRssiError;
-
-    if (rssi_data.rssi <= 39)
+    if(rssi_data.rssi <= 39)
         return LevelRssi39_0;
-    else if (rssi_data.rssi <= 59)
+    else if(rssi_data.rssi <= 59)
         return LevelRssi59_40;
-    else if (rssi_data.rssi <= 79)
+    else if(rssi_data.rssi <= 79)
         return LevelRssi79_60;
-    else if (rssi_data.rssi <= 99)
+    else if(rssi_data.rssi <= 99)
         return LevelRssi99_80;
-    else if (rssi_data.rssi <= 122)
+    else if(rssi_data.rssi <= 122)
         return LevelRssi122_100;
-    
+
     return LevelRssiError;
 }
 
-static inline void update_bt_timeout(Bt *bt) {
-    
+static inline void update_bt_timeout(Bt* bt) {
     LevelRssiRange r = bt_remote_rssi_range(bt);
-    if (r < LevelRssiNum) {
+    if(r < LevelRssiNum) {
         bt_timeout = bt_hid_delays[r];
     }
 }
@@ -297,7 +296,7 @@ static bool ducky_string(BadBleScript* bad_ble, const char* param) {
         if(keycode != HID_KEYBOARD_NONE) {
             bt_hid_hold_while_keyboard_buffer_full(1, -1);
             furi_hal_bt_hid_kb_press(keycode);
-    
+
             furi_delay_ms(bt_timeout);
             furi_hal_bt_hid_kb_release(keycode);
         }
@@ -329,8 +328,6 @@ static int32_t
     if(line_len == 0) {
         return SCRIPT_STATE_NEXT_LINE; // Skip empty lines
     }
-
-    FURI_LOG_D(WORKER_TAG, "line:%s", line_tmp);
 
     // General commands
     if(strncmp(line_tmp, ducky_cmd_comment, strlen(ducky_cmd_comment)) == 0) {
@@ -426,7 +423,6 @@ static int32_t
             line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
             key |= ducky_get_keycode(bad_ble, line_tmp, true);
         }
-        FURI_LOG_I(WORKER_TAG, "Special key pressed %x\r\n", key);
         furi_hal_bt_hid_kb_press(key);
 
         furi_delay_ms(bt_timeout);
@@ -545,7 +541,7 @@ static void bad_ble_hid_state_callback(BtStatus status, void* context) {
 
     if(state == true) {
         LevelRssiRange r = bt_remote_rssi_range(bad_ble->bt);
-        if (r != LevelRssiError) {
+        if(r != LevelRssiError) {
             bt_timeout = bt_hid_delays[r];
         }
         furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtConnect);
@@ -559,19 +555,15 @@ static int32_t bad_ble_worker(void* context) {
     BadBleWorkerState worker_state = BadBleStateInit;
     int32_t delay_val = 0;
 
+    // BLE HID init
     bt_timeout = bt_hid_delays[LevelRssi39_0];
 
-    // init ble hid
     bt_disconnect(bad_ble->bt);
 
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
     bt_keys_storage_set_storage_path(bad_ble->bt, HID_BT_KEYS_STORAGE_PATH);
-
-    bt_set_profile_adv_name(bad_ble->bt, "Keyboard K99");
-
-    //furi_hal_bt_set_profile_adv_name("Keyboard K99", FuriHalBtProfileHidKeyboard);
 
     if(!bt_set_profile(bad_ble->bt, BtProfileHidKeyboard)) {
         FURI_LOG_E(TAG, "Failed to switch to HID profile");
@@ -727,7 +719,7 @@ static int32_t bad_ble_worker(void* context) {
         }
 
         update_bt_timeout(bad_ble->bt);
-        FURI_LOG_I(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
+        FURI_LOG_D(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
     }
 
     // release all keys
