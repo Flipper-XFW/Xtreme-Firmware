@@ -23,7 +23,7 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 
 - Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
 
-- Clean upgraded code: RM wrote some updates to certain files. These are... painful, to say the least. Here its all built with perfection in mind and integrated in a mostly clean way. I invite you all to compare the code with theirs.
+- Clean upgraded code: Some people wrote updates to certain files. These are... painful, to say the least. Here its all built with perfection in mind and integrated in a mostly clean way. I invite you all to compare the code with theirs.
 
 - Up2Date: This firmware receives updates from a few repositories, not just from its Upstream. If there are functional, but yet un-merged Pull requests on another flipper firmware that are good, they will be in here!
 
