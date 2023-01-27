@@ -54,6 +54,9 @@ static const uint8_t gap_erk[16] =
 
 static Gap* gap = NULL;
 
+/** function for updating rssi informations in global Gap object
+ * 
+*/
 static inline void fetch_rssi() {
     uint8_t ret_rssi = 127;
     if(hci_read_rssi(gap->service.connection_handle, &ret_rssi) == BLE_STATUS_SUCCESS) {
@@ -61,7 +64,7 @@ static inline void fetch_rssi() {
         gap->time_rssi_sample = furi_get_tick();
         return;
     }
-    FURI_LOG_E(TAG, "Failed to read RSSI");
+    FURI_LOG_D(TAG, "Failed to read RSSI");
 }
 
 static void gap_advertise_start(GapState new_state);
