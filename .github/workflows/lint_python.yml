@@ -10,7 +10,6 @@ on:
   pull_request:
 
 env:
-    FBT_TOOLCHAIN_PATH: /runner/_work
     SET_GH_OUTPUT: 1
 
 jobs:
