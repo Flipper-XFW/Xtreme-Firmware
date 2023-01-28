@@ -3,10 +3,15 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <lib/toolbox/args.h>
+#include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
 #include <storage/storage.h>
 #include "bad_usb_script.h"
 #include <dolphin/dolphin.h>
+
+#include <bt/bt_service/bt.h>
+
+#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Tools/.bt_hid.keys")
 
 #define TAG "BadUSB"
 #define WORKER_TAG TAG "Worker"
@@ -26,6 +31,27 @@ typedef enum {
     WorkerEvtDisconnect = (1 << 3),
 } WorkerEvtFlags;
 
+typedef enum {
+    LevelRssi122_100,
+    LevelRssi99_80,
+    LevelRssi79_60,
+    LevelRssi59_40,
+    LevelRssi39_0,
+    LevelRssiNum,
+    LevelRssiError = 0xFF,
+} LevelRssiRange;
+
+/**
+ * Delays for waiting between HID key press and key release
+*/
+const uint8_t bt_hid_delays[LevelRssiNum] = {
+    30, // LevelRssi122_100
+    25, // LevelRssi99_80
+    20, // LevelRssi79_60
+    17, // LevelRssi59_40
+    14, // LevelRssi39_0
+};
+
 struct BadUsbScript {
     FuriHalUsbHidConfig hid_cfg;
     BadUsbState st;
@@ -41,6 +67,8 @@ struct BadUsbScript {
 
     FuriString* line_prev;
     uint32_t repeat_cnt;
+
+    Bt* bt;
 };
 
 typedef struct {
@@ -75,8 +103,8 @@ static const DuckyKey ducky_keys[] = {
     {"BREAK", HID_KEYBOARD_PAUSE},
     {"PAUSE", HID_KEYBOARD_PAUSE},
     {"CAPSLOCK", HID_KEYBOARD_CAPS_LOCK},
-    {"DELETE", HID_KEYBOARD_DELETE_FORWARD},
-    {"BACKSPACE", HID_KEYBOARD_DELETE},
+    {"DELETE", HID_KEYBOARD_DELETE},
+    {"BACKSPACE", HID_KEYPAD_BACKSPACE},
     {"END", HID_KEYBOARD_END},
     {"ESC", HID_KEYBOARD_ESCAPE},
     {"ESCAPE", HID_KEYBOARD_ESCAPE},
@@ -133,6 +161,51 @@ static const uint8_t numpad_keys[10] = {
     HID_KEYPAD_8,
     HID_KEYPAD_9,
 };
+
+uint8_t bt_timeout = 0;
+
+static LevelRssiRange bt_remote_rssi_range(Bt* bt) {
+    BtRssi rssi_data = {0};
+
+    if(!bt_remote_rssi(bt, &rssi_data)) return LevelRssiError;
+
+    if(rssi_data.rssi <= 39)
+        return LevelRssi39_0;
+    else if(rssi_data.rssi <= 59)
+        return LevelRssi59_40;
+    else if(rssi_data.rssi <= 79)
+        return LevelRssi79_60;
+    else if(rssi_data.rssi <= 99)
+        return LevelRssi99_80;
+    else if(rssi_data.rssi <= 122)
+        return LevelRssi122_100;
+
+    return LevelRssiError;
+}
+
+static inline void update_bt_timeout(Bt* bt) {
+    LevelRssiRange r = bt_remote_rssi_range(bt);
+    if(r < LevelRssiNum) {
+        bt_timeout = bt_hid_delays[r];
+    }
+}
+
+/**
+ *  @brief  Wait until there are enough free slots in the keyboard buffer
+ *
+ * @param  n_free_chars    Number of free slots to wait for (and consider the buffer not full)
+*/
+// static void bt_hid_hold_while_keyboard_buffer_full(uint8_t n_free_chars, int32_t timeout) {
+//     uint32_t start = furi_get_tick();
+//     uint32_t timeout_ms = timeout <= -1 ? 0 : timeout;
+//     while(furi_hal_bt_hid_kb_free_slots(n_free_chars) == false) {
+//         furi_delay_ms(100);
+
+//         if(timeout != -1 && (furi_get_tick() - start) > timeout_ms) {
+//             break;
+//         }
+//     }
+// }
 
 static bool ducky_get_number(const char* param, uint32_t* val) {
     uint32_t value = 0;
@@ -664,7 +737,7 @@ static void bad_usb_script_set_default_keyboard_layout(BadUsbScript* bad_usb) {
     memcpy(bad_usb->layout, hid_asciimap, MIN(sizeof(hid_asciimap), sizeof(bad_usb->layout)));
 }
 
-BadUsbScript* bad_usb_script_open(FuriString* file_path) {
+BadUsbScript* bad_usb_script_open(FuriString* file_path, Bt* bt) {
     furi_assert(file_path);
 
     BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript));
@@ -675,6 +748,8 @@ BadUsbScript* bad_usb_script_open(FuriString* file_path) {
     bad_usb->st.state = BadUsbStateInit;
     bad_usb->st.error[0] = '\0';
 
+    bad_usb->bt = bt;
+
     bad_usb->thread = furi_thread_alloc_ex("BadUsbWorker", 2048, bad_usb_worker, bad_usb);
     furi_thread_start(bad_usb->thread);
     return bad_usb;
@@ -682,6 +757,7 @@ BadUsbScript* bad_usb_script_open(FuriString* file_path) {
 
 void bad_usb_script_close(BadUsbScript* bad_usb) {
     furi_assert(bad_usb);
+    furi_record_close(RECORD_STORAGE);
     furi_thread_flags_set(furi_thread_get_id(bad_usb->thread), WorkerEvtEnd);
     furi_thread_join(bad_usb->thread);
     furi_thread_free(bad_usb->thread);

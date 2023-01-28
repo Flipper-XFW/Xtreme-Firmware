@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include <furi.h>
+#include <bt/bt_service/bt_i.h>
 
 typedef struct BadUsbScript BadUsbScript;
 
@@ -29,7 +30,7 @@ typedef struct {
     char error[64];
 } BadUsbState;
 
-BadUsbScript* bad_usb_script_open(FuriString* file_path);
+BadUsbScript* bad_usb_script_open(FuriString* file_path, Bt* bt);
 
 void bad_usb_script_close(BadUsbScript* bad_usb);
 

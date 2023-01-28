@@ -16,7 +16,11 @@ bool bad_usb_scene_work_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InputKeyLeft) {
-            scene_manager_next_scene(app->scene_manager, BadUsbSceneConfig);
+            if (app->is_bluetooth) {
+                scene_manager_next_scene(app->scene_manager, BadUsbSceneConfigBt);
+            } else {
+                scene_manager_next_scene(app->scene_manager, BadUsbSceneConfigUsb);
+            }
             consumed = true;
         } else if(event.event == InputKeyOk) {
             bad_usb_script_toggle(app->bad_usb_script);

@@ -6,6 +6,8 @@ extern "C" {
 
 typedef struct BadUsbApp BadUsbApp;
 
+void bad_usb_set_name(BadUsbApp* app, const char* fmt, ...);
+
 #ifdef __cplusplus
 }
 #endif

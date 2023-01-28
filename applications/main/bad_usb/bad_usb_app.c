@@ -5,6 +5,9 @@
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 
+#include <bt/bt_service/bt_i.h>
+#include <bt/bt_service/bt.h>
+
 #define BAD_USB_SETTINGS_PATH BAD_USB_APP_BASE_FOLDER "/" BAD_USB_SETTINGS_FILE_NAME
 
 static bool bad_usb_app_custom_event_callback(void* context, uint32_t event) {
@@ -51,6 +54,17 @@ static void bad_usb_save_settings(BadUsbApp* app) {
     storage_file_free(settings_file);
 }
 
+void bad_usb_set_name(BadUsbApp* app, const char* fmt, ...) {
+    furi_assert(app);
+
+    va_list args;
+    va_start(args, fmt);
+
+    vsnprintf(app->name, BAD_USB_ADV_NAME_MAX_LEN, fmt, args);
+
+    va_end(args);
+}
+
 BadUsbApp* bad_usb_app_alloc(char* arg) {
     BadUsbApp* app = malloc(sizeof(BadUsbApp));
 
@@ -81,18 +95,37 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, bad_usb_app_back_event_callback);
 
+    Bt* bt = furi_record_open(RECORD_BT);
+    app->bt = bt;
+    const char* adv_name = bt_get_profile_adv_name(bt);
+    memcpy(app->name, adv_name, BAD_USB_ADV_NAME_MAX_LEN);
+
+    const uint8_t* mac_addr = bt_get_profile_mac_address(bt);
+    memcpy(app->mac, mac_addr, BAD_USB_MAC_ADDRESS_LEN);
+
     // Custom Widget
     app->widget = widget_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewError, widget_get_view(app->widget));
 
-    app->submenu = submenu_alloc();
+    app->var_item_list_bt = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadUsbAppViewConfig, submenu_get_view(app->submenu));
+        app->view_dispatcher, BadUsbAppViewConfigBt, variable_item_list_get_view(app->var_item_list_bt));
+    app->var_item_list_usb = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BadUsbAppViewConfigUsb, variable_item_list_get_view(app->var_item_list_usb));
 
     app->bad_usb_view = bad_usb_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewWork, bad_usb_get_view(app->bad_usb_view));
+
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BadUsbAppViewConfigName, text_input_get_view(app->text_input));
+
+    app->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BadUsbAppViewConfigMac, byte_input_get_view(app->byte_input));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -101,7 +134,7 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
         scene_manager_next_scene(app->scene_manager, BadUsbSceneError);
     } else {
         if(!furi_string_empty(app->file_path)) {
-            app->bad_usb_script = bad_usb_script_open(app->file_path);
+            app->bad_usb_script = bad_usb_script_open(app->file_path, bt);
             bad_usb_script_set_keyboard_layout(app->bad_usb_script, app->keyboard_layout);
             scene_manager_next_scene(app->scene_manager, BadUsbSceneWork);
         } else {
@@ -129,9 +162,19 @@ void bad_usb_app_free(BadUsbApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewError);
     widget_free(app->widget);
 
-    // Submenu
-    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfig);
-    submenu_free(app->submenu);
+    // Variable item list
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfigBt);
+    variable_item_list_free(app->var_item_list_bt);
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfigUsb);
+    variable_item_list_free(app->var_item_list_usb);
+
+    // Text Input
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfigName);
+    text_input_free(app->text_input);
+
+    // Byte Input
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfigMac);
+    byte_input_free(app->byte_input);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -141,6 +184,7 @@ void bad_usb_app_free(BadUsbApp* app) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_BT);
 
     bad_usb_save_settings(app);
 

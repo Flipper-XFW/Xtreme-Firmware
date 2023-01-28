@@ -1,10 +1,6 @@
 #include "../bad_usb_app_i.h"
 #include "../../../settings/xtreme_settings/xtreme_settings.h"
 
-typedef enum {
-    BadUsbCustomEventErrorBack,
-} BadUsbCustomEvent;
-
 static void
     bad_usb_scene_error_event_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
