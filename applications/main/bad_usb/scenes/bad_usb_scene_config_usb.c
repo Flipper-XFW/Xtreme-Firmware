@@ -49,6 +49,7 @@ bool bad_usb_scene_config_usb_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == VarItemListIndexConnection) {
             bad_usb_script_close(bad_usb->bad_usb_script);
             bad_usb->bad_usb_script = bad_usb_script_open(bad_usb->file_path, bad_usb->is_bt ? bad_usb->bt : NULL);
+            bad_usb_script_set_keyboard_layout(bad_usb->bad_usb_script, bad_usb->keyboard_layout);
             scene_manager_previous_scene(bad_usb->scene_manager);
             if (bad_usb->is_bt) {
                 scene_manager_next_scene(bad_usb->scene_manager, BadUsbSceneConfigBt);

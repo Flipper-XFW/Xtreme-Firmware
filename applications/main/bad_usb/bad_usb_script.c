@@ -56,6 +56,7 @@ struct BadUsbScript {
     FuriHalUsbHidConfig hid_cfg;
     BadUsbState st;
     FuriString* file_path;
+    FuriString* keyboard_layout;
     uint32_t defdelay;
     uint16_t layout[128];
     FuriThread* thread;
@@ -719,6 +720,7 @@ static int32_t bad_usb_worker(void* context) {
                 bad_usb->repeat_cnt = 0;
                 bad_usb->file_end = false;
                 storage_file_seek(script_file, 0, true);
+                bad_usb_script_set_keyboard_layout(bad_usb, bad_usb->keyboard_layout);
                 worker_state = BadUsbStateRunning;
             } else if(flags & WorkerEvtDisconnect) {
                 worker_state = BadUsbStateNotConnected; // USB disconnected
@@ -748,6 +750,7 @@ static int32_t bad_usb_worker(void* context) {
                     update_bt_timeout(bad_usb->bt);
                     FURI_LOG_I(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
                 }
+                bad_usb_script_set_keyboard_layout(bad_usb, bad_usb->keyboard_layout);
                 worker_state = BadUsbStateRunning;
             } else if(flags & WorkerEvtToggle) { // Cancel scheduled execution
                 worker_state = BadUsbStateNotConnected;
@@ -861,6 +864,7 @@ static int32_t bad_usb_worker(void* context) {
 
 static void bad_usb_script_set_default_keyboard_layout(BadUsbScript* bad_usb) {
     furi_assert(bad_usb);
+    furi_string_set_str(bad_usb->keyboard_layout, "");
     memset(bad_usb->layout, HID_KEYBOARD_NONE, sizeof(bad_usb->layout));
     memcpy(bad_usb->layout, hid_asciimap, MIN(sizeof(hid_asciimap), sizeof(bad_usb->layout)));
 }
@@ -871,6 +875,7 @@ BadUsbScript* bad_usb_script_open(FuriString* file_path, Bt* bt) {
     BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript));
     bad_usb->file_path = furi_string_alloc();
     furi_string_set(bad_usb->file_path, file_path);
+    bad_usb->keyboard_layout = furi_string_alloc();
     bad_usb_script_set_default_keyboard_layout(bad_usb);
 
     bad_usb->st.state = BadUsbStateInit;
@@ -890,6 +895,7 @@ void bad_usb_script_close(BadUsbScript* bad_usb) {
     furi_thread_join(bad_usb->thread);
     furi_thread_free(bad_usb->thread);
     furi_string_free(bad_usb->file_path);
+    furi_string_free(bad_usb->keyboard_layout);
     free(bad_usb);
 }
 
@@ -903,6 +909,7 @@ void bad_usb_script_set_keyboard_layout(BadUsbScript* bad_usb, FuriString* layou
 
     File* layout_file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
     if(!furi_string_empty(layout_path)) {
+        furi_string_set(bad_usb->keyboard_layout, layout_path);
         if(storage_file_open(
                layout_file, furi_string_get_cstr(layout_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             uint16_t layout[128];
