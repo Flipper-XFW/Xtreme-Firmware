@@ -29,7 +29,7 @@ void bad_usb_scene_file_select_on_enter(void* context) {
     }
 
     if(bad_usb_file_select(bad_usb)) {
-        bad_usb->bad_usb_script = bad_usb_script_open(bad_usb->file_path, bad_usb->bt);
+        bad_usb->bad_usb_script = bad_usb_script_open(bad_usb->file_path, bad_usb->is_bt ? bad_usb->bt : NULL);
         bad_usb_script_set_keyboard_layout(bad_usb->bad_usb_script, bad_usb->keyboard_layout);
 
         scene_manager_next_scene(bad_usb->scene_manager, BadUsbSceneWork);

@@ -195,17 +195,17 @@ static inline void update_bt_timeout(Bt* bt) {
  *
  * @param  n_free_chars    Number of free slots to wait for (and consider the buffer not full)
 */
-// static void bt_hid_hold_while_keyboard_buffer_full(uint8_t n_free_chars, int32_t timeout) {
-//     uint32_t start = furi_get_tick();
-//     uint32_t timeout_ms = timeout <= -1 ? 0 : timeout;
-//     while(furi_hal_bt_hid_kb_free_slots(n_free_chars) == false) {
-//         furi_delay_ms(100);
+static void bt_hid_hold_while_keyboard_buffer_full(uint8_t n_free_chars, int32_t timeout) {
+    uint32_t start = furi_get_tick();
+    uint32_t timeout_ms = timeout <= -1 ? 0 : timeout;
+    while(furi_hal_bt_hid_kb_free_slots(n_free_chars) == false) {
+        furi_delay_ms(100);
 
-//         if(timeout != -1 && (furi_get_tick() - start) > timeout_ms) {
-//             break;
-//         }
-//     }
-// }
+        if(timeout != -1 && (furi_get_tick() - start) > timeout_ms) {
+            break;
+        }
+    }
+}
 
 static bool ducky_get_number(const char* param, uint32_t* val) {
     uint32_t value = 0;
@@ -228,42 +228,68 @@ static bool ducky_is_line_end(const char chr) {
     return ((chr == ' ') || (chr == '\0') || (chr == '\r') || (chr == '\n'));
 }
 
-static void ducky_numlock_on() {
-    if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) {
-        furi_hal_hid_kb_press(HID_KEYBOARD_LOCK_NUM_LOCK);
-        furi_hal_hid_kb_release(HID_KEYBOARD_LOCK_NUM_LOCK);
+static void ducky_numlock_on(BadUsbScript* bad_usb) {
+    if (bad_usb->bt) {
+        if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) {  // FIXME
+            bt_hid_hold_while_keyboard_buffer_full(1, -1);
+            furi_hal_bt_hid_kb_press(HID_KEYBOARD_LOCK_NUM_LOCK);
+            furi_delay_ms(bt_timeout);
+            furi_hal_bt_hid_kb_release(HID_KEYBOARD_LOCK_NUM_LOCK);
+        }
+    } else {
+        if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) {
+            furi_hal_hid_kb_press(HID_KEYBOARD_LOCK_NUM_LOCK);
+            furi_hal_hid_kb_release(HID_KEYBOARD_LOCK_NUM_LOCK);
+        }
     }
 }
 
-static bool ducky_numpad_press(const char num) {
+static bool ducky_numpad_press(BadUsbScript* bad_usb, const char num) {
     if((num < '0') || (num > '9')) return false;
 
     uint16_t key = numpad_keys[num - '0'];
-    furi_hal_hid_kb_press(key);
-    furi_hal_hid_kb_release(key);
+    FURI_LOG_I(WORKER_TAG, "Pressing %c\r\n", num);
+    if (bad_usb->bt) {
+        bt_hid_hold_while_keyboard_buffer_full(1, -1);
+        furi_hal_bt_hid_kb_press(key);
+        furi_delay_ms(bt_timeout);
+        furi_hal_bt_hid_kb_release(key);
+    } else {
+        furi_hal_hid_kb_press(key);
+        furi_hal_hid_kb_release(key);
+    }
 
     return true;
 }
 
-static bool ducky_altchar(const char* charcode) {
+static bool ducky_altchar(BadUsbScript* bad_usb, const char* charcode) {
     uint8_t i = 0;
     bool state = false;
 
     FURI_LOG_I(WORKER_TAG, "char %s", charcode);
 
-    furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
+    if (bad_usb->bt) {
+        bt_hid_hold_while_keyboard_buffer_full(1, -1);
+        furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT);
+    } else {
+        furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
+    }
 
     while(!ducky_is_line_end(charcode[i])) {
-        state = ducky_numpad_press(charcode[i]);
+        state = ducky_numpad_press(bad_usb, charcode[i]);
         if(state == false) break;
         i++;
     }
 
-    furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
+    if (bad_usb->bt) {
+        furi_hal_bt_hid_kb_release(KEY_MOD_LEFT_ALT);
+    } else {
+        furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
+    }
     return state;
 }
 
-static bool ducky_altstring(const char* param) {
+static bool ducky_altstring(BadUsbScript* bad_usb, const char* param) {
     uint32_t i = 0;
     bool state = false;
 
@@ -276,7 +302,7 @@ static bool ducky_altstring(const char* param) {
         char temp_str[4];
         snprintf(temp_str, 4, "%u", param[i]);
 
-        state = ducky_altchar(temp_str);
+        state = ducky_altchar(bad_usb, temp_str);
         if(state == false) break;
         i++;
     }
@@ -288,8 +314,15 @@ static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     while(param[i] != '\0') {
         uint16_t keycode = BADUSB_ASCII_TO_KEY(bad_usb, param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
-            furi_hal_hid_kb_press(keycode);
-            furi_hal_hid_kb_release(keycode);
+            if (bad_usb->bt) {
+                bt_hid_hold_while_keyboard_buffer_full(1, -1);
+                furi_hal_bt_hid_kb_press(keycode);
+                furi_delay_ms(bt_timeout);
+                furi_hal_bt_hid_kb_release(keycode);
+            } else {
+                furi_hal_hid_kb_press(keycode);
+                furi_hal_hid_kb_release(keycode);
+            }
         }
         i++;
     }
@@ -365,8 +398,8 @@ static int32_t
     } else if(strncmp(line_tmp, ducky_cmd_altchar, strlen(ducky_cmd_altchar)) == 0) {
         // ALTCHAR
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
-        ducky_numlock_on();
-        state = ducky_altchar(line_tmp);
+        ducky_numlock_on(bad_usb);
+        state = ducky_altchar(bad_usb, line_tmp);
         if(!state && error != NULL) {
             snprintf(error, error_len, "Invalid altchar %s", line_tmp);
         }
@@ -376,8 +409,8 @@ static int32_t
         (strncmp(line_tmp, ducky_cmd_altstr_2, strlen(ducky_cmd_altstr_2)) == 0)) {
         // ALTSTRING
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
-        ducky_numlock_on();
-        state = ducky_altstring(line_tmp);
+        ducky_numlock_on(bad_usb);
+        state = ducky_altstring(bad_usb, line_tmp);
         if(!state && error != NULL) {
             snprintf(error, error_len, "Invalid altstring %s", line_tmp);
         }
@@ -394,9 +427,18 @@ static int32_t
         // SYSRQ
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         uint16_t key = ducky_get_keycode(bad_usb, line_tmp, true);
-        furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
-        furi_hal_hid_kb_press(key);
-        furi_hal_hid_kb_release_all();
+        if (bad_usb->bt) {
+            bt_hid_hold_while_keyboard_buffer_full(1, -1);
+            furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
+            furi_hal_bt_hid_kb_press(key);
+            furi_delay_ms(bt_timeout);
+            furi_hal_bt_hid_kb_release(key);
+            furi_hal_bt_hid_kb_release(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
+        } else {
+            furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
+            furi_hal_hid_kb_press(key);
+            furi_hal_hid_kb_release_all();
+        }
         return (0);
     } else {
         // Special keys + modifiers
@@ -412,8 +454,14 @@ static int32_t
             line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
             key |= ducky_get_keycode(bad_usb, line_tmp, true);
         }
-        furi_hal_hid_kb_press(key);
-        furi_hal_hid_kb_release(key);
+        if (bad_usb->bt) {
+            furi_hal_bt_hid_kb_press(key);
+            furi_delay_ms(bt_timeout);
+            furi_hal_bt_hid_kb_release(key);
+        } else {
+            furi_hal_hid_kb_press(key);
+            furi_hal_hid_kb_release(key);
+        }
         return (0);
     }
 }
@@ -470,16 +518,18 @@ static bool ducky_script_preload(BadUsbScript* bad_usb, File* script_file) {
         }
     } while(ret > 0);
 
-    const char* line_tmp = furi_string_get_cstr(bad_usb->line);
-    bool id_set = false; // Looking for ID command at first line
-    if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
-        id_set = ducky_set_usb_id(bad_usb, &line_tmp[strlen(ducky_cmd_id) + 1]);
-    }
+    if (!bad_usb->bt) {
+        const char* line_tmp = furi_string_get_cstr(bad_usb->line);
+        bool id_set = false; // Looking for ID command at first line
+        if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
+            id_set = ducky_set_usb_id(bad_usb, &line_tmp[strlen(ducky_cmd_id) + 1]);
+        }
 
-    if(id_set) {
-        furi_check(furi_hal_usb_set_config(&usb_hid, &bad_usb->hid_cfg));
-    } else {
-        furi_check(furi_hal_usb_set_config(&usb_hid, NULL));
+        if(id_set) {
+            furi_check(furi_hal_usb_set_config(&usb_hid, &bad_usb->hid_cfg));
+        } else {
+            furi_check(furi_hal_usb_set_config(&usb_hid, NULL));
+        }
     }
 
     storage_file_seek(script_file, 0, true);
@@ -535,7 +585,14 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
                     return 0;
                 } else if(delay_val < 0) {
                     bad_usb->st.error_line = bad_usb->st.line_cur;
-                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
+                    if(delay_val == SCRIPT_STATE_NEXT_LINE) {
+                        snprintf(
+                            bad_usb->st.error, sizeof(bad_usb->st.error), "Forbidden empty line");
+                        FURI_LOG_E(
+                            WORKER_TAG, "Forbidden empty line at line %u", bad_usb->st.line_cur);
+                    } else {
+                        FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
+                    }
                     return SCRIPT_STATE_ERROR;
                 } else {
                     return (delay_val + bad_usb->defdelay);
@@ -551,7 +608,22 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
     return 0;
 }
 
-static void bad_usb_hid_state_callback(bool state, void* context) {
+static void bad_usb_bt_hid_state_callback(BtStatus status, void* context) {
+    furi_assert(context);
+    BadUsbScript* bad_usb = (BadUsbScript*)context;
+    bool state = (status == BtStatusConnected);
+
+    if(state == true) {
+        LevelRssiRange r = bt_remote_rssi_range(bad_usb->bt);
+        if(r != LevelRssiError) {
+            bt_timeout = bt_hid_delays[r];
+        }
+        furi_thread_flags_set(furi_thread_get_id(bad_usb->thread), WorkerEvtConnect);
+    } else
+        furi_thread_flags_set(furi_thread_get_id(bad_usb->thread), WorkerEvtDisconnect);
+}
+
+static void bad_usb_usb_hid_state_callback(bool state, void* context) {
     furi_assert(context);
     BadUsbScript* bad_usb = context;
 
@@ -567,14 +639,27 @@ static int32_t bad_usb_worker(void* context) {
     BadUsbWorkerState worker_state = BadUsbStateInit;
     int32_t delay_val = 0;
 
-    FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
+    FuriHalUsbInterface* usb_mode_prev = NULL;
+    if (bad_usb->bt) {
+        bt_timeout = bt_hid_delays[LevelRssi39_0];
+        bt_disconnect(bad_usb->bt);
+        furi_delay_ms(200);
+        bt_keys_storage_set_storage_path(bad_usb->bt, HID_BT_KEYS_STORAGE_PATH);
+        if(!bt_set_profile(bad_usb->bt, BtProfileHidKeyboard)) {
+            FURI_LOG_E(TAG, "Failed to switch to HID profile");
+            return -1;
+        }
+        furi_hal_bt_start_advertising();
+        bt_set_status_changed_callback(bad_usb->bt, bad_usb_bt_hid_state_callback, bad_usb);
+    } else {
+        usb_mode_prev = furi_hal_usb_get_config();
+        furi_hal_hid_set_state_callback(bad_usb_usb_hid_state_callback, bad_usb);
+    }
 
     FURI_LOG_I(WORKER_TAG, "Init");
     File* script_file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
     bad_usb->line = furi_string_alloc();
     bad_usb->line_prev = furi_string_alloc();
-
-    furi_hal_hid_set_state_callback(bad_usb_hid_state_callback, bad_usb);
 
     while(1) {
         if(worker_state == BadUsbStateInit) { // State: initialization
@@ -584,10 +669,14 @@ static int32_t bad_usb_worker(void* context) {
                    FSAM_READ,
                    FSOM_OPEN_EXISTING)) {
                 if((ducky_script_preload(bad_usb, script_file)) && (bad_usb->st.line_nb > 0)) {
-                    if(furi_hal_hid_is_connected()) {
-                        worker_state = BadUsbStateIdle; // Ready to run
+                    if (bad_usb->bt) {
+                        worker_state = BadUsbStateNotConnected; // Ready to run
                     } else {
-                        worker_state = BadUsbStateNotConnected; // USB not connected
+                        if(furi_hal_hid_is_connected()) {
+                            worker_state = BadUsbStateIdle; // Ready to run
+                        } else {
+                            worker_state = BadUsbStateNotConnected; // USB not connected
+                        }
                     }
                 } else {
                     worker_state = BadUsbStateScriptError; // Script preload error
@@ -655,6 +744,10 @@ static int32_t bad_usb_worker(void* context) {
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
                 furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
+                if (bad_usb->bt) {
+                    update_bt_timeout(bad_usb->bt);
+                    FURI_LOG_I(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
+                }
                 worker_state = BadUsbStateRunning;
             } else if(flags & WorkerEvtToggle) { // Cancel scheduled execution
                 worker_state = BadUsbStateNotConnected;
@@ -671,10 +764,18 @@ static int32_t bad_usb_worker(void* context) {
                     break;
                 } else if(flags & WorkerEvtToggle) {
                     worker_state = BadUsbStateIdle; // Stop executing script
-                    furi_hal_hid_kb_release_all();
+                    if (bad_usb->bt) {
+                        furi_hal_bt_hid_kb_release_all();
+                    } else {
+                        furi_hal_hid_kb_release_all();
+                    }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadUsbStateNotConnected; // USB disconnected
-                    furi_hal_hid_kb_release_all();
+                    if (bad_usb->bt) {
+                        furi_hal_bt_hid_kb_release_all();
+                    } else {
+                        furi_hal_hid_kb_release_all();
+                    }
                 }
                 bad_usb->st.state = worker_state;
                 continue;
@@ -695,7 +796,11 @@ static int32_t bad_usb_worker(void* context) {
                     delay_val = 0;
                     worker_state = BadUsbStateIdle;
                     bad_usb->st.state = BadUsbStateDone;
-                    furi_hal_hid_kb_release_all();
+                    if (bad_usb->bt) {
+                        furi_hal_bt_hid_kb_release_all();
+                    } else {
+                        furi_hal_hid_kb_release_all();
+                    }
                     continue;
                 } else if(delay_val > 1000) {
                     bad_usb->st.state = BadUsbStateDelay; // Show long delays
@@ -715,11 +820,34 @@ static int32_t bad_usb_worker(void* context) {
                 break;
             }
         }
+        if (bad_usb->bt) {
+            update_bt_timeout(bad_usb->bt);
+            FURI_LOG_D(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
+        }
     }
 
-    furi_hal_hid_set_state_callback(NULL, NULL);
+    if (bad_usb->bt) {
+        // release all keys
+        bt_hid_hold_while_keyboard_buffer_full(6, 3000);
 
-    furi_hal_usb_set_config(usb_mode_prev, NULL);
+        // stop ble
+        bt_set_status_changed_callback(bad_usb->bt, NULL, NULL);
+
+        bt_disconnect(bad_usb->bt);
+
+        // Wait 2nd core to update nvm storage
+        furi_delay_ms(200);
+
+        bt_keys_storage_set_default_path(bad_usb->bt);
+
+        if(!bt_set_profile(bad_usb->bt, BtProfileSerial)) {
+            FURI_LOG_E(TAG, "Failed to switch to Serial profile");
+        }
+    } else {
+        furi_hal_hid_set_state_callback(NULL, NULL);
+
+        furi_hal_usb_set_config(usb_mode_prev, NULL);
+    }
 
     storage_file_close(script_file);
     storage_file_free(script_file);

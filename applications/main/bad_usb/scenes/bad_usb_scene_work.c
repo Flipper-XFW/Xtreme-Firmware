@@ -16,7 +16,7 @@ bool bad_usb_scene_work_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InputKeyLeft) {
-            if (app->is_bluetooth) {
+            if (app->is_bt) {
                 scene_manager_next_scene(app->scene_manager, BadUsbSceneConfigBt);
             } else {
                 scene_manager_next_scene(app->scene_manager, BadUsbSceneConfigUsb);

@@ -11,8 +11,8 @@ enum VarItemListIndex {
 
 void bad_usb_scene_config_bt_connection_callback(VariableItem* item) {
     BadUsbApp* bad_usb = variable_item_get_context(item);
-    bad_usb->is_bluetooth = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, bad_usb->is_bluetooth ? "BT" : "USB");
+    bad_usb->is_bt = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, bad_usb->is_bt ? "BT" : "USB");
     view_dispatcher_send_custom_event(bad_usb->view_dispatcher, VarItemListIndexConnection);
 }
 
@@ -28,8 +28,8 @@ void bad_usb_scene_config_bt_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list, "Connection", 2, bad_usb_scene_config_bt_connection_callback, bad_usb);
-    variable_item_set_current_value_index(item, bad_usb->is_bluetooth);
-    variable_item_set_current_value_text(item, bad_usb->is_bluetooth ? "BT" : "USB");
+    variable_item_set_current_value_index(item, bad_usb->is_bt);
+    variable_item_set_current_value_text(item, bad_usb->is_bt ? "BT" : "USB");
 
     item = variable_item_list_add(
         var_item_list, "Keyboard layout", 0, NULL, bad_usb);
@@ -55,8 +55,10 @@ bool bad_usb_scene_config_bt_on_event(void* context, SceneManagerEvent event) {
         if(event.event == VarItemListIndexKeyboardLayout) {
             scene_manager_next_scene(bad_usb->scene_manager, BadUsbSceneConfigLayout);
         } else if(event.event == VarItemListIndexConnection) {
+            bad_usb_script_close(bad_usb->bad_usb_script);
+            bad_usb->bad_usb_script = bad_usb_script_open(bad_usb->file_path, bad_usb->is_bt ? bad_usb->bt : NULL);
             scene_manager_previous_scene(bad_usb->scene_manager);
-            if (bad_usb->is_bluetooth) {
+            if (bad_usb->is_bt) {
                 scene_manager_next_scene(bad_usb->scene_manager, BadUsbSceneConfigBt);
             } else {
                 scene_manager_next_scene(bad_usb->scene_manager, BadUsbSceneConfigUsb);

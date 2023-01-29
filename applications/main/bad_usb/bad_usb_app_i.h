@@ -57,7 +57,7 @@ struct BadUsbApp {
     BadUsb* bad_usb_view;
     BadUsbScript* bad_usb_script;
 
-    bool is_bluetooth;
+    bool is_bt;
 };
 
 typedef enum {
