@@ -76,7 +76,10 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
-
+    
+    if (bt_get_profile_pairing_method(bt) == GapPairingNone)
+        return true;
+        
     notification_message(bt->notification, &sequence_display_backlight_on);
     FuriString* pin_str;
     dialog_message_set_icon(bt->dialog_message, XTREME_ASSETS()->I_BLE_Pairing_128x64, 0, 0);
@@ -86,6 +89,7 @@ static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     dialog_message_set_buttons(bt->dialog_message, "Cancel", "OK", NULL);
     DialogMessageButton button = dialog_message_show(bt->dialogs, bt->dialog_message);
     furi_string_free(pin_str);
+
     return button == DialogMessageButtonCenter;
 }
 
@@ -431,7 +435,7 @@ bool bt_remote_rssi(Bt* bt, BtRssi* rssi) {
     return true;
 }
 
-void        bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method) {
+void bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method) {
     furi_assert(bt);
     furi_hal_bt_set_profile_pairing_method(get_hal_bt_profile(bt->profile), pairing_method);
     bt_restart(bt);
