@@ -377,15 +377,24 @@ static void gap_init_svc(Gap* gap) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
     }
+
+    uint8_t conf_mitm = CFG_MITM_PROTECTION;
+    uint8_t conf_used_fixed_pin = CFG_USED_FIXED_PIN;
+    
+    if (gap->config->pairing_method == GapPairingNone) {
+        conf_mitm = 0;
+        conf_used_fixed_pin = 0;
+    }
+
     // Setup  authentication
     aci_gap_set_authentication_requirement(
         gap->config->bonding_mode,
-        CFG_MITM_PROTECTION,
+        conf_mitm,
         CFG_SC_SUPPORT,
         keypress_supported,
         CFG_ENCRYPTION_KEY_SIZE_MIN,
         CFG_ENCRYPTION_KEY_SIZE_MAX,
-        CFG_USED_FIXED_PIN, // 0x0 for no pin
+        conf_used_fixed_pin, // 0x0 for no pin
         0,
         PUBLIC_ADDR);
     // Configure whitelist

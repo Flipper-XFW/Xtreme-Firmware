@@ -370,12 +370,16 @@ static void bt_close_connection(Bt* bt) {
     furi_event_flag_set(bt->api_event, BT_API_UNLOCK_EVENT);
 }
 
-static void bt_restart(Bt* bt) {
-    if(bt->profile == BtProfileHidKeyboard) {
-        furi_hal_bt_change_app(FuriHalBtProfileHidKeyboard, bt_on_gap_event_callback, bt);
+static inline FuriHalBtProfile get_hal_bt_profile(BtProfile profile) {
+    if(profile == BtProfileHidKeyboard) {
+        return FuriHalBtProfileHidKeyboard;
     } else {
-        furi_hal_bt_change_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt);
+        return FuriHalBtProfileSerial;
     }
+}
+
+static void bt_restart(Bt* bt) {
+    furi_hal_bt_change_app(get_hal_bt_profile(bt->profile), bt_on_gap_event_callback, bt);
     furi_hal_bt_start_advertising();
 }
 
@@ -388,44 +392,28 @@ void bt_set_profile_adv_name(Bt* bt, const char* fmt, ...) {
     va_start(args, fmt);
     vsnprintf(name, sizeof(name), fmt, args);
     va_end(args);
-    if(bt->profile == BtProfileHidKeyboard) {
-        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, name);
-    } else {
-        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileSerial, name);
-    }
+    furi_hal_bt_set_profile_adv_name(get_hal_bt_profile(bt->profile), name);
 
     bt_restart(bt);
 }
 
 const char* bt_get_profile_adv_name(Bt* bt) {
     furi_assert(bt);
-    if(bt->profile == BtProfileHidKeyboard) {
-        return furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard);
-    } else {
-        return furi_hal_bt_get_profile_adv_name(FuriHalBtProfileSerial);
-    }
+    return furi_hal_bt_get_profile_adv_name(get_hal_bt_profile(bt->profile));
 }
 
 void bt_set_profile_mac_address(Bt* bt, const uint8_t mac[6]) {
     furi_assert(bt);
     furi_assert(mac);
 
-    if(bt->profile == BtProfileHidKeyboard) {
-        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, mac);
-    } else {
-        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileSerial, mac);
-    }
+    furi_hal_bt_set_profile_mac_addr(get_hal_bt_profile(bt->profile), mac);
 
     bt_restart(bt);
 }
 
 const uint8_t* bt_get_profile_mac_address(Bt* bt) {
     furi_assert(bt);
-    if(bt->profile == BtProfileHidKeyboard) {
-        return furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard);
-    } else {
-        return furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileSerial);
-    }
+    return furi_hal_bt_get_profile_mac_addr(get_hal_bt_profile(bt->profile));
 }
 
 bool bt_remote_rssi(Bt* bt, BtRssi* rssi) {
@@ -441,6 +429,17 @@ bool bt_remote_rssi(Bt* bt, BtRssi* rssi) {
     rssi->since = since;
 
     return true;
+}
+
+void        bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method) {
+    furi_assert(bt);
+    furi_hal_bt_set_profile_pairing_method(get_hal_bt_profile(bt->profile), pairing_method);
+    bt_restart(bt);
+}
+
+GapPairing bt_get_profile_pairing_method(Bt* bt) {
+    furi_assert(bt);
+    return furi_hal_bt_get_profile_pairing_method(get_hal_bt_profile(bt->profile));
 }
 
 int32_t bt_srv(void* p) {

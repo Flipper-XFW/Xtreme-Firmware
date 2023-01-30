@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,13.0,,
+Version,+,13.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -573,12 +573,14 @@ Function,+,bt_disconnect,void,Bt*
 Function,+,bt_forget_bonded_devices,void,Bt*
 Function,+,bt_get_profile_adv_name,const char*,Bt*
 Function,+,bt_get_profile_mac_address,const uint8_t*,Bt*
+Function,+,bt_get_profile_pairing_method,GapPairing,Bt*
 Function,+,bt_keys_storage_set_default_path,void,Bt*
 Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
 Function,+,bt_remote_rssi,_Bool,"Bt*, BtRssi*"
 Function,+,bt_set_profile,_Bool,"Bt*, BtProfile"
 Function,+,bt_set_profile_adv_name,void,"Bt*, const char*, ..."
 Function,+,bt_set_profile_mac_address,void,"Bt*, const uint8_t[6]"
+Function,+,bt_set_profile_pairing_method,void,"Bt*, GapPairing"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
@@ -1004,6 +1006,7 @@ Function,+,furi_hal_bt_get_conn_rssi,uint32_t,uint8_t*
 Function,+,furi_hal_bt_get_key_storage_buff,void,"uint8_t**, uint16_t*"
 Function,+,furi_hal_bt_get_profile_adv_name,const char*,FuriHalBtProfile
 Function,+,furi_hal_bt_get_profile_mac_addr,const uint8_t*,FuriHalBtProfile
+Function,+,furi_hal_bt_get_profile_pairing_method,GapPairing,FuriHalBtProfile
 Function,+,furi_hal_bt_get_radio_stack,FuriHalBtStack,
 Function,+,furi_hal_bt_get_rssi,float,
 Function,+,furi_hal_bt_get_transmitted_packets,uint32_t,
@@ -1039,6 +1042,7 @@ Function,+,furi_hal_bt_serial_tx,_Bool,"uint8_t*, uint16_t"
 Function,+,furi_hal_bt_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
 Function,+,furi_hal_bt_set_profile_adv_name,void,"FuriHalBtProfile, const char[( 1 + ( 8 + 1 ) ) - 1]"
 Function,+,furi_hal_bt_set_profile_mac_addr,void,"FuriHalBtProfile, const uint8_t[( 6 )]"
+Function,+,furi_hal_bt_set_profile_pairing_method,void,"FuriHalBtProfile, GapPairing"
 Function,+,furi_hal_bt_start_advertising,void,
 Function,+,furi_hal_bt_start_app,_Bool,"FuriHalBtProfile, GapEventCallback, void*"
 Function,+,furi_hal_bt_start_packet_rx,void,"uint8_t, uint8_t"

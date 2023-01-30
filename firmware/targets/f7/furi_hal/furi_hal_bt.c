@@ -495,3 +495,13 @@ const uint8_t* furi_hal_bt_get_profile_mac_addr(FuriHalBtProfile profile) {
     furi_assert(profile < FuriHalBtProfileNumber);
     return profile_config[profile].config.mac_address;
 }
+
+void furi_hal_bt_set_profile_pairing_method(FuriHalBtProfile profile, GapPairing pairing_method) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    profile_config[profile].config.pairing_method = pairing_method;
+}
+
+GapPairing furi_hal_bt_get_profile_pairing_method(FuriHalBtProfile profile) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    return profile_config[profile].config.pairing_method;
+}

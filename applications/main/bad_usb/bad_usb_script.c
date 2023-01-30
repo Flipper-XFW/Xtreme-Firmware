@@ -641,15 +641,19 @@ static int32_t bad_usb_worker(void* context) {
     int32_t delay_val = 0;
 
     FuriHalUsbInterface* usb_mode_prev = NULL;
+    GapPairing old_pairing_method = GapPairingNone;
     if (bad_usb->bt) {
         bt_timeout = bt_hid_delays[LevelRssi39_0];
         bt_disconnect(bad_usb->bt);
         furi_delay_ms(200);
         bt_keys_storage_set_storage_path(bad_usb->bt, HID_BT_KEYS_STORAGE_PATH);
+
         if(!bt_set_profile(bad_usb->bt, BtProfileHidKeyboard)) {
             FURI_LOG_E(TAG, "Failed to switch to HID profile");
             return -1;
         }
+        old_pairing_method = bt_get_profile_pairing_method(bad_usb->bt);
+        bt_set_profile_pairing_method(bad_usb->bt, GapPairingNone);
         furi_hal_bt_start_advertising();
         bt_set_status_changed_callback(bad_usb->bt, bad_usb_bt_hid_state_callback, bad_usb);
     } else {
@@ -843,6 +847,8 @@ static int32_t bad_usb_worker(void* context) {
 
         bt_keys_storage_set_default_path(bad_usb->bt);
 
+        bt_set_profile_pairing_method(bad_usb->bt, old_pairing_method);
+        
         if(!bt_set_profile(bad_usb->bt, BtProfileSerial)) {
             FURI_LOG_E(TAG, "Failed to switch to Serial profile");
         }
