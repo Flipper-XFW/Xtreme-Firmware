@@ -371,20 +371,23 @@ static void gap_init_svc(Gap* gap) {
     hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
     // Set I/O capability
     bool keypress_supported = false;
+    uint8_t conf_mitm = CFG_MITM_PROTECTION;
+    uint8_t conf_used_fixed_pin = CFG_USED_FIXED_PIN;
     if(gap->config->pairing_method == GapPairingPinCodeShow) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
     } else if(gap->config->pairing_method == GapPairingPinCodeVerifyYesNo) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
-    }
-
-    uint8_t conf_mitm = CFG_MITM_PROTECTION;
-    uint8_t conf_used_fixed_pin = CFG_USED_FIXED_PIN;
-    
-    if (gap->config->pairing_method == GapPairingNone) {
+    } else if (gap->config->pairing_method == GapPairingNone) {
+        // Just works pairing method (IOS accept it, it seems android and linux doesn't)
         conf_mitm = 0;
         conf_used_fixed_pin = 0;
+        // if just works isn't supported, we want the numeric comparaison method
+        aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
+        keypress_supported = true;
     }
+
+
 
     // Setup  authentication
     aci_gap_set_authentication_requirement(
