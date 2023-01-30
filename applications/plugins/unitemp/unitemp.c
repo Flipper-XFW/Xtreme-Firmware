@@ -1,6 +1,6 @@
 /*
     Unitemp - Universal temperature reader
-    Copyright (C) 2022  Victor Nikitchuk (https://github.com/quen0n)
+    Copyright (C) 2022-2023  Victor Nikitchuk (https://github.com/quen0n)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include "./views/UnitempViews.h"
 
 #include <furi_hal_power.h>
-#include <m-string.h>
 
 /* Переменные */
 //Данные приложения
@@ -79,9 +78,7 @@ bool unitemp_saveSettings(void) {
 }
 
 bool unitemp_loadSettings(void) {
-#ifdef UNITEMP_DEBUG
-    FURI_LOG_D(APP_NAME, "Loading settings...");
-#endif
+    UNITEMP_DEBUG("Loading settings...");
 
     //Выделение памяти на поток
     app->file_stream = file_stream_alloc(app->storage);
@@ -147,7 +144,7 @@ bool unitemp_loadSettings(void) {
     //Сколько байт до конца строки
     size_t line_end = 0;
 
-    while(line_end != STRING_FAILURE && line_end != (size_t)(file_size - 1)) {
+    while(line_end != ((size_t)-1) && line_end != (size_t)(file_size - 1)) {
         char buff[20] = {0};
         sscanf(((char*)(file_buf + line_end)), "%s", buff);
 
@@ -236,6 +233,8 @@ static bool unitemp_alloc(void) {
  */
 static void unitemp_free(void) {
     popup_free(app->popup);
+    //Удаление вида после обработки
+    view_dispatcher_remove_view(app->view_dispatcher, UnitempViewPopup);
     unitemp_widgets_free();
 
     unitemp_SensorActions_free();

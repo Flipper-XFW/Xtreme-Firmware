@@ -1,6 +1,6 @@
 /*
     Unitemp - Universal temperature reader
-    Copyright (C) 2022  Victor Nikitchuk (https://github.com/quen0n)
+    Copyright (C) 2022-2023  Victor Nikitchuk (https://github.com/quen0n)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,8 @@
 #include "UnitempViews.h"
 #include <gui/modules/variable_item_list.h>
 #include <stdio.h>
-#include <assets_icons.h>
+
+extern const Icon I_Cry_dolph_55x52;
 
 //Текущий вид
 static View* view;
@@ -85,8 +86,8 @@ static void _enter_callback(void* context, uint32_t index) {
         return;
     }
 
-    //Выбор первого доступного порта для датчика single wire
-    if(type->interface == &SINGLE_WIRE) {
+    //Выбор первого доступного порта для датчика single wire и SPI
+    if(type->interface == &SINGLE_WIRE || type->interface == &SPI) {
         snprintf(
             args,
             4,
