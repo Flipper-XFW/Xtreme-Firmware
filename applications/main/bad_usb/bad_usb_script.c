@@ -648,8 +648,7 @@ static int32_t bad_usb_worker(void* context) {
         bt_disconnect(bad_usb->bt);
         furi_delay_ms(200);
         bt_keys_storage_set_storage_path(bad_usb->bt, HID_BT_KEYS_STORAGE_PATH);
-
-        if(!bt_set_profile(bad_usb->bt, BtProfileHidKeyboard)) {
+        if (!bt_set_profile(bad_usb->bt, BtProfileHidKeyboard)) {
             FURI_LOG_E(TAG, "Failed to switch to HID profile");
             return -1;
         }
@@ -849,10 +848,10 @@ static int32_t bad_usb_worker(void* context) {
         bt_keys_storage_set_default_path(bad_usb->bt);
 
         bt_set_profile_pairing_method(bad_usb->bt, old_pairing_method);
-        
-        if(!bt_set_profile(bad_usb->bt, BtProfileSerial)) {
-            FURI_LOG_E(TAG, "Failed to switch to Serial profile");
-        }
+
+        // fails if ble radio stack isn't ready when switching profile
+        // if it happens, maybe we should increase the delay after bt_disconnect
+        bt_set_profile(bad_usb->bt, BtProfileSerial);
     } else {
         furi_hal_hid_set_state_callback(NULL, NULL);
 

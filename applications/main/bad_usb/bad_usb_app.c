@@ -99,9 +99,11 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     app->bt = bt;
     const char* adv_name = bt_get_profile_adv_name(bt);
     memcpy(app->name, adv_name, BAD_USB_ADV_NAME_MAX_LEN);
+    memcpy(app->bt_old_config.name, adv_name, BAD_USB_ADV_NAME_MAX_LEN);
 
     const uint8_t* mac_addr = bt_get_profile_mac_address(bt);
     memcpy(app->mac, mac_addr, BAD_USB_MAC_ADDRESS_LEN);
+    memcpy(app->bt_old_config.mac, mac_addr, BAD_USB_MAC_ADDRESS_LEN);
 
     // Custom Widget
     app->widget = widget_alloc();
@@ -179,6 +181,17 @@ void bad_usb_app_free(BadUsbApp* app) {
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
+
+    // restores bt config
+    // BtProfile have already been switched to the previous one
+    // so we directly modify the right profile 
+    if (strcmp(app->bt_old_config.name, app->name) != 0) {
+        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->bt_old_config.name);
+    }
+    if (memcmp(app->bt_old_config.mac, app->mac, BAD_USB_MAC_ADDRESS_LEN) != 0) {
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->bt_old_config.mac);
+    }
+
 
     // Close records
     furi_record_close(RECORD_GUI);

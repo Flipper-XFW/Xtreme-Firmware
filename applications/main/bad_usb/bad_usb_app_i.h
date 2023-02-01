@@ -35,6 +35,15 @@ typedef enum BadUsbCustomEvent {
     BadUsbCustomEventErrorBack
 } BadUsbCustomEvent;
 
+typedef struct {
+    uint8_t mac[BAD_USB_MAC_ADDRESS_LEN];
+    char name[BAD_USB_ADV_NAME_MAX_LEN + 1];
+
+    // number of bt keys before starting the app (all keys added in
+    // the bt keys file then will be removed)
+    uint16_t n_keys;
+} BadUsbBtConfig;
+
 struct BadUsbApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
@@ -50,6 +59,7 @@ struct BadUsbApp {
     ByteInput* byte_input;
     uint8_t mac[BAD_USB_MAC_ADDRESS_LEN];
     char name[BAD_USB_ADV_NAME_MAX_LEN + 1];
+    BadUsbBtConfig bt_old_config;
 
     BadUsbAppError error;
     FuriString* file_path;
