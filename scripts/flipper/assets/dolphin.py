@@ -35,7 +35,7 @@ class DolphinBubbleAnimation:
         min_level: int,
         max_level: int,
         weight: int,
-        subpath: str = None
+        subpath: str = None,
     ):
         # Manifest
         self.name = name
@@ -188,7 +188,9 @@ class DolphinBubbleAnimation:
 
     def save(self, output_directory: str):
         if self.subpath:
-            animation_directory = os.path.join(output_directory, self.subpath, self.name)
+            animation_directory = os.path.join(
+                output_directory, self.subpath, self.name
+            )
         else:
             animation_directory = os.path.join(output_directory, self.name)
         os.makedirs(animation_directory, exist_ok=True)
@@ -294,7 +296,13 @@ class DolphinManifest:
 
                 # Initialize animation
                 animation = DolphinBubbleAnimation(
-                    name, min_butthurt, max_butthurt, min_level, max_level, weight, subpath
+                    name,
+                    min_butthurt,
+                    max_butthurt,
+                    min_level,
+                    max_level,
+                    weight,
+                    subpath,
                 )
 
                 # Load Animation meta and frames
