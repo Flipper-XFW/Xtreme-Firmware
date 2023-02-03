@@ -43,7 +43,9 @@ def convert_bmx(img: "Image.Image | pathlib.Path") -> bytes:
     return data
 
 
-def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typing.Callable):
+def pack(
+    input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typing.Callable
+):
     input = pathlib.Path(input)
     output = pathlib.Path(output)
     output.mkdir(parents=True, exist_ok=True)
@@ -68,7 +70,9 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
 
         if (source / "Anims/manifest.txt").exists():
             (packed / "Anims").mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source / "Anims/manifest.txt", packed / "Anims/manifest.txt")
+            shutil.copyfile(
+                source / "Anims/manifest.txt", packed / "Anims/manifest.txt"
+            )
             for anim in (source / "Anims").iterdir():
                 if not anim.is_dir():
                     continue
@@ -77,9 +81,13 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
                     if not frame.is_file():
                         continue
                     if frame.name == "meta.txt":
-                        shutil.copyfile(frame, packed / "Anims" / anim.name / "meta.txt")
+                        shutil.copyfile(
+                            frame, packed / "Anims" / anim.name / "meta.txt"
+                        )
                     elif frame.name.startswith("frame_"):
-                        (packed / "Anims" / anim.name / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
+                        (
+                            packed / "Anims" / anim.name / frame.with_suffix(".bm").name
+                        ).write_bytes(convert_bm(frame))
 
         if (source / "Icons").is_dir():
             for icons in (source / "Icons").iterdir():
@@ -89,7 +97,9 @@ def pack(input: "str | pathlib.Path", output: "str | pathlib.Path", logger: typi
                 for icon in icons.iterdir():
                     if not icon.is_file():
                         continue
-                    (packed / "Icons" / icons.name / icon.with_suffix(".bmx").name).write_bytes(convert_bmx(icon))
+                    (
+                        packed / "Icons" / icons.name / icon.with_suffix(".bmx").name
+                    ).write_bytes(convert_bmx(icon))
 
 
 if __name__ == "__main__":
@@ -105,7 +115,4 @@ if __name__ == "__main__":
     pack(here, here / "dolphin_custom", logger=print)
 
     end = time.perf_counter()
-    input(
-        f"\nFinished in {round(end - start, 2)}s\n"
-        "Press [Enter] to exit"
-    )
+    input(f"\nFinished in {round(end - start, 2)}s\n" "Press [Enter] to exit")
