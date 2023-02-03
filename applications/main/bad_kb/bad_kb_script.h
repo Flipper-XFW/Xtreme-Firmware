@@ -30,6 +30,10 @@ typedef struct {
     char error[64];
 } BadKbState;
 
+void bad_kb_connection_init(Bt* bt);
+
+void bad_kb_connection_deinit(Bt* bt);
+
 BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt);
 
 void bad_kb_script_close(BadKbScript* bad_kb);

@@ -155,6 +155,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 void bad_kb_app_free(BadKbApp* app) {
     furi_assert(app);
 
+    bad_kb_connection_deinit(app->bt);
     if(app->bad_kb_script) {
         bad_kb_script_close(app->bad_kb_script);
         app->bad_kb_script = NULL;
