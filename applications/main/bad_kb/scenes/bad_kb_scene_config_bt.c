@@ -33,9 +33,9 @@ void bad_kb_scene_config_bt_on_enter(void* context) {
 
     item = variable_item_list_add(var_item_list, "Keyboard layout", 0, NULL, bad_kb);
 
-    item = variable_item_list_add(var_item_list, "Change adv name", 0, NULL, bad_kb);
+    item = variable_item_list_add(var_item_list, "BT device name", 0, NULL, bad_kb);
 
-    item = variable_item_list_add(var_item_list, "Change MAC address", 0, NULL, bad_kb);
+    item = variable_item_list_add(var_item_list, "BT MAC address", 0, NULL, bad_kb);
 
     variable_item_list_set_enter_callback(
         var_item_list, bad_kb_scene_config_bt_var_item_list_callback, bad_kb);
