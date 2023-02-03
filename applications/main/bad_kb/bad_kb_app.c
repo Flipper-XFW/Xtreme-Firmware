@@ -112,10 +112,14 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->var_item_list_bt = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfigBt, variable_item_list_get_view(app->var_item_list_bt));
+        app->view_dispatcher,
+        BadKbAppViewConfigBt,
+        variable_item_list_get_view(app->var_item_list_bt));
     app->var_item_list_usb = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfigUsb, variable_item_list_get_view(app->var_item_list_usb));
+        app->view_dispatcher,
+        BadKbAppViewConfigUsb,
+        variable_item_list_get_view(app->var_item_list_usb));
 
     app->bad_kb_view = bad_kb_alloc();
     view_dispatcher_add_view(
@@ -184,14 +188,13 @@ void bad_kb_app_free(BadKbApp* app) {
 
     // restores bt config
     // BtProfile have already been switched to the previous one
-    // so we directly modify the right profile 
-    if (strcmp(app->bt_old_config.name, app->name) != 0) {
+    // so we directly modify the right profile
+    if(strcmp(app->bt_old_config.name, app->name) != 0) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->bt_old_config.name);
     }
-    if (memcmp(app->bt_old_config.mac, app->mac, BAD_KB_MAC_ADDRESS_LEN) != 0) {
+    if(memcmp(app->bt_old_config.mac, app->mac, BAD_KB_MAC_ADDRESS_LEN) != 0) {
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->bt_old_config.mac);
     }
-
 
     // Close records
     furi_record_close(RECORD_GUI);

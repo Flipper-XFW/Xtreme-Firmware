@@ -3,8 +3,7 @@
 static void bad_kb_scene_config_name_text_input_callback(void* context) {
     BadKbApp* bad_kb = context;
 
-    view_dispatcher_send_custom_event(
-        bad_kb->view_dispatcher, BadKbAppCustomEventTextEditResult);
+    view_dispatcher_send_custom_event(bad_kb->view_dispatcher, BadKbAppCustomEventTextEditResult);
 }
 
 void bad_kb_scene_config_name_on_enter(void* context) {

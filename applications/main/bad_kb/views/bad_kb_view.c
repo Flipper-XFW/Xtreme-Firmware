@@ -60,8 +60,8 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         elements_button_center(canvas, "Cancel");
     }
 
-    if((model->state.state == BadKbStateNotConnected) ||
-       (model->state.state == BadKbStateIdle) || (model->state.state == BadKbStateDone)) {
+    if((model->state.state == BadKbStateNotConnected) || (model->state.state == BadKbStateIdle) ||
+       (model->state.state == BadKbStateDone)) {
         elements_button_left(canvas, "Config");
     }
 
@@ -204,19 +204,13 @@ void bad_kb_set_button_callback(BadKb* bad_kb, BadKbButtonCallback callback, voi
 void bad_kb_set_file_name(BadKb* bad_kb, const char* name) {
     furi_assert(name);
     with_view_model(
-        bad_kb->view,
-        BadKbModel * model,
-        { strlcpy(model->file_name, name, MAX_NAME_LEN); },
-        true);
+        bad_kb->view, BadKbModel * model, { strlcpy(model->file_name, name, MAX_NAME_LEN); }, true);
 }
 
 void bad_kb_set_layout(BadKb* bad_kb, const char* layout) {
     furi_assert(layout);
     with_view_model(
-        bad_kb->view,
-        BadKbModel * model,
-        { strlcpy(model->layout, layout, MAX_NAME_LEN); },
-        true);
+        bad_kb->view, BadKbModel * model, { strlcpy(model->layout, layout, MAX_NAME_LEN); }, true);
 }
 
 void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {

@@ -29,10 +29,10 @@ void bad_kb_scene_config_usb_on_enter(void* context) {
     variable_item_set_current_value_index(item, bad_kb->is_bt);
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
 
-    item = variable_item_list_add(
-        var_item_list, "Keyboard layout", 0, NULL, bad_kb);
+    item = variable_item_list_add(var_item_list, "Keyboard layout", 0, NULL, bad_kb);
 
-    variable_item_list_set_enter_callback(var_item_list, bad_kb_scene_config_usb_var_item_list_callback, bad_kb);
+    variable_item_list_set_enter_callback(
+        var_item_list, bad_kb_scene_config_usb_var_item_list_callback, bad_kb);
 
     view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewConfigUsb);
 }
@@ -48,16 +48,17 @@ bool bad_kb_scene_config_usb_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
         } else if(event.event == VarItemListIndexConnection) {
             bad_kb_script_close(bad_kb->bad_kb_script);
-            bad_kb->bad_kb_script = bad_kb_script_open(bad_kb->file_path, bad_kb->is_bt ? bad_kb->bt : NULL);
+            bad_kb->bad_kb_script =
+                bad_kb_script_open(bad_kb->file_path, bad_kb->is_bt ? bad_kb->bt : NULL);
             bad_kb_script_set_keyboard_layout(bad_kb->bad_kb_script, bad_kb->keyboard_layout);
             scene_manager_previous_scene(bad_kb->scene_manager);
-            if (bad_kb->is_bt) {
+            if(bad_kb->is_bt) {
                 scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBt);
             } else {
                 scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigUsb);
             }
-        // } else {
-        //     furi_crash("Unknown key type");
+            // } else {
+            //     furi_crash("Unknown key type");
         }
     }
 

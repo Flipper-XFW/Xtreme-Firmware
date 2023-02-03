@@ -231,8 +231,8 @@ static bool ducky_is_line_end(const char chr) {
 }
 
 static void ducky_numlock_on(BadKbScript* bad_kb) {
-    if (bad_kb->bt) {
-        if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) {  // FIXME
+    if(bad_kb->bt) {
+        if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) { // FIXME
             bt_hid_hold_while_keyboard_buffer_full(1, -1);
             furi_hal_bt_hid_kb_press(HID_KEYBOARD_LOCK_NUM_LOCK);
             furi_delay_ms(bt_timeout);
@@ -251,7 +251,7 @@ static bool ducky_numpad_press(BadKbScript* bad_kb, const char num) {
 
     uint16_t key = numpad_keys[num - '0'];
     FURI_LOG_I(WORKER_TAG, "Pressing %c\r\n", num);
-    if (bad_kb->bt) {
+    if(bad_kb->bt) {
         bt_hid_hold_while_keyboard_buffer_full(1, -1);
         furi_hal_bt_hid_kb_press(key);
         furi_delay_ms(bt_timeout);
@@ -270,7 +270,7 @@ static bool ducky_altchar(BadKbScript* bad_kb, const char* charcode) {
 
     FURI_LOG_I(WORKER_TAG, "char %s", charcode);
 
-    if (bad_kb->bt) {
+    if(bad_kb->bt) {
         bt_hid_hold_while_keyboard_buffer_full(1, -1);
         furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT);
     } else {
@@ -283,7 +283,7 @@ static bool ducky_altchar(BadKbScript* bad_kb, const char* charcode) {
         i++;
     }
 
-    if (bad_kb->bt) {
+    if(bad_kb->bt) {
         furi_hal_bt_hid_kb_release(KEY_MOD_LEFT_ALT);
     } else {
         furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
@@ -316,7 +316,7 @@ static bool ducky_string(BadKbScript* bad_kb, const char* param) {
     while(param[i] != '\0') {
         uint16_t keycode = BADKB_ASCII_TO_KEY(bad_kb, param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
-            if (bad_kb->bt) {
+            if(bad_kb->bt) {
                 bt_hid_hold_while_keyboard_buffer_full(1, -1);
                 furi_hal_bt_hid_kb_press(keycode);
                 furi_delay_ms(bt_timeout);
@@ -429,7 +429,7 @@ static int32_t
         // SYSRQ
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         uint16_t key = ducky_get_keycode(bad_kb, line_tmp, true);
-        if (bad_kb->bt) {
+        if(bad_kb->bt) {
             bt_hid_hold_while_keyboard_buffer_full(1, -1);
             furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
             furi_hal_bt_hid_kb_press(key);
@@ -456,7 +456,7 @@ static int32_t
             line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
             key |= ducky_get_keycode(bad_kb, line_tmp, true);
         }
-        if (bad_kb->bt) {
+        if(bad_kb->bt) {
             furi_hal_bt_hid_kb_press(key);
             furi_delay_ms(bt_timeout);
             furi_hal_bt_hid_kb_release(key);
@@ -520,7 +520,7 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         }
     } while(ret > 0);
 
-    if (!bad_kb->bt) {
+    if(!bad_kb->bt) {
         const char* line_tmp = furi_string_get_cstr(bad_kb->line);
         bool id_set = false; // Looking for ID command at first line
         if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
@@ -643,12 +643,12 @@ static int32_t bad_kb_worker(void* context) {
 
     FuriHalUsbInterface* usb_mode_prev = NULL;
     GapPairing old_pairing_method = GapPairingNone;
-    if (bad_kb->bt) {
+    if(bad_kb->bt) {
         bt_timeout = bt_hid_delays[LevelRssi39_0];
         bt_disconnect(bad_kb->bt);
         furi_delay_ms(200);
         bt_keys_storage_set_storage_path(bad_kb->bt, HID_BT_KEYS_STORAGE_PATH);
-        if (!bt_set_profile(bad_kb->bt, BtProfileHidKeyboard)) {
+        if(!bt_set_profile(bad_kb->bt, BtProfileHidKeyboard)) {
             FURI_LOG_E(TAG, "Failed to switch to HID profile");
             return -1;
         }
@@ -674,7 +674,7 @@ static int32_t bad_kb_worker(void* context) {
                    FSAM_READ,
                    FSOM_OPEN_EXISTING)) {
                 if((ducky_script_preload(bad_kb, script_file)) && (bad_kb->st.line_nb > 0)) {
-                    if (bad_kb->bt) {
+                    if(bad_kb->bt) {
                         worker_state = BadKbStateNotConnected; // Ready to run
                     } else {
                         if(furi_hal_hid_is_connected()) {
@@ -750,7 +750,7 @@ static int32_t bad_kb_worker(void* context) {
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
                 furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
-                if (bad_kb->bt) {
+                if(bad_kb->bt) {
                     update_bt_timeout(bad_kb->bt);
                     FURI_LOG_I(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
                 }
@@ -771,14 +771,14 @@ static int32_t bad_kb_worker(void* context) {
                     break;
                 } else if(flags & WorkerEvtToggle) {
                     worker_state = BadKbStateIdle; // Stop executing script
-                    if (bad_kb->bt) {
+                    if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
-                    if (bad_kb->bt) {
+                    if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
@@ -803,7 +803,7 @@ static int32_t bad_kb_worker(void* context) {
                     delay_val = 0;
                     worker_state = BadKbStateIdle;
                     bad_kb->st.state = BadKbStateDone;
-                    if (bad_kb->bt) {
+                    if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
@@ -827,13 +827,13 @@ static int32_t bad_kb_worker(void* context) {
                 break;
             }
         }
-        if (bad_kb->bt) {
+        if(bad_kb->bt) {
             update_bt_timeout(bad_kb->bt);
             FURI_LOG_D(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
         }
     }
 
-    if (bad_kb->bt) {
+    if(bad_kb->bt) {
         // release all keys
         bt_hid_hold_while_keyboard_buffer_full(6, 3000);
 
