@@ -662,7 +662,7 @@ void bad_kb_bt_init(Bt* bt) {
     bt_set_profile_pairing_method(bt, GapPairingNone);
     furi_hal_bt_start_advertising();
     // disable peer key adding to bt SRAM storage
-    bt_disable_peer_key_update(bad_usb->bt);
+    bt_disable_peer_key_update(bt);
 
     connection_mode = BadKbConnectionModeBt;
 }
@@ -686,7 +686,7 @@ void bad_kb_bt_deinit(Bt* bt) {
     bt_set_profile(bt, BtProfileSerial);
 
     // starts saving peer keys (bounded devices)
-    bt_enable_peer_key_update(bad_usb->bt);
+    bt_enable_peer_key_update(bt);
 
     connection_mode = BadKbConnectionModeNone;
 }
