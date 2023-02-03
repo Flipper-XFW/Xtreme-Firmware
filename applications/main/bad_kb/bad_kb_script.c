@@ -680,7 +680,7 @@ static int32_t bad_kb_worker(void* context) {
                         if(furi_hal_hid_is_connected()) {
                             worker_state = BadKbStateIdle; // Ready to run
                         } else {
-                            worker_state = BadKbStateNotConnected; // USB not connected
+                            worker_state = BadKbStateNotConnected; // Not connected
                         }
                     }
                 } else {
@@ -692,7 +692,7 @@ static int32_t bad_kb_worker(void* context) {
             }
             bad_kb->st.state = worker_state;
 
-        } else if(worker_state == BadKbStateNotConnected) { // State: USB not connected
+        } else if(worker_state == BadKbStateNotConnected) { // State: Not connected
             uint32_t flags = furi_thread_flags_wait(
                 WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
                 FuriFlagWaitAny,
@@ -703,7 +703,7 @@ static int32_t bad_kb_worker(void* context) {
             } else if(flags & WorkerEvtConnect) {
                 worker_state = BadKbStateIdle; // Ready to run
             } else if(flags & WorkerEvtToggle) {
-                worker_state = BadKbStateWillRun; // Will run when USB is connected
+                worker_state = BadKbStateWillRun; // Will run when connected
             }
             bad_kb->st.state = worker_state;
 
@@ -727,7 +727,7 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb_script_set_keyboard_layout(bad_kb, bad_kb->keyboard_layout);
                 worker_state = BadKbStateRunning;
             } else if(flags & WorkerEvtDisconnect) {
-                worker_state = BadKbStateNotConnected; // USB disconnected
+                worker_state = BadKbStateNotConnected; // Disconnected
             }
             bad_kb->st.state = worker_state;
 
@@ -777,7 +777,7 @@ static int32_t bad_kb_worker(void* context) {
                         furi_hal_hid_kb_release_all();
                     }
                 } else if(flags & WorkerEvtDisconnect) {
-                    worker_state = BadKbStateNotConnected; // USB disconnected
+                    worker_state = BadKbStateNotConnected; // Disconnected
                     if (bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
                     } else {
