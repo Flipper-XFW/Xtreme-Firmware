@@ -627,13 +627,13 @@ static void bad_kb_bt_hid_state_callback(BtStatus status, void* context) {
 
 static inline BadKbWorkerState bad_kb_hid_get_initial_state(BadKbScript* bad_kb) {
     if(bad_kb->bt) {
-        if(furi_hal_usb_is_connected(&usb_hid)) {
+        if(furi_hal_bt_is_connected()) {
             return BadKbStateIdle;
         } else {
             return BadKbStateNotConnected;
         }
     } else {
-        if(bt_get_status(bad_kb->bt) == BtStatusConnected) {
+        if(furi_hal_hid_is_connected()) {
             return BadKbStateIdle;
         } else {
             return BadKbStateNotConnected;
