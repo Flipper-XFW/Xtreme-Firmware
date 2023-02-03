@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,13.2,,
+Version,v,13.4,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -569,7 +569,9 @@ Function,+,ble_glue_start,_Bool,
 Function,+,ble_glue_thread_stop,void,
 Function,+,ble_glue_wait_for_c2_start,_Bool,int32_t
 Function,-,bsearch,void*,"const void*, const void*, size_t, size_t, __compar_fn_t"
+Function,+,bt_disable_peer_key_update,void,Bt*
 Function,+,bt_disconnect,void,Bt*
+Function,+,bt_enable_peer_key_update,void,Bt*
 Function,+,bt_forget_bonded_devices,void,Bt*
 Function,+,bt_get_profile_adv_name,const char*,Bt*
 Function,+,bt_get_profile_mac_address,const uint8_t*,Bt*

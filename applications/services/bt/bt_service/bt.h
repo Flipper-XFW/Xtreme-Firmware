@@ -52,6 +52,17 @@ bool bt_remote_rssi(Bt* bt, BtRssi* rssi);
 void bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method);
 GapPairing bt_get_profile_pairing_method(Bt* bt);
 
+/** Stop saving new peer key to flash (in .bt.keys file)
+ * 
+*/
+void bt_disable_peer_key_update(Bt *bt);
+
+/** Enable saving peer key to internal flash (enable by default)
+ * 
+ * @note This function should be called if bt_disable_peer_key_update was called before
+*/
+void bt_enable_peer_key_update(Bt *bt);
+
 /** Disconnect from Central
  *
  * @param bt        Bt instance
