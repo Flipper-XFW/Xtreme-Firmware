@@ -2,7 +2,7 @@ ID 1234:5678 Apple:Keyboard
 REM You can change these values to VID/PID of original Apple keyboard
 REM to bypass Keyboard Setup Assistant
 
-REM This is BadUSB demo script for macOS
+REM This is BadKB demo script for macOS
 
 REM Open terminal window
 DELAY 1000
@@ -75,7 +75,7 @@ ENTER
 HOME
 ENTER
 
-STRING Flipper Zero BadUSB feature is compatible with USB Rubber Ducky script format
+STRING Flipper Zero BadKB feature is compatible with USB Rubber Ducky script format
 ENTER
 STRING More information about script syntax can be found here:
 ENTER

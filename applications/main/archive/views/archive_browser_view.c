@@ -16,7 +16,7 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabSubGhz] = "Sub-GHz",
     [ArchiveTabLFRFID] = "RFID LF",
     [ArchiveTabInfrared] = "Infrared",
-    [ArchiveTabBadUsb] = "Bad USB",
+    [ArchiveTabBadKb] = "Bad KB",
     [ArchiveTabU2f] = "U2F",
     [ArchiveTabApplications] = "Apps",
     [ArchiveTabBrowser] = "Browser",
@@ -28,7 +28,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeSubGhz] = &I_sub1_10px,
     [ArchiveFileTypeLFRFID] = &I_125_10px,
     [ArchiveFileTypeInfrared] = &I_ir_10px,
-    [ArchiveFileTypeBadUsb] = &I_badusb_10px,
+    [ArchiveFileTypeBadKb] = &I_badkb_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
     [ArchiveFileTypeApplication] = &I_Apps_10px,
     [ArchiveFileTypeUpdateManifest] = &I_update_10px,
@@ -109,7 +109,7 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 menu_array_push_raw(model->context_menu),
                 item_pin,
                 ArchiveBrowserEventFileMenuPin);
-            if(selected->type <= ArchiveFileTypeBadUsb) {
+            if(selected->type <= ArchiveFileTypeBadKb) {
                 archive_menu_add_item(
                     menu_array_push_raw(model->context_menu),
                     item_show,
@@ -129,7 +129,7 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 menu_array_push_raw(model->context_menu),
                 item_info,
                 ArchiveBrowserEventFileMenuInfo);
-            if(selected->type <= ArchiveFileTypeBadUsb) {
+            if(selected->type <= ArchiveFileTypeBadKb) {
                 archive_menu_add_item(
                     menu_array_push_raw(model->context_menu),
                     item_show,
@@ -157,7 +157,7 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 menu_array_push_raw(model->context_menu),
                 item_info,
                 ArchiveBrowserEventFileMenuInfo);
-            if(selected->type <= ArchiveFileTypeBadUsb) {
+            if(selected->type <= ArchiveFileTypeBadKb) {
                 archive_menu_add_item(
                     menu_array_push_raw(model->context_menu),
                     item_show,

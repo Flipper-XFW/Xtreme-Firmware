@@ -1,4 +1,4 @@
-REM This is BadUSB demo script for windows
+REM This is BadKB demo script for windows
 
 REM Open windows notepad
 DELAY 1000
@@ -76,7 +76,7 @@ ENTER
 HOME
 ENTER
 
-STRING Flipper Zero BadUSB feature is compatible with USB Rubber Ducky script format
+STRING Flipper Zero BadKB feature is compatible with USB Rubber Ducky script format
 ENTER
 STRING More information about script syntax can be found here:
 ENTER
