@@ -132,7 +132,7 @@ static TotpConfigFileOpenResult totp_open_config_file(Storage* storage, FlipperF
         flipper_format_write_comment_cstr(fff_data_file, " ");
         flipper_format_write_comment_cstr(
             fff_data_file,
-            "How to notify user when new token is generated or badusb mode is activated (possible values: 0 - do not notify, 1 - sound, 2 - vibro, 3 sound and vibro)");
+            "How to notify user when new token is generated or badkb mode is activated (possible values: 0 - do not notify, 1 - sound, 2 - vibro, 3 sound and vibro)");
         flipper_format_write_uint32(
             fff_data_file, TOTP_CONFIG_KEY_NOTIFICATION_METHOD, &tmp_uint32, 1);
 

@@ -378,7 +378,7 @@ static void gap_init_svc(Gap* gap) {
     } else if(gap->config->pairing_method == GapPairingPinCodeVerifyYesNo) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
-    } else if (gap->config->pairing_method == GapPairingNone) {
+    } else if(gap->config->pairing_method == GapPairingNone) {
         // Just works pairing method (IOS accept it, it seems android and linux doesn't)
         conf_mitm = 0;
         conf_used_fixed_pin = 0;
@@ -386,8 +386,6 @@ static void gap_init_svc(Gap* gap) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
     }
-
-
 
     // Setup  authentication
     aci_gap_set_authentication_requirement(

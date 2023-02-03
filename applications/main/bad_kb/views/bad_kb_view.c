@@ -1,5 +1,5 @@
-#include "bad_usb_view.h"
-#include "../bad_usb_script.h"
+#include "bad_kb_view.h"
+#include "../bad_kb_script.h"
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
@@ -7,21 +7,21 @@
 
 #define MAX_NAME_LEN 64
 
-struct BadUsb {
+struct BadKb {
     View* view;
-    BadUsbButtonCallback callback;
+    BadKbButtonCallback callback;
     void* context;
 };
 
 typedef struct {
     char file_name[MAX_NAME_LEN];
     char layout[MAX_NAME_LEN];
-    BadUsbState state;
+    BadKbState state;
     uint8_t anim_frame;
-} BadUsbModel;
+} BadKbModel;
 
-static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
-    BadUsbModel* model = _model;
+static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
+    BadKbModel* model = _model;
 
     FuriString* disp_str;
     disp_str = furi_string_alloc_set(model->file_name);
@@ -47,25 +47,25 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_draw_icon(canvas, 22, 24, &I_UsbTree_48x22);
 
-    if((model->state.state == BadUsbStateIdle) || (model->state.state == BadUsbStateDone) ||
-       (model->state.state == BadUsbStateNotConnected)) {
+    if((model->state.state == BadKbStateIdle) || (model->state.state == BadKbStateDone) ||
+       (model->state.state == BadKbStateNotConnected)) {
         if(xtreme_settings->nsfw_mode) {
             elements_button_center(canvas, "Cum");
         } else {
             elements_button_center(canvas, "Start");
         }
-    } else if((model->state.state == BadUsbStateRunning) || (model->state.state == BadUsbStateDelay)) {
+    } else if((model->state.state == BadKbStateRunning) || (model->state.state == BadKbStateDelay)) {
         elements_button_center(canvas, "Stop");
-    } else if(model->state.state == BadUsbStateWillRun) {
+    } else if(model->state.state == BadKbStateWillRun) {
         elements_button_center(canvas, "Cancel");
     }
 
-    if((model->state.state == BadUsbStateNotConnected) ||
-       (model->state.state == BadUsbStateIdle) || (model->state.state == BadUsbStateDone)) {
+    if((model->state.state == BadKbStateNotConnected) || (model->state.state == BadKbStateIdle) ||
+       (model->state.state == BadKbStateDone)) {
         elements_button_left(canvas, "Config");
     }
 
-    if(model->state.state == BadUsbStateNotConnected) {
+    if(model->state.state == BadKbStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         if(xtreme_settings->nsfw_mode) {
@@ -75,7 +75,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
             canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
         }
-    } else if(model->state.state == BadUsbStateWillRun) {
+    } else if(model->state.state == BadKbStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         if(xtreme_settings->nsfw_mode) {
@@ -84,12 +84,12 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
         }
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "on connect");
-    } else if(model->state.state == BadUsbStateFileError) {
+    } else if(model->state.state == BadKbStateFileError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "File");
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "ERROR");
-    } else if(model->state.state == BadUsbStateScriptError) {
+    } else if(model->state.state == BadKbStateScriptError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 33, AlignRight, AlignBottom, "ERROR:");
@@ -99,12 +99,12 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 127, 46, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
         canvas_draw_str_aligned(canvas, 127, 56, AlignRight, AlignBottom, model->state.error);
-    } else if(model->state.state == BadUsbStateIdle) {
+    } else if(model->state.state == BadKbStateIdle) {
         canvas_draw_icon(canvas, 4, 26, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "0");
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(model->state.state == BadUsbStateRunning) {
+    } else if(model->state.state == BadKbStateRunning) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
         } else {
@@ -117,13 +117,13 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(model->state.state == BadUsbStateDone) {
+    } else if(model->state.state == BadKbStateDone) {
         canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "100");
         furi_string_reset(disp_str);
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(model->state.state == BadUsbStateDelay) {
+    } else if(model->state.state == BadKbStateDelay) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviWaiting1_18x21);
         } else {
@@ -148,84 +148,78 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     furi_string_free(disp_str);
 }
 
-static bool bad_usb_input_callback(InputEvent* event, void* context) {
+static bool bad_kb_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
-    BadUsb* bad_usb = context;
+    BadKb* bad_kb = context;
     bool consumed = false;
 
     if(event->type == InputTypeShort) {
         if((event->key == InputKeyLeft) || (event->key == InputKeyOk)) {
             consumed = true;
-            furi_assert(bad_usb->callback);
-            bad_usb->callback(event->key, bad_usb->context);
+            furi_assert(bad_kb->callback);
+            bad_kb->callback(event->key, bad_kb->context);
         }
     }
 
     return consumed;
 }
 
-BadUsb* bad_usb_alloc() {
-    BadUsb* bad_usb = malloc(sizeof(BadUsb));
+BadKb* bad_kb_alloc() {
+    BadKb* bad_kb = malloc(sizeof(BadKb));
 
-    bad_usb->view = view_alloc();
-    view_allocate_model(bad_usb->view, ViewModelTypeLocking, sizeof(BadUsbModel));
-    view_set_context(bad_usb->view, bad_usb);
-    view_set_draw_callback(bad_usb->view, bad_usb_draw_callback);
-    view_set_input_callback(bad_usb->view, bad_usb_input_callback);
+    bad_kb->view = view_alloc();
+    view_allocate_model(bad_kb->view, ViewModelTypeLocking, sizeof(BadKbModel));
+    view_set_context(bad_kb->view, bad_kb);
+    view_set_draw_callback(bad_kb->view, bad_kb_draw_callback);
+    view_set_input_callback(bad_kb->view, bad_kb_input_callback);
 
-    return bad_usb;
+    return bad_kb;
 }
 
-void bad_usb_free(BadUsb* bad_usb) {
-    furi_assert(bad_usb);
-    view_free(bad_usb->view);
-    free(bad_usb);
+void bad_kb_free(BadKb* bad_kb) {
+    furi_assert(bad_kb);
+    view_free(bad_kb->view);
+    free(bad_kb);
 }
 
-View* bad_usb_get_view(BadUsb* bad_usb) {
-    furi_assert(bad_usb);
-    return bad_usb->view;
+View* bad_kb_get_view(BadKb* bad_kb) {
+    furi_assert(bad_kb);
+    return bad_kb->view;
 }
 
-void bad_usb_set_button_callback(BadUsb* bad_usb, BadUsbButtonCallback callback, void* context) {
-    furi_assert(bad_usb);
+void bad_kb_set_button_callback(BadKb* bad_kb, BadKbButtonCallback callback, void* context) {
+    furi_assert(bad_kb);
     furi_assert(callback);
     with_view_model(
-        bad_usb->view,
-        BadUsbModel * model,
+        bad_kb->view,
+        BadKbModel * model,
         {
             UNUSED(model);
-            bad_usb->callback = callback;
-            bad_usb->context = context;
+            bad_kb->callback = callback;
+            bad_kb->context = context;
         },
         true);
 }
 
-void bad_usb_set_file_name(BadUsb* bad_usb, const char* name) {
+void bad_kb_set_file_name(BadKb* bad_kb, const char* name) {
     furi_assert(name);
     with_view_model(
-        bad_usb->view,
-        BadUsbModel * model,
-        { strlcpy(model->file_name, name, MAX_NAME_LEN); },
-        true);
+        bad_kb->view, BadKbModel * model, { strlcpy(model->file_name, name, MAX_NAME_LEN); }, true);
 }
 
-void bad_usb_set_layout(BadUsb* bad_usb, const char* layout) {
+void bad_kb_set_layout(BadKb* bad_kb, const char* layout) {
     furi_assert(layout);
     with_view_model(
-        bad_usb->view,
-        BadUsbModel * model,
-        { strlcpy(model->layout, layout, MAX_NAME_LEN); },
-        true);
+        bad_kb->view, BadKbModel * model, { strlcpy(model->layout, layout, MAX_NAME_LEN); }, true);
 }
 
-void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st) {
+void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {
     furi_assert(st);
     with_view_model(
-        bad_usb->view,
-        BadUsbModel * model,
+        bad_kb->view,
+        BadKbModel * model,
         {
-            memcpy(&(model->state), st, sizeof(BadUsbState));
+            memcpy(&(model->state), st, sizeof(BadKbState));
             model->anim_frame ^= 1;
         },
         true);

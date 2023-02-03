@@ -76,10 +76,9 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
-    
-    if (bt_get_profile_pairing_method(bt) == GapPairingNone)
-        return true;
-        
+
+    if(bt_get_profile_pairing_method(bt) == GapPairingNone) return true;
+
     notification_message(bt->notification, &sequence_display_backlight_on);
     FuriString* pin_str;
     dialog_message_set_icon(bt->dialog_message, XTREME_ASSETS()->I_BLE_Pairing_128x64, 0, 0);

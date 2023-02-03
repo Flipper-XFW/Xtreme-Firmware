@@ -24,7 +24,7 @@ typedef struct {
     uint32_t last_token_gen_time;
     TotpTypeCodeWorkerContext* type_code_worker_context;
     NotificationMessage const** notification_sequence_new_token;
-    NotificationMessage const** notification_sequence_badusb;
+    NotificationMessage const** notification_sequence_badkb;
 } SceneState;
 
 static const NotificationSequence*
@@ -69,8 +69,8 @@ static const NotificationSequence*
 }
 
 static const NotificationSequence*
-    get_notification_sequence_badusb(const PluginState* plugin_state, SceneState* scene_state) {
-    if(scene_state->notification_sequence_badusb == NULL) {
+    get_notification_sequence_badkb(const PluginState* plugin_state, SceneState* scene_state) {
+    if(scene_state->notification_sequence_badkb == NULL) {
         uint8_t i = 0;
         uint8_t length = 3;
         if(plugin_state->notification_method & NotificationMethodVibro) {
@@ -81,36 +81,36 @@ static const NotificationSequence*
             length += 6;
         }
 
-        scene_state->notification_sequence_badusb = malloc(sizeof(void*) * length);
-        furi_check(scene_state->notification_sequence_badusb != NULL);
+        scene_state->notification_sequence_badkb = malloc(sizeof(void*) * length);
+        furi_check(scene_state->notification_sequence_badkb != NULL);
 
-        scene_state->notification_sequence_badusb[i++] = &message_blue_255;
+        scene_state->notification_sequence_badkb[i++] = &message_blue_255;
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_badusb[i++] = &message_vibro_on;
+            scene_state->notification_sequence_badkb[i++] = &message_vibro_on;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_badusb[i++] = &message_note_d5; //-V525
-            scene_state->notification_sequence_badusb[i++] = &message_delay_50;
-            scene_state->notification_sequence_badusb[i++] = &message_note_e4;
-            scene_state->notification_sequence_badusb[i++] = &message_delay_50;
-            scene_state->notification_sequence_badusb[i++] = &message_note_f3;
+            scene_state->notification_sequence_badkb[i++] = &message_note_d5; //-V525
+            scene_state->notification_sequence_badkb[i++] = &message_delay_50;
+            scene_state->notification_sequence_badkb[i++] = &message_note_e4;
+            scene_state->notification_sequence_badkb[i++] = &message_delay_50;
+            scene_state->notification_sequence_badkb[i++] = &message_note_f3;
         }
 
-        scene_state->notification_sequence_badusb[i++] = &message_delay_50;
+        scene_state->notification_sequence_badkb[i++] = &message_delay_50;
 
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_badusb[i++] = &message_vibro_off;
+            scene_state->notification_sequence_badkb[i++] = &message_vibro_off;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_badusb[i++] = &message_sound_off;
+            scene_state->notification_sequence_badkb[i++] = &message_sound_off;
         }
 
-        scene_state->notification_sequence_badusb[i++] = NULL;
+        scene_state->notification_sequence_badkb[i++] = NULL;
     }
 
-    return (NotificationSequence*)scene_state->notification_sequence_badusb;
+    return (NotificationSequence*)scene_state->notification_sequence_badkb;
 }
 
 static void int_token_to_str(uint32_t i_token_code, char* str, TokenDigitsCount len) {
@@ -340,7 +340,7 @@ bool totp_scene_generate_token_handle_event(
             scene_state->type_code_worker_context, TotpTypeCodeWorkerEventType);
         notification_message(
             plugin_state->notification_app,
-            get_notification_sequence_badusb(plugin_state, scene_state));
+            get_notification_sequence_badkb(plugin_state, scene_state));
         return true;
     }
 
@@ -399,8 +399,8 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
         free(scene_state->notification_sequence_new_token);
     }
 
-    if(scene_state->notification_sequence_badusb != NULL) {
-        free(scene_state->notification_sequence_badusb);
+    if(scene_state->notification_sequence_badkb != NULL) {
+        free(scene_state->notification_sequence_badkb);
     }
 
     free(scene_state);
