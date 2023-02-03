@@ -661,6 +661,8 @@ void bad_kb_bt_init(Bt* bt) {
     bt_mode_prev = bt_get_profile_pairing_method(bt);
     bt_set_profile_pairing_method(bt, GapPairingNone);
     furi_hal_bt_start_advertising();
+    // disable peer key adding to bt SRAM storage
+    bt_disable_peer_key_update(bad_usb->bt);
 
     connection_mode = BadKbConnectionModeBt;
 }
@@ -682,6 +684,9 @@ void bad_kb_bt_deinit(Bt* bt) {
     // fails if ble radio stack isn't ready when switching profile
     // if it happens, maybe we should increase the delay after bt_disconnect
     bt_set_profile(bt, BtProfileSerial);
+
+    // starts saving peer keys (bounded devices)
+    bt_enable_peer_key_update(bad_usb->bt);
 
     connection_mode = BadKbConnectionModeNone;
 }
@@ -827,7 +832,6 @@ static int32_t bad_kb_worker(void* context) {
                 furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
                 if(bad_kb->bt) {
                     update_bt_timeout(bad_kb->bt);
-                    FURI_LOG_I(WORKER_TAG, "BLE Key timeout : %u", bt_timeout);
                 }
                 bad_kb_script_set_keyboard_layout(bad_kb, bad_kb->keyboard_layout);
                 worker_state = BadKbStateRunning;
