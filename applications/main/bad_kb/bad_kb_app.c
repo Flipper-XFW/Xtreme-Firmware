@@ -155,7 +155,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 void bad_kb_app_free(BadKbApp* app) {
     furi_assert(app);
 
-    bad_kb_connection_deinit(app->bt);
     if(app->bad_kb_script) {
         bad_kb_script_close(app->bad_kb_script);
         app->bad_kb_script = NULL;
@@ -190,6 +189,7 @@ void bad_kb_app_free(BadKbApp* app) {
     // restores bt config
     // BtProfile have already been switched to the previous one
     // so we directly modify the right profile
+    bad_kb_connection_deinit(app->bt);
     if(strcmp(app->bt_old_config.name, app->name) != 0) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->bt_old_config.name);
     }
