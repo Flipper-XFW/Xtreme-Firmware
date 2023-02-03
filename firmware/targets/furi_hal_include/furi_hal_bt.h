@@ -250,6 +250,8 @@ void furi_hal_bt_set_profile_pairing_method(FuriHalBtProfile profile, GapPairing
 
 GapPairing furi_hal_bt_get_profile_pairing_method(FuriHalBtProfile profile);
 
+bool furi_hal_bt_is_connected(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -44,6 +44,7 @@ void bad_kb_script_toggle(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 
+void bad_kb_script_bt_disconnect_and_reset_config(Bt *bt, GapPairing old_pairing_method);
 #ifdef __cplusplus
 }
 #endif

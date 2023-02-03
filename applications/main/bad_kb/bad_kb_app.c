@@ -186,6 +186,11 @@ void bad_kb_app_free(BadKbApp* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
+    // disconnect victim and reset bt config
+    if (furi_hal_bt_is_connected()) {
+        bad_kb_script_bt_disconnect_and_reset_config(app->bt, GapPairingPinCodeVerifyYesNo);
+    }
+
     // restores bt config
     // BtProfile have already been switched to the previous one
     // so we directly modify the right profile
