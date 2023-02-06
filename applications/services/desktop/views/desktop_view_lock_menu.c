@@ -68,7 +68,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
                 str = "Set PIN + Off";
             }
         } else if(i == DesktopLockMenuIndexXtremeSettings) {
-                str = "Xtreme Settings";
+            str = "Xtreme Settings";
         }
 
         if(str) //-V547

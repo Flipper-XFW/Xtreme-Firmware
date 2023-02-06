@@ -35,18 +35,18 @@ void animation_handler_select_manifest() {
     FuriString* anim_dir = furi_string_alloc();
     FuriString* manifest = furi_string_alloc();
     bool use_asset_pack = xtreme_settings->asset_pack[0] != '\0';
-    if (use_asset_pack) {
+    if(use_asset_pack) {
         furi_string_printf(anim_dir, "%s/%s/Anims", PACKS_DIR, xtreme_settings->asset_pack);
         furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
         Storage* storage = furi_record_open(RECORD_STORAGE);
-        if (storage_common_stat(storage, furi_string_get_cstr(manifest), NULL) == FSE_OK) {
+        if(storage_common_stat(storage, furi_string_get_cstr(manifest), NULL) == FSE_OK) {
             FURI_LOG_I(TAG, "Custom Manifest selected");
         } else {
             use_asset_pack = false;
         }
         furi_record_close(RECORD_STORAGE);
     }
-    if (!use_asset_pack) {
+    if(!use_asset_pack) {
         furi_string_set(anim_dir, BASE_ANIMATION_DIR);
         if(xtreme_settings->nsfw_mode) {
             furi_string_cat_str(anim_dir, "/nsfw");
@@ -58,7 +58,8 @@ void animation_handler_select_manifest() {
         furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
     }
     strlcpy(ANIMATION_DIR, furi_string_get_cstr(anim_dir), sizeof(ANIMATION_DIR));
-    strlcpy(ANIMATION_MANIFEST_FILE, furi_string_get_cstr(manifest), sizeof(ANIMATION_MANIFEST_FILE));
+    strlcpy(
+        ANIMATION_MANIFEST_FILE, furi_string_get_cstr(manifest), sizeof(ANIMATION_MANIFEST_FILE));
     furi_string_free(manifest);
     furi_string_free(anim_dir);
 }
@@ -335,7 +336,7 @@ static bool animation_storage_load_frames(
     FileInfo file_info;
     FuriString* filename;
     filename = furi_string_alloc();
-    size_t max_filesize = ROUND_UP_TO(width, 8) * height + 1;
+    size_t max_filesize = ROUND_UP_TO(width, 8) * height + 2;
 
     for(int i = 0; i < icon->frame_count; ++i) {
         frames_ok = false;
