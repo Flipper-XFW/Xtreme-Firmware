@@ -145,9 +145,20 @@ void xtreme_settings_scene_start_on_enter(void* context) {
             if(info.flags & FSF_DIRECTORY) {
                 char* copy = malloc(MAX_PACK_NAME_LEN);
                 strlcpy(copy, name, MAX_PACK_NAME_LEN);
-                asset_packs_push_back(app->asset_packs, copy);
-                if(strcmp(name, xtreme_settings->asset_pack) == 0)
-                    current_pack = asset_packs_size(app->asset_packs);
+                uint idx;
+                for(idx = 0; idx < asset_packs_size(app->asset_packs); idx++) {
+                    if(strcasecmp(copy, *asset_packs_get(app->asset_packs, idx)) < 0) {
+                        break;
+                    }
+                }
+                asset_packs_push_at(app->asset_packs, idx, copy);
+                if(current_pack != 0) {
+                    if(idx <= current_pack)
+                        current_pack++;
+                } else {
+                    if(strcmp(copy, xtreme_settings->asset_pack) == 0)
+                        current_pack = idx + 1;
+                }
             }
         }
     } while(false);
