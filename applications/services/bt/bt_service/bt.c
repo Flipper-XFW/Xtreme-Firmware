@@ -445,12 +445,12 @@ GapPairing bt_get_profile_pairing_method(Bt* bt) {
     return furi_hal_bt_get_profile_pairing_method(get_hal_bt_profile(bt->profile));
 }
 
-void bt_disable_peer_key_update(Bt *bt) {
+void bt_disable_peer_key_update(Bt* bt) {
     UNUSED(bt);
     furi_hal_bt_set_key_storage_change_callback(NULL, NULL);
 }
 
-void bt_enable_peer_key_update(Bt *bt) {
+void bt_enable_peer_key_update(Bt* bt) {
     furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 }
 
