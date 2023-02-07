@@ -78,10 +78,17 @@ static void BrowserItem_t_clear(BrowserItem_t* obj) {
 
 static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
     // Back indicator comes before everything, then folders, then all other files.
-    if((a->type == BrowserItemTypeBack) ||
-       (a->type == BrowserItemTypeFolder && b->type != BrowserItemTypeFolder &&
-        b->type != BrowserItemTypeBack)) {
+    if(a->type == BrowserItemTypeBack) {
         return -1;
+    }
+    if(b->type == BrowserItemTypeBack) {
+        return 1;
+    }
+    if(a->type == BrowserItemTypeFolder && b->type != BrowserItemTypeFolder) {
+        return -1;
+    }
+    if(a->type != BrowserItemTypeFolder && b->type == BrowserItemTypeFolder) {
+        return 1;
     }
 
     return furi_string_cmpi(a->path, b->path);

@@ -87,6 +87,9 @@ static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
     if(a->type == ArchiveFileTypeFolder && b->type != ArchiveFileTypeFolder) {
         return -1;
     }
+    if(a->type != ArchiveFileTypeFolder && b->type == ArchiveFileTypeFolder) {
+        return 1;
+    }
 
     return furi_string_cmpi(a->path, b->path);
 }
