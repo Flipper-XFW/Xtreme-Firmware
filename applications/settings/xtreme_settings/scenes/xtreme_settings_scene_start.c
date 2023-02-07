@@ -87,6 +87,14 @@ static void xtreme_settings_scene_start_battery_style_changed(VariableItem* item
     app->settings_changed = true;
 }
 
+static void xtreme_settings_scene_start_sort_folders_before_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->sort_ignore_dirs = !value;
+    app->settings_changed = true;
+}
+
 static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
     app->dolphin_level = variable_item_get_current_value_index(item) + 1;
@@ -218,6 +226,11 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         xtreme_settings->battery_style, battery_style_values, COUNT_OF(battery_style_names));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, battery_style_names[value_index]);
+
+    item = variable_item_list_add(
+        var_item_list, "Sort folders before", 2, xtreme_settings_scene_start_sort_folders_before_changed, app);
+    variable_item_set_current_value_index(item, !xtreme_settings->sort_ignore_dirs);
+    variable_item_set_current_value_text(item, !xtreme_settings->sort_ignore_dirs ? "ON" : "OFF");
 
     char level_str[4];
     snprintf(level_str, 4, "%i", app->dolphin_level);
