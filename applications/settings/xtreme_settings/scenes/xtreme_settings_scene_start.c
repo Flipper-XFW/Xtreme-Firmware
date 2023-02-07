@@ -161,7 +161,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
                 }
                 asset_packs_push_at(app->asset_packs, idx, copy);
                 if(current_pack != 0) {
-                    if(idx <= current_pack) current_pack++;
+                    if(idx < current_pack) current_pack++;
                 } else {
                     if(strcmp(copy, xtreme_settings->asset_pack) == 0) current_pack = idx + 1;
                 }
