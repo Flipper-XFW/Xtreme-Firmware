@@ -239,7 +239,8 @@ static bool
         if(browser->list_load_cb) {
             browser->list_load_cb(browser->cb_ctx, 0);
         }
-        while(storage_dir_read(directory, &file_info, name_temp, FILE_NAME_LEN_MAX) && storage_file_get_error(directory) == FSE_OK) {
+        while(storage_dir_read(directory, &file_info, name_temp, FILE_NAME_LEN_MAX) &&
+              storage_file_get_error(directory) == FSE_OK) {
             furi_string_set(name_str, name_temp);
             if(browser_filter_by_name(browser, name_str, (file_info.flags & FSF_DIRECTORY))) {
                 furi_string_printf(name_str, "%s/%s", furi_string_get_cstr(path), name_temp);
