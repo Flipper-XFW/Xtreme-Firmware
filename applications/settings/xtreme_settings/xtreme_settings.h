@@ -22,6 +22,7 @@ typedef struct {
     char asset_pack[MAX_PACK_NAME_LEN];
     BatteryStyle battery_style;
     uint16_t anim_speed;
+    bool sort_ignore_dirs;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();
