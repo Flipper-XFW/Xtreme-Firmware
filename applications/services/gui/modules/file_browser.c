@@ -1,16 +1,19 @@
 #include "file_browser.h"
-#include "assets_icons.h"
 #include "file_browser_worker.h"
+
+#include <gui/elements.h>
+#include <assets_icons.h>
+#include <toolbox/path.h>
+
+#include <furi.h>
+#include <furi_hal_resources.h>
+
 #include <core/check.h>
 #include <core/common_defines.h>
 #include <core/log.h>
-#include "furi_hal_resources.h"
 #include "m-string.h"
 #include "m-algo.h"
 #include <m-array.h>
-#include <gui/elements.h>
-#include <furi.h>
-#include "toolbox/path.h"
 #include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define LIST_ITEMS 5u

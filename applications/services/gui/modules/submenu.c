@@ -1,9 +1,9 @@
 #include "submenu.h"
 #include <gui/canvas_i.h>
 
-#include <m-array.h>
 #include <gui/elements.h>
 #include <furi.h>
+#include <m-array.h>
 
 struct Submenu {
     View* view;
