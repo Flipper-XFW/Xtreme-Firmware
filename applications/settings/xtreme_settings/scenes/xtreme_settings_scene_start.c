@@ -228,7 +228,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_text(item, battery_style_names[value_index]);
 
     item = variable_item_list_add(
-        var_item_list, "Sort folders before", 2, xtreme_settings_scene_start_sort_folders_before_changed, app);
+        var_item_list, "Sort dirs before", 2, xtreme_settings_scene_start_sort_folders_before_changed, app);
     variable_item_set_current_value_index(item, !xtreme_settings->sort_ignore_dirs);
     variable_item_set_current_value_text(item, !xtreme_settings->sort_ignore_dirs ? "ON" : "OFF");
 
