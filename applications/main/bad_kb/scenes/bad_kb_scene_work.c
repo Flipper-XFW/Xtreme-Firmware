@@ -1,7 +1,7 @@
 #include "../bad_kb_script.h"
 #include "../bad_kb_app_i.h"
 #include "../views/bad_kb_view.h"
-#include "furi_hal.h"
+#include <furi_hal.h>
 #include "toolbox/path.h"
 
 void bad_kb_scene_work_button_callback(InputKey key, void* context) {

@@ -2,8 +2,9 @@
 #define __GPIO_SCENE_START_H__
 
 #include "../gpio_app_i.h"
-#include "furi_hal_power.h"
-#include "furi_hal_usb.h"
+#include <furi_hal_power.h>
+#include <furi_hal_usb.h>
+#include <dolphin/dolphin.h>
 
 enum GpioItem {
     GpioItemUsbUart,
