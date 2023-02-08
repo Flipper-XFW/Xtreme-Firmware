@@ -51,6 +51,7 @@ Frequency: 438900000
 Frequency: 440175000
 Frequency: 446000000
 Frequency: 464000000
+Frequency: 467750000
 Frequency: 779000000
 Frequency: 868350000
 Frequency: 868400000
