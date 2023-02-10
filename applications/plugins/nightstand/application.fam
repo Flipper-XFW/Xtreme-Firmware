@@ -10,3 +10,4 @@ App(
     fap_category="Misc",
     order=81,
 )
+

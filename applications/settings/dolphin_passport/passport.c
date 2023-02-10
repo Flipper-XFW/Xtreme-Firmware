@@ -40,7 +40,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
 
-    if(XTREME_ASSETS()->is_nsfw) {
+    if(XTREME_SETTINGS()->nsfw_mode) {
         if(stats->butthurt <= 4) {
             portrait = xtreme_assets->I_passport_happy_46x49;
             mood_str = "Status: Wet";

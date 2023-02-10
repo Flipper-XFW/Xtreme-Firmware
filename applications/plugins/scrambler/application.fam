@@ -1,6 +1,6 @@
 # COMPILE ISTRUCTIONS:
 
-# Clean the code and remove old binaries/compilation artefact
+# Clean the code and remove old binaries/compilation artefact 
 # ./fbt -c fap_rubiks_cube_scrambler
 
 # Compile FAP

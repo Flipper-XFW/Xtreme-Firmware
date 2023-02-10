@@ -40,7 +40,7 @@ void animation_handler_select_manifest() {
         furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
         Storage* storage = furi_record_open(RECORD_STORAGE);
         if(storage_common_stat(storage, furi_string_get_cstr(manifest), NULL) == FSE_OK) {
-            FURI_LOG_I(TAG, "Custom manifest selected");
+            FURI_LOG_I(TAG, "Custom Manifest selected");
         } else {
             use_asset_pack = false;
         }
@@ -48,8 +48,14 @@ void animation_handler_select_manifest() {
     }
     if(!use_asset_pack) {
         furi_string_set(anim_dir, BASE_ANIMATION_DIR);
+        if(xtreme_settings->nsfw_mode) {
+            furi_string_cat_str(anim_dir, "/nsfw");
+            FURI_LOG_I(TAG, "NSFW Manifest selected");
+        } else {
+            furi_string_cat_str(anim_dir, "/sfw");
+            FURI_LOG_I(TAG, "SFW Manifest selected");
+        }
         furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
-        FURI_LOG_I(TAG, "Base manifest selected");
     }
     strlcpy(ANIMATION_DIR, furi_string_get_cstr(anim_dir), sizeof(ANIMATION_DIR));
     strlcpy(

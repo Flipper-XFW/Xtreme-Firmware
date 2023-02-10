@@ -3,6 +3,15 @@
 #include <power/power_service/power.h>
 #include <lib/toolbox/version.h>
 
+static void xtreme_settings_scene_start_base_graphics_changed(VariableItem* item) {
+    XtremeSettingsApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "NSFW" : "SFW");
+    XTREME_SETTINGS()->nsfw_mode = value;
+    app->settings_changed = true;
+    app->assets_changed = true;
+}
+
 static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -162,6 +171,11 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     free(name);
     storage_file_free(folder);
     furi_record_close(RECORD_STORAGE);
+
+    item = variable_item_list_add(
+        var_item_list, "Base Graphics", 2, xtreme_settings_scene_start_base_graphics_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->nsfw_mode);
+    variable_item_set_current_value_text(item, xtreme_settings->nsfw_mode ? "NSFW" : "SFW");
 
     item = variable_item_list_add(
         var_item_list,

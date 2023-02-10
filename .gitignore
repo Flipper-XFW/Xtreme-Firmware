@@ -74,9 +74,7 @@ lib/STM32CubeWB
 
 # Asset packs
 assets/dolphin/custom/*
-!assets/dolphin/custom/NSFW/
 !assets/dolphin/custom/WatchDogs/
 !assets/dolphin/custom/ReadMe.md
 assets/resources/dolphin_custom/*
-!assets/resources/dolphin_custom/NSFW/
 !assets/resources/dolphin_custom/WatchDogs/

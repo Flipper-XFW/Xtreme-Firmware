@@ -13,7 +13,7 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define TAG "AnimationManager"
 
@@ -569,6 +569,9 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
 static void animation_manager_switch_to_one_shot_view(AnimationManager* animation_manager) {
     furi_assert(animation_manager);
     furi_assert(!animation_manager->one_shot_view);
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinStats stats = dolphin_stats(dolphin);
+    furi_record_close(RECORD_DOLPHIN);
 
     animation_manager->one_shot_view = one_shot_view_alloc();
     one_shot_view_set_interact_callback(
@@ -577,8 +580,19 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    one_shot_view_start_animation(
-        animation_manager->one_shot_view, XTREME_ASSETS()->A_Levelup_128x64);
+    if(XTREME_SETTINGS()->nsfw_mode) {
+        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
+    } else {
+        if(stats.level <= 20) {
+            one_shot_view_start_animation(
+                animation_manager->one_shot_view, &A_Levelup1_128x64_sfw);
+        } else if(stats.level >= 21) {
+            one_shot_view_start_animation(
+                animation_manager->one_shot_view, &A_Levelup2_128x64_sfw);
+        } else {
+            furi_assert(0);
+        }
+    }
 }
 
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager) {

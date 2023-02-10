@@ -7,8 +7,6 @@
 #define PACKS_DIR EXT_PATH("dolphin_custom")
 
 typedef struct {
-    bool is_nsfw;
-    const Icon* A_Levelup_128x64;
     const Icon* I_BLE_Pairing_128x64;
     const Icon* I_DolphinCommon_56x48;
     const Icon* I_DolphinMafia_115x62;
@@ -32,6 +30,15 @@ typedef struct {
     const Icon* I_Error_62x31;
 } XtremeAssets;
 
+XtremeAssets* XTREME_ASSETS();
+
 void XTREME_ASSETS_LOAD();
 
-XtremeAssets* XTREME_ASSETS();
+void swap_bmx_icon(
+    const Icon** replace,
+    const char* base,
+    const char* name,
+    FuriString* path,
+    File* file);
+
+void free_bmx_icon(Icon* icon);
