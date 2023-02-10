@@ -17,6 +17,8 @@
 #include "helpers/pin_lock.h"
 #include "helpers/slideshow_filename.h"
 
+#include "../../settings/xtreme_settings/xtreme_assets.h"
+
 static void desktop_auto_lock_arm(Desktop*);
 static void desktop_auto_lock_inhibit(Desktop*);
 static void desktop_start_auto_lock_timer(Desktop*);
@@ -304,6 +306,9 @@ static bool desktop_check_file_flag(const char* flag_path) {
 
 int32_t desktop_srv(void* p) {
     UNUSED(p);
+
+    // TODO: find a (working) way to run this at startup without hooking desktop
+    XTREME_ASSETS_LOAD();
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W("Desktop", "Desktop load skipped. Device is in special startup mode.");
