@@ -13,7 +13,7 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "../../../settings/xtreme_settings/xtreme_assets.h"
 
 #define TAG "AnimationManager"
 
@@ -580,7 +580,7 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    if(XTREME_SETTINGS()->nsfw_mode) {
+    if(XTREME_ASSETS()->is_nsfw) {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
     } else {
         if(stats.level <= 20) {
