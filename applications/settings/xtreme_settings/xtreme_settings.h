@@ -18,7 +18,6 @@
 typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
-    bool nsfw_mode;
     char asset_pack[MAX_PACK_NAME_LEN];
     BatteryStyle battery_style;
     uint16_t anim_speed;
