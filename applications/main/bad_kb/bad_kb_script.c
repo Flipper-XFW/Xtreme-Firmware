@@ -243,7 +243,7 @@ static bool ducky_is_line_end(const char chr) {
 
 static void ducky_numlock_on(BadKbScript* bad_kb) {
     if(bad_kb->bt) {
-        if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) { // FIXME
+        if((furi_hal_bt_hid_get_led_state() & HID_KB_LED_NUM) == 0) { // FIXME
             bt_hid_hold_while_keyboard_buffer_full(1, -1);
             furi_hal_bt_hid_kb_press(HID_KEYBOARD_LOCK_NUM_LOCK);
             furi_delay_ms(bt_timeout);

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,13.5,,
+Version,v,13.9,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1015,6 +1015,7 @@ Function,+,furi_hal_bt_get_transmitted_packets,uint32_t,
 Function,+,furi_hal_bt_hid_consumer_key_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release_all,_Bool,
+Function,+,furi_hal_bt_hid_get_led_state,uint8_t,
 Function,+,furi_hal_bt_hid_kb_free_slots,_Bool,uint8_t
 Function,+,furi_hal_bt_hid_kb_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_kb_release,_Bool,uint16_t

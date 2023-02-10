@@ -95,6 +95,12 @@ bool furi_hal_bt_hid_consumer_key_release_all();
 */
 bool furi_hal_bt_hid_kb_free_slots(uint8_t n_empty_slots);
 
+/** Retrieves LED state from remote BT HID host
+ * 
+ * (look at HID usage page to know what each bit of the returned byte means)
+*/
+uint8_t furi_hal_bt_hid_get_led_state(void);
+
 #ifdef __cplusplus
 }
 #endif
