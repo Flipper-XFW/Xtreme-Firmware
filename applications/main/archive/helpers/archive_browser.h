@@ -17,6 +17,7 @@ static const char* tab_default_paths[] = {
     [ArchiveTabBadKb] = ANY_PATH("badkb"),
     [ArchiveTabU2f] = "/app:u2f",
     [ArchiveTabApplications] = ANY_PATH("apps"),
+    [ArchiveTabInternal] = STORAGE_INT_PATH_PREFIX,
     [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
 };
 
@@ -44,6 +45,7 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabBadKb] = ArchiveFileTypeBadKb,
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
     [ArchiveTabApplications] = ArchiveFileTypeApplication,
+    [ArchiveTabInternal] = ArchiveFileTypeUnknown,
     [ArchiveTabBrowser] = ArchiveFileTypeUnknown,
 };
 

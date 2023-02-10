@@ -1,10 +1,11 @@
-#include <archive/views/archive_browser_view.h>
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
+#include "../views/archive_browser_view.h"
+
 #include <core/common_defines.h>
 #include <core/log.h>
-#include "gui/modules/file_browser_worker.h"
+#include <gui/modules/file_browser_worker.h>
 #include <fap_loader/fap_loader_app.h>
 #include <math.h>
 
@@ -456,10 +457,14 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
 
     browser->last_tab_switch_dir = key;
 
-    if(key == InputKeyLeft) {
-        tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
-    } else {
-        tab = (tab + 1) % ArchiveTabTotal;
+    for(int i = 0; i < 2; i++) {
+        if(key == InputKeyLeft) {
+            tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
+        } else {
+            tab = (tab + 1) % ArchiveTabTotal;
+        }
+        if(tab == ArchiveTabInternal && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) continue;
+        break;
     }
 
     browser->is_root = true;

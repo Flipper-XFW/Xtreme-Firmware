@@ -1,16 +1,20 @@
 #include "file_browser.h"
-#include "assets_icons.h"
 #include "file_browser_worker.h"
+
+#include <gui/elements.h>
+#include <assets_icons.h>
+#include <toolbox/path.h>
+
+#include <furi.h>
+#include <furi_hal_resources.h>
+
 #include <core/check.h>
 #include <core/common_defines.h>
 #include <core/log.h>
-#include "furi_hal_resources.h"
 #include "m-string.h"
 #include "m-algo.h"
 #include <m-array.h>
-#include <gui/elements.h>
-#include <furi.h>
-#include "toolbox/path.h"
+#include "../../../settings/xtreme_settings/xtreme_settings.h"
 
 #define LIST_ITEMS 5u
 #define MAX_LEN_PX 110
@@ -78,13 +82,22 @@ static void BrowserItem_t_clear(BrowserItem_t* obj) {
 
 static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
     // Back indicator comes before everything, then folders, then all other files.
-    if((a->type == BrowserItemTypeBack) ||
-       (a->type == BrowserItemTypeFolder && b->type != BrowserItemTypeFolder &&
-        b->type != BrowserItemTypeBack)) {
+    if(a->type == BrowserItemTypeBack) {
         return -1;
     }
+    if(b->type == BrowserItemTypeBack) {
+        return 1;
+    }
+    if(!XTREME_SETTINGS()->sort_ignore_dirs) {
+        if(a->type == BrowserItemTypeFolder && b->type != BrowserItemTypeFolder) {
+            return -1;
+        }
+        if(a->type != BrowserItemTypeFolder && b->type == BrowserItemTypeFolder) {
+            return 1;
+        }
+    }
 
-    return furi_string_cmp(a->path, b->path);
+    return furi_string_cmpi(a->path, b->path);
 }
 
 #define M_OPL_BrowserItem_t()                 \
