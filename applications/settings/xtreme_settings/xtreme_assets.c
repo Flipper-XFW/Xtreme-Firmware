@@ -56,6 +56,7 @@ void XTREME_ASSETS_LOAD() {
     xtreme_assets = malloc(sizeof(XtremeAssets));
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
+    xtreme_assets->A_Levelup_128x64 = &A_Levelup_128x64;
     xtreme_assets->I_BLE_Pairing_128x64 = &I_BLE_Pairing_128x64;
     xtreme_assets->I_DolphinCommon_56x48 = &I_DolphinCommon_56x48;
     xtreme_assets->I_DolphinMafia_115x62 = &I_DolphinMafia_115x62;

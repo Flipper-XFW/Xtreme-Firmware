@@ -8,6 +8,7 @@
 
 typedef struct {
     bool is_nsfw;
+    const Icon* A_Levelup_128x64;
     const Icon* I_BLE_Pairing_128x64;
     const Icon* I_DolphinCommon_56x48;
     const Icon* I_DolphinMafia_115x62;
