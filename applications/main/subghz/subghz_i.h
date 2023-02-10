@@ -3,7 +3,6 @@
 #include "helpers/subghz_types.h"
 #include "helpers/subghz_error_type.h"
 #include <lib/subghz/types.h>
-#include <lib/subghz/helpers/subghz_config_preset_custom.h>
 #include "subghz.h"
 #include "views/receiver.h"
 #include "views/transmitter.h"
@@ -63,6 +62,7 @@ struct SubGhzTxRx {
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
     SubGhzTransmitter* transmitter;
+    SubGhzProtocolFlag filter;
     SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
     SecureData* secure_data;
@@ -77,15 +77,10 @@ struct SubGhzTxRx {
     uint8_t hopper_idx_frequency;
     SubGhzRxKeyState rx_key_state;
 
+    bool debug_pin_state;
+
     float raw_threshold_rssi;
     uint8_t raw_threshold_rssi_low_count;
-
-    // one of the 16 possible bandwidth values
-    uint8_t raw_bandwidth;
-    // datarate in bauds
-    float raw_datarate;
-    // flag if manchester encoding/decoding enabled
-    bool raw_manchester_enabled;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
@@ -113,13 +108,6 @@ struct SubGhz {
     SubGhzViewReceiver* subghz_receiver;
     SubGhzViewTransmitter* subghz_transmitter;
     VariableItemList* variable_item_list;
-
-    // Advanced config items
-    VariableItem* variable_item_bandwidth; // specific config list view item: bandwidth
-    VariableItem* variable_item_datarate; // specific config list view item: data rate
-    VariableItem* variable_item_manchester; // specific config list view item: manchester enc flag
-    // Advanced config strings
-    char datarate_input_str[16];
 
     SubGhzFrequencyAnalyzer* subghz_frequency_analyzer;
     SubGhzReadRAW* subghz_read_raw;

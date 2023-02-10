@@ -54,9 +54,11 @@ extern const GpioPin vibro_gpio;
 extern const GpioPin ibutton_gpio;
 
 extern const GpioPin gpio_cc1101_g0;
+extern const GpioPin gpio_cc1101_g0_ext;
 extern const GpioPin gpio_rf_sw_0;
 
 extern const GpioPin gpio_subghz_cs;
+extern const GpioPin gpio_subghz_cs_ext;
 extern const GpioPin gpio_display_cs;
 extern const GpioPin gpio_display_rst_n;
 extern const GpioPin gpio_display_di;
@@ -77,6 +79,9 @@ extern const GpioPin gpio_spi_d_sck;
 extern const GpioPin gpio_spi_r_miso;
 extern const GpioPin gpio_spi_r_mosi;
 extern const GpioPin gpio_spi_r_sck;
+extern const GpioPin gpio_spi_r_miso_ext;
+extern const GpioPin gpio_spi_r_mosi_ext;
+extern const GpioPin gpio_spi_r_sck_ext;
 
 extern const GpioPin gpio_ext_pc0;
 extern const GpioPin gpio_ext_pc1;
@@ -215,6 +220,13 @@ void furi_hal_resources_init_early();
 void furi_hal_resources_deinit_early();
 
 void furi_hal_resources_init();
+
+/**
+ * Get a corresponding external connector pin number for a gpio
+ * @param gpio GpioPin
+ * @return pin number or -1 if gpio is not on the external connector
+ */
+int32_t furi_hal_resources_get_ext_pin_number(const GpioPin* gpio);
 
 #ifdef __cplusplus
 }
