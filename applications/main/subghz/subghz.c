@@ -183,7 +183,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     //init setting
     subghz->setting = subghz_setting_alloc();
 
-    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user.txt"));
+    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
 
     // Custom Presets load without using config file
 
@@ -208,37 +208,26 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
 
     flipper_format_free(temp_fm_preset2);
 
-    // Pagers
+    // # HND - FM presets
     FlipperFormat* temp_fm_preset3 = flipper_format_string_alloc();
     flipper_format_write_string_cstr(
-        temp_fm_preset2,
+        temp_fm_preset3,
         (const char*)"Custom_preset_data",
-        (const char*)"02 0D 07 04 08 32 0B 06 10 64 11 93 12 0C 13 02 14 00 15 15 18 18 19 16 1B 07 1C 00 1D 91 20 FB 21 56 22 10 00 00 C0 00 00 00 00 00 00 00");
+        (const char*)"02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 36 10 69 15 32 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00");
     flipper_format_rewind(temp_fm_preset3);
-    subghz_setting_load_custom_preset(subghz->setting, (const char*)"Pagers", temp_fm_preset3);
+    subghz_setting_load_custom_preset(subghz->setting, (const char*)"HND_1", temp_fm_preset3);
 
     flipper_format_free(temp_fm_preset3);
 
-    // # HND - FM presets
     FlipperFormat* temp_fm_preset4 = flipper_format_string_alloc();
     flipper_format_write_string_cstr(
         temp_fm_preset4,
         (const char*)"Custom_preset_data",
-        (const char*)"02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 36 10 69 15 32 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00");
-    flipper_format_rewind(temp_fm_preset4);
-    subghz_setting_load_custom_preset(subghz->setting, (const char*)"Honda_1", temp_fm_preset4);
-
-    flipper_format_free(temp_fm_preset3);
-
-    FlipperFormat* temp_fm_preset5 = flipper_format_string_alloc();
-    flipper_format_write_string_cstr(
-        temp_fm_preset5,
-        (const char*)"Custom_preset_data",
         (const char*)"02 0D 0B 06 08 32 07 04 14 00 13 02 12 07 11 36 10 E9 15 32 18 18 19 16 1D 92 1C 40 1B 03 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00");
-    flipper_format_rewind(temp_fm_preset5);
-    subghz_setting_load_custom_preset(subghz->setting, (const char*)"Honda_2", temp_fm_preset5);
+    flipper_format_rewind(temp_fm_preset4);
+    subghz_setting_load_custom_preset(subghz->setting, (const char*)"HND_2", temp_fm_preset4);
 
-    flipper_format_free(temp_fm_preset5);
+    flipper_format_free(temp_fm_preset4);
 
     // custom presets loading - end
 
@@ -247,20 +236,11 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
         subghz->last_settings = subghz_last_settings_alloc();
         subghz_last_settings_load(subghz->last_settings, 0);
 #if FURI_DEBUG
-#ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
-        FURI_LOG_D(
-            TAG,
-            "last frequency: %ld, preset: %ld, detect_raw: %d",
-            subghz->last_settings->frequency,
-            subghz->last_settings->preset,
-            subghz->last_settings->detect_raw);
-#else
         FURI_LOG_D(
             TAG,
             "last frequency: %ld, preset: %ld",
             subghz->last_settings->frequency,
             subghz->last_settings->preset);
-#endif
 #endif
         subghz_setting_set_default_frequency(subghz->setting, subghz->last_settings->frequency);
     }
@@ -279,6 +259,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
     subghz->txrx->speaker_state = SubGhzSpeakerStateDisable;
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+    subghz->txrx->debug_pin_state = false;
     if(!alloc_for_tx_only) {
         subghz->txrx->history = subghz_history_alloc();
     }
@@ -292,16 +273,15 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     subghz->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_came_atomo_rainbow_table_file_name(
         subghz->txrx->environment, EXT_PATH("subghz/assets/came_atomo"));
+    subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
+        subghz->txrx->environment, EXT_PATH("subghz/assets/alutech_at_4n"));
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
         subghz->txrx->environment, EXT_PATH("subghz/assets/nice_flor_s"));
     subghz_environment_set_protocol_registry(
         subghz->txrx->environment, (void*)&subghz_protocol_registry);
     subghz->txrx->receiver = subghz_receiver_alloc_init(subghz->txrx->environment);
-#ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
-    subghz_last_settings_set_detect_raw_values(subghz);
-#else
-    subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
-#endif
+    subghz->txrx->filter = SubGhzProtocolFlag_Decodable;
+    subghz_receiver_set_filter(subghz->txrx->receiver, subghz->txrx->filter);
 
     subghz_worker_set_overrun_callback(
         subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
@@ -324,6 +304,8 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
         subghz_blink_stop(subghz);
         subghz->rpc_ctx = NULL;
     }
+
+    subghz_speaker_off(subghz);
 
 #if FURI_DEBUG
     // Packet Test
