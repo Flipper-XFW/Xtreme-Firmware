@@ -32,4 +32,6 @@ typedef struct {
     const Icon* I_Error_62x31;
 } XtremeAssets;
 
+void XTREME_ASSETS_LOAD();
+
 XtremeAssets* XTREME_ASSETS();

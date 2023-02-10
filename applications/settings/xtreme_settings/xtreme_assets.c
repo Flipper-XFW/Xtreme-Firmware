@@ -2,10 +2,50 @@
 #include "assets_icons.h"
 #include <core/dangerous_defines.h>
 
+#define ICONS_FMT PACKS_DIR "/%s/Icons/%s"
+
 XtremeAssets* xtreme_assets = NULL;
 
+void anim(const Icon** replace, const char* name, FuriString* path, File* file) {
+    do {
+        furi_string_printf(path, ICONS_FMT "/meta", XTREME_SETTINGS()->asset_pack, name);
+        if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
+            break;
+        int32_t width, height, frame_rate, frame_count;
+        storage_file_read(file, &width, 4);
+        storage_file_read(file, &height, 4);
+        storage_file_read(file, &frame_rate, 4);
+        storage_file_read(file, &frame_count, 4);
+        storage_file_close(file);
+
+        Icon* icon = malloc(sizeof(Icon));
+        FURI_CONST_ASSIGN(icon->width, width);
+        FURI_CONST_ASSIGN(icon->height, height);
+        FURI_CONST_ASSIGN(icon->frame_rate, frame_rate);
+        FURI_CONST_ASSIGN(icon->frame_count, frame_count);
+        icon->frames = malloc(sizeof(const uint8_t*) * icon->frame_count);
+        const char* pack = XTREME_SETTINGS()->asset_pack;
+
+        bool ok = true;
+        for(int i = 0; ok && i < icon->frame_count; ++i) {
+            ok = false;
+            furi_string_printf(path, ICONS_FMT "/frame_%02d.bm", pack, name, i);
+            if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
+                break;
+
+            uint64_t size = storage_file_size(file);
+            FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(size));
+            if(storage_file_read(file, (void*)icon->frames[i], size) == size) ok = true;
+            storage_file_close(file);
+        }
+        if(!ok) break;
+
+        *replace = icon;
+    } while(false);
+}
+
 void icon(const Icon** replace, const char* name, FuriString* path, File* file) {
-    furi_string_printf(path, PACKS_DIR "/%s/Icons/%s.bmx", XTREME_SETTINGS()->asset_pack, name);
+    furi_string_printf(path, ICONS_FMT ".bmx", XTREME_SETTINGS()->asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
         int32_t width, height;
@@ -27,6 +67,7 @@ void icon(const Icon** replace, const char* name, FuriString* path, File* file) 
 }
 
 void swap(XtremeAssets* x, FuriString* p, File* f) {
+    anim(&x->A_Levelup_128x64, "Animations/Levelup_128x64", p, f);
     icon(&x->I_BLE_Pairing_128x64, "BLE/BLE_Pairing_128x64", p, f);
     icon(&x->I_DolphinCommon_56x48, "Dolphin/DolphinCommon_56x48", p, f);
     icon(&x->I_DolphinMafia_115x62, "iButton/DolphinMafia_115x62", p, f);
