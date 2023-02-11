@@ -7,7 +7,7 @@ static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
     XtremeSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
-        item, index == 0 ? "OFF" : *asset_packs_get(app->asset_packs, index - 1));
+        item, index == 0 ? "SFW" : *asset_packs_get(app->asset_packs, index - 1));
     strlcpy(
         XTREME_SETTINGS()->asset_pack,
         index == 0 ? "" : *asset_packs_get(app->asset_packs, index - 1),
@@ -144,10 +144,12 @@ void xtreme_settings_scene_start_on_enter(void* context) {
             if(info.flags & FSF_DIRECTORY) {
                 char* copy = malloc(MAX_PACK_NAME_LEN);
                 strlcpy(copy, name, MAX_PACK_NAME_LEN);
-                uint idx;
-                for(idx = 0; idx < asset_packs_size(app->asset_packs); idx++) {
-                    if(strcasecmp(copy, *asset_packs_get(app->asset_packs, idx)) < 0) {
-                        break;
+                uint idx = 0;
+                if(strcmp(copy, "NSFW") != 0) {
+                    for(; idx < asset_packs_size(app->asset_packs); idx++) {
+                        if(strcasecmp(copy, *asset_packs_get(app->asset_packs, idx)) < 0) {
+                            break;
+                        }
                     }
                 }
                 asset_packs_push_at(app->asset_packs, idx, copy);
@@ -171,7 +173,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, current_pack);
     variable_item_set_current_value_text(
-        item, current_pack == 0 ? "OFF" : *asset_packs_get(app->asset_packs, current_pack - 1));
+        item, current_pack == 0 ? "SFW" : *asset_packs_get(app->asset_packs, current_pack - 1));
 
     item = variable_item_list_add(
         var_item_list,
