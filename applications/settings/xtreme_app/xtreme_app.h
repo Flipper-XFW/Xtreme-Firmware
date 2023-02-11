@@ -8,14 +8,14 @@
 #include <assets_icons.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/popup.h>
-#include "xtreme_settings.h"
-#include "xtreme_assets.h"
-#include "scenes/xtreme_settings_scene.h"
+#include "scenes/xtreme_app_scene.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"
 #include "dolphin/dolphin_i.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <m-array.h>
+#include "xtreme/settings.h"
+#include "xtreme/assets.h"
 
 ARRAY_DEF(asset_packs, char*)
 
@@ -33,9 +33,9 @@ typedef struct {
     bool subghz_changed;
     bool level_changed;
     asset_packs_t asset_packs;
-} XtremeSettingsApp;
+} XtremeApp;
 
 typedef enum {
-    XtremeSettingsAppViewVarItemList,
-    XtremeSettingsAppViewPopup,
-} XtremeSettingsAppView;
+    XtremeAppViewVarItemList,
+    XtremeAppViewPopup,
+} XtremeAppView;

@@ -1,5 +1,5 @@
 #include "../bad_usb_app_i.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 typedef enum {
     BadUsbCustomEventErrorBack,

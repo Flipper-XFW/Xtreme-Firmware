@@ -1,6 +1,6 @@
 #pragma once
 
-#include "xtreme_settings_filename.h"
+#include "settings_filename.h"
 
 #include <furi_hal.h>
 #include <stdint.h>

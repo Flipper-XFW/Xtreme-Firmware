@@ -1,4 +1,4 @@
-#include "../../settings/xtreme_settings/xtreme_settings.h"
+#include "xtreme/settings.h"
 #include "gui_i.h"
 #include <assets_icons.h>
 

@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 void nfc_scene_restore_original_popup_callback(void* context) {
     Nfc* nfc = context;

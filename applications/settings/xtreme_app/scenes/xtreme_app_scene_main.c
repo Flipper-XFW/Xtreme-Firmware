@@ -1,10 +1,10 @@
-#include "../xtreme_settings_app.h"
+#include "../xtreme_app.h"
 #include <lib/toolbox/value_index.h>
 #include <power/power_service/power.h>
 #include <lib/toolbox/version.h>
 
-static void xtreme_settings_scene_start_asset_pack_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_asset_pack_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, index == 0 ? "SFW" : *asset_packs_get(app->asset_packs, index - 1));
@@ -20,8 +20,8 @@ const char* const anim_speed_names[] =
     {"25%", "50%", "75%", "100%", "125%", "150%", "175%", "200%", "225%", "250%", "275%", "300%"};
 const int32_t anim_speed_values[COUNT_OF(anim_speed_names)] =
     {25, 50, 75, 0, 125, 150, 175, 200, 225, 250, 275, 300};
-static void xtreme_settings_scene_start_anim_speed_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_anim_speed_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, anim_speed_names[index]);
     XTREME_SETTINGS()->anim_speed = anim_speed_values[index];
@@ -44,16 +44,16 @@ const char* const cycle_anims_names[] = {
     "24 H"};
 const int32_t cycle_anims_values[COUNT_OF(cycle_anims_names)] =
     {-1, 0, 30, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400};
-static void xtreme_settings_scene_start_cycle_anims_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_cycle_anims_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cycle_anims_names[index]);
     XTREME_SETTINGS()->cycle_anims = cycle_anims_values[index];
     app->settings_changed = true;
 }
 
-static void xtreme_settings_scene_start_unlock_anims_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_unlock_anims_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->unlock_anims = value;
@@ -70,32 +70,32 @@ const int32_t battery_style_values[COUNT_OF(battery_style_names)] = {
     BatteryStyleRetro3,
     BatteryStyleRetro5,
     BatteryStyleBarPercent};
-static void xtreme_settings_scene_start_battery_style_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_battery_style_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, battery_style_names[index]);
     XTREME_SETTINGS()->battery_style = battery_style_values[index];
     app->settings_changed = true;
 }
 
-static void xtreme_settings_scene_start_status_bar_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_status_bar_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->status_bar = value;
     app->settings_changed = true;
 }
 
-static void xtreme_settings_scene_start_sort_folders_before_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_sort_folders_before_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->sort_ignore_dirs = !value;
     app->settings_changed = true;
 }
 
-static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_xp_level_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     app->dolphin_level = variable_item_get_current_value_index(item) + 1;
     char level_str[4];
     snprintf(level_str, 4, "%i", app->dolphin_level);
@@ -103,22 +103,22 @@ static void xtreme_settings_scene_start_xp_level_changed(VariableItem* item) {
     app->level_changed = true;
 }
 
-static void xtreme_settings_scene_start_subghz_extend_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_subghz_extend_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     app->subghz_extend = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
     app->subghz_changed = true;
 }
 
-static void xtreme_settings_scene_start_subghz_bypass_changed(VariableItem* item) {
-    XtremeSettingsApp* app = variable_item_get_context(item);
+static void xtreme_app_scene_main_subghz_bypass_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
     app->subghz_bypass = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
     app->subghz_changed = true;
 }
 
-void xtreme_settings_scene_start_on_enter(void* context) {
-    XtremeSettingsApp* app = context;
+void xtreme_app_scene_main_on_enter(void* context) {
+    XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
@@ -177,7 +177,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         var_item_list,
         "Asset Pack",
         asset_packs_size(app->asset_packs) + 1,
-        xtreme_settings_scene_start_asset_pack_changed,
+        xtreme_app_scene_main_asset_pack_changed,
         app);
     variable_item_set_current_value_index(item, current_pack);
     variable_item_set_current_value_text(
@@ -187,7 +187,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         var_item_list,
         "Anim Speed",
         COUNT_OF(anim_speed_names),
-        xtreme_settings_scene_start_anim_speed_changed,
+        xtreme_app_scene_main_anim_speed_changed,
         app);
     value_index = value_index_int32(
         xtreme_settings->anim_speed, anim_speed_values, COUNT_OF(anim_speed_names));
@@ -198,7 +198,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         var_item_list,
         "Cycle Anims",
         COUNT_OF(cycle_anims_names),
-        xtreme_settings_scene_start_cycle_anims_changed,
+        xtreme_app_scene_main_cycle_anims_changed,
         app);
     value_index = value_index_int32(
         xtreme_settings->cycle_anims, cycle_anims_values, COUNT_OF(cycle_anims_names));
@@ -206,7 +206,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_text(item, cycle_anims_names[value_index]);
 
     item = variable_item_list_add(
-        var_item_list, "Unlock Anims", 2, xtreme_settings_scene_start_unlock_anims_changed, app);
+        var_item_list, "Unlock Anims", 2, xtreme_app_scene_main_unlock_anims_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->unlock_anims);
     variable_item_set_current_value_text(item, xtreme_settings->unlock_anims ? "ON" : "OFF");
 
@@ -214,7 +214,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         var_item_list,
         "Battery Style",
         COUNT_OF(battery_style_names),
-        xtreme_settings_scene_start_battery_style_changed,
+        xtreme_app_scene_main_battery_style_changed,
         app);
     value_index = value_index_int32(
         xtreme_settings->battery_style, battery_style_values, COUNT_OF(battery_style_names));
@@ -222,7 +222,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_text(item, battery_style_names[value_index]);
 
     item = variable_item_list_add(
-        var_item_list, "Status Bar", 2, xtreme_settings_scene_start_status_bar_changed, app);
+        var_item_list, "Status Bar", 2, xtreme_app_scene_main_status_bar_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->status_bar);
     variable_item_set_current_value_text(item, xtreme_settings->status_bar ? "ON" : "OFF");
 
@@ -230,7 +230,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         var_item_list,
         "Sort Dirs Before",
         2,
-        xtreme_settings_scene_start_sort_folders_before_changed,
+        xtreme_app_scene_main_sort_folders_before_changed,
         app);
     variable_item_set_current_value_index(item, !xtreme_settings->sort_ignore_dirs);
     variable_item_set_current_value_text(item, !xtreme_settings->sort_ignore_dirs ? "ON" : "OFF");
@@ -241,18 +241,18 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         var_item_list,
         "XP Level",
         DOLPHIN_LEVEL_COUNT + 1,
-        xtreme_settings_scene_start_xp_level_changed,
+        xtreme_app_scene_main_xp_level_changed,
         app);
     variable_item_set_current_value_index(item, app->dolphin_level - 1);
     variable_item_set_current_value_text(item, level_str);
 
     item = variable_item_list_add(
-        var_item_list, "SubGHz Extend", 2, xtreme_settings_scene_start_subghz_extend_changed, app);
+        var_item_list, "SubGHz Extend", 2, xtreme_app_scene_main_subghz_extend_changed, app);
     variable_item_set_current_value_index(item, app->subghz_extend);
     variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "SubGHz Bypass", 2, xtreme_settings_scene_start_subghz_bypass_changed, app);
+        var_item_list, "SubGHz Bypass", 2, xtreme_app_scene_main_subghz_bypass_changed, app);
     variable_item_set_current_value_index(item, app->subghz_bypass);
     variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
 
@@ -260,18 +260,18 @@ void xtreme_settings_scene_start_on_enter(void* context) {
         "%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
     item = variable_item_list_add(var_item_list, furi_string_get_cstr(version_tag), 0, NULL, app);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, XtremeSettingsAppViewVarItemList);
+    view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
-bool xtreme_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
+bool xtreme_app_scene_main_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
     bool consumed = false;
     return consumed;
 }
 
-void xtreme_settings_scene_start_on_exit(void* context) {
-    XtremeSettingsApp* app = context;
+void xtreme_app_scene_main_on_exit(void* context) {
+    XtremeApp* app = context;
     asset_packs_it_t it;
     for(asset_packs_it(it, app->asset_packs); !asset_packs_end_p(it); asset_packs_next(it)) {
         free(*asset_packs_cref(it));

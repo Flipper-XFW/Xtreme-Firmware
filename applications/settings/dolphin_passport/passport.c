@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
-#include "../xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 #include "math.h"
 
 typedef struct {

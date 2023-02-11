@@ -1,5 +1,5 @@
-#include "xtreme_assets.h"
-#include "assets_icons.h"
+#include "assets.h"
+#include <assets_icons.h>
 #include <core/dangerous_defines.h>
 
 #define ICONS_FMT PACKS_DIR "/%s/Icons/%s"

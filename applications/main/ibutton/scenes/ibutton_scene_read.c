@@ -1,6 +1,6 @@
 #include "../ibutton_i.h"
 #include <dolphin/dolphin.h>
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 static void ibutton_scene_read_callback(void* context) {
     iButton* ibutton = context;

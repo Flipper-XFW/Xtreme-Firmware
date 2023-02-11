@@ -6,7 +6,7 @@
 #include "../desktop_settings_app.h"
 #include <desktop/desktop_settings.h>
 #include "desktop_settings_scene.h"
-#include "../../xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 #define SCENE_EVENT_EXIT (0U)
 
