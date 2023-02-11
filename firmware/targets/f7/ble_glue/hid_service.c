@@ -23,27 +23,6 @@ typedef struct {
 
 static HIDSvc* hid_svc = NULL;
 
-// #define N_BYTE_PER_LINE 16
-// static void hexdump(uint8_t* data, uint32_t len) {
-//     uint32_t n_line = len / N_BYTE_PER_LINE + 1;
-//     char line[len * 3 + n_line + 1];
-//     memset(line, 0, sizeof(line));
-//     uint32_t i;
-//     for(i = 0; i < len; i++) {
-//         if(i % N_BYTE_PER_LINE == 0) {
-//             if(i != 0) {
-//                 FURI_LOG_D(TAG, "%s", line);
-//             }
-//             memset(line, 0, sizeof(line));
-//         }
-//         uint32_t line_len = strlen(line);
-//         snprintf(line + line_len, sizeof(line) - line_len, "%02X ", data[i]);
-//     }
-//     if(strlen(line) > 0) {
-//         FURI_LOG_D(TAG, "%s", line);
-//     }
-// }
-
 static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void* event) {
     SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
     hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
