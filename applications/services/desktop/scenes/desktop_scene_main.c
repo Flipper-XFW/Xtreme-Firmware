@@ -207,7 +207,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenClock: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Tools/Clock.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Misc/Nightstand.fap"));
             break;
         }
         case DesktopLockedEventUpdate:
