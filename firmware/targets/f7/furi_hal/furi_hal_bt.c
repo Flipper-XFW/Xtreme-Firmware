@@ -200,13 +200,6 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             break;
         }
         GapConfig* config = &profile_config[profile].config;
-        if(strlen(&(profile_config[profile].config.adv_name[1])) == 0) {
-            // Set advertise name
-            strlcpy(
-                profile_config[profile].config.adv_name,
-                furi_hal_version_get_ble_local_device_name_ptr(),
-                FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
-        }
         // Configure GAP
         if(profile == FuriHalBtProfileSerial) {
             // Set mac address
@@ -429,8 +422,8 @@ float furi_hal_bt_get_rssi() {
     return val;
 }
 
-/** fill the RSSI of the remote host of the bt connection and returns the time since
- * the beginning of the connection 
+/** fill the RSSI of the remote host of the bt connection and returns the last 
+ *  time the RSSI was updated
  * 
 */
 uint32_t furi_hal_bt_get_conn_rssi(uint8_t* rssi) {

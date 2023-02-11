@@ -259,14 +259,6 @@ bool furi_hal_bt_hid_kb_press(uint16_t button) {
         ReportNumberKeyboard, (uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
 }
 
-bool furi_hal_bt_hid_kb_free_slots(uint8_t n_empty_slots) {
-    furi_assert(kb_report);
-    for(uint8_t i = 0; n_empty_slots > 0 && i < FURI_HAL_BT_HID_KB_MAX_KEYS; i++) {
-        if(kb_report->key[i] == 0) n_empty_slots--;
-    }
-    return (n_empty_slots == 0);
-}
-
 bool furi_hal_bt_hid_kb_release(uint16_t button) {
     furi_assert(kb_report);
     for(uint8_t i = 0; i < FURI_HAL_BT_HID_KB_MAX_KEYS; i++) {

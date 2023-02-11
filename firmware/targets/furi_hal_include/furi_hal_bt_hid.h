@@ -86,18 +86,10 @@ bool furi_hal_bt_hid_consumer_key_release(uint16_t button);
  */
 bool furi_hal_bt_hid_consumer_key_release_all();
 
-/**
- * @brief Check if keyboard buffer has free slots
- * 
- * @param n_emptry_slots number of empty slots in buffer to consider buffer is not full
- * 
- * @return true if there is enough free slots in buffer
-*/
-bool furi_hal_bt_hid_kb_free_slots(uint8_t n_empty_slots);
-
 /** Retrieves LED state from remote BT HID host
  * 
- * (look at HID usage page to know what each bit of the returned byte means)
+ * @return (look at HID usage page to know what each bit of the returned byte means)
+ * NB: RFU bit has been shifted out in the returned octet so USB defines should work
 */
 uint8_t furi_hal_bt_hid_get_led_state(void);
 
