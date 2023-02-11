@@ -92,9 +92,13 @@ static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, boo
     if(is_folder) {
         // Skip assets folders (if enabled)
         if(browser->skip_assets) {
+<<<<<<< HEAD
             return ((furi_string_cmp_str(name, ASSETS_DIR) == 0) ? (false) : (true)) &&
                    ((furi_string_cmp_str(name, BADKB_LAYOUTS_DIR) == 0) ? (false) : (true)) &&
                    ((furi_string_cmp_str(name, SUBGHZ_TEMP_DIR) == 0) ? (false) : (true));
+=======
+            return ((furi_string_cmp_str(name, ASSETS_DIR) == 0) ? (false) : (true));
+>>>>>>> upstream/dev
         } else {
             return true;
         }
