@@ -8,4 +8,7 @@ App(
         "gui",
     ],
     order=90,
+    provides=[
+        "xtreme_settings",
+    ],
 )
