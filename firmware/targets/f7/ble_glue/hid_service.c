@@ -61,14 +61,6 @@ static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void* event) {
             aci_gatt_write_permit_req_event_rp0* req =
                 (aci_gatt_write_permit_req_event_rp0*)blecore_evt->data;
 
-            // FURI_LOG_I(TAG, "GATT write request");
-            // size_t len = 2 + event_pckt->plen;
-            // hexdump((uint8_t*)event_pckt, len);
-            // FURI_LOG_D(TAG, "conn_handle = %04x", req->Connection_Handle);
-            // FURI_LOG_D(TAG, "attr handle = %04x", req->Attribute_Handle);
-            // FURI_LOG_D(TAG, "led char handle = %04x", hid_svc->led_state_char_handle);
-            // FURI_LOG_D(TAG, "led state = %02x", req->Data[0]);
-
             furi_check(hid_svc->led_state_event_callback && hid_svc->led_state_ctx);
 
             // this check is likely to be incorrect, it will actually work in our case
@@ -76,6 +68,12 @@ static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void* event) {
             // that specify attibute handle value from char handle (or the reverse)
             if(req->Attribute_Handle == (hid_svc->led_state_char_handle + 1)) {
                 hid_svc->led_state_event_callback(req->Data[0], hid_svc->led_state_ctx);
+                aci_gatt_write_resp(req->Connection_Handle, req->Attribute_Handle,                                  
+                                        0x00, /* write_status = 0 (no error))*/
+                                        0x00, /* err_code */
+                                        req->Data_Length, req->Data);
+                aci_gatt_write_char_value(req->Connection_Handle, hid_svc->led_state_char_handle, req->Data_Length, req->Data);
+                ret = SVCCTL_EvtAckFlowEnable;
             }
         }
     }
@@ -252,7 +250,7 @@ void hid_svc_start() {
         UUID_TYPE_16,
         &char_uuid,
         1,
-        CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP,
+        CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE,
         ATTR_PERMISSION_NONE,
         GATT_NOTIFY_ATTRIBUTE_WRITE | GATT_NOTIFY_WRITE_REQ_AND_WAIT_FOR_APPL_RESP,
         10,
