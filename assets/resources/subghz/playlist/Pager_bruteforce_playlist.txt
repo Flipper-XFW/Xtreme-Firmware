@@ -1,2 +1,0 @@
-# Pager Bruteforce Playlist
-sub: /ext/subghz/Misc/Pager_Bruteforce.sub
