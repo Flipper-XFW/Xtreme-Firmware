@@ -228,7 +228,7 @@ void xtreme_app_scene_main_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Force Dirs first",
+        "Sort Dirs First",
         2,
         xtreme_app_scene_main_sort_folders_before_changed,
         app);
