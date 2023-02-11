@@ -6,7 +6,7 @@
 #include <m-string.h>
 #include <storage/storage.h>
 #include "toolbox/path.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "xtreme/settings.h"
 
 #define FAP_MANIFEST_MAX_ICON_SIZE 32
 

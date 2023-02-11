@@ -1,4 +1,4 @@
-#include "xtreme_settings.h"
+#include "settings.h"
 
 XtremeSettings* xtreme_settings = NULL;
 

@@ -1,0 +1,10 @@
+App(
+    appid="xtreme",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="xtreme_on_system_start",
+    requires=["storage"],
+    order=1000,
+    provides=[
+        "xtreme",
+    ],
+)

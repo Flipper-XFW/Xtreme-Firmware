@@ -1,5 +1,5 @@
 #include "../u2f_app_i.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 static void u2f_scene_error_event_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);

@@ -1,5 +1,5 @@
 #include "../lfrfid_i.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 static void lfrfid_write_callback(LFRFIDWorkerWriteResult result, void* context) {
     LfRfid* app = context;

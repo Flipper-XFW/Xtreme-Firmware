@@ -1,6 +1,6 @@
 #pragma once
 
-#include "xtreme_settings_filename.h"
+#include "settings_filename.h"
 
 #include <furi_hal.h>
 #include <stdint.h>
@@ -22,6 +22,7 @@ typedef struct {
     BatteryStyle battery_style;
     uint16_t anim_speed;
     bool sort_ignore_dirs;
+    bool status_bar;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();

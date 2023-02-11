@@ -14,7 +14,7 @@
 #include "m-string.h"
 #include "m-algo.h"
 #include <m-array.h>
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "xtreme/settings.h"
 
 #define LIST_ITEMS 5u
 #define MAX_LEN_PX 110

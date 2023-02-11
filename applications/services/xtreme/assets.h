@@ -1,7 +1,7 @@
 #pragma once
 
+#include "settings.h"
 #include <gui/icon_i.h>
-#include "xtreme_settings.h"
 #include <toolbox/path.h>
 
 #define PACKS_DIR EXT_PATH("dolphin_custom")

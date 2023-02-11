@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 #define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (100)
 

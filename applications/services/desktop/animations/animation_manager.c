@@ -13,7 +13,7 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 #define TAG "AnimationManager"
 

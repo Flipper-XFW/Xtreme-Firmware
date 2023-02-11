@@ -5,7 +5,7 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "xtreme/settings.h"
 
 #define LOCK_MENU_ITEMS_NB 5
 
