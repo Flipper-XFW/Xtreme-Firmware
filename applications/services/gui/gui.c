@@ -165,7 +165,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             ViewPortArray_next(it);
         }
         // Extra notification
-        if(need_attention || !need_attention) {
+        if(need_attention) {
             width = icon_get_width(&I_Hidden_window_9x8);
             // Prepare work area background
             canvas_frame_set(
