@@ -270,6 +270,7 @@ int32_t clock_app(void* p) {
 
     notif = furi_record_open(RECORD_NOTIFICATION);
     float tmpBrightness = notif->settings.display_brightness;
+    brightness = tmpBrightness * 100;
 
     notification_message(notif, &sequence_display_backlight_enforce_on);
     notification_message(notif, &led_off);
@@ -284,7 +285,7 @@ int32_t clock_app(void* p) {
         if(furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) != FuriStatusOk) continue;
         // press events
         if(event.type == EventTypeKey) {
-            if(event.input.type == InputTypeLong) {
+            if(event.input.type == InputTypeShort) {
                 switch(event.input.key) {
                 case InputKeyLeft:
                     // Reset seconds
@@ -298,11 +299,6 @@ int32_t clock_app(void* p) {
                     // Exit the plugin
                     processing = false;
                     break;
-                default:
-                    break;
-                }
-            } else if(event.input.type == InputTypeShort) {
-                switch(event.input.key) {
                 case InputKeyUp:
                     handle_up();
                     break;
