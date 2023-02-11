@@ -215,7 +215,7 @@ void xtreme_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Sort dirs before",
+        "Sort Dirs Before",
         2,
         xtreme_settings_scene_start_sort_folders_before_changed,
         app);
