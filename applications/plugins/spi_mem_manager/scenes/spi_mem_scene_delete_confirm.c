@@ -1,3 +1,5 @@
+#pragma warning disable c:S796
+
 #include "../spi_mem_app_i.h"
 #include "../spi_mem_files.h"
 
