@@ -54,27 +54,25 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                         },
                 },
         },
-    [FuriHalBtProfileHidKeyboard] =
-        {
-            .start = furi_hal_bt_hid_start,
-            .stop = furi_hal_bt_hid_stop,
-            .config =
-                {
-                    .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
-                    .appearance_char = GAP_APPEARANCE_KEYBOARD,
-                    .bonding_mode = true,
-                    .pairing_method = GapPairingPinCodeVerifyYesNo,
-                    .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
-                    .conn_param =
-                        {
-                            .conn_int_min = 0x18, // 30 ms
-                            .conn_int_max = 0x24, // 45 ms
-                            .slave_latency = 0,
-                            .supervisor_timeout = 0,
-                        },
-                },
-        },
-};
+    [FuriHalBtProfileHidKeyboard] = {
+        .start = furi_hal_bt_hid_start,
+        .stop = furi_hal_bt_hid_stop,
+        .config =
+            {
+                .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
+                .appearance_char = GAP_APPEARANCE_KEYBOARD,
+                .bonding_mode = true,
+                .pairing_method = GapPairingPinCodeVerifyYesNo,
+                .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
+                .conn_param =
+                    {
+                        .conn_int_min = 0x18, // 30 ms
+                        .conn_int_max = 0x24, // 45 ms
+                        .slave_latency = 0,
+                        .supervisor_timeout = 0,
+                    },
+            },
+    }};
 FuriHalBtProfileConfig* current_profile = NULL;
 
 void furi_hal_bt_init() {
@@ -201,26 +199,26 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             FURI_LOG_E(TAG, "Can't start Ble App - unsupported radio stack");
             break;
         }
-        // Set mac address
-        memcpy(
-            profile_config[profile].config.mac_address,
-            furi_hal_version_get_ble_mac(),
-            sizeof(profile_config[profile].config.mac_address));
-        // Set advertise name
-        strlcpy(
-            profile_config[profile].config.adv_name,
-            furi_hal_version_get_ble_local_device_name_ptr(),
-            FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
-        // Configure GAP
         GapConfig* config = &profile_config[profile].config;
+        // Configure GAP
         if(profile == FuriHalBtProfileSerial) {
+            // Set mac address
+            memcpy(
+                profile_config[profile].config.mac_address,
+                furi_hal_version_get_ble_mac(),
+                sizeof(profile_config[profile].config.mac_address));
             config->adv_service_uuid |= furi_hal_version_get_hw_color();
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
-            config->mac_address[2]++;
-            // Change name Flipper -> Flipper Remote
-            const char* clicker_str = "Flipper Remote";
-            memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
+            uint8_t default_mac[GAP_MAC_ADDR_SIZE] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
+            if(memcmp(config->mac_address, default_mac, 6) == 0) {
+                config->mac_address[2]++;
+            }
+            // Change name Flipper -> Control
+            if(strlen(&config->adv_name[1]) == 0) {
+                const char* clicker_str = "Control";
+                memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
+            }
         }
         if(!gap_init(config, event_cb, context)) {
             gap_thread_stop();
@@ -280,6 +278,10 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
 
 bool furi_hal_bt_is_active() {
     return gap_get_state() > GapStateIdle;
+}
+
+bool furi_hal_bt_is_connected() {
+    return gap_get_state() == GapStateConnected;
 }
 
 void furi_hal_bt_start_advertising() {
@@ -420,6 +422,21 @@ float furi_hal_bt_get_rssi() {
     return val;
 }
 
+/** fill the RSSI of the remote host of the bt connection and returns the last 
+ *  time the RSSI was updated
+ * 
+*/
+uint32_t furi_hal_bt_get_conn_rssi(uint8_t* rssi) {
+    int8_t ret_rssi = 0;
+    uint32_t since = gap_get_remote_conn_rssi(&ret_rssi);
+
+    if(ret_rssi == 127 || since == 0) return 0;
+
+    *rssi = (uint8_t)abs(ret_rssi);
+
+    return since;
+}
+
 uint32_t furi_hal_bt_get_transmitted_packets() {
     uint32_t packets = 0;
     aci_hal_le_tx_test_packet_number(&packets);
@@ -443,4 +460,46 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
     FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
     return false;
+}
+
+void furi_hal_bt_set_profile_adv_name(
+    FuriHalBtProfile profile,
+    const char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1]) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    furi_assert(name);
+
+    profile_config[profile].config.adv_name[0] = 0x09;
+    memcpy(
+        &(profile_config[profile].config.adv_name[1]),
+        name,
+        FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1);
+}
+
+const char* furi_hal_bt_get_profile_adv_name(FuriHalBtProfile profile) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    return &(profile_config[profile].config.adv_name[1]);
+}
+
+void furi_hal_bt_set_profile_mac_addr(
+    FuriHalBtProfile profile,
+    const uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    furi_assert(mac_addr);
+
+    memcpy(profile_config[profile].config.mac_address, mac_addr, GAP_MAC_ADDR_SIZE);
+}
+
+const uint8_t* furi_hal_bt_get_profile_mac_addr(FuriHalBtProfile profile) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    return profile_config[profile].config.mac_address;
+}
+
+void furi_hal_bt_set_profile_pairing_method(FuriHalBtProfile profile, GapPairing pairing_method) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    profile_config[profile].config.pairing_method = pairing_method;
+}
+
+GapPairing furi_hal_bt_get_profile_pairing_method(FuriHalBtProfile profile) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+    return profile_config[profile].config.pairing_method;
 }

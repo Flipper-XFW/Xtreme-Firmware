@@ -16,11 +16,11 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
         for(size_t i = 0; i < COUNT_OF(known_ext); i++) {
             if((known_ext[i][0] == '?') || (known_ext[i][0] == '*')) continue;
             if(furi_string_search(file->path, known_ext[i], 0) != FURI_STRING_FAILURE) {
-                if(i == ArchiveFileTypeBadUsb) {
-                    if(furi_string_search(
-                           file->path, archive_get_default_path(ArchiveTabBadUsb)) == 0) {
+                if(i == ArchiveFileTypeBadKb) {
+                    if(furi_string_search(file->path, archive_get_default_path(ArchiveTabBadKb)) ==
+                       0) {
                         file->type = i;
-                        return; // *.txt file is a BadUSB script only if it is in BadUSB folder
+                        return; // *.txt file is a BadKB script only if it is in BadKB folder
                     }
                 } else {
                     file->type = i;

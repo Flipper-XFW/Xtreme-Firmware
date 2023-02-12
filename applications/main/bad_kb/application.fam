@@ -1,0 +1,15 @@
+App(
+    appid="bad_kb",
+    name="Bad KB",
+    apptype=FlipperAppType.APP,
+    entry_point="bad_kb_app",
+    cdefines=["APP_BAD_KB"],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=2 * 1024,
+    icon="A_BadKb_14",
+    order=70,
+    fap_libs=["assets"],
+)

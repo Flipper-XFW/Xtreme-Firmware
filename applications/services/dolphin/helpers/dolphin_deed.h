@@ -12,7 +12,7 @@ typedef enum {
     DolphinAppNfc,
     DolphinAppIr,
     DolphinAppIbutton,
-    DolphinAppBadusb,
+    DolphinAppBadKb,
     DolphinAppPlugin,
     DolphinAppMAX,
 } DolphinApp;
@@ -50,7 +50,7 @@ typedef enum {
     DolphinDeedIbuttonEmulate,
     DolphinDeedIbuttonAdd,
 
-    DolphinDeedBadUsbPlayScript,
+    DolphinDeedBadKbPlayScript,
 
     DolphinDeedU2fAuthorized,
     DolphinDeedGpioUartBridge,
