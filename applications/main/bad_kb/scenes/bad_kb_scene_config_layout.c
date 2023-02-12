@@ -3,6 +3,8 @@
 #include "furi_hal_usb.h"
 #include <storage/storage.h>
 
+#define KEYBOARD_FOLDER "/ext/badkb/layouts"
+
 static bool bad_kb_layout_select(BadKbApp* bad_kb) {
     furi_assert(bad_kb);
 
@@ -17,6 +19,7 @@ static bool bad_kb_layout_select(BadKbApp* bad_kb) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
         &browser_options, BAD_KB_APP_LAYOUT_EXTENSION, &I_keyboard_10px);
+    browser_options.base_path = KEYBOARD_FOLDER;
 
     // Input events and views are managed by file_browser
     bool res = dialog_file_browser_show(
