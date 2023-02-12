@@ -468,6 +468,7 @@ void furi_hal_bt_set_profile_adv_name(
     furi_assert(profile < FuriHalBtProfileNumber);
     furi_assert(name);
 
+    profile_config[profile].config.adv_name[0] = 0x09;
     memcpy(
         &(profile_config[profile].config.adv_name[1]),
         name,

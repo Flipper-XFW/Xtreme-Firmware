@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,15.1,,
+Version,v,17.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1028,7 +1028,6 @@ Function,+,furi_hal_bt_hid_consumer_key_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_consumer_key_release_all,_Bool,
 Function,+,furi_hal_bt_hid_get_led_state,uint8_t,
-Function,+,furi_hal_bt_hid_kb_free_slots,_Bool,uint8_t
 Function,+,furi_hal_bt_hid_kb_press,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_kb_release,_Bool,uint16_t
 Function,+,furi_hal_bt_hid_kb_release_all,_Bool,
@@ -1056,7 +1055,7 @@ Function,+,furi_hal_bt_serial_start,void,
 Function,+,furi_hal_bt_serial_stop,void,
 Function,+,furi_hal_bt_serial_tx,_Bool,"uint8_t*, uint16_t"
 Function,+,furi_hal_bt_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
-Function,+,furi_hal_bt_set_profile_adv_name,void,"FuriHalBtProfile, const char[( 1 + ( 8 + 1 ) ) - 1]"
+Function,+,furi_hal_bt_set_profile_adv_name,void,"FuriHalBtProfile, const char[( 1 + ( 8 + 1 ) ) + 9 - 1]"
 Function,+,furi_hal_bt_set_profile_mac_addr,void,"FuriHalBtProfile, const uint8_t[( 6 )]"
 Function,+,furi_hal_bt_set_profile_pairing_method,void,"FuriHalBtProfile, GapPairing"
 Function,+,furi_hal_bt_start_advertising,void,
@@ -3060,12 +3059,12 @@ Function,-,subghz_protocol_decoder_star_line_free,void,void*
 Function,-,subghz_protocol_decoder_star_line_get_hash_data,uint8_t,void*
 Function,-,subghz_protocol_decoder_star_line_get_string,void,"void*, FuriString*"
 Function,-,subghz_protocol_decoder_star_line_reset,void,void*
+Function,-,subghz_protocol_decoder_star_line_serialize,_Bool,"void*, FlipperFormat*, SubGhzRadioPreset*"
 Function,-,subghz_protocol_encoder_alutech_at_4n_alloc,void*,SubGhzEnvironment*
 Function,-,subghz_protocol_encoder_alutech_at_4n_deserialize,_Bool,"void*, FlipperFormat*"
 Function,-,subghz_protocol_encoder_alutech_at_4n_free,void,void*
 Function,-,subghz_protocol_encoder_alutech_at_4n_stop,void,void*
 Function,-,subghz_protocol_encoder_alutech_at_4n_yield,LevelDuration,void*
-Function,-,subghz_protocol_decoder_star_line_serialize,_Bool,"void*, FlipperFormat*, SubGhzRadioPreset*"
 Function,-,subghz_protocol_encoder_ansonic_alloc,void*,SubGhzEnvironment*
 Function,-,subghz_protocol_encoder_ansonic_deserialize,_Bool,"void*, FlipperFormat*"
 Function,-,subghz_protocol_encoder_ansonic_free,void,void*
