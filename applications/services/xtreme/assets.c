@@ -38,7 +38,17 @@ void anim(const Icon** replace, const char* name, FuriString* path, File* file) 
             if(storage_file_read(file, (void*)icon->frames[i], size) == size) ok = true;
             storage_file_close(file);
         }
-        if(!ok) break;
+        if(!ok) {
+            for(int i = 0; i < icon->frame_count; ++i) {
+                if(icon->frames[i]) {
+                    free((void*)icon->frames[i]);
+                }
+            }
+            free((void*)icon->frames);
+            free(icon);
+
+            break;
+        }
 
         *replace = icon;
     } while(false);
