@@ -1,6 +1,6 @@
 App(
-    appid="Pomodoro2",
-    name="Pomodoro 2",
+    appid="Pomodoro",
+    name="Pomodoro",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipp_pomodoro_app",
     requires=["gui", "notification", "dolphin"],
