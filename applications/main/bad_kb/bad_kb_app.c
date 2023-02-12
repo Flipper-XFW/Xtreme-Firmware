@@ -4,6 +4,7 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
+#include <xtreme/settings.h>
 
 #include <bt/bt_service/bt_i.h>
 #include <bt/bt_service/bt.h>
@@ -97,6 +98,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
+    app->is_bt = XTREME_SETTINGS()->bad_bt;
     const char* adv_name = bt_get_profile_adv_name(bt);
     memcpy(app->name, adv_name, BAD_KB_ADV_NAME_MAX_LEN);
     memcpy(app->bt_old_config.name, adv_name, BAD_KB_ADV_NAME_MAX_LEN);

@@ -23,6 +23,7 @@ typedef struct {
     uint16_t anim_speed;
     bool sort_ignore_dirs;
     bool status_bar;
+    bool bad_bt;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();
