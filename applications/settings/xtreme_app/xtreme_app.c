@@ -82,8 +82,7 @@ XtremeApp* xtreme_app_alloc() {
         variable_item_list_get_view(app->var_item_list));
 
     app->popup = popup_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
+    view_dispatcher_add_view(app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
 
     return app;
 }

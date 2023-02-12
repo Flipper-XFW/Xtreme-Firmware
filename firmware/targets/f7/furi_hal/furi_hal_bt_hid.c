@@ -179,8 +179,8 @@ uint8_t furi_hal_bt_hid_get_led_state(void) {
         hid_host_led_state.s_shift);
 
     return (hid_host_led_state.s_value >> 1); // bit 0 is undefined (after shift bit location
-                                                // match with HID led state bits defines)
-                                                // see bad_kb_script.c (ducky_numlock_on function)
+        // match with HID led state bits defines)
+        // see bad_kb_script.c (ducky_numlock_on function)
 }
 
 void furi_hal_bt_hid_start() {

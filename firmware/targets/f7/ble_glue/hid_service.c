@@ -47,11 +47,18 @@ static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void* event) {
             // that specify attibute handle value from char handle (or the reverse)
             if(req->Attribute_Handle == (hid_svc->led_state_char_handle + 1)) {
                 hid_svc->led_state_event_callback(req->Data[0], hid_svc->led_state_ctx);
-                aci_gatt_write_resp(req->Connection_Handle, req->Attribute_Handle,                                  
-                                        0x00, /* write_status = 0 (no error))*/
-                                        0x00, /* err_code */
-                                        req->Data_Length, req->Data);
-                aci_gatt_write_char_value(req->Connection_Handle, hid_svc->led_state_char_handle, req->Data_Length, req->Data);
+                aci_gatt_write_resp(
+                    req->Connection_Handle,
+                    req->Attribute_Handle,
+                    0x00, /* write_status = 0 (no error))*/
+                    0x00, /* err_code */
+                    req->Data_Length,
+                    req->Data);
+                aci_gatt_write_char_value(
+                    req->Connection_Handle,
+                    hid_svc->led_state_char_handle,
+                    req->Data_Length,
+                    req->Data);
                 ret = SVCCTL_EvtAckFlowEnable;
             }
         }
