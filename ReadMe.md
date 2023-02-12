@@ -113,9 +113,9 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - NSFW Animations tied to the level system. Read more above
 - Folder handling for empty ones (Now indicate they are empty)
 
-- Jamming Files
 - Custom subghz presets
 - Multiple NFC protocols
+- Multiple Sub-Ghz protocols | Merged from Unleashed, thanks @xMasterX
 - Subghz and IR signal replication via gpio | Credits to @ankris812
 - Honda Keys (CVE-2022-27254) & Ford blockers
 
