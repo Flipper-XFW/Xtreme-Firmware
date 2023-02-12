@@ -127,6 +127,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - All Assets
 
 - Tons of apps
+- File browser
 - Massive compiler re-do
 - About 1k files to speed things up a lot
 - Applications to now use the new Locale setting
