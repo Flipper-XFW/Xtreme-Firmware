@@ -66,7 +66,7 @@ static void xtreme_app_scene_main_battery_icon_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, battery_icon_names[index]);
-    XTREME_SETTINGS()->battery_icon = battery_icon_values[index];
+    XTREME_SETTINGS()->battery_icon = index;
     app->settings_changed = true;
 }
 
@@ -211,9 +211,7 @@ void xtreme_app_scene_main_on_enter(void* context) {
         BatteryIconCount,
         xtreme_app_scene_main_battery_icon_changed,
         app);
-    value_index = value_index_int32(
-        xtreme_settings->battery_icon, battery_icon_values, BatteryIconCount);
-    variable_item_set_current_value_index(item, value_index);
+    value_index = xtreme_settings->battery_icon;
     variable_item_set_current_value_text(item, battery_icon_names[value_index]);
 
     item = variable_item_list_add(
