@@ -11,18 +11,23 @@
 
 #define MAX_PACK_NAME_LEN 32
 
-#define XTREME_SETTINGS_VERSION (1)
+#define XTREME_SETTINGS_VERSION (2)
 #define XTREME_SETTINGS_PATH INT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
 
+// Some settings function backwards (logically) in
+// order to fit the default value we want
+// (values will default to 0 / false)
 typedef struct {
+    char asset_pack[MAX_PACK_NAME_LEN];
+    uint16_t anim_speed;
     int32_t cycle_anims;
     bool unlock_anims;
-    char asset_pack[MAX_PACK_NAME_LEN];
     BatteryIcon battery_icon;
-    uint16_t anim_speed;
+    bool status_icons;
+    bool status_bar_back;
+    bool status_bar_frames;
     bool sort_ignore_dirs;
-    bool status_bar;
     bool bad_bt;
 } XtremeSettings;
 
