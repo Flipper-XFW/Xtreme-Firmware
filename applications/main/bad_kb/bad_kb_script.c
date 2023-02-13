@@ -595,8 +595,6 @@ static int32_t ducky_script_execute_next(BadKbScript* bad_kb, File* script_file)
         bad_kb->buf_len = 0;
         if(bad_kb->file_end) return SCRIPT_STATE_END;
     }
-
-    return 0;
 }
 
 static void bad_kb_bt_hid_state_callback(BtStatus status, void* context) {

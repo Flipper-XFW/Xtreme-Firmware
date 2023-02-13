@@ -291,9 +291,10 @@ static void animation_storage_free_frames(BubbleAnimation* animation) {
 
     const Icon* icon = &animation->icon_animation;
     for(int i = 0; i < icon->frame_count; ++i) {
-        if(icon->frames[i]) {
-            free((void*)icon->frames[i]);
+        if(!icon->frames[i]) {
+            break;
         }
+        free((void*)icon->frames[i]);
     }
 
     free((void*)icon->frames);
@@ -336,6 +337,7 @@ static bool animation_storage_load_frames(
         frames_ok = false;
         furi_string_printf(filename, "%s/%s/frame_%d.bm", ANIMATION_DIR, name, i);
 
+        FURI_CONST_ASSIGN_PTR(icon->frames[i], 0);
         if(storage_common_stat(storage, furi_string_get_cstr(filename), &file_info) != FSE_OK)
             break;
         if(file_info.size > max_filesize) {
