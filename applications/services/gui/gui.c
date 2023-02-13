@@ -93,7 +93,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
                 width + 2,
                 GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
             // Hide battery background
-            if(xtreme_settings->status_bar && xtreme_settings->battery_style != BatteryStyleOff) {
+            if(xtreme_settings->status_bar && xtreme_settings->battery_icon != BatteryIconOff) {
                 canvas_set_color(gui->canvas, ColorWhite);
                 canvas_draw_box(
                     gui->canvas, -1, 0, canvas_width(gui->canvas) + 1, canvas_height(gui->canvas));
@@ -119,7 +119,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             right_used + 4,
             GUI_STATUS_BAR_HEIGHT);
         // Disable battery border
-        if(xtreme_settings->status_bar && xtreme_settings->battery_style != BatteryStyleOff) {
+        if(xtreme_settings->status_bar && xtreme_settings->battery_icon != BatteryIconOff) {
             canvas_set_color(gui->canvas, ColorBlack);
             canvas_draw_rframe(
                 gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);

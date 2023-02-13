@@ -60,21 +60,13 @@ static void xtreme_app_scene_main_unlock_anims_changed(VariableItem* item) {
     app->settings_changed = true;
 }
 
-const char* const battery_style_names[] =
+const char* const battery_icon_names[] =
     {"OFF", "Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
-const int32_t battery_style_values[COUNT_OF(battery_style_names)] = {
-    BatteryStyleOff,
-    BatteryStyleBar,
-    BatteryStylePercent,
-    BatteryStyleInvertedPercent,
-    BatteryStyleRetro3,
-    BatteryStyleRetro5,
-    BatteryStyleBarPercent};
-static void xtreme_app_scene_main_battery_style_changed(VariableItem* item) {
+static void xtreme_app_scene_main_battery_icon_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, battery_style_names[index]);
-    XTREME_SETTINGS()->battery_style = battery_style_values[index];
+    variable_item_set_current_value_text(item, battery_icon_names[index]);
+    XTREME_SETTINGS()->battery_icon = battery_icon_values[index];
     app->settings_changed = true;
 }
 
@@ -212,14 +204,14 @@ void xtreme_app_scene_main_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Battery Style",
-        COUNT_OF(battery_style_names),
-        xtreme_app_scene_main_battery_style_changed,
+        "Battery Icon",
+        BatteryIconCount,
+        xtreme_app_scene_main_battery_icon_changed,
         app);
     value_index = value_index_int32(
-        xtreme_settings->battery_style, battery_style_values, COUNT_OF(battery_style_names));
+        xtreme_settings->battery_icon, battery_icon_values, BatteryIconCount);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, battery_style_names[value_index]);
+    variable_item_set_current_value_text(item, battery_icon_names[value_index]);
 
     item = variable_item_list_add(
         var_item_list, "Status Bar", 2, xtreme_app_scene_main_status_bar_changed, app);

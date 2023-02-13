@@ -19,7 +19,7 @@ typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
     char asset_pack[MAX_PACK_NAME_LEN];
-    BatteryStyle battery_style;
+    BatteryIcon battery_icon;
     uint16_t anim_speed;
     bool sort_ignore_dirs;
     bool status_bar;

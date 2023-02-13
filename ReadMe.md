@@ -42,7 +42,7 @@ We wrote a powerful yet easy-to-use application specifically for our Firmware, t
 <br><code>Anim Speed:</code> Speed in which the animations play
 <br><code>Cycle Anims:</code> Duration of how long animations are played before switching to next
 <br><code>Unlock Anims:</code> Custom setting just for NSFW fallback animations. Figure it out ;)
-<br><code>Battery style:</code> Classic Firmware battery style toggle, just at a more convenient place
+<br><code>Battery Icon:</code> Classic Firmware battery style toggle, just at a more convenient place
 <br><code>XP Level:</code> Changes your Flippers level
 <br><code>SubGhz Extend:</code> Allows you to extend the subghz range beyond what FZ devs planned
 <br><code>SubGhz Bypass:</code> Allows you to bypass the subghz region locks of the Flipper
