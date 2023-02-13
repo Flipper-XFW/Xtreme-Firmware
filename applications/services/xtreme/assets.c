@@ -27,7 +27,7 @@ void anim(const Icon** replace, const char* name, FuriString* path, File* file) 
         const char* pack = XTREME_SETTINGS()->asset_pack;
 
         bool ok = true;
-        for(int i = 0; ok && i < icon->frame_count; ++i) {
+        for(int i = 0; i < icon->frame_count; ++i) {
             FURI_CONST_ASSIGN_PTR(icon->frames[i], 0);
             if(ok) {
                 ok = false;
