@@ -25,8 +25,8 @@ typedef struct {
     bool unlock_anims;
     BatteryIcon battery_icon;
     bool status_icons;
-    bool status_bar_frames;
-    bool status_bar_back;
+    bool bar_borders;
+    bool bar_background;
     bool sort_ignore_dirs;
     bool bad_bt;
 } XtremeSettings;

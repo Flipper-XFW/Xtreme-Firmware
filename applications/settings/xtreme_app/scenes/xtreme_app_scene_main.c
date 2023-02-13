@@ -70,11 +70,27 @@ static void xtreme_app_scene_main_battery_icon_changed(VariableItem* item) {
     app->settings_changed = true;
 }
 
-static void xtreme_app_scene_main_status_bar_changed(VariableItem* item) {
+static void xtreme_app_scene_main_status_icons_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->status_bar = value;
+    XTREME_SETTINGS()->status_icons = value;
+    app->settings_changed = true;
+}
+
+static void xtreme_app_scene_main_bar_borders_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->bar_borders = value;
+    app->settings_changed = true;
+}
+
+static void xtreme_app_scene_main_bar_background_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->bar_background = value;
     app->settings_changed = true;
 }
 
@@ -216,9 +232,19 @@ void xtreme_app_scene_main_on_enter(void* context) {
     variable_item_set_current_value_text(item, battery_icon_names[value_index]);
 
     item = variable_item_list_add(
-        var_item_list, "Status Bar", 2, xtreme_app_scene_main_status_bar_changed, app);
-    variable_item_set_current_value_index(item, xtreme_settings->status_bar);
-    variable_item_set_current_value_text(item, xtreme_settings->status_bar ? "ON" : "OFF");
+        var_item_list, "Status Icons", 2, xtreme_app_scene_main_status_icons_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->status_icons);
+    variable_item_set_current_value_text(item, xtreme_settings->status_icons ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list, "Bar Borders", 2, xtreme_app_scene_main_bar_borders_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->bar_borders);
+    variable_item_set_current_value_text(item, xtreme_settings->bar_borders ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list, "Bar Background", 2, xtreme_app_scene_main_bar_background_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->bar_background);
+    variable_item_set_current_value_text(item, xtreme_settings->bar_background ? "ON" : "OFF");
 
 
     variable_item_list_add(var_item_list, "               = Protocols =", 0, NULL, app);
