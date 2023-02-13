@@ -78,6 +78,20 @@ static void xtreme_app_scene_main_status_bar_changed(VariableItem* item) {
     app->settings_changed = true;
 }
 
+static void xtreme_app_scene_main_subghz_extend_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    app->subghz_extend = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
+    app->subghz_changed = true;
+}
+
+static void xtreme_app_scene_main_subghz_bypass_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    app->subghz_bypass = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
+    app->subghz_changed = true;
+}
+
 static void xtreme_app_scene_main_sort_folders_before_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
@@ -93,20 +107,6 @@ static void xtreme_app_scene_main_xp_level_changed(VariableItem* item) {
     snprintf(level_str, 4, "%i", app->dolphin_level);
     variable_item_set_current_value_text(item, level_str);
     app->level_changed = true;
-}
-
-static void xtreme_app_scene_main_subghz_extend_changed(VariableItem* item) {
-    XtremeApp* app = variable_item_get_context(item);
-    app->subghz_extend = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
-    app->subghz_changed = true;
-}
-
-static void xtreme_app_scene_main_subghz_bypass_changed(VariableItem* item) {
-    XtremeApp* app = variable_item_get_context(item);
-    app->subghz_bypass = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
-    app->subghz_changed = true;
 }
 
 void xtreme_app_scene_main_on_enter(void* context) {
@@ -202,6 +202,9 @@ void xtreme_app_scene_main_on_enter(void* context) {
     variable_item_set_current_value_index(item, xtreme_settings->unlock_anims);
     variable_item_set_current_value_text(item, xtreme_settings->unlock_anims ? "ON" : "OFF");
 
+
+    variable_item_list_add(var_item_list, "             = Status Bar =", 0, NULL, app);
+
     item = variable_item_list_add(
         var_item_list,
         "Battery Icon",
@@ -217,6 +220,22 @@ void xtreme_app_scene_main_on_enter(void* context) {
         var_item_list, "Status Bar", 2, xtreme_app_scene_main_status_bar_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->status_bar);
     variable_item_set_current_value_text(item, xtreme_settings->status_bar ? "ON" : "OFF");
+
+
+    variable_item_list_add(var_item_list, "               = Protocols =", 0, NULL, app);
+
+    item = variable_item_list_add(
+        var_item_list, "SubGHz Extend", 2, xtreme_app_scene_main_subghz_extend_changed, app);
+    variable_item_set_current_value_index(item, app->subghz_extend);
+    variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list, "SubGHz Bypass", 2, xtreme_app_scene_main_subghz_bypass_changed, app);
+    variable_item_set_current_value_index(item, app->subghz_bypass);
+    variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
+
+
+    variable_item_list_add(var_item_list, "                     = Misc =", 0, NULL, app);
 
     item = variable_item_list_add(
         var_item_list,
@@ -238,19 +257,9 @@ void xtreme_app_scene_main_on_enter(void* context) {
     variable_item_set_current_value_index(item, app->dolphin_level - 1);
     variable_item_set_current_value_text(item, level_str);
 
-    item = variable_item_list_add(
-        var_item_list, "SubGHz Extend", 2, xtreme_app_scene_main_subghz_extend_changed, app);
-    variable_item_set_current_value_index(item, app->subghz_extend);
-    variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
-
-    item = variable_item_list_add(
-        var_item_list, "SubGHz Bypass", 2, xtreme_app_scene_main_subghz_bypass_changed, app);
-    variable_item_set_current_value_index(item, app->subghz_bypass);
-    variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
-
     FuriString* version_tag = furi_string_alloc_printf(
         "%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
-    item = variable_item_list_add(var_item_list, furi_string_get_cstr(version_tag), 0, NULL, app);
+    variable_item_list_add(var_item_list, furi_string_get_cstr(version_tag), 0, NULL, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
