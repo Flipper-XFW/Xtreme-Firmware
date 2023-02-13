@@ -27,8 +27,8 @@ typedef struct {
     bool status_icons;
     bool bar_borders;
     bool bar_background;
-    bool sort_ignore_dirs;
     bool bad_bt;
+    bool sort_ignore_dirs;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();
