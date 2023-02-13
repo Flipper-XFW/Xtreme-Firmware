@@ -28,15 +28,20 @@ void anim(const Icon** replace, const char* name, FuriString* path, File* file) 
 
         bool ok = true;
         for(int i = 0; ok && i < icon->frame_count; ++i) {
-            ok = false;
-            furi_string_printf(path, ICONS_FMT "/frame_%02d.bm", pack, name, i);
-            if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
-                break;
+            FURI_CONST_ASSIGN_PTR(icon->frames[i], 0);
+            if(ok) {
+                ok = false;
+                furi_string_printf(path, ICONS_FMT "/frame_%02d.bm", pack, name, i);
+                do {
+                    if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
+                        break;
 
-            uint64_t size = storage_file_size(file);
-            FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(size));
-            if(storage_file_read(file, (void*)icon->frames[i], size) == size) ok = true;
-            storage_file_close(file);
+                    uint64_t size = storage_file_size(file);
+                    FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(size));
+                    if(storage_file_read(file, (void*)icon->frames[i], size) == size) ok = true;
+                    storage_file_close(file);
+                } while(0);
+            }
         }
         if(!ok) {
             for(int i = 0; i < icon->frame_count; ++i) {

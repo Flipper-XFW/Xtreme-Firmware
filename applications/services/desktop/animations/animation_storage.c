@@ -291,10 +291,9 @@ static void animation_storage_free_frames(BubbleAnimation* animation) {
 
     const Icon* icon = &animation->icon_animation;
     for(int i = 0; i < icon->frame_count; ++i) {
-        if(!icon->frames[i]) {
-            break;
+        if(icon->frames[i]) {
+            free((void*)icon->frames[i]);
         }
-        free((void*)icon->frames[i]);
     }
 
     free((void*)icon->frames);
@@ -326,7 +325,7 @@ static bool animation_storage_load_frames(
     FURI_CONST_ASSIGN(icon->width, width);
     icon->frames = malloc(sizeof(const uint8_t*) * icon->frame_count);
 
-    bool frames_ok = false;
+    bool frames_ok = true;
     File* file = storage_file_alloc(storage);
     FileInfo file_info;
     FuriString* filename;
@@ -334,35 +333,39 @@ static bool animation_storage_load_frames(
     size_t max_filesize = ROUND_UP_TO(width, 8) * height + 2;
 
     for(int i = 0; i < icon->frame_count; ++i) {
-        frames_ok = false;
-        furi_string_printf(filename, "%s/%s/frame_%d.bm", ANIMATION_DIR, name, i);
-
         FURI_CONST_ASSIGN_PTR(icon->frames[i], 0);
-        if(storage_common_stat(storage, furi_string_get_cstr(filename), &file_info) != FSE_OK)
-            break;
-        if(file_info.size > max_filesize) {
-            FURI_LOG_E(
-                TAG,
-                "Filesize %lld, max: %d (width %d, height %d)",
-                file_info.size,
-                max_filesize,
-                width,
-                height);
-            break;
-        }
-        if(!storage_file_open(
-               file, furi_string_get_cstr(filename), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            FURI_LOG_E(TAG, "Can't open file \'%s\'", furi_string_get_cstr(filename));
-            break;
-        }
+        if(frames_ok) {
+            frames_ok = false;
+            furi_string_printf(filename, "%s/%s/frame_%d.bm", ANIMATION_DIR, name, i);
+            do {
+                if(storage_common_stat(storage, furi_string_get_cstr(filename), &file_info) != FSE_OK)
+                    break;
+                if(file_info.size > max_filesize) {
+                    FURI_LOG_E(
+                        TAG,
+                        "Filesize %lld, max: %d (width %d, height %d)",
+                        file_info.size,
+                        max_filesize,
+                        width,
+                        height);
+                    break;
+                }
+                if(!storage_file_open(
+                    file, furi_string_get_cstr(filename), FSAM_READ, FSOM_OPEN_EXISTING)) {
+                    FURI_LOG_E(TAG, "Can't open file \'%s\'", furi_string_get_cstr(filename));
+                    break;
+                }
 
-        FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(file_info.size));
-        if(storage_file_read(file, (void*)icon->frames[i], file_info.size) != file_info.size) {
-            FURI_LOG_E(TAG, "Read failed: \'%s\'", furi_string_get_cstr(filename));
-            break;
+                FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(file_info.size));
+                if(storage_file_read(file, (void*)icon->frames[i], file_info.size) != file_info.size) {
+                    FURI_LOG_E(TAG, "Read failed: \'%s\'", furi_string_get_cstr(filename));
+                    break;
+                } else {
+                    frames_ok = true;
+                }
+                storage_file_close(file);
+            } while(0);
         }
-        storage_file_close(file);
-        frames_ok = true;
     }
 
     if(!frames_ok) {
