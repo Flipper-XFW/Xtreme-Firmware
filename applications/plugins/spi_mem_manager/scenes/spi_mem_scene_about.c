@@ -5,7 +5,8 @@
 #define SPI_MEM_DEVELOPER "DrunkBatya"
 #define SPI_MEM_GITHUB "https://github.com/flipperdevices/flipperzero-firmware"
 #define SPI_MEM_NAME "\e#\e!       SPI Mem Manager        \e!\n" // NOSONAR
-#define SPI_MEM_BLANK_INV "\e#\e!                                                      \e!\n" // NOSONAR
+#define SPI_MEM_BLANK_INV \
+    "\e#\e!                                                      \e!\n" // NOSONAR
 
 void spi_mem_scene_about_on_enter(void* context) {
     SPIMemApp* app = context;

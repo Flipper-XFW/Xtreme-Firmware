@@ -338,7 +338,8 @@ static bool animation_storage_load_frames(
             frames_ok = false;
             furi_string_printf(filename, "%s/%s/frame_%d.bm", ANIMATION_DIR, name, i);
             do {
-                if(storage_common_stat(storage, furi_string_get_cstr(filename), &file_info) != FSE_OK)
+                if(storage_common_stat(storage, furi_string_get_cstr(filename), &file_info) !=
+                   FSE_OK)
                     break;
                 if(file_info.size > max_filesize) {
                     FURI_LOG_E(
@@ -351,13 +352,14 @@ static bool animation_storage_load_frames(
                     break;
                 }
                 if(!storage_file_open(
-                    file, furi_string_get_cstr(filename), FSAM_READ, FSOM_OPEN_EXISTING)) {
+                       file, furi_string_get_cstr(filename), FSAM_READ, FSOM_OPEN_EXISTING)) {
                     FURI_LOG_E(TAG, "Can't open file \'%s\'", furi_string_get_cstr(filename));
                     break;
                 }
 
                 FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(file_info.size));
-                if(storage_file_read(file, (void*)icon->frames[i], file_info.size) != file_info.size) {
+                if(storage_file_read(file, (void*)icon->frames[i], file_info.size) !=
+                   file_info.size) {
                     FURI_LOG_E(TAG, "Read failed: \'%s\'", furi_string_get_cstr(filename));
                     break;
                 } else {

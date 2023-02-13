@@ -33,7 +33,8 @@ void anim(const Icon** replace, const char* name, FuriString* path, File* file) 
                 ok = false;
                 furi_string_printf(path, ICONS_FMT "/frame_%02d.bm", pack, name, i);
                 do {
-                    if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
+                    if(!storage_file_open(
+                           file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
                         break;
 
                     uint64_t size = storage_file_size(file);
