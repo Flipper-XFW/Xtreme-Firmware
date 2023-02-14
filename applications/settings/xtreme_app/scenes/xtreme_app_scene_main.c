@@ -161,17 +161,16 @@ void xtreme_app_scene_main_on_enter(void* context) {
     File* folder = storage_file_alloc(storage);
     FileInfo info;
     char* name = malloc(MAX_PACK_NAME_LEN);
-    do {
-        if(!storage_dir_open(folder, PACKS_DIR)) break;
-        while(true) {
-            if(!storage_dir_read(folder, &info, name, MAX_PACK_NAME_LEN)) break;
+    if(storage_dir_open(folder, PACKS_DIR)) {
+        while(storage_dir_read(folder, &info, name, MAX_PACK_NAME_LEN)) {
             if(info.flags & FSF_DIRECTORY) {
                 char* copy = malloc(MAX_PACK_NAME_LEN);
                 strlcpy(copy, name, MAX_PACK_NAME_LEN);
                 uint idx = 0;
                 if(strcmp(copy, "NSFW") != 0) {
                     for(; idx < asset_packs_size(app->asset_packs); idx++) {
-                        if(strcasecmp(copy, *asset_packs_get(app->asset_packs, idx)) < 0) {
+                        char* comp = *asset_packs_get(app->asset_packs, idx);
+                        if(strcasecmp(copy, comp) < 0 && strcmp(comp, "NSFW") != 0) {
                             break;
                         }
                     }
@@ -184,7 +183,7 @@ void xtreme_app_scene_main_on_enter(void* context) {
                 }
             }
         }
-    } while(false);
+    }
     free(name);
     storage_file_free(folder);
     furi_record_close(RECORD_STORAGE);
