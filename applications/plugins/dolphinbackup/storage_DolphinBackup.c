@@ -16,7 +16,7 @@ static const char* app_dirsDolphinBackup[] = {
     "nfc",
     "infrared",
     "ibutton",
-    "badusb",
+    "badkb",
     ".bt.settings",
     ".desktop.settings",
     ".dolphin.state",

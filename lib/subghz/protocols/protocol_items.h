@@ -21,6 +21,7 @@
 #include "gate_tx.h"
 #include "raw.h"
 #include "linear.h"
+#include "linear_delta3.h"
 #include "secplus_v2.h"
 #include "secplus_v1.h"
 #include "megacode.h"
@@ -36,9 +37,12 @@
 #include "intertechno_v3.h"
 #include "clemsa.h"
 #include "ansonic.h"
-#include "pocsag.h"
 #include "smc5326.h"
 #include "holtek_ht12x.h"
+#include "dooya.h"
+#include "alutech_at_4n.h"
+#include "kinggates_stylo_4k.h"
+#include "bin_raw.h"
 
 #ifdef __cplusplus
 extern "C" {

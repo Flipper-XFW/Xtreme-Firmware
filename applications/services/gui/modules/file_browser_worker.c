@@ -1,19 +1,20 @@
 #include "file_browser_worker.h"
+
+#include <storage/filesystem_api_defines.h>
+#include <storage/storage.h>
+
+#include <toolbox/path.h>
 #include <core/check.h>
 #include <core/common_defines.h>
-#include "storage/filesystem_api_defines.h"
+#include <furi.h>
+
 #include <m-array.h>
 #include <stdbool.h>
-#include <storage/storage.h>
-#include <furi.h>
 #include <stddef.h>
-#include "toolbox/path.h"
 
 #define TAG "BrowserWorker"
 
 #define ASSETS_DIR "assets"
-#define BADUSB_LAYOUTS_DIR "layouts"
-#define SUBGHZ_TEMP_DIR "tmp_history"
 #define BROWSER_ROOT STORAGE_ANY_PATH_PREFIX
 #define FILE_NAME_LEN_MAX 256
 #define LONG_LOAD_THRESHOLD 100
@@ -89,9 +90,7 @@ static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, boo
     if(is_folder) {
         // Skip assets folders (if enabled)
         if(browser->skip_assets) {
-            return ((furi_string_cmp_str(name, ASSETS_DIR) == 0) ? (false) : (true)) &&
-                   ((furi_string_cmp_str(name, BADUSB_LAYOUTS_DIR) == 0) ? (false) : (true)) &&
-                   ((furi_string_cmp_str(name, SUBGHZ_TEMP_DIR) == 0) ? (false) : (true));
+            return ((furi_string_cmp_str(name, ASSETS_DIR) == 0) ? (false) : (true));
         } else {
             return true;
         }
@@ -190,8 +189,12 @@ static bool browser_folder_init(
     return state;
 }
 
-static bool
-    browser_folder_load(BrowserWorker* browser, FuriString* path, uint32_t offset, uint32_t count) {
+// Load files list by chunks, like it was originally, not compatible with sorting, sorting needs to be disabled to use this
+static bool browser_folder_load_chunked(
+    BrowserWorker* browser,
+    FuriString* path,
+    uint32_t offset,
+    uint32_t count) {
     FileInfo file_info;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -241,7 +244,11 @@ static bool
                     furi_string_printf(name_str, "%s/%s", furi_string_get_cstr(path), name_temp);
                     if(browser->list_item_cb) {
                         browser->list_item_cb(
-                            browser->cb_ctx, name_str, (file_info.flags & FSF_DIRECTORY), false);
+                            browser->cb_ctx,
+                            name_str,
+                            items_cnt,
+                            (file_info.flags & FSF_DIRECTORY),
+                            false);
                     }
                     items_cnt++;
                 }
@@ -250,7 +257,7 @@ static bool
             }
         }
         if(browser->list_item_cb) {
-            browser->list_item_cb(browser->cb_ctx, NULL, false, true);
+            browser->list_item_cb(browser->cb_ctx, NULL, 0, false, true);
         }
     } while(0);
 
@@ -262,6 +269,59 @@ static bool
     furi_record_close(RECORD_STORAGE);
 
     return (items_cnt == count);
+}
+
+// Load all files at once, may cause memory overflow so need to limit that to about 400 files
+static bool browser_folder_load_full(BrowserWorker* browser, FuriString* path) {
+    FileInfo file_info;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* directory = storage_file_alloc(storage);
+
+    char name_temp[FILE_NAME_LEN_MAX];
+    FuriString* name_str;
+    name_str = furi_string_alloc();
+
+    uint32_t items_cnt = 0;
+
+    bool ret = false;
+    do {
+        if(!storage_dir_open(directory, furi_string_get_cstr(path))) {
+            break;
+        }
+        if(browser->list_load_cb) {
+            browser->list_load_cb(browser->cb_ctx, 0);
+        }
+        while(storage_dir_read(directory, &file_info, name_temp, FILE_NAME_LEN_MAX) &&
+              storage_file_get_error(directory) == FSE_OK) {
+            furi_string_set(name_str, name_temp);
+            if(browser_filter_by_name(browser, name_str, (file_info.flags & FSF_DIRECTORY))) {
+                furi_string_printf(name_str, "%s/%s", furi_string_get_cstr(path), name_temp);
+                if(browser->list_item_cb) {
+                    browser->list_item_cb(
+                        browser->cb_ctx,
+                        name_str,
+                        items_cnt,
+                        (file_info.flags & FSF_DIRECTORY),
+                        false);
+                }
+                items_cnt++;
+            }
+        }
+        if(browser->list_item_cb) {
+            browser->list_item_cb(browser->cb_ctx, NULL, 0, false, true);
+        }
+        ret = true;
+    } while(0);
+
+    furi_string_free(name_str);
+
+    storage_dir_close(directory);
+    storage_file_free(directory);
+
+    furi_record_close(RECORD_STORAGE);
+
+    return ret;
 }
 
 static int32_t browser_worker(void* context) {
@@ -358,7 +418,12 @@ static int32_t browser_worker(void* context) {
         if(flags & WorkerEvtLoad) {
             FURI_LOG_D(
                 TAG, "Load offset: %lu cnt: %lu", browser->load_offset, browser->load_count);
-            browser_folder_load(browser, path, browser->load_offset, browser->load_count);
+            if(items_cnt > BROWSER_SORT_THRESHOLD) {
+                browser_folder_load_chunked(
+                    browser, path, browser->load_offset, browser->load_count);
+            } else {
+                browser_folder_load_full(browser, path);
+            }
         }
 
         if(flags & WorkerEvtStop) {

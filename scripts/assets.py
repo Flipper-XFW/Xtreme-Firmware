@@ -26,15 +26,6 @@ ICONS_TEMPLATE_C_FRAME = "const uint8_t {name}[] = {data};\n"
 ICONS_TEMPLATE_C_DATA = "const uint8_t* const {name}[] = {data};\n"
 ICONS_TEMPLATE_C_ICONS = "const Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
 
-valid_dirs = list()
-# This will not stay, dont worry! This is temp code until we got time to rewrite this all
-root_dir = pathlib.Path(__file__).absolute().parent.parent
-dolphin_external = root_dir / "assets/dolphin/external/"
-potential_directories = [item for item in dolphin_external.iterdir() if item.is_dir()] # Get all animation directories
-
-for directory in potential_directories: # loop through all of them
-    if (directory / "manifest.txt").exists(): # check if they contain a manifest.txt TODO: This code should be moved to wherever manifest.txt files are validated! 
-        valid_dirs.append(directory) # append valid directory to list
 
 class Main(App):
     def init(self):
@@ -258,14 +249,13 @@ class Main(App):
         else:
             self.logger.info("Manifest is up-to-date!")
 
-        # This will not stay, dont worry! This is temp code until we got time to rewrite this all
-        global valid_dirs # access our global variable
-        for valid_dir in valid_dirs: # We can copy the manifest for all of the valid dirs!
-            (root_dir / f"assets/resources/dolphin/{valid_dir.name}").mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(valid_dir / "manifest.txt", root_dir / f"assets/resources/dolphin/{valid_dir.name}/manifest.txt")
-        (root_dir / "assets/resources/dolphin/manifest.txt").unlink()
         self.logger.info("Packing custom asset packs")
-        asset_packer.pack(root_dir / "assets/dolphin/custom", root_dir / f"assets/resources/dolphin_custom", self.logger.info)
+        root_dir = pathlib.Path(__file__).absolute().parent.parent
+        asset_packer.pack(
+            root_dir / "assets/dolphin/custom",
+            root_dir / f"assets/resources/dolphin_custom",
+            self.logger.info,
+        )
 
         self.logger.info(f"Complete")
 
@@ -295,10 +285,7 @@ class Main(App):
         self.logger.info(f"Processing Dolphin sources")
         dolphin = Dolphin()
         self.logger.info(f"Loading data")
-        if f"dolphin{os.sep}external" in str(self.args.input_directory): # AHEM... oopsie. This script apparently just loads all assets, not only external assets, lol.
-            dolphin.load(self.args.input_directory, valid_dirs)
-        else:
-            dolphin.load(self.args.input_directory)
+        dolphin.load(self.args.input_directory)
         self.logger.info(f"Packing")
         dolphin.pack(self.args.output_directory, self.args.symbol_name)
         self.logger.info(f"Complete")

@@ -1,5 +1,5 @@
 #include "../ibutton_i.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 static void ibutton_scene_save_success_popup_callback(void* context) {
     iButton* ibutton = context;

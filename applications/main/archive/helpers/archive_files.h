@@ -3,9 +3,9 @@
 #include <m-array.h>
 #include <furi.h>
 #include <m-algo.h>
-#include <m-string.h>
 #include <storage/storage.h>
 #include "toolbox/path.h"
+#include "xtreme/settings.h"
 
 #define FAP_MANIFEST_MAX_ICON_SIZE 32
 
@@ -15,7 +15,7 @@ typedef enum {
     ArchiveFileTypeSubGhz,
     ArchiveFileTypeLFRFID,
     ArchiveFileTypeInfrared,
-    ArchiveFileTypeBadUsb,
+    ArchiveFileTypeBadKb,
     ArchiveFileTypeU2f,
     ArchiveFileTypeApplication,
     ArchiveFileTypeUpdateManifest,
@@ -84,11 +84,16 @@ static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
 }
 
 static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
-    if(a->type == ArchiveFileTypeFolder && b->type != ArchiveFileTypeFolder) {
-        return -1;
+    if(!XTREME_SETTINGS()->sort_ignore_dirs) {
+        if(a->type == ArchiveFileTypeFolder && b->type != ArchiveFileTypeFolder) {
+            return -1;
+        }
+        if(a->type != ArchiveFileTypeFolder && b->type == ArchiveFileTypeFolder) {
+            return 1;
+        }
     }
 
-    return furi_string_cmp(a->path, b->path);
+    return furi_string_cmpi(a->path, b->path);
 }
 
 #define M_OPL_ArchiveFile_t()                 \

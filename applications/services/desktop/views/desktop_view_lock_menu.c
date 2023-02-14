@@ -5,7 +5,7 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
-#include "../../../settings/xtreme_settings/xtreme_settings.h"
+#include "xtreme/settings.h"
 
 #define LOCK_MENU_ITEMS_NB 5
 
@@ -68,7 +68,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
                 str = "Set PIN + Off";
             }
         } else if(i == DesktopLockMenuIndexXtremeSettings) {
-                str = "Xtreme Settings";
+            str = "Xtreme Settings";
         }
 
         if(str) //-V547

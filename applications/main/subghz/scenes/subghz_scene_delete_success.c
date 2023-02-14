@@ -1,6 +1,6 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 void subghz_scene_delete_success_popup_callback(void* context) {
     SubGhz* subghz = context;
@@ -32,7 +32,6 @@ bool subghz_scene_delete_success_on_event(void* context, SceneManagerEvent event
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
             } else if(scene_manager_search_and_switch_to_previous_scene(
                           subghz->scene_manager, SubGhzSceneSaved)) {
-                //scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
             } else {
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);

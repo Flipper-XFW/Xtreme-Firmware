@@ -11,10 +11,14 @@ from datetime import date, datetime
 class GitVersion:
     def __init__(self, source_dir):
         self.source_dir = source_dir
-        self.gitlist = [("commit", "rev-parse --short HEAD"), ("branch", "rev-parse --abbrev-ref") , ("branch_num", "rev-list -count HEAD")]
+        self.gitlist = [
+            ("commit", "rev-parse --short HEAD"),
+            ("branch", "rev-parse --abbrev-ref"),
+            ("branch_num", "rev-list -count HEAD"),
+        ]
 
     def get_version_info(self):
-        commit = branch = branch_num = "XFW-0040"
+        commit = branch = branch_num = "XFW-0041"
 
         # We dont use an `or` in commands that we expect to fail. It will serve no function.
         # We also dont try;exept an entire block of code. This is bad practise. We only try the single part that we expect to fail!
@@ -36,20 +40,19 @@ class GitVersion:
         # If WORKFLOW_BRANCH_OR_TAG is set in environment, is has precedence
         # (set by CI)
 
-        custom_fz_name = (
-            os.environ.get("CUSTOM_FLIPPER_NAME", None)
-            or ""
-        )
+        custom_fz_name = os.environ.get("CUSTOM_FLIPPER_NAME", None) or ""
 
-        force_no_dirty = (
-            os.environ.get("FORCE_NO_DIRTY", None)
-            or ""
-        )
+        force_no_dirty = os.environ.get("FORCE_NO_DIRTY", None) or ""
 
-        if (force_no_dirty != ""):
+        if force_no_dirty != "":
             dirty = False
 
-        if (custom_fz_name != "") and (len(custom_fz_name) <= 8) and (custom_fz_name.isalnum()) and (custom_fz_name.isascii()):
+        if (
+            (custom_fz_name != "")
+            and (len(custom_fz_name) <= 8)
+            and (custom_fz_name.isalnum())
+            and (custom_fz_name.isascii())
+        ):
             return {
                 "GIT_COMMIT": commit,
                 "GIT_BRANCH": "dev",

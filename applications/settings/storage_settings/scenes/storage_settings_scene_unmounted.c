@@ -1,5 +1,5 @@
 #include "../storage_settings.h"
-#include "../../xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 static void
     storage_settings_scene_unmounted_dialog_callback(DialogExResult result, void* context) {

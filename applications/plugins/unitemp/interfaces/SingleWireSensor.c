@@ -1,6 +1,6 @@
 /*
     Unitemp - Universal temperature reader
-    Copyright (C) 2022  Victor Nikitchuk (https://github.com/quen0n)
+    Copyright (C) 2022-2023  Victor Nikitchuk (https://github.com/quen0n)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ const SensorType DHT12_SW = {
     .updater = unitemp_singlewire_update};
 const SensorType DHT21 = {
     .typename = "DHT21",
-    .altname = "DHT21 (AM2301)",
+    .altname = "DHT21/AM2301",
     .interface = &SINGLE_WIRE,
     .datatype = UT_DATA_TYPE_TEMP_HUM,
     .pollingInterval = 1000,
@@ -54,7 +54,7 @@ const SensorType DHT21 = {
     .updater = unitemp_singlewire_update};
 const SensorType DHT22 = {
     .typename = "DHT22",
-    .altname = "DHT22 (AM2302)",
+    .altname = "DHT22/AM2302",
     .interface = &SINGLE_WIRE,
     .datatype = UT_DATA_TYPE_TEMP_HUM,
     .pollingInterval = 2000,
@@ -262,7 +262,7 @@ UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
         //Проверка на отрицательность температуры
         if(READ_BIT(raw, 1 << 15)) {
             //Проверка на способ кодирования данных
-            if(READ_BIT(raw, 0x60)) {
+            if(READ_BIT(raw, 0x6000)) {
                 //Не оригинал
                 sensor->temp = (float)((int16_t)raw) / 10;
             } else {

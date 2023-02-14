@@ -5,7 +5,7 @@
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 #define TAG "BtSrv"
 
@@ -77,6 +77,8 @@ static void bt_pin_code_hide(Bt* bt) {
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
 
+    if(bt_get_profile_pairing_method(bt) == GapPairingNone) return true;
+
     notification_message(bt->notification, &sequence_display_backlight_on);
     FuriString* pin_str;
     dialog_message_set_icon(bt->dialog_message, XTREME_ASSETS()->I_BLE_Pairing_128x64, 0, 0);
@@ -86,6 +88,7 @@ static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     dialog_message_set_buttons(bt->dialog_message, "Cancel", "OK", NULL);
     DialogMessageButton button = dialog_message_show(bt->dialogs, bt->dialog_message);
     furi_string_free(pin_str);
+
     return button == DialogMessageButtonCenter;
 }
 
@@ -368,6 +371,87 @@ static void bt_close_connection(Bt* bt) {
     bt_close_rpc_connection(bt);
     furi_hal_bt_stop_advertising();
     furi_event_flag_set(bt->api_event, BT_API_UNLOCK_EVENT);
+}
+
+static inline FuriHalBtProfile get_hal_bt_profile(BtProfile profile) {
+    if(profile == BtProfileHidKeyboard) {
+        return FuriHalBtProfileHidKeyboard;
+    } else {
+        return FuriHalBtProfileSerial;
+    }
+}
+
+static void bt_restart(Bt* bt) {
+    furi_hal_bt_change_app(get_hal_bt_profile(bt->profile), bt_on_gap_event_callback, bt);
+    furi_hal_bt_start_advertising();
+}
+
+void bt_set_profile_adv_name(Bt* bt, const char* fmt, ...) {
+    furi_assert(bt);
+    furi_assert(fmt);
+
+    char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(name, sizeof(name), fmt, args);
+    va_end(args);
+    furi_hal_bt_set_profile_adv_name(get_hal_bt_profile(bt->profile), name);
+
+    bt_restart(bt);
+}
+
+const char* bt_get_profile_adv_name(Bt* bt) {
+    furi_assert(bt);
+    return furi_hal_bt_get_profile_adv_name(get_hal_bt_profile(bt->profile));
+}
+
+void bt_set_profile_mac_address(Bt* bt, const uint8_t mac[6]) {
+    furi_assert(bt);
+    furi_assert(mac);
+
+    furi_hal_bt_set_profile_mac_addr(get_hal_bt_profile(bt->profile), mac);
+
+    bt_restart(bt);
+}
+
+const uint8_t* bt_get_profile_mac_address(Bt* bt) {
+    furi_assert(bt);
+    return furi_hal_bt_get_profile_mac_addr(get_hal_bt_profile(bt->profile));
+}
+
+bool bt_remote_rssi(Bt* bt, BtRssi* rssi) {
+    furi_assert(bt);
+    UNUSED(rssi);
+
+    uint8_t rssi_val;
+    uint32_t since = furi_hal_bt_get_conn_rssi(&rssi_val);
+
+    if(since == 0) return false;
+
+    rssi->rssi = rssi_val;
+    rssi->since = since;
+
+    return true;
+}
+
+void bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method) {
+    furi_assert(bt);
+    furi_hal_bt_set_profile_pairing_method(get_hal_bt_profile(bt->profile), pairing_method);
+    bt_restart(bt);
+}
+
+GapPairing bt_get_profile_pairing_method(Bt* bt) {
+    furi_assert(bt);
+    return furi_hal_bt_get_profile_pairing_method(get_hal_bt_profile(bt->profile));
+}
+
+void bt_disable_peer_key_update(Bt* bt) {
+    UNUSED(bt);
+    furi_hal_bt_set_key_storage_change_callback(NULL, NULL);
+}
+
+void bt_enable_peer_key_update(Bt* bt) {
+    furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 }
 
 int32_t bt_srv(void* p) {

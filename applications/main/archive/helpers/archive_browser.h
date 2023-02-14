@@ -14,9 +14,10 @@ static const char* tab_default_paths[] = {
     [ArchiveTabSubGhz] = ANY_PATH("subghz"),
     [ArchiveTabLFRFID] = ANY_PATH("lfrfid"),
     [ArchiveTabInfrared] = ANY_PATH("infrared"),
-    [ArchiveTabBadUsb] = ANY_PATH("badusb"),
+    [ArchiveTabBadKb] = ANY_PATH("badkb"),
     [ArchiveTabU2f] = "/app:u2f",
     [ArchiveTabApplications] = ANY_PATH("apps"),
+    [ArchiveTabInternal] = STORAGE_INT_PATH_PREFIX,
     [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
 };
 
@@ -26,7 +27,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeSubGhz] = ".sub",
     [ArchiveFileTypeLFRFID] = ".rfid",
     [ArchiveFileTypeInfrared] = ".ir",
-    [ArchiveFileTypeBadUsb] = ".txt",
+    [ArchiveFileTypeBadKb] = ".txt",
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
     [ArchiveFileTypeUpdateManifest] = ".fuf",
@@ -41,9 +42,10 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabSubGhz] = ArchiveFileTypeSubGhz,
     [ArchiveTabLFRFID] = ArchiveFileTypeLFRFID,
     [ArchiveTabInfrared] = ArchiveFileTypeInfrared,
-    [ArchiveTabBadUsb] = ArchiveFileTypeBadUsb,
+    [ArchiveTabBadKb] = ArchiveFileTypeBadKb,
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
     [ArchiveTabApplications] = ArchiveFileTypeApplication,
+    [ArchiveTabInternal] = ArchiveFileTypeUnknown,
     [ArchiveTabBrowser] = ArchiveFileTypeUnknown,
 };
 

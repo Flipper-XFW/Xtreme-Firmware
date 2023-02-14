@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
-#include "../xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 #include "math.h"
 
 typedef struct {
@@ -40,7 +40,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
 
-    if(XTREME_SETTINGS()->nsfw_mode) {
+    if(XTREME_ASSETS()->is_nsfw) {
         if(stats->butthurt <= 4) {
             portrait = xtreme_assets->I_passport_happy_46x49;
             mood_str = "Status: Wet";
@@ -67,7 +67,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     uint32_t xp_need = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
     uint32_t xp_levelup = 0;
-    if (ctx->progress_total) {
+    if(ctx->progress_total) {
         xp_levelup = xp_need + stats->icounter;
     } else {
         xp_levelup = xp_need + xp_above_last_levelup;

@@ -8,9 +8,11 @@ const GpioPin vibro_gpio = {.port = VIBRO_GPIO_Port, .pin = VIBRO_Pin};
 const GpioPin ibutton_gpio = {.port = iBTN_GPIO_Port, .pin = iBTN_Pin};
 
 const GpioPin gpio_cc1101_g0 = {.port = CC1101_G0_GPIO_Port, .pin = CC1101_G0_Pin};
+const GpioPin gpio_cc1101_g0_ext = {.port = GPIOB, .pin = LL_GPIO_PIN_2};
 const GpioPin gpio_rf_sw_0 = {.port = RF_SW_0_GPIO_Port, .pin = RF_SW_0_Pin};
 
 const GpioPin gpio_subghz_cs = {.port = CC1101_CS_GPIO_Port, .pin = CC1101_CS_Pin};
+const GpioPin gpio_subghz_cs_ext = {.port = GPIOA, .pin = LL_GPIO_PIN_4};
 const GpioPin gpio_display_cs = {.port = DISPLAY_CS_GPIO_Port, .pin = DISPLAY_CS_Pin};
 const GpioPin gpio_display_rst_n = {.port = DISPLAY_RST_GPIO_Port, .pin = DISPLAY_RST_Pin};
 const GpioPin gpio_display_di = {.port = DISPLAY_DI_GPIO_Port, .pin = DISPLAY_DI_Pin};
@@ -31,6 +33,9 @@ const GpioPin gpio_spi_d_sck = {.port = SPI_D_SCK_GPIO_Port, .pin = SPI_D_SCK_Pi
 const GpioPin gpio_spi_r_miso = {.port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin};
 const GpioPin gpio_spi_r_mosi = {.port = SPI_R_MOSI_GPIO_Port, .pin = SPI_R_MOSI_Pin};
 const GpioPin gpio_spi_r_sck = {.port = SPI_R_SCK_GPIO_Port, .pin = SPI_R_SCK_Pin};
+const GpioPin gpio_spi_r_miso_ext = {.port = GPIOA, .pin = LL_GPIO_PIN_6};
+const GpioPin gpio_spi_r_mosi_ext = {.port = GPIOA, .pin = LL_GPIO_PIN_7};
+const GpioPin gpio_spi_r_sck_ext = {.port = GPIOB, .pin = LL_GPIO_PIN_3};
 
 const GpioPin gpio_ext_pc0 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
 const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = LL_GPIO_PIN_1};
@@ -62,6 +67,23 @@ const GpioPin periph_power = {.port = GPIOA, .pin = LL_GPIO_PIN_3};
 const GpioPin gpio_usb_dm = {.port = GPIOA, .pin = LL_GPIO_PIN_11};
 const GpioPin gpio_usb_dp = {.port = GPIOA, .pin = LL_GPIO_PIN_12};
 
+const GpioPinRecord gpio_pins[] = {
+    {.pin = &gpio_ext_pa7, .name = "PA7", .debug = false},
+    {.pin = &gpio_ext_pa6, .name = "PA6", .debug = false},
+    {.pin = &gpio_ext_pa4, .name = "PA4", .debug = false},
+    {.pin = &gpio_ext_pb3, .name = "PB3", .debug = false},
+    {.pin = &gpio_ext_pb2, .name = "PB2", .debug = false},
+    {.pin = &gpio_ext_pc3, .name = "PC3", .debug = false},
+    {.pin = &gpio_ext_pc1, .name = "PC1", .debug = false},
+    {.pin = &gpio_ext_pc0, .name = "PC0", .debug = false},
+
+    /* Dangerous pins, may damage hardware */
+    {.pin = &gpio_usart_rx, .name = "PB7", .debug = true},
+    {.pin = &gpio_speaker, .name = "PB8", .debug = true},
+};
+
+const size_t gpio_pins_count = sizeof(gpio_pins) / sizeof(GpioPinRecord);
+
 const InputPin input_pins[] = {
     {.gpio = &gpio_button_up, .key = InputKeyUp, .inverted = true, .name = "Up"},
     {.gpio = &gpio_button_down, .key = InputKeyDown, .inverted = true, .name = "Down"},
@@ -73,8 +95,18 @@ const InputPin input_pins[] = {
 
 const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);
 
+static void furi_hal_resources_init_input_pins(GpioMode mode) {
+    for(size_t i = 0; i < input_pins_count; i++) {
+        furi_hal_gpio_init(
+            input_pins[i].gpio,
+            mode,
+            (input_pins[i].inverted) ? GpioPullUp : GpioPullDown,
+            GpioSpeedLow);
+    }
+}
+
 void furi_hal_resources_init_early() {
-    furi_hal_gpio_init(&gpio_button_left, GpioModeInput, GpioPullUp, GpioSpeedLow);
+    furi_hal_resources_init_input_pins(GpioModeInput);
 
     // SD Card stepdown control
     furi_hal_gpio_write(&periph_power, 1);
@@ -117,14 +149,12 @@ void furi_hal_resources_init_early() {
 }
 
 void furi_hal_resources_deinit_early() {
+    furi_hal_resources_init_input_pins(GpioModeAnalog);
 }
 
 void furi_hal_resources_init() {
     // Button pins
-    for(size_t i = 0; i < input_pins_count; i++) {
-        furi_hal_gpio_init(
-            input_pins[i].gpio, GpioModeInterruptRiseFall, GpioPullUp, GpioSpeedLow);
-    }
+    furi_hal_resources_init_input_pins(GpioModeInterruptRiseFall);
 
     // Display pins
     furi_hal_gpio_init(&gpio_display_rst_n, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -165,4 +195,27 @@ void furi_hal_resources_init() {
 
     NVIC_SetPriority(EXTI15_10_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
     NVIC_EnableIRQ(EXTI15_10_IRQn);
+}
+
+int32_t furi_hal_resources_get_ext_pin_number(const GpioPin* gpio) {
+    if(gpio == &gpio_ext_pa7)
+        return 2;
+    else if(gpio == &gpio_ext_pa6)
+        return 3;
+    else if(gpio == &gpio_ext_pa4)
+        return 4;
+    else if(gpio == &gpio_ext_pb3)
+        return 5;
+    else if(gpio == &gpio_ext_pb2)
+        return 6;
+    else if(gpio == &gpio_ext_pc3)
+        return 7;
+    else if(gpio == &gpio_ext_pc1)
+        return 15;
+    else if(gpio == &gpio_ext_pc0)
+        return 16;
+    else if(gpio == &ibutton_gpio)
+        return 17;
+    else
+        return -1;
 }

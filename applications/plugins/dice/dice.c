@@ -467,7 +467,6 @@ int32_t dice_app(void* p) {
         return 255;
     }
 
-
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, plugin_state);
     view_port_input_callback_set(view_port, dice_input_callback, plugin_state->event_queue);

@@ -1,6 +1,7 @@
 #include "../bt_settings_app.h"
 #include "furi_hal_bt.h"
-#include "../../xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
+#include <furi_hal_bt.h>
 
 void bt_settings_app_scene_forget_dev_success_popup_callback(void* context) {
     BtSettingsApp* app = context;

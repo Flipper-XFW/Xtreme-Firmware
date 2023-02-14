@@ -7,12 +7,14 @@
 #include <assets_icons.h>
 #include <m-array.h>
 
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 111
 #define MENU_ITEMS 4u
 #define UNLOCK_CNT 3
+
+#define SUBGHZ_RAW_TRESHOLD_MIN -90.0f
 
 typedef struct {
     FuriString* item_str;
@@ -34,7 +36,7 @@ static const Icon* ReceiverItemIcons[] = {
     [SubGhzProtocolTypeUnknown] = &I_Quest_7x8,
     [SubGhzProtocolTypeStatic] = &I_Static_9x7,
     [SubGhzProtocolTypeDynamic] = &I_Dynamic_9x7,
-    [SubGhzProtocolTypeRAW] = &I_Raw_9x7,
+    [SubGhzProtocolTypeBinRAW] = &I_Raw_9x7,
 };
 
 typedef enum {
@@ -64,6 +66,7 @@ typedef struct {
     uint16_t history_item;
     SubGhzViewReceiverBarShow bar_show;
     SubGhzViewReceiverMode mode;
+    uint8_t u_rssi;
 } SubGhzViewReceiverModel;
 
 void subghz_view_receiver_set_mode(
@@ -71,6 +74,21 @@ void subghz_view_receiver_set_mode(
     SubGhzViewReceiverMode mode) {
     with_view_model(
         subghz_receiver->view, SubGhzViewReceiverModel * model, { model->mode = mode; }, true);
+}
+
+void subghz_receiver_rssi(SubGhzViewReceiver* instance, float rssi) {
+    furi_assert(instance);
+    with_view_model(
+        instance->view,
+        SubGhzViewReceiverModel * model,
+        {
+            if(rssi < SUBGHZ_RAW_TRESHOLD_MIN) {
+                model->u_rssi = 0;
+            } else {
+                model->u_rssi = (uint8_t)(rssi - SUBGHZ_RAW_TRESHOLD_MIN);
+            }
+        },
+        true);
 }
 
 void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, SubGhzLock lock) {
@@ -191,6 +209,16 @@ static void subghz_view_receiver_draw_frame(Canvas* canvas, uint16_t idx, bool s
     canvas_draw_dot(canvas, scrollbar ? 121 : 126, (0 + idx * FRAME_HEIGHT) + 11);
 }
 
+static void subghz_view_rssi_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
+    for(uint8_t i = 1; i < model->u_rssi; i++) {
+        if(i % 5) {
+            canvas_draw_dot(canvas, 46 + i, 50);
+            canvas_draw_dot(canvas, 47 + i, 51);
+            canvas_draw_dot(canvas, 46 + i, 52);
+        }
+    }
+}
+
 void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -198,8 +226,9 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
 
     if(model->mode == SubGhzViewReceiverModeLive) {
         elements_button_left(canvas, "Config");
-        canvas_draw_line(canvas, 46, 51, 125, 51);
+        //canvas_draw_line(canvas, 46, 51, 125, 51);
     } else {
+        canvas_draw_line(canvas, 2, 52, 125, 52);
         canvas_draw_str(canvas, 3, 62, furi_string_get_cstr(model->progress_str));
     }
 
@@ -235,7 +264,7 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
             canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->I_Scanning_123x52);
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 63, 46, "Scanning...");
-            canvas_draw_line(canvas, 46, 51, 125, 51);
+            //canvas_draw_line(canvas, 46, 51, 125, 51);
             canvas_set_font(canvas, FontSecondary);
         } else {
             canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->I_Scanning_123x52);
@@ -245,6 +274,9 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         }
     }
 
+    if(model->mode == SubGhzViewReceiverModeLive) {
+        subghz_view_rssi_draw(canvas, model);
+    }
     switch(model->bar_show) {
     case SubGhzViewReceiverBarShowLock:
         canvas_draw_icon(canvas, 64, 55, &I_Lock_7x8);
@@ -252,7 +284,28 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         break;
     case SubGhzViewReceiverBarShowToUnlockPress:
         canvas_draw_str(canvas, 44, 62, furi_string_get_cstr(model->frequency_str));
+#ifdef SUBGHZ_EXT_PRESET_NAME
+        if(model->history_item == 0 && model->mode == SubGhzViewReceiverModeLive) {
+            canvas_draw_str(
+                canvas,
+                44 + canvas_string_width(canvas, furi_string_get_cstr(model->frequency_str)) + 1,
+                62,
+                "MHz");
+            const char* str = furi_string_get_cstr(model->preset_str);
+            const uint8_t vertical_offset = 7;
+            const uint8_t horizontal_offset = 3;
+            const uint8_t string_width = canvas_string_width(canvas, str);
+            canvas_draw_str(
+                canvas,
+                canvas_width(canvas) - (string_width + horizontal_offset),
+                vertical_offset,
+                str);
+        } else {
+            canvas_draw_str(canvas, 79, 62, furi_string_get_cstr(model->preset_str));
+        }
+#else
         canvas_draw_str(canvas, 79, 62, furi_string_get_cstr(model->preset_str));
+#endif
         canvas_draw_str(canvas, 96, 62, furi_string_get_cstr(model->history_stat_str));
         canvas_set_font(canvas, FontSecondary);
         elements_bold_rounded_frame(canvas, 14, 8, 99, 48);

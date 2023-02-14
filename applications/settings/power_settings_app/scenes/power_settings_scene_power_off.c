@@ -1,5 +1,5 @@
 #include "../power_settings_app.h"
-#include "../../xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 void power_settings_scene_power_off_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
@@ -12,7 +12,7 @@ void power_settings_scene_power_off_on_enter(void* context) {
     DialogEx* dialog = app->dialog;
 
     dialog_ex_set_header(dialog, "Turn Off Device?", 64, 2, AlignCenter, AlignTop);
-    if(XTREME_SETTINGS()->nsfw_mode) {
+    if(XTREME_ASSETS()->is_nsfw) {
         dialog_ex_set_text(
             dialog, "   I will be\nwaiting for\n you master", 78, 16, AlignLeft, AlignTop);
     } else {

@@ -1,111 +1,204 @@
-#include "furi_hal_subghz.h"
-#include "furi_hal_subghz_configs.h"
-
+#include <furi_hal_subghz.h>
+#include <furi_hal_subghz_configs.h>
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
-
-#include <lib/flipper_format/flipper_format.h>
+#include <furi_hal_power.h>
 
 #include <stm32wbxx_ll_dma.h>
+
+#include <lib/flipper_format/flipper_format.h>
 
 #include <furi.h>
 #include <cc1101.h>
 #include <stdio.h>
 
 #define TAG "FuriHalSubGhz"
+//Initialisation timeout (ms)
+#define INIT_TIMEOUT 10
 
 static uint32_t furi_hal_subghz_debug_gpio_buff[2];
+static bool last_OTG_state = false;
 
-typedef struct {
-    volatile SubGhzState state;
-    volatile SubGhzRegulation regulation;
-    volatile FuriHalSubGhzPreset preset;
-    const GpioPin* async_mirror_pin;
-} FuriHalSubGhz;
+/* DMA Channels definition */
+#define SUBGHZ_DMA DMA2
+#define SUBGHZ_DMA_CH1_CHANNEL LL_DMA_CHANNEL_1
+#define SUBGHZ_DMA_CH2_CHANNEL LL_DMA_CHANNEL_2
+#define SUBGHZ_DMA_CH1_IRQ FuriHalInterruptIdDma2Ch1
+#define SUBGHZ_DMA_CH1_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH1_CHANNEL
+#define SUBGHZ_DMA_CH2_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH2_CHANNEL
 
 volatile FuriHalSubGhz furi_hal_subghz = {
     .state = SubGhzStateInit,
     .regulation = SubGhzRegulationTxRx,
     .preset = FuriHalSubGhzPresetIDLE,
     .async_mirror_pin = NULL,
+    .radio_type = SubGhzRadioInternal,
+    .spi_bus_handle = &furi_hal_spi_bus_handle_subghz,
+    .cc1101_g0_pin = &gpio_cc1101_g0,
 };
+
+bool furi_hal_subghz_set_radio_type(SubGhzRadioType state) {
+    furi_hal_subghz.radio_type = state;
+    furi_hal_spi_bus_handle_deinit(furi_hal_subghz.spi_bus_handle);
+    if(state) {
+        furi_hal_subghz.spi_bus_handle = &furi_hal_spi_bus_handle_subghz_ext;
+        furi_hal_subghz.cc1101_g0_pin = &gpio_cc1101_g0_ext;
+    } else {
+        furi_hal_subghz.spi_bus_handle = &furi_hal_spi_bus_handle_subghz;
+        furi_hal_subghz.cc1101_g0_pin = &gpio_cc1101_g0;
+    }
+    furi_hal_spi_bus_handle_init(furi_hal_subghz.spi_bus_handle);
+    furi_hal_subghz_init_check();
+    return true;
+}
+
+SubGhzRadioType furi_hal_subghz_get_radio_type(void) {
+    return furi_hal_subghz.radio_type;
+}
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
     furi_hal_subghz.async_mirror_pin = pin;
 }
 
-void furi_hal_subghz_init() {
+void furi_hal_subghz_init(void) {
+    furi_hal_subghz_init_check();
+}
+
+void furi_hal_subghz_enable_ext_power(void) {
+    if(furi_hal_subghz.radio_type != SubGhzRadioInternal && !furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_enable_otg();
+    }
+}
+
+void furi_hal_subghz_disable_ext_power(void) {
+    if(furi_hal_subghz.radio_type != SubGhzRadioInternal && !last_OTG_state) {
+        furi_hal_power_disable_otg();
+    }
+}
+
+bool furi_hal_subghz_check_radio(void) {
+    bool result = true;
+
+    furi_hal_subghz_enable_ext_power();
+
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    uint8_t ver = cc1101_get_version(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
+
+    if((ver != 0) && (ver != 255)) {
+        FURI_LOG_D(TAG, "Radio check ok");
+    } else {
+        FURI_LOG_D(TAG, "Radio check failed");
+        furi_hal_subghz_disable_ext_power();
+        result = false;
+    }
+    return result;
+}
+
+bool furi_hal_subghz_init_check(void) {
+    bool result = true;
+
     furi_assert(furi_hal_subghz.state == SubGhzStateInit);
     furi_hal_subghz.state = SubGhzStateIdle;
     furi_hal_subghz.preset = FuriHalSubGhzPresetIDLE;
 
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    last_OTG_state = furi_hal_power_is_otg_enabled();
+    furi_hal_subghz_enable_ext_power();
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
 
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
     furi_hal_gpio_init(&FURI_HAL_SUBGHZ_TX_GPIO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 #endif
 
     // Reset
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    cc1101_reset(furi_hal_subghz.spi_bus_handle);
+    cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
 
     // Prepare GD0 for power on self test
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    if(furi_hal_subghz.radio_type == SubGhzRadioExternal) {
+        // GD0 low
+        cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHW);
+        uint32_t test_start_time = furi_get_tick();
+        while(furi_hal_gpio_read(furi_hal_subghz.cc1101_g0_pin) != false && result) {
+            if(furi_get_tick() - test_start_time > INIT_TIMEOUT) {
+                result = false;
+            }
+        }
 
-    // GD0 low
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHW);
-    while(furi_hal_gpio_read(&gpio_cc1101_g0) != false)
-        ;
+        // GD0 high
+        cc1101_write_reg(
+            furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
+        test_start_time = furi_get_tick();
+        while(furi_hal_gpio_read(furi_hal_subghz.cc1101_g0_pin) != true && result) {
+            if(furi_get_tick() - test_start_time > INIT_TIMEOUT) {
+                result = false;
+            }
+        }
+    } else {
+        // GD0 low
+        cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHW);
+        while(furi_hal_gpio_read(&gpio_cc1101_g0) != false)
+            ;
 
-    // GD0 high
-    cc1101_write_reg(
-        &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
-    while(furi_hal_gpio_read(&gpio_cc1101_g0) != true)
-        ;
-
+        // GD0 high
+        cc1101_write_reg(
+            furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
+        while(furi_hal_gpio_read(&gpio_cc1101_g0) != true)
+            ;
+    }
     // Reset GD0 to floating state
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // RF switches
     furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
+    cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW);
 
     // Go to sleep
-    cc1101_shutdown(&furi_hal_spi_bus_handle_subghz);
+    cc1101_shutdown(furi_hal_subghz.spi_bus_handle);
 
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-    FURI_LOG_I(TAG, "Init OK");
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
+
+    if(result) {
+        FURI_LOG_I(TAG, "Init OK");
+    } else {
+        FURI_LOG_E(TAG, "Failed to initialization");
+        furi_hal_subghz_disable_ext_power();
+    }
+    return result;
 }
 
 void furi_hal_subghz_sleep() {
     furi_assert(furi_hal_subghz.state == SubGhzStateIdle);
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
 
-    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+    cc1101_switch_to_idle(furi_hal_subghz.spi_bus_handle);
 
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
-    cc1101_shutdown(&furi_hal_spi_bus_handle_subghz);
+    cc1101_shutdown(furi_hal_subghz.spi_bus_handle);
 
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
+
+    furi_hal_subghz_disable_ext_power();
 
     furi_hal_subghz.preset = FuriHalSubGhzPresetIDLE;
 }
 
 void furi_hal_subghz_dump_state() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
     printf(
         "[furi_hal_subghz] cc1101 chip %d, version %d\r\n",
-        cc1101_get_partnumber(&furi_hal_spi_bus_handle_subghz),
-        cc1101_get_version(&furi_hal_spi_bus_handle_subghz));
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+        cc1101_get_partnumber(furi_hal_subghz.spi_bus_handle),
+        cc1101_get_version(furi_hal_subghz.spi_bus_handle));
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
@@ -137,15 +230,15 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
 
 void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
     //load config
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_reset(furi_hal_subghz.spi_bus_handle);
     uint32_t i = 0;
     uint8_t pa[8] = {0};
     while(preset_data[i]) {
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, preset_data[i], preset_data[i + 1]);
+        cc1101_write_reg(furi_hal_subghz.spi_bus_handle, preset_data[i], preset_data[i + 1]);
         i += 2;
     }
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 
     //load pa table
     memcpy(&pa[0], &preset_data[i + 2], 8);
@@ -167,48 +260,48 @@ void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
 }
 
 void furi_hal_subghz_load_registers(uint8_t* data) {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_reset(furi_hal_subghz.spi_bus_handle);
     uint32_t i = 0;
     while(data[i]) {
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i], data[i + 1]);
+        cc1101_write_reg(furi_hal_subghz.spi_bus_handle, data[i], data[i + 1]);
         i += 2;
     }
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_load_patable(const uint8_t data[8]) {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_set_pa_table(&furi_hal_spi_bus_handle_subghz, data);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_set_pa_table(furi_hal_subghz.spi_bus_handle, data);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size) {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_flush_tx(&furi_hal_spi_bus_handle_subghz);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_FIFO, size);
-    cc1101_write_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_flush_tx(furi_hal_subghz.spi_bus_handle);
+    cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_FIFO, size);
+    cc1101_write_fifo(furi_hal_subghz.spi_bus_handle, data, size);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_flush_rx() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_flush_rx(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_flush_rx(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_flush_tx() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_flush_tx(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_flush_tx(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 bool furi_hal_subghz_rx_pipe_not_empty() {
     CC1101RxBytes status[1];
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
     cc1101_read_reg(
-        &furi_hal_spi_bus_handle_subghz, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+        furi_hal_subghz.spi_bus_handle, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
     // TODO: you can add a buffer overflow flag if needed
     if(status->NUM_RXBYTES > 0) {
         return true;
@@ -218,10 +311,10 @@ bool furi_hal_subghz_rx_pipe_not_empty() {
 }
 
 bool furi_hal_subghz_is_rx_data_crc_valid() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
     uint8_t data[1];
-    cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    cc1101_read_reg(furi_hal_subghz.spi_bus_handle, CC1101_STATUS_LQI | CC1101_BURST, data);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
     if(((data[0] >> 7) & 0x01)) {
         return true;
     } else {
@@ -230,51 +323,52 @@ bool furi_hal_subghz_is_rx_data_crc_valid() {
 }
 
 void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size) {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_read_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_read_fifo(furi_hal_subghz.spi_bus_handle, data, size);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_shutdown() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
     // Reset and shutdown
-    cc1101_shutdown(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    cc1101_shutdown(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
+    furi_hal_subghz_disable_ext_power();
 }
 
 void furi_hal_subghz_reset() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    cc1101_switch_to_idle(furi_hal_subghz.spi_bus_handle);
+    cc1101_reset(furi_hal_subghz.spi_bus_handle);
+    cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_idle() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_switch_to_idle(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 void furi_hal_subghz_rx() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_switch_to_rx(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 bool furi_hal_subghz_tx() {
-    // if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    cc1101_switch_to_tx(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
     return true;
 }
 
 float furi_hal_subghz_get_rssi() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    int32_t rssi_dec = cc1101_get_rssi(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    int32_t rssi_dec = cc1101_get_rssi(furi_hal_subghz.spi_bus_handle);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 
     float rssi = rssi_dec;
     if(rssi_dec >= 128) {
@@ -287,10 +381,10 @@ float furi_hal_subghz_get_rssi() {
 }
 
 uint8_t furi_hal_subghz_get_lqi() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
     uint8_t data[1];
-    cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    cc1101_read_reg(furi_hal_subghz.spi_bus_handle, CC1101_STATUS_LQI | CC1101_BURST, data);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
     return data[0] & 0x7F;
 }
 
@@ -299,6 +393,7 @@ uint8_t furi_hal_subghz_get_lqi() {
  These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage
  Set flag use_ext_range_at_own_risk in extend_range.txt to use
  */
+
 bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
     if(!(value >= 281000000 && value <= 361000000) &&
        !(value >= 378000000 && value <= 481000000) &&
@@ -325,16 +420,18 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 }
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
-    //checking regional settings
     bool is_extended = false;
     bool is_allowed = false;
 
+    // TODO: !!! Move file check to another place
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
+
     if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
         flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &is_extended, 1);
         flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &is_allowed, 1);
     }
+
     flipper_format_free(fff_data_file);
     furi_record_close(RECORD_STORAGE);
 
@@ -380,16 +477,17 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     if(!(value >= 299999755 && value <= 348000335) &&
        !(value >= 386999938 && value <= 464000000) &&
        !(value >= 778999847 && value <= 928000000) && !(is_extended)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside standard range");
-        is_allowed = false;
+        FURI_LOG_I(TAG, "Frequency blocked - outside regional range");
+        return false;
     } else if(
         !(value >= 281000000 && value <= 361000000) &&
         !(value >= 378000000 && value <= 481000000) &&
         !(value >= 749000000 && value <= 962000000) && is_extended) {
         FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
-        is_allowed = false;
+        return false;
     }
-    return is_allowed;
+
+    return true;
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
@@ -398,40 +496,39 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     } else {
         furi_hal_subghz.regulation = SubGhzRegulationTxRx;
     }
-
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    uint32_t real_frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, value);
-    cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+    uint32_t real_frequency = cc1101_set_frequency(furi_hal_subghz.spi_bus_handle, value);
+    cc1101_calibrate(furi_hal_subghz.spi_bus_handle);
 
     while(true) {
-        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
+        CC1101Status status = cc1101_get_status(furi_hal_subghz.spi_bus_handle);
         if(status.STATE == CC1101StateIDLE) break;
     }
 
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
     return real_frequency;
 }
 
 void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
     if(path == FuriHalSubGhzPath433) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 0);
         cc1101_write_reg(
-            &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
+            furi_hal_subghz.spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
     } else if(path == FuriHalSubGhzPath315) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 1);
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
+        cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW);
     } else if(path == FuriHalSubGhzPath868) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 1);
         cc1101_write_reg(
-            &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
+            furi_hal_subghz.spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
     } else if(path == FuriHalSubGhzPathIsolate) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 0);
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
+        cc1101_write_reg(furi_hal_subghz.spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW);
     } else {
         furi_crash("SubGhz: Incorrect path during set.");
     }
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 }
 
 static bool furi_hal_subghz_start_debug() {
@@ -462,31 +559,53 @@ volatile FuriHalSubGhzCaptureCallback furi_hal_subghz_capture_callback = NULL;
 volatile void* furi_hal_subghz_capture_callback_context = NULL;
 
 static void furi_hal_subghz_capture_ISR() {
-    // Channel 1
-    if(LL_TIM_IsActiveFlag_CC1(TIM2)) {
-        LL_TIM_ClearFlag_CC1(TIM2);
-        furi_hal_subghz_capture_delta_duration = LL_TIM_IC_GetCaptureCH1(TIM2);
-        if(furi_hal_subghz_capture_callback) {
-            if(furi_hal_subghz.async_mirror_pin != NULL)
-                furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, false);
+    if(furi_hal_subghz.radio_type == SubGhzRadioExternal) {
+        if(!furi_hal_gpio_read(furi_hal_subghz.cc1101_g0_pin)) {
+            if(furi_hal_subghz_capture_callback) {
+                if(furi_hal_subghz.async_mirror_pin != NULL)
+                    furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, false);
 
-            furi_hal_subghz_capture_callback(
-                true,
-                furi_hal_subghz_capture_delta_duration,
-                (void*)furi_hal_subghz_capture_callback_context);
+                furi_hal_subghz_capture_callback(
+                    true, TIM2->CNT, (void*)furi_hal_subghz_capture_callback_context);
+            }
+        } else {
+            if(furi_hal_subghz_capture_callback) {
+                if(furi_hal_subghz.async_mirror_pin != NULL)
+                    furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, true);
+
+                furi_hal_subghz_capture_callback(
+                    false, TIM2->CNT, (void*)furi_hal_subghz_capture_callback_context);
+            }
         }
-    }
-    // Channel 2
-    if(LL_TIM_IsActiveFlag_CC2(TIM2)) {
-        LL_TIM_ClearFlag_CC2(TIM2);
-        if(furi_hal_subghz_capture_callback) {
-            if(furi_hal_subghz.async_mirror_pin != NULL)
-                furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, true);
+        //Forced correction for improved accuracy
+        TIM2->CNT = 9;
+    } else {
+        // Channel 1
+        if(LL_TIM_IsActiveFlag_CC1(TIM2)) {
+            LL_TIM_ClearFlag_CC1(TIM2);
+            furi_hal_subghz_capture_delta_duration = LL_TIM_IC_GetCaptureCH1(TIM2);
+            if(furi_hal_subghz_capture_callback) {
+                if(furi_hal_subghz.async_mirror_pin != NULL)
+                    furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, false);
 
-            furi_hal_subghz_capture_callback(
-                false,
-                LL_TIM_IC_GetCaptureCH2(TIM2) - furi_hal_subghz_capture_delta_duration,
-                (void*)furi_hal_subghz_capture_callback_context);
+                furi_hal_subghz_capture_callback(
+                    true,
+                    furi_hal_subghz_capture_delta_duration,
+                    (void*)furi_hal_subghz_capture_callback_context);
+            }
+        }
+        // Channel 2
+        if(LL_TIM_IsActiveFlag_CC2(TIM2)) {
+            LL_TIM_ClearFlag_CC2(TIM2);
+            if(furi_hal_subghz_capture_callback) {
+                if(furi_hal_subghz.async_mirror_pin != NULL)
+                    furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, true);
+
+                furi_hal_subghz_capture_callback(
+                    false,
+                    LL_TIM_IC_GetCaptureCH2(TIM2) - furi_hal_subghz_capture_delta_duration,
+                    (void*)furi_hal_subghz_capture_callback_context);
+            }
         }
     }
 }
@@ -498,47 +617,64 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     furi_hal_subghz_capture_callback = callback;
     furi_hal_subghz_capture_callback_context = context;
 
-    furi_hal_gpio_init_ex(
-        &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+    if(furi_hal_subghz.radio_type == SubGhzRadioExternal) {
+        furi_hal_gpio_init(
+            furi_hal_subghz.cc1101_g0_pin,
+            GpioModeInterruptRiseFall,
+            GpioPullUp,
+            GpioSpeedVeryHigh);
+        furi_hal_gpio_add_int_callback(
+            furi_hal_subghz.cc1101_g0_pin,
+            furi_hal_subghz_capture_ISR,
+            furi_hal_subghz_capture_callback);
+        furi_hal_gpio_enable_int_callback(furi_hal_subghz.cc1101_g0_pin);
+    } else {
+        furi_hal_gpio_init_ex(
+            &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+    }
 
     // Timer: base
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     TIM_InitStruct.Prescaler = 64 - 1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     TIM_InitStruct.Autoreload = 0x7FFFFFFE;
-    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV4;
+    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV4; // Clock division for capture filter
     LL_TIM_Init(TIM2, &TIM_InitStruct);
 
     // Timer: advanced
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
     LL_TIM_DisableARRPreload(TIM2);
-    LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_TI2FP2);
-    LL_TIM_SetSlaveMode(TIM2, LL_TIM_SLAVEMODE_RESET);
-    LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
-    LL_TIM_EnableMasterSlaveMode(TIM2);
+    if(furi_hal_subghz.radio_type == SubGhzRadioInternal) {
+        LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_TI2FP2);
+        LL_TIM_SetSlaveMode(TIM2, LL_TIM_SLAVEMODE_RESET);
+        LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
+        LL_TIM_EnableMasterSlaveMode(TIM2);
+    }
     LL_TIM_DisableDMAReq_TRIG(TIM2);
     LL_TIM_DisableIT_TRIG(TIM2);
 
-    // Timer: channel 1 indirect
-    LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_INDIRECTTI);
-    LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ICPSC_DIV1);
-    LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_POLARITY_FALLING);
-    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_FILTER_FDIV1);
+    if(furi_hal_subghz.radio_type == SubGhzRadioInternal) {
+        // Timer: channel 1 indirect
+        LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_INDIRECTTI);
+        LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ICPSC_DIV1);
+        LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_POLARITY_FALLING);
+        LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_FILTER_FDIV1);
 
-    // Timer: channel 2 direct
-    LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_DIRECTTI);
-    LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
-    LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
-    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV32_N8);
+        // Timer: channel 2 direct
+        LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_DIRECTTI);
+        LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
+        LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
+        LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV32_N8);
 
-    // ISR setup
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_subghz_capture_ISR, NULL);
+        // ISR setup
+        furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_subghz_capture_ISR, NULL);
 
-    // Interrupts and channels
-    LL_TIM_EnableIT_CC1(TIM2);
-    LL_TIM_EnableIT_CC2(TIM2);
-    LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1);
-    LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
+        // Interrupts and channels
+        LL_TIM_EnableIT_CC1(TIM2);
+        LL_TIM_EnableIT_CC2(TIM2);
+        LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1);
+        LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
+    }
 
     // Start timer
     LL_TIM_SetCounter(TIM2, 0);
@@ -549,6 +685,9 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
 
     // Switch to RX
     furi_hal_subghz_rx();
+
+    // Clear the variable after the end of the session
+    furi_hal_subghz_capture_delta_duration = 0;
 }
 
 void furi_hal_subghz_stop_async_rx() {
@@ -565,9 +704,11 @@ void furi_hal_subghz_stop_async_rx() {
     furi_hal_subghz_stop_debug();
 
     FURI_CRITICAL_EXIT();
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
+    if(furi_hal_subghz.radio_type == SubGhzRadioInternal) {
+        furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
+    }
 
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
 typedef struct {
@@ -601,8 +742,8 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             *buffer = 0;
             buffer++;
             samples--;
-            LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_1);
-            LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_1);
+            LL_DMA_DisableIT_HT(SUBGHZ_DMA_CH1_DEF);
+            LL_DMA_DisableIT_TC(SUBGHZ_DMA_CH1_DEF);
             LL_TIM_EnableIT_UPDATE(TIM2);
             break;
         } else {
@@ -643,17 +784,22 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
 
 static void furi_hal_subghz_async_tx_dma_isr() {
     furi_assert(furi_hal_subghz.state == SubGhzStateAsyncTx);
-    if(LL_DMA_IsActiveFlag_HT1(DMA1)) {
-        LL_DMA_ClearFlag_HT1(DMA1);
+
+#if SUBGHZ_DMA_CH1_CHANNEL == LL_DMA_CHANNEL_1
+    if(LL_DMA_IsActiveFlag_HT1(SUBGHZ_DMA)) {
+        LL_DMA_ClearFlag_HT1(SUBGHZ_DMA);
         furi_hal_subghz_async_tx_refill(
             furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
     }
-    if(LL_DMA_IsActiveFlag_TC1(DMA1)) {
-        LL_DMA_ClearFlag_TC1(DMA1);
+    if(LL_DMA_IsActiveFlag_TC1(SUBGHZ_DMA)) {
+        LL_DMA_ClearFlag_TC1(SUBGHZ_DMA);
         furi_hal_subghz_async_tx_refill(
             furi_hal_subghz_async_tx.buffer + API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF,
             API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
     }
+#else
+#error Update this code. Would you kindly?
+#endif
 }
 
 static void furi_hal_subghz_async_tx_timer_isr() {
@@ -662,11 +808,12 @@ static void furi_hal_subghz_async_tx_timer_isr() {
         if(LL_TIM_GetAutoReload(TIM2) == 0) {
             if(furi_hal_subghz.state == SubGhzStateAsyncTx) {
                 furi_hal_subghz.state = SubGhzStateAsyncTxLast;
-                LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
+                LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
             } else if(furi_hal_subghz.state == SubGhzStateAsyncTxLast) {
                 furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 //forcibly pulls the pin to the ground so that there is no carrier
-                furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
+                furi_hal_gpio_init(
+                    furi_hal_subghz.cc1101_g0_pin, GpioModeInput, GpioPullDown, GpioSpeedLow);
                 LL_TIM_DisableCounter(TIM2);
             } else {
                 furi_crash(NULL);
@@ -680,7 +827,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_assert(callback);
 
     //If transmission is prohibited by regional settings
-    // if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
+    if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
 
     furi_hal_subghz_async_tx.callback = callback;
     furi_hal_subghz_async_tx.callback_context = context;
@@ -693,9 +840,19 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_subghz_async_tx.buffer =
         malloc(API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * sizeof(uint32_t));
 
-    // Connect CC1101_GD0 to TIM2 as output
-    furi_hal_gpio_init_ex(
-        &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedLow, GpioAltFn1TIM2);
+    if(furi_hal_subghz.radio_type == SubGhzRadioExternal) {
+        furi_hal_gpio_write(furi_hal_subghz.cc1101_g0_pin, true);
+        furi_hal_gpio_init(
+            furi_hal_subghz.cc1101_g0_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    } else {
+        // Connect CC1101_GD0 to TIM2 as output
+        furi_hal_gpio_init_ex(
+            &gpio_cc1101_g0,
+            GpioModeAltFunctionPushPull,
+            GpioPullDown,
+            GpioSpeedLow,
+            GpioAltFn1TIM2);
+    }
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
@@ -710,11 +867,11 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     dma_config.NbData = API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL;
     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     dma_config.Priority = LL_DMA_MODE_NORMAL;
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, furi_hal_subghz_async_tx_dma_isr, NULL);
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_Init(SUBGHZ_DMA_CH1_DEF, &dma_config);
+    furi_hal_interrupt_set_isr(SUBGHZ_DMA_CH1_IRQ, furi_hal_subghz_async_tx_dma_isr, NULL);
+    LL_DMA_EnableIT_TC(SUBGHZ_DMA_CH1_DEF);
+    LL_DMA_EnableIT_HT(SUBGHZ_DMA_CH1_DEF);
+    LL_DMA_EnableChannel(SUBGHZ_DMA_CH1_DEF);
 
     // Configure TIM2
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
@@ -755,9 +912,20 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
 
-    // Start debug
-    if(furi_hal_subghz_start_debug()) {
-        const GpioPin* gpio = furi_hal_subghz.async_mirror_pin;
+    //Signal generation for external module
+
+    // Start debug (and speaker)
+    furi_hal_subghz_start_debug();
+
+    const GpioPin* gpio = furi_hal_subghz.cc1101_g0_pin;
+
+    if((furi_hal_subghz.async_mirror_pin != NULL) &&
+       (furi_hal_subghz.radio_type == SubGhzRadioInternal)) {
+        gpio = furi_hal_subghz.async_mirror_pin;
+    }
+    if(((furi_hal_subghz.async_mirror_pin != NULL) &&
+        (furi_hal_subghz.radio_type == SubGhzRadioInternal)) ||
+       (furi_hal_subghz.radio_type == SubGhzRadioExternal)) {
         furi_hal_subghz_debug_gpio_buff[0] = (uint32_t)gpio->pin << GPIO_NUMBER;
         furi_hal_subghz_debug_gpio_buff[1] = gpio->pin;
 
@@ -772,9 +940,9 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
         dma_config.NbData = 2;
         dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
         dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
-        LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &dma_config);
-        LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, 2);
-        LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
+        LL_DMA_Init(SUBGHZ_DMA_CH2_DEF, &dma_config);
+        LL_DMA_SetDataLength(SUBGHZ_DMA_CH2_DEF, 2);
+        LL_DMA_EnableChannel(SUBGHZ_DMA_CH2_DEF);
     }
 
     return true;
@@ -792,9 +960,9 @@ void furi_hal_subghz_stop_async_tx() {
 
     // Shutdown radio
     furi_hal_subghz_idle();
-#ifdef FURI_HAL_SUBGHZ_TX_GPIO
-    furi_hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, false);
-#endif
+    if(furi_hal_subghz.radio_type == SubGhzRadioExternal) {
+        furi_hal_gpio_write(furi_hal_subghz.cc1101_g0_pin, false);
+    }
 
     // Deinitialize Timer
     FURI_CRITICAL_ENTER();
@@ -802,16 +970,20 @@ void furi_hal_subghz_stop_async_tx() {
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
 
     // Deinitialize DMA
-    LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_DeInit(SUBGHZ_DMA_CH1_DEF);
 
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
+    furi_hal_interrupt_set_isr(SUBGHZ_DMA_CH1_IRQ, NULL, NULL);
 
     // Deinitialize GPIO
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // Stop debug
-    if(furi_hal_subghz_stop_debug()) {
-        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
+    furi_hal_subghz_stop_debug();
+
+    if(((furi_hal_subghz.async_mirror_pin != NULL) &&
+        (furi_hal_subghz.radio_type == SubGhzRadioInternal)) ||
+       (furi_hal_subghz.radio_type == SubGhzRadioExternal)) {
+        LL_DMA_DisableChannel(SUBGHZ_DMA_CH2_DEF);
     }
 
     FURI_CRITICAL_EXIT();

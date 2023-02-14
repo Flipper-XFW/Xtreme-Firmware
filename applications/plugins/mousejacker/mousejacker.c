@@ -112,7 +112,7 @@ static bool open_ducky_script(Stream* stream, PluginState* plugin_state) {
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
-        &browser_options, MOUSEJACKER_APP_PATH_EXTENSION, &I_badusb_10px);
+        &browser_options, MOUSEJACKER_APP_PATH_EXTENSION, &I_badkb_10px);
     browser_options.hide_ext = false;
 
     bool ret = dialog_file_browser_show(dialogs, path, path, &browser_options);

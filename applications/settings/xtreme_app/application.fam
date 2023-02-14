@@ -1,0 +1,12 @@
+App(
+    appid="xtreme_app",
+    name="Xtreme FW",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="xtreme_app",
+    stack_size=2 * 1024,
+    requires=[
+        "gui",
+        "xtreme",
+    ],
+    order=90,
+)

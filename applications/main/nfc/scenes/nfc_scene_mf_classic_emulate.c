@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 #define NFC_MF_CLASSIC_DATA_NOT_CHANGED (0UL)
 #define NFC_MF_CLASSIC_DATA_CHANGED (1UL)

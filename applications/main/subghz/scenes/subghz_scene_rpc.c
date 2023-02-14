@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
-#include "../../../settings/xtreme_settings/xtreme_assets.h"
+#include "xtreme/assets.h"
 
 typedef enum {
     SubGhzRpcStateIdle,

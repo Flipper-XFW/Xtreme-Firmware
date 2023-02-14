@@ -4,7 +4,7 @@
   <img src="https://user-images.githubusercontent.com/55334727/215170306-051eeb8f-8f72-437f-8c2d-0e4be009bdad.png">
 </p>
 
-[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations--Asset-Packs) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme#Known-bugs) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
+[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations--Asset-Packs) | [Docs](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-pending) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
 -----
 
 This firmware is a complete overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), it also features lots of awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
@@ -42,7 +42,7 @@ We wrote a powerful yet easy-to-use application specifically for our Firmware, t
 <br><code>Anim Speed:</code> Speed in which the animations play
 <br><code>Cycle Anims:</code> Duration of how long animations are played before switching to next
 <br><code>Unlock Anims:</code> Custom setting just for NSFW fallback animations. Figure it out ;)
-<br><code>Battery style:</code> Classic Firmware battery style toggle, just at a more convenient place
+<br><code>Battery Icon:</code> Classic Firmware battery style toggle, just at a more convenient place
 <br><code>XP Level:</code> Changes your Flippers level
 <br><code>SubGhz Extend:</code> Allows you to extend the subghz range beyond what FZ devs planned
 <br><code>SubGhz Bypass:</code> Allows you to bypass the subghz region locks of the Flipper
@@ -113,9 +113,9 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - NSFW Animations tied to the level system. Read more above
 - Folder handling for empty ones (Now indicate they are empty)
 
-- Jamming Files
 - Custom subghz presets
 - Multiple NFC protocols
+- Multiple Sub-Ghz protocols | Merged from Unleashed, thanks @xMasterX
 - Subghz and IR signal replication via gpio | Credits to @ankris812
 - Honda Keys (CVE-2022-27254) & Ford blockers
 
@@ -127,6 +127,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - All Assets
 
 - Tons of apps
+- File browser
 - Massive compiler re-do
 - About 1k files to speed things up a lot
 - Applications to now use the new Locale setting
@@ -145,14 +146,6 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Unused Dummy Mode
 - Broken apps (bad apple, chess, etc.)
 - Tons of unused code from FAPs and system calls
-```
-
-----
-<br>
-<h2 align="center">Known Bugs:</h2>
-
-```txt
-- Nothing rn. Hopefully that wont change
 ```
 
 ----
