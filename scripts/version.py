@@ -18,7 +18,7 @@ class GitVersion:
         ]
 
     def get_version_info(self):
-        commit = branch = branch_num = "XFW-0040"
+        commit = branch = branch_num = "XFW-0041"
 
         # We dont use an `or` in commands that we expect to fail. It will serve no function.
         # We also dont try;exept an entire block of code. This is bad practise. We only try the single part that we expect to fail!
