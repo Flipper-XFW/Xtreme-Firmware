@@ -372,11 +372,11 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    const char* old_animation_name = NULL;
-    if(animation_manager->current_animation) {
-        old_animation_name =
-            animation_storage_get_meta(animation_manager->current_animation)->name;
-    }
+    // const char* avoid_animation = NULL;
+    // if(animation_manager->current_animation) {
+    //     avoid_animation = animation_storage_get_meta(animation_manager->current_animation)->name;
+    // }
+    UNUSED(animation_manager);
 
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
@@ -385,6 +385,7 @@ static StorageAnimation*
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
     furi_record_close(RECORD_DOLPHIN);
+    // avoid_animation = StorageAnimationList_size(animation_list) > 1 ? avoid_animation : NULL;
     uint32_t whole_weight = 0;
 
     StorageAnimationList_it_t it;
@@ -395,11 +396,14 @@ static StorageAnimation*
             animation_storage_get_meta(storage_animation);
         bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
 
-        if(old_animation_name != NULL) {
-            if(strcmp(manifest_info->name, old_animation_name) == 0) {
-                valid = false;
-            }
-        }
+        // Avoid repeating animation
+        // Bad / empty manifests can crash flipper and (very rarely) require DFU
+        // Need better solution, disabled for now
+        // if(avoid_animation != NULL) {
+        //     if(strcmp(manifest_info->name, avoid_animation) == 0) {
+        //         valid = false;
+        //     }
+        // }
 
         if(valid) {
             whole_weight += manifest_info->weight;
