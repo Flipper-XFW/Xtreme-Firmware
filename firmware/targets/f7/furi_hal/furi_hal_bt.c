@@ -207,6 +207,12 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
                 profile_config[profile].config.mac_address,
                 furi_hal_version_get_ble_mac(),
                 sizeof(profile_config[profile].config.mac_address));
+            // Set advertise name
+            strlcpy(
+                profile_config[profile].config.adv_name,
+                furi_hal_version_get_ble_local_device_name_ptr(),
+                FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
+
             config->adv_service_uuid |= furi_hal_version_get_hw_color();
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
@@ -216,8 +222,9 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             }
             // Change name Flipper -> Control
             if(strlen(&config->adv_name[1]) == 0) {
-                const char* clicker_str = "Control";
+                const char* clicker_str = "Control ";
                 memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
+                strlcat(&config->adv_name[1], furi_hal_version_get_ble_local_device_name_ptr(), FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
             }
         }
         if(!gap_init(config, event_cb, context)) {
@@ -468,11 +475,18 @@ void furi_hal_bt_set_profile_adv_name(
     furi_assert(profile < FuriHalBtProfileNumber);
     furi_assert(name);
 
-    profile_config[profile].config.adv_name[0] = 0x09;
-    memcpy(
-        &(profile_config[profile].config.adv_name[1]),
-        name,
-        FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1);
+    if (strlen(name) == 0) {
+        memset(
+            &(profile_config[profile].config.adv_name[1]),
+            0,
+            strlen(&(profile_config[profile].config.adv_name[1])));
+    } else {
+        profile_config[profile].config.adv_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
+        memcpy(
+            &(profile_config[profile].config.adv_name[1]),
+            name,
+            FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1);
+    }
 }
 
 const char* furi_hal_bt_get_profile_adv_name(FuriHalBtProfile profile) {
