@@ -42,7 +42,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     submenu_reset(submenu);
 
     uint32_t primary_favorite =
-        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
+        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite) == SCENE_EVENT_SELECT_FAVORITE_PRIMARY;
     uint32_t pre_select_item = 0;
 
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
@@ -69,7 +69,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     }
 
     submenu_set_header(
-        submenu, primary_favorite ? "Secondary favorite app:" : "Primary favorite app:");
+        submenu, primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
     submenu_set_selected_item(submenu, pre_select_item); // If set during loop, visual glitch.
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
@@ -81,7 +81,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
     FuriString* temp_path = furi_string_alloc_set_str(EXT_PATH("apps"));
 
     uint32_t primary_favorite =
-        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
+        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite) == SCENE_EVENT_SELECT_FAVORITE_PRIMARY;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(strcmp(FLIPPER_APPS[event.event].name, FAP_LOADER_APP_NAME) != 0) {

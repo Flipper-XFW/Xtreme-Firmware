@@ -46,9 +46,9 @@ void desktop_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(variable_item_list, "Primary Favorite App", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Primary Fav. App (UP)", 1, NULL, NULL);
 
-    variable_item_list_add(variable_item_list, "Secondary Favorite App", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Secondary Fav. App (DOWN)", 1, NULL, NULL);
 
     // variable_item_list_add(variable_item_list, "Favorite Game", 1, NULL, NULL);
 
@@ -78,12 +78,12 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
     if(sme.type == SceneManagerEventTypeCustom) {
         switch(sme.event) {
         case SCENE_EVENT_SELECT_FAVORITE_PRIMARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 0);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, SCENE_EVENT_SELECT_FAVORITE_PRIMARY);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
             consumed = true;
             break;
         case SCENE_EVENT_SELECT_FAVORITE_SECONDARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 1);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, SCENE_EVENT_SELECT_FAVORITE_SECONDARY);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
             consumed = true;
             break;
