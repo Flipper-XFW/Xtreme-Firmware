@@ -23,7 +23,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
 
     // Setup view
     ByteInput* byte_input = bad_kb->byte_input;
-    byte_input_set_header_text(byte_input, "Enter new MAC address");
+    byte_input_set_header_text(byte_input, "Set BT MAC address");
     byte_input_set_result_callback(
         byte_input,
         bad_kb_scene_config_mac_byte_input_callback,
