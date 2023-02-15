@@ -42,7 +42,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     submenu_reset(submenu);
 
     uint32_t primary_favorite =
-        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite) == SCENE_EVENT_SELECT_FAVORITE_PRIMARY;
+        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
     uint32_t pre_select_item = 0;
 
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
@@ -81,7 +81,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
     FuriString* temp_path = furi_string_alloc_set_str(EXT_PATH("apps"));
 
     uint32_t primary_favorite =
-        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite) == SCENE_EVENT_SELECT_FAVORITE_PRIMARY;
+        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(strcmp(FLIPPER_APPS[event.event].name, FAP_LOADER_APP_NAME) != 0) {

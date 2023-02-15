@@ -78,12 +78,12 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
     if(sme.type == SceneManagerEventTypeCustom) {
         switch(sme.event) {
         case SCENE_EVENT_SELECT_FAVORITE_PRIMARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, SCENE_EVENT_SELECT_FAVORITE_PRIMARY);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, true);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
             consumed = true;
             break;
         case SCENE_EVENT_SELECT_FAVORITE_SECONDARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, SCENE_EVENT_SELECT_FAVORITE_SECONDARY);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, false);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
             consumed = true;
             break;
