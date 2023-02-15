@@ -58,10 +58,8 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         if(!loader_is_locked(desktop->loader)) {
             if(desktop->settings.pin_code.length > 0) {
                 desktop_pin_lock(&desktop->settings);
-                desktop_lock(desktop);
-            } else {
-                desktop_lock(desktop);
             }
+            desktop_lock(desktop);
         }
         return true;
     }
