@@ -46,9 +46,9 @@ void desktop_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(variable_item_list, "Primary Fav. App (UP)", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Primary Fav App (Up)", 1, NULL, NULL);
 
-    variable_item_list_add(variable_item_list, "Secondary Fav. App (DOWN)", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Secondary Fav App (Down)", 1, NULL, NULL);
 
     // variable_item_list_add(variable_item_list, "Favorite Game", 1, NULL, NULL);
 
