@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <furi.h>
 #include "furi_hal_random.h"
+#include <xtreme/settings.h>
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
 
 #define TAG "Dolphin"
@@ -92,8 +93,10 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     dolphin->event_queue = furi_message_queue_alloc(8, sizeof(DolphinEvent));
     dolphin->pubsub = furi_pubsub_alloc();
+    int32_t butthurt = XTREME_SETTINGS()->butthurt_timer;
+    butthurt = butthurt == 0 ? 43200 : butthurt;
     dolphin->butthurt_timer = xTimerCreate(
-        NULL, HOURS_IN_TICKS(2 * 24), pdTRUE, dolphin, dolphin_butthurt_timer_callback);
+        NULL, (butthurt > 0) ? (butthurt * 1000) : -1, pdTRUE, dolphin, dolphin_butthurt_timer_callback);
     dolphin->flush_timer =
         xTimerCreate(NULL, 30 * 1000, pdFALSE, dolphin, dolphin_flush_timer_callback);
     dolphin->clear_limits_timer = xTimerCreate(

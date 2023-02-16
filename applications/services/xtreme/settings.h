@@ -29,6 +29,7 @@ typedef struct {
     bool bar_background;
     bool bad_bt;
     bool sort_ignore_dirs;
+    int32_t butthurt_timer;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();

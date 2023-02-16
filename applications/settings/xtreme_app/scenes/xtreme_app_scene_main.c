@@ -116,14 +116,6 @@ static void xtreme_app_scene_main_subghz_bypass_changed(VariableItem* item) {
     app->save_subghz = true;
 }
 
-static void xtreme_app_scene_main_sort_folders_before_changed(VariableItem* item) {
-    XtremeApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->sort_ignore_dirs = !value;
-    app->save_settings = true;
-}
-
 static void xtreme_app_scene_main_xp_level_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     app->dolphin_level = variable_item_get_current_value_index(item) + 1;
@@ -131,6 +123,36 @@ static void xtreme_app_scene_main_xp_level_changed(VariableItem* item) {
     snprintf(level_str, 4, "%i", app->dolphin_level);
     variable_item_set_current_value_text(item, level_str);
     app->save_level = true;
+}
+
+const char* const butthurt_timer_names[] = {
+    "OFF",
+    "30 M",
+    "1 H",
+    "2 H",
+    "4 H",
+    "6 H",
+    "8 H",
+    "12 H",
+    "24 H",
+    "48 H"};
+const int32_t butthurt_timer_values[COUNT_OF(butthurt_timer_names)] =
+    {-1, 1800, 3600, 7200, 14400, 21600, 28800, 0, 86400, 172800};
+static void xtreme_app_scene_main_butthurt_timer_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, butthurt_timer_names[index]);
+    XTREME_SETTINGS()->butthurt_timer = butthurt_timer_values[index];
+    app->save_settings = true;
+    app->require_reboot = true;
+}
+
+static void xtreme_app_scene_main_sort_folders_before_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->sort_ignore_dirs = !value;
+    app->save_settings = true;
 }
 
 void xtreme_app_scene_main_on_enter(void* context) {
@@ -272,16 +294,7 @@ void xtreme_app_scene_main_on_enter(void* context) {
     variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
 
 
-    variable_item_list_add(var_item_list, "                     = Misc =", 0, NULL, app);
-
-    item = variable_item_list_add(
-        var_item_list,
-        "Sort Dirs First",
-        2,
-        xtreme_app_scene_main_sort_folders_before_changed,
-        app);
-    variable_item_set_current_value_index(item, !xtreme_settings->sort_ignore_dirs);
-    variable_item_set_current_value_text(item, !xtreme_settings->sort_ignore_dirs ? "ON" : "OFF");
+    variable_item_list_add(var_item_list, "                  = Dolphin =", 0, NULL, app);
 
     char level_str[4];
     snprintf(level_str, 4, "%i", app->dolphin_level);
@@ -293,6 +306,29 @@ void xtreme_app_scene_main_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, app->dolphin_level - 1);
     variable_item_set_current_value_text(item, level_str);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Butthurt Timer",
+        COUNT_OF(butthurt_timer_names),
+        xtreme_app_scene_main_butthurt_timer_changed,
+        app);
+    value_index = value_index_int32(
+        xtreme_settings->butthurt_timer, butthurt_timer_values, COUNT_OF(butthurt_timer_names));
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, butthurt_timer_names[value_index]);
+
+
+    variable_item_list_add(var_item_list, "                     = Misc =", 0, NULL, app);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Sort Dirs First",
+        2,
+        xtreme_app_scene_main_sort_folders_before_changed,
+        app);
+    variable_item_set_current_value_index(item, !xtreme_settings->sort_ignore_dirs);
+    variable_item_set_current_value_text(item, !xtreme_settings->sort_ignore_dirs ? "ON" : "OFF");
 
     FuriString* version_tag = furi_string_alloc_printf(
         "%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
