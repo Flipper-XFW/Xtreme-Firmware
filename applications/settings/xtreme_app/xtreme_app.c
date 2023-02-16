@@ -17,7 +17,6 @@ static bool xtreme_app_back_event_callback(void* context) {
 
     if(app->save_level) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-        DolphinStats stats = dolphin_stats(dolphin);
         int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
         dolphin->state->data.icounter = xp + 1;
         dolphin->state->dirty = true;
