@@ -15,19 +15,17 @@ static bool xtreme_app_back_event_callback(void* context) {
     furi_assert(context);
     XtremeApp* app = context;
 
-    if(app->level_changed) {
+    if(app->save_level) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         DolphinStats stats = dolphin_stats(dolphin);
-        if(app->dolphin_level != stats.level) {
-            int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
-            dolphin->state->data.icounter = xp + 1;
-            dolphin->state->dirty = true;
-            dolphin_state_save(dolphin->state);
-        }
+        int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+        dolphin->state->data.icounter = xp + 1;
+        dolphin->state->dirty = true;
+        dolphin_state_save(dolphin->state);
         furi_record_close(RECORD_DOLPHIN);
     }
 
-    if(app->subghz_changed) {
+    if(app->save_subghz) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
         FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
         if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
@@ -40,18 +38,19 @@ static bool xtreme_app_back_event_callback(void* context) {
         furi_record_close(RECORD_STORAGE);
     }
 
-    if(app->settings_changed) {
+    if(app->save_settings) {
         XTREME_SETTINGS_SAVE();
-        if(app->assets_changed) {
-            popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
-            popup_set_text(app->popup, "Swapping assets...", 64, 40, AlignCenter, AlignCenter);
-            popup_set_callback(app->popup, xtreme_app_reboot);
-            popup_set_context(app->popup, app);
-            popup_set_timeout(app->popup, 1000);
-            popup_enable_timeout(app->popup);
-            view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewPopup);
-            return true;
-        }
+    }
+
+    if(app->require_reboot) {
+        popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
+        popup_set_text(app->popup, "Applying changes...", 64, 40, AlignCenter, AlignCenter);
+        popup_set_callback(app->popup, xtreme_app_reboot);
+        popup_set_context(app->popup, app);
+        popup_set_timeout(app->popup, 1000);
+        popup_enable_timeout(app->popup);
+        view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewPopup);
+        return true;
     }
 
     return scene_manager_handle_back_event(app->scene_manager);
