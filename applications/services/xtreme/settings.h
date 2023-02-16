@@ -34,6 +34,6 @@ typedef struct {
 
 XtremeSettings* XTREME_SETTINGS();
 
-bool XTREME_SETTINGS_LOAD();
+void XTREME_SETTINGS_LOAD();
 
 bool XTREME_SETTINGS_SAVE();
