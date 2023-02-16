@@ -54,4 +54,5 @@ typedef struct {
     PinCode pin_code;
     uint8_t is_locked;
     uint32_t auto_lock_delay_ms;
+    bool auto_lock_with_pin;
 } DesktopSettings;
