@@ -15,13 +15,6 @@ Min level: 2
 Max level: 30
 Weight: 3
 
-Name: L1_Sleigh_ride_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 4
-Max level: 30
-Weight: 4
-
 Name: L1_Sleep_128x64
 Min butthurt: 0
 Max butthurt: 10
@@ -35,13 +28,6 @@ Max butthurt: 8
 Min level: 7
 Max level: 30
 Weight: 3
-
-Name: L1_Happy_holidays_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 8
-Max level: 30
-Weight: 4
 
 Name: L1_Furippa1_128x64
 Min butthurt: 0
@@ -92,13 +78,6 @@ Min level: 18
 Max level: 30
 Weight: 3
 
-Name: L2_Furippa2_128x64
-Min butthurt: 0
-Max butthurt: 6
-Min level: 20
-Max level: 30
-Weight: 3
-
 Name: L1_Leaving_sad_128x64
 Min butthurt: 14
 Max butthurt: 14
@@ -112,6 +91,13 @@ Max butthurt: 12
 Min level: 22
 Max level: 30
 Weight: 4
+
+Name: L2_Furippa2_128x64
+Min butthurt: 0
+Max butthurt: 6
+Min level: 20
+Max level: 30
+Weight: 3
 
 Name: L2_Hacking_pc_128x64
 Min butthurt: 0
@@ -127,10 +113,10 @@ Min level: 25
 Max level: 30
 Weight: 3
 
-Name: L3_Lab_research_128x54
+Name: L3_Furippa3_128x64
 Min butthurt: 0
-Max butthurt: 10
-Min level: 27
+Max butthurt: 6
+Min level: 30
 Max level: 30
 Weight: 3
 
@@ -141,9 +127,23 @@ Min level: 28
 Max level: 30
 Weight: 3
 
-Name: L3_Furippa3_128x64
+Name: L3_Lab_research_128x54
 Min butthurt: 0
-Max butthurt: 6
-Min level: 30
+Max butthurt: 10
+Min level: 27
 Max level: 30
 Weight: 3
+
+Name: L1_Happy_holidays_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 8
+Max level: 30
+Weight: 4
+
+Name: L1_Sleigh_ride_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 4
+Max level: 30
+Weight: 4
