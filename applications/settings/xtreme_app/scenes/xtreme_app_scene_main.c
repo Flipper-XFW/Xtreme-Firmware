@@ -19,7 +19,7 @@ static void xtreme_app_scene_main_asset_pack_changed(VariableItem* item) {
 const char* const anim_speed_names[] =
     {"25%", "50%", "75%", "100%", "125%", "150%", "175%", "200%", "225%", "250%", "275%", "300%"};
 const int32_t anim_speed_values[COUNT_OF(anim_speed_names)] =
-    {25, 50, 75, 0, 125, 150, 175, 200, 225, 250, 275, 300};
+    {25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300};
 static void xtreme_app_scene_main_anim_speed_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -66,7 +66,7 @@ static void xtreme_app_scene_main_battery_icon_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, battery_icon_names[index]);
-    XTREME_SETTINGS()->battery_icon = (index + 1) % BatteryIconCount;
+    XTREME_SETTINGS()->battery_icon = index;
     app->save_settings = true;
 }
 
@@ -137,7 +137,7 @@ const char* const butthurt_timer_names[] = {
     "24 H",
     "48 H"};
 const int32_t butthurt_timer_values[COUNT_OF(butthurt_timer_names)] =
-    {-1, 1800, 3600, 7200, 14400, 21600, 28800, 0, 86400, 172800};
+    {-1, 1800, 3600, 7200, 14400, 21600, 28800, 43200, 86400, 172800};
 static void xtreme_app_scene_main_butthurt_timer_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -151,7 +151,7 @@ static void xtreme_app_scene_main_sort_folders_before_changed(VariableItem* item
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->sort_ignore_dirs = !value;
+    XTREME_SETTINGS()->sort_dirs_first = value;
     app->save_settings = true;
 }
 
@@ -256,9 +256,8 @@ void xtreme_app_scene_main_on_enter(void* context) {
         BatteryIconCount,
         xtreme_app_scene_main_battery_icon_changed,
         app);
-    value_index = (xtreme_settings->battery_icon + BatteryIconCount - 1) % BatteryIconCount;
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, battery_icon_names[value_index]);
+    variable_item_set_current_value_index(item, xtreme_settings->battery_icon);
+    variable_item_set_current_value_text(item, battery_icon_names[xtreme_settings->battery_icon]);
 
     item = variable_item_list_add(
         var_item_list, "Status Icons", 2, xtreme_app_scene_main_status_icons_changed, app);
@@ -327,8 +326,8 @@ void xtreme_app_scene_main_on_enter(void* context) {
         2,
         xtreme_app_scene_main_sort_folders_before_changed,
         app);
-    variable_item_set_current_value_index(item, !xtreme_settings->sort_ignore_dirs);
-    variable_item_set_current_value_text(item, !xtreme_settings->sort_ignore_dirs ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings->sort_dirs_first);
+    variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
 
     FuriString* version_tag = furi_string_alloc_printf(
         "%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));

@@ -11,7 +11,7 @@
 
 #define MAX_PACK_NAME_LEN 32
 
-#define XTREME_SETTINGS_VERSION (2)
+#define XTREME_SETTINGS_VERSION (3)
 #define XTREME_SETTINGS_PATH INT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
 
@@ -28,7 +28,7 @@ typedef struct {
     bool bar_borders;
     bool bar_background;
     bool bad_bt;
-    bool sort_ignore_dirs;
+    bool sort_dirs_first;
     int32_t butthurt_timer;
 } XtremeSettings;
 

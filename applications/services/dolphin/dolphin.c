@@ -94,7 +94,6 @@ Dolphin* dolphin_alloc() {
     dolphin->event_queue = furi_message_queue_alloc(8, sizeof(DolphinEvent));
     dolphin->pubsub = furi_pubsub_alloc();
     int32_t butthurt = XTREME_SETTINGS()->butthurt_timer;
-    butthurt = butthurt == 0 ? 43200 : butthurt;
     dolphin->butthurt_timer = xTimerCreate(
         NULL, (butthurt > 0) ? (butthurt * 1000) : -1, pdTRUE, dolphin, dolphin_butthurt_timer_callback);
     dolphin->flush_timer =
