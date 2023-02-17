@@ -39,7 +39,7 @@ Weight: 3
 Name: L1_Read_books_128x64
 Min butthurt: 0
 Max butthurt: 8
-Min level: 11
+Min level: 8
 Max level: 30
 Weight: 3
 
@@ -53,21 +53,21 @@ Weight: 3
 Name: L1_Boxing_128x64
 Min butthurt: 10
 Max butthurt: 13
-Min level: 14
+Min level: 3
 Max level: 30
 Weight: 3
 
 Name: L1_Mad_fist_128x64
 Min butthurt: 9
 Max butthurt: 13
-Min level: 15
+Min level: 4
 Max level: 30
 Weight: 3
 
 Name: L1_Mods_128x64
 Min butthurt: 0
 Max butthurt: 9
-Min level: 17
+Min level: 15
 Max level: 30
 Weight: 4
 
