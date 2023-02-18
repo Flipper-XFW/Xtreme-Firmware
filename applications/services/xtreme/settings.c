@@ -31,7 +31,7 @@ void XTREME_SETTINGS_LOAD() {
 
         if(!loaded) {
             memset(xtreme_settings, 0, sizeof(XtremeSettings));
-            xtreme_settings->asset_pack = ""; // SFW
+            strlcpy(xtreme_settings->asset_pack, "", MAX_PACK_NAME_LEN); // SFW
             xtreme_settings->anim_speed = 100; // 100%
             xtreme_settings->cycle_anims = 0; // Meta.txt
             xtreme_settings->unlock_anims = false; // OFF
