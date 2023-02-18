@@ -29,7 +29,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
         bad_kb_scene_config_mac_byte_input_callback,
         NULL,
         bad_kb,
-        reverse_mac_addr(bad_kb->mac),
+        reverse_mac_addr(bad_kb->mac),      
         GAP_MAC_ADDR_SIZE);
     view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewConfigMac);
 }
@@ -54,4 +54,7 @@ void bad_kb_scene_config_mac_on_exit(void* context) {
     // Clear view
     byte_input_set_result_callback(bad_kb->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(bad_kb->byte_input, "");
+
+    // reverse back addr (in case it didn't get modified)
+    reverse_mac_addr(bad_kb->mac);
 }
