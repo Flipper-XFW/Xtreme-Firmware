@@ -8,6 +8,7 @@
 #include <assets_icons.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/popup.h>
+#include <lib/toolbox/value_index.h>
 #include "scenes/xtreme_app_scene.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"

@@ -15,41 +15,45 @@ static bool xtreme_app_back_event_callback(void* context) {
     furi_assert(context);
     XtremeApp* app = context;
 
-    if(app->save_level) {
-        Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-        int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
-        dolphin->state->data.icounter = xp + 1;
-        dolphin->state->dirty = true;
-        dolphin_state_save(dolphin->state);
-        furi_record_close(RECORD_DOLPHIN);
-    }
+    if(!scene_manager_has_previous_scene(app->scene_manager, XtremeAppSceneStart)) {
 
-    if(app->save_subghz) {
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-        if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-            flipper_format_insert_or_update_bool(
-                subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
-            flipper_format_insert_or_update_bool(
-                subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+        if(app->save_level) {
+            Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+            int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+            dolphin->state->data.icounter = xp + 1;
+            dolphin->state->dirty = true;
+            dolphin_state_save(dolphin->state);
+            furi_record_close(RECORD_DOLPHIN);
         }
-        flipper_format_free(subghz_range);
-        furi_record_close(RECORD_STORAGE);
-    }
 
-    if(app->save_settings) {
-        XTREME_SETTINGS_SAVE();
-    }
+        if(app->save_subghz) {
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
+            if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
+                flipper_format_insert_or_update_bool(
+                    subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+                flipper_format_insert_or_update_bool(
+                    subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+            }
+            flipper_format_free(subghz_range);
+            furi_record_close(RECORD_STORAGE);
+        }
 
-    if(app->require_reboot) {
-        popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
-        popup_set_text(app->popup, "Applying changes...", 64, 40, AlignCenter, AlignCenter);
-        popup_set_callback(app->popup, xtreme_app_reboot);
-        popup_set_context(app->popup, app);
-        popup_set_timeout(app->popup, 1000);
-        popup_enable_timeout(app->popup);
-        view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewPopup);
-        return true;
+        if(app->save_settings) {
+            XTREME_SETTINGS_SAVE();
+        }
+
+        if(app->require_reboot) {
+            popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
+            popup_set_text(app->popup, "Applying changes...", 64, 40, AlignCenter, AlignCenter);
+            popup_set_callback(app->popup, xtreme_app_reboot);
+            popup_set_context(app->popup, app);
+            popup_set_timeout(app->popup, 1000);
+            popup_enable_timeout(app->popup);
+            view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewPopup);
+            return true;
+        }
+
     }
 
     return scene_manager_handle_back_event(app->scene_manager);
@@ -169,7 +173,7 @@ void xtreme_app_free(XtremeApp* app) {
 extern int32_t xtreme_app(void* p) {
     UNUSED(p);
     XtremeApp* app = xtreme_app_alloc();
-    scene_manager_next_scene(app->scene_manager, XtremeAppSceneMain);
+    scene_manager_next_scene(app->scene_manager, XtremeAppSceneStart);
     view_dispatcher_run(app->view_dispatcher);
     xtreme_app_free(app);
     return 0;

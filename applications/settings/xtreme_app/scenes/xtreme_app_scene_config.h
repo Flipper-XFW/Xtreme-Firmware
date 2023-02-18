@@ -1,1 +1,6 @@
-ADD_SCENE(xtreme_app, main, Main)
+ADD_SCENE(xtreme_app, start, Start)
+ADD_SCENE(xtreme_app, graphics, Graphics)
+ADD_SCENE(xtreme_app, statusbar, Statusbar)
+ADD_SCENE(xtreme_app, protocols, Protocols)
+ADD_SCENE(xtreme_app, dolphin, Dolphin)
+ADD_SCENE(xtreme_app, misc, Misc)
