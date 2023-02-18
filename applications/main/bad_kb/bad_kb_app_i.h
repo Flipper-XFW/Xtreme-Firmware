@@ -17,7 +17,7 @@
 #include "views/bad_kb_view.h"
 
 #define BAD_KB_APP_BASE_FOLDER ANY_PATH("badkb")
-#define BAD_KB_APP_PATH_LAYOUT_FOLDER BAD_KB_APP_BASE_FOLDER "/layouts"
+#define BAD_KB_APP_PATH_LAYOUT_FOLDER BAD_KB_APP_BASE_FOLDER "/assets/layouts"
 #define BAD_KB_APP_SCRIPT_EXTENSION ".txt"
 #define BAD_KB_APP_LAYOUT_EXTENSION ".kl"
 

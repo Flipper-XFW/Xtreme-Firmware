@@ -17,9 +17,6 @@
 #include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
 #include <lib/subghz/subghz_setting.h>
-#include <lib/subghz/subghz_worker.h>
-#include <lib/subghz/receiver.h>
-#include <lib/subghz/transmitter.h>
 #include <lib/subghz/registry.h>
 #include "raw_samples.h"
 
@@ -28,7 +25,7 @@
 #define BITMAP_SEEK_NOT_FOUND UINT32_MAX // Returned by function as sentinel
 #define PROTOVIEW_VIEW_PRIVDATA_LEN 64 // View specific private data len
 
-#define DEBUG_MSG 1
+#define DEBUG_MSG 0
 
 /* Forward declarations. */
 
@@ -69,8 +66,11 @@ typedef struct {
     const char* name; // Name to show to the user.
     const char* id; // Identifier in the Flipper API/file.
     FuriHalSubGhzPreset preset; // The preset ID.
-    uint8_t* custom; // If not null, a set of registers for
-        // the CC1101, specifying a custom preset.
+    uint8_t* custom; /* If not null, a set of registers for
+                                       the CC1101, specifying a custom preset.*/
+    uint32_t duration_filter; /* Ignore pulses and gaps that are less
+                                       than the specified microseconds. This
+                                       depends on the data rate. */
 } ProtoViewModulation;
 
 extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
@@ -82,9 +82,6 @@ struct ProtoViewTxRx {
     bool freq_mod_changed; /* The user changed frequency and/or modulation
                                    from the interface. There is to restart the
                                    radio with the right parameters. */
-    SubGhzWorker* worker; /* Our background worker. */
-    SubGhzEnvironment* environment;
-    SubGhzReceiver* receiver;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
 
     /* Timer sampling mode state. */
@@ -108,6 +105,10 @@ struct ProtoViewApp {
     ViewPort* view_port; /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
     ProtoViewCurrentView current_view; /* Active left-right view ID. */
+    FuriMutex* view_updating_mutex; /* The Flipper GUI calls the screen redraw
+                                       callback in a different thread. We
+                                       use this mutex to protect the redraw
+                                       from changes in app->view_privdata. */
     int current_subview[ViewLast]; /* Active up-down subview ID. */
     FuriMessageQueue* event_queue; /* Keypress events go here. */
 
@@ -238,7 +239,7 @@ typedef struct ProtoViewDecoder {
 
 extern RawSamplesBuffer *RawSamples, *DetectedSamples;
 
-/* app_radio.c */
+/* app_subghz.c */
 void radio_begin(ProtoViewApp* app);
 uint32_t radio_rx(ProtoViewApp* app);
 void radio_idle(ProtoViewApp* app);
@@ -247,11 +248,12 @@ void radio_sleep(ProtoViewApp* app);
 void raw_sampling_worker_start(ProtoViewApp* app);
 void raw_sampling_worker_stop(ProtoViewApp* app);
 void radio_tx_signal(ProtoViewApp* app, FuriHalSubGhzAsyncTxCallback data_feeder, void* ctx);
+void protoview_rx_callback(bool level, uint32_t duration, void* context);
 
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
 void reset_current_signal(ProtoViewApp* app);
-void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source);
+void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source, uint32_t min_duration);
 bool bitmap_get(uint8_t* b, uint32_t blen, uint32_t bitpos);
 void bitmap_set(uint8_t* b, uint32_t blen, uint32_t bitpos, bool val);
 void bitmap_copy(
@@ -271,6 +273,15 @@ uint32_t bitmap_seek_bits(
     uint32_t startpos,
     uint32_t maxbits,
     const char* bits);
+bool bitmap_match_bitmap(
+    uint8_t* b1,
+    uint32_t b1len,
+    uint32_t b1off,
+    uint8_t* b2,
+    uint32_t b2len,
+    uint32_t b2off,
+    uint32_t cmplen);
+void bitmap_to_string(char* dst, uint8_t* b, uint32_t blen, uint32_t off, uint32_t len);
 uint32_t convert_from_line_code(
     uint8_t* buf,
     uint64_t buflen,
@@ -339,7 +350,7 @@ void fieldset_add_int(ProtoViewFieldSet* fs, const char* name, int64_t val, uint
 void fieldset_add_uint(ProtoViewFieldSet* fs, const char* name, uint64_t uval, uint8_t bits);
 void fieldset_add_hex(ProtoViewFieldSet* fs, const char* name, uint64_t uval, uint8_t bits);
 void fieldset_add_bin(ProtoViewFieldSet* fs, const char* name, uint64_t uval, uint8_t bits);
-void fieldset_add_str(ProtoViewFieldSet* fs, const char* name, const char* s);
+void fieldset_add_str(ProtoViewFieldSet* fs, const char* name, const char* s, size_t len);
 void fieldset_add_bytes(
     ProtoViewFieldSet* fs,
     const char* name,
@@ -359,3 +370,5 @@ void field_set_from_field(ProtoViewField* dst, ProtoViewField* src);
 
 /* crc.c */
 uint8_t crc8(const uint8_t* data, size_t len, uint8_t init, uint8_t poly);
+uint8_t sum_bytes(const uint8_t* data, size_t len, uint8_t init);
+uint8_t xor_bytes(const uint8_t* data, size_t len, uint8_t init);

@@ -949,7 +949,7 @@ void bad_kb_script_set_keyboard_layout(BadKbScript* bad_kb, FuriString* layout_p
     }
 
     File* layout_file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
-    if(!furi_string_empty(layout_path)) {
+    if(!furi_string_empty(layout_path)) { //-V1051
         furi_string_set(bad_kb->keyboard_layout, layout_path);
         if(storage_file_open(
                layout_file, furi_string_get_cstr(layout_path), FSAM_READ, FSOM_OPEN_EXISTING)) {

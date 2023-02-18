@@ -88,7 +88,7 @@ void process_input_settings(ProtoViewApp* app, InputEvent input) {
             if(input.key == InputKeyUp) {
                 modid = modid == 0 ? count - 1 : modid - 1;
             } else if(input.key == InputKeyDown) {
-                modid = (modid + 1) % (count ? count : 1);
+                modid = (modid + 1) % count;
             } else {
                 return;
             }
