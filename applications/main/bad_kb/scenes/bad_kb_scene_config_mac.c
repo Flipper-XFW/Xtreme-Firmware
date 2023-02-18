@@ -2,14 +2,14 @@
 
 #define TAG "BadKbConfigMac"
 
-static uint8_t* reverse_mac_addr(uint8_t* mac) {
+static uint8_t* reverse_mac_addr(uint8_t* mac, uint8_t *out) {
     uint8_t tmp;
     for(int i = 0; i < 3; i++) {
         tmp = mac[i];
-        mac[i] = mac[5 - i];
-        mac[5 - i] = tmp;
+        out[i] = mac[5 - i];
+        out[5 - i] = tmp;
     }
-    return mac;
+    return out;
 }
 
 void bad_kb_scene_config_mac_byte_input_callback(void* context) {
@@ -29,7 +29,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
         bad_kb_scene_config_mac_byte_input_callback,
         NULL,
         bad_kb,
-        reverse_mac_addr(bad_kb->mac),      
+        reverse_mac_addr(bad_kb->mac, bad_kb->mac),      
         GAP_MAC_ADDR_SIZE);
     view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewConfigMac);
 }
@@ -40,7 +40,8 @@ bool bad_kb_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == BadKbAppCustomEventByteInputDone) {
-            bt_set_profile_mac_address(bad_kb->bt, reverse_mac_addr(bad_kb->mac));
+            uint8_t mac[GAP_MAC_ADDR_SIZE];
+            bt_set_profile_mac_address(bad_kb->bt, reverse_mac_addr(bad_kb->mac, mac));
             scene_manager_previous_scene(bad_kb->scene_manager);
             consumed = true;
         }
@@ -56,5 +57,5 @@ void bad_kb_scene_config_mac_on_exit(void* context) {
     byte_input_set_header_text(bad_kb->byte_input, "");
 
     // reverse back addr (in case it didn't get modified)
-    reverse_mac_addr(bad_kb->mac);
+    reverse_mac_addr(bad_kb->mac, bad_kb->mac);
 }
