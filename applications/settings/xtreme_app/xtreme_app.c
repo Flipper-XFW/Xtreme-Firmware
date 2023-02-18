@@ -82,6 +82,59 @@ XtremeApp* xtreme_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
 
+    // Settings init
+
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
+
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinStats stats = dolphin_stats(dolphin);
+    app->dolphin_level = stats.level;
+    furi_record_close(RECORD_DOLPHIN);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
+    app->subghz_extend = false;
+    app->subghz_bypass = false;
+    if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
+        flipper_format_read_bool(subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+        flipper_format_read_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+    }
+    flipper_format_free(subghz_range);
+
+    app->asset_pack = 0;
+    asset_packs_init(app->asset_packs);
+    File* folder = storage_file_alloc(storage);
+    FileInfo info;
+    char* name = malloc(MAX_PACK_NAME_LEN);
+    if(storage_dir_open(folder, PACKS_DIR)) {
+        while(storage_dir_read(folder, &info, name, MAX_PACK_NAME_LEN)) {
+            if(info.flags & FSF_DIRECTORY) {
+                char* copy = malloc(MAX_PACK_NAME_LEN);
+                strlcpy(copy, name, MAX_PACK_NAME_LEN);
+                uint idx = 0;
+                if(strcmp(copy, "NSFW") != 0) {
+                    for(; idx < asset_packs_size(app->asset_packs); idx++) {
+                        char* comp = *asset_packs_get(app->asset_packs, idx);
+                        if(strcasecmp(copy, comp) < 0 && strcmp(comp, "NSFW") != 0) {
+                            break;
+                        }
+                    }
+                }
+                asset_packs_push_at(app->asset_packs, idx, copy);
+                if(app->asset_pack != 0) {
+                    if(idx < app->asset_pack) app->asset_pack++;
+                } else {
+                    if(strcmp(copy, xtreme_settings->asset_pack) == 0) app->asset_pack = idx + 1;
+                }
+            }
+        }
+    }
+    free(name);
+    storage_file_free(folder);
+    furi_record_close(RECORD_STORAGE);
+
+    app->version_tag = furi_string_alloc_printf("%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
+
     return app;
 }
 
@@ -97,6 +150,16 @@ void xtreme_app_free(XtremeApp* app) {
     // View Dispatcher and Scene Manager
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
+
+    // Settings deinit
+
+    asset_packs_it_t it;
+    for(asset_packs_it(it, app->asset_packs); !asset_packs_end_p(it); asset_packs_next(it)) {
+        free(*asset_packs_cref(it));
+    }
+    asset_packs_clear(app->asset_packs);
+
+    furi_string_free(app->version_tag);
 
     // Records
     furi_record_close(RECORD_GUI);

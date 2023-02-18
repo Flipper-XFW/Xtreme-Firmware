@@ -32,7 +32,9 @@ typedef struct {
     bool require_reboot;
     bool save_subghz;
     bool save_level;
+    uint asset_pack;
     asset_packs_t asset_packs;
+    FuriString* version_tag;
 } XtremeApp;
 
 typedef enum {
