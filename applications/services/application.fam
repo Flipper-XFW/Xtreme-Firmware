@@ -6,6 +6,7 @@ App(
         "crypto_start",
         "rpc_start",
         "bt",
+        "xtreme",
         "desktop",
         "loader",
         "power",

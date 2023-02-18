@@ -8,6 +8,7 @@
 #include <assets_icons.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/popup.h>
+#include <lib/toolbox/value_index.h>
 #include "scenes/xtreme_app_scene.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"
@@ -28,11 +29,13 @@ typedef struct {
     int dolphin_level;
     bool subghz_extend;
     bool subghz_bypass;
-    bool settings_changed;
-    bool assets_changed;
-    bool subghz_changed;
-    bool level_changed;
+    bool save_settings;
+    bool require_reboot;
+    bool save_subghz;
+    bool save_level;
+    uint asset_pack;
     asset_packs_t asset_packs;
+    FuriString* version_tag;
 } XtremeApp;
 
 typedef enum {

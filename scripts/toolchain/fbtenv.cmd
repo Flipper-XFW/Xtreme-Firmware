@@ -31,7 +31,13 @@ if not exist "%FBT_TOOLCHAIN_VERSION_FILE%" (
 
 set /p REAL_TOOLCHAIN_VERSION=<"%FBT_TOOLCHAIN_VERSION_FILE%"
 if not "%REAL_TOOLCHAIN_VERSION%" == "%FLIPPER_TOOLCHAIN_VERSION%" (
+    echo FBT: starting toolchain upgrade process..
     powershell -ExecutionPolicy Bypass -File "%FBT_ROOT%\scripts\toolchain\windows-toolchain-download.ps1" %flipper_toolchain_version% "%FBT_TOOLCHAIN_ROOT%"
+    set /p REAL_TOOLCHAIN_VERSION=<"%FBT_TOOLCHAIN_VERSION_FILE%"
+)
+
+if defined FBT_VERBOSE (
+    echo FBT: using toolchain version %REAL_TOOLCHAIN_VERSION%
 )
 
 set "HOME=%USERPROFILE%"

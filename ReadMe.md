@@ -152,16 +152,20 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 <br>
 <h2 align="center">Install:</h2>
 
-**NOTE: If you are coming from a different FW, it is recommended to delete / clear your "apps" folder on the SD card prior to updating. This folder houses all the .fap files, which do not update to the correct API versions by default if old ones are present (Thanks flipper devs). This does `NOT` remove any of your saved files!**
+**This is the recommended install procedure. Please follow these steps EXACTLY and CAREFULLY to ensure you install correctly.**
+**This process will NOT delete any saved files and simply ensures the install goes smoothly.**
 <br><br>
 
-- Download the latest release (.zip) from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Extract the archive. This is now your new Firmware folder
-- Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
-- On the Flipper, hit the `Arrow Down` button, this will get you to the file menu. Hit `Arrow Left` once, and then simply search for your updates folder
-- Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called `Update`
+- Download the latest release (`.tgz`) from [the release page](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
+- Open [qFlipper](https://flipperzero.one/update) and connect your Flipper Zero
+- Go to the files tab, into SD Card, and DELETE THE `apps` AND `update` FOLDERS
+- Go back to the device tab
+- Click `Install from file...` and select the downloaded file (`.tgz`)
 
 - Enjoy!
+
+**If you have issues or crashes with that process, you can try to use `Settings > Storage > Factory Reset` then retry the install.**
+**Doing that will NOT remove your saved files, it will only forget some settings and paired devices.**
 
 ----
 <br>

@@ -26,14 +26,14 @@ typedef enum {
 } PowerEventType;
 
 typedef enum {
-    BatteryIconOff = 1,
-    BatteryIconBar = 2,
-    BatteryIconPercent = 3,
-    BatteryIconInvertedPercent = 4,
-    BatteryIconRetro3 = 5,
-    BatteryIconRetro5 = 6,
-    BatteryIconBarPercent = 0,
-    BatteryIconCount = 7,
+    BatteryIconOff,
+    BatteryIconBar,
+    BatteryIconPercent,
+    BatteryIconInvertedPercent,
+    BatteryIconRetro3,
+    BatteryIconRetro5,
+    BatteryIconBarPercent,
+    BatteryIconCount,
 } BatteryIcon;
 
 typedef union {
