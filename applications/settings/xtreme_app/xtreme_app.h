@@ -7,8 +7,10 @@
 #include <gui/scene_manager.h>
 #include <assets_icons.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
 #include <lib/toolbox/value_index.h>
+#include <namechangersrv/namechangersrv.h>
 #include "scenes/xtreme_app_scene.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"
@@ -25,20 +27,24 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
+    TextInput* text_input;
     Popup* popup;
-    int dolphin_level;
     bool subghz_extend;
     bool subghz_bypass;
-    bool save_settings;
-    bool require_reboot;
-    bool save_subghz;
-    bool save_level;
+    int dolphin_level;
+    char device_name[NAMECHANGER_TEXT_STORE_SIZE];
     uint asset_pack;
     asset_packs_t asset_packs;
     FuriString* version_tag;
+    bool save_subghz;
+    bool save_level;
+    bool save_name;
+    bool save_settings;
+    bool require_reboot;
 } XtremeApp;
 
 typedef enum {
     XtremeAppViewVarItemList,
+    XtremeAppViewTextInput,
     XtremeAppViewPopup,
 } XtremeAppView;
