@@ -255,7 +255,9 @@ bool place_on_top(Card* where, Card what) {
         int8_t b_letter = (int8_t)what.character;
         if(a_letter == 12) a_letter = -1;
         if(b_letter == 12) b_letter = -1;
+
         if(where->disabled && b_letter != -1) return false;
+
         if((a_letter + 1) == b_letter) {
             where->disabled = what.disabled;
             where->pip = what.pip;
@@ -275,6 +277,7 @@ void tick(GameState* game_state, NotificationApp* notification) {
     if(game_state->state == GameStatePlay) {
         if(game_state->top_cards[0].character == 11 && game_state->top_cards[1].character == 11 &&
            game_state->top_cards[2].character == 11 && game_state->top_cards[3].character == 11) {
+            DOLPHIN_DEED(DolphinDeedPluginGameWin);
             game_state->state = GameStateAnimate;
             return;
         }
@@ -488,6 +491,10 @@ int32_t solitaire_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     AppEvent event;
+
+    // Call Dolphin deed on game start
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 150);
         GameState* localstate = (GameState*)acquire_mutex_block(&state_mutex);

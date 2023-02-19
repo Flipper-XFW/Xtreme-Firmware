@@ -205,6 +205,7 @@ Header,+,lib/toolbox/stream/string_stream.h,,
 Header,+,lib/toolbox/tar/tar_archive.h,,
 Header,+,lib/toolbox/value_index.h,,
 Header,+,lib/toolbox/version.h,,
+Header,+,lib/u8g2/u8g2.h,,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
@@ -1443,6 +1444,8 @@ Function,+,furi_hal_version_get_hw_connect,uint8_t,
 Function,+,furi_hal_version_get_hw_display,FuriHalVersionDisplay,
 Function,+,furi_hal_version_get_hw_region,FuriHalVersionRegion,
 Function,+,furi_hal_version_get_hw_region_name,const char*,
+Function,+,furi_hal_version_get_hw_region_name_otp,const char*,
+Function,+,furi_hal_version_get_hw_region_otp,FuriHalVersionRegion,
 Function,+,furi_hal_version_get_hw_target,uint8_t,
 Function,+,furi_hal_version_get_hw_timestamp,uint32_t,
 Function,+,furi_hal_version_get_hw_version,uint8_t,
@@ -4483,7 +4486,7 @@ Function,-,uxStreamBufferGetStreamBufferNumber,UBaseType_t,StreamBufferHandle_t
 Function,-,uxTaskGetNumberOfTasks,UBaseType_t,
 Function,-,uxTaskGetStackHighWaterMark,UBaseType_t,TaskHandle_t
 Function,-,uxTaskGetStackHighWaterMark2,uint16_t,TaskHandle_t
-Function,+,uxTaskGetSystemState,UBaseType_t,"TaskStatus_t*, const UBaseType_t, uint32_t*"
+Function,-,uxTaskGetSystemState,UBaseType_t,"TaskStatus_t*, const UBaseType_t, uint32_t*"
 Function,-,uxTaskGetTaskNumber,UBaseType_t,TaskHandle_t
 Function,+,uxTaskPriorityGet,UBaseType_t,const TaskHandle_t
 Function,-,uxTaskPriorityGetFromISR,UBaseType_t,const TaskHandle_t

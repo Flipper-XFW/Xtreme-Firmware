@@ -1,5 +1,5 @@
 App(
-    appid="HEX_Viewer",
+    appid="hex_viewer",
     name="HEX Viewer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="hex_viewer_app",
@@ -13,5 +13,4 @@ App(
     fap_icon="icons/hex_10px.png",
     fap_category="Misc",
     fap_icon_assets="icons",
-    fap_icon_assets_symbol="hex_viewer",
 )
