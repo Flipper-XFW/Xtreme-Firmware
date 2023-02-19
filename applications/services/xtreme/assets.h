@@ -25,6 +25,7 @@ typedef struct {
     const Icon* I_RFIDDolphinSend_97x61;
     const Icon* I_RFIDDolphinSuccess_108x57;
     const Icon* I_Cry_dolph_55x52;
+    const Icon* I_Fishing_123x52;
     const Icon* I_Scanning_123x52;
     const Icon* I_Auth_62x31;
     const Icon* I_Connect_me_62x31;
