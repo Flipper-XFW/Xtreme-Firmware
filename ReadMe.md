@@ -192,9 +192,9 @@ $ ./fbt resources icons dolphin_ext
 
 ----
 <h2 align="center">Contributors</h2>
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/55334727/212134625-21383102-02f3-453f-b1d7-8a9c65b27612.svg">
-</p>
+
+[![Contributors](https://user-images.githubusercontent.com/55334727/212134625-21383102-02f3-453f-b1d7-8a9c65b27612.svg)](https://github.com/ClaraCrazy/Flipper-Xtreme/graphs/contributors)
+
 
 ----
 ## SAST Tools
