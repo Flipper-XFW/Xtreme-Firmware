@@ -1,5 +1,15 @@
 #include "../xtreme_app.h"
 
+enum VarItemListIndex {
+    VarItemListIndexSortDirsFirst,
+    VarItemListIndexChangeDeviceName,
+};
+
+void xtreme_app_scene_misc_var_item_list_callback(void* context, uint32_t index) {
+    XtremeApp* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
 static void xtreme_app_scene_misc_sort_folders_before_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
@@ -23,15 +33,31 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     variable_item_set_current_value_index(item, xtreme_settings->sort_dirs_first);
     variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
 
-    variable_item_list_set_selected_item(var_item_list, 0);
+    variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
+
+    variable_item_list_set_enter_callback(var_item_list, xtreme_app_scene_misc_var_item_list_callback, app);
+
+    variable_item_list_set_selected_item(var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneMisc));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
 bool xtreme_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
+    XtremeApp* app = context;
     bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneMisc, event.event);
+        consumed = true;
+        switch(event.event) {
+            case VarItemListIndexChangeDeviceName:
+                scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscRename);
+                break;
+            default:
+                break;
+        }
+    }
+
     return consumed;
 }
 

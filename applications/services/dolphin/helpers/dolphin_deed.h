@@ -56,8 +56,6 @@ typedef enum {
     DolphinDeedGpioUartBridge,
 
     DolphinDeedPluginStart,
-    DolphinDeedPluginGameStart,
-    DolphinDeedPluginGameWin,
 
     DolphinDeedMAX,
 

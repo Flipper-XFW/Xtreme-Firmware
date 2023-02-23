@@ -1,7 +1,6 @@
 
 #include <gui/gui.h>
 #include <stdlib.h>
-#include <dolphin/dolphin.h>
 #include <dialogs/dialogs.h>
 #include <gui/canvas_i.h>
 
@@ -278,7 +277,6 @@ void dealer_tick(GameState* game_state) {
 
     if(dealer_score >= DEALER_MAX) {
         if(dealer_score > 21 || dealer_score < player_score) {
-            DOLPHIN_DEED(DolphinDeedPluginGameWin);
             enqueue(
                 &(game_state->queue_state),
                 game_state,
@@ -571,9 +569,6 @@ int32_t blackjack_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     AppEvent event;
-
-    // Call dolphin deed on game start
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
 
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);

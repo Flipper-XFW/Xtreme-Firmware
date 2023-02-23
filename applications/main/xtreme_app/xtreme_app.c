@@ -16,6 +16,18 @@ static bool xtreme_app_back_event_callback(void* context) {
     XtremeApp* app = context;
 
     if(!scene_manager_has_previous_scene(app->scene_manager, XtremeAppSceneStart)) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+
+        if(app->save_subghz) {
+            FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
+            if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
+                flipper_format_insert_or_update_bool(
+                    subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+                flipper_format_insert_or_update_bool(
+                    subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+            }
+            flipper_format_free(subghz_range);
+        }
 
         if(app->save_level) {
             Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
@@ -26,17 +38,27 @@ static bool xtreme_app_back_event_callback(void* context) {
             furi_record_close(RECORD_DOLPHIN);
         }
 
-        if(app->save_subghz) {
-            Storage* storage = furi_record_open(RECORD_STORAGE);
-            FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-            if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-                flipper_format_insert_or_update_bool(
-                    subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
-                flipper_format_insert_or_update_bool(
-                    subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
+        if(app->save_name) {
+            if(strcmp(app->device_name, "") == 0) {
+                storage_simply_remove(storage, NAMECHANGER_PATH);
+            } else {
+                FlipperFormat* file = flipper_format_file_alloc(storage);
+
+                do {
+                    if(!flipper_format_file_open_always(file, NAMECHANGER_PATH)) break;
+
+                    if(!flipper_format_write_header_cstr(file, NAMECHANGER_HEADER, 1)) break;
+
+                    if(!flipper_format_write_comment_cstr(file, "Changing the value below will change your FlipperZero device name.")) break;
+                    if(!flipper_format_write_comment_cstr(file, "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _")) break;
+                    if(!flipper_format_write_comment_cstr(file, "It cannot contain any other characters.")) break;
+
+                    if(!flipper_format_write_string_cstr(file, "Name", app->device_name)) break;
+
+                } while(0);
+
+                flipper_format_free(file);
             }
-            flipper_format_free(subghz_range);
-            furi_record_close(RECORD_STORAGE);
         }
 
         if(app->save_settings) {
@@ -54,6 +76,7 @@ static bool xtreme_app_back_event_callback(void* context) {
             return true;
         }
 
+        furi_record_close(RECORD_STORAGE);
     }
 
     return scene_manager_handle_back_event(app->scene_manager);
@@ -83,17 +106,18 @@ XtremeApp* xtreme_app_alloc() {
         XtremeAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        XtremeAppViewTextInput,
+        text_input_get_view(app->text_input));
+
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
 
     // Settings init
 
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-
-    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-    DolphinStats stats = dolphin_stats(dolphin);
-    app->dolphin_level = stats.level;
-    furi_record_close(RECORD_DOLPHIN);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
@@ -104,6 +128,13 @@ XtremeApp* xtreme_app_alloc() {
         flipper_format_read_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
     }
     flipper_format_free(subghz_range);
+
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinStats stats = dolphin_stats(dolphin);
+    app->dolphin_level = stats.level;
+    furi_record_close(RECORD_DOLPHIN);
+
+    strlcpy(app->device_name, furi_hal_version_get_name_ptr(), NAMECHANGER_TEXT_STORE_SIZE);
 
     app->asset_pack = 0;
     asset_packs_init(app->asset_packs);
@@ -148,6 +179,8 @@ void xtreme_app_free(XtremeApp* app) {
     // Gui modules
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewTextInput);
+    text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewPopup);
     popup_free(app->popup);
 
