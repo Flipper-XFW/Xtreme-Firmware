@@ -2793,8 +2793,6 @@ int32_t swd_probe_app_main(void* p) {
     DBGS("swd_execute_script");
     swd_execute_script(app, ANY_PATH("swd_scripts/startup.swd"));
 
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
-
     DBGS("processing");
     for(bool processing = true; processing;) {
         swd_main_loop(app);
