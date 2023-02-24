@@ -414,7 +414,9 @@ static void text_input_handle_right(TextInput* text_input, TextInputModel* model
     }
 }
 
-static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, bool shift) {
+static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, InputType type) {
+    bool shift = type == InputTypeLong;
+    bool repeat = type == InputTypeRepeat;
     char selected = get_selected_char(model);
     size_t text_length = strlen(model->text_buffer);
 
@@ -432,7 +434,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
     } else {
         if(selected == BACKSPACE_KEY) {
             text_input_backspace_cb(model);
-        } else {
+        } else if(!repeat) {
             if(model->clear_default_text) {
                 text_length = 0;
             }
@@ -477,7 +479,7 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             text_input_handle_right(text_input, model);
             break;
         case InputKeyOk:
-            text_input_handle_ok(text_input, model, false);
+            text_input_handle_ok(text_input, model, event->type);
             break;
         default:
             consumed = false;
@@ -499,7 +501,7 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             text_input_handle_right(text_input, model);
             break;
         case InputKeyOk:
-            text_input_handle_ok(text_input, model, true);
+            text_input_handle_ok(text_input, model, event->type);
             break;
         case InputKeyBack:
             text_input_backspace_cb(model);
@@ -522,6 +524,9 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             break;
         case InputKeyRight:
             text_input_handle_right(text_input, model);
+            break;
+        case InputKeyOk:
+            text_input_handle_ok(text_input, model, event->type);
             break;
         case InputKeyBack:
             text_input_backspace_cb(model);
