@@ -76,4 +76,5 @@ struct Bt {
     FuriEventFlag* api_event;
     BtStatusChangedCallback status_changed_cb;
     void* status_changed_ctx;
+    uint32_t pin;
 };

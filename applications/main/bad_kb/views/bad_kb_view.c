@@ -1,5 +1,6 @@
 #include "bad_kb_view.h"
 #include "../bad_kb_script.h"
+#include "../bad_kb_app_i.h"
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
@@ -37,6 +38,9 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         for(size_t i = 0; i < strlen(model->layout); i++)
             furi_string_push_back(disp_str, model->layout[i]);
         furi_string_push_back(disp_str, ')');
+    }
+    if(model->state.pin) {
+        furi_string_cat_printf(disp_str, "  PIN: %ld", model->state.pin);
     }
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_draw_str(
@@ -214,6 +218,11 @@ void bad_kb_set_layout(BadKb* bad_kb, const char* layout) {
 
 void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {
     furi_assert(st);
+    if(bad_kb->context != NULL && ((BadKbApp*)bad_kb->context)->bt != NULL) {
+        st->pin = ((BadKbApp*)bad_kb->context)->bt->pin;
+    } else {
+        st->pin = 0;
+    }
     with_view_model(
         bad_kb->view,
         BadKbModel * model,

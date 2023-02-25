@@ -76,6 +76,7 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
+    bt->pin = pin;
 
     if(bt_get_profile_pairing_method(bt) == GapPairingNone) return true;
 
@@ -154,6 +155,8 @@ Bt* bt_alloc() {
     // API evnent
     bt->api_event = furi_event_flag_alloc();
 
+    bt->pin = 0;
+
     return bt;
 }
 
@@ -219,6 +222,7 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     furi_assert(context);
     Bt* bt = context;
     bool ret = false;
+    bt->pin = 0;
 
     if(event.type == GapEventTypeConnected) {
         // Update status bar
