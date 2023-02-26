@@ -222,9 +222,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             }
             // Change name Flipper -> Control
             if(strlen(&config->adv_name[1]) == 0) {
-                const char* clicker_str = "Control ";
-                memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
-                strlcat(&config->adv_name[1], furi_hal_version_get_ble_local_device_name_ptr(), FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
+                snprintf(&config->adv_name[1], strlen("Control ") + FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "Control %s", furi_hal_version_get_ble_local_device_name_ptr());
             }
         }
         if(!gap_init(config, event_cb, context)) {
