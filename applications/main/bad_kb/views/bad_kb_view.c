@@ -25,7 +25,8 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     BadKbModel* model = _model;
 
     FuriString* disp_str;
-    disp_str = furi_string_alloc_set(model->file_name);
+    disp_str = furi_string_alloc_set(model->state.is_bt ? "(BT) " : "(USB) ");
+    furi_string_cat_str(disp_str, model->file_name);
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 8, furi_string_get_cstr(disp_str));

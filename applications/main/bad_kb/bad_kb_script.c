@@ -878,6 +878,7 @@ BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt) {
 
     bad_kb->st.state = BadKbStateInit;
     bad_kb->st.error[0] = '\0';
+    bad_kb->st.is_bt = !!bt;
 
     bad_kb->bt = bt;
 

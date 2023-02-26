@@ -23,6 +23,7 @@ typedef enum {
 
 typedef struct {
     BadKbWorkerState state;
+    bool is_bt;
     uint32_t pin;
     uint16_t line_cur;
     uint16_t line_nb;
