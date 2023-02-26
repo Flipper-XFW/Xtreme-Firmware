@@ -7,6 +7,8 @@ extern "C" {
 #include <furi.h>
 #include <bt/bt_service/bt_i.h>
 
+typedef struct BadKbApp BadKbApp;
+
 typedef struct BadKbScript BadKbScript;
 
 typedef enum {
@@ -32,7 +34,11 @@ typedef struct {
     char error[64];
 } BadKbState;
 
-void bad_kb_connection_deinit(Bt* bt, bool reset_bt);
+void bad_kb_config_switch_mode(BadKbApp* app);
+
+void bad_kb_connection_init(BadKbApp* app);
+
+void bad_kb_connection_deinit(BadKbApp* app);
 
 BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt);
 

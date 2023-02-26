@@ -72,17 +72,6 @@ static void bad_kb_save_settings(BadKbApp* app) {
     storage_file_free(settings_file);
 }
 
-void bad_kb_set_name(BadKbApp* app, const char* fmt, ...) {
-    furi_assert(app);
-
-    va_list args;
-    va_start(args, fmt);
-
-    vsnprintf(app->name, BAD_KB_ADV_NAME_MAX_LEN, fmt, args);
-
-    va_end(args);
-}
-
 BadKbApp* bad_kb_app_alloc(char* arg) {
     BadKbApp* app = malloc(sizeof(BadKbApp));
 
@@ -112,6 +101,8 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         app->view_dispatcher, bad_kb_app_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, bad_kb_app_back_event_callback);
+
+    app->connection_init = false;
 
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
@@ -158,6 +149,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         app->error = BadKbAppErrorCloseRpc;
         scene_manager_next_scene(app->scene_manager, BadKbSceneError);
     } else {
+        bad_kb_connection_init(app);
         if(!furi_string_empty(app->file_path)) {
             app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
             bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
@@ -178,6 +170,8 @@ void bad_kb_app_free(BadKbApp* app) {
         bad_kb_script_close(app->bad_kb_script);
         app->bad_kb_script = NULL;
     }
+
+    bad_kb_connection_deinit(app);
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewWork);
@@ -205,10 +199,9 @@ void bad_kb_app_free(BadKbApp* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
-    // restores bt config
-    // BtProfile have already been switched to the previous one
-    // so we directly modify the right profile
-    bad_kb_connection_deinit(app->bt, true);
+    // Restore bt config
+    // BtProfile has already been switched to the previous one
+    // So we directly modify the right profile
     if(strcmp(app->bt_old_config.name, app->name) != 0) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->bt_old_config.name);
     }

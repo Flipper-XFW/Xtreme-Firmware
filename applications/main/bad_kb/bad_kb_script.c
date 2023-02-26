@@ -11,6 +11,8 @@
 
 #include <bt/bt_service/bt.h>
 
+#include "bad_kb_app_i.h"
+
 #define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Tools/.bt_hid.keys")
 
 #define TAG "BadKB"
@@ -164,10 +166,6 @@ static const uint8_t numpad_keys[10] = {
     HID_KEYPAD_9,
 };
 
-FuriHalUsbInterface* usb_mode_prev = NULL;
-GapPairing bt_mode_prev = GapPairingNone;
-bool usb_initialized = false;
-bool bt_initialized = false;
 uint8_t bt_timeout = 0;
 
 static LevelRssiRange bt_remote_rssi_range(Bt* bt) {
@@ -617,43 +615,55 @@ static void bad_kb_usb_hid_state_callback(bool state, void* context) {
     }
 }
 
-void bad_kb_connection_init(Bt* bt) {
-    if(bt && !bt_initialized) {
-        bt_timeout = bt_hid_delays[LevelRssi39_0];
-        bt_disconnect(bt);
-        furi_delay_ms(200);
-        bt_keys_storage_set_storage_path(bt, HID_BT_KEYS_STORAGE_PATH);
-        furi_assert(bt_set_profile(bt, BtProfileHidKeyboard));
-        bt_mode_prev = bt_get_profile_pairing_method(bt);
-        bt_set_profile_pairing_method(bt, GapPairingNone);
+void bad_kb_config_switch_mode(BadKbApp* app) {
+    bad_kb_script_close(app->bad_kb_script);
+    app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
+    bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
+    scene_manager_previous_scene(app->scene_manager);
+    if(app->is_bt) {
         furi_hal_bt_start_advertising();
-        // disable peer key adding to bt SRAM storage
-        bt_disable_peer_key_update(bt);
-        bt_initialized = true;
-    }
-    if(!bt && !usb_initialized) {
-        usb_mode_prev = furi_hal_usb_get_config();
-        usb_initialized = true;
+        scene_manager_next_scene(app->scene_manager, BadKbSceneConfigBt);
+    } else {
+        furi_hal_bt_stop_advertising();
+        scene_manager_next_scene(app->scene_manager, BadKbSceneConfigUsb);
     }
 }
 
-void bad_kb_connection_deinit(Bt* bt, bool reset_bt) {
-    if(bt_initialized && reset_bt && bt) {
-        // bt_hid_hold_while_keyboard_buffer_full(6, 3000); // release all keys
-        bt_disconnect(bt); // stop ble
-        furi_delay_ms(200); // Wait 2nd core to update nvm storage
-        bt_keys_storage_set_default_path(bt);
-        bt_set_profile_pairing_method(bt, bt_mode_prev);
-        // fails if ble radio stack isn't ready when switching profile
-        // if it happens, maybe we should increase the delay after bt_disconnect
-        bt_set_profile(bt, BtProfileSerial);
-        bt_enable_peer_key_update(bt); // starts saving peer keys (bounded devices)
-        bt_initialized = false;
+void bad_kb_connection_init(BadKbApp* app) {
+    app->usb_prev_mode = furi_hal_usb_get_config();
+    furi_hal_usb_set_config(NULL, NULL);
+
+    bt_timeout = bt_hid_delays[LevelRssi39_0];
+    bt_disconnect(app->bt);
+    // furi_delay_ms(200);
+    bt_keys_storage_set_storage_path(app->bt, HID_BT_KEYS_STORAGE_PATH);
+    bt_set_profile(app->bt, BtProfileHidKeyboard);
+    app->bt_prev_mode = bt_get_profile_pairing_method(app->bt);
+    bt_set_profile_pairing_method(app->bt, GapPairingNone);
+    bt_disable_peer_key_update(app->bt); // disable peer key adding to bt SRAM storage
+    if(app->is_bt) {
+        furi_hal_bt_start_advertising();
+    } else {
+        furi_hal_bt_stop_advertising();
     }
-    if(usb_initialized) {
-        furi_hal_usb_set_config(usb_mode_prev, NULL);
-        usb_initialized = false;
-    }
+
+    app->connection_init = true;
+}
+
+void bad_kb_connection_deinit(BadKbApp* app) {
+    if(!app->connection_init) return;
+
+    furi_hal_usb_set_config(app->usb_prev_mode, NULL);
+
+    // bt_hid_hold_while_keyboard_buffer_full(6, 3000); // release all keys
+    bt_disconnect(app->bt); // stop ble
+    // furi_delay_ms(200); // Wait 2nd core to update nvm storage
+    bt_keys_storage_set_default_path(app->bt);
+    bt_set_profile_pairing_method(app->bt, app->bt_prev_mode);
+    // fails if ble radio stack isn't ready when switching profile
+    // if it happens, maybe we should increase the delay after bt_disconnect
+    bt_set_profile(app->bt, BtProfileSerial);
+    bt_enable_peer_key_update(app->bt); // starts saving peer keys (bounded devices)
 }
 
 static int32_t bad_kb_worker(void* context) {
@@ -662,7 +672,6 @@ static int32_t bad_kb_worker(void* context) {
     BadKbWorkerState worker_state = BadKbStateInit;
     int32_t delay_val = 0;
 
-    bad_kb_connection_init(bad_kb->bt);
     if(bad_kb->bt) {
         bt_set_status_changed_callback(bad_kb->bt, bad_kb_bt_hid_state_callback, bad_kb);
     } else {
@@ -848,7 +857,6 @@ static int32_t bad_kb_worker(void* context) {
     } else {
         furi_hal_hid_set_state_callback(NULL, NULL);
     }
-    bad_kb_connection_deinit(bad_kb->bt, false);
 
     storage_file_close(script_file);
     storage_file_free(script_file);

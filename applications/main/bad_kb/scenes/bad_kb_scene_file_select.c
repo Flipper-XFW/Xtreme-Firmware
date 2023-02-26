@@ -22,7 +22,6 @@ static bool bad_kb_file_select(BadKbApp* bad_kb) {
 void bad_kb_scene_file_select_on_enter(void* context) {
     BadKbApp* bad_kb = context;
 
-    furi_hal_usb_disable();
     if(bad_kb->bad_kb_script) {
         bad_kb_script_close(bad_kb->bad_kb_script);
         bad_kb->bad_kb_script = NULL;
@@ -35,7 +34,6 @@ void bad_kb_scene_file_select_on_enter(void* context) {
 
         scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneWork);
     } else {
-        furi_hal_usb_enable();
         view_dispatcher_stop(bad_kb->view_dispatcher);
     }
 }
