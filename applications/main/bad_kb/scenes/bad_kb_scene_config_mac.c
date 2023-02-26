@@ -2,7 +2,7 @@
 
 #define TAG "BadKbConfigMac"
 
-static uint8_t* reverse_mac_addr(uint8_t* mac, uint8_t *out) {
+static uint8_t* reverse_mac_addr(uint8_t* mac, uint8_t* out) {
     uint8_t tmp;
     for(int i = 0; i < 3; i++) {
         tmp = mac[i];
@@ -29,7 +29,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
         bad_kb_scene_config_mac_byte_input_callback,
         NULL,
         bad_kb,
-        reverse_mac_addr(bad_kb->mac, bad_kb->mac),      
+        reverse_mac_addr(bad_kb->mac, bad_kb->mac),
         GAP_MAC_ADDR_SIZE);
     view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewConfigMac);
 }
