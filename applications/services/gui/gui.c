@@ -99,7 +99,11 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
                 if(xtreme_settings->bar_borders) {
                     canvas_set_color(gui->canvas, ColorWhite);
                     canvas_draw_box(
-                        gui->canvas, -1, 0, canvas_width(gui->canvas) + 1, canvas_height(gui->canvas));
+                        gui->canvas,
+                        -1,
+                        0,
+                        canvas_width(gui->canvas) + 1,
+                        canvas_height(gui->canvas));
                 }
                 canvas_set_color(gui->canvas, ColorBlack);
                 // ViewPort draw

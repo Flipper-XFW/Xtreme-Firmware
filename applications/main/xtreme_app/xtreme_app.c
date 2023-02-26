@@ -20,7 +20,8 @@ static bool xtreme_app_back_event_callback(void* context) {
 
         if(app->save_subghz) {
             FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-            if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
+            if(flipper_format_file_open_existing(
+                   subghz_range, "/ext/subghz/assets/extend_range.txt")) {
                 flipper_format_insert_or_update_bool(
                     subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
                 flipper_format_insert_or_update_bool(
@@ -49,9 +50,17 @@ static bool xtreme_app_back_event_callback(void* context) {
 
                     if(!flipper_format_write_header_cstr(file, NAMECHANGER_HEADER, 1)) break;
 
-                    if(!flipper_format_write_comment_cstr(file, "Changing the value below will change your FlipperZero device name.")) break;
-                    if(!flipper_format_write_comment_cstr(file, "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _")) break;
-                    if(!flipper_format_write_comment_cstr(file, "It cannot contain any other characters.")) break;
+                    if(!flipper_format_write_comment_cstr(
+                           file,
+                           "Changing the value below will change your FlipperZero device name."))
+                        break;
+                    if(!flipper_format_write_comment_cstr(
+                           file,
+                           "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _"))
+                        break;
+                    if(!flipper_format_write_comment_cstr(
+                           file, "It cannot contain any other characters."))
+                        break;
 
                     if(!flipper_format_write_string_cstr(file, "Name", app->device_name)) break;
 
@@ -108,9 +117,7 @@ XtremeApp* xtreme_app_alloc() {
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        XtremeAppViewTextInput,
-        text_input_get_view(app->text_input));
+        app->view_dispatcher, XtremeAppViewTextInput, text_input_get_view(app->text_input));
 
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
@@ -124,7 +131,8 @@ XtremeApp* xtreme_app_alloc() {
     app->subghz_extend = false;
     app->subghz_bypass = false;
     if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+        flipper_format_read_bool(
+            subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
         flipper_format_read_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
     }
     flipper_format_free(subghz_range);
@@ -168,7 +176,8 @@ XtremeApp* xtreme_app_alloc() {
     storage_file_free(folder);
     furi_record_close(RECORD_STORAGE);
 
-    app->version_tag = furi_string_alloc_printf("%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
+    app->version_tag = furi_string_alloc_printf(
+        "%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
 
     return app;
 }

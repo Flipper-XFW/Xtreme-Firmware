@@ -25,9 +25,11 @@ void xtreme_app_scene_start_on_enter(void* context) {
 
     variable_item_list_add(var_item_list, furi_string_get_cstr(app->version_tag), 0, NULL, app);
 
-    variable_item_list_set_enter_callback(var_item_list, xtreme_app_scene_start_var_item_list_callback, app);
+    variable_item_list_set_enter_callback(
+        var_item_list, xtreme_app_scene_start_var_item_list_callback, app);
 
-    variable_item_list_set_selected_item(var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneStart));
+    variable_item_list_set_selected_item(
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneStart));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
@@ -40,23 +42,23 @@ bool xtreme_app_scene_start_on_event(void* context, SceneManagerEvent event) {
         scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneStart, event.event);
         consumed = true;
         switch(event.event) {
-            case VarItemListIndexGraphics:
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneGraphics);
-                break;
-            case VarItemListIndexStatusbar:
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneStatusbar);
-                break;
-            case VarItemListIndexProtocols:
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocols);
-                break;
-            case VarItemListIndexDolphin:
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneDolphin);
-                break;
-            case VarItemListIndexMisc:
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneMisc);
-                break;
-            default:
-                break;
+        case VarItemListIndexGraphics:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneGraphics);
+            break;
+        case VarItemListIndexStatusbar:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneStatusbar);
+            break;
+        case VarItemListIndexProtocols:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocols);
+            break;
+        case VarItemListIndexDolphin:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneDolphin);
+            break;
+        case VarItemListIndexMisc:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneMisc);
+            break;
+        default:
+            break;
         }
     }
 

@@ -73,7 +73,8 @@ void xtreme_app_scene_graphics_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, app->asset_pack);
     variable_item_set_current_value_text(
-        item, app->asset_pack == 0 ? "SFW" : *asset_packs_get(app->asset_packs, app->asset_pack - 1));
+        item,
+        app->asset_pack == 0 ? "SFW" : *asset_packs_get(app->asset_packs, app->asset_pack - 1));
 
     item = variable_item_list_add(
         var_item_list,

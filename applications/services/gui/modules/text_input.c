@@ -43,7 +43,6 @@ static const uint8_t keyboard_origin_y = 29;
 static const uint8_t keyboard_row_count = 3;
 static const uint8_t keyboard_count = 2;
 
-
 #define ENTER_KEY '\r'
 #define BACKSPACE_KEY '\b'
 #define SWITCH_KEYBOARD_KEY 0xfe
@@ -134,7 +133,7 @@ static const TextInputKey symbol_keyboard_keys_row_3[] = {
     {SWITCH_KEYBOARD_KEY, 1, 23},
     {'+', 13, 32},
     {'`', 21, 32},
-    {'\'',28, 32},
+    {'\'', 28, 32},
     {'^', 36, 32},
     {'*', 44, 32},
     {',', 52, 32},
@@ -146,33 +145,32 @@ static const TextInputKey symbol_keyboard_keys_row_3[] = {
     {'9', 120, 32},
 };
 
-
 static const Keyboard keyboard = {
-    .rows = {
-        keyboard_keys_row_1,
-        keyboard_keys_row_2,
-        keyboard_keys_row_3,
-    },
+    .rows =
+        {
+            keyboard_keys_row_1,
+            keyboard_keys_row_2,
+            keyboard_keys_row_3,
+        },
     .keyboard_index = 0,
 };
 
 static const Keyboard symbol_keyboard = {
-    .rows = {
-        symbol_keyboard_keys_row_1,
-        symbol_keyboard_keys_row_2,
-        symbol_keyboard_keys_row_3,
-    },
+    .rows =
+        {
+            symbol_keyboard_keys_row_1,
+            symbol_keyboard_keys_row_2,
+            symbol_keyboard_keys_row_3,
+        },
     .keyboard_index = 1,
 };
-
 
 static const Keyboard* keyboards[] = {
     &keyboard,
     &symbol_keyboard,
 };
 
-static void switch_keyboard(TextInputModel* model)
-{
+static void switch_keyboard(TextInputModel* model) {
     model->selected_keyboard = (model->selected_keyboard + 1) % keyboard_count;
 }
 
@@ -180,31 +178,31 @@ static uint8_t get_row_size(const Keyboard* keyboard, uint8_t row_index) {
     uint8_t row_size = 0;
     if(keyboard == &symbol_keyboard) {
         switch(row_index + 1) {
-            case 1:
-                row_size = COUNT_OF(symbol_keyboard_keys_row_1);
-                break;
-            case 2:
-                row_size = COUNT_OF(symbol_keyboard_keys_row_2);
-                break;
-            case 3:
-                row_size = COUNT_OF(symbol_keyboard_keys_row_3);
-                break;
-            default:
-                furi_crash(NULL);
+        case 1:
+            row_size = COUNT_OF(symbol_keyboard_keys_row_1);
+            break;
+        case 2:
+            row_size = COUNT_OF(symbol_keyboard_keys_row_2);
+            break;
+        case 3:
+            row_size = COUNT_OF(symbol_keyboard_keys_row_3);
+            break;
+        default:
+            furi_crash(NULL);
         }
     } else {
         switch(row_index + 1) {
-            case 1:
-                row_size = COUNT_OF(keyboard_keys_row_1);
-                break;
-            case 2:
-                row_size = COUNT_OF(keyboard_keys_row_2);
-                break;
-            case 3:
-                row_size = COUNT_OF(keyboard_keys_row_3);
-                break;
-            default:
-                furi_crash(NULL);
+        case 1:
+            row_size = COUNT_OF(keyboard_keys_row_1);
+            break;
+        case 2:
+            row_size = COUNT_OF(keyboard_keys_row_2);
+            break;
+        case 3:
+            row_size = COUNT_OF(keyboard_keys_row_3);
+            break;
+        default:
+            furi_crash(NULL);
         }
     }
 
@@ -223,7 +221,9 @@ static const TextInputKey* get_row(const Keyboard* keyboard, uint8_t row_index) 
 }
 
 static char get_selected_char(TextInputModel* model) {
-    return get_row(keyboards[model->selected_keyboard], model->selected_row)[model->selected_column].text;
+    return get_row(
+               keyboards[model->selected_keyboard], model->selected_row)[model->selected_column]
+        .text;
 }
 
 static bool char_is_lowercase(char letter) {
@@ -380,7 +380,8 @@ static void text_input_handle_up(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
     if(model->selected_row > 0) {
         model->selected_row--;
-        if(model->selected_column > get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 6) {
+        if(model->selected_column >
+           get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 6) {
             model->selected_column = model->selected_column + 1;
         }
     }
@@ -390,7 +391,8 @@ static void text_input_handle_down(TextInput* text_input, TextInputModel* model)
     UNUSED(text_input);
     if(model->selected_row < keyboard_row_count - 1) {
         model->selected_row++;
-        if(model->selected_column > get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 4) {
+        if(model->selected_column >
+           get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 4) {
             model->selected_column = model->selected_column - 1;
         }
     }
@@ -401,13 +403,15 @@ static void text_input_handle_left(TextInput* text_input, TextInputModel* model)
     if(model->selected_column > 0) {
         model->selected_column--;
     } else {
-        model->selected_column = get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 1;
+        model->selected_column =
+            get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 1;
     }
 }
 
 static void text_input_handle_right(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
-    if(model->selected_column < get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 1) {
+    if(model->selected_column <
+       get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 1) {
         model->selected_column++;
     } else {
         model->selected_column = 0;

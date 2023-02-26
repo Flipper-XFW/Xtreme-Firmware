@@ -9,17 +9,8 @@ static void xtreme_app_scene_dolphin_xp_level_changed(VariableItem* item) {
     app->save_level = true;
 }
 
-const char* const butthurt_timer_names[] = {
-    "OFF",
-    "30 M",
-    "1 H",
-    "2 H",
-    "4 H",
-    "6 H",
-    "8 H",
-    "12 H",
-    "24 H",
-    "48 H"};
+const char* const butthurt_timer_names[] =
+    {"OFF", "30 M", "1 H", "2 H", "4 H", "6 H", "8 H", "12 H", "24 H", "48 H"};
 const int32_t butthurt_timer_values[COUNT_OF(butthurt_timer_names)] =
     {-1, 1800, 3600, 7200, 14400, 21600, 28800, 43200, 86400, 172800};
 static void xtreme_app_scene_dolphin_butthurt_timer_changed(VariableItem* item) {
