@@ -219,11 +219,14 @@ void bad_kb_set_layout(BadKb* bad_kb, const char* layout) {
 
 void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {
     furi_assert(st);
-    if(bad_kb->context != NULL && ((BadKbApp*)bad_kb->context)->bt != NULL) {
-        st->pin = ((BadKbApp*)bad_kb->context)->bt->pin;
-    } else {
-        st->pin = 0;
+    uint32_t pin = 0;
+    if(bad_kb->context != NULL) {
+        BadKbApp* app = bad_kb->context;
+        if(app->bt != NULL) {
+            pin = app->bt->pin;
+        }
     }
+    st->pin = pin;
     with_view_model(
         bad_kb->view,
         BadKbModel * model,
