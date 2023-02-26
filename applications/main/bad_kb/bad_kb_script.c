@@ -41,12 +41,6 @@ typedef enum {
     LevelRssiError = 0xFF,
 } LevelRssiRange;
 
-typedef enum {
-    BadKbConnectionModeNone,
-    BadKbConnectionModeUsb,
-    BadKbConnectionModeBt,
-} BadKbConnectionMode;
-
 /**
  * Delays for waiting between HID key press and key release
 */
@@ -170,11 +164,10 @@ static const uint8_t numpad_keys[10] = {
     HID_KEYPAD_9,
 };
 
-BadKbConnectionMode connection_mode = BadKbConnectionModeNone;
 FuriHalUsbInterface* usb_mode_prev = NULL;
 GapPairing bt_mode_prev = GapPairingNone;
-bool bt_connected = false;
-bool usb_connected = false;
+bool usb_initialized = false;
+bool bt_initialized = false;
 uint8_t bt_timeout = 0;
 
 static LevelRssiRange bt_remote_rssi_range(Bt* bt) {
@@ -607,10 +600,8 @@ static void bad_kb_bt_hid_state_callback(BtStatus status, void* context) {
         if(r != LevelRssiError) {
             bt_timeout = bt_hid_delays[r];
         }
-        bt_connected = true;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtConnect);
     } else {
-        bt_connected = false;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtDisconnect);
     }
 }
@@ -620,82 +611,48 @@ static void bad_kb_usb_hid_state_callback(bool state, void* context) {
     BadKbScript* bad_kb = context;
 
     if(state == true) {
-        usb_connected = true;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtConnect);
     } else {
-        usb_connected = false;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtDisconnect);
     }
 }
 
-void bad_kb_bt_init(Bt* bt) {
-    bt_timeout = bt_hid_delays[LevelRssi39_0];
-    bt_disconnect(bt);
-    furi_delay_ms(200);
-    bt_keys_storage_set_storage_path(bt, HID_BT_KEYS_STORAGE_PATH);
-    furi_assert(bt_set_profile(bt, BtProfileHidKeyboard));
-    bt_mode_prev = bt_get_profile_pairing_method(bt);
-    bt_set_profile_pairing_method(bt, GapPairingNone);
-    furi_hal_bt_start_advertising();
-    // disable peer key adding to bt SRAM storage
-    bt_disable_peer_key_update(bt);
-
-    connection_mode = BadKbConnectionModeBt;
-}
-
-void bad_kb_bt_deinit(Bt* bt) {
-    // release all keys
-    // bt_hid_hold_while_keyboard_buffer_full(6, 3000);
-
-    // stop ble
-    bt_disconnect(bt);
-
-    // Wait 2nd core to update nvm storage
-    furi_delay_ms(200);
-
-    bt_keys_storage_set_default_path(bt);
-
-    bt_set_profile_pairing_method(bt, bt_mode_prev);
-
-    // fails if ble radio stack isn't ready when switching profile
-    // if it happens, maybe we should increase the delay after bt_disconnect
-    bt_set_profile(bt, BtProfileSerial);
-
-    // starts saving peer keys (bounded devices)
-    bt_enable_peer_key_update(bt);
-
-    connection_mode = BadKbConnectionModeNone;
-}
-
-void bad_kb_usb_init() {
-    usb_mode_prev = furi_hal_usb_get_config();
-
-    connection_mode = BadKbConnectionModeUsb;
-}
-
-void bad_kb_usb_deinit() {
-    furi_hal_usb_set_config(usb_mode_prev, NULL);
-
-    connection_mode = BadKbConnectionModeNone;
-}
-
 void bad_kb_connection_init(Bt* bt) {
-    if(connection_mode != BadKbConnectionModeNone) return;
-
-    if(bt) {
-        bad_kb_bt_init(bt);
-    } else {
-        bad_kb_usb_init();
+    if(bt && !bt_initialized) {
+        bt_timeout = bt_hid_delays[LevelRssi39_0];
+        bt_disconnect(bt);
+        furi_delay_ms(200);
+        bt_keys_storage_set_storage_path(bt, HID_BT_KEYS_STORAGE_PATH);
+        furi_assert(bt_set_profile(bt, BtProfileHidKeyboard));
+        bt_mode_prev = bt_get_profile_pairing_method(bt);
+        bt_set_profile_pairing_method(bt, GapPairingNone);
+        furi_hal_bt_start_advertising();
+        // disable peer key adding to bt SRAM storage
+        bt_disable_peer_key_update(bt);
+        bt_initialized = true;
+    }
+    if(!bt && !usb_initialized) {
+        usb_mode_prev = furi_hal_usb_get_config();
+        usb_initialized = true;
     }
 }
 
-void bad_kb_connection_deinit(Bt* bt) {
-    if(connection_mode == BadKbConnectionModeNone) return;
-
-    if(connection_mode == BadKbConnectionModeBt) {
-        bad_kb_bt_deinit(bt);
-    } else {
-        bad_kb_usb_deinit();
+void bad_kb_connection_deinit(Bt* bt, bool reset_bt) {
+    if(bt_initialized && reset_bt && bt) {
+        // bt_hid_hold_while_keyboard_buffer_full(6, 3000); // release all keys
+        bt_disconnect(bt); // stop ble
+        furi_delay_ms(200); // Wait 2nd core to update nvm storage
+        bt_keys_storage_set_default_path(bt);
+        bt_set_profile_pairing_method(bt, bt_mode_prev);
+        // fails if ble radio stack isn't ready when switching profile
+        // if it happens, maybe we should increase the delay after bt_disconnect
+        bt_set_profile(bt, BtProfileSerial);
+        bt_enable_peer_key_update(bt); // starts saving peer keys (bounded devices)
+        bt_initialized = false;
+    }
+    if(usb_initialized) {
+        furi_hal_usb_set_config(usb_mode_prev, NULL);
+        usb_initialized = false;
     }
 }
 
@@ -706,7 +663,6 @@ static int32_t bad_kb_worker(void* context) {
     int32_t delay_val = 0;
 
     bad_kb_connection_init(bad_kb->bt);
-
     if(bad_kb->bt) {
         bt_set_status_changed_callback(bad_kb->bt, bad_kb_bt_hid_state_callback, bad_kb);
     } else {
@@ -727,7 +683,11 @@ static int32_t bad_kb_worker(void* context) {
                    FSOM_OPEN_EXISTING)) {
                 if((ducky_script_preload(bad_kb, script_file)) && (bad_kb->st.line_nb > 0)) {
                     if(bad_kb->bt) {
-                        worker_state = BadKbStateNotConnected; // Ready to run
+                        if(furi_hal_bt_is_connected()) {
+                            worker_state = BadKbStateIdle; // Ready to run
+                        } else {
+                            worker_state = BadKbStateNotConnected; // Not connected
+                        }
                     } else {
                         if(furi_hal_hid_is_connected()) {
                             worker_state = BadKbStateIdle; // Ready to run
@@ -745,21 +705,17 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateNotConnected) { // State: Not connected
-            if((bad_kb->bt && bt_connected) || (!bad_kb->bt && usb_connected)) {
+            uint32_t flags = furi_thread_flags_wait(
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
+                FuriFlagWaitAny,
+                FuriWaitForever);
+            furi_check((flags & FuriFlagError) == 0);
+            if(flags & WorkerEvtEnd) {
+                break;
+            } else if(flags & WorkerEvtConnect) {
                 worker_state = BadKbStateIdle; // Ready to run
-            } else {
-                uint32_t flags = furi_thread_flags_wait(
-                    WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
-                    FuriFlagWaitAny,
-                    FuriWaitForever);
-                furi_check((flags & FuriFlagError) == 0);
-                if(flags & WorkerEvtEnd) {
-                    break;
-                } else if(flags & WorkerEvtConnect) {
-                    worker_state = BadKbStateIdle; // Ready to run
-                } else if(flags & WorkerEvtToggle) {
-                    worker_state = BadKbStateWillRun; // Will run when connected
-                }
+            } else if(flags & WorkerEvtToggle) {
+                worker_state = BadKbStateWillRun; // Will run when connected
             }
             bad_kb->st.state = worker_state;
 
@@ -892,6 +848,7 @@ static int32_t bad_kb_worker(void* context) {
     } else {
         furi_hal_hid_set_state_callback(NULL, NULL);
     }
+    bad_kb_connection_deinit(bad_kb->bt, false);
 
     storage_file_close(script_file);
     storage_file_free(script_file);

@@ -51,7 +51,7 @@ bool bad_kb_scene_config_usb_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
         } else if(event.event == VarItemListIndexConnection) {
             bad_kb_script_close(bad_kb->bad_kb_script);
-            bad_kb_connection_deinit(bad_kb->bt);
+            bad_kb_connection_deinit(bad_kb->bt, true);
             bad_kb->bad_kb_script =
                 bad_kb_script_open(bad_kb->file_path, bad_kb->is_bt ? bad_kb->bt : NULL);
             bad_kb_script_set_keyboard_layout(bad_kb->bad_kb_script, bad_kb->keyboard_layout);

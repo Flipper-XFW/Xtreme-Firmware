@@ -208,7 +208,7 @@ void bad_kb_app_free(BadKbApp* app) {
     // restores bt config
     // BtProfile have already been switched to the previous one
     // so we directly modify the right profile
-    bad_kb_connection_deinit(app->bt);
+    bad_kb_connection_deinit(app->bt, true);
     if(strcmp(app->bt_old_config.name, app->name) != 0) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->bt_old_config.name);
     }
