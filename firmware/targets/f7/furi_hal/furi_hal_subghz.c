@@ -427,42 +427,42 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     furi_record_close(RECORD_STORAGE);
 
     switch(furi_hal_version_get_hw_region_otp()) {
-        case FuriHalVersionRegionEuRu:
-            //433,05..434,79; 868,15..868,55
-            if(!(value >= 433050000 && value <= 434790000) &&
-            !(value >= 868150000 && value <= 868550000)) {
-            } else {
-                is_allowed = true;
-            }
-            break;
-        case FuriHalVersionRegionUsCaAu:
-            //304,10..321,95; 433,05..434,79; 915,00..928,00
-            if(!(value >= 304100000 && value <= 321950000) &&
-            !(value >= 433050000 && value <= 434790000) &&
-            !(value >= 915000000 && value <= 928000000)) {
-            } else {
-                if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-                    if(value <= 321950000 &&
-                    ((furi_hal_subghz.preset == FuriHalSubGhzPresetOok270Async) ||
-                        (furi_hal_subghz.preset == FuriHalSubGhzPresetOok650Async))) {
-                        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
-                    }
-                }
-                is_allowed = true;
-            }
-            break;
-        case FuriHalVersionRegionJp:
-            //312,00..315,25; 920,50..923,50
-            if(!(value >= 312000000 && value <= 315250000) &&
-            !(value >= 920500000 && value <= 923500000)) {
-            } else {
-                is_allowed = true;
-            }
-            break;
-
-        default:
+    case FuriHalVersionRegionEuRu:
+        //433,05..434,79; 868,15..868,55
+        if(!(value >= 433050000 && value <= 434790000) &&
+           !(value >= 868150000 && value <= 868550000)) {
+        } else {
             is_allowed = true;
-            break;
+        }
+        break;
+    case FuriHalVersionRegionUsCaAu:
+        //304,10..321,95; 433,05..434,79; 915,00..928,00
+        if(!(value >= 304100000 && value <= 321950000) &&
+           !(value >= 433050000 && value <= 434790000) &&
+           !(value >= 915000000 && value <= 928000000)) {
+        } else {
+            if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+                if(value <= 321950000 &&
+                   ((furi_hal_subghz.preset == FuriHalSubGhzPresetOok270Async) ||
+                    (furi_hal_subghz.preset == FuriHalSubGhzPresetOok650Async))) {
+                    furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
+                }
+            }
+            is_allowed = true;
+        }
+        break;
+    case FuriHalVersionRegionJp:
+        //312,00..315,25; 920,50..923,50
+        if(!(value >= 312000000 && value <= 315250000) &&
+           !(value >= 920500000 && value <= 923500000)) {
+        } else {
+            is_allowed = true;
+        }
+        break;
+
+    default:
+        is_allowed = true;
+        break;
     }
     // No flag - test original range, flag set, test extended range
     if(!(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350

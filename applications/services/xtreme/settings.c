@@ -13,7 +13,6 @@ XtremeSettings* XTREME_SETTINGS() {
 
 void XTREME_SETTINGS_LOAD() {
     if(xtreme_settings == NULL) {
-
         xtreme_settings = malloc(sizeof(XtremeSettings));
         bool loaded;
 

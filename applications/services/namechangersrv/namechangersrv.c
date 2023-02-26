@@ -13,7 +13,6 @@ void namechanger_on_system_start() {
         FuriString* NAMEHEADER;
         NAMEHEADER = furi_string_alloc_set("Flipper Name File");
 
-
         bool result = false;
 
         FuriString* data;

@@ -8,7 +8,6 @@
 #include <dialogs/dialogs.h>
 #include <m-string.h>
 
-
 #include "assets.h"
 
 #define PLAYFIELD_WIDTH 16

@@ -35,9 +35,11 @@ void xtreme_app_scene_misc_on_enter(void* context) {
 
     variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
 
-    variable_item_list_set_enter_callback(var_item_list, xtreme_app_scene_misc_var_item_list_callback, app);
+    variable_item_list_set_enter_callback(
+        var_item_list, xtreme_app_scene_misc_var_item_list_callback, app);
 
-    variable_item_list_set_selected_item(var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneMisc));
+    variable_item_list_set_selected_item(
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneMisc));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
@@ -50,11 +52,11 @@ bool xtreme_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
         scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneMisc, event.event);
         consumed = true;
         switch(event.event) {
-            case VarItemListIndexChangeDeviceName:
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscRename);
-                break;
-            default:
-                break;
+        case VarItemListIndexChangeDeviceName:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscRename);
+            break;
+        default:
+            break;
         }
     }
 

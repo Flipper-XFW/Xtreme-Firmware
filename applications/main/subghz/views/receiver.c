@@ -265,7 +265,8 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
                 canvas,
                 0,
                 0,
-                furi_hal_subghz_get_radio_type() ? XTREME_ASSETS()->I_Fishing_123x52 : XTREME_ASSETS()->I_Scanning_123x52);
+                furi_hal_subghz_get_radio_type() ? XTREME_ASSETS()->I_Fishing_123x52 :
+                                                   XTREME_ASSETS()->I_Scanning_123x52);
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 63, 46, "Scanning...");
             //canvas_draw_line(canvas, 46, 51, 125, 51);
@@ -275,7 +276,8 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
                 canvas,
                 0,
                 0,
-                furi_hal_subghz_get_radio_type() ? XTREME_ASSETS()->I_Fishing_123x52 : XTREME_ASSETS()->I_Scanning_123x52);
+                furi_hal_subghz_get_radio_type() ? XTREME_ASSETS()->I_Fishing_123x52 :
+                                                   XTREME_ASSETS()->I_Scanning_123x52);
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 63, 46, "Decoding...");
             canvas_set_font(canvas, FontSecondary);
