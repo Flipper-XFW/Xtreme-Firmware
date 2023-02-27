@@ -6,6 +6,7 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
+#include <xtreme/settings.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},
@@ -105,11 +106,22 @@ CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font) {
 
 void canvas_clear(Canvas* canvas) {
     furi_assert(canvas);
-    u8g2_ClearBuffer(&canvas->fb);
+    if(XTREME_SETTINGS()->dark_mode) {
+        u8g2_FillBuffer(&canvas->fb);
+    } else {
+        u8g2_ClearBuffer(&canvas->fb);
+    }
 }
 
 void canvas_set_color(Canvas* canvas, Color color) {
     furi_assert(canvas);
+    if(XTREME_SETTINGS()->dark_mode) {
+        if(color == ColorBlack) {
+            color = ColorWhite;
+        } else if(color == ColorWhite) {
+            color = ColorBlack;
+        }
+    }
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
