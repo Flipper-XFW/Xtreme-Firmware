@@ -124,12 +124,16 @@ def pack(
                     continue
                 for icon in icons.iterdir():
                     if icon.is_dir():
-                        logger(f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}")
+                        logger(
+                            f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
+                        )
                         pack_icon_animated(
                             icon, packed / "Icons" / icons.name / icon.name
                         )
                     elif icon.is_file():
-                        logger(f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}")
+                        logger(
+                            f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
+                        )
                         pack_icon_static(
                             icon, packed / "Icons" / icons.name / icon.name
                         )
