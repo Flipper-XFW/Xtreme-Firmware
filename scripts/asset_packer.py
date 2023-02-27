@@ -30,7 +30,7 @@ def convert_bm(img: "Image.Image | pathlib.Path") -> bytes:
     data_enc = bytearray(data_encoded_str)
     data_enc = bytearray([len(data_enc) & 0xFF, len(data_enc) >> 8]) + data_enc
 
-    if len(data_enc) < len(data_bin) + 1:
+    if len(data_enc) + 2 < len(data_bin) + 1:
         return b"\x01\x00" + data_enc
     else:
         return b"\x00" + data_bin
@@ -124,12 +124,16 @@ def pack(
                     continue
                 for icon in icons.iterdir():
                     if icon.is_dir():
-                        logger(f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}")
+                        logger(
+                            f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
+                        )
                         pack_icon_animated(
                             icon, packed / "Icons" / icons.name / icon.name
                         )
                     elif icon.is_file():
-                        logger(f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}")
+                        logger(
+                            f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
+                        )
                         pack_icon_static(
                             icon, packed / "Icons" / icons.name / icon.name
                         )

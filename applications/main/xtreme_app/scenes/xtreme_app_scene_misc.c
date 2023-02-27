@@ -2,6 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexSortDirsFirst,
+    VarItemListIndexDarkMode,
     VarItemListIndexChangeDeviceName,
 };
 
@@ -10,11 +11,19 @@ void xtreme_app_scene_misc_var_item_list_callback(void* context, uint32_t index)
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void xtreme_app_scene_misc_sort_folders_before_changed(VariableItem* item) {
+static void xtreme_app_scene_misc_sort_dirs_first_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->sort_dirs_first = value;
+    app->save_settings = true;
+}
+
+static void xtreme_app_scene_misc_dark_mode_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->dark_mode = value;
     app->save_settings = true;
 }
 
@@ -25,13 +34,14 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list,
-        "Sort Dirs First",
-        2,
-        xtreme_app_scene_misc_sort_folders_before_changed,
-        app);
+        var_item_list, "Sort Dirs First", 2, xtreme_app_scene_misc_sort_dirs_first_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->sort_dirs_first);
     variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list, "Dark Mode (Exp.)", 2, xtreme_app_scene_misc_dark_mode_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->dark_mode);
+    variable_item_set_current_value_text(item, xtreme_settings->dark_mode ? "ON" : "OFF");
 
     variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
 
