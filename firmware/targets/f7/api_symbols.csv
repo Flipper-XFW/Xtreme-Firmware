@@ -3431,6 +3431,7 @@ Function,-,u8g2_DrawUTF8Lines,u8g2_uint_t,"u8g2_t*, u8g2_uint_t, u8g2_uint_t, u8
 Function,-,u8g2_DrawVLine,void,"u8g2_t*, u8g2_uint_t, u8g2_uint_t, u8g2_uint_t"
 Function,-,u8g2_DrawXBM,void,"u8g2_t*, u8g2_uint_t, u8g2_uint_t, u8g2_uint_t, u8g2_uint_t, const uint8_t*"
 Function,-,u8g2_DrawXBMP,void,"u8g2_t*, u8g2_uint_t, u8g2_uint_t, u8g2_uint_t, u8g2_uint_t, const uint8_t*"
+Function,-,u8g2_FillBuffer,void,u8g2_t*
 Function,-,u8g2_FirstPage,void,u8g2_t*
 Function,-,u8g2_GetFontSize,size_t,const uint8_t*
 Function,-,u8g2_GetGlyphWidth,int8_t,"u8g2_t*, uint16_t"
