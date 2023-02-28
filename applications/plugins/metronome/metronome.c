@@ -287,7 +287,6 @@ int32_t metronome_app() {
     metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, &state_mutex);
 
     // Open GUI and register view_port
-    //
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
@@ -326,7 +325,7 @@ int32_t metronome_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
-                    case InputKeyMAX:
+                    default:
                         break;
                     }
                 } else if(event.input.type == InputTypeLong) {
@@ -348,7 +347,7 @@ int32_t metronome_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
-                    case InputKeyMAX:
+                    default:
                         break;
                     }
                 } else if(event.input.type == InputTypeRepeat) {
@@ -369,7 +368,7 @@ int32_t metronome_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
-                    case InputKeyMAX:
+                    default:
                         break;
                     }
                 }

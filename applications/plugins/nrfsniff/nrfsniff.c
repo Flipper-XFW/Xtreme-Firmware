@@ -291,7 +291,7 @@ static void wrap_up(Storage* storage, NotificationApp* notification) {
             hexlify(addr, 5, top_address);
             found_count++;
             save_addr_to_file(storage, addr, 5, notification);
-            DOLPHIN_DEED(getRandomDeed());
+            // DOLPHIN_DEED(getRandomDeed());
             if(confirmed_idx < MAX_CONFIRMED) memcpy(confirmed[confirmed_idx++], addr, 5);
             break;
         }

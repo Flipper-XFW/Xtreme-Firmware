@@ -86,4 +86,4 @@ Small applications providing configuration for basic firmware and its services.
 Utility apps not visible in other menus.
 
 - `storage_move_to_sd`  - Data migration tool for internal storage
-- `updater`             - updater service & application
+- `updater`             - Update service & application

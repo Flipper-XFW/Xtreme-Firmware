@@ -498,6 +498,10 @@ Function,+,acquire_mutex,void*,"ValueMutex*, uint32_t"
 Function,-,aligned_alloc,void*,"size_t, size_t"
 Function,+,aligned_free,void,void*
 Function,+,aligned_malloc,void*,"size_t, size_t"
+Function,-,alutech_get_custom_btn,uint8_t,
+Function,-,alutech_get_original_btn,uint8_t,
+Function,-,alutech_reset_original_btn,void,
+Function,-,alutech_set_btn,void,uint8_t
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
@@ -624,7 +628,7 @@ Function,-,bzero,void,"void*, size_t"
 Function,-,calloc,void*,"size_t, size_t"
 Function,+,canvas_clear,void,Canvas*
 Function,+,canvas_commit,void,Canvas*
-Function,+,canvas_current_font_height,uint8_t,Canvas*
+Function,+,canvas_current_font_height,uint8_t,const Canvas*
 Function,+,canvas_draw_bitmap,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, const uint8_t*"
 Function,+,canvas_draw_box,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,canvas_draw_circle,void,"Canvas*, uint8_t, uint8_t, uint8_t"
@@ -645,11 +649,11 @@ Function,+,canvas_draw_xbm,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, co
 Function,-,canvas_frame_set,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,-,canvas_free,void,Canvas*
 Function,+,canvas_get_buffer,uint8_t*,Canvas*
-Function,+,canvas_get_buffer_size,size_t,Canvas*
-Function,+,canvas_get_font_params,CanvasFontParameters*,"Canvas*, Font"
+Function,+,canvas_get_buffer_size,size_t,const Canvas*
+Function,+,canvas_get_font_params,const CanvasFontParameters*,"const Canvas*, Font"
 Function,-,canvas_get_orientation,CanvasOrientation,const Canvas*
 Function,+,canvas_glyph_width,uint8_t,"Canvas*, char"
-Function,+,canvas_height,uint8_t,Canvas*
+Function,+,canvas_height,uint8_t,const Canvas*
 Function,-,canvas_init,Canvas*,
 Function,+,canvas_invert_color,void,Canvas*
 Function,+,canvas_reset,void,Canvas*
@@ -660,7 +664,7 @@ Function,+,canvas_set_font,void,"Canvas*, Font"
 Function,+,canvas_set_font_direction,void,"Canvas*, CanvasDirection"
 Function,-,canvas_set_orientation,void,"Canvas*, CanvasOrientation"
 Function,+,canvas_string_width,uint16_t,"Canvas*, const char*"
-Function,+,canvas_width,uint8_t,Canvas*
+Function,+,canvas_width,uint8_t,const Canvas*
 Function,-,cbrt,double,double
 Function,-,cbrtf,float,float
 Function,-,cbrtl,long double,long double
@@ -1173,20 +1177,13 @@ Function,+,furi_hal_i2c_tx,_Bool,"FuriHalI2cBusHandle*, const uint8_t, const uin
 Function,+,furi_hal_i2c_write_mem,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t*, uint8_t, uint32_t"
 Function,+,furi_hal_i2c_write_reg_16,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t, uint32_t"
 Function,+,furi_hal_i2c_write_reg_8,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t, uint32_t"
-Function,+,furi_hal_ibutton_add_interrupt,void,"GpioExtiCallback, void*"
 Function,+,furi_hal_ibutton_emulate_set_next,void,uint32_t
 Function,+,furi_hal_ibutton_emulate_start,void,"uint32_t, FuriHalIbuttonEmulateCallback, void*"
 Function,+,furi_hal_ibutton_emulate_stop,void,
 Function,-,furi_hal_ibutton_init,void,
-Function,+,furi_hal_ibutton_pin_get_level,_Bool,
-Function,+,furi_hal_ibutton_pin_high,void,
-Function,+,furi_hal_ibutton_pin_low,void,
-Function,+,furi_hal_ibutton_remove_interrupt,void,
-Function,+,furi_hal_ibutton_start_drive,void,
-Function,+,furi_hal_ibutton_start_drive_in_isr,void,
-Function,+,furi_hal_ibutton_start_interrupt,void,
-Function,+,furi_hal_ibutton_start_interrupt_in_isr,void,
-Function,+,furi_hal_ibutton_stop,void,
+Function,+,furi_hal_ibutton_pin_configure,void,
+Function,+,furi_hal_ibutton_pin_reset,void,
+Function,+,furi_hal_ibutton_pin_write,void,const _Bool
 Function,+,furi_hal_info_get,void,"PropertyValueCallback, char, void*"
 Function,+,furi_hal_infrared_async_rx_set_capture_isr_callback,void,"FuriHalInfraredRxCaptureCallback, void*"
 Function,+,furi_hal_infrared_async_rx_set_timeout,void,uint32_t
@@ -1198,7 +1195,9 @@ Function,+,furi_hal_infrared_async_tx_set_signal_sent_isr_callback,void,"FuriHal
 Function,+,furi_hal_infrared_async_tx_start,void,"uint32_t, float"
 Function,+,furi_hal_infrared_async_tx_stop,void,
 Function,+,furi_hal_infrared_async_tx_wait_termination,void,
+Function,+,furi_hal_infrared_get_debug_out_status,_Bool,
 Function,+,furi_hal_infrared_is_busy,_Bool,
+Function,+,furi_hal_infrared_set_debug_out,void,_Bool
 Function,-,furi_hal_init,void,
 Function,-,furi_hal_init_early,void,
 Function,-,furi_hal_interrupt_init,void,
@@ -1261,7 +1260,7 @@ Function,+,furi_hal_power_enable_external_3_3v,void,
 Function,+,furi_hal_power_enable_otg,void,
 Function,+,furi_hal_power_gauge_is_ok,_Bool,
 Function,+,furi_hal_power_get_bat_health_pct,uint8_t,
-Function,+,furi_hal_power_get_battery_charging_voltage,float,
+Function,+,furi_hal_power_get_battery_charge_voltage_limit,float,
 Function,+,furi_hal_power_get_battery_current,float,FuriHalPowerIC
 Function,+,furi_hal_power_get_battery_design_capacity,uint32_t,
 Function,+,furi_hal_power_get_battery_full_capacity,uint32_t,
@@ -1280,7 +1279,7 @@ Function,+,furi_hal_power_is_charging_done,_Bool,
 Function,+,furi_hal_power_is_otg_enabled,_Bool,
 Function,+,furi_hal_power_off,void,
 Function,+,furi_hal_power_reset,void,
-Function,+,furi_hal_power_set_battery_charging_voltage,void,float
+Function,+,furi_hal_power_set_battery_charge_voltage_limit,void,float
 Function,+,furi_hal_power_shutdown,void,
 Function,+,furi_hal_power_sleep,void,
 Function,+,furi_hal_power_sleep_available,_Bool,
@@ -1386,6 +1385,7 @@ Function,+,furi_hal_subghz_flush_rx,void,
 Function,+,furi_hal_subghz_flush_tx,void,
 Function,+,furi_hal_subghz_get_lqi,uint8_t,
 Function,+,furi_hal_subghz_get_radio_type,SubGhzRadioType,
+Function,+,furi_hal_subghz_get_rolling_counter_mult,uint8_t,
 Function,+,furi_hal_subghz_get_rssi,float,
 Function,+,furi_hal_subghz_idle,void,
 Function,-,furi_hal_subghz_init,void,
@@ -1407,6 +1407,7 @@ Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
 Function,+,furi_hal_subghz_set_radio_type,_Bool,SubGhzRadioType
+Function,+,furi_hal_subghz_set_rolling_counter_mult,void,uint8_t
 Function,-,furi_hal_subghz_shutdown,void,
 Function,+,furi_hal_subghz_sleep,void,
 Function,+,furi_hal_subghz_start_async_rx,void,"FuriHalSubGhzCaptureCallback, void*"
@@ -1470,6 +1471,7 @@ Function,+,furi_kernel_unlock,int32_t,
 Function,+,furi_log_get_level,FuriLogLevel,
 Function,-,furi_log_init,void,
 Function,+,furi_log_print_format,void,"FuriLogLevel, const char*, const char*, ..."
+Function,+,furi_log_print_raw_format,void,"FuriLogLevel, const char*, ..."
 Function,+,furi_log_set_level,void,FuriLogLevel
 Function,-,furi_log_set_puts,void,FuriLogPuts
 Function,-,furi_log_set_timestamp,void,FuriLogTimestamp
@@ -1582,6 +1584,7 @@ Function,+,furi_thread_flags_wait,uint32_t,"uint32_t, uint32_t, uint32_t"
 Function,+,furi_thread_free,void,FuriThread*
 Function,+,furi_thread_get_current,FuriThread*,
 Function,+,furi_thread_get_current_id,FuriThreadId,
+Function,+,furi_thread_get_current_priority,FuriThreadPriority,
 Function,+,furi_thread_get_heap_size,size_t,FuriThread*
 Function,+,furi_thread_get_id,FuriThreadId,FuriThread*
 Function,+,furi_thread_get_name,const char*,FuriThreadId
@@ -1595,6 +1598,7 @@ Function,+,furi_thread_mark_as_service,void,FuriThread*
 Function,+,furi_thread_resume,void,FuriThreadId
 Function,+,furi_thread_set_callback,void,"FuriThread*, FuriThreadCallback"
 Function,+,furi_thread_set_context,void,"FuriThread*, void*"
+Function,+,furi_thread_set_current_priority,void,FuriThreadPriority
 Function,+,furi_thread_set_name,void,"FuriThread*, const char*"
 Function,+,furi_thread_set_priority,void,"FuriThread*, FuriThreadPriority"
 Function,+,furi_thread_set_stack_size,void,"FuriThread*, size_t"
@@ -1623,7 +1627,6 @@ Function,-,gap_init,_Bool,"GapConfig*, GapEventCallback, void*"
 Function,-,gap_start_advertising,void,
 Function,-,gap_stop_advertising,void,
 Function,-,gap_thread_stop,void,
-Function,+,getRandomDeed,DolphinDeed,
 Function,-,getc,int,FILE*
 Function,-,getc_unlocked,int,FILE*
 Function,-,getchar,int,
@@ -1638,7 +1641,7 @@ Function,+,gui_add_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, voi
 Function,+,gui_add_view_port,void,"Gui*, ViewPort*, GuiLayer"
 Function,+,gui_direct_draw_acquire,Canvas*,Gui*
 Function,+,gui_direct_draw_release,void,Gui*
-Function,+,gui_get_framebuffer_size,size_t,Gui*
+Function,+,gui_get_framebuffer_size,size_t,const Gui*
 Function,+,gui_remove_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, void*"
 Function,+,gui_remove_view_port,void,"Gui*, ViewPort*"
 Function,+,gui_set_lockdown,void,"Gui*, _Bool"
@@ -1681,9 +1684,9 @@ Function,+,ibutton_worker_write_set_callback,void,"iButtonWorker*, iButtonWorker
 Function,+,ibutton_worker_write_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,icon_animation_alloc,IconAnimation*,const Icon*
 Function,+,icon_animation_free,void,IconAnimation*
-Function,+,icon_animation_get_height,uint8_t,IconAnimation*
-Function,+,icon_animation_get_width,uint8_t,IconAnimation*
-Function,+,icon_animation_is_last_frame,_Bool,IconAnimation*
+Function,+,icon_animation_get_height,uint8_t,const IconAnimation*
+Function,+,icon_animation_get_width,uint8_t,const IconAnimation*
+Function,+,icon_animation_is_last_frame,_Bool,const IconAnimation*
 Function,+,icon_animation_set_update_callback,void,"IconAnimation*, IconAnimationCallback, void*"
 Function,+,icon_animation_start,void,IconAnimation*
 Function,+,icon_animation_stop,void,IconAnimation*
@@ -1779,8 +1782,12 @@ Function,-,j1f,float,float
 Function,-,jn,double,"int, double"
 Function,-,jnf,float,"int, float"
 Function,-,jrand48,long,unsigned short[3]
+Function,-,keeloq_get_custom_btn,uint8_t,
+Function,-,keeloq_get_original_btn,uint8_t,
 Function,-,keeloq_reset_kl_type,void,
 Function,-,keeloq_reset_mfname,void,
+Function,-,keeloq_reset_original_btn,void,
+Function,-,keeloq_set_btn,void,uint8_t
 Function,-,l64a,char*,long
 Function,-,labs,long,long
 Function,-,lcong48,void,unsigned short[7]
@@ -1827,7 +1834,7 @@ Function,-,llround,long long int,double
 Function,-,llroundf,long long int,float
 Function,-,llroundl,long long int,long double
 Function,+,loader_get_pubsub,FuriPubSub*,Loader*
-Function,+,loader_is_locked,_Bool,Loader*
+Function,+,loader_is_locked,_Bool,const Loader*
 Function,+,loader_lock,_Bool,Loader*
 Function,+,loader_show_menu,void,
 Function,+,loader_start,LoaderStatus,"Loader*, const char*, const char*"
@@ -2128,6 +2135,10 @@ Function,-,nfcv_inventory,ReturnCode,uint8_t*
 Function,-,nfcv_read_blocks,ReturnCode,"NfcVReader*, NfcVData*"
 Function,-,nfcv_read_card,_Bool,"NfcVReader*, FuriHalNfcDevData*, NfcVData*"
 Function,-,nfcv_read_sysinfo,ReturnCode,"FuriHalNfcDevData*, NfcVData*"
+Function,-,nice_flors_get_custom_btn,uint8_t,
+Function,-,nice_flors_get_original_btn,uint8_t,
+Function,-,nice_flors_reset_original_btn,void,
+Function,-,nice_flors_set_btn,void,uint8_t
 Function,+,notification_internal_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_internal_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
@@ -2140,7 +2151,7 @@ Function,+,onewire_device_detach,void,OneWireDevice*
 Function,+,onewire_device_free,void,OneWireDevice*
 Function,+,onewire_device_get_id_p,uint8_t*,OneWireDevice*
 Function,+,onewire_device_send_id,void,OneWireDevice*
-Function,+,onewire_host_alloc,OneWireHost*,
+Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
 Function,+,onewire_host_free,void,OneWireHost*
 Function,+,onewire_host_read,uint8_t,OneWireHost*
 Function,+,onewire_host_read_bit,_Bool,OneWireHost*
@@ -2154,7 +2165,7 @@ Function,+,onewire_host_stop,void,OneWireHost*
 Function,+,onewire_host_target_search,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write_bit,void,"OneWireHost*, _Bool"
-Function,+,onewire_slave_alloc,OneWireSlave*,
+Function,+,onewire_slave_alloc,OneWireSlave*,const GpioPin*
 Function,+,onewire_slave_attach,void,"OneWireSlave*, OneWireDevice*"
 Function,+,onewire_slave_detach,void,OneWireSlave*
 Function,+,onewire_slave_free,void,OneWireSlave*
@@ -2484,11 +2495,11 @@ Function,-,scalbnl,long double,"long double, int"
 Function,-,scanf,int,"const char*, ..."
 Function,+,scene_manager_alloc,SceneManager*,"const SceneManagerHandlers*, void*"
 Function,+,scene_manager_free,void,SceneManager*
-Function,+,scene_manager_get_scene_state,uint32_t,"SceneManager*, uint32_t"
+Function,+,scene_manager_get_scene_state,uint32_t,"const SceneManager*, uint32_t"
 Function,+,scene_manager_handle_back_event,_Bool,SceneManager*
 Function,+,scene_manager_handle_custom_event,_Bool,"SceneManager*, uint32_t"
 Function,+,scene_manager_handle_tick_event,void,SceneManager*
-Function,+,scene_manager_has_previous_scene,_Bool,"SceneManager*, uint32_t"
+Function,+,scene_manager_has_previous_scene,_Bool,"const SceneManager*, uint32_t"
 Function,+,scene_manager_next_scene,void,"SceneManager*, uint32_t"
 Function,+,scene_manager_previous_scene,_Bool,SceneManager*
 Function,+,scene_manager_search_and_switch_to_another_scene,_Bool,"SceneManager*, uint32_t"
@@ -2532,6 +2543,10 @@ Function,-,siprintf,int,"char*, const char*, ..."
 Function,-,siscanf,int,"const char*, const char*, ..."
 Function,-,sniprintf,int,"char*, size_t, const char*, ..."
 Function,+,snprintf,int,"char*, size_t, const char*, ..."
+Function,-,somfy_telis_get_custom_btn,uint8_t,
+Function,-,somfy_telis_get_original_btn,uint8_t,
+Function,-,somfy_telis_reset_original_btn,void,
+Function,-,somfy_telis_set_btn,void,uint8_t
 Function,-,sprintf,int,"char*, const char*, ..."
 Function,-,sqrt,double,double
 Function,-,sqrtf,float,float
@@ -3262,7 +3277,7 @@ Function,-,subghz_protocol_encoder_star_line_yield,LevelDuration,void*
 Function,-,subghz_protocol_faac_slh_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint32_t, uint32_t, const char*, SubGhzRadioPreset*"
 Function,-,subghz_protocol_keeloq_bft_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, uint32_t, const char*, SubGhzRadioPreset*"
 Function,-,subghz_protocol_keeloq_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, const char*, SubGhzRadioPreset*"
-Function,-,subghz_protocol_nice_flor_s_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, SubGhzRadioPreset*"
+Function,-,subghz_protocol_nice_flor_s_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, SubGhzRadioPreset*, _Bool"
 Function,-,subghz_protocol_nice_flor_s_encrypt,uint64_t,"uint64_t, const char*"
 Function,+,subghz_protocol_raw_file_encoder_worker_set_callback_end,void,"SubGhzProtocolEncoderRAW*, SubGhzProtocolEncoderRAWCallbackEnd, void*"
 Function,+,subghz_protocol_raw_gen_fff_data,void,"FlipperFormat*, const char*"
@@ -4604,11 +4619,11 @@ Function,+,view_port_alloc,ViewPort*,
 Function,+,view_port_draw_callback_set,void,"ViewPort*, ViewPortDrawCallback, void*"
 Function,+,view_port_enabled_set,void,"ViewPort*, _Bool"
 Function,+,view_port_free,void,ViewPort*
-Function,+,view_port_get_height,uint8_t,ViewPort*
+Function,+,view_port_get_height,uint8_t,const ViewPort*
 Function,+,view_port_get_orientation,ViewPortOrientation,const ViewPort*
-Function,+,view_port_get_width,uint8_t,ViewPort*
+Function,+,view_port_get_width,uint8_t,const ViewPort*
 Function,+,view_port_input_callback_set,void,"ViewPort*, ViewPortInputCallback, void*"
-Function,+,view_port_is_enabled,_Bool,ViewPort*
+Function,+,view_port_is_enabled,_Bool,const ViewPort*
 Function,+,view_port_set_height,void,"ViewPort*, uint8_t"
 Function,+,view_port_set_orientation,void,"ViewPort*, ViewPortOrientation"
 Function,+,view_port_set_width,void,"ViewPort*, uint8_t"

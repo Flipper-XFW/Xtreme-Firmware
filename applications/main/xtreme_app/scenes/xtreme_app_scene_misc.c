@@ -39,7 +39,7 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "Dark Mode (Exp.)", 2, xtreme_app_scene_misc_dark_mode_changed, app);
+        var_item_list, "Exp. Dark Mode", 2, xtreme_app_scene_misc_dark_mode_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->dark_mode);
     variable_item_set_current_value_text(item, xtreme_settings->dark_mode ? "ON" : "OFF");
 

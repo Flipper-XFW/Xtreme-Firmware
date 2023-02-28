@@ -415,7 +415,7 @@ static StorageAnimation*
         }
     }
 
-    uint32_t lucky_number = furi_hal_random_get() % (whole_weight != 0 ? whole_weight : 1);
+    uint32_t lucky_number = furi_hal_random_get() % whole_weight;
     uint32_t weight = 0;
 
     StorageAnimation* selected = NULL;
