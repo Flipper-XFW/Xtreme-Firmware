@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import shutil
-import pathlib
 from collections import Counter
 
 from flipper.utils.fff import *
@@ -34,7 +33,6 @@ class DolphinBubbleAnimation:
         min_level: int,
         max_level: int,
         weight: int,
-        subpath: str = None,
     ):
         # Manifest
         self.name = name
@@ -43,7 +41,6 @@ class DolphinBubbleAnimation:
         self.min_level = min_level
         self.max_level = max_level
         self.weight = weight
-        self.subpath = subpath
         # Meta and data
         self.meta = {}
         self.frames = []
@@ -186,12 +183,7 @@ class DolphinBubbleAnimation:
                 bubble["_NextBubbleIndex"] = bubble_index + 1
 
     def save(self, output_directory: str):
-        if self.subpath:
-            animation_directory = os.path.join(
-                output_directory, self.subpath, self.name
-            )
-        else:
-            animation_directory = os.path.join(output_directory, self.name)
+        animation_directory = os.path.join(output_directory, self.name)
         os.makedirs(animation_directory, exist_ok=True)
         meta_filename = os.path.join(animation_directory, "meta.txt")
 
@@ -263,8 +255,8 @@ class DolphinManifest:
         self.animations = []
         self.logger = logging.getLogger("DolphinManifest")
 
-    def load(self, loc: str, subpath: str = None):
-        manifest_filename = os.path.join(loc, "manifest.txt")
+    def load(self, source_directory: str):
+        manifest_filename = os.path.join(source_directory, "manifest.txt")
 
         file = FlipperFormatFile()
         file.load(manifest_filename)
@@ -294,17 +286,11 @@ class DolphinManifest:
 
                 # Initialize animation
                 animation = DolphinBubbleAnimation(
-                    name,
-                    min_butthurt,
-                    max_butthurt,
-                    min_level,
-                    max_level,
-                    weight,
-                    subpath,
+                    name, min_butthurt, max_butthurt, min_level, max_level, weight
                 )
 
                 # Load Animation meta and frames
-                animation.load(os.path.join(loc, name))
+                animation.load(os.path.join(source_directory, name))
 
                 # Add to array
                 self.animations.append(animation)
@@ -373,20 +359,11 @@ class Dolphin:
         self.manifest = DolphinManifest()
         self.logger = logging.getLogger("Dolphin")
 
-    def load(self, input_directory, dirs: list = None):
-        if dirs:
-            input = str(pathlib.Path(input_directory).absolute())
-            for path in dirs:
-                path = str(pathlib.Path(path).absolute())
-                assert os.path.isdir(path)
-                # Load Manifest
-                self.logger.info(f"Loading directory {path}")
-                self.manifest.load(path, subpath=path.removeprefix(input + os.sep))
-        else:
-            assert os.path.isdir(input_directory)
-            # Load Manifest
-            self.logger.info(f"Loading directory {input_directory}")
-            self.manifest.load(input_directory)
+    def load(self, source_directory: str):
+        assert os.path.isdir(source_directory)
+        # Load Manifest
+        self.logger.info(f"Loading directory {source_directory}")
+        self.manifest.load(source_directory)
 
     def pack(self, output_directory: str, symbol_name: str = None):
         self.manifest.save(output_directory, symbol_name)

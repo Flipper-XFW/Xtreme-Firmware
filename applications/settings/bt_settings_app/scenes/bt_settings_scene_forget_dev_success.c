@@ -1,5 +1,4 @@
 #include "../bt_settings_app.h"
-#include "furi_hal_bt.h"
 #include "xtreme/assets.h"
 #include <furi_hal_bt.h>
 

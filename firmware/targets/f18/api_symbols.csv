@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,12.1,,
+Version,+,15.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -546,6 +546,7 @@ Function,+,canvas_invert_color,void,Canvas*
 Function,+,canvas_reset,void,Canvas*
 Function,+,canvas_set_bitmap_mode,void,"Canvas*, _Bool"
 Function,+,canvas_set_color,void,"Canvas*, Color"
+Function,+,canvas_set_custom_u8g2_font,void,"Canvas*, const uint8_t*"
 Function,+,canvas_set_font,void,"Canvas*, Font"
 Function,+,canvas_set_font_direction,void,"Canvas*, CanvasDirection"
 Function,+,canvas_string_width,uint16_t,"Canvas*, const char*"
@@ -978,7 +979,7 @@ Function,+,furi_hal_power_enable_external_3_3v,void,
 Function,+,furi_hal_power_enable_otg,void,
 Function,+,furi_hal_power_gauge_is_ok,_Bool,
 Function,+,furi_hal_power_get_bat_health_pct,uint8_t,
-Function,+,furi_hal_power_get_battery_charging_voltage,float,
+Function,+,furi_hal_power_get_battery_charge_voltage_limit,float,
 Function,+,furi_hal_power_get_battery_current,float,FuriHalPowerIC
 Function,+,furi_hal_power_get_battery_design_capacity,uint32_t,
 Function,+,furi_hal_power_get_battery_full_capacity,uint32_t,
@@ -997,7 +998,7 @@ Function,+,furi_hal_power_is_charging_done,_Bool,
 Function,+,furi_hal_power_is_otg_enabled,_Bool,
 Function,+,furi_hal_power_off,void,
 Function,+,furi_hal_power_reset,void,
-Function,+,furi_hal_power_set_battery_charging_voltage,void,float
+Function,+,furi_hal_power_set_battery_charge_voltage_limit,void,float
 Function,+,furi_hal_power_shutdown,void,
 Function,+,furi_hal_power_sleep,void,
 Function,+,furi_hal_power_sleep_available,_Bool,
@@ -1016,6 +1017,7 @@ Function,+,furi_hal_region_is_frequency_allowed,_Bool,uint32_t
 Function,+,furi_hal_region_is_provisioned,_Bool,
 Function,+,furi_hal_region_set,void,FuriHalRegion*
 Function,-,furi_hal_resources_deinit_early,void,
+Function,+,furi_hal_resources_get_ext_pin_number,int32_t,const GpioPin*
 Function,-,furi_hal_resources_init,void,
 Function,-,furi_hal_resources_init_early,void,
 Function,+,furi_hal_rtc_datetime_to_timestamp,uint32_t,FuriHalRtcDateTime*
@@ -1061,11 +1063,13 @@ Function,+,furi_hal_spi_bus_handle_deinit,void,FuriHalSpiBusHandle*
 Function,+,furi_hal_spi_bus_handle_init,void,FuriHalSpiBusHandle*
 Function,+,furi_hal_spi_bus_init,void,FuriHalSpiBus*
 Function,+,furi_hal_spi_bus_rx,_Bool,"FuriHalSpiBusHandle*, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_spi_bus_trx,_Bool,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_spi_bus_tx,_Bool,"FuriHalSpiBusHandle*, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_spi_bus_trx,_Bool,"FuriHalSpiBusHandle*, const uint8_t*, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_spi_bus_trx_dma,_Bool,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_spi_bus_tx,_Bool,"FuriHalSpiBusHandle*, const uint8_t*, size_t, uint32_t"
 Function,-,furi_hal_spi_config_deinit_early,void,
 Function,-,furi_hal_spi_config_init,void,
 Function,-,furi_hal_spi_config_init_early,void,
+Function,-,furi_hal_spi_dma_init,void,
 Function,+,furi_hal_spi_release,void,FuriHalSpiBusHandle*
 Function,+,furi_hal_switch,void,void*
 Function,+,furi_hal_uart_deinit,void,FuriHalUartId
@@ -1119,6 +1123,7 @@ Function,+,furi_kernel_unlock,int32_t,
 Function,+,furi_log_get_level,FuriLogLevel,
 Function,-,furi_log_init,void,
 Function,+,furi_log_print_format,void,"FuriLogLevel, const char*, const char*, ..."
+Function,+,furi_log_print_raw_format,void,"FuriLogLevel, const char*, ..."
 Function,+,furi_log_set_level,void,FuriLogLevel
 Function,-,furi_log_set_puts,void,FuriLogPuts
 Function,-,furi_log_set_timestamp,void,FuriLogTimestamp
@@ -1231,6 +1236,7 @@ Function,+,furi_thread_flags_wait,uint32_t,"uint32_t, uint32_t, uint32_t"
 Function,+,furi_thread_free,void,FuriThread*
 Function,+,furi_thread_get_current,FuriThread*,
 Function,+,furi_thread_get_current_id,FuriThreadId,
+Function,+,furi_thread_get_current_priority,FuriThreadPriority,
 Function,+,furi_thread_get_heap_size,size_t,FuriThread*
 Function,+,furi_thread_get_id,FuriThreadId,FuriThread*
 Function,+,furi_thread_get_name,const char*,FuriThreadId
@@ -1244,6 +1250,7 @@ Function,+,furi_thread_mark_as_service,void,FuriThread*
 Function,+,furi_thread_resume,void,FuriThreadId
 Function,+,furi_thread_set_callback,void,"FuriThread*, FuriThreadCallback"
 Function,+,furi_thread_set_context,void,"FuriThread*, void*"
+Function,+,furi_thread_set_current_priority,void,FuriThreadPriority
 Function,+,furi_thread_set_name,void,"FuriThread*, const char*"
 Function,+,furi_thread_set_priority,void,"FuriThread*, FuriThreadPriority"
 Function,+,furi_thread_set_stack_size,void,"FuriThread*, size_t"

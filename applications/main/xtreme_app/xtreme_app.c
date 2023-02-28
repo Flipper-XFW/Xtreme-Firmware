@@ -177,7 +177,7 @@ XtremeApp* xtreme_app_alloc() {
     furi_record_close(RECORD_STORAGE);
 
     app->version_tag = furi_string_alloc_printf(
-        "%s  %s", version_get_gitbranchnum(NULL), version_get_builddate(NULL));
+        "%s  %s", version_get_version(NULL), version_get_builddate(NULL));
 
     return app;
 }
