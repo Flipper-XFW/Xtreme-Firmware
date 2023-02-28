@@ -38,7 +38,7 @@ void bad_kb_config_switch_mode(BadKbApp* app);
 
 void bad_kb_config_switch_bonding_mode(BadKbApp *app);
 
-void bad_kb_connection_init(BadKbApp* app);
+int32_t bad_kb_connection_init(BadKbApp* app);
 
 void bad_kb_connection_deinit(BadKbApp* app);
 
