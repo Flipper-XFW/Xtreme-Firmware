@@ -27,7 +27,7 @@
 #define BAD_KB_ADV_NAME_MAX_LEN     18
 
 // this is the MAC address used when we do not forget paired device (BOUND STATE)
-#define BAD_KB_BOUND_MAC_ADDRESS   { 0x41, 0x4a, 0xef, 0xbe, 0xad, 0xde };
+#define BAD_KB_BOUND_MAC_ADDRESS   { 0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4 };
 
 typedef enum {
     BadKbAppErrorNoFiles,
