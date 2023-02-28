@@ -75,6 +75,8 @@ bool bad_kb_scene_config_bt_on_event(void* context, SceneManagerEvent event) {
             bad_kb_config_switch_mode(bad_kb);
         } else if (event.event == VarItemListIndexBonding) {
             bad_kb_config_switch_bonding_mode(bad_kb);
+            scene_manager_previous_scene(bad_kb->scene_manager);
+            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBt);
         } else if(event.event == VarItemListIndexAdvertisementName) {
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigName);
         } else if(event.event == VarItemListIndexMacAddress) {
