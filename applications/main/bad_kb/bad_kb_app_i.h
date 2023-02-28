@@ -80,7 +80,7 @@ struct BadKbApp {
     FuriHalUsbInterface* usb_prev_mode;
     GapPairing bt_prev_mode;
 
-    FuriThread *bt_init_thread;
+    FuriThread* conn_init_thread;
 };
 
 typedef enum {

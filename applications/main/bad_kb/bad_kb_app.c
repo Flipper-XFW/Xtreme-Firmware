@@ -151,8 +151,8 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         app->error = BadKbAppErrorCloseRpc;
         scene_manager_next_scene(app->scene_manager, BadKbSceneError);
     } else {
-        app->bt_init_thread = furi_thread_alloc_ex("BadKbBtInit", 512, (FuriThreadCallback)bad_kb_connection_init, app);
-        furi_thread_start(app->bt_init_thread);
+        app->conn_init_thread = furi_thread_alloc_ex("BadKbConnInit", 512, (FuriThreadCallback)bad_kb_connection_init, app);
+        furi_thread_start(app->conn_init_thread);
         if(!furi_string_empty(app->file_path)) {
             app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
             bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
@@ -173,9 +173,6 @@ void bad_kb_app_free(BadKbApp* app) {
         bad_kb_script_close(app->bad_kb_script);
         app->bad_kb_script = NULL;
     }
-
-    furi_thread_join(app->bt_init_thread);
-    bad_kb_connection_deinit(app);
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewWork);
@@ -223,6 +220,10 @@ void bad_kb_app_free(BadKbApp* app) {
 
     furi_string_free(app->file_path);
     furi_string_free(app->keyboard_layout);
+
+    furi_thread_join(app->conn_init_thread);
+    bad_kb_connection_deinit(app);
+    furi_thread_free(app->conn_init_thread);
 
     free(app);
 }
