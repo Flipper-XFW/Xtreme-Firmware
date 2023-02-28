@@ -424,17 +424,15 @@ const uint8_t* bt_get_profile_mac_address(Bt* bt) {
     return furi_hal_bt_get_profile_mac_addr(get_hal_bt_profile(bt->profile));
 }
 
-bool bt_remote_rssi(Bt* bt, BtRssi* rssi) {
+bool bt_remote_rssi(Bt* bt, uint8_t* rssi) {
     furi_assert(bt);
-    UNUSED(rssi);
 
     uint8_t rssi_val;
     uint32_t since = furi_hal_bt_get_conn_rssi(&rssi_val);
 
     if(since == 0) return false;
 
-    rssi->rssi = rssi_val;
-    rssi->since = since;
+    *rssi = rssi_val;
 
     return true;
 }
@@ -456,6 +454,7 @@ void bt_disable_peer_key_update(Bt* bt) {
 }
 
 void bt_enable_peer_key_update(Bt* bt) {
+    furi_assert(bt);
     furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 }
 

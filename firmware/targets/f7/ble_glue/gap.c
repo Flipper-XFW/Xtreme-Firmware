@@ -373,6 +373,7 @@ static void gap_init_svc(Gap* gap) {
     bool keypress_supported = false;
     uint8_t conf_mitm = CFG_MITM_PROTECTION;
     uint8_t conf_used_fixed_pin = CFG_USED_FIXED_PIN;
+    bool conf_bonding = gap->config->bonding_mode;
     if(gap->config->pairing_method == GapPairingPinCodeShow) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
     } else if(gap->config->pairing_method == GapPairingPinCodeVerifyYesNo) {
@@ -382,6 +383,7 @@ static void gap_init_svc(Gap* gap) {
         // Just works pairing method (IOS accept it, it seems android and linux doesn't)
         conf_mitm = 0;
         conf_used_fixed_pin = 0;
+        conf_bonding = false;
         // if just works isn't supported, we want the numeric comparaison method
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
@@ -389,7 +391,7 @@ static void gap_init_svc(Gap* gap) {
 
     // Setup  authentication
     aci_gap_set_authentication_requirement(
-        gap->config->bonding_mode,
+        conf_bonding,
         conf_mitm,
         CFG_SC_SUPPORT,
         keypress_supported,

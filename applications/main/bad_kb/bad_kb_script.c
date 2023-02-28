@@ -169,19 +169,19 @@ static const uint8_t numpad_keys[10] = {
 uint8_t bt_timeout = 0;
 
 static LevelRssiRange bt_remote_rssi_range(Bt* bt) {
-    BtRssi rssi_data = {0};
+    uint8_t rssi;
 
-    if(!bt_remote_rssi(bt, &rssi_data)) return LevelRssiError;
+    if(!bt_remote_rssi(bt, &rssi)) return LevelRssiError;
 
-    if(rssi_data.rssi <= 39)
+    if(rssi <= 39)
         return LevelRssi39_0;
-    else if(rssi_data.rssi <= 59)
+    else if(rssi <= 59)
         return LevelRssi59_40;
-    else if(rssi_data.rssi <= 79)
+    else if(rssi <= 79)
         return LevelRssi79_60;
-    else if(rssi_data.rssi <= 99)
+    else if(rssi <= 99)
         return LevelRssi99_80;
-    else if(rssi_data.rssi <= 122)
+    else if(rssi <= 122)
         return LevelRssi122_100;
 
     return LevelRssiError;
@@ -629,6 +629,23 @@ void bad_kb_config_switch_mode(BadKbApp* app) {
     }
 }
 
+void bad_kb_config_switch_bonding_mode(BadKbApp *app) {
+    if (app->bonding) {
+        // set bouding mac
+        uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        bt_set_profile_mac_address(app->bt, mac);   // this also restart bt    
+        // enable keys storage
+        bt_enable_peer_key_update(app->bt);
+    } else {
+        // set back user defined mac address
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
+        bt_set_profile_mac_address(app->bt, app->mac);
+        // disable key storage
+        bt_disable_peer_key_update(app->bt);
+    }
+}
+
 void bad_kb_connection_init(BadKbApp* app) {
     app->usb_prev_mode = furi_hal_usb_get_config();
     furi_hal_usb_set_config(NULL, NULL);
@@ -636,13 +653,22 @@ void bad_kb_connection_init(BadKbApp* app) {
     bt_timeout = bt_hid_delays[LevelRssi39_0];
     bt_disconnect(app->bt);
     // furi_delay_ms(200);
-    bt_keys_storage_set_storage_path(app->bt, HID_BT_KEYS_STORAGE_PATH);
+    bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
+    app->bt_prev_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
+    if (app->bonding) {    // usefull if bounding become an XTREME setting
+        uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, mac);
+        // using GapPairingNone breaks bounding between devices
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+    } else {
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
+    }
+
     bt_set_profile(app->bt, BtProfileHidKeyboard);
-    app->bt_prev_mode = bt_get_profile_pairing_method(app->bt);
-    bt_set_profile_pairing_method(app->bt, GapPairingNone);
-    bt_disable_peer_key_update(app->bt); // disable peer key adding to bt SRAM storage
     if(app->is_bt) {
         furi_hal_bt_start_advertising();
+        if (!app->bonding)
+            bt_disable_peer_key_update(app->bt); // disable peer key adding to bt SRAM storage
     } else {
         furi_hal_bt_stop_advertising();
     }
@@ -659,11 +685,16 @@ void bad_kb_connection_deinit(BadKbApp* app) {
     bt_disconnect(app->bt); // stop ble
     // furi_delay_ms(200); // Wait 2nd core to update nvm storage
     bt_keys_storage_set_default_path(app->bt);
-    bt_set_profile_pairing_method(app->bt, app->bt_prev_mode);
+    if (app->bonding) {
+        // hal primitives doesn't restarts ble, that's what we want cuz we are shutting down
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->mac);
+    }else {
+        bt_enable_peer_key_update(app->bt); // starts saving peer keys (bounded devices)
+    }
     // fails if ble radio stack isn't ready when switching profile
     // if it happens, maybe we should increase the delay after bt_disconnect
     bt_set_profile(app->bt, BtProfileSerial);
-    bt_enable_peer_key_update(app->bt); // starts saving peer keys (bounded devices)
+    furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, app->bt_prev_mode);
 }
 
 static int32_t bad_kb_worker(void* context) {
