@@ -2,7 +2,6 @@
 #include <furi.h>
 #include "loader/loader.h"
 #include "loader_i.h"
-#include "applications/services/desktop/desktop_i.h"
 
 #define TAG "LoaderSrv"
 
@@ -48,18 +47,13 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
 
     furi_assert(application->app);
     furi_assert(application->name);
-    furi_assert(application->link);
 
-    if(strcmp(application->link, "NULL") != 0) {
-        loader_start(NULL, "Applications", application->link);
-    } else {
-        if(!loader_lock(loader_instance)) {
-            FURI_LOG_E(TAG, "Loader is locked");
-            return;
-        }
-
-        loader_start_application(application, NULL);
+    if(!loader_lock(loader_instance)) {
+        FURI_LOG_E(TAG, "Loader is locked");
+        return;
     }
+
+    loader_start_application(application, NULL);
 }
 
 static void loader_submenu_callback(void* context, uint32_t index) {
@@ -162,12 +156,7 @@ static void loader_cli_list(Cli* cli, FuriString* args, Loader* instance) {
     UNUSED(instance);
     printf("Applications:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_APPS[i].link, "NULL") != 0) {
-            printf(
-                "\tFor %s, Use: Applications %s\r\n", FLIPPER_APPS[i].name, FLIPPER_APPS[i].link);
-        } else {
-            printf("\t%s\r\n", FLIPPER_APPS[i].name);
-        }
+        printf("\t%s\r\n", FLIPPER_APPS[i].name);
     }
 
     printf("Plugins:\r\n");
@@ -175,7 +164,7 @@ static void loader_cli_list(Cli* cli, FuriString* args, Loader* instance) {
         printf("\t%s\r\n", FLIPPER_PLUGINS[i].name);
     }
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         printf("Debug:\r\n");
         for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
             printf("\t%s\r\n", FLIPPER_DEBUG_APPS[i].name);
@@ -273,7 +262,7 @@ void loader_unlock(Loader* instance) {
     FURI_CRITICAL_EXIT();
 }
 
-bool loader_is_locked(Loader* instance) {
+bool loader_is_locked(const Loader* instance) {
     return instance->lock_count > 0;
 }
 
@@ -429,7 +418,7 @@ static void loader_build_menu() {
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
     }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && (FLIPPER_DEBUG_APPS_COUNT > 0)) {
         menu_add_item(
             loader_instance->primary_menu,
             "Debug Tools",
@@ -448,9 +437,8 @@ static void loader_build_menu() {
 }
 
 static void loader_build_submenu() {
-    size_t i;
-
     FURI_LOG_I(TAG, "Building plugins menu");
+    size_t i;
     for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
         submenu_add_item(
             loader_instance->plugins_menu,

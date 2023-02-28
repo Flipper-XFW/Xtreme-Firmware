@@ -51,7 +51,6 @@ class FlipperApplication:
     stack_size: int = 2048
     icon: Optional[str] = None
     order: int = 0
-    link: Optional[str] = ""
     sdk_headers: List[str] = field(default_factory=list)
     targets: List[str] = field(default_factory=lambda: ["all"])
 
@@ -194,8 +193,6 @@ class AppBuildset:
         return self.appmgr.get(app_name).supports_hardware_target(self.hw_target)
 
     def _get_app_depends(self, app_name: str) -> List[str]:
-        app_def = self.appmgr.get(app_name)
-
         # Skip app if its target is not supported by the target we are building for
         if not self._check_if_app_target_supported(app_name):
             self._writer(
@@ -203,6 +200,7 @@ class AppBuildset:
             )
             return []
 
+        app_def = self.appmgr.get(app_name)
         return list(
             filter(
                 self._check_if_app_target_supported,
@@ -325,7 +323,6 @@ class ApplicationsCGenerator:
      .name = "{app.name}",
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .link = "{f"{app.link}" if app.link else "NULL"}",
      .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
 
     def generate(self):

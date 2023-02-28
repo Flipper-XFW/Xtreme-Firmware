@@ -54,25 +54,27 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                         },
                 },
         },
-    [FuriHalBtProfileHidKeyboard] = {
-        .start = furi_hal_bt_hid_start,
-        .stop = furi_hal_bt_hid_stop,
-        .config =
-            {
-                .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
-                .appearance_char = GAP_APPEARANCE_KEYBOARD,
-                .bonding_mode = true,
-                .pairing_method = GapPairingPinCodeVerifyYesNo,
-                .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
-                .conn_param =
-                    {
-                        .conn_int_min = 0x18, // 30 ms
-                        .conn_int_max = 0x24, // 45 ms
-                        .slave_latency = 0,
-                        .supervisor_timeout = 0,
-                    },
-            },
-    }};
+    [FuriHalBtProfileHidKeyboard] =
+        {
+            .start = furi_hal_bt_hid_start,
+            .stop = furi_hal_bt_hid_stop,
+            .config =
+                {
+                    .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
+                    .appearance_char = GAP_APPEARANCE_KEYBOARD,
+                    .bonding_mode = true,
+                    .pairing_method = GapPairingPinCodeVerifyYesNo,
+                    .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
+                    .conn_param =
+                        {
+                            .conn_int_min = 0x18, // 30 ms
+                            .conn_int_max = 0x24, // 45 ms
+                            .slave_latency = 0,
+                            .supervisor_timeout = 0,
+                        },
+                },
+        },
+};
 FuriHalBtProfileConfig* current_profile = NULL;
 
 void furi_hal_bt_init() {

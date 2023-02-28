@@ -1,6 +1,6 @@
 App(
     appid="Picopass",
-    name="PicoPass Reader",
+    name="PicoPass",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="picopass_app",
@@ -9,7 +9,7 @@ App(
         "gui",
     ],
     stack_size=4 * 1024,
-    order=175,
+    order=30,
     fap_icon="125_10px.png",
     fap_category="Tools",
     fap_libs=["mbedtls"],
