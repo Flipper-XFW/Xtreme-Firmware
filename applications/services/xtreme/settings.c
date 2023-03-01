@@ -42,6 +42,7 @@ void XTREME_SETTINGS_LOAD() {
             xtreme_settings->butthurt_timer = 43200; // 12 H
             xtreme_settings->sort_dirs_first = true; // ON
             xtreme_settings->dark_mode = false; // OFF
+            xtreme_settings->left_handed = false; // OFF
         }
     }
 }
