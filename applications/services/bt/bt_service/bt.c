@@ -61,8 +61,11 @@ static ViewPort* bt_pin_code_view_port_alloc(Bt* bt) {
 }
 
 static void bt_pin_code_show(Bt* bt, uint32_t pin_code) {
+    furi_assert(bt);
     bt->pin_code = pin_code;
     notification_message(bt->notification, &sequence_display_backlight_on);
+    if(bt->suppress_pin_screen) return;
+
     gui_view_port_send_to_front(bt->gui, bt->pin_code_view_port);
     view_port_enabled_set(bt->pin_code_view_port, true);
 }
@@ -76,10 +79,10 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
-
-    if(bt_get_profile_pairing_method(bt) == GapPairingNone) return true;
-
+    bt->pin_code = pin;
     notification_message(bt->notification, &sequence_display_backlight_on);
+    if(bt->suppress_pin_screen) return true;
+
     FuriString* pin_str;
     dialog_message_set_icon(bt->dialog_message, XTREME_ASSETS()->I_BLE_Pairing_128x64, 0, 0);
     pin_str = furi_string_alloc_printf("Verify code\n%06lu", pin);

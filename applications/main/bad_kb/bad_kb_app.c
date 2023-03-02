@@ -106,6 +106,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
+    app->bt->suppress_pin_screen = true;
     app->is_bt = XTREME_SETTINGS()->bad_bt;
     app->bt_remember = XTREME_SETTINGS()->bad_bt_remember;
     const char* adv_name = furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard);
@@ -210,6 +211,7 @@ void bad_kb_app_free(BadKbApp* app) {
     if(memcmp(app->bt_old_config.mac, app->mac, BAD_KB_MAC_ADDRESS_LEN) != 0) {
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->bt_old_config.mac);
     }
+    app->bt->suppress_pin_screen = false;
 
     // Close records
     furi_record_close(RECORD_GUI);
