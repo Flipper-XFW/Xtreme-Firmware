@@ -650,12 +650,13 @@ void bad_kb_config_switch_mode(BadKbApp* app) {
     }
 }
 
-void bad_kb_config_switch_remember_mode(BadKbApp *app) {
-    if (app->bt_remember) {
+void bad_kb_config_switch_remember_mode(BadKbApp* app) {
+    if(app->bt_remember) {
         // set bouding mac
         uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
-        bt_set_profile_mac_address(app->bt, mac);   // this also restart bt
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        bt_set_profile_mac_address(app->bt, mac); // this also restart bt
         // enable keys storage
         bt_enable_peer_key_update(app->bt);
     } else {
@@ -676,11 +677,12 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
     // furi_delay_ms(200);
     bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
     app->bt_prev_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
-    if (app->bt_remember) {
+    if(app->bt_remember) {
         uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, mac);
         // using GapPairingNone breaks bounding between devices
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
     } else {
         furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
     }
@@ -688,7 +690,7 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
     bt_set_profile(app->bt, BtProfileHidKeyboard);
     if(app->is_bt) {
         furi_hal_bt_start_advertising();
-        if (app->bt_remember) {
+        if(app->bt_remember) {
             bt_enable_peer_key_update(app->bt);
         } else {
             bt_disable_peer_key_update(app->bt); // disable peer key adding to bt SRAM storage
@@ -711,7 +713,7 @@ void bad_kb_connection_deinit(BadKbApp* app) {
     bt_disconnect(app->bt); // stop ble
     // furi_delay_ms(200); // Wait 2nd core to update nvm storage
     bt_keys_storage_set_default_path(app->bt);
-    if (app->bt_remember) {
+    if(app->bt_remember) {
         // hal primitives doesn't restarts ble, that's what we want cuz we are shutting down
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->mac);
     }
@@ -911,7 +913,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(
             (worker_state == BadKbStateFileError) ||
             (worker_state == BadKbStateScriptError)) { // State: error
-            uint32_t flags = bad_kb_flags_get(WorkerEvtEnd, FuriWaitForever); // Waiting for exit command
+            uint32_t flags =
+                bad_kb_flags_get(WorkerEvtEnd, FuriWaitForever); // Waiting for exit command
             if(flags & WorkerEvtEnd) {
                 break;
             }

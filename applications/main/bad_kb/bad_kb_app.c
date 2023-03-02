@@ -151,7 +151,8 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         app->error = BadKbAppErrorCloseRpc;
         scene_manager_next_scene(app->scene_manager, BadKbSceneError);
     } else {
-        app->conn_init_thread = furi_thread_alloc_ex("BadKbConnInit", 512, (FuriThreadCallback)bad_kb_connection_init, app);
+        app->conn_init_thread = furi_thread_alloc_ex(
+            "BadKbConnInit", 512, (FuriThreadCallback)bad_kb_connection_init, app);
         furi_thread_start(app->conn_init_thread);
         if(!furi_string_empty(app->file_path)) {
             app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);

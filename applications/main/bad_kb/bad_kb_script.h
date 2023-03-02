@@ -36,7 +36,7 @@ typedef struct {
 
 void bad_kb_config_switch_mode(BadKbApp* app);
 
-void bad_kb_config_switch_remember_mode(BadKbApp *app);
+void bad_kb_config_switch_remember_mode(BadKbApp* app);
 
 int32_t bad_kb_connection_init(BadKbApp* app);
 

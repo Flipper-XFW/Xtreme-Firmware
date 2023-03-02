@@ -239,8 +239,7 @@ bool bad_kb_is_idle_state(BadKb* bad_kb) {
         bad_kb->view,
         BadKbModel * model,
         {
-            if((model->state.state == BadKbStateIdle) ||
-               (model->state.state == BadKbStateDone) ||
+            if((model->state.state == BadKbStateIdle) || (model->state.state == BadKbStateDone) ||
                (model->state.state == BadKbStateNotConnected)) {
                 is_idle = true;
             }

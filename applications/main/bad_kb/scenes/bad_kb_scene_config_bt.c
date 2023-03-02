@@ -54,7 +54,7 @@ void bad_kb_scene_config_bt_on_enter(void* context) {
     item = variable_item_list_add(var_item_list, "BT device name", 0, NULL, bad_kb);
 
     // this doesn't update instantly when toggling between Bounding modes
-    if (!bad_kb->bt_remember) {
+    if(!bad_kb->bt_remember) {
         item = variable_item_list_add(var_item_list, "BT MAC address", 0, NULL, bad_kb);
     }
 
@@ -75,7 +75,7 @@ bool bad_kb_scene_config_bt_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
         } else if(event.event == VarItemListIndexConnection) {
             bad_kb_config_switch_mode(bad_kb);
-        } else if (event.event == VarItemListIndexRemember) {
+        } else if(event.event == VarItemListIndexRemember) {
             bad_kb_config_switch_remember_mode(bad_kb);
             scene_manager_previous_scene(bad_kb->scene_manager);
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBt);
