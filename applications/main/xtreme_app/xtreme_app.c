@@ -19,15 +19,7 @@ static bool xtreme_app_back_event_callback(void* context) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
 
         if(app->save_subghz) {
-            FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-            if(flipper_format_file_open_existing(
-                   subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-                flipper_format_insert_or_update_bool(
-                    subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
-                flipper_format_insert_or_update_bool(
-                    subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
-            }
-            flipper_format_free(subghz_range);
+            furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
         }
 
         if(app->save_level) {
@@ -126,16 +118,7 @@ XtremeApp* xtreme_app_alloc() {
 
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* subghz_range = flipper_format_file_alloc(storage);
-    app->subghz_extend = false;
-    app->subghz_bypass = false;
-    if(flipper_format_file_open_existing(subghz_range, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(
-            subghz_range, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
-        flipper_format_read_bool(subghz_range, "ignore_default_tx_region", &app->subghz_bypass, 1);
-    }
-    flipper_format_free(subghz_range);
+    furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
@@ -146,6 +129,7 @@ XtremeApp* xtreme_app_alloc() {
 
     app->asset_pack = 0;
     asset_packs_init(app->asset_packs);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* folder = storage_file_alloc(storage);
     FileInfo info;
     char* name = malloc(MAX_PACK_NAME_LEN);

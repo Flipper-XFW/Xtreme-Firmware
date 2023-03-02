@@ -419,21 +419,42 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     return value;
 }
 
-bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
-    bool is_extended = false;
-    bool is_allowed = false;
-
-    // TODO: !!! Move file check to another place
+void furi_hal_subghz_get_extend_settings(bool* extend, bool* bypass) {
+    *extend = false;
+    *bypass = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
+    FlipperFormat* file = flipper_format_file_alloc(storage);
 
-    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &is_extended, 1);
-        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &is_allowed, 1);
+    if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
+        flipper_format_read_bool(file, "use_ext_range_at_own_risk", extend, 1);
+        flipper_format_read_bool(file, "ignore_default_tx_region", bypass, 1);
     }
 
-    flipper_format_free(fff_data_file);
+    flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+}
+
+void furi_hal_subghz_set_extend_settings(bool extend, bool bypass) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+
+    do {
+        if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt")) break;
+        if(!flipper_format_write_header_cstr(file, "Flipper SubGhz Setting File", 1)) break;
+        if(!flipper_format_write_comment_cstr(file, "Whether to allow extended ranges that can break your flipper")) break;
+        if(!flipper_format_write_bool(file, "use_ext_range_at_own_risk", &extend, 1)) break;
+        if(!flipper_format_write_comment_cstr(file, "Whether to ignore the default TX region settings")) break;
+        if(!flipper_format_write_bool(file, "ignore_default_tx_region", &bypass, 1)) break;
+    } while(0);
+
+    flipper_format_free(file);
+    furi_record_close(RECORD_STORAGE);
+}
+
+bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
+    bool is_extended;
+    bool is_allowed;
+    furi_hal_subghz_get_extend_settings(&is_extended, &is_allowed);
 
     switch(furi_hal_version_get_hw_region_otp()) {
     case FuriHalVersionRegionEuRu:
