@@ -636,10 +636,13 @@ static void bad_kb_usb_hid_state_callback(bool state, void* context) {
     }
 }
 
-void bad_kb_config_switch_mode(BadKbApp* app) {
+void bad_kb_reload_worker(BadKbApp* app) {
     bad_kb_script_close(app->bad_kb_script);
     app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
     bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
+}
+
+void bad_kb_config_switch_mode(BadKbApp* app) {
     scene_manager_previous_scene(app->scene_manager);
     if(app->is_bt) {
         furi_hal_bt_start_advertising();
@@ -648,6 +651,7 @@ void bad_kb_config_switch_mode(BadKbApp* app) {
         furi_hal_bt_stop_advertising();
         scene_manager_next_scene(app->scene_manager, BadKbSceneConfigUsb);
     }
+    bad_kb_reload_worker(app);
 }
 
 void bad_kb_config_switch_remember_mode(BadKbApp* app) {
@@ -666,6 +670,7 @@ void bad_kb_config_switch_remember_mode(BadKbApp* app) {
         // disable key storage
         bt_disable_peer_key_update(app->bt);
     }
+    bad_kb_reload_worker(app);
 }
 
 int32_t bad_kb_connection_init(BadKbApp* app) {
