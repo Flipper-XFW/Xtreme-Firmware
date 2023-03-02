@@ -27,6 +27,8 @@ Canvas* canvas_init() {
     // Wake up display
     u8g2_SetPowerSave(&canvas->fb, 0);
 
+    canvas_set_orientation(canvas, CanvasOrientationHorizontal);
+
     // Clear buffer and send to device
     canvas_clear(canvas);
     canvas_commit(canvas);
@@ -408,6 +410,13 @@ void canvas_set_bitmap_mode(Canvas* canvas, bool alpha) {
 
 void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation) {
     furi_assert(canvas);
+    if(XTREME_SETTINGS()->left_handed) {
+        if(orientation == CanvasOrientationHorizontal) {
+            orientation = CanvasOrientationHorizontalFlip;
+        } else if(orientation == CanvasOrientationHorizontalFlip) {
+            orientation = CanvasOrientationHorizontal;
+        }
+    }
     if(canvas->orientation != orientation) {
         switch(orientation) {
         case CanvasOrientationHorizontal:

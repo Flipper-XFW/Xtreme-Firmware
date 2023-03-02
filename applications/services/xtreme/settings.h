@@ -31,6 +31,7 @@ typedef struct {
     int32_t butthurt_timer;
     bool sort_dirs_first;
     bool dark_mode;
+    bool left_handed;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();

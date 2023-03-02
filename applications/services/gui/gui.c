@@ -326,6 +326,25 @@ static void gui_input(Gui* gui, InputEvent* input_event) {
             gui->ongoing_input_view_port = view_port;
         }
 
+        if(XTREME_SETTINGS()->left_handed) {
+            switch(input_event->key) {
+                case InputKeyUp:
+                    input_event->key = InputKeyDown;
+                    break;
+                case InputKeyDown:
+                    input_event->key = InputKeyUp;
+                    break;
+                case InputKeyLeft:
+                    input_event->key = InputKeyRight;
+                    break;
+                case InputKeyRight:
+                    input_event->key = InputKeyLeft;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         if(view_port && view_port == gui->ongoing_input_view_port) {
             view_port_input(view_port, input_event);
         } else if(gui->ongoing_input_view_port && input_event->type == InputTypeRelease) {
