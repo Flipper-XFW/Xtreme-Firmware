@@ -328,20 +328,20 @@ static void gui_input(Gui* gui, InputEvent* input_event) {
 
         if(XTREME_SETTINGS()->left_handed) {
             switch(input_event->key) {
-                case InputKeyUp:
-                    input_event->key = InputKeyDown;
-                    break;
-                case InputKeyDown:
-                    input_event->key = InputKeyUp;
-                    break;
-                case InputKeyLeft:
-                    input_event->key = InputKeyRight;
-                    break;
-                case InputKeyRight:
-                    input_event->key = InputKeyLeft;
-                    break;
-                default:
-                    break;
+            case InputKeyUp:
+                input_event->key = InputKeyDown;
+                break;
+            case InputKeyDown:
+                input_event->key = InputKeyUp;
+                break;
+            case InputKeyLeft:
+                input_event->key = InputKeyRight;
+                break;
+            case InputKeyRight:
+                input_event->key = InputKeyLeft;
+                break;
+            default:
+                break;
             }
         }
 
