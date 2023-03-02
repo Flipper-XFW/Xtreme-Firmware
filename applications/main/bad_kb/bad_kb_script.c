@@ -650,8 +650,8 @@ void bad_kb_config_switch_mode(BadKbApp* app) {
     }
 }
 
-void bad_kb_config_switch_bonding_mode(BadKbApp *app) {
-    if (app->bonding) {
+void bad_kb_config_switch_remember_mode(BadKbApp *app) {
+    if (app->bt_remember) {
         // set bouding mac
         uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
         furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
@@ -676,7 +676,7 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
     // furi_delay_ms(200);
     bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
     app->bt_prev_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
-    if (app->bonding) {    // usefull if bounding become an XTREME setting
+    if (app->bt_remember) {
         uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, mac);
         // using GapPairingNone breaks bounding between devices
@@ -688,8 +688,11 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
     bt_set_profile(app->bt, BtProfileHidKeyboard);
     if(app->is_bt) {
         furi_hal_bt_start_advertising();
-        if (!app->bonding)
+        if (app->bt_remember) {
+            bt_enable_peer_key_update(app->bt);
+        } else {
             bt_disable_peer_key_update(app->bt); // disable peer key adding to bt SRAM storage
+        }
     } else {
         furi_hal_bt_stop_advertising();
     }
@@ -708,12 +711,11 @@ void bad_kb_connection_deinit(BadKbApp* app) {
     bt_disconnect(app->bt); // stop ble
     // furi_delay_ms(200); // Wait 2nd core to update nvm storage
     bt_keys_storage_set_default_path(app->bt);
-    if (app->bonding) {
+    if (app->bt_remember) {
         // hal primitives doesn't restarts ble, that's what we want cuz we are shutting down
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->mac);
-    }else {
-        bt_enable_peer_key_update(app->bt); // starts saving peer keys (bounded devices)
     }
+    bt_enable_peer_key_update(app->bt); // starts saving peer keys (bounded devices)
     // fails if ble radio stack isn't ready when switching profile
     // if it happens, maybe we should increase the delay after bt_disconnect
     bt_set_profile(app->bt, BtProfileSerial);

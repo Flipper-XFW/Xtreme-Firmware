@@ -107,7 +107,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
     app->is_bt = XTREME_SETTINGS()->bad_bt;
-    app->bonding = BondingForgetDevices;  
+    app->bt_remember = XTREME_SETTINGS()->bad_bt_remember;
     const char* adv_name = furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard);
     memcpy(app->name, adv_name, BAD_KB_ADV_NAME_MAX_LEN);
     memcpy(app->bt_old_config.name, adv_name, BAD_KB_ADV_NAME_MAX_LEN);

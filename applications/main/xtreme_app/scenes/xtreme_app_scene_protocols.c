@@ -8,6 +8,14 @@ static void xtreme_app_scene_protocols_bad_bk_mode_changed(VariableItem* item) {
     app->save_settings = true;
 }
 
+static void xtreme_app_scene_protocols_bad_bt_remember_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->bad_bt_remember = value;
+    app->save_settings = true;
+}
+
 static void xtreme_app_scene_protocols_subghz_extend_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     app->subghz_extend = variable_item_get_current_value_index(item);
@@ -32,6 +40,11 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
         var_item_list, "Bad KB Mode", 2, xtreme_app_scene_protocols_bad_bk_mode_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt ? "BT" : "USB");
+
+    item = variable_item_list_add(
+        var_item_list, "Bad BT Remember", 2, xtreme_app_scene_protocols_bad_bt_remember_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->bad_bt_remember);
+    variable_item_set_current_value_text(item, xtreme_settings->bad_bt_remember ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list, "SubGHz Extend", 2, xtreme_app_scene_protocols_subghz_extend_changed, app);

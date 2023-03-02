@@ -40,10 +40,6 @@ typedef enum BadKbCustomEvent {
     BadKbCustomEventErrorBack
 } BadKbCustomEvent;
 
-
-#define    BondingForgetDevices       false
-#define    BondingRememberDevices     true
-
 typedef struct {
     //uint8_t bounded_mac[BAD_KB_MAC_ADDRESS_LEN];
     uint8_t mac[BAD_KB_MAC_ADDRESS_LEN];
@@ -65,7 +61,7 @@ struct BadKbApp {
     ByteInput* byte_input;
     uint8_t mac[BAD_KB_MAC_ADDRESS_LEN];
     char name[BAD_KB_ADV_NAME_MAX_LEN + 1];
-    bool bonding;          // weither we remember paired devices or not
+    bool bt_remember;          // weither we remember paired devices or not
     BadKbBtConfig bt_old_config;
 
     BadKbAppError error;

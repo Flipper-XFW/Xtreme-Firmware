@@ -5,7 +5,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexConnection,
-    VarItemListIndexBonding,
+    VarItemListIndexRemember,
     VarItemListIndexKeyboardLayout,
     VarItemListIndexAdvertisementName,
     VarItemListIndexMacAddress,
@@ -22,9 +22,11 @@ void bad_kb_scene_config_bt_connection_callback(VariableItem* item) {
 
 void bad_kb_scene_config_bt_bounding_callback(VariableItem* item) {
     BadKbApp* bad_kb = variable_item_get_context(item);
-    bad_kb->bonding = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, bad_kb->bonding ? "Remember" : "Forget");
-    view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexBonding);
+    bad_kb->bt_remember = variable_item_get_current_value_index(item);
+    XTREME_SETTINGS()->bad_bt_remember = bad_kb->bt_remember;
+    XTREME_SETTINGS_SAVE();
+    variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
+    view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexRemember);
 }
 
 void bad_kb_scene_config_bt_var_item_list_callback(void* context, uint32_t index) {
@@ -43,16 +45,16 @@ void bad_kb_scene_config_bt_on_enter(void* context) {
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
 
     item = variable_item_list_add(
-        var_item_list, "Bonding", 2, bad_kb_scene_config_bt_bounding_callback, bad_kb);
-    variable_item_set_current_value_index(item, bad_kb->bonding);
-    variable_item_set_current_value_text(item, bad_kb->bonding ? "Remember" : "Forget");
+        var_item_list, "Remember", 2, bad_kb_scene_config_bt_bounding_callback, bad_kb);
+    variable_item_set_current_value_index(item, bad_kb->bt_remember);
+    variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
 
     item = variable_item_list_add(var_item_list, "Keyboard layout", 0, NULL, bad_kb);
 
     item = variable_item_list_add(var_item_list, "BT device name", 0, NULL, bad_kb);
-    
+
     // this doesn't update instantly when toggling between Bounding modes
-    if (!bad_kb->bonding) {
+    if (!bad_kb->bt_remember) {
         item = variable_item_list_add(var_item_list, "BT MAC address", 0, NULL, bad_kb);
     }
 
@@ -73,8 +75,8 @@ bool bad_kb_scene_config_bt_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
         } else if(event.event == VarItemListIndexConnection) {
             bad_kb_config_switch_mode(bad_kb);
-        } else if (event.event == VarItemListIndexBonding) {
-            bad_kb_config_switch_bonding_mode(bad_kb);
+        } else if (event.event == VarItemListIndexRemember) {
+            bad_kb_config_switch_remember_mode(bad_kb);
             scene_manager_previous_scene(bad_kb->scene_manager);
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBt);
         } else if(event.event == VarItemListIndexAdvertisementName) {
