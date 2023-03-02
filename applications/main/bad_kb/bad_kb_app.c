@@ -150,6 +150,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     if(furi_hal_usb_is_locked()) {
         app->error = BadKbAppErrorCloseRpc;
+        app->conn_init_thread = NULL;
         scene_manager_next_scene(app->scene_manager, BadKbSceneError);
     } else {
         app->conn_init_thread = furi_thread_alloc_ex(
@@ -224,9 +225,11 @@ void bad_kb_app_free(BadKbApp* app) {
     furi_string_free(app->file_path);
     furi_string_free(app->keyboard_layout);
 
-    furi_thread_join(app->conn_init_thread);
+    if(app->conn_init_thread) {
+        furi_thread_join(app->conn_init_thread);
+        furi_thread_free(app->conn_init_thread);
+    }
     bad_kb_connection_deinit(app);
-    furi_thread_free(app->conn_init_thread);
 
     free(app);
 }
