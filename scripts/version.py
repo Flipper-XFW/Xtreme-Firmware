@@ -34,25 +34,20 @@ class GitVersion:
 
         branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
 
-        version = (
-            os.environ.get("DIST_SUFFIX", None)
-            or VERSION
-            or "unknown"
-        )
+        version = os.environ.get("DIST_SUFFIX", None) or VERSION or "unknown"
 
-        custom_fz_name = (
-            os.environ.get("CUSTOM_FLIPPER_NAME", None)
-            or ""
-        )
+        custom_fz_name = os.environ.get("CUSTOM_FLIPPER_NAME", None) or ""
 
-        force_no_dirty = (
-            os.environ.get("FORCE_NO_DIRTY", None)
-            or ""
-        )
-        if (force_no_dirty != ""):
+        force_no_dirty = os.environ.get("FORCE_NO_DIRTY", None) or ""
+        if force_no_dirty != "":
             dirty = False
 
-        if (custom_fz_name != "") and (len(custom_fz_name) <= 8) and (custom_fz_name.isalnum()) and (custom_fz_name.isascii()):
+        if (
+            (custom_fz_name != "")
+            and (len(custom_fz_name) <= 8)
+            and (custom_fz_name.isalnum())
+            and (custom_fz_name.isascii())
+        ):
             return {
                 "GIT_COMMIT": commit,
                 "GIT_BRANCH": branch,
