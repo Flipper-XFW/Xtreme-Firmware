@@ -61,6 +61,7 @@ struct BadKbScript {
     FuriString* keyboard_layout;
     uint32_t defdelay;
     uint16_t layout[128];
+    uint32_t stringdelay;
     FuriThread* thread;
     uint8_t file_buf[FILE_BUFFER_LEN + 1];
     uint8_t buf_start;
@@ -144,6 +145,8 @@ static const char ducky_cmd_delay[] = {"DELAY "};
 static const char ducky_cmd_string[] = {"STRING "};
 static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY "};
 static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY "};
+static const char ducky_cmd_stringdelay_1[] = {"STRINGDELAY "};
+static const char ducky_cmd_stringdelay_2[] = {"STRING_DELAY "};
 static const char ducky_cmd_repeat[] = {"REPEAT "};
 static const char ducky_cmd_sysrq[] = {"SYSRQ "};
 
@@ -295,6 +298,7 @@ static bool ducky_altstring(BadKbScript* bad_kb, const char* param) {
 
 static bool ducky_string(BadKbScript* bad_kb, const char* param) {
     uint32_t i = 0;
+
     while(param[i] != '\0') {
         uint16_t keycode = BADKB_ASCII_TO_KEY(bad_kb, param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
@@ -306,9 +310,13 @@ static bool ducky_string(BadKbScript* bad_kb, const char* param) {
                 furi_hal_hid_kb_press(keycode);
                 furi_hal_hid_kb_release(keycode);
             }
+            if(bad_kb->stringdelay > 0) {
+                furi_delay_ms(bad_kb->stringdelay);
+            }
         }
         i++;
     }
+    bad_kb->stringdelay = 0;
     return true;
 }
 
@@ -370,6 +378,19 @@ static int32_t
             snprintf(error, error_len, "Invalid number %s", line_tmp);
         }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
+    } else if(
+        (strncmp(line_tmp, ducky_cmd_stringdelay_1, strlen(ducky_cmd_stringdelay_1)) == 0) ||
+        (strncmp(line_tmp, ducky_cmd_stringdelay_2, strlen(ducky_cmd_stringdelay_2)) == 0)) {
+        //STRINGDELAY, finally it's here
+        line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
+        state = ducky_get_number(line_tmp, &bad_kb->stringdelay);
+        if((state) && (bad_kb->stringdelay > 0)) {
+            return state;
+        }
+        if(error != NULL) {
+            snprintf(error, error_len, "Invalid number %s", line_tmp);
+        }
+        return SCRIPT_STATE_ERROR;
     } else if(strncmp(line_tmp, ducky_cmd_string, strlen(ducky_cmd_string)) == 0) {
         // STRING
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
@@ -634,7 +655,7 @@ void bad_kb_config_switch_bonding_mode(BadKbApp *app) {
         // set bouding mac
         uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
         furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
-        bt_set_profile_mac_address(app->bt, mac);   // this also restart bt    
+        bt_set_profile_mac_address(app->bt, mac);   // this also restart bt
         // enable keys storage
         bt_enable_peer_key_update(app->bt);
     } else {
@@ -699,6 +720,19 @@ void bad_kb_connection_deinit(BadKbApp* app) {
     furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, app->bt_prev_mode);
 }
 
+static uint32_t bad_kb_flags_get(uint32_t flags_mask, uint32_t timeout) {
+    uint32_t flags = furi_thread_flags_get();
+    furi_check((flags & FuriFlagError) == 0);
+    if(flags == 0) {
+        flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny, timeout);
+        furi_check(((flags & FuriFlagError) == 0) || (flags == FuriFlagErrorTimeout));
+    } else {
+        uint32_t state = furi_thread_flags_clear(flags);
+        furi_check((state & FuriFlagError) == 0);
+    }
+    return flags;
+}
+
 static int32_t bad_kb_worker(void* context) {
     BadKbScript* bad_kb = context;
 
@@ -747,11 +781,8 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateNotConnected) { // State: Not connected
-            uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
-                FuriFlagWaitAny,
-                FuriWaitForever);
-            furi_check((flags & FuriFlagError) == 0);
+            uint32_t flags = bad_kb_flags_get(
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle, FuriWaitForever);
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtConnect) {
@@ -762,11 +793,8 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateIdle) { // State: ready to start
-            uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtToggle | WorkerEvtDisconnect,
-                FuriFlagWaitAny,
-                FuriWaitForever);
-            furi_check((flags & FuriFlagError) == 0);
+            uint32_t flags = bad_kb_flags_get(
+                WorkerEvtEnd | WorkerEvtToggle | WorkerEvtDisconnect, FuriWaitForever);
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtToggle) { // Start executing script
@@ -775,6 +803,7 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->buf_len = 0;
                 bad_kb->st.line_cur = 0;
                 bad_kb->defdelay = 0;
+                bad_kb->stringdelay = 0;
                 bad_kb->repeat_cnt = 0;
                 bad_kb->file_end = false;
                 storage_file_seek(script_file, 0, true);
@@ -786,11 +815,8 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateWillRun) { // State: start on connection
-            uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
-                FuriFlagWaitAny,
-                FuriWaitForever);
-            furi_check((flags & FuriFlagError) == 0);
+            uint32_t flags = bad_kb_flags_get(
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle, FuriWaitForever);
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtConnect) { // Start executing script
@@ -799,16 +825,26 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->buf_len = 0;
                 bad_kb->st.line_cur = 0;
                 bad_kb->defdelay = 0;
+                bad_kb->stringdelay = 0;
                 bad_kb->repeat_cnt = 0;
                 bad_kb->file_end = false;
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
-                furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
+                flags = furi_thread_flags_wait(
+                    WorkerEvtEnd | WorkerEvtDisconnect | WorkerEvtToggle,
+                    FuriFlagWaitAny | FuriFlagNoClear,
+                    1500);
+                if(flags == FuriFlagErrorTimeout) {
+                    // If nothing happened - start script execution
+                    worker_state = BadKbStateRunning;
+                } else if(flags & WorkerEvtToggle) {
+                    worker_state = BadKbStateIdle;
+                    furi_thread_flags_clear(WorkerEvtToggle);
+                }
                 if(bad_kb->bt) {
                     update_bt_timeout(bad_kb->bt);
                 }
                 bad_kb_script_set_keyboard_layout(bad_kb, bad_kb->keyboard_layout);
-                worker_state = BadKbStateRunning;
             } else if(flags & WorkerEvtToggle) { // Cancel scheduled execution
                 worker_state = BadKbStateNotConnected;
             }
@@ -873,9 +909,7 @@ static int32_t bad_kb_worker(void* context) {
         } else if(
             (worker_state == BadKbStateFileError) ||
             (worker_state == BadKbStateScriptError)) { // State: error
-            uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd, FuriFlagWaitAny, FuriWaitForever); // Waiting for exit command
-            furi_check((flags & FuriFlagError) == 0);
+            uint32_t flags = bad_kb_flags_get(WorkerEvtEnd, FuriWaitForever); // Waiting for exit command
             if(flags & WorkerEvtEnd) {
                 break;
             }
