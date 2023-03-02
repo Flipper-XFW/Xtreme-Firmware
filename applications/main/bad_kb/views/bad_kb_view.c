@@ -56,17 +56,13 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         if(XTREME_ASSETS()->is_nsfw) {
             elements_button_center(canvas, "Cum");
         } else {
-            elements_button_center(canvas, "Start");
+            elements_button_center(canvas, "Run");
         }
+        elements_button_left(canvas, "Config");
     } else if((model->state.state == BadKbStateRunning) || (model->state.state == BadKbStateDelay)) {
         elements_button_center(canvas, "Stop");
     } else if(model->state.state == BadKbStateWillRun) {
         elements_button_center(canvas, "Cancel");
-    }
-
-    if((model->state.state == BadKbStateNotConnected) || (model->state.state == BadKbStateIdle) ||
-       (model->state.state == BadKbStateDone)) {
-        elements_button_left(canvas, "Config");
     }
 
     if(model->state.state == BadKbStateNotConnected) {
@@ -235,4 +231,20 @@ void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {
             model->anim_frame ^= 1;
         },
         true);
+}
+
+bool bad_kb_is_idle_state(BadKb* bad_kb) {
+    bool is_idle = false;
+    with_view_model(
+        bad_kb->view,
+        BadKbModel * model,
+        {
+            if((model->state.state == BadKbStateIdle) ||
+               (model->state.state == BadKbStateDone) ||
+               (model->state.state == BadKbStateNotConnected)) {
+                is_idle = true;
+            }
+        },
+        false);
+    return is_idle;
 }

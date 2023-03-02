@@ -725,7 +725,7 @@ static uint32_t bad_kb_flags_get(uint32_t flags_mask, uint32_t timeout) {
     furi_check((flags & FuriFlagError) == 0);
     if(flags == 0) {
         flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny, timeout);
-        furi_check(((flags & FuriFlagError) == 0) || (flags == FuriFlagErrorTimeout));
+        furi_check(((flags & FuriFlagError) == 0) || (flags == (unsigned)FuriFlagErrorTimeout));
     } else {
         uint32_t state = furi_thread_flags_clear(flags);
         furi_check((state & FuriFlagError) == 0);
@@ -834,7 +834,7 @@ static int32_t bad_kb_worker(void* context) {
                     WorkerEvtEnd | WorkerEvtDisconnect | WorkerEvtToggle,
                     FuriFlagWaitAny | FuriFlagNoClear,
                     1500);
-                if(flags == FuriFlagErrorTimeout) {
+                if(flags == (unsigned)FuriFlagErrorTimeout) {
                     // If nothing happened - start script execution
                     worker_state = BadKbStateRunning;
                 } else if(flags & WorkerEvtToggle) {
