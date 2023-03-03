@@ -1,6 +1,6 @@
 App(
     appid="swd_probe",
-    name="SWD Probe",
+    name="[SWD] Probe",
     apptype=FlipperAppType.PLUGIN,
     entry_point="swd_probe_app_main",
     cdefines=["APP_SWD_PROBE"],
@@ -8,6 +8,6 @@ App(
     stack_size=2 * 1024,
     order=10,
     fap_icon="icons/app.png",
-    fap_category="Tools",
+    fap_category="GPIO",
     fap_icon_assets="icons",
 )
