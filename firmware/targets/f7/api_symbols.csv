@@ -1379,7 +1379,7 @@ Function,+,furi_hal_spi_bus_tx,_Bool,"FuriHalSpiBusHandle*, const uint8_t*, size
 Function,-,furi_hal_spi_config_deinit_early,void,
 Function,-,furi_hal_spi_config_init,void,
 Function,-,furi_hal_spi_config_init_early,void,
-Function,+,furi_hal_spi_dma_init,void,
+Function,-,furi_hal_spi_dma_init,void,
 Function,+,furi_hal_spi_release,void,FuriHalSpiBusHandle*
 Function,+,furi_hal_subghz_check_radio,_Bool,
 Function,+,furi_hal_subghz_disable_ext_power,void,

@@ -78,32 +78,81 @@ typedef enum {
 /** Early initialization */
 void furi_hal_rtc_init_early();
 
-/** Early deinitialization */
+/** Early de-initialization */
 void furi_hal_rtc_deinit_early();
 
 /** Initialize RTC subsystem */
 void furi_hal_rtc_init();
 
+/** Get RTC register content
+ *
+ * @param[in]  reg   The register identifier
+ *
+ * @return     content of the register
+ */
 uint32_t furi_hal_rtc_get_register(FuriHalRtcRegister reg);
 
+/** Set register content
+ *
+ * @param[in]  reg    The register identifier
+ * @param[in]  value  The value to store into register
+ */
 void furi_hal_rtc_set_register(FuriHalRtcRegister reg, uint32_t value);
 
+/** Set Log Level value
+ *
+ * @param[in]  level  The level to store
+ */
 void furi_hal_rtc_set_log_level(uint8_t level);
 
+/** Get Log Level value
+ *
+ * @return     The Log Level value
+ */
 uint8_t furi_hal_rtc_get_log_level();
 
+/** Set RTC Flag
+ *
+ * @param[in]  flag  The flag to set
+ */
 void furi_hal_rtc_set_flag(FuriHalRtcFlag flag);
 
+/** Reset RTC Flag
+ *
+ * @param[in]  flag  The flag to reset
+ */
 void furi_hal_rtc_reset_flag(FuriHalRtcFlag flag);
 
+/** Check if RTC Flag is set
+ *
+ * @param[in]  flag  The flag to check
+ *
+ * @return     true if set
+ */
 bool furi_hal_rtc_is_flag_set(FuriHalRtcFlag flag);
 
+/** Set RTC boot mode
+ *
+ * @param[in]  mode  The mode to set
+ */
 void furi_hal_rtc_set_boot_mode(FuriHalRtcBootMode mode);
 
+/** Get RTC boot mode
+ *
+ * @return     The RTC boot mode.
+ */
 FuriHalRtcBootMode furi_hal_rtc_get_boot_mode();
 
+/** Set Heap Track mode
+ *
+ * @param[in]  mode  The mode to set
+ */
 void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode);
 
+/** Get RTC Heap Track mode
+ *
+ * @return     The RTC heap track mode.
+ */
 FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode();
 
 /** Set locale units
@@ -146,23 +195,58 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat();
  *
  * @param      datetime  The date time to set
  */
-
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime);
 
+/** Get RTC Date Time
+ *
+ * @param      datetime  The datetime
+ */
 void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime);
 
+/** Validate Date Time
+ *
+ * @param      datetime  The datetime to validate
+ *
+ * @return     { description_of_the_return_value }
+ */
 bool furi_hal_rtc_validate_datetime(FuriHalRtcDateTime* datetime);
 
+/** Set RTC Fault Data
+ *
+ * @param[in]  value  The value
+ */
 void furi_hal_rtc_set_fault_data(uint32_t value);
 
+/** Get RTC Fault Data
+ *
+ * @return     RTC Fault Data value
+ */
 uint32_t furi_hal_rtc_get_fault_data();
 
+/** Set Pin Fails count
+ *
+ * @param[in]  value  The Pin Fails count
+ */
 void furi_hal_rtc_set_pin_fails(uint32_t value);
 
+/** Get Pin Fails count
+ *
+ * @return     Pin Fails Count
+ */
 uint32_t furi_hal_rtc_get_pin_fails();
 
+/** Get UNIX Timestamp
+ *
+ * @return     Unix Timestamp in seconds from UNIX epoch start
+ */
 uint32_t furi_hal_rtc_get_timestamp();
 
+/** Convert DateTime to UNIX timestamp
+ *
+ * @param      datetime  The datetime
+ *
+ * @return     UNIX Timestamp in seconds from UNIX epoch start
+ */
 uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime);
 
 #ifdef __cplusplus
