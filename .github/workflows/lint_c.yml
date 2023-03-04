@@ -11,6 +11,7 @@ on:
 
 env:
   TARGETS: f7
+  FBT_TOOLCHAIN_PATH: /home/runner/work
   SET_GH_OUTPUT: 1
 
 jobs:

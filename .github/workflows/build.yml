@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  TARGETS: f7 f18
+  TARGETS: f7
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /home/runner/work
 
@@ -47,7 +47,9 @@ jobs:
       - name: 'Make artifacts directory'
         run: |
           rm -rf artifacts
+          rm -rf map_analyser_files
           mkdir artifacts
+          mkdir map_analyser_files
 
       - name: 'Bundle scripts'
         run: |
@@ -80,6 +82,12 @@ jobs:
       - name: 'Bundle core2 firmware'
         run: |
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
+
+      - name: 'Copy map analyser files'
+        run: |
+          cp build/f7-firmware-*/firmware.elf.map map_analyser_files/firmware.elf.map
+          cp build/f7-firmware-*/firmware.elf map_analyser_files/firmware.elf
+          cp ${{ github.event_path }} map_analyser_files/event.json
 
       - name: 'Updater artifact'
         uses: actions/upload-artifact@v3
@@ -156,5 +164,5 @@ jobs:
           set -e
           for TARGET in ${TARGETS}; do
             TARGET="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET DEBUG=0 COMPACT=1 updater_package 
+            ./fbt TARGET_HW=$TARGET DEBUG=0 COMPACT=1 fap_dist updater_package
           done
