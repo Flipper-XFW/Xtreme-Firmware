@@ -9,6 +9,10 @@
 #include <storage/storage.h>
 #include <power/power_service/power.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_PACK_NAME_LEN 32
 
 #define XTREME_SETTINGS_VERSION (5)
@@ -40,3 +44,7 @@ XtremeSettings* XTREME_SETTINGS();
 void XTREME_SETTINGS_LOAD();
 
 bool XTREME_SETTINGS_SAVE();
+
+#ifdef __cplusplus
+}
+#endif

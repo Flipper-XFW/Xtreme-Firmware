@@ -4,6 +4,10 @@
 #include <gui/icon_i.h>
 #include <toolbox/path.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PACKS_DIR EXT_PATH("dolphin_custom")
 
 typedef struct {
@@ -36,3 +40,7 @@ typedef struct {
 void XTREME_ASSETS_LOAD();
 
 XtremeAssets* XTREME_ASSETS();
+
+#ifdef __cplusplus
+}
+#endif
