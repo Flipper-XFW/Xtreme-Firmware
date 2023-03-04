@@ -6,7 +6,7 @@
 #include <storage/storage.h>
 
 #include <lib/toolbox/path.h>
-#include <assets_icons.h>
+#include <SubGHz_Playlist_icons.h>
 
 #include <lib/subghz/protocols/protocol_items.h>
 #include <flipper_format/flipper_format_i.h>
@@ -591,8 +591,6 @@ static void render_callback(Canvas* canvas, void* ctx) {
             }
         }
         break;
-    default:
-        break;
     }
 
     furi_string_free(temp_str);
@@ -683,9 +681,8 @@ int32_t playlist_app(void* p) {
         dialog_file_browser_set_basic_options(&browser_options, PLAYLIST_EXT, &I_sub1_10px);
         browser_options.base_path = PLAYLIST_FOLDER;
 
-        bool res =
+        const bool res =
             dialog_file_browser_show(dialogs, app->file_path, app->file_path, &browser_options);
-
         furi_record_close(RECORD_DIALOGS);
         // check if a file was selected
         if(!res) {
