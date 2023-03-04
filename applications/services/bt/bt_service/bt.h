@@ -47,7 +47,7 @@ const char* bt_get_profile_adv_name(Bt* bt);
 void bt_set_profile_mac_address(Bt* bt, const uint8_t mac[6]);
 const uint8_t* bt_get_profile_mac_address(Bt* bt);
 
-bool bt_remote_rssi(Bt* bt, BtRssi* rssi);
+bool bt_remote_rssi(Bt* bt, uint8_t* rssi);
 
 void bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method);
 GapPairing bt_get_profile_pairing_method(Bt* bt);
