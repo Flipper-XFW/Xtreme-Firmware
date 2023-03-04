@@ -1,7 +1,12 @@
 #include "applications.h"
 #include <furi.h>
+#include <storage/storage.h>
 #include "loader/loader.h"
 #include "loader_i.h"
+#include "applications/main/fap_loader/fap_loader_app.h"
+#include <flipper_application/application_manifest.h>
+#include <gui/icon_i.h>
+#include <core/dangerous_defines.h>
 
 #define TAG "LoaderSrv"
 
@@ -43,36 +48,6 @@ static bool
     return true;
 }
 
-static void loader_menu_callback(void* _ctx, uint32_t index) {
-    UNUSED(index);
-    const FlipperApplication* application = _ctx;
-
-    furi_assert(application->app);
-    furi_assert(application->name);
-
-    if(!loader_lock(loader_instance)) {
-        FURI_LOG_E(TAG, "Loader is locked");
-        return;
-    }
-
-    loader_start_application(application, NULL);
-}
-
-static void loader_submenu_callback(void* context, uint32_t index) {
-    UNUSED(index);
-    uint32_t view_id = (uint32_t)context;
-    view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
-}
-
-static void loader_cli_print_usage() {
-    printf("Usage:\r\n");
-    printf("loader <cmd> <args>\r\n");
-    printf("Cmd list:\r\n");
-    printf("\tlist\t - List available applications\r\n");
-    printf("\topen <Application Name:string>\t - Open application by name\r\n");
-    printf("\tinfo\t - Show loader state\r\n");
-}
-
 static FlipperApplication const* loader_find_application_by_name_in_list(
     const char* name,
     const FlipperApplication* list,
@@ -106,6 +81,51 @@ const FlipperApplication* loader_find_application_by_name(const char* name) {
     }
 
     return application;
+}
+
+static void loader_menu_callback(void* _ctx, uint32_t index) {
+    UNUSED(index);
+    const FlipperApplication* application = _ctx;
+
+    furi_assert(application->app);
+    furi_assert(application->name);
+
+    if(!loader_lock(loader_instance)) {
+        FURI_LOG_E(TAG, "Loader is locked");
+        return;
+    }
+
+    loader_start_application(application, NULL);
+}
+
+static void loader_main_callback(void* _ctx, uint32_t index) {
+    UNUSED(index);
+    const char* path = _ctx;
+    const FlipperApplication* app = loader_find_application_by_name_in_list(FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+
+    furi_assert(path);
+
+    if(!loader_lock(loader_instance)) {
+        FURI_LOG_E(TAG, "Loader is locked");
+        return;
+    }
+
+    loader_start_application(app, path);
+}
+
+static void loader_submenu_callback(void* context, uint32_t index) {
+    UNUSED(index);
+    uint32_t view_id = (uint32_t)context;
+    view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
+}
+
+static void loader_cli_print_usage() {
+    printf("Usage:\r\n");
+    printf("loader <cmd> <args>\r\n");
+    printf("Cmd list:\r\n");
+    printf("\tlist\t - List available applications\r\n");
+    printf("\topen <Application Name:string>\t - Open application by name\r\n");
+    printf("\tinfo\t - Show loader state\r\n");
 }
 
 static void loader_cli_open(Cli* cli, FuriString* args, Loader* instance) {
@@ -411,6 +431,42 @@ static void loader_build_menu() {
             loader_menu_callback,
             (void*)&FLIPPER_APPS[i]);
     }
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* folder = storage_file_alloc(storage);
+    FileInfo info;
+    char* name = malloc(100);
+    if(storage_dir_open(folder, EXT_PATH("apps/.Main"))) {
+        FuriString* path = furi_string_alloc();
+        FuriString* appname = furi_string_alloc();
+        while(storage_dir_read(folder, &info, name, 100)) {
+            if(file_info_is_dir(&info)) continue;
+            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), name);
+            uint8_t* icondata = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
+            if(!fap_loader_load_name_and_icon(path, storage, &icondata, appname)) {
+                free(icondata);
+                continue;
+            }
+            Icon* icon = malloc(sizeof(Icon));
+            FURI_CONST_ASSIGN(icon->frame_count, 1);
+            FURI_CONST_ASSIGN(icon->frame_rate, 0);
+            FURI_CONST_ASSIGN(icon->width, 10);
+            FURI_CONST_ASSIGN(icon->height, 10);
+            icon->frames = malloc(sizeof(const uint8_t*));
+            FURI_CONST_ASSIGN_PTR(icon->frames[0], icondata);
+            menu_add_item(
+                loader_instance->primary_menu,
+                strdup(furi_string_get_cstr(appname)),
+                icon,
+                i++,
+                loader_main_callback,
+                (void*)strdup(furi_string_get_cstr(path)));
+        }
+        furi_string_free(appname);
+        furi_string_free(path);
+    }
+    free(name);
+    storage_file_free(folder);
+    furi_record_close(RECORD_STORAGE);
     if(FLIPPER_PLUGINS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,

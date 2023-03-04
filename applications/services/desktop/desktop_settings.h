@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
+#include <loader/loader.h>
 
 #define DESKTOP_SETTINGS_VER (7)
 
@@ -35,8 +36,6 @@
 #define MAX_PIN_SIZE 10
 #define MIN_PIN_SIZE 4
 #define MAX_APP_LENGTH 128
-
-#define FAP_LOADER_APP_NAME "Applications"
 
 typedef struct {
     InputKey data[MAX_PIN_SIZE];

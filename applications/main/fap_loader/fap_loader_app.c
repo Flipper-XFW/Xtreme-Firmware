@@ -153,6 +153,7 @@ static bool fap_loader_select_app(FapLoader* loader) {
         .skip_assets = true,
         .icon = &I_unknown_10px,
         .hide_ext = true,
+        .hide_dot_files = true,
         .item_loader_callback = fap_loader_item_callback,
         .item_loader_context = loader,
         .base_path = EXT_PATH("apps"),
