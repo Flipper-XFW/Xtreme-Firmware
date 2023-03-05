@@ -14,9 +14,10 @@ XtremeSettings* XTREME_SETTINGS() {
 void XTREME_SETTINGS_LOAD() {
     if(xtreme_settings == NULL) {
         xtreme_settings = malloc(sizeof(XtremeSettings));
-        bool loaded;
+        bool loaded = false;
+        bool skip = furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal;
 
-        if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+        if(skip) {
             FURI_LOG_W(TAG, "Load skipped. Device is in special startup mode.");
             loaded = false;
         } else {
@@ -29,6 +30,10 @@ void XTREME_SETTINGS_LOAD() {
         }
 
         if(!loaded) {
+            if(!skip) {
+                storage_simply_remove(furi_record_open(RECORD_STORAGE), XTREME_SETTINGS_PATH_OLD);
+                furi_record_close(RECORD_STORAGE);
+            }
             memset(xtreme_settings, 0, sizeof(XtremeSettings));
             strlcpy(xtreme_settings->asset_pack, "", MAX_PACK_NAME_LEN); // SFW
             xtreme_settings->anim_speed = 100; // 100%
