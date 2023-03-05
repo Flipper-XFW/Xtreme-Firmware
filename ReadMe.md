@@ -73,7 +73,8 @@ After installing the packs to Flipper, hit the <code>Arrow UP</code> button on t
 -----
 <br>
 <h2 align="center">Bad Keyboard:</h2>
-<img src="https://user-images.githubusercontent.com/55334727/222941732-8240e21b-e5a0-456d-a689-9a87f9d06b9e.png" align="left" width="220px"/>
+<img src="https://user-images.githubusercontent.com/55334727/222941732-8240e21b-e5a0-456d-a689-9a87f9d06b9e.png" align="left" width="250px"/>
+<! -- This fuckshit needs a captured image, but bc of blockage, i cant get one. someone do some magic plz -- !>
 BadUSB is a wonderful app, but it lacks bluetooth capabilities. Now some might argue that its useless as you will always need authentication from both sides, but what if I told you that we found a solution to this problem?
 <br><br>
 Bad-KB allows you to toggle between USB and Bluetooth mode for your attacks. In Bluetooth mode it allows you to spoof the name & MAC of the device to whatever you want. Being a JBL speaker or a wireless razer keyboard is easily doable, allowing you to trick people so you can run your payloads without needing a cable at hand.
