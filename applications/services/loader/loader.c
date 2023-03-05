@@ -420,6 +420,10 @@ static void loader_free(Loader* instance) {
 }
 
 const Icon* loader_get_main_icon(char* name) {
+    // Temp solution, not sure how this could be easily improved
+    if(strcmp(name, "xtreme_app.fap") == 0) {
+        return &A_Xtreme_14;
+    }
     return NULL;
 }
 

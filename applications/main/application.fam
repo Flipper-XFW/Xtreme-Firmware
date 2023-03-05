@@ -13,7 +13,6 @@ App(
         "ibutton",
         "bad_kb",
         "u2f",
-        "xtreme_app",
         "archive",
     ],
 )
