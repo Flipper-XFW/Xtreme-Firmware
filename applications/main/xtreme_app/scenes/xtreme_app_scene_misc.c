@@ -2,9 +2,10 @@
 
 enum VarItemListIndex {
     VarItemListIndexSortDirsFirst,
+    VarItemListIndexChangeDeviceName,
+    VarItemListIndexExperimentalOptions,
     VarItemListIndexDarkMode,
     VarItemListIndexLeftHanded,
-    VarItemListIndexChangeDeviceName,
 };
 
 void xtreme_app_scene_misc_var_item_list_callback(void* context, uint32_t index) {
@@ -47,17 +48,19 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     variable_item_set_current_value_index(item, xtreme_settings->sort_dirs_first);
     variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
 
+    variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
+
+    variable_item_list_add(var_item_list, "      Experimental Options:", 0, NULL, app);
+
     item = variable_item_list_add(
-        var_item_list, "Exp. Dark Mode", 2, xtreme_app_scene_misc_dark_mode_changed, app);
+        var_item_list, "Dark Mode", 2, xtreme_app_scene_misc_dark_mode_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->dark_mode);
     variable_item_set_current_value_text(item, xtreme_settings->dark_mode ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "Exp. Left Handed", 2, xtreme_app_scene_misc_left_handed_changed, app);
+        var_item_list, "Left Handed", 2, xtreme_app_scene_misc_left_handed_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->left_handed);
     variable_item_set_current_value_text(item, xtreme_settings->left_handed ? "ON" : "OFF");
-
-    variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_misc_var_item_list_callback, app);

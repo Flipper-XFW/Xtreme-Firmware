@@ -37,13 +37,13 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list, "Bad KB Mode", 2, xtreme_app_scene_protocols_bad_bk_mode_changed, app);
+        var_item_list, "BadKB Mode", 2, xtreme_app_scene_protocols_bad_bk_mode_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt ? "BT" : "USB");
 
     item = variable_item_list_add(
         var_item_list,
-        "Bad BT Remember",
+        "BadBT Rmembr",
         2,
         xtreme_app_scene_protocols_bad_bt_remember_changed,
         app);
