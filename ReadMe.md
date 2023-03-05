@@ -90,7 +90,7 @@ With this new system in place, it allows for some cool stuff like locking animat
 <details>
 <summary>Our example</summary>
 
-In our case, this is used with the NSFW animations. Dont worry, these are disabled by default because I know not everyone likes to see my / anime tits and thats fine. Anyways.. each level gives a brand new background animation, they also become more and more lewd over time. (Funfact for those reading.. thats why the repository has this warning. Github doesnt like my tits :c)
+In our example case, this is used with the NSFW animation pack you can select in the Xtreme app. Dont worry, this is not used by default because I know not everyone likes to see my / anime tits and thats fine. Anyways.. each level gives a brand new background animation, they also become more and more lewd over time.
 
 | Level  | Animations |
 | ------------- | ------------- |
