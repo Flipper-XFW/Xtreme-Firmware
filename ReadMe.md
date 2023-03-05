@@ -1,4 +1,5 @@
 <h1 align="center">XFW - <code>Xtreme Firmware</code> for the Flipper Zero</h1>
+<h3 align="center">Feature-rich, stable, customizable</h3>
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/55334727/215170306-051eeb8f-8f72-437f-8c2d-0e4be009bdad.png">
@@ -17,35 +18,29 @@ We have spent many hours perfecting this code even further, and getting the most
 
 The goal of this Firmware is to regularly bring out amazing updates based on what the community wants, with an actual understanding of whats going on. Fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned everywhere else.
 <br><br>
-- The focus of this firmware is functionality & stability: If an App doesnt work, its gone
+- <h4>Feature-rich: We include all commonly found apps in the firmware, as long as they work.</h4>
 
-- Asset Packs: Are you tired of having to remake your custom animations after every update, switching manifests and having a hard time sharing them, especially once you modify scanning assets too? Those times are over. Scroll down to learn more
+- <h4>Stable: Many hours have been spent rewriting core parts of the Flippers firmware as well as some of its apps to ensure stability. A task that was long needed on all Firmware, so we tackled it right away.</h4>
 
-- Giving the level system a purpose: Right now, each level unlocks a new wallpaper. More on that below
-
-- Clean upgraded code: Some people wrote updates to certain files. These are... painful, to say the least. Here its all built with perfection in mind and integrated in a mostly clean way. I invite you all to compare the code with theirs.
-
-- Up2Date: This firmware receives updates from a few repositories, not just from its Upstream. If there are functional, but yet un-merged Pull requests on another flipper firmware that are good, they will be in here!
-
+- <h4>Customizable: Dont like the Animations, want to turn on/off the Home screen icons (battery, SD card etc), change the flippers name or anything like that? You absolutely can. No need to mess with code or deal with weird manifest files. Its all done with an App.</h4>
 
 -----
 <br>
 <h2 align="center">Xtreme Settings:</h2>
 
-
 We wrote a powerful yet easy-to-use application specifically for our Firmware, that gives you easy-access to all the fancy things we implemented:
 
-<img src="https://user-images.githubusercontent.com/55334727/215137728-529274e8-ab95-4164-a2a0-9ff712c9d3c7.gif" align="left" width="400px"/>
+<img src="https://user-images.githubusercontent.com/55334727/222941141-32e3ef23-1dad-473f-86ee-45bef66ebd77.gif" align="left" width="400px"/>
 
-<code>Base Graphics:</code> Change the fallback assets used. Its either SFW (default) or NSFW
-<br><code>Asset Pack:</code> Allows you to easily customize your firmware, more on that below 
-<br><code>Anim Speed:</code> Speed in which the animations play
-<br><code>Cycle Anims:</code> Duration of how long animations are played before switching to next
-<br><code>Unlock Anims:</code> Custom setting just for NSFW fallback animations. Figure it out ;)
-<br><code>Battery Icon:</code> Classic Firmware battery style toggle, just at a more convenient place
-<br><code>XP Level:</code> Changes your Flippers level
-<br><code>SubGhz Extend:</code> Allows you to extend the subghz range beyond what FZ devs planned
-<br><code>SubGhz Bypass:</code> Allows you to bypass the subghz region locks of the Flipper
+<details><summary><code>Graphics:</code></summary>Change the animation package (more on that below), the play speed of them, cycle duration and bypass level-bassed animations</details>
+
+<details><summary><code>Statusbar:</code></summary>Modify the design of the statusbar seen on the main Screen. Toggle Icons, their background, the top line and modify the battery icon to your liking.</details>
+
+<details><summary><code>Protocols:</code></summary>Here you can cycle between USB & Bluetooth mode for our Bad-Keyboard app, and toggle Subghz settings.</details>
+
+<details><summary><code>Dolphin:</code></summary>Two simple yet sought after features: Simply change the level of your Flipper and disable / change the "Butthurt timer", aka. the time it takes for the Flipper to get sad when its not used.</details>
+
+<details><summary><code>Misc:</code></summary>All the other options that dont fit elsewhere. Toggles for our custom dark mode & left-handed mode (yes, we thought about you :3 ), an option to change the Flippers name and a switch for file sorting.</details>
 
 <br clear="left"/>
 
@@ -74,6 +69,14 @@ Once you have some packs, upload them to your Flipper in <code>SD/dolphin_custom
 After installing the packs to Flipper, hit the <code>Arrow UP</code> button on the main menu and go to <code>Xtreme Settings</code>. Here choose which pack you want and tweak the other settings how you prefer, then press back to reboot and enjoy your new assets & animations!
 
 <br clear="left"/>
+
+-----
+<br>
+<h2 align="center">Bad Keyboard:</h2>
+<img src="https://user-images.githubusercontent.com/55334727/222941732-8240e21b-e5a0-456d-a689-9a87f9d06b9e.png" align="left" width="220px"/>
+BadUSB is a wonderful app, but it lacks bluetooth capabilities. Now some might argue that its useless as you will always need authentication from both sides, but what if I told you that we found a solution to this problem?
+<br><br>
+Bad-KB allows you to toggle between USB and Bluetooth mode for your attacks. In Bluetooth mode it allows you to spoof the name & MAC of the device to whatever you want. Being a JBL speaker or a wireless razer keyboard is easily doable, allowing you to trick people so you can run your payloads without needing a cable at hand.
 
 -----
 <br>
@@ -108,6 +111,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Xtreme App
 - Asset Packs
 - More UI options
+- Bad-Keyboard App
 - A new battery display-type
 - Scrolling view for long file names in browser
 - NSFW Animations tied to the level system. Read more above
@@ -117,7 +121,6 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Multiple NFC protocols
 - Multiple Sub-Ghz protocols | Merged from Unleashed, thanks @xMasterX
 - Subghz and IR signal replication via gpio | Credits to @ankris812
-- Honda Keys (CVE-2022-27254) & Ford blockers
 
 - New API Routes for Locale settings
 ```
@@ -129,12 +132,13 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Tons of apps
 - File browser
 - Massive compiler re-do
-- About 1k files to speed things up a lot
+- About 4k files to speed things up a lot
 - Applications to now use the new Locale setting
 ```
 ```txt
 [Fixed]
 
+- Keyboard issues on first char
 - Passport crash on high level
 - SFW / Dummy_mode getting you XP
 - Leveling system
