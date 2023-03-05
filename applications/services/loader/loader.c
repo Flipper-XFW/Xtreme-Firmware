@@ -419,6 +419,10 @@ static void loader_free(Loader* instance) {
     instance = NULL;
 }
 
+const Icon* loader_get_main_icon(char* name) {
+    return NULL;
+}
+
 static void loader_build_menu() {
     FURI_LOG_I(TAG, "Building main menu");
     size_t i;
@@ -441,18 +445,8 @@ static void loader_build_menu() {
         while(storage_dir_read(folder, &info, name, 100)) {
             if(file_info_is_dir(&info)) continue;
             furi_string_printf(path, EXT_PATH("apps/.Main/%s"), name);
-            uint8_t* icondata = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
-            if(!fap_loader_load_name_and_icon(path, storage, &icondata, appname)) {
-                free(icondata);
-                continue;
-            }
-            Icon* icon = malloc(sizeof(Icon));
-            FURI_CONST_ASSIGN(icon->frame_count, 1);
-            FURI_CONST_ASSIGN(icon->frame_rate, 0);
-            FURI_CONST_ASSIGN(icon->width, 10);
-            FURI_CONST_ASSIGN(icon->height, 10);
-            icon->frames = malloc(sizeof(const uint8_t*));
-            FURI_CONST_ASSIGN_PTR(icon->frames[0], icondata);
+            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
+            const Icon* icon = loader_get_main_icon(name);
             menu_add_item(
                 loader_instance->primary_menu,
                 strdup(furi_string_get_cstr(appname)),
