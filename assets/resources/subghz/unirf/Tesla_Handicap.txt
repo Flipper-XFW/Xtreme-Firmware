@@ -1,5 +1,3 @@
-Filetype: Flipper SubGhz RAW File
-Version: 1
 UP: /any/subghz/Vehicles/Tesla/Tesla_charge_AM270.sub
 DOWN: /any/subghz/Vehicles/Tesla/Tesla_charge_AM650.sub
 LEFT: /any/subghz/Handicap/handicap_push_door.sub
