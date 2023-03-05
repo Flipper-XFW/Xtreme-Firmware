@@ -1,5 +1,15 @@
 #include "../xtreme_app.h"
 
+enum VarItemListIndex {
+    VarItemListIndexXpLevel,
+    VarItemListIndexButthurtTimer,
+};
+
+void xtreme_app_scene_dolphin_var_item_list_callback(void* context, uint32_t index) {
+    XtremeApp* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
 static void xtreme_app_scene_dolphin_xp_level_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     app->dolphin_level = variable_item_get_current_value_index(item) + 1;
@@ -51,15 +61,28 @@ void xtreme_app_scene_dolphin_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, butthurt_timer_names[value_index]);
 
-    variable_item_list_set_selected_item(var_item_list, 0);
+    variable_item_list_set_enter_callback(
+        var_item_list, xtreme_app_scene_dolphin_var_item_list_callback, app);
+
+    variable_item_list_set_selected_item(
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneDolphin));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
 bool xtreme_app_scene_dolphin_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
+    XtremeApp* app = context;
     bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneDolphin, event.event);
+        consumed = true;
+        switch(event.event) {
+        default:
+            break;
+        }
+    }
+
     return consumed;
 }
 

@@ -1,6 +1,18 @@
 #include "../xtreme_app.h"
 
-static void xtreme_app_scene_protocols_bad_bk_mode_changed(VariableItem* item) {
+enum VarItemListIndex {
+    VarItemListIndexBadkbMode,
+    VarItemListIndexBadbtRemember,
+    VarItemListIndexSubghzExtend,
+    VarItemListIndexSubghzBypass,
+};
+
+void xtreme_app_scene_protocols_var_item_list_callback(void* context, uint32_t index) {
+    XtremeApp* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
+static void xtreme_app_scene_protocols_badkb_mode_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "BT" : "USB");
@@ -8,7 +20,7 @@ static void xtreme_app_scene_protocols_bad_bk_mode_changed(VariableItem* item) {
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_protocols_bad_bt_remember_changed(VariableItem* item) {
+static void xtreme_app_scene_protocols_badbt_remember_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -37,7 +49,7 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list, "BadKB Mode", 2, xtreme_app_scene_protocols_bad_bk_mode_changed, app);
+        var_item_list, "BadKB Mode", 2, xtreme_app_scene_protocols_badkb_mode_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt ? "BT" : "USB");
 
@@ -45,7 +57,7 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
         var_item_list,
         "BadBT Rmembr",
         2,
-        xtreme_app_scene_protocols_bad_bt_remember_changed,
+        xtreme_app_scene_protocols_badbt_remember_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt_remember);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt_remember ? "ON" : "OFF");
@@ -60,15 +72,28 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
     variable_item_set_current_value_index(item, app->subghz_bypass);
     variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
 
-    variable_item_list_set_selected_item(var_item_list, 0);
+    variable_item_list_set_enter_callback(
+        var_item_list, xtreme_app_scene_protocols_var_item_list_callback, app);
+
+    variable_item_list_set_selected_item(
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocols));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
 bool xtreme_app_scene_protocols_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
+    XtremeApp* app = context;
     bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocols, event.event);
+        consumed = true;
+        switch(event.event) {
+        default:
+            break;
+        }
+    }
+
     return consumed;
 }
 

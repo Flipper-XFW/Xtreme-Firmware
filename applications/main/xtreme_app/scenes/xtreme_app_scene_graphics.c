@@ -1,5 +1,17 @@
 #include "../xtreme_app.h"
 
+enum VarItemListIndex {
+    VarItemListIndexAssetPack,
+    VarItemListIndexAnimSpeed,
+    VarItemListIndexCycleAnims,
+    VarItemListIndexUnlockAnims,
+};
+
+void xtreme_app_scene_graphics_var_item_list_callback(void* context, uint32_t index) {
+    XtremeApp* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
 static void xtreme_app_scene_graphics_asset_pack_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -103,15 +115,28 @@ void xtreme_app_scene_graphics_on_enter(void* context) {
     variable_item_set_current_value_index(item, xtreme_settings->unlock_anims);
     variable_item_set_current_value_text(item, xtreme_settings->unlock_anims ? "ON" : "OFF");
 
-    variable_item_list_set_selected_item(var_item_list, 0);
+    variable_item_list_set_enter_callback(
+        var_item_list, xtreme_app_scene_graphics_var_item_list_callback, app);
+
+    variable_item_list_set_selected_item(
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneGraphics));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
 bool xtreme_app_scene_graphics_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
+    XtremeApp* app = context;
     bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneGraphics, event.event);
+        consumed = true;
+        switch(event.event) {
+        default:
+            break;
+        }
+    }
+
     return consumed;
 }
 
