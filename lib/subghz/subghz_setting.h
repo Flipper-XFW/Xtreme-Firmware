@@ -4,7 +4,6 @@
 #include <math.h>
 #include <furi.h>
 #include <m-list.h>
-#include <m-array.h>
 #include <furi_hal.h>
 #include <lib/flipper_format/flipper_format.h>
 
@@ -14,30 +13,11 @@ extern "C" {
 
 #define SUBGHZ_SETTING_DEFAULT_PRESET_COUNT 4
 
-typedef struct {
-    FuriString* custom_preset_name;
-    uint8_t* custom_preset_data;
-    size_t custom_preset_data_size;
-} SubGhzSettingCustomPresetItem;
-
-ARRAY_DEF(SubGhzSettingCustomPresetItemArray, SubGhzSettingCustomPresetItem, M_POD_OPLIST)
-
-#define M_OPL_SubGhzSettingCustomPresetItemArray_t() \
-    ARRAY_OPLIST(SubGhzSettingCustomPresetItemArray, M_POD_OPLIST)
-
 LIST_DEF(FrequencyList, uint32_t)
 
 #define M_OPL_FrequencyList_t() LIST_OPLIST(FrequencyList)
 
-typedef struct {
-    SubGhzSettingCustomPresetItemArray_t data;
-} SubGhzSettingCustomPresetStruct;
-
-typedef struct {
-    FrequencyList_t frequencies;
-    FrequencyList_t hopper_frequencies;
-    SubGhzSettingCustomPresetStruct* preset;
-} SubGhzSetting;
+typedef struct SubGhzSetting SubGhzSetting;
 
 SubGhzSetting* subghz_setting_alloc(void);
 

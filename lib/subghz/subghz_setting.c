@@ -85,6 +85,27 @@ static const uint32_t subghz_hopper_frequency_list[] = {
     0,
 };
 
+typedef struct {
+    FuriString* custom_preset_name;
+    uint8_t* custom_preset_data;
+    size_t custom_preset_data_size;
+} SubGhzSettingCustomPresetItem;
+
+ARRAY_DEF(SubGhzSettingCustomPresetItemArray, SubGhzSettingCustomPresetItem, M_POD_OPLIST)
+
+#define M_OPL_SubGhzSettingCustomPresetItemArray_t() \
+    ARRAY_OPLIST(SubGhzSettingCustomPresetItemArray, M_POD_OPLIST)
+
+typedef struct {
+    SubGhzSettingCustomPresetItemArray_t data;
+} SubGhzSettingCustomPresetStruct;
+
+struct SubGhzSetting {
+    FrequencyList_t frequencies;
+    FrequencyList_t hopper_frequencies;
+    SubGhzSettingCustomPresetStruct* preset;
+};
+
 SubGhzSetting* subghz_setting_alloc(void) {
     SubGhzSetting* instance = malloc(sizeof(SubGhzSetting));
     FrequencyList_init(instance->frequencies);
