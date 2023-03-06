@@ -83,6 +83,18 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         furi_string_set(app->file_path, arg);
     }
 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    // Remove old pre-included files to avoid duplicates on migrate
+    storage_simply_remove(storage, EXT_PATH("badusb/layouts"));
+    storage_simply_remove(storage, EXT_PATH("badusb/.badusb.settings"));
+    storage_simply_remove(storage, EXT_PATH("badusb/Kiosk-Evasion-Bruteforce.txt"));
+    storage_simply_remove(storage, EXT_PATH("badusb/Wifi-Stealer_ORG.txt"));
+    storage_simply_remove(storage, EXT_PATH("badusb/demo_macos.txt"));
+    storage_simply_remove(storage, EXT_PATH("badusb/demo_windows.txt"));
+    storage_common_migrate(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
+    storage_simply_mkdir(storage, BAD_KB_APP_BASE_FOLDER);
+    furi_record_close(RECORD_STORAGE);
+
     bad_kb_load_settings(app);
 
     app->gui = furi_record_open(RECORD_GUI);
