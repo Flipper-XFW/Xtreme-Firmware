@@ -2,7 +2,9 @@
 
 enum VarItemListIndex {
     VarItemListIndexStaticFrequency,
+    VarItemListIndexDeleteStatic,
     VarItemListIndexHopperFrequency,
+    VarItemListIndexDeleteHopper,
 };
 
 void xtreme_app_scene_protocols_frequencies_var_item_list_callback(void* context, uint32_t index) {
@@ -12,8 +14,8 @@ void xtreme_app_scene_protocols_frequencies_var_item_list_callback(void* context
 
 static void xtreme_app_scene_protocols_frequencies_static_frequency_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-    uint32_t value = *FrequencyList_get(app->subghz_static_frequencies, index);
+    app->subghz_static_index = variable_item_get_current_value_index(item);
+    uint32_t value = *FrequencyList_get(app->subghz_static_frequencies, app->subghz_static_index);
     char text[10] = {0};
     snprintf(text, sizeof(text), "%lu.%02lu", value / 1000000, (value % 1000000) / 10000);
     variable_item_set_current_value_text(item, text);
@@ -21,8 +23,8 @@ static void xtreme_app_scene_protocols_frequencies_static_frequency_changed(Vari
 
 static void xtreme_app_scene_protocols_frequencies_hopper_frequency_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-    uint32_t value = *FrequencyList_get(app->subghz_hopper_frequencies, index);
+    app->subghz_hopper_index = variable_item_get_current_value_index(item);
+    uint32_t value = *FrequencyList_get(app->subghz_hopper_frequencies, app->subghz_hopper_index);
     char text[10] = {0};
     snprintf(text, sizeof(text), "%lu.%02lu", value / 1000000, (value % 1000000) / 10000);
     variable_item_set_current_value_text(item, text);
@@ -34,9 +36,10 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(var_item_list, "Static Freq", FrequencyList_size(app->subghz_static_frequencies), xtreme_app_scene_protocols_frequencies_static_frequency_changed, app);
-    variable_item_set_current_value_index(item, 0);
+    app->subghz_static_index = 0;
+    variable_item_set_current_value_index(item, app->subghz_static_index);
     if(FrequencyList_size(app->subghz_static_frequencies)) {
-        uint32_t value = *FrequencyList_get(app->subghz_static_frequencies, 0);
+        uint32_t value = *FrequencyList_get(app->subghz_static_frequencies, app->subghz_static_index);
         char text[10] = {0};
         snprintf(text, sizeof(text), "%lu.%02lu", value / 1000000, (value % 1000000) / 10000);
         variable_item_set_current_value_text(item, text);
@@ -44,16 +47,21 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
         variable_item_set_current_value_text(item, "None");
     }
 
+    variable_item_list_add(var_item_list, "Delete Static Freq", 0, NULL, app);
+
     item = variable_item_list_add(var_item_list, "Hopper Freq", FrequencyList_size(app->subghz_hopper_frequencies), xtreme_app_scene_protocols_frequencies_hopper_frequency_changed, app);
-    variable_item_set_current_value_index(item, 0);
+    app->subghz_hopper_index = 0;
+    variable_item_set_current_value_index(item, app->subghz_hopper_index);
     if(FrequencyList_size(app->subghz_hopper_frequencies)) {
-        uint32_t value = *FrequencyList_get(app->subghz_hopper_frequencies, 0);
+        uint32_t value = *FrequencyList_get(app->subghz_hopper_frequencies, app->subghz_hopper_index);
         char text[10] = {0};
         snprintf(text, sizeof(text), "%lu.%02lu", value / 1000000, (value % 1000000) / 10000);
         variable_item_set_current_value_text(item, text);
     } else {
         variable_item_set_current_value_text(item, "None");
     }
+
+    variable_item_list_add(var_item_list, "Delete Hopper Freq", 0, NULL, app);
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_protocols_frequencies_var_item_list_callback, app);
@@ -64,6 +72,20 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
+void remove_frequency(FrequencyList_t list, uint8_t index) {
+    if(!FrequencyList_size(list)) return;
+    uint32_t value = *FrequencyList_get(list, index);
+    FrequencyList_it_t it;
+    FrequencyList_it(it, list);
+    while(!FrequencyList_end_p(it)) {
+        if(*FrequencyList_ref(it) == value) {
+            FrequencyList_remove(list, it);
+        } else {
+            FrequencyList_next(it);
+        }
+    }
+}
+
 bool xtreme_app_scene_protocols_frequencies_on_event(void* context, SceneManagerEvent event) {
     XtremeApp* app = context;
     bool consumed = false;
@@ -71,9 +93,22 @@ bool xtreme_app_scene_protocols_frequencies_on_event(void* context, SceneManager
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequencies, event.event);
         consumed = true;
+        bool redraw = false;
         switch(event.event) {
+        case VarItemListIndexDeleteStatic:
+            remove_frequency(app->subghz_static_frequencies, app->subghz_static_index);
+            redraw = true;
+            break;
+        case VarItemListIndexDeleteHopper:
+            remove_frequency(app->subghz_hopper_frequencies, app->subghz_hopper_index);
+            redraw = true;
+            break;
         default:
             break;
+        }
+        if(redraw) {
+            scene_manager_previous_scene(app->scene_manager);
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFrequencies);
         }
     }
 

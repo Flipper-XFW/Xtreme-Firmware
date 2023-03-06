@@ -33,7 +33,9 @@ typedef struct {
     bool subghz_use_defaults;
     uint32_t subghz_default_frequency;
     FrequencyList_t subghz_static_frequencies;
+    uint8_t subghz_static_index;
     FrequencyList_t subghz_hopper_frequencies;
+    uint8_t subghz_hopper_index;
     bool subghz_extend;
     bool subghz_bypass;
     int dolphin_level;
