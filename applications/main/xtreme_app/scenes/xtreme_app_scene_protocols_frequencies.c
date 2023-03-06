@@ -3,9 +3,11 @@
 enum VarItemListIndex {
     VarItemListIndexUseDefaults,
     VarItemListIndexStaticFrequency,
-    VarItemListIndexDeleteStatic,
+    VarItemListIndexDeleteStaticFreq,
+    VarItemListIndexAddStaticFreq,
     VarItemListIndexHopperFrequency,
-    VarItemListIndexDeleteHopper,
+    VarItemListIndexDeleteHopperFreq,
+    VarItemListIndexAddHopperFreq,
 };
 
 void xtreme_app_scene_protocols_frequencies_var_item_list_callback(void* context, uint32_t index) {
@@ -63,6 +65,8 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
 
     variable_item_list_add(var_item_list, "Delete Static Freq", 0, NULL, app);
 
+    variable_item_list_add(var_item_list, "Add Static Freq", 0, NULL, app);
+
     item = variable_item_list_add(var_item_list, "Hopper Freq", FrequencyList_size(app->subghz_hopper_frequencies), xtreme_app_scene_protocols_frequencies_hopper_frequency_changed, app);
     app->subghz_hopper_index = 0;
     variable_item_set_current_value_index(item, app->subghz_hopper_index);
@@ -76,6 +80,8 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
     }
 
     variable_item_list_add(var_item_list, "Delete Hopper Freq", 0, NULL, app);
+
+    variable_item_list_add(var_item_list, "Add Hopper Freq", 0, NULL, app);
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_protocols_frequencies_var_item_list_callback, app);
@@ -99,6 +105,8 @@ void remove_frequency(XtremeApp* app, FrequencyList_t list, uint8_t index) {
         }
     }
     app->save_subghz_frequencies = true;
+    scene_manager_previous_scene(app->scene_manager);
+    scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFrequencies);
 }
 
 bool xtreme_app_scene_protocols_frequencies_on_event(void* context, SceneManagerEvent event) {
@@ -108,21 +116,23 @@ bool xtreme_app_scene_protocols_frequencies_on_event(void* context, SceneManager
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequencies, event.event);
         consumed = true;
-        bool redraw = true;
         switch(event.event) {
-        case VarItemListIndexDeleteStatic:
+        case VarItemListIndexDeleteStaticFreq:
             remove_frequency(app, app->subghz_static_frequencies, app->subghz_static_index);
             break;
-        case VarItemListIndexDeleteHopper:
+        case VarItemListIndexAddStaticFreq:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd, false);
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd);
+            break;
+        case VarItemListIndexDeleteHopperFreq:
             remove_frequency(app, app->subghz_hopper_frequencies, app->subghz_hopper_index);
             break;
-        default:
-            redraw = false;
+        case VarItemListIndexAddHopperFreq:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd, true);
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd);
             break;
-        }
-        if(redraw) {
-            scene_manager_previous_scene(app->scene_manager);
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFrequencies);
+        default:
+            break;
         }
     }
 

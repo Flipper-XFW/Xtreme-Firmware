@@ -21,6 +21,8 @@
 #include "xtreme/settings.h"
 #include "xtreme/assets.h"
 
+#define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 6
+
 ARRAY_DEF(asset_packs, char*)
 
 typedef struct {
@@ -35,6 +37,7 @@ typedef struct {
     uint8_t subghz_static_index;
     FrequencyList_t subghz_hopper_frequencies;
     uint8_t subghz_hopper_index;
+    char subghz_freq_buffer[XTREME_SUBGHZ_FREQ_BUFFER_SIZE];
     bool subghz_extend;
     bool subghz_bypass;
     int dolphin_level;
