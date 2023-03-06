@@ -72,7 +72,7 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
-void remove_frequency(FrequencyList_t list, uint8_t index) {
+void remove_frequency(XtremeApp* app, FrequencyList_t list, uint8_t index) {
     if(!FrequencyList_size(list)) return;
     uint32_t value = *FrequencyList_get(list, index);
     FrequencyList_it_t it;
@@ -84,6 +84,7 @@ void remove_frequency(FrequencyList_t list, uint8_t index) {
             FrequencyList_next(it);
         }
     }
+    app->save_subghz_frequencies = true;
 }
 
 bool xtreme_app_scene_protocols_frequencies_on_event(void* context, SceneManagerEvent event) {
@@ -93,17 +94,16 @@ bool xtreme_app_scene_protocols_frequencies_on_event(void* context, SceneManager
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequencies, event.event);
         consumed = true;
-        bool redraw = false;
+        bool redraw = true;
         switch(event.event) {
         case VarItemListIndexDeleteStatic:
-            remove_frequency(app->subghz_static_frequencies, app->subghz_static_index);
-            redraw = true;
+            remove_frequency(app, app->subghz_static_frequencies, app->subghz_static_index);
             break;
         case VarItemListIndexDeleteHopper:
-            remove_frequency(app->subghz_hopper_frequencies, app->subghz_hopper_index);
-            redraw = true;
+            remove_frequency(app, app->subghz_hopper_frequencies, app->subghz_hopper_index);
             break;
         default:
+            redraw = false;
             break;
         }
         if(redraw) {

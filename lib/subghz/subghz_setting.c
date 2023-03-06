@@ -7,9 +7,6 @@
 
 #define TAG "SubGhzSetting"
 
-#define SUBGHZ_SETTING_FILE_TYPE "Flipper SubGhz Setting File"
-#define SUBGHZ_SETTING_FILE_VERSION 1
-
 #define FREQUENCY_FLAG_DEFAULT (1 << 31)
 #define FREQUENCY_MASK (0xFFFFFFFF ^ FREQUENCY_FLAG_DEFAULT)
 
