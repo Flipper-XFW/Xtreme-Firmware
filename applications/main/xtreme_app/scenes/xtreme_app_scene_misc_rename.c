@@ -1,7 +1,7 @@
 #include "../xtreme_app.h"
 
 enum TextInputIndex {
-    TextInputIndexResult,
+    TextInputResultOk,
 };
 
 static void xtreme_app_scene_misc_rename_text_input_callback(void* context) {
@@ -9,7 +9,7 @@ static void xtreme_app_scene_misc_rename_text_input_callback(void* context) {
 
     app->save_name = true;
     app->require_reboot = true;
-    view_dispatcher_send_custom_event(app->view_dispatcher, TextInputIndexResult);
+    view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultOk);
 }
 
 void xtreme_app_scene_misc_rename_on_enter(void* context) {
@@ -36,7 +36,7 @@ bool xtreme_app_scene_misc_rename_on_event(void* context, SceneManagerEvent even
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         switch(event.event) {
-        case TextInputIndexResult:
+        case TextInputResultOk:
             scene_manager_previous_scene(app->scene_manager);
             break;
         default:

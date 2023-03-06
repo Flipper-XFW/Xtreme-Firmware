@@ -6,7 +6,7 @@ static bool xtreme_app_custom_event_callback(void* context, uint32_t event) {
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
-void xtreme_app_reboot(void* context) {
+void callback_reboot(void* context) {
     UNUSED(context);
     power_reboot(PowerBootModeNormal);
 }
@@ -96,7 +96,7 @@ static bool xtreme_app_back_event_callback(void* context) {
         if(app->require_reboot) {
             popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
             popup_set_text(app->popup, "Applying changes...", 64, 40, AlignCenter, AlignCenter);
-            popup_set_callback(app->popup, xtreme_app_reboot);
+            popup_set_callback(app->popup, callback_reboot);
             popup_set_context(app->popup, app);
             popup_set_timeout(app->popup, 1000);
             popup_enable_timeout(app->popup);
