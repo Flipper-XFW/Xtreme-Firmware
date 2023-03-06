@@ -5,7 +5,7 @@ App(
     provides=[
         "fap_loader",
         "subghz",
-        "unirfremix",
+        "subghz_remote",
         "lfrfid",
         "nfc",
         "infrared",
