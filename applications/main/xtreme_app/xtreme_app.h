@@ -16,6 +16,7 @@
 #include "dolphin/dolphin.h"
 #include "dolphin/dolphin_i.h"
 #include <lib/flipper_format/flipper_format.h>
+#include <lib/subghz/subghz_setting.h>
 #include <m-array.h>
 #include "xtreme/settings.h"
 #include "xtreme/assets.h"
@@ -29,6 +30,10 @@ typedef struct {
     VariableItemList* var_item_list;
     TextInput* text_input;
     Popup* popup;
+    bool subghz_use_defaults;
+    uint32_t subghz_default_frequency;
+    FrequencyList_t subghz_static_frequencies;
+    FrequencyList_t subghz_hopper_frequencies;
     bool subghz_extend;
     bool subghz_bypass;
     int dolphin_level;
@@ -37,6 +42,7 @@ typedef struct {
     asset_packs_t asset_packs;
     FuriString* version_tag;
     bool save_subghz;
+    bool save_subghz_frequencies;
     bool save_level;
     bool save_name;
     bool save_settings;

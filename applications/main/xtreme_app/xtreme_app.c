@@ -22,6 +22,9 @@ static bool xtreme_app_back_event_callback(void* context) {
             furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
         }
 
+        if(app->save_subghz_frequencies) {
+        }
+
         if(app->save_level) {
             Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
             int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
@@ -118,6 +121,37 @@ XtremeApp* xtreme_app_alloc() {
 
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+    FrequencyList_init(app->subghz_static_frequencies);
+    FrequencyList_init(app->subghz_hopper_frequencies);
+    app->subghz_use_defaults = true;
+    app->subghz_default_frequency = 0;
+    do {
+        uint32_t temp;
+        if(!flipper_format_file_open_existing(file, EXT_PATH("subghz/assets/setting_user"))) break;
+
+        flipper_format_read_bool(file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
+
+        if(!flipper_format_rewind(file)) break;
+        flipper_format_read_uint32(file, "Default_frequency", &app->subghz_default_frequency, 1);
+
+        if(!flipper_format_rewind(file)) break;
+        while(flipper_format_read_uint32(file, "Frequency", &temp, 1)) {
+            if(furi_hal_subghz_is_frequency_valid(temp)) {
+                FrequencyList_push_back(app->subghz_static_frequencies, temp);
+            }
+        }
+
+        if(!flipper_format_rewind(file)) break;
+        while(flipper_format_read_uint32(file, "Hopper_frequency", &temp, 1)) {
+            if(furi_hal_subghz_is_frequency_valid(temp)) {
+                FrequencyList_push_back(app->subghz_hopper_frequencies, temp);
+            }
+        }
+    } while(false);
+    flipper_format_free(file);
+
     furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
@@ -129,7 +163,6 @@ XtremeApp* xtreme_app_alloc() {
 
     app->asset_pack = 0;
     asset_packs_init(app->asset_packs);
-    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* folder = storage_file_alloc(storage);
     FileInfo info;
     char* name = malloc(MAX_PACK_NAME_LEN);
@@ -182,6 +215,9 @@ void xtreme_app_free(XtremeApp* app) {
     scene_manager_free(app->scene_manager);
 
     // Settings deinit
+
+    FrequencyList_clear(app->subghz_static_frequencies);
+    FrequencyList_clear(app->subghz_hopper_frequencies);
 
     asset_packs_it_t it;
     for(asset_packs_it(it, app->asset_packs); !asset_packs_end_p(it); asset_packs_next(it)) {
