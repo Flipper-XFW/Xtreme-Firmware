@@ -1,6 +1,7 @@
 #include "../xtreme_app.h"
 
 enum VarItemListIndex {
+    VarItemListIndexUseDefaults,
     VarItemListIndexStaticFrequency,
     VarItemListIndexDeleteStatic,
     VarItemListIndexHopperFrequency,
@@ -10,6 +11,14 @@ enum VarItemListIndex {
 void xtreme_app_scene_protocols_frequencies_var_item_list_callback(void* context, uint32_t index) {
     XtremeApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
+static void xtreme_app_scene_protocols_frequencies_use_defaults_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    app->subghz_use_defaults = value;
+    app->save_subghz_frequencies = true;
 }
 
 static void xtreme_app_scene_protocols_frequencies_static_frequency_changed(VariableItem* item) {
@@ -34,6 +43,11 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
     XtremeApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
+
+    item = variable_item_list_add(
+        var_item_list, "Use Defaults", 2, xtreme_app_scene_protocols_frequencies_use_defaults_changed, app);
+    variable_item_set_current_value_index(item, app->subghz_use_defaults);
+    variable_item_set_current_value_text(item, app->subghz_use_defaults ? "ON" : "OFF");
 
     item = variable_item_list_add(var_item_list, "Static Freq", FrequencyList_size(app->subghz_static_frequencies), xtreme_app_scene_protocols_frequencies_static_frequency_changed, app);
     app->subghz_static_index = 0;

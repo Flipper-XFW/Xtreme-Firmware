@@ -34,10 +34,6 @@ static bool xtreme_app_back_event_callback(void* context) {
                 flipper_format_write_bool(file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
 
                 if(!flipper_format_rewind(file)) break;
-                while(flipper_format_delete_key(file, "Default_frequency"));
-                flipper_format_write_uint32(file, "Default_frequency", &app->subghz_default_frequency, 1);
-
-                if(!flipper_format_rewind(file)) break;
                 while(flipper_format_delete_key(file, "Frequency"));
                 FrequencyList_it(it, app->subghz_static_frequencies);
                 for(uint i = 0; i < FrequencyList_size(app->subghz_static_frequencies); i++) {
@@ -154,15 +150,11 @@ XtremeApp* xtreme_app_alloc() {
     FrequencyList_init(app->subghz_static_frequencies);
     FrequencyList_init(app->subghz_hopper_frequencies);
     app->subghz_use_defaults = true;
-    app->subghz_default_frequency = 0;
     do {
         uint32_t temp;
         if(!flipper_format_file_open_existing(file, EXT_PATH("subghz/assets/setting_user"))) break;
 
         flipper_format_read_bool(file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
-
-        if(!flipper_format_rewind(file)) break;
-        flipper_format_read_uint32(file, "Default_frequency", &app->subghz_default_frequency, 1);
 
         if(!flipper_format_rewind(file)) break;
         while(flipper_format_read_uint32(file, "Frequency", &temp, 1)) {
