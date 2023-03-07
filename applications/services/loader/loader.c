@@ -101,7 +101,8 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
 static void loader_main_callback(void* _ctx, uint32_t index) {
     UNUSED(index);
     const char* path = _ctx;
-    const FlipperApplication* app = loader_find_application_by_name_in_list(FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+    const FlipperApplication* app = loader_find_application_by_name_in_list(
+        FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
 
     furi_assert(path);
 

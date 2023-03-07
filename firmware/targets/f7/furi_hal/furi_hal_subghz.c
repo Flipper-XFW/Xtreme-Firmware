@@ -448,9 +448,13 @@ void furi_hal_subghz_set_extend_settings(bool extend, bool bypass) {
     do {
         if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt")) break;
         if(!flipper_format_write_header_cstr(file, "Flipper SubGhz Setting File", 1)) break;
-        if(!flipper_format_write_comment_cstr(file, "Whether to allow extended ranges that can break your flipper")) break;
+        if(!flipper_format_write_comment_cstr(
+               file, "Whether to allow extended ranges that can break your flipper"))
+            break;
         if(!flipper_format_write_bool(file, "use_ext_range_at_own_risk", &extend, 1)) break;
-        if(!flipper_format_write_comment_cstr(file, "Whether to ignore the default TX region settings")) break;
+        if(!flipper_format_write_comment_cstr(
+               file, "Whether to ignore the default TX region settings"))
+            break;
         if(!flipper_format_write_bool(file, "ignore_default_tx_region", &bypass, 1)) break;
     } while(0);
 

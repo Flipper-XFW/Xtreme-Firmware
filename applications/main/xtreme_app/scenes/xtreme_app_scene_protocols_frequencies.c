@@ -25,7 +25,11 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list, "Use Defaults", 2, xtreme_app_scene_protocols_frequencies_use_defaults_changed, app);
+        var_item_list,
+        "Use Defaults",
+        2,
+        xtreme_app_scene_protocols_frequencies_use_defaults_changed,
+        app);
     variable_item_set_current_value_index(item, app->subghz_use_defaults);
     variable_item_set_current_value_text(item, app->subghz_use_defaults ? "ON" : "OFF");
 
@@ -37,7 +41,8 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
         var_item_list, xtreme_app_scene_protocols_frequencies_var_item_list_callback, app);
 
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequencies));
+        var_item_list,
+        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequencies));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
@@ -47,7 +52,8 @@ bool xtreme_app_scene_protocols_frequencies_on_event(void* context, SceneManager
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequencies, event.event);
+        scene_manager_set_scene_state(
+            app->scene_manager, XtremeAppSceneProtocolsFrequencies, event.event);
         consumed = true;
         switch(event.event) {
         case VarItemListIndexStaticFrequencies:

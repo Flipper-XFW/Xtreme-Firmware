@@ -55,11 +55,7 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt ? "BT" : "USB");
 
     item = variable_item_list_add(
-        var_item_list,
-        "BadBT Rmembr",
-        2,
-        xtreme_app_scene_protocols_badbt_remember_changed,
-        app);
+        var_item_list, "BadBT Rmembr", 2, xtreme_app_scene_protocols_badbt_remember_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt_remember);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt_remember ? "ON" : "OFF");
 

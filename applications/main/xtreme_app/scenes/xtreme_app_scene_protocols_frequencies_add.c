@@ -8,13 +8,14 @@ enum TextInputResult {
 static void xtreme_app_scene_protocols_frequencies_add_text_input_callback(void* context) {
     XtremeApp* app = context;
 
-    char *end;
+    char* end;
     uint32_t value = strtol(app->subghz_freq_buffer, &end, 0) * 10000;
     if(*end || !furi_hal_subghz_is_frequency_valid(value)) {
         view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultError);
         return;
     }
-    bool is_hopper = scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd);
+    bool is_hopper =
+        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd);
     if(is_hopper) {
         FrequencyList_push_back(app->subghz_hopper_frequencies, value);
     } else {
@@ -60,7 +61,8 @@ bool xtreme_app_scene_protocols_frequencies_add_on_event(void* context, SceneMan
             break;
         case TextInputResultError:
             popup_set_header(app->popup, "Invalid value!", 64, 26, AlignCenter, AlignCenter);
-            popup_set_text(app->popup, "Frequency was not added...", 64, 40, AlignCenter, AlignCenter);
+            popup_set_text(
+                app->popup, "Frequency was not added...", 64, 40, AlignCenter, AlignCenter);
             popup_set_callback(app->popup, callback_return);
             popup_set_context(app->popup, app);
             popup_set_timeout(app->popup, 1000);

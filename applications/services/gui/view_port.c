@@ -52,7 +52,8 @@ static const InputKey view_port_input_mapping[ViewPortOrientationMAX][InputKeyMA
 // Remaps directional pad buttons on Flipper based on ViewPort orientation
 static void view_port_map_input(InputEvent* event, ViewPortOrientation orientation) {
     furi_assert(orientation < ViewPortOrientationMAX && event->key < InputKeyMAX);
-    if(orientation == ViewPortOrientationHorizontal || orientation == ViewPortOrientationHorizontalFlip) {
+    if(orientation == ViewPortOrientationHorizontal ||
+       orientation == ViewPortOrientationHorizontalFlip) {
         if(XTREME_SETTINGS()->left_handed) {
             switch(event->key) {
             case InputKeyUp:

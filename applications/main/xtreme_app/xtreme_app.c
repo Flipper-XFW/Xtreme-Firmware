@@ -26,24 +26,36 @@ static bool xtreme_app_back_event_callback(void* context) {
             FlipperFormat* file = flipper_format_file_alloc(storage);
             do {
                 FrequencyList_it_t it;
-                if(!flipper_format_file_open_always(file, EXT_PATH("subghz/assets/setting_user"))) break;
+                if(!flipper_format_file_open_always(file, EXT_PATH("subghz/assets/setting_user")))
+                    break;
 
-                if(!flipper_format_write_header_cstr(file, SUBGHZ_SETTING_FILE_TYPE, SUBGHZ_SETTING_FILE_VERSION)) break;
+                if(!flipper_format_write_header_cstr(
+                       file, SUBGHZ_SETTING_FILE_TYPE, SUBGHZ_SETTING_FILE_VERSION))
+                    break;
 
-                while(flipper_format_delete_key(file, "Add_standard_frequencies"));
-                flipper_format_write_bool(file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
+                while(flipper_format_delete_key(file, "Add_standard_frequencies"))
+                    ;
+                flipper_format_write_bool(
+                    file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
 
                 if(!flipper_format_rewind(file)) break;
-                while(flipper_format_delete_key(file, "Frequency"));
+                while(flipper_format_delete_key(file, "Frequency"))
+                    ;
                 FrequencyList_it(it, app->subghz_static_frequencies);
                 for(uint i = 0; i < FrequencyList_size(app->subghz_static_frequencies); i++) {
-                    flipper_format_write_uint32(file, "Frequency", FrequencyList_get(app->subghz_static_frequencies, i), 1);
+                    flipper_format_write_uint32(
+                        file, "Frequency", FrequencyList_get(app->subghz_static_frequencies, i), 1);
                 }
 
                 if(!flipper_format_rewind(file)) break;
-                while(flipper_format_delete_key(file, "Hopper_frequency"));
+                while(flipper_format_delete_key(file, "Hopper_frequency"))
+                    ;
                 for(uint i = 0; i < FrequencyList_size(app->subghz_hopper_frequencies); i++) {
-                    flipper_format_write_uint32(file, "Hopper_frequency", FrequencyList_get(app->subghz_hopper_frequencies, i), 1);
+                    flipper_format_write_uint32(
+                        file,
+                        "Hopper_frequency",
+                        FrequencyList_get(app->subghz_hopper_frequencies, i),
+                        1);
                 }
             } while(false);
             flipper_format_free(file);
