@@ -73,7 +73,8 @@ After installing the packs to Flipper, hit the <code>Arrow UP</code> button on t
 -----
 <br>
 <h2 align="center">Bad Keyboard:</h2>
-<img src="https://user-images.githubusercontent.com/55334727/222941732-8240e21b-e5a0-456d-a689-9a87f9d06b9e.png" align="left" width="250px"/>
+
+<img src="https://user-images.githubusercontent.com/49810075/223855940-b8ee6770-4520-4bcc-a4cc-089196cf904b.png" align="left" width="250px"/>
 <! -- This fuckshit needs a captured image, but bc of blockage, i cant get one. someone do some magic plz -- !>
 BadUSB is a wonderful app, but it lacks bluetooth capabilities. Now some might argue that its useless as you will always need authentication from both sides, but what if I told you that we found a solution to this problem?
 <br><br>
