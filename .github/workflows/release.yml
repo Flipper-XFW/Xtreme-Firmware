@@ -64,7 +64,7 @@ jobs:
           7z a ../${RELEASE_TAG}.zip .
           cd ..
           python -m pip install pyncclient
-          WEBUPDATER_URL="$(python -c "import nextcloud_client as n;c = n.Client('https://cloud.cynthialabs.net/');c.login('${{ secrets.NC_USER }}', '${{ secrets.NC_PASS }}');c.put_file('XFW-Updater/${RELEASE_TAG}.tgz', '${RELEASE_TAG}.tgz');print(c.share_file_with_link('XFW-Updater/${RELEASE_TAG}.tgz').get_link(), end='')")"
+          WEBUPDATER_URL="$(python -c "import nextcloud_client as n;c = n.Client('https://cloud.cynthialabs.net/');c.login('${{ secrets.NC_USER }}', '${{ secrets.NC_PASS }}');c.put_file('XFW-Updater/${RELEASE_TAG}.tgz', '${RELEASE_TAG}.tgz');print(c.share_file_with_link('XFW-Updater/${RELEASE_TAG}.tgz').get_link().rstrip('/') + '/download/${RELEASE_TAG}.tgz', end='')")"
           echo "WEBUPDATER_URL=${WEBUPDATER_URL}" >> $GITHUB_ENV
 
       - name: "Update release notes"
