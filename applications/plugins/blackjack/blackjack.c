@@ -1,7 +1,6 @@
 
 #include <gui/gui.h>
 #include <stdlib.h>
-#include <dolphin/dolphin.h>
 #include <dialogs/dialogs.h>
 #include <gui/canvas_i.h>
 

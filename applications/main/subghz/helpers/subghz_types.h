@@ -23,7 +23,7 @@ typedef enum {
 /** SubGhzHopperState state */
 typedef enum {
     SubGhzHopperStateOFF,
-    SubGhzHopperStateRunnig,
+    SubGhzHopperStateRunning,
     SubGhzHopperStatePause,
     SubGhzHopperStateRSSITimeOut,
 } SubGhzHopperState;
@@ -54,6 +54,7 @@ typedef enum {
     SubGhzLoadKeyStateOK,
     SubGhzLoadKeyStateParseErr,
     SubGhzLoadKeyStateOnlyRx,
+    SubGhzLoadKeyStateProtocolDescriptionErr,
 } SubGhzLoadKeyState;
 
 /** SubGhzLock */

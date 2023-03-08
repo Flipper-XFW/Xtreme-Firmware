@@ -1,8 +1,12 @@
 #include "applications.h"
 #include <furi.h>
+#include <storage/storage.h>
 #include "loader/loader.h"
 #include "loader_i.h"
-#include "applications/services/desktop/desktop_i.h"
+#include "applications/main/fap_loader/fap_loader_app.h"
+#include <flipper_application/application_manifest.h>
+#include <gui/icon_i.h>
+#include <core/dangerous_defines.h>
 
 #define TAG "LoaderSrv"
 
@@ -30,6 +34,8 @@ static bool
     }
 
     furi_thread_set_name(loader_instance->application_thread, loader_instance->application->name);
+    furi_thread_set_appid(
+        loader_instance->application_thread, loader_instance->application->appid);
     furi_thread_set_stack_size(
         loader_instance->application_thread, loader_instance->application->stack_size);
     furi_thread_set_context(
@@ -40,41 +46,6 @@ static bool
     furi_thread_start(loader_instance->application_thread);
 
     return true;
-}
-
-static void loader_menu_callback(void* _ctx, uint32_t index) {
-    UNUSED(index);
-    const FlipperApplication* application = _ctx;
-
-    furi_assert(application->app);
-    furi_assert(application->name);
-    furi_assert(application->link);
-
-    if(strcmp(application->link, "NULL") != 0) {
-        loader_start(NULL, "Applications", application->link);
-    } else {
-        if(!loader_lock(loader_instance)) {
-            FURI_LOG_E(TAG, "Loader is locked");
-            return;
-        }
-
-        loader_start_application(application, NULL);
-    }
-}
-
-static void loader_submenu_callback(void* context, uint32_t index) {
-    UNUSED(index);
-    uint32_t view_id = (uint32_t)context;
-    view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
-}
-
-static void loader_cli_print_usage() {
-    printf("Usage:\r\n");
-    printf("loader <cmd> <args>\r\n");
-    printf("Cmd list:\r\n");
-    printf("\tlist\t - List available applications\r\n");
-    printf("\topen <Application Name:string>\t - Open application by name\r\n");
-    printf("\tinfo\t - Show loader state\r\n");
 }
 
 static FlipperApplication const* loader_find_application_by_name_in_list(
@@ -110,6 +81,52 @@ const FlipperApplication* loader_find_application_by_name(const char* name) {
     }
 
     return application;
+}
+
+static void loader_menu_callback(void* _ctx, uint32_t index) {
+    UNUSED(index);
+    const FlipperApplication* application = _ctx;
+
+    furi_assert(application->app);
+    furi_assert(application->name);
+
+    if(!loader_lock(loader_instance)) {
+        FURI_LOG_E(TAG, "Loader is locked");
+        return;
+    }
+
+    loader_start_application(application, NULL);
+}
+
+static void loader_main_callback(void* _ctx, uint32_t index) {
+    UNUSED(index);
+    const char* path = _ctx;
+    const FlipperApplication* app = loader_find_application_by_name_in_list(
+        FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+
+    furi_assert(path);
+
+    if(!loader_lock(loader_instance)) {
+        FURI_LOG_E(TAG, "Loader is locked");
+        return;
+    }
+
+    loader_start_application(app, path);
+}
+
+static void loader_submenu_callback(void* context, uint32_t index) {
+    UNUSED(index);
+    uint32_t view_id = (uint32_t)context;
+    view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
+}
+
+static void loader_cli_print_usage() {
+    printf("Usage:\r\n");
+    printf("loader <cmd> <args>\r\n");
+    printf("Cmd list:\r\n");
+    printf("\tlist\t - List available applications\r\n");
+    printf("\topen <Application Name:string>\t - Open application by name\r\n");
+    printf("\tinfo\t - Show loader state\r\n");
 }
 
 static void loader_cli_open(Cli* cli, FuriString* args, Loader* instance) {
@@ -162,12 +179,7 @@ static void loader_cli_list(Cli* cli, FuriString* args, Loader* instance) {
     UNUSED(instance);
     printf("Applications:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_APPS[i].link, "NULL") != 0) {
-            printf(
-                "\tFor %s, Use: Applications %s\r\n", FLIPPER_APPS[i].name, FLIPPER_APPS[i].link);
-        } else {
-            printf("\t%s\r\n", FLIPPER_APPS[i].name);
-        }
+        printf("\t%s\r\n", FLIPPER_APPS[i].name);
     }
 
     printf("Plugins:\r\n");
@@ -175,7 +187,7 @@ static void loader_cli_list(Cli* cli, FuriString* args, Loader* instance) {
         printf("\t%s\r\n", FLIPPER_PLUGINS[i].name);
     }
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         printf("Debug:\r\n");
         for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
             printf("\t%s\r\n", FLIPPER_DEBUG_APPS[i].name);
@@ -273,7 +285,7 @@ void loader_unlock(Loader* instance) {
     FURI_CRITICAL_EXIT();
 }
 
-bool loader_is_locked(Loader* instance) {
+bool loader_is_locked(const Loader* instance) {
     return instance->lock_count > 0;
 }
 
@@ -408,6 +420,14 @@ static void loader_free(Loader* instance) {
     instance = NULL;
 }
 
+const Icon* loader_get_main_icon(char* name) {
+    // Temp solution, not sure how this could be easily improved
+    if(strcmp(name, "xtreme_app.fap") == 0) {
+        return &A_Xtreme_14;
+    }
+    return NULL;
+}
+
 static void loader_build_menu() {
     FURI_LOG_I(TAG, "Building main menu");
     size_t i;
@@ -420,6 +440,32 @@ static void loader_build_menu() {
             loader_menu_callback,
             (void*)&FLIPPER_APPS[i]);
     }
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* folder = storage_file_alloc(storage);
+    FileInfo info;
+    char* name = malloc(100);
+    if(storage_dir_open(folder, EXT_PATH("apps/.Main"))) {
+        FuriString* path = furi_string_alloc();
+        FuriString* appname = furi_string_alloc();
+        while(storage_dir_read(folder, &info, name, 100)) {
+            if(file_info_is_dir(&info)) continue;
+            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), name);
+            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
+            const Icon* icon = loader_get_main_icon(name);
+            menu_add_item(
+                loader_instance->primary_menu,
+                strdup(furi_string_get_cstr(appname)),
+                icon,
+                i++,
+                loader_main_callback,
+                (void*)strdup(furi_string_get_cstr(path)));
+        }
+        furi_string_free(appname);
+        furi_string_free(path);
+    }
+    free(name);
+    storage_file_free(folder);
+    furi_record_close(RECORD_STORAGE);
     if(FLIPPER_PLUGINS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,
@@ -429,7 +475,7 @@ static void loader_build_menu() {
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
     }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && (FLIPPER_DEBUG_APPS_COUNT > 0)) {
         menu_add_item(
             loader_instance->primary_menu,
             "Debug Tools",
@@ -448,9 +494,8 @@ static void loader_build_menu() {
 }
 
 static void loader_build_submenu() {
-    size_t i;
-
     FURI_LOG_I(TAG, "Building plugins menu");
+    size_t i;
     for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
         submenu_add_item(
             loader_instance->plugins_menu,

@@ -1,7 +1,7 @@
 #pragma once
 #include "base.h"
 
-#define SUBGHZ_PROTOCOL_ALUTECH_AT_4N_NAME "Alutech at-4n"
+#define SUBGHZ_PROTOCOL_ALUTECH_AT_4N_NAME "Alutech AT-4N"
 
 typedef struct SubGhzProtocolDecoderAlutech_at_4n SubGhzProtocolDecoderAlutech_at_4n;
 typedef struct SubGhzProtocolEncoderAlutech_at_4n SubGhzProtocolEncoderAlutech_at_4n;
@@ -9,6 +9,14 @@ typedef struct SubGhzProtocolEncoderAlutech_at_4n SubGhzProtocolEncoderAlutech_a
 extern const SubGhzProtocolDecoder subghz_protocol_alutech_at_4n_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_alutech_at_4n_encoder;
 extern const SubGhzProtocol subghz_protocol_alutech_at_4n;
+
+// Custom buttons
+void alutech_set_btn(uint8_t b);
+
+uint8_t alutech_get_original_btn();
+uint8_t alutech_get_custom_btn();
+
+void alutech_reset_original_btn();
 
 /**
  * Allocate SubGhzProtocolEncoderAlutech_at_4n.
@@ -47,9 +55,8 @@ bool subghz_protocol_alutech_at_4n_create_data(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_alutech_at_4n_deserialize(
-    void* context,
-    FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_alutech_at_4n_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -103,9 +110,9 @@ uint8_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderAlutech_at_4n instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_alutech_at_4n_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_alutech_at_4n_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -114,11 +121,10 @@ bool subghz_protocol_decoder_alutech_at_4n_serialize(
  * Deserialize data SubGhzProtocolDecoderAlutech_at_4n.
  * @param context Pointer to a SubGhzProtocolDecoderAlutech_at_4n instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_alutech_at_4n_deserialize(
-    void* context,
-    FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_alutech_at_4n_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.

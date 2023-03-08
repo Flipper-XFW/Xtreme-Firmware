@@ -16,11 +16,11 @@ class Main(App):
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
         self.parser.add_argument(
-            "-l",
-            "--launch",
+            "-n",
+            "--no-launch",
             dest="launch_app",
-            action="store_true",
-            help="Launch app",
+            action="store_false",
+            help="Don't launch app",
         )
 
         self.parser.add_argument("fap_src_path", help="App file to upload")
@@ -91,11 +91,14 @@ class Main(App):
                 self.logger.error(f"Error: upload failed: {storage.last_error}")
                 return -3
 
-            storage.send_and_wait_eol(f'loader open "Applications" {fap_dst_path}\r')
-            result = storage.read.until(storage.CLI_EOL)
-            if len(result):
-                self.logger.error(f"Unexpected response: {result.decode('ascii')}")
-                return -4
+            if self.args.launch_app:
+                storage.send_and_wait_eol(
+                    f'loader open "Applications" {fap_dst_path}\r'
+                )
+                result = storage.read.until(storage.CLI_EOL)
+                if len(result):
+                    self.logger.error(f"Unexpected response: {result.decode('ascii')}")
+                    return -4
 
             return 0
         finally:

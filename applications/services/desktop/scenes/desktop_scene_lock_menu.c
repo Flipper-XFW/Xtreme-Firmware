@@ -98,7 +98,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopLockMenuEventXtremeSettings:
-            loader_start(desktop->loader, "Xtreme FW", NULL);
+            loader_start(
+                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/.Main/xtreme_app.fap"));
             break;
         default:
             break;

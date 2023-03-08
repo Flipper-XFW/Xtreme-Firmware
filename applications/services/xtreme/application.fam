@@ -1,10 +1,14 @@
 App(
     appid="xtreme",
-    apptype=FlipperAppType.STARTUP,
-    entry_point="xtreme_on_system_start",
+    name="Xtreme",
+    apptype=FlipperAppType.SERVICE,
+    entry_point="xtreme_srv",
+    cdefines=["SRV_XTREME"],
     requires=["storage"],
-    order=1000,
-    provides=[
-        "xtreme",
+    stack_size=1 * 1024,
+    order=46,
+    sdk_headers=[
+        "settings.h",
+        "assets.h",
     ],
 )

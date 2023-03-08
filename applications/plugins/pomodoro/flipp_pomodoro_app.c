@@ -29,11 +29,6 @@ static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) 
             app->view_dispatcher, FlippPomodoroAppCustomEventStateUpdated);
         return CustomEventConsumed;
     case FlippPomodoroAppCustomEventStageComplete:
-        if(flipp_pomodoro__get_stage(app->state) == FlippPomodoroStageFocus) {
-            // REGISTER a deed on work stage complete to get an acheivement
-            DOLPHIN_DEED(DolphinDeedPluginGameWin);
-        };
-
         flipp_pomodoro__toggle_stage(app->state);
         notification_message(
             app->notification_app,

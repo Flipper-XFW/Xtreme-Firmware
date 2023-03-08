@@ -382,7 +382,7 @@ int32_t game_2048_app() {
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, game_state, sizeof(GameState))) {
-        FURI_LOG_E("SnakeGame", "cannot create mutex\r\n");
+        FURI_LOG_E("2048Game", "cannot create mutex\r\n");
         free(game_state);
         return 255;
     }

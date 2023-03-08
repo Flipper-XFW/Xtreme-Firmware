@@ -1,10 +1,10 @@
-name: 'Check submodules branch'
+name: 'Check submodules'
 
 on:
   push:
     branches:
       - dev
-      - "release*"
+      - main
     tags:
       - '*'
   pull_request:
@@ -13,11 +13,6 @@ jobs:
   check_protobuf:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-          fi
 
       - name: 'Checkout code'
         uses: actions/checkout@v3

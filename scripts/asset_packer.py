@@ -6,7 +6,9 @@ import shutil
 import struct
 import typing
 import time
+import re
 import io
+import os
 
 
 def convert_bm(img: "Image.Image | pathlib.Path") -> bytes:
@@ -28,7 +30,7 @@ def convert_bm(img: "Image.Image | pathlib.Path") -> bytes:
     data_enc = bytearray(data_encoded_str)
     data_enc = bytearray([len(data_enc) & 0xFF, len(data_enc) >> 8]) + data_enc
 
-    if len(data_enc) < len(data_bin) + 1:
+    if len(data_enc) + 2 < len(data_bin) + 1:
         return b"\x01\x00" + data_enc
     else:
         return b"\x00" + data_bin
@@ -94,7 +96,7 @@ def pack(
         if not source.is_dir():
             continue
 
-        logger(f"Packing {source.name}... ")
+        logger(f"Pack: custom user pack '{source.name}'")
         packed = output / source.name
         if packed.exists():
             try:
@@ -110,10 +112,11 @@ def pack(
             shutil.copyfile(
                 source / "Anims/manifest.txt", packed / "Anims/manifest.txt"
             )
-            for anim in (source / "Anims").iterdir():
-                if not anim.is_dir():
-                    continue
-                pack_anim(anim, packed / "Anims" / anim.name)
+            manifest = (source / "Anims/manifest.txt").read_bytes()
+            for anim in re.finditer(rb"Name: (.*)", manifest):
+                anim = anim.group(1).decode().replace("\\", "/").replace("/", os.sep)
+                logger(f"Compile: anim for pack '{source.name}': {anim}")
+                pack_anim(source / "Anims" / anim, packed / "Anims" / anim)
 
         if (source / "Icons").is_dir():
             for icons in (source / "Icons").iterdir():
@@ -121,10 +124,16 @@ def pack(
                     continue
                 for icon in icons.iterdir():
                     if icon.is_dir():
+                        logger(
+                            f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
+                        )
                         pack_icon_animated(
                             icon, packed / "Icons" / icons.name / icon.name
                         )
                     elif icon.is_file():
+                        logger(
+                            f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
+                        )
                         pack_icon_static(
                             icon, packed / "Icons" / icons.name / icon.name
                         )

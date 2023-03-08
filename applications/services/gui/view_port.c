@@ -1,4 +1,5 @@
 #include "view_port_i.h"
+#include "xtreme/settings.h"
 
 #include <furi.h>
 
@@ -51,6 +52,27 @@ static const InputKey view_port_input_mapping[ViewPortOrientationMAX][InputKeyMA
 // Remaps directional pad buttons on Flipper based on ViewPort orientation
 static void view_port_map_input(InputEvent* event, ViewPortOrientation orientation) {
     furi_assert(orientation < ViewPortOrientationMAX && event->key < InputKeyMAX);
+    if(orientation == ViewPortOrientationHorizontal ||
+       orientation == ViewPortOrientationHorizontalFlip) {
+        if(XTREME_SETTINGS()->left_handed) {
+            switch(event->key) {
+            case InputKeyUp:
+                event->key = InputKeyDown;
+                break;
+            case InputKeyDown:
+                event->key = InputKeyUp;
+                break;
+            case InputKeyLeft:
+                event->key = InputKeyRight;
+                break;
+            case InputKeyRight:
+                event->key = InputKeyLeft;
+                break;
+            default:
+                break;
+            }
+        }
+    }
     event->key = view_port_input_mapping[orientation][event->key];
 }
 
@@ -89,7 +111,7 @@ void view_port_set_width(ViewPort* view_port, uint8_t width) {
     view_port->width = width;
 }
 
-uint8_t view_port_get_width(ViewPort* view_port) {
+uint8_t view_port_get_width(const ViewPort* view_port) {
     furi_assert(view_port);
     return view_port->width;
 }
@@ -99,7 +121,7 @@ void view_port_set_height(ViewPort* view_port, uint8_t height) {
     view_port->height = height;
 }
 
-uint8_t view_port_get_height(ViewPort* view_port) {
+uint8_t view_port_get_height(const ViewPort* view_port) {
     furi_assert(view_port);
     return view_port->height;
 }
@@ -112,7 +134,7 @@ void view_port_enabled_set(ViewPort* view_port, bool enabled) {
     }
 }
 
-bool view_port_is_enabled(ViewPort* view_port) {
+bool view_port_is_enabled(const ViewPort* view_port) {
     furi_assert(view_port);
     return view_port->is_enabled;
 }

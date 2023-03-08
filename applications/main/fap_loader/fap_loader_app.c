@@ -5,6 +5,7 @@
 #include <storage/storage.h>
 #include <gui/modules/loading.h>
 #include <dialogs/dialogs.h>
+#include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>
 #include "elf_cpp/elf_hashtable.h"
 #include "fap_loader_app.h"
@@ -35,7 +36,7 @@ bool fap_loader_load_name_and_icon(
 
     if(preload_res == FlipperApplicationPreloadStatusSuccess) {
         const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-        if(manifest->has_icon) {
+        if(manifest->has_icon && icon_ptr != NULL) {
             memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
         }
         furi_string_set(item_name, manifest->name);
@@ -105,6 +106,12 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
         FURI_LOG_I(TAG, "FAP Loader is starting app");
 
         FuriThread* thread = flipper_application_spawn(loader->app, NULL);
+
+        FuriString* app_name = furi_string_alloc();
+        path_extract_filename_no_ext(furi_string_get_cstr(loader->fap_path), app_name);
+        furi_thread_set_appid(thread, furi_string_get_cstr(app_name));
+        furi_string_free(app_name);
+
         furi_thread_start(thread);
         furi_thread_join(thread);
 
@@ -146,6 +153,7 @@ static bool fap_loader_select_app(FapLoader* loader) {
         .skip_assets = true,
         .icon = &I_unknown_10px,
         .hide_ext = true,
+        .hide_dot_files = true,
         .item_loader_callback = fap_loader_item_callback,
         .item_loader_context = loader,
         .base_path = EXT_PATH("apps"),

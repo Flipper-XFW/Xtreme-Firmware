@@ -2,6 +2,8 @@
 #include <assets_icons.h>
 #include <core/dangerous_defines.h>
 
+#define TAG "XtremeAssets"
+
 #define ICONS_FMT PACKS_DIR "/%s/Icons/%s"
 
 XtremeAssets* xtreme_assets = NULL;
@@ -100,6 +102,7 @@ void swap(XtremeAssets* x, FuriString* p, File* f) {
     icon(&x->I_RFIDDolphinSend_97x61, "RFID/RFIDDolphinSend_97x61", p, f);
     icon(&x->I_RFIDDolphinSuccess_108x57, "RFID/RFIDDolphinSuccess_108x57", p, f);
     icon(&x->I_Cry_dolph_55x52, "Settings/Cry_dolph_55x52", p, f);
+    icon(&x->I_Fishing_123x52, "SubGhz/Fishing_123x52", p, f);
     icon(&x->I_Scanning_123x52, "SubGhz/Scanning_123x52", p, f);
     icon(&x->I_Auth_62x31, "U2F/Auth_62x31", p, f);
     icon(&x->I_Connect_me_62x31, "U2F/Connect_me_62x31", p, f);
@@ -111,7 +114,6 @@ void XTREME_ASSETS_LOAD() {
     if(xtreme_assets != NULL) return;
 
     xtreme_assets = malloc(sizeof(XtremeAssets));
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     xtreme_assets->A_Levelup_128x64 = &A_Levelup_128x64;
     xtreme_assets->I_BLE_Pairing_128x64 = &I_BLE_Pairing_128x64;
@@ -130,26 +132,41 @@ void XTREME_ASSETS_LOAD() {
     xtreme_assets->I_RFIDDolphinSend_97x61 = &I_RFIDDolphinSend_97x61;
     xtreme_assets->I_RFIDDolphinSuccess_108x57 = &I_RFIDDolphinSuccess_108x57;
     xtreme_assets->I_Cry_dolph_55x52 = &I_Cry_dolph_55x52;
+    xtreme_assets->I_Fishing_123x52 = &I_Fishing_123x52;
     xtreme_assets->I_Scanning_123x52 = &I_Scanning_123x52;
     xtreme_assets->I_Auth_62x31 = &I_Auth_62x31;
     xtreme_assets->I_Connect_me_62x31 = &I_Connect_me_62x31;
     xtreme_assets->I_Connected_62x31 = &I_Connected_62x31;
     xtreme_assets->I_Error_62x31 = &I_Error_62x31;
 
+    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+        FURI_LOG_W(TAG, "Load skipped. Device is in special startup mode.");
+        return;
+    }
+
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     if(xtreme_settings->asset_pack[0] == '\0') return;
     xtreme_assets->is_nsfw = strncmp(xtreme_settings->asset_pack, "NSFW", strlen("NSFW")) == 0;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    int32_t timeout = 5000;
+    while(timeout > 0) {
+        if(storage_sd_status(storage) == FSE_OK) break;
+        furi_delay_ms(250);
+        timeout -= 250;
+    }
+
     FileInfo info;
     FuriString* path = furi_string_alloc();
     furi_string_printf(path, PACKS_DIR "/%s", xtreme_settings->asset_pack);
-    Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_common_stat(storage, furi_string_get_cstr(path), &info) == FSE_OK &&
        info.flags & FSF_DIRECTORY) {
         File* file = storage_file_alloc(storage);
         swap(xtreme_assets, path, file);
         storage_file_free(file);
     }
-    furi_record_close(RECORD_STORAGE);
     furi_string_free(path);
+    furi_record_close(RECORD_STORAGE);
 }
 
 XtremeAssets* XTREME_ASSETS() {

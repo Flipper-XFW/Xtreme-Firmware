@@ -16,7 +16,7 @@ struct DesktopMainView {
     TimerHandle_t poweroff_timer;
 };
 
-#define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 2000
+#define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 1300
 
 static void desktop_main_poweroff_timer_callback(TimerHandle_t timer) {
     DesktopMainView* main_view = pvTimerGetTimerID(timer);
@@ -85,7 +85,6 @@ DesktopMainView* desktop_main_alloc() {
     DesktopMainView* main_view = malloc(sizeof(DesktopMainView));
 
     main_view->view = view_alloc();
-    view_allocate_model(main_view->view, ViewModelTypeLockFree, 1);
     view_set_context(main_view->view, main_view);
     view_set_input_callback(main_view->view, desktop_main_input_callback);
 
