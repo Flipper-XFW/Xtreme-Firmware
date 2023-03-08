@@ -1,4 +1,4 @@
-name: 'Check submodules branch'
+name: 'Check submodules'
 
 on:
   push:

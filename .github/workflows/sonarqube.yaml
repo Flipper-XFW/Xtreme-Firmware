@@ -1,4 +1,4 @@
-name: 'SonarCloud'
+name: 'SonarCloud analysis'
 
 on:
   workflow_dispatch:

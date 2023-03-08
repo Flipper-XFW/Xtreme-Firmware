@@ -1,4 +1,4 @@
-name: 'Lint code formatting'
+name: 'Lint formatting'
 
 on:
   push:
@@ -10,6 +10,7 @@ on:
   pull_request:
 
 env:
+  FBT_NO_SYNC: "true"  # Skip submodules, irrelevant for linting
   SET_GH_OUTPUT: 1
 
 jobs:
