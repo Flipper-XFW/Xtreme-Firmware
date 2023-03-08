@@ -1,11 +1,8 @@
 # GPS for Flipper Zero
 
-A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
-
 [Original link](https://github.com/ezod/flipperzero-gps)
+
 [Adafruit Ultimate GPS Breakout].
-
-[Original link](https://github.com/ezod/flipperzero-gps)
 
 ![ui](ui.png)
 
@@ -35,4 +32,3 @@ baud rate, may be useful for other GPS modules.
 [Adafruit Ultimate GPS Breakout]: https://www.adafruit.com/product/746
 [minmea]: https://github.com/kosma/minmea
 [flipperzero-firmware]: https://github.com/flipperdevices/flipperzero-firmware
-[qFlipper]: https://flipperzero.one/update

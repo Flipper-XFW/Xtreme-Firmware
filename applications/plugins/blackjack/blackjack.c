@@ -13,7 +13,7 @@
 #include "util.h"
 #include "ui.h"
 
-#include "BlackJack_icons.h"
+#include "Blackjack_icons.h"
 
 #define DEALER_MAX 17
 

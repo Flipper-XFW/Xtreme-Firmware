@@ -74,8 +74,8 @@ bool spi_mem_tools_read_chip_info(SPIMemChip* chip) {
 
 bool spi_mem_tools_check_chip_info(SPIMemChip* chip) {
     SPIMemChip new_chip_info;
+    spi_mem_tools_read_chip_info(&new_chip_info);
     do {
-        if(!spi_mem_tools_read_chip_info(&new_chip_info)) break;
         if(chip->vendor_id != new_chip_info.vendor_id) break;
         if(chip->type_id != new_chip_info.type_id) break;
         if(chip->capacity_id != new_chip_info.capacity_id) break;

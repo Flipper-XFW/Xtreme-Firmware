@@ -6,6 +6,5 @@ App(
         "music_player",
         "music_beeper",
         "snake_game",
-        "bt_hid",
     ],
 )
