@@ -29,6 +29,7 @@ typedef struct {
 } EventApp;
 
 typedef struct {
+    FuriMutex* mutex;
     uint32_t cps, cpm;
     uint32_t line[SCREEN_SIZE_X / 2];
     float coef;
@@ -36,12 +37,13 @@ typedef struct {
 } mutexStruct;
 
 static void draw_callback(Canvas* canvas, void* ctx) {
-    UNUSED(ctx);
+    furi_assert(ctx);
 
     mutexStruct displayStruct;
-    mutexStruct* geigerMutex = (mutexStruct*)acquire_mutex_block((ValueMutex*)ctx);
+    mutexStruct* geigerMutex = ctx;
+    furi_mutex_acquire(geigerMutex->mutex, FuriWaitForever);
     memcpy(&displayStruct, geigerMutex, sizeof(mutexStruct));
-    release_mutex((ValueMutex*)ctx, geigerMutex);
+    furi_mutex_release(geigerMutex->mutex);
 
     char buffer[32];
     if(displayStruct.data == 0)
@@ -101,7 +103,8 @@ static void gpiocallback(void* ctx) {
     furi_message_queue_put(queue, &event, 0);
 }
 
-int32_t flipper_geiger_app() {
+int32_t flipper_geiger_app(void* p) {
+    UNUSED(p);
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
@@ -117,11 +120,14 @@ int32_t flipper_geiger_app() {
 
     uint32_t counter = 0;
 
-    ValueMutex state_mutex;
-    init_mutex(&state_mutex, &mutexVal, sizeof(mutexVal));
+    mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!mutexVal.mutex) {
+        furi_message_queue_free(event_queue);
+        return 255;
+    }
 
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, draw_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, draw_callback, &mutexVal);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     furi_hal_gpio_add_int_callback(&gpio_ext_pa7, gpiocallback, event_queue);
@@ -146,62 +152,62 @@ int32_t flipper_geiger_app() {
                     break;
                 } else if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) {
                     counter = 0;
-                    mutexStruct* geigerMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
+                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
-                    geigerMutex->cps = 0;
-                    geigerMutex->cpm = 0;
-                    for(int i = 0; i < SCREEN_SIZE_X / 2; i++) geigerMutex->line[i] = 0;
+                    mutexVal.cps = 0;
+                    mutexVal.cpm = 0;
+                    for(int i = 0; i < SCREEN_SIZE_X / 2; i++) mutexVal.line[i] = 0;
 
                     screenRefresh = 1;
-                    release_mutex(&state_mutex, geigerMutex);
+                    furi_mutex_release(mutexVal.mutex);
                 } else if((event.input.key == InputKeyLeft &&
                            event.input.type == InputTypeShort)) {
-                    mutexStruct* geigerMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
+                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
-                    if(geigerMutex->data != 0)
-                        geigerMutex->data--;
+                    if(mutexVal.data != 0)
+                        mutexVal.data--;
                     else
-                        geigerMutex->data = 2;
+                        mutexVal.data = 2;
 
                     screenRefresh = 1;
-                    release_mutex(&state_mutex, geigerMutex);
+                    furi_mutex_release(mutexVal.mutex);
                 } else if((event.input.key == InputKeyRight &&
                            event.input.type == InputTypeShort)) {
-                    mutexStruct* geigerMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
+                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
-                    if(geigerMutex->data != 2)
-                        geigerMutex->data++;
+                    if(mutexVal.data != 2)
+                        mutexVal.data++;
                     else
-                        geigerMutex->data = 0;
+                        mutexVal.data = 0;
 
                     screenRefresh = 1;
-                    release_mutex(&state_mutex, geigerMutex);
+                    furi_mutex_release(mutexVal.mutex);
                 }
             } else if(event.type == ClockEventTypeTick) {
-                mutexStruct* geigerMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
+                furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
                 for(int i = 0; i < SCREEN_SIZE_X / 2 - 1; i++)
-                    geigerMutex->line[SCREEN_SIZE_X / 2 - 1 - i] =
-                        geigerMutex->line[SCREEN_SIZE_X / 2 - 2 - i];
+                    mutexVal.line[SCREEN_SIZE_X / 2 - 1 - i] =
+                        mutexVal.line[SCREEN_SIZE_X / 2 - 2 - i];
 
-                geigerMutex->line[0] = counter;
-                geigerMutex->cps = counter;
+                mutexVal.line[0] = counter;
+                mutexVal.cps = counter;
                 counter = 0;
 
-                geigerMutex->cpm = geigerMutex->line[0];
-                uint32_t max = geigerMutex->line[0];
+                mutexVal.cpm = mutexVal.line[0];
+                uint32_t max = mutexVal.line[0];
                 for(int i = 1; i < SCREEN_SIZE_X / 2; i++) {
-                    if(i < 60) geigerMutex->cpm += geigerMutex->line[i];
-                    if(geigerMutex->line[i] > max) max = geigerMutex->line[i];
+                    if(i < 60) mutexVal.cpm += mutexVal.line[i];
+                    if(mutexVal.line[i] > max) max = mutexVal.line[i];
                 }
 
                 if(max > 0)
-                    geigerMutex->coef = ((float)(SCREEN_SIZE_Y - 15)) / ((float)max);
+                    mutexVal.coef = ((float)(SCREEN_SIZE_Y - 15)) / ((float)max);
                 else
-                    geigerMutex->coef = 1;
+                    mutexVal.coef = 1;
 
                 screenRefresh = 1;
-                release_mutex(&state_mutex, geigerMutex);
+                furi_mutex_release(mutexVal.mutex);
             } else if(event.type == EventGPIO) {
                 counter++;
             }
@@ -217,7 +223,7 @@ int32_t flipper_geiger_app() {
     furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
 
     furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(mutexVal.mutex);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_timer_free(timer);

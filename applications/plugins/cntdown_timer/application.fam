@@ -1,5 +1,7 @@
+# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
+
 App(
-    appid="Count_Down_Timer",
+    appid="cntdown_tim",
     name="Count Down Timer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="app_main",

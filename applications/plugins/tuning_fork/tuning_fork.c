@@ -28,6 +28,7 @@ typedef struct {
 enum Page { Tunings, Notes };
 
 typedef struct {
+    FuriMutex* mutex;
     bool playing;
     enum Page page;
     int current_tuning_note_index;
@@ -114,7 +115,7 @@ static void decrease_volume(TuningForkState* tuning_fork_state) {
 }
 
 static void play(TuningForkState* tuning_fork_state) {
-    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
         furi_hal_speaker_start(
             current_tuning_note_freq(tuning_fork_state), tuning_fork_state->volume);
     }
@@ -133,10 +134,9 @@ static void replay(TuningForkState* tuning_fork_state) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    TuningForkState* tuning_fork_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(tuning_fork_state == NULL) {
-        return;
-    }
+    furi_assert(ctx);
+    TuningForkState* tuning_fork_state = ctx;
+    furi_mutex_acquire(tuning_fork_state->mutex, FuriWaitForever);
 
     string_t tempStr;
     string_init(tempStr);
@@ -185,7 +185,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     }
 
     string_clear(tempStr);
-    release_mutex((ValueMutex*)ctx, tuning_fork_state);
+    furi_mutex_release(tuning_fork_state->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -210,8 +210,8 @@ int32_t tuning_fork_app() {
     TuningForkState* tuning_fork_state = malloc(sizeof(TuningForkState));
     tuning_fork_state_init(tuning_fork_state);
 
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, tuning_fork_state, sizeof(TuningForkState))) {
+    tuning_fork_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!tuning_fork_state->mutex) {
         FURI_LOG_E("TuningFork", "cannot create mutex\r\n");
         free(tuning_fork_state);
         return 255;
@@ -219,7 +219,7 @@ int32_t tuning_fork_app() {
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, render_callback, tuning_fork_state);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     Gui* gui = furi_record_open("gui");
@@ -229,7 +229,7 @@ int32_t tuning_fork_app() {
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-        TuningForkState* tuning_fork_state = (TuningForkState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(tuning_fork_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {
@@ -387,12 +387,10 @@ int32_t tuning_fork_app() {
                     }
                 }
             }
-        } else {
-            FURI_LOG_D("TuningFork", "FuriMessageQueue: event timeout");
         }
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, tuning_fork_state);
+        furi_mutex_release(tuning_fork_state->mutex);
     }
 
     view_port_enabled_set(view_port, false);
@@ -400,7 +398,7 @@ int32_t tuning_fork_app() {
     furi_record_close("gui");
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(tuning_fork_state->mutex);
     furi_record_close(RECORD_NOTIFICATION);
     free(tuning_fork_state);
 
