@@ -6,7 +6,7 @@
 >### [🖥️ Web Updater (chrome)](https://lab.flipper.net/?url={webupdater_url}&channel=XFW-Updater&version={release_tag}) [not recommended]
 
 **Remember to delete your `apps` folders before updating!**\
-**Check the [install guide](https://github.com/ClaraCrazy/Flipper-Xtreme#install) if you're not sure, or [join our Discord](https://discord.gg/flipper-xtreme) if you have questions!**
+**Check the [install guide](https://github.com/ClaraCrazy/Flipper-Xtreme#install) if you're not sure, or [join our Discord](https://discord.gg/flipper-xtreme) if you have questions or encounter issues!**
 
 ## 🚀 Changelog
 {changelog}
