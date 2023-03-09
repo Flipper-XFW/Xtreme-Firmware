@@ -63,6 +63,9 @@ jobs:
           cd ./${DEFAULT_TARGET}-update-*
           7z a ../${RELEASE_TAG}.zip .
           cd ..
+          mv ${RELEASE_TAG}.tgz ..
+          mv ${RELEASE_TAG}.zip ..
+          cd ..
           python -m pip install pyncclient
           WEBUPDATER_URL="$(python -c "import nextcloud_client as n;c = n.Client('https://cloud.cynthialabs.net/');c.login('${{ secrets.NC_USER }}', '${{ secrets.NC_PASS }}');c.put_file('XFW-Updater/${RELEASE_TAG}.tgz', '${RELEASE_TAG}.tgz');print(c.share_file_with_link('XFW-Updater/${RELEASE_TAG}.tgz').get_link().rstrip('/') + '/download/${RELEASE_TAG}.tgz', end='')")"
           echo "WEBUPDATER_URL=${WEBUPDATER_URL}" >> $GITHUB_ENV
@@ -91,8 +94,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ${{ env.RELEASE_TAG }}.tgz
-            ${{ env.RELEASE_TAG }}.zip
+            dist/${{ env.RELEASE_TAG }}.tgz
+            dist/${{ env.RELEASE_TAG }}.zip
           name: "${{ env.RELEASE_TAG }}"
           tag_name: "${{ env.RELEASE_TAG }}"
           target_commitish: main
