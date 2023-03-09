@@ -1,0 +1,98 @@
+name: "Release integration"
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+
+jobs:
+  release:
+    if: |
+      github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name &&
+      endsWith(github.event.pull_request.title, ' Release Candidate Changes') &&
+      github.event.review.author_association == 'OWNER' &&
+      startsWith(github.event.pull_request.title, 'V') &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.ref == 'dev' &&
+      github.event.pull_request.state == 'open' &&
+      github.event.pull_request.draft == false &&
+      github.event.review.state == 'APPROVED'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Update version number"
+        run: |
+          VERSION="$(python -c "print('%04d' % int('${{ github.event.pull_request.title }}'.removeprefix('V').removesuffix(' Release Candidate Changes')), end='')")"
+          DATE="$(python -c "from datetime import date;print(date.today().strftime('%d%m%Y'), end='')")"
+          RELEASE_NAME="XFW-${VERSION}"
+          RELEASE_TAG="${RELEASE_NAME}_${DATE}"
+          echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+
+          sed "s/VERSION = \"XFW-[[:digit:]]\{4\}\"/VERSION = \"${RELEASE_NAME}\"/g" ./scripts/version.py > ./scripts/version.py.new
+          rm ./scripts/version.py
+          mv ./scripts/version.py.new ./scripts/version.py
+
+          sed "s/DIST_SUFFIX = \"XFW-[[:digit:]]\{4\}_[[:digit:]]\{8\}\"/DIST_SUFFIX = \"${RELEASE_TAG}\"/g" ./fbt_options.py > ./fbt_options.py.new
+          rm ./fbt_options.py
+          mv ./fbt_options.py.new ./fbt_options.py
+
+      - name: 'Build the firmware'
+        run: |
+          set -e
+          for TARGET in ${TARGETS}; do
+            TARGET="$(echo "${TARGET}" | sed 's/f//')"; \
+            ./fbt TARGET_HW=$TARGET updater_package
+          done
+
+      - name: "Make tgz, zip and webupdater"
+        run: |
+          cd ./dist/${DEFAULT_TARGET}-*
+          mv flipper-z-${DEFAULT_TARGET}-update-*.tgz ${RELEASE_TAG}.tgz
+          cd ./${DEFAULT_TARGET}-update-*
+          7z a ../${RELEASE_TAG}.zip .
+          cd ..
+          python -m pip install pyncclient
+          WEBUPDATER_URL="$(python -c "import nextcloud_client as n;c = n.Client('https://cloud.cynthialabs.net/');c.login('${{ secrets.NC_USER }}', '${{ secrets.NC_PASS }}');c.put_file('XFW-Updater/${RELEASE_TAG}.tgz', '${RELEASE_TAG}.tgz');print(c.share_file_with_link('XFW-Updater/${RELEASE_TAG}.tgz').get_link().rstrip('/') + '/download/${RELEASE_TAG}.tgz', end='')")"
+          echo "WEBUPDATER_URL=${WEBUPDATER_URL}" >> $GITHUB_ENV
+
+      - name: "Update release notes"
+        run: |
+          python -c "import json, os;f = '.github/workflow_data/release.md';c = json.load(open(os.environ['GITHUB_EVENT_PATH']))['pull_request']['body'];f_ = open(f);n = f_.read().format(release_tag='${RELEASE_TAG}', webupdater_url='${WEBUPDATER_URL}', changelog=c);f_.close();f_ = open(f, 'w');f_.write(n);f_.close()"
+
+      - name: "Commit new version number"
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: Update version number
+          add: './fbt_options.py ./scripts/version.py'
+
+      - name: "Merge pull request"
+        uses: "pascalgn/automerge-action@v0.15.6"
+        env:
+          MERGE_LABELS: ""
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: "Make release"
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: ".github/workflow_data/release.md"
+          draft: false
+          prerelease: false
+          files: |
+            ${{ env.RELEASE_TAG }}.tgz
+            ${{ env.RELEASE_TAG }}.zip
+          name: "${{ env.RELEASE_TAG }}"
+          tag_name: "${{ env.RELEASE_TAG }}"
+          target_commitish: main

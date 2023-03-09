@@ -11,6 +11,8 @@
 
 #include <bt/bt_service/bt.h>
 
+#include "bad_kb_app_i.h"
+
 #define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Tools/.bt_hid.keys")
 
 #define TAG "BadKB"
@@ -41,12 +43,6 @@ typedef enum {
     LevelRssiError = 0xFF,
 } LevelRssiRange;
 
-typedef enum {
-    BadKbConnectionModeNone,
-    BadKbConnectionModeUsb,
-    BadKbConnectionModeBt,
-} BadKbConnectionMode;
-
 /**
  * Delays for waiting between HID key press and key release
 */
@@ -65,6 +61,7 @@ struct BadKbScript {
     FuriString* keyboard_layout;
     uint32_t defdelay;
     uint16_t layout[128];
+    uint32_t stringdelay;
     FuriThread* thread;
     uint8_t file_buf[FILE_BUFFER_LEN + 1];
     uint8_t buf_start;
@@ -148,6 +145,8 @@ static const char ducky_cmd_delay[] = {"DELAY "};
 static const char ducky_cmd_string[] = {"STRING "};
 static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY "};
 static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY "};
+static const char ducky_cmd_stringdelay_1[] = {"STRINGDELAY "};
+static const char ducky_cmd_stringdelay_2[] = {"STRING_DELAY "};
 static const char ducky_cmd_repeat[] = {"REPEAT "};
 static const char ducky_cmd_sysrq[] = {"SYSRQ "};
 
@@ -170,27 +169,22 @@ static const uint8_t numpad_keys[10] = {
     HID_KEYPAD_9,
 };
 
-BadKbConnectionMode connection_mode = BadKbConnectionModeNone;
-FuriHalUsbInterface* usb_mode_prev = NULL;
-GapPairing bt_mode_prev = GapPairingNone;
-bool bt_connected = false;
-bool usb_connected = false;
 uint8_t bt_timeout = 0;
 
 static LevelRssiRange bt_remote_rssi_range(Bt* bt) {
-    BtRssi rssi_data = {0};
+    uint8_t rssi;
 
-    if(!bt_remote_rssi(bt, &rssi_data)) return LevelRssiError;
+    if(!bt_remote_rssi(bt, &rssi)) return LevelRssiError;
 
-    if(rssi_data.rssi <= 39)
+    if(rssi <= 39)
         return LevelRssi39_0;
-    else if(rssi_data.rssi <= 59)
+    else if(rssi <= 59)
         return LevelRssi59_40;
-    else if(rssi_data.rssi <= 79)
+    else if(rssi <= 79)
         return LevelRssi79_60;
-    else if(rssi_data.rssi <= 99)
+    else if(rssi <= 99)
         return LevelRssi99_80;
-    else if(rssi_data.rssi <= 122)
+    else if(rssi <= 122)
         return LevelRssi122_100;
 
     return LevelRssiError;
@@ -304,6 +298,7 @@ static bool ducky_altstring(BadKbScript* bad_kb, const char* param) {
 
 static bool ducky_string(BadKbScript* bad_kb, const char* param) {
     uint32_t i = 0;
+
     while(param[i] != '\0') {
         uint16_t keycode = BADKB_ASCII_TO_KEY(bad_kb, param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
@@ -315,9 +310,13 @@ static bool ducky_string(BadKbScript* bad_kb, const char* param) {
                 furi_hal_hid_kb_press(keycode);
                 furi_hal_hid_kb_release(keycode);
             }
+            if(bad_kb->stringdelay > 0) {
+                furi_delay_ms(bad_kb->stringdelay);
+            }
         }
         i++;
     }
+    bad_kb->stringdelay = 0;
     return true;
 }
 
@@ -379,6 +378,19 @@ static int32_t
             snprintf(error, error_len, "Invalid number %s", line_tmp);
         }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
+    } else if(
+        (strncmp(line_tmp, ducky_cmd_stringdelay_1, strlen(ducky_cmd_stringdelay_1)) == 0) ||
+        (strncmp(line_tmp, ducky_cmd_stringdelay_2, strlen(ducky_cmd_stringdelay_2)) == 0)) {
+        //STRINGDELAY, finally it's here
+        line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
+        state = ducky_get_number(line_tmp, &bad_kb->stringdelay);
+        if((state) && (bad_kb->stringdelay > 0)) {
+            return state;
+        }
+        if(error != NULL) {
+            snprintf(error, error_len, "Invalid number %s", line_tmp);
+        }
+        return SCRIPT_STATE_ERROR;
     } else if(strncmp(line_tmp, ducky_cmd_string, strlen(ducky_cmd_string)) == 0) {
         // STRING
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
@@ -607,10 +619,8 @@ static void bad_kb_bt_hid_state_callback(BtStatus status, void* context) {
         if(r != LevelRssiError) {
             bt_timeout = bt_hid_delays[r];
         }
-        bt_connected = true;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtConnect);
     } else {
-        bt_connected = false;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtDisconnect);
     }
 }
@@ -620,83 +630,116 @@ static void bad_kb_usb_hid_state_callback(bool state, void* context) {
     BadKbScript* bad_kb = context;
 
     if(state == true) {
-        usb_connected = true;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtConnect);
     } else {
-        usb_connected = false;
         furi_thread_flags_set(furi_thread_get_id(bad_kb->thread), WorkerEvtDisconnect);
     }
 }
 
-void bad_kb_bt_init(Bt* bt) {
-    bt_timeout = bt_hid_delays[LevelRssi39_0];
-    bt_disconnect(bt);
-    furi_delay_ms(200);
-    bt_keys_storage_set_storage_path(bt, HID_BT_KEYS_STORAGE_PATH);
-    furi_assert(bt_set_profile(bt, BtProfileHidKeyboard));
-    bt_mode_prev = bt_get_profile_pairing_method(bt);
-    bt_set_profile_pairing_method(bt, GapPairingNone);
-    furi_hal_bt_start_advertising();
-    // disable peer key adding to bt SRAM storage
-    bt_disable_peer_key_update(bt);
-
-    connection_mode = BadKbConnectionModeBt;
+void bad_kb_reload_worker(BadKbApp* app) {
+    bad_kb_script_close(app->bad_kb_script);
+    app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
+    bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
 }
 
-void bad_kb_bt_deinit(Bt* bt) {
-    // release all keys
-    // bt_hid_hold_while_keyboard_buffer_full(6, 3000);
+void bad_kb_config_switch_mode(BadKbApp* app) {
+    scene_manager_previous_scene(app->scene_manager);
+    if(app->is_bt) {
+        furi_hal_bt_start_advertising();
+        scene_manager_next_scene(app->scene_manager, BadKbSceneConfigBt);
+    } else {
+        furi_hal_bt_stop_advertising();
+        scene_manager_next_scene(app->scene_manager, BadKbSceneConfigUsb);
+    }
+    bad_kb_reload_worker(app);
+}
 
-    // stop ble
-    bt_disconnect(bt);
+void bad_kb_config_switch_remember_mode(BadKbApp* app) {
+    if(app->bt_remember) {
+        // set bouding mac
+        uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        bt_set_profile_mac_address(app->bt, mac); // this also restart bt
+        // enable keys storage
+        bt_enable_peer_key_update(app->bt);
+    } else {
+        // set back user defined mac address
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
+        bt_set_profile_mac_address(app->bt, app->mac);
+        // disable key storage
+        bt_disable_peer_key_update(app->bt);
+    }
+    bad_kb_reload_worker(app);
+}
 
-    // Wait 2nd core to update nvm storage
-    furi_delay_ms(200);
+int32_t bad_kb_connection_init(BadKbApp* app) {
+    app->usb_prev_mode = furi_hal_usb_get_config();
+    furi_hal_usb_set_config(NULL, NULL);
 
-    bt_keys_storage_set_default_path(bt);
+    bt_timeout = bt_hid_delays[LevelRssi39_0];
+    bt_disconnect(app->bt);
+    // furi_delay_ms(200);
+    bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
+    app->bt_prev_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
+    if(app->bt_remember) {
+        uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, mac);
+        // using GapPairingNone breaks bounding between devices
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+    } else {
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
+    }
 
-    bt_set_profile_pairing_method(bt, bt_mode_prev);
+    bt_set_profile(app->bt, BtProfileHidKeyboard);
+    if(app->is_bt) {
+        furi_hal_bt_start_advertising();
+        if(app->bt_remember) {
+            bt_enable_peer_key_update(app->bt);
+        } else {
+            bt_disable_peer_key_update(app->bt); // disable peer key adding to bt SRAM storage
+        }
+    } else {
+        furi_hal_bt_stop_advertising();
+    }
 
+    app->connection_init = true;
+
+    return 0;
+}
+
+void bad_kb_connection_deinit(BadKbApp* app) {
+    if(!app->connection_init) return;
+
+    furi_hal_usb_set_config(app->usb_prev_mode, NULL);
+
+    // bt_hid_hold_while_keyboard_buffer_full(6, 3000); // release all keys
+    bt_disconnect(app->bt); // stop ble
+    // furi_delay_ms(200); // Wait 2nd core to update nvm storage
+    bt_keys_storage_set_default_path(app->bt);
+    if(app->bt_remember) {
+        // hal primitives doesn't restarts ble, that's what we want cuz we are shutting down
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->mac);
+    }
+    bt_enable_peer_key_update(app->bt); // starts saving peer keys (bounded devices)
     // fails if ble radio stack isn't ready when switching profile
     // if it happens, maybe we should increase the delay after bt_disconnect
-    bt_set_profile(bt, BtProfileSerial);
-
-    // starts saving peer keys (bounded devices)
-    bt_enable_peer_key_update(bt);
-
-    connection_mode = BadKbConnectionModeNone;
+    bt_set_profile(app->bt, BtProfileSerial);
+    furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, app->bt_prev_mode);
 }
 
-void bad_kb_usb_init() {
-    usb_mode_prev = furi_hal_usb_get_config();
-
-    connection_mode = BadKbConnectionModeUsb;
-}
-
-void bad_kb_usb_deinit() {
-    furi_hal_usb_set_config(usb_mode_prev, NULL);
-
-    connection_mode = BadKbConnectionModeNone;
-}
-
-void bad_kb_connection_init(Bt* bt) {
-    if(connection_mode != BadKbConnectionModeNone) return;
-
-    if(bt) {
-        bad_kb_bt_init(bt);
+static uint32_t bad_kb_flags_get(uint32_t flags_mask, uint32_t timeout) {
+    uint32_t flags = furi_thread_flags_get();
+    furi_check((flags & FuriFlagError) == 0);
+    if(flags == 0) {
+        flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny, timeout);
+        furi_check(((flags & FuriFlagError) == 0) || (flags == (unsigned)FuriFlagErrorTimeout));
     } else {
-        bad_kb_usb_init();
+        uint32_t state = furi_thread_flags_clear(flags);
+        furi_check((state & FuriFlagError) == 0);
     }
-}
-
-void bad_kb_connection_deinit(Bt* bt) {
-    if(connection_mode == BadKbConnectionModeNone) return;
-
-    if(connection_mode == BadKbConnectionModeBt) {
-        bad_kb_bt_deinit(bt);
-    } else {
-        bad_kb_usb_deinit();
-    }
+    return flags;
 }
 
 static int32_t bad_kb_worker(void* context) {
@@ -704,8 +747,6 @@ static int32_t bad_kb_worker(void* context) {
 
     BadKbWorkerState worker_state = BadKbStateInit;
     int32_t delay_val = 0;
-
-    bad_kb_connection_init(bad_kb->bt);
 
     if(bad_kb->bt) {
         bt_set_status_changed_callback(bad_kb->bt, bad_kb_bt_hid_state_callback, bad_kb);
@@ -727,7 +768,11 @@ static int32_t bad_kb_worker(void* context) {
                    FSOM_OPEN_EXISTING)) {
                 if((ducky_script_preload(bad_kb, script_file)) && (bad_kb->st.line_nb > 0)) {
                     if(bad_kb->bt) {
-                        worker_state = BadKbStateNotConnected; // Ready to run
+                        if(furi_hal_bt_is_connected()) {
+                            worker_state = BadKbStateIdle; // Ready to run
+                        } else {
+                            worker_state = BadKbStateNotConnected; // Not connected
+                        }
                     } else {
                         if(furi_hal_hid_is_connected()) {
                             worker_state = BadKbStateIdle; // Ready to run
@@ -745,30 +790,20 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateNotConnected) { // State: Not connected
-            if((bad_kb->bt && bt_connected) || (!bad_kb->bt && usb_connected)) {
+            uint32_t flags = bad_kb_flags_get(
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle, FuriWaitForever);
+            if(flags & WorkerEvtEnd) {
+                break;
+            } else if(flags & WorkerEvtConnect) {
                 worker_state = BadKbStateIdle; // Ready to run
-            } else {
-                uint32_t flags = furi_thread_flags_wait(
-                    WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
-                    FuriFlagWaitAny,
-                    FuriWaitForever);
-                furi_check((flags & FuriFlagError) == 0);
-                if(flags & WorkerEvtEnd) {
-                    break;
-                } else if(flags & WorkerEvtConnect) {
-                    worker_state = BadKbStateIdle; // Ready to run
-                } else if(flags & WorkerEvtToggle) {
-                    worker_state = BadKbStateWillRun; // Will run when connected
-                }
+            } else if(flags & WorkerEvtToggle) {
+                worker_state = BadKbStateWillRun; // Will run when connected
             }
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateIdle) { // State: ready to start
-            uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtToggle | WorkerEvtDisconnect,
-                FuriFlagWaitAny,
-                FuriWaitForever);
-            furi_check((flags & FuriFlagError) == 0);
+            uint32_t flags = bad_kb_flags_get(
+                WorkerEvtEnd | WorkerEvtToggle | WorkerEvtDisconnect, FuriWaitForever);
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtToggle) { // Start executing script
@@ -777,6 +812,7 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->buf_len = 0;
                 bad_kb->st.line_cur = 0;
                 bad_kb->defdelay = 0;
+                bad_kb->stringdelay = 0;
                 bad_kb->repeat_cnt = 0;
                 bad_kb->file_end = false;
                 storage_file_seek(script_file, 0, true);
@@ -788,11 +824,8 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateWillRun) { // State: start on connection
-            uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
-                FuriFlagWaitAny,
-                FuriWaitForever);
-            furi_check((flags & FuriFlagError) == 0);
+            uint32_t flags = bad_kb_flags_get(
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle, FuriWaitForever);
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtConnect) { // Start executing script
@@ -801,16 +834,26 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->buf_len = 0;
                 bad_kb->st.line_cur = 0;
                 bad_kb->defdelay = 0;
+                bad_kb->stringdelay = 0;
                 bad_kb->repeat_cnt = 0;
                 bad_kb->file_end = false;
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
-                furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
+                flags = furi_thread_flags_wait(
+                    WorkerEvtEnd | WorkerEvtDisconnect | WorkerEvtToggle,
+                    FuriFlagWaitAny | FuriFlagNoClear,
+                    1500);
+                if(flags == (unsigned)FuriFlagErrorTimeout) {
+                    // If nothing happened - start script execution
+                    worker_state = BadKbStateRunning;
+                } else if(flags & WorkerEvtToggle) {
+                    worker_state = BadKbStateIdle;
+                    furi_thread_flags_clear(WorkerEvtToggle);
+                }
                 if(bad_kb->bt) {
                     update_bt_timeout(bad_kb->bt);
                 }
                 bad_kb_script_set_keyboard_layout(bad_kb, bad_kb->keyboard_layout);
-                worker_state = BadKbStateRunning;
             } else if(flags & WorkerEvtToggle) { // Cancel scheduled execution
                 worker_state = BadKbStateNotConnected;
             }
@@ -875,9 +918,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(
             (worker_state == BadKbStateFileError) ||
             (worker_state == BadKbStateScriptError)) { // State: error
-            uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd, FuriFlagWaitAny, FuriWaitForever); // Waiting for exit command
-            furi_check((flags & FuriFlagError) == 0);
+            uint32_t flags =
+                bad_kb_flags_get(WorkerEvtEnd, FuriWaitForever); // Waiting for exit command
             if(flags & WorkerEvtEnd) {
                 break;
             }
@@ -921,6 +963,7 @@ BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt) {
 
     bad_kb->st.state = BadKbStateInit;
     bad_kb->st.error[0] = '\0';
+    bad_kb->st.is_bt = !!bt;
 
     bad_kb->bt = bt;
 
@@ -949,7 +992,7 @@ void bad_kb_script_set_keyboard_layout(BadKbScript* bad_kb, FuriString* layout_p
     }
 
     File* layout_file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
-    if(!furi_string_empty(layout_path)) {
+    if(!furi_string_empty(layout_path)) { //-V1051
         furi_string_set(bad_kb->keyboard_layout, layout_path);
         if(storage_file_open(
                layout_file, furi_string_get_cstr(layout_path), FSAM_READ, FSOM_OPEN_EXISTING)) {

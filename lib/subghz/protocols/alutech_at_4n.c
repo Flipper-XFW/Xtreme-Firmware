@@ -77,6 +77,25 @@ const SubGhzProtocol subghz_protocol_alutech_at_4n = {
     .encoder = &subghz_protocol_alutech_at_4n_encoder,
 };
 
+static uint8_t al_btn_temp_id;
+static uint8_t al_btn_temp_id_original;
+
+void alutech_set_btn(uint8_t b) {
+    al_btn_temp_id = b;
+}
+
+uint8_t alutech_get_original_btn() {
+    return al_btn_temp_id_original;
+}
+
+uint8_t alutech_get_custom_btn() {
+    return al_btn_temp_id;
+}
+
+void alutech_reset_original_btn() {
+    al_btn_temp_id_original = 0;
+}
+
 void* subghz_protocol_encoder_alutech_at_4n_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
     SubGhzProtocolEncoderAlutech_at_4n* instance =
@@ -255,8 +274,6 @@ static uint64_t subghz_protocol_alutech_at_4n_encrypt(uint64_t data, const char*
 static bool subghz_protocol_alutech_at_4n_gen_data(
     SubGhzProtocolEncoderAlutech_at_4n* instance,
     uint8_t btn) {
-    UNUSED(btn);
-
     uint64_t data = subghz_protocol_blocks_reverse_key(instance->generic.data, 64);
 
     data = subghz_protocol_alutech_at_4n_decrypt(
@@ -269,13 +286,17 @@ static bool subghz_protocol_alutech_at_4n_gen_data(
     }
 
     if(instance->generic.cnt < 0xFFFF) {
-        instance->generic.cnt++;
+        if((instance->generic.cnt + furi_hal_subghz_get_rolling_counter_mult()) >= 0xFFFF) {
+            instance->generic.cnt = 0;
+        } else {
+            instance->generic.cnt += furi_hal_subghz_get_rolling_counter_mult();
+        }
     } else if(instance->generic.cnt >= 0xFFFF) {
         instance->generic.cnt = 0;
     }
     crc = subghz_protocol_alutech_at_4n_decrypt_data_crc((uint8_t)(instance->generic.cnt & 0xFF));
     data = (uint64_t)crc << 56 | (uint64_t)instance->generic.serial << 24 |
-           (uint32_t)instance->generic.cnt << 8 | instance->generic.btn;
+           (uint32_t)instance->generic.cnt << 8 | btn;
 
     data = subghz_protocol_alutech_at_4n_encrypt(
         data, instance->alutech_at_4n_rainbow_table_file_name);
@@ -299,14 +320,15 @@ bool subghz_protocol_alutech_at_4n_create_data(
     instance->generic.data_count_bit = 72;
     bool res = subghz_protocol_alutech_at_4n_gen_data(instance, btn);
     if(res) {
-        res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+        return SubGhzProtocolStatusOk ==
+               subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
     }
     return res;
 }
 
 /**
  * Generating an upload from data.
- * @param instance Pointer to a SubGhzProtocolEncoderKeeloq instance
+ * @param instance Pointer to a SubGhzProtocolEncoderAlutech instance
  * @return true On success
  */
 static bool subghz_protocol_encoder_alutech_at_4n_get_upload(
@@ -314,6 +336,104 @@ static bool subghz_protocol_encoder_alutech_at_4n_get_upload(
     uint8_t btn) {
     furi_assert(instance);
 
+    // Save original button for later use
+    if(al_btn_temp_id_original == 0) {
+        al_btn_temp_id_original = btn;
+    }
+
+    // Set custom button
+    if(al_btn_temp_id == 1) {
+        switch(al_btn_temp_id_original) {
+        case 0x11:
+            btn = 0x22;
+            break;
+        case 0x22:
+            btn = 0x11;
+            break;
+        case 0xFF:
+            btn = 0x11;
+            break;
+        case 0x44:
+            btn = 0x11;
+            break;
+        case 0x33:
+            btn = 0x11;
+            break;
+
+        default:
+            break;
+        }
+    }
+    if(al_btn_temp_id == 2) {
+        switch(al_btn_temp_id_original) {
+        case 0x11:
+            btn = 0x44;
+            break;
+        case 0x22:
+            btn = 0x44;
+            break;
+        case 0xFF:
+            btn = 0x44;
+            break;
+        case 0x44:
+            btn = 0xFF;
+            break;
+        case 0x33:
+            btn = 0x44;
+            break;
+
+        default:
+            break;
+        }
+    }
+    if(al_btn_temp_id == 3) {
+        switch(al_btn_temp_id_original) {
+        case 0x11:
+            btn = 0x33;
+            break;
+        case 0x22:
+            btn = 0x33;
+            break;
+        case 0xFF:
+            btn = 0x33;
+            break;
+        case 0x44:
+            btn = 0x33;
+            break;
+        case 0x33:
+            btn = 0x22;
+            break;
+
+        default:
+            break;
+        }
+    }
+    if(al_btn_temp_id == 4) {
+        switch(al_btn_temp_id_original) {
+        case 0x11:
+            btn = 0xFF;
+            break;
+        case 0x22:
+            btn = 0xFF;
+            break;
+        case 0xFF:
+            btn = 0x22;
+            break;
+        case 0x44:
+            btn = 0x22;
+            break;
+        case 0x33:
+            btn = 0xFF;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    if((al_btn_temp_id == 0) && (al_btn_temp_id_original != 0)) {
+        btn = al_btn_temp_id_original;
+    }
     //gen new key
     if(subghz_protocol_alutech_at_4n_gen_data(instance, btn)) {
         //ToDo if you need to add a callback to automatically update the data on the display
@@ -380,14 +500,15 @@ static bool subghz_protocol_encoder_alutech_at_4n_get_upload(
     return true;
 }
 
-bool subghz_protocol_encoder_alutech_at_4n_deserialize(
+SubGhzProtocolStatus subghz_protocol_encoder_alutech_at_4n_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderAlutech_at_4n* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+        if(SubGhzProtocolStatusOk !=
+           subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
@@ -421,7 +542,7 @@ bool subghz_protocol_encoder_alutech_at_4n_deserialize(
 
         instance->encoder.is_running = true;
 
-        res = true;
+        res = SubGhzProtocolStatusOk;
     } while(false);
 
     return res;
@@ -608,6 +729,11 @@ static void subghz_protocol_alutech_at_4n_remote_controller(
         instance->cnt = 0;
         instance->serial = 0;
     }
+
+    // Save original button for later use
+    if(al_btn_temp_id_original == 0) {
+        al_btn_temp_id_original = instance->btn;
+    }
 }
 
 uint8_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context) {
@@ -616,46 +742,46 @@ uint8_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context) {
     return (uint8_t)instance->crc;
 }
 
-bool subghz_protocol_decoder_alutech_at_4n_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_alutech_at_4n_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderAlutech_at_4n* instance = context;
-    bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
-    if(res && !flipper_format_write_uint32(flipper_format, "CRC", &instance->crc, 1)) {
+    SubGhzProtocolStatus res =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+    if((res == SubGhzProtocolStatusOk) &&
+       !flipper_format_write_uint32(flipper_format, "CRC", &instance->crc, 1)) {
         FURI_LOG_E(TAG, "Unable to add CRC");
-        res = false;
+        res = SubGhzProtocolStatusErrorParserOthers;
     }
     return res;
-
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_alutech_at_4n_deserialize(
+SubGhzProtocolStatus subghz_protocol_decoder_alutech_at_4n_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderAlutech_at_4n* instance = context;
-    bool ret = false;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            break;
-        }
-        if(instance->generic.data_count_bit !=
-           subghz_protocol_alutech_at_4n_const.min_count_bit_for_found) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            subghz_protocol_alutech_at_4n_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "CRC", (uint32_t*)&instance->crc, 1)) {
             FURI_LOG_E(TAG, "Missing CRC");
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
-        ret = true;
     } while(false);
     return ret;
 }
@@ -670,16 +796,15 @@ void subghz_protocol_decoder_alutech_at_4n_get_string(void* context, FuriString*
 
     furi_string_cat_printf(
         output,
-        "%s %d\r\n"
-        "Key:0x%08lX%08lX%02X\r\n"
+        "%s\r\n"
+        "Key:0x%08lX%08lX\nCRC:%02X  %dbit\r\n"
         "Sn:0x%08lX  Btn:0x%01X\r\n"
-        "Cnt:0x%03lX\r\n",
-
+        "Cnt:0x%04lX\r\n",
         instance->generic.protocol_name,
-        instance->generic.data_count_bit,
         code_found_hi,
         code_found_lo,
         (uint8_t)instance->crc,
+        instance->generic.data_count_bit,
         instance->generic.serial,
         instance->generic.btn,
         instance->generic.cnt);

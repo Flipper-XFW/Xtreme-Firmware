@@ -4,7 +4,7 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
-#include <Password_Generator_icons.h>
+#include <passgen_icons.h>
 
 #define PASSGEN_MAX_LENGTH 16
 #define PASSGEN_CHARACTERS_LENGTH (26 * 4)

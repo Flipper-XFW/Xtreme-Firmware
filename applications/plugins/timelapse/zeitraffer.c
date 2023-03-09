@@ -5,10 +5,10 @@
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
 #include "gpio_item.h"
-#include "GPIO_Intervalometer_icons.h"
+#include "GPIO_Timelapse_icons.h"
 
-#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/intravelometer"
-#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/intravelometer.conf"
+#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/timelapse"
+#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/timelapse.conf"
 
 // Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
@@ -390,7 +390,7 @@ int32_t zeitraffer_app(void* p) {
         }
         if(!flipper_format_write_comment_cstr(
                save,
-               "Zeitraffer app settings: № of frames, interval time, backlight type, Delay")) {
+               "Zeitraffer app settings: n of frames, interval time, backlight type, Delay")) {
             notification_message(notifications, &sequence_error);
             break;
         }

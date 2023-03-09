@@ -91,7 +91,7 @@ static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
     if(b->type == BrowserItemTypeBack) {
         return 1;
     }
-    if(!XTREME_SETTINGS()->sort_ignore_dirs) {
+    if(XTREME_SETTINGS()->sort_dirs_first) {
         if(a->type == BrowserItemTypeFolder && b->type != BrowserItemTypeFolder) {
             return -1;
         }

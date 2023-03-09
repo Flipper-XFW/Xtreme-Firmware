@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG "nrf24scan"
-#define VERSION "2.1"
+#define VERSION "2.2"
 #define MAX_CHANNEL 125
 #define MAX_ADDR 6
 
@@ -71,6 +71,7 @@ uint8_t NRF_Payload = 32; // Payload len in bytes or Minimum payload in sniff mo
 uint8_t NRF_Payload_sniff_min = 0;
 uint8_t NRF_AA_OFF = 0; // Disable Auto Acknowledgement
 bool NRF_ERROR = 0;
+bool NRF_BOARD_POWER_5V = false;
 
 struct ADDRS {
     uint8_t addr_P0[5]; // MSB first
@@ -485,7 +486,13 @@ void check_add_addr(uint8_t* pkt) {
 
 static void prepare_nrf24(bool fsend_packet) {
     nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
-    nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, NRF_rate);
+    nrf24_write_reg(
+        nrf24_HANDLE,
+        REG_RF_SETUP,
+        (NRF_rate == 0 ? 0b00100000 :
+         NRF_rate == 1 ? 0 :
+                         0b00001000) |
+            0b111); // +TX high power
     uint8_t erx_addr = (1 << 0); // Enable RX_P0
     struct ADDRS* adr = what_to_do == 1 ? &addrs_sniff : &addrs;
     if(!fsend_packet) {
@@ -517,14 +524,13 @@ static void prepare_nrf24(bool fsend_packet) {
         }
         if(what_to_do == 1) { // SNIFF
             payload = 32;
-            nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts, NO CRC
+            nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts
             nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
             nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
             nrf24_write_reg(
                 nrf24_HANDLE,
                 REG_FEATURE,
                 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-            nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
         } else if(setup_from_log) { // Scan
             nrf24_write_reg(
                 nrf24_HANDLE,
@@ -947,8 +953,10 @@ bool nrf24_send_packet() {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    const PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(plugin_state == NULL) return;
+    furi_assert(ctx);
+    const PluginState* plugin_state = ctx;
+    furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
+
     //canvas_draw_frame(canvas, 0, 0, 128, 64); // border around the edge of the screen
     if(what_doing == 0) {
         canvas_set_font(canvas, FontSecondary); // 8x10 font, 6 lines
@@ -1317,7 +1325,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str(canvas, 0, 64, screen_buf);
         }
     }
-    release_mutex((ValueMutex*)ctx, plugin_state);
+    furi_mutex_release(plugin_state->mutex);
 }
 
 int32_t nrf24scan_app(void* p) {
@@ -1325,8 +1333,8 @@ int32_t nrf24scan_app(void* p) {
     APP = malloc(sizeof(Nrf24Scan));
     APP->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     APP->plugin_state = malloc(sizeof(PluginState));
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, APP->plugin_state, sizeof(PluginState))) {
+    APP->plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!APP->plugin_state->mutex) {
         furi_message_queue_free(APP->event_queue);
         FURI_LOG_E(TAG, "cannot create mutex");
         free(APP->plugin_state);
@@ -1346,11 +1354,16 @@ int32_t nrf24scan_app(void* p) {
 
     memset((uint8_t*)&addrs, 0, sizeof(addrs));
     memset((uint8_t*)&addrs_sniff, 0, sizeof(addrs_sniff));
+    if(!furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_enable_otg();
+        NRF_BOARD_POWER_5V = true;
+        furi_delay_ms(100);
+    }
     nrf24_init();
 
     // Set system callbacks
     APP->view_port = view_port_alloc();
-    view_port_draw_callback_set(APP->view_port, render_callback, &state_mutex);
+    view_port_draw_callback_set(APP->view_port, render_callback, APP->plugin_state);
     view_port_input_callback_set(APP->view_port, input_callback, APP->event_queue);
 
     // Open GUI and register view_port
@@ -1391,7 +1404,7 @@ int32_t nrf24scan_app(void* p) {
     PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(APP->event_queue, &event, 100);
-        PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(APP->plugin_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -1618,13 +1631,14 @@ int32_t nrf24scan_app(void* p) {
         }
 
         view_port_update(APP->view_port);
-        release_mutex(&state_mutex, plugin_state);
+        furi_mutex_release(APP->plugin_state->mutex);
     }
     nrf24_set_idle(nrf24_HANDLE);
     if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
         write_to_log_file(APP->storage, false);
     }
     nrf24_deinit();
+    if(NRF_BOARD_POWER_5V) furi_hal_power_disable_otg();
 
     view_port_enabled_set(APP->view_port, false);
     gui_remove_view_port(APP->gui, APP->view_port);
@@ -1632,6 +1646,7 @@ int32_t nrf24scan_app(void* p) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_STORAGE);
     view_port_free(APP->view_port);
+    furi_mutex_free(APP->plugin_state->mutex);
     furi_message_queue_free(APP->event_queue);
     free(APP->plugin_state);
     if(APP->log_arr) free(APP->log_arr);

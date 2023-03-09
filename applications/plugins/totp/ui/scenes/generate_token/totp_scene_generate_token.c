@@ -1,7 +1,7 @@
 #include <gui/gui.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <Authenticator_icons.h>
+#include <totp_icons.h>
 #include "totp_scene_generate_token.h"
 #include "../../../types/token_info.h"
 #include "../../../types/common.h"
@@ -16,6 +16,9 @@
 #include "../token_menu/totp_scene_token_menu.h"
 #include "../../../workers/type_code/type_code.h"
 
+static const uint8_t PROGRESS_BAR_MARGIN = 3;
+static const uint8_t PROGRESS_BAR_HEIGHT = 4;
+
 typedef struct {
     uint16_t current_token_index;
     char last_code[TOTP_TOKEN_DIGITS_MAX_COUNT + 1];
@@ -24,7 +27,7 @@ typedef struct {
     uint32_t last_token_gen_time;
     TotpTypeCodeWorkerContext* type_code_worker_context;
     NotificationMessage const** notification_sequence_new_token;
-    NotificationMessage const** notification_sequence_badkb;
+    NotificationMessage const** notification_sequence_badusb;
 } SceneState;
 
 static const NotificationSequence*
@@ -69,8 +72,8 @@ static const NotificationSequence*
 }
 
 static const NotificationSequence*
-    get_notification_sequence_badkb(const PluginState* plugin_state, SceneState* scene_state) {
-    if(scene_state->notification_sequence_badkb == NULL) {
+    get_notification_sequence_badusb(const PluginState* plugin_state, SceneState* scene_state) {
+    if(scene_state->notification_sequence_badusb == NULL) {
         uint8_t i = 0;
         uint8_t length = 3;
         if(plugin_state->notification_method & NotificationMethodVibro) {
@@ -81,36 +84,36 @@ static const NotificationSequence*
             length += 6;
         }
 
-        scene_state->notification_sequence_badkb = malloc(sizeof(void*) * length);
-        furi_check(scene_state->notification_sequence_badkb != NULL);
+        scene_state->notification_sequence_badusb = malloc(sizeof(void*) * length);
+        furi_check(scene_state->notification_sequence_badusb != NULL);
 
-        scene_state->notification_sequence_badkb[i++] = &message_blue_255;
+        scene_state->notification_sequence_badusb[i++] = &message_blue_255;
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_badkb[i++] = &message_vibro_on;
+            scene_state->notification_sequence_badusb[i++] = &message_vibro_on;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_badkb[i++] = &message_note_d5; //-V525
-            scene_state->notification_sequence_badkb[i++] = &message_delay_50;
-            scene_state->notification_sequence_badkb[i++] = &message_note_e4;
-            scene_state->notification_sequence_badkb[i++] = &message_delay_50;
-            scene_state->notification_sequence_badkb[i++] = &message_note_f3;
+            scene_state->notification_sequence_badusb[i++] = &message_note_d5; //-V525
+            scene_state->notification_sequence_badusb[i++] = &message_delay_50;
+            scene_state->notification_sequence_badusb[i++] = &message_note_e4;
+            scene_state->notification_sequence_badusb[i++] = &message_delay_50;
+            scene_state->notification_sequence_badusb[i++] = &message_note_f3;
         }
 
-        scene_state->notification_sequence_badkb[i++] = &message_delay_50;
+        scene_state->notification_sequence_badusb[i++] = &message_delay_50;
 
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_badkb[i++] = &message_vibro_off;
+            scene_state->notification_sequence_badusb[i++] = &message_vibro_off;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_badkb[i++] = &message_sound_off;
+            scene_state->notification_sequence_badusb[i++] = &message_sound_off;
         }
 
-        scene_state->notification_sequence_badkb[i++] = NULL;
+        scene_state->notification_sequence_badusb[i++] = NULL;
     }
 
-    return (NotificationSequence*)scene_state->notification_sequence_badkb;
+    return (NotificationSequence*)scene_state->notification_sequence_badusb;
 }
 
 static void int_token_to_str(uint32_t i_token_code, char* str, TokenDigitsCount len) {
@@ -306,14 +309,18 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
         AlignCenter,
         scene_state->last_code);
 
-    const uint8_t BAR_MARGIN = 3;
-    const uint8_t BAR_HEIGHT = 4;
     const uint8_t TOKEN_LIFETIME = scene_state->current_token->duration;
     float percentDone = (float)(TOKEN_LIFETIME - curr_ts % TOKEN_LIFETIME) / (float)TOKEN_LIFETIME;
-    uint8_t barWidth = (uint8_t)((float)(SCREEN_WIDTH - (BAR_MARGIN << 1)) * percentDone);
-    uint8_t barX = ((SCREEN_WIDTH - (BAR_MARGIN << 1) - barWidth) >> 1) + BAR_MARGIN;
+    uint8_t barWidth = (uint8_t)((float)(SCREEN_WIDTH - (PROGRESS_BAR_MARGIN << 1)) * percentDone);
+    uint8_t barX =
+        ((SCREEN_WIDTH - (PROGRESS_BAR_MARGIN << 1) - barWidth) >> 1) + PROGRESS_BAR_MARGIN;
 
-    canvas_draw_box(canvas, barX, SCREEN_HEIGHT - BAR_MARGIN - BAR_HEIGHT, barWidth, BAR_HEIGHT);
+    canvas_draw_box(
+        canvas,
+        barX,
+        SCREEN_HEIGHT - PROGRESS_BAR_MARGIN - PROGRESS_BAR_HEIGHT,
+        barWidth,
+        PROGRESS_BAR_HEIGHT);
 
     if(plugin_state->tokens_count > 1) {
         canvas_draw_icon(canvas, 0, SCREEN_HEIGHT_CENTER - 24, &I_totp_arrow_left_8x9);
@@ -340,7 +347,7 @@ bool totp_scene_generate_token_handle_event(
             scene_state->type_code_worker_context, TotpTypeCodeWorkerEventType);
         notification_message(
             plugin_state->notification_app,
-            get_notification_sequence_badkb(plugin_state, scene_state));
+            get_notification_sequence_badusb(plugin_state, scene_state));
         return true;
     }
 
@@ -399,8 +406,8 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
         free(scene_state->notification_sequence_new_token);
     }
 
-    if(scene_state->notification_sequence_badkb != NULL) {
-        free(scene_state->notification_sequence_badkb);
+    if(scene_state->notification_sequence_badusb != NULL) {
+        free(scene_state->notification_sequence_badusb);
     }
 
     free(scene_state);

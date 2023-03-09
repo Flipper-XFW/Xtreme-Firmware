@@ -4,7 +4,7 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
-#include <dolphin/dolphin.h>
+
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
 
@@ -29,8 +29,7 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    int x;
-    int y;
+    FuriMutex* mutex;
 } PluginState;
 
 char rate_text_fmt[] = "Transfer rate: %dMbps";
@@ -96,13 +95,13 @@ static void insert_addr(uint8_t* addr, uint8_t addr_size) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
+    furi_assert(ctx);
+    const PluginState* plugin_state = ctx;
+    furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
+
     uint8_t rate = 2;
     char sniffing[] = "Yes";
 
-    const PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(plugin_state == NULL) {
-        return;
-    }
     // border around the edge of the screen
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontSecondary);
@@ -126,7 +125,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 30, 50, AlignLeft, AlignBottom, addresses_header_text);
     canvas_draw_str_aligned(canvas, 30, 60, AlignLeft, AlignBottom, sniffed_address);
 
-    release_mutex((ValueMutex*)ctx, plugin_state);
+    furi_mutex_release(plugin_state->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -291,7 +290,6 @@ static void wrap_up(Storage* storage, NotificationApp* notification) {
             hexlify(addr, 5, top_address);
             found_count++;
             save_addr_to_file(storage, addr, 5, notification);
-            DOLPHIN_DEED(getRandomDeed());
             if(confirmed_idx < MAX_CONFIRMED) memcpy(confirmed[confirmed_idx++], addr, 5);
             break;
         }
@@ -321,8 +319,8 @@ int32_t nrfsniff_app(void* p) {
     hexlify(address, 5, top_address);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     PluginState* plugin_state = malloc(sizeof(PluginState));
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!plugin_state->mutex) {
         furi_message_queue_free(event_queue);
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(plugin_state);
@@ -333,7 +331,7 @@ int32_t nrfsniff_app(void* p) {
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, render_callback, plugin_state);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     // Open GUI and register view_port
@@ -348,7 +346,7 @@ int32_t nrfsniff_app(void* p) {
     PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-        PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -405,9 +403,6 @@ int32_t nrfsniff_app(void* p) {
                     }
                 }
             }
-        } else {
-            // FURI_LOG_D(TAG, "osMessageQueue: event timeout");
-            // event timeout
         }
 
         if(sniffing_state) {
@@ -439,7 +434,7 @@ int32_t nrfsniff_app(void* p) {
         }
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, plugin_state);
+        furi_mutex_release(plugin_state->mutex);
     }
 
     clear_cache();
@@ -454,6 +449,8 @@ int32_t nrfsniff_app(void* p) {
     furi_record_close(RECORD_STORAGE);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
+    furi_mutex_free(plugin_state->mutex);
+    free(plugin_state);
 
     return 0;
 }

@@ -14,18 +14,18 @@ extern "C" {
 #endif
 
 typedef enum {
-    CONDITIONAL_SEARCH = 0, /**< Search for alarmed device */
-    NORMAL_SEARCH = 1, /**< Search all devices */
+    OneWireHostSearchModeConditional = 0, /**< Search for alarmed device */
+    OneWireHostSearchModeNormal = 1, /**< Search all devices */
 } OneWireHostSearchMode;
 
 typedef struct OneWireHost OneWireHost;
 
 /**
  * Allocate onewire host bus
- * @param gpio 
+ * @param pin
  * @return OneWireHost* 
  */
-OneWireHost* onewire_host_alloc();
+OneWireHost* onewire_host_alloc(const GpioPin* gpio_pin);
 
 /**
  * Deallocate onewire host bus
@@ -77,6 +77,14 @@ void onewire_host_write_bit(OneWireHost* host, bool value);
 void onewire_host_write(OneWireHost* host, uint8_t value);
 
 /**
+ * Write many bytes
+ * @param host
+ * @param buffer
+ * @param count
+ */
+void onewire_host_write_bytes(OneWireHost* host, const uint8_t* buffer, uint16_t count);
+
+/**
  * Skip ROM command
  * @param host 
  */
@@ -114,7 +122,7 @@ void onewire_host_target_search(OneWireHost* host, uint8_t family_code);
  * @param mode 
  * @return uint8_t 
  */
-uint8_t onewire_host_search(OneWireHost* host, uint8_t* newAddr, OneWireHostSearchMode mode);
+uint8_t onewire_host_search(OneWireHost* host, uint8_t* new_addr, OneWireHostSearchMode mode);
 
 #ifdef __cplusplus
 }

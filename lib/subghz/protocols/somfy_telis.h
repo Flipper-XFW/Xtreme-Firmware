@@ -11,6 +11,14 @@ extern const SubGhzProtocolDecoder subghz_protocol_somfy_telis_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_somfy_telis_encoder;
 extern const SubGhzProtocol subghz_protocol_somfy_telis;
 
+// Custom buttons
+void somfy_telis_set_btn(uint8_t b);
+
+uint8_t somfy_telis_get_original_btn();
+uint8_t somfy_telis_get_custom_btn();
+
+void somfy_telis_reset_original_btn();
+
 /**
  * Allocate SubGhzProtocolEncoderSomfyTelis.
  * @param environment Pointer to a SubGhzEnvironment instance
@@ -48,7 +56,8 @@ bool subghz_protocol_somfy_telis_create_data(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -102,9 +111,9 @@ uint8_t subghz_protocol_decoder_somfy_telis_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderSomfyTelis instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_somfy_telis_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_somfy_telis_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -113,9 +122,10 @@ bool subghz_protocol_decoder_somfy_telis_serialize(
  * Deserialize data SubGhzProtocolDecoderSomfyTelis.
  * @param context Pointer to a SubGhzProtocolDecoderSomfyTelis instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.

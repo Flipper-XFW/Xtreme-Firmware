@@ -1,5 +1,5 @@
 App(
-    appid="Weather_Station",
+    appid="weather_station",
     name="Weather Station",
     apptype=FlipperAppType.PLUGIN,
     targets=["f7"],
@@ -9,6 +9,6 @@ App(
     stack_size=4 * 1024,
     order=50,
     fap_icon="weather_station_10px.png",
-    fap_category="Tools",
+    fap_category="Sub-GHz",
     fap_icon_assets="images",
 )

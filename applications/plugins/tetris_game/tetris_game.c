@@ -6,7 +6,6 @@
 #include <string.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_gpio.h>
-#include <dolphin/dolphin.h>
 
 #define BORDER_OFFSET 1
 #define MARGIN_OFFSET 3
@@ -15,6 +14,9 @@
 
 #define FIELD_WIDTH 11
 #define FIELD_HEIGHT 24
+
+#define MAX_FALL_SPEED 500
+#define MIN_FALL_SPEED 100
 
 typedef struct Point {
     // Also used for offset data, which is sometimes negative
@@ -68,6 +70,7 @@ typedef struct {
     uint16_t fallSpeed;
     GameState gameState;
     FuriTimer* timer;
+    FuriMutex* mutex;
 } TetrisState;
 
 typedef enum {
@@ -124,11 +127,9 @@ static void tetris_game_draw_playfield(Canvas* const canvas, const TetrisState* 
 }
 
 static void tetris_game_render_callback(Canvas* const canvas, void* ctx) {
-    const TetrisState* tetris_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(tetris_state == NULL) {
-        FURI_LOG_E("TetrisGame", "it null");
-        return;
-    }
+    furi_assert(ctx);
+    const TetrisState* tetris_state = ctx;
+    furi_mutex_acquire(tetris_state->mutex, FuriWaitForever);
 
     tetris_game_draw_border(canvas);
     tetris_game_draw_playfield(canvas, tetris_state);
@@ -151,16 +152,12 @@ static void tetris_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 4, 63, "Game Over");
 
-        if(tetris_state->numLines % 8 == 0 && tetris_state->numLines != 0) {
-            DOLPHIN_DEED(getRandomDeed());
-        }
-
         char buffer[13];
         snprintf(buffer, sizeof(buffer), "Lines: %u", tetris_state->numLines);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 32, 73, AlignCenter, AlignBottom, buffer);
     }
-    release_mutex((ValueMutex*)ctx, tetris_state);
+    furi_mutex_release(tetris_state->mutex);
 }
 
 static void tetris_game_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -173,7 +170,7 @@ static void tetris_game_input_callback(InputEvent* input_event, FuriMessageQueue
 static void tetris_game_init_state(TetrisState* tetris_state) {
     tetris_state->gameState = GameStatePlaying;
     tetris_state->numLines = 0;
-    tetris_state->fallSpeed = 500;
+    tetris_state->fallSpeed = MAX_FALL_SPEED;
     memset(tetris_state->playField, 0, sizeof(tetris_state->playField));
 
     memcpy(&tetris_state->currPiece, &shapes[rand() % 7], sizeof(tetris_state->currPiece));
@@ -307,6 +304,7 @@ static void
             tetris_game_render_curr_piece(tetris_state);
             uint8_t numLines = 0;
             uint8_t lines[] = {0, 0, 0, 0};
+            uint16_t nextFallSpeed;
 
             tetris_game_check_for_lines(tetris_state, lines, &numLines);
             if(numLines > 0) {
@@ -327,7 +325,11 @@ static void
                 uint16_t oldNumLines = tetris_state->numLines;
                 tetris_state->numLines += numLines;
                 if((oldNumLines / 10) % 10 != (tetris_state->numLines / 10) % 10) {
-                    tetris_state->fallSpeed -= 50;
+                    nextFallSpeed =
+                        tetris_state->fallSpeed - (100 / (tetris_state->numLines / 10));
+                    if(nextFallSpeed >= MIN_FALL_SPEED) {
+                        tetris_state->fallSpeed = nextFallSpeed;
+                    }
                 }
             }
 
@@ -354,8 +356,8 @@ int32_t tetris_game_app() {
 
     TetrisState* tetris_state = malloc(sizeof(TetrisState));
 
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, tetris_state, sizeof(TetrisState))) {
+    tetris_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!tetris_state->mutex) {
         FURI_LOG_E("TetrisGame", "cannot create mutex\r\n");
         furi_message_queue_free(event_queue);
         free(tetris_state);
@@ -372,7 +374,7 @@ int32_t tetris_game_app() {
 
     ViewPort* view_port = view_port_alloc();
     view_port_set_orientation(view_port, ViewPortOrientationVertical);
-    view_port_draw_callback_set(view_port, tetris_game_render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, tetris_game_render_callback, tetris_state);
     view_port_input_callback_set(view_port, tetris_game_input_callback, event_queue);
 
     // Open GUI and register view_port
@@ -392,7 +394,7 @@ int32_t tetris_game_app() {
         // This 10U implicitly sets the game loop speed. downRepeatCounter relies on this value
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 10U);
 
-        TetrisState* tetris_state = (TetrisState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(tetris_state->mutex, FuriWaitForever);
 
         memcpy(newPiece, &tetris_state->currPiece, sizeof(tetris_state->currPiece));
         bool wasDownMove = false;
@@ -459,7 +461,7 @@ int32_t tetris_game_app() {
         tetris_game_process_step(tetris_state, newPiece, wasDownMove);
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, tetris_state);
+        furi_mutex_release(tetris_state->mutex);
     }
 
     furi_timer_free(tetris_state->timer);
@@ -468,7 +470,7 @@ int32_t tetris_game_app() {
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(tetris_state->mutex);
     vTaskPrioritySet(timer_task, origTimerPrio);
     free(newPiece);
     free(tetris_state);

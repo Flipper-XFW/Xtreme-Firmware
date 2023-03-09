@@ -1,5 +1,5 @@
 App(
-    appid="Geiger_Coutner",
+    appid="flipper_geiger",
     name="[GPIO] Geiger Counter",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipper_geiger_app",

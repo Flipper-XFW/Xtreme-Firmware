@@ -1,5 +1,5 @@
 App(
-    appid="USB_Remote",
+    appid="hid_usb",
     name="USB Remote",
     apptype=FlipperAppType.PLUGIN,
     entry_point="hid_usb_app",
@@ -10,8 +10,9 @@ App(
     fap_icon_assets_symbol="hid",
 )
 
+
 App(
-    appid="Bluetooth_Remote",
+    appid="hid_ble",
     name="Bluetooth Remote",
     apptype=FlipperAppType.PLUGIN,
     entry_point="hid_ble_app",

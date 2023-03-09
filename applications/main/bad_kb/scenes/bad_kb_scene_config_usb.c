@@ -50,19 +50,7 @@ bool bad_kb_scene_config_usb_on_event(void* context, SceneManagerEvent event) {
         if(event.event == VarItemListIndexKeyboardLayout) {
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
         } else if(event.event == VarItemListIndexConnection) {
-            bad_kb_script_close(bad_kb->bad_kb_script);
-            bad_kb_connection_deinit(bad_kb->bt);
-            bad_kb->bad_kb_script =
-                bad_kb_script_open(bad_kb->file_path, bad_kb->is_bt ? bad_kb->bt : NULL);
-            bad_kb_script_set_keyboard_layout(bad_kb->bad_kb_script, bad_kb->keyboard_layout);
-            scene_manager_previous_scene(bad_kb->scene_manager);
-            if(bad_kb->is_bt) {
-                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBt);
-            } else {
-                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigUsb);
-            }
-            // } else {
-            //     furi_crash("Unknown key type");
+            bad_kb_config_switch_mode(bad_kb);
         }
     }
 

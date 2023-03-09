@@ -10,7 +10,7 @@ SceneManager* scene_manager_alloc(const SceneManagerHandlers* app_scene_handlers
     scene_manager->scene_handlers = app_scene_handlers;
     // Allocate all scenes
     scene_manager->scene = malloc(sizeof(AppScene) * app_scene_handlers->scene_num);
-    // Initialize ScaneManager array for navigation
+    // Initialize SceneManager array for navigation
     SceneManagerIdStack_init(scene_manager->scene_id_stack);
 
     return scene_manager;
@@ -19,7 +19,7 @@ SceneManager* scene_manager_alloc(const SceneManagerHandlers* app_scene_handlers
 void scene_manager_free(SceneManager* scene_manager) {
     furi_assert(scene_manager);
 
-    // Clear ScaneManager array
+    // Clear SceneManager array
     SceneManagerIdStack_clear(scene_manager->scene_id_stack);
     // Clear allocated scenes
     free(scene_manager->scene);
@@ -34,7 +34,7 @@ void scene_manager_set_scene_state(SceneManager* scene_manager, uint32_t scene_i
     scene_manager->scene[scene_id].state = state;
 }
 
-uint32_t scene_manager_get_scene_state(SceneManager* scene_manager, uint32_t scene_id) {
+uint32_t scene_manager_get_scene_state(const SceneManager* scene_manager, uint32_t scene_id) {
     furi_assert(scene_manager);
     furi_assert(scene_id < scene_manager->scene_handlers->scene_num);
 
@@ -184,7 +184,7 @@ bool scene_manager_search_and_switch_to_previous_scene_one_of(
     return scene_found;
 }
 
-bool scene_manager_has_previous_scene(SceneManager* scene_manager, uint32_t scene_id) {
+bool scene_manager_has_previous_scene(const SceneManager* scene_manager, uint32_t scene_id) {
     furi_assert(scene_manager);
     bool scene_found = false;
 

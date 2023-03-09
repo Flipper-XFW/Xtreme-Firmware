@@ -5,21 +5,18 @@
 
 void storage_file_init(StorageFile* obj) {
     obj->file = NULL;
-    obj->type = ST_ERROR;
     obj->file_data = NULL;
     obj->path = furi_string_alloc();
 }
 
 void storage_file_init_set(StorageFile* obj, const StorageFile* src) {
     obj->file = src->file;
-    obj->type = src->type;
     obj->file_data = src->file_data;
     obj->path = furi_string_alloc_set(src->path);
 }
 
 void storage_file_set(StorageFile* obj, const StorageFile* src) { //-V524
     obj->file = src->file;
-    obj->type = src->type;
     obj->file_data = src->file_data;
     furi_string_set(obj->path, src->path);
 }
@@ -31,29 +28,13 @@ void storage_file_clear(StorageFile* obj) {
 /****************** storage data ******************/
 
 void storage_data_init(StorageData* storage) {
-    storage->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    furi_check(storage->mutex != NULL);
     storage->data = NULL;
     storage->status = StorageStatusNotReady;
     StorageFileList_init(storage->files);
 }
 
-bool storage_data_lock(StorageData* storage) {
-    return (furi_mutex_acquire(storage->mutex, FuriWaitForever) == FuriStatusOk);
-}
-
-bool storage_data_unlock(StorageData* storage) {
-    return (furi_mutex_release(storage->mutex) == FuriStatusOk);
-}
-
 StorageStatus storage_data_status(StorageData* storage) {
-    StorageStatus status;
-
-    storage_data_lock(storage);
-    status = storage->status;
-    storage_data_unlock(storage);
-
-    return status;
+    return storage->status;
 }
 
 const char* storage_data_status_text(StorageData* storage) {
@@ -166,16 +147,10 @@ void* storage_get_storage_file_data(const File* file, StorageData* storage) {
     return founded_file->file_data;
 }
 
-void storage_push_storage_file(
-    File* file,
-    FuriString* path,
-    StorageType type,
-    StorageData* storage) {
+void storage_push_storage_file(File* file, FuriString* path, StorageData* storage) {
     StorageFile* storage_file = StorageFileList_push_new(storage->files);
-
     file->file_id = (uint32_t)storage_file;
     storage_file->file = file;
-    storage_file->type = type;
     furi_string_set(storage_file->path, path);
 }
 

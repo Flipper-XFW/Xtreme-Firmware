@@ -461,6 +461,7 @@ int32_t game15_app() {
 
     sandbox_init(
         FPS, (SandboxRenderCallback)render_callback, (SandboxEventHandler)game_event_handler);
+
     sandbox_loop();
     sandbox_free();
     game_free();

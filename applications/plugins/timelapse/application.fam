@@ -1,6 +1,6 @@
 App(
-    appid="GPIO_Intervalometer",
-    name="[GPIO] Intervalometer",
+    appid="GPIO_Timelapse",
+    name="[GPIO] Timelapse",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="zeitraffer_app",
     cdefines=["APP_ZEITRAFFER"],

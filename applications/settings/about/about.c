@@ -3,17 +3,12 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/empty_screen.h>
-#include <gui/elements.h>
 #include <assets_icons.h>
 #include <furi_hal_version.h>
 #include <furi_hal_region.h>
 #include <furi_hal_bt.h>
-#include <power/power_service/power.h>
 
 int screen_index;
-
-#define LOW_CHARGE_THRESHOLD 10
-#define HIGH_DRAIN_CURRENT_THRESHOLD 100
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
 
@@ -108,7 +103,7 @@ static DialogMessageButton hw_version_screen(DialogsApp* dialogs, DialogMessage*
         furi_hal_version_get_hw_target(),
         furi_hal_version_get_hw_body(),
         furi_hal_version_get_hw_connect(),
-        furi_hal_version_get_hw_region_name(),
+        furi_hal_version_get_hw_region_name_otp(),
         furi_hal_region_get_name(),
         my_name ? my_name : "Unknown");
 
@@ -170,6 +165,13 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
     return result;
 }
 
+#include <gui/elements.h>
+#include <locale/locale.h>
+#include <power/power_service/power.h>
+
+#define LOW_CHARGE_THRESHOLD 10
+#define HIGH_DRAIN_CURRENT_THRESHOLD 100
+
 static void draw_stat(Canvas* canvas, int x, int y, const Icon* icon, char* val) {
     canvas_draw_frame(canvas, x - 7, y + 7, 30, 13);
     canvas_draw_icon(canvas, x, y, icon);
@@ -221,15 +223,15 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
             drain_current > HIGH_DRAIN_CURRENT_THRESHOLD ? "mA!" : "mA");
     } else if(drain_current != 0) {
         snprintf(header, 20, "...");
-    } else if(info->voltage_battery_charging < 4.2) {
+    } else if(info->voltage_battery_charge_limit < 4.2) {
         // Non-default battery charging limit, mention it
         snprintf(header, sizeof(header), "Limited to");
         snprintf(
             value,
             sizeof(value),
             "%lu.%luV",
-            (uint32_t)(info->voltage_battery_charging),
-            (uint32_t)(info->voltage_battery_charging * 10) % 10);
+            (uint32_t)(info->voltage_battery_charge_limit),
+            (uint32_t)(info->voltage_battery_charge_limit * 10) % 10);
     } else {
         snprintf(header, sizeof(header), "Charged!");
     }
@@ -258,7 +260,15 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
     char health[10];
 
     snprintf(batt_level, sizeof(batt_level), "%lu%%", (uint32_t)info->charge);
-    snprintf(temperature, sizeof(temperature), "%lu C", (uint32_t)info->temperature_gauge);
+    if(locale_get_measurement_unit() == LocaleMeasurementUnitsMetric) {
+        snprintf(temperature, sizeof(temperature), "%lu C", (uint32_t)info->temperature_gauge);
+    } else {
+        snprintf(
+            temperature,
+            sizeof(temperature),
+            "%lu F",
+            (uint32_t)locale_celsius_to_fahrenheit(info->temperature_gauge));
+    }
     snprintf(
         voltage,
         sizeof(voltage),

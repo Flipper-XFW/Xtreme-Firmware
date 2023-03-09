@@ -4,9 +4,8 @@
 #define SPI_MEM_VERSION_APP "0.1.0"
 #define SPI_MEM_DEVELOPER "DrunkBatya"
 #define SPI_MEM_GITHUB "https://github.com/flipperdevices/flipperzero-firmware"
-#define SPI_MEM_NAME "\e#\e!       SPI Mem Manager        \e!\n" // NOSONAR
-#define SPI_MEM_BLANK_INV \
-    "\e#\e!                                                      \e!\n" // NOSONAR
+#define SPI_MEM_NAME "\e#\e!       SPI Mem Manager        \e!\n"
+#define SPI_MEM_BLANK_INV "\e#\e!                                                      \e!\n"
 
 void spi_mem_scene_about_on_enter(void* context) {
     SPIMemApp* app = context;
@@ -16,11 +15,11 @@ void spi_mem_scene_about_on_enter(void* context) {
         app->widget, 0, 0, 128, 14, AlignCenter, AlignBottom, SPI_MEM_BLANK_INV, false);
     widget_add_text_box_element(
         app->widget, 0, 2, 128, 14, AlignCenter, AlignBottom, SPI_MEM_NAME, false);
-    furi_string_printf(tmp_string, "\e#%s\n", "Information"); // NOSONAR
+    furi_string_printf(tmp_string, "\e#%s\n", "Information");
     furi_string_cat_printf(tmp_string, "Version: %s\n", SPI_MEM_VERSION_APP);
     furi_string_cat_printf(tmp_string, "Developed by: %s\n", SPI_MEM_DEVELOPER);
     furi_string_cat_printf(tmp_string, "Github: %s\n\n", SPI_MEM_GITHUB);
-    furi_string_cat_printf(tmp_string, "\e#%s\n", "Description"); // NOSONAR
+    furi_string_cat_printf(tmp_string, "\e#%s\n", "Description");
     furi_string_cat_printf(
         tmp_string,
         "SPI memory dumper\n"

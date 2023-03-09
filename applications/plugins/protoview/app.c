@@ -3,32 +3,6 @@
 
 #include "app.h"
 
-/* If this define is enabled, ProtoView is going to mess with the
- * otherwise opaque SubGhzWorker structure in order to disable
- * its filter for samples shorter than a given amount (30us at the
- * time I'm writing this comment).
- *
- * This structure must be taken in sync with the one of the firmware. */
-#define PROTOVIEW_DISABLE_SUBGHZ_FILTER 0
-
-#ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
-struct SubGhzWorker {
-    FuriThread* thread;
-    FuriStreamBuffer* stream;
-
-    volatile bool running;
-    volatile bool overrun;
-
-    LevelDuration filter_level_duration;
-    bool filter_running;
-    uint16_t filter_duration;
-
-    SubGhzWorkerOverrunCallback overrun_callback;
-    SubGhzWorkerPairCallback pair_callback;
-    void* context;
-};
-#endif
-
 RawSamplesBuffer *RawSamples, *DetectedSamples;
 extern const SubGhzProtocolRegistry protoview_protocol_registry;
 
@@ -42,6 +16,7 @@ extern const SubGhzProtocolRegistry protoview_protocol_registry;
  * and setting color to black. */
 static void render_callback(Canvas* const canvas, void* ctx) {
     ProtoViewApp* app = ctx;
+    furi_mutex_acquire(app->view_updating_mutex, FuriWaitForever);
 
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
@@ -74,6 +49,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     /* Draw the alert box if set. */
     ui_draw_alert_if_needed(canvas, app);
+    furi_mutex_release(app->view_updating_mutex);
 }
 
 /* Here all we do is putting the events into the queue that will be handled
@@ -91,6 +67,8 @@ static void input_callback(InputEvent* input_event, void* ctx) {
  * special views ViewGoNext and ViewGoPrev in order to move to
  * the logical next/prev view. */
 static void app_switch_view(ProtoViewApp* app, ProtoViewCurrentView switchto) {
+    furi_mutex_acquire(app->view_updating_mutex, FuriWaitForever);
+
     /* Switch to the specified view. */
     ProtoViewCurrentView old = app->current_view;
     if(switchto == ViewGoNext) {
@@ -106,22 +84,10 @@ static void app_switch_view(ProtoViewApp* app, ProtoViewCurrentView switchto) {
     }
     ProtoViewCurrentView new = app->current_view;
 
-    /* Set the current subview of the view we just left to zero. This is
-     * the main subview of the old view. When re re-enter the view we are
-     * lefting, we want to see the main thing again. */
-    app->current_subview[old] = 0;
-
-    /* Reset the view private data each time, before calling the enter/exit
-     * callbacks that may want to setup some state. */
-    memset(app->view_privdata, 0, PROTOVIEW_VIEW_PRIVDATA_LEN);
-
-    /* Call the enter/exit view callbacks if needed. */
+    /* Call the exit view callbacks. */
     if(old == ViewDirectSampling) view_exit_direct_sampling(app);
-    if(new == ViewDirectSampling) view_enter_direct_sampling(app);
     if(old == ViewBuildMessage) view_exit_build_message(app);
-    if(new == ViewBuildMessage) view_enter_build_message(app);
     if(old == ViewInfo) view_exit_info(app);
-
     /* The frequency/modulation settings are actually a single view:
      * as long as the user stays between the two modes of this view we
      * don't need to call the exit-view callback. */
@@ -129,7 +95,24 @@ static void app_switch_view(ProtoViewApp* app, ProtoViewCurrentView switchto) {
        (old == ViewModulationSettings && new != ViewFrequencySettings))
         view_exit_settings(app);
 
+    /* Reset the view private data each time, before calling the enter
+     * callbacks that may want to setup some state. */
+    memset(app->view_privdata, 0, PROTOVIEW_VIEW_PRIVDATA_LEN);
+
+    /* Call the enter view callbacks after all the exit callback
+     * of the old view was already executed. */
+    if(new == ViewDirectSampling) view_enter_direct_sampling(app);
+    if(new == ViewBuildMessage) view_enter_build_message(app);
+
+    /* Set the current subview of the view we just left to zero. This is
+     * the main subview of the old view. When we re-enter the view we are
+     * lefting, we want to see the main thing again. */
+    app->current_subview[old] = 0;
+
+    /* If there is an alert on screen, dismiss it: if the user is
+     * switching view she already read it. */
     ui_dismiss_alert(app);
+    furi_mutex_release(app->view_updating_mutex);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -143,7 +126,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     //init setting
     app->setting = subghz_setting_alloc();
-    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user.txt"));
+    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user"));
 
     // GUI
     app->gui = furi_record_open(RECORD_GUI);
@@ -158,6 +141,7 @@ ProtoViewApp* protoview_app_alloc() {
     app->show_text_input = false;
     app->alert_dismiss_time = 0;
     app->current_view = ViewRawPulses;
+    app->view_updating_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     for(int j = 0; j < ViewLast; j++) app->current_subview[j] = 0;
     app->direct_sampling_enabled = false;
     app->view_privdata = malloc(PROTOVIEW_VIEW_PRIVDATA_LEN);
@@ -174,28 +158,17 @@ ProtoViewApp* protoview_app_alloc() {
     // Init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
-    /* Setup rx worker and environment. */
+    /* Setup rx state. */
     app->txrx->freq_mod_changed = false;
     app->txrx->debug_timer_sampling = false;
     app->txrx->last_g0_change_time = DWT->CYCCNT;
     app->txrx->last_g0_value = false;
-    app->txrx->worker = subghz_worker_alloc();
-#ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
-    app->txrx->worker->filter_running = 0;
-#endif
-    app->txrx->environment = subghz_environment_alloc();
-    subghz_environment_set_protocol_registry(
-        app->txrx->environment, (void*)&protoview_protocol_registry);
-    app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
-    subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
-    subghz_worker_set_overrun_callback(
-        app->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
-    subghz_worker_set_pair_callback(
-        app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
-    subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
 
     app->frequency = subghz_setting_get_default_frequency(app->setting);
     app->modulation = 0; /* Defaults to ProtoViewModulations[0]. */
+
+    // Enable power for External CC1101 if it is connected
+    furi_hal_subghz_enable_ext_power();
 
     furi_hal_power_suppress_charge_enter();
     app->running = 1;
@@ -212,6 +185,9 @@ void protoview_app_free(ProtoViewApp* app) {
     // Put CC1101 on sleep, this also restores charging.
     radio_sleep(app);
 
+    // Disable power for External CC1101 if it was enabled and module is connected
+    furi_hal_subghz_disable_ext_power();
+
     // View related.
     view_port_enabled_set(app->view_port, false);
     gui_remove_view_port(app->gui, app->view_port);
@@ -219,17 +195,13 @@ void protoview_app_free(ProtoViewApp* app) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
     furi_message_queue_free(app->event_queue);
+    furi_mutex_free(app->view_updating_mutex);
     app->gui = NULL;
 
     // Frequency setting.
     subghz_setting_free(app->setting);
 
     // Worker stuff.
-    if(!app->txrx->debug_timer_sampling) {
-        subghz_receiver_free(app->txrx->receiver);
-        subghz_environment_free(app->txrx->environment);
-        subghz_worker_free(app->txrx->worker);
-    }
     free(app->txrx);
 
     // Raw samples buffers.
@@ -259,7 +231,7 @@ static void timer_callback(void* ctx) {
     }
     if(delta < RawSamples->total / 2) return;
     app->signal_last_scan_idx = RawSamples->idx;
-    scan_for_signal(app, RawSamples);
+    scan_for_signal(app, RawSamples, ProtoViewModulations[app->modulation].duration_filter);
 }
 
 /* This is the navigation callback we use in the view dispatcher used

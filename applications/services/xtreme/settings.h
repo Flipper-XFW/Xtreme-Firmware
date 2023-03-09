@@ -9,10 +9,15 @@
 #include <storage/storage.h>
 #include <power/power_service/power.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_PACK_NAME_LEN 32
 
-#define XTREME_SETTINGS_VERSION (2)
-#define XTREME_SETTINGS_PATH INT_PATH(XTREME_SETTINGS_FILE_NAME)
+#define XTREME_SETTINGS_VERSION (5)
+#define XTREME_SETTINGS_PATH_OLD INT_PATH(XTREME_SETTINGS_FILE_NAME)
+#define XTREME_SETTINGS_PATH EXT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
 
 // Some settings function backwards (logically) in
@@ -28,11 +33,19 @@ typedef struct {
     bool bar_borders;
     bool bar_background;
     bool bad_bt;
-    bool sort_ignore_dirs;
+    bool bad_bt_remember;
+    int32_t butthurt_timer;
+    bool sort_dirs_first;
+    bool dark_mode;
+    bool left_handed;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();
 
-bool XTREME_SETTINGS_LOAD();
+void XTREME_SETTINGS_LOAD();
 
 bool XTREME_SETTINGS_SAVE();
+
+#ifdef __cplusplus
+}
+#endif

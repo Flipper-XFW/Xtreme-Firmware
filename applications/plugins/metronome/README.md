@@ -1,5 +1,7 @@
 # Metronome
 
+[Original link](https://github.com/panki27/Metronome)
+
 A metronome for the [Flipper Zero](https://flipperzero.one/) device. Goes along perfectly with my [BPM tapper](https://github.com/panki27/bpm-tapper).
 
 ![screenshot](img/screenshot.png)
@@ -17,5 +19,5 @@ A metronome for the [Flipper Zero](https://flipperzero.one/) device. Goes along 
 ## Compiling
 
 ```
-./fbt fap_metronome
+./fbt firmware_metronome
 ```

@@ -1,7 +1,7 @@
 App(
-    appid="Password_Generator",
+    appid="passgen",
     name="Password Generator",
-    apptype=FlipperAppType.EXTERNAL,
+    apptype=FlipperAppType.PLUGIN,
     entry_point="passgenapp",
     requires=[
         "gui",

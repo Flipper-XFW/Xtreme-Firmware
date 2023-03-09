@@ -1,6 +1,6 @@
 App(
-    appid="Pomodoro",
-    name="Pomodoro",
+    appid="flipp_pomodoro",
+    name="Pomodoro Timer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipp_pomodoro_app",
     requires=["gui", "notification", "dolphin"],
@@ -8,5 +8,4 @@ App(
     fap_category="Tools",
     fap_icon_assets="images",
     fap_icon="flipp_pomodoro_10.png",
-    fap_icon_assets_symbol="flipp_pomodoro",
 )

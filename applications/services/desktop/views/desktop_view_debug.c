@@ -42,7 +42,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             furi_hal_version_get_hw_target(),
             furi_hal_version_get_hw_body(),
             furi_hal_version_get_hw_connect(),
-            furi_hal_version_get_hw_region_name(),
+            furi_hal_version_get_hw_region_name_otp(),
             furi_hal_region_get_name(),
             my_name ? my_name : "Unknown");
         canvas_draw_str(canvas, 0, 19 + STATUS_BAR_Y_SHIFT, buffer);
@@ -75,7 +75,8 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             c2_ver ? c2_ver->StackTypeString : "<none>");
         canvas_draw_str(canvas, 0, 40 + STATUS_BAR_Y_SHIFT, buffer);
 
-        snprintf(buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), "dev");
+        snprintf(
+            buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), version_get_gitbranch(ver));
         canvas_draw_str(canvas, 0, 50 + STATUS_BAR_Y_SHIFT, buffer);
 
     } else {

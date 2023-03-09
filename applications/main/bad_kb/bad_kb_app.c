@@ -37,9 +37,26 @@ static void bad_kb_load_settings(BadKbApp* app) {
               !storage_file_eof(settings_file) && !isspace(chr)) {
             furi_string_push_back(app->keyboard_layout, chr);
         }
+    } else {
+        furi_string_reset(app->keyboard_layout);
     }
     storage_file_close(settings_file);
     storage_file_free(settings_file);
+
+    if(!furi_string_empty(app->keyboard_layout)) {
+        Storage* fs_api = furi_record_open(RECORD_STORAGE);
+        FileInfo layout_file_info;
+        FS_Error file_check_err = storage_common_stat(
+            fs_api, furi_string_get_cstr(app->keyboard_layout), &layout_file_info);
+        furi_record_close(RECORD_STORAGE);
+        if(file_check_err != FSE_OK) {
+            furi_string_reset(app->keyboard_layout);
+            return;
+        }
+        if(layout_file_info.size != 256) {
+            furi_string_reset(app->keyboard_layout);
+        }
+    }
 }
 
 static void bad_kb_save_settings(BadKbApp* app) {
@@ -55,17 +72,6 @@ static void bad_kb_save_settings(BadKbApp* app) {
     storage_file_free(settings_file);
 }
 
-void bad_kb_set_name(BadKbApp* app, const char* fmt, ...) {
-    furi_assert(app);
-
-    va_list args;
-    va_start(args, fmt);
-
-    vsnprintf(app->name, BAD_KB_ADV_NAME_MAX_LEN, fmt, args);
-
-    va_end(args);
-}
-
 BadKbApp* bad_kb_app_alloc(char* arg) {
     BadKbApp* app = malloc(sizeof(BadKbApp));
 
@@ -76,6 +82,18 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     if(arg && strlen(arg)) {
         furi_string_set(app->file_path, arg);
     }
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    // Remove old pre-included files to avoid duplicates on migrate
+    storage_simply_remove(storage, EXT_PATH("badusb/layouts"));
+    storage_simply_remove(storage, EXT_PATH("badusb/.badusb.settings"));
+    storage_simply_remove(storage, EXT_PATH("badusb/Kiosk-Evasion-Bruteforce.txt"));
+    storage_simply_remove(storage, EXT_PATH("badusb/Wifi-Stealer_ORG.txt"));
+    storage_simply_remove(storage, EXT_PATH("badusb/demo_macos.txt"));
+    storage_simply_remove(storage, EXT_PATH("badusb/demo_windows.txt"));
+    storage_common_migrate(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
+    storage_simply_mkdir(storage, BAD_KB_APP_BASE_FOLDER);
+    furi_record_close(RECORD_STORAGE);
 
     bad_kb_load_settings(app);
 
@@ -96,14 +114,19 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, bad_kb_app_back_event_callback);
 
+    app->connection_init = false;
+
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
+    app->bt->suppress_pin_screen = true;
     app->is_bt = XTREME_SETTINGS()->bad_bt;
-    const char* adv_name = bt_get_profile_adv_name(bt);
+    app->bt_remember = XTREME_SETTINGS()->bad_bt_remember;
+    const char* adv_name = furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard);
     memcpy(app->name, adv_name, BAD_KB_ADV_NAME_MAX_LEN);
     memcpy(app->bt_old_config.name, adv_name, BAD_KB_ADV_NAME_MAX_LEN);
 
-    const uint8_t* mac_addr = bt_get_profile_mac_address(bt);
+    // need to be done before bt init (where mac address get modified if bounding is activated)
+    const uint8_t* mac_addr = furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard);
     memcpy(app->mac, mac_addr, BAD_KB_MAC_ADDRESS_LEN);
     memcpy(app->bt_old_config.mac, mac_addr, BAD_KB_MAC_ADDRESS_LEN);
 
@@ -139,8 +162,12 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     if(furi_hal_usb_is_locked()) {
         app->error = BadKbAppErrorCloseRpc;
+        app->conn_init_thread = NULL;
         scene_manager_next_scene(app->scene_manager, BadKbSceneError);
     } else {
+        app->conn_init_thread = furi_thread_alloc_ex(
+            "BadKbConnInit", 512, (FuriThreadCallback)bad_kb_connection_init, app);
+        furi_thread_start(app->conn_init_thread);
         if(!furi_string_empty(app->file_path)) {
             app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
             bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
@@ -188,16 +215,16 @@ void bad_kb_app_free(BadKbApp* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
-    // restores bt config
-    // BtProfile have already been switched to the previous one
-    // so we directly modify the right profile
-    bad_kb_connection_deinit(app->bt);
+    // Restore bt config
+    // BtProfile has already been switched to the previous one
+    // So we directly modify the right profile
     if(strcmp(app->bt_old_config.name, app->name) != 0) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->bt_old_config.name);
     }
     if(memcmp(app->bt_old_config.mac, app->mac, BAD_KB_MAC_ADDRESS_LEN) != 0) {
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->bt_old_config.mac);
     }
+    app->bt->suppress_pin_screen = false;
 
     // Close records
     furi_record_close(RECORD_GUI);
@@ -209,6 +236,12 @@ void bad_kb_app_free(BadKbApp* app) {
 
     furi_string_free(app->file_path);
     furi_string_free(app->keyboard_layout);
+
+    if(app->conn_init_thread) {
+        furi_thread_join(app->conn_init_thread);
+        furi_thread_free(app->conn_init_thread);
+    }
+    bad_kb_connection_deinit(app);
 
     free(app);
 }

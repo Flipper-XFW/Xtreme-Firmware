@@ -77,6 +77,8 @@ typedef struct {
     SubGhzRadioType radio_type;
     FuriHalSpiBusHandle* spi_bus_handle;
     const GpioPin* cc1101_g0_pin;
+    uint8_t rolling_counter_mult;
+    bool ext_module_power_disabled;
 } FuriHalSubGhz;
 
 extern volatile FuriHalSubGhz furi_hal_subghz;
@@ -222,6 +224,20 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
 
+/** Read extend and bypass settings values into out params
+ *
+ * @param      extend  pointer to bool for extend
+ * @param      bypass  pointer to bool for bypass
+ */
+void furi_hal_subghz_get_extend_settings(bool* extend, bool* bypass);
+
+/** Set extend and bypass settings values to file
+ *
+ * @param      extend  bool for extend
+ * @param      bypass  bool for bypass
+ */
+void furi_hal_subghz_set_extend_settings(bool extend, bool bypass);
+
 /** Сheck if transmission is allowed on this frequency with your current config
  *
  * @param      value  frequency in Hz
@@ -302,12 +318,31 @@ SubGhzRadioType furi_hal_subghz_get_radio_type(void);
 bool furi_hal_subghz_check_radio(void);
 
 /** Turn on the power of the external radio module
+ * @return     true if power-up is successful
  */
-void furi_hal_subghz_enable_ext_power(void);
+bool furi_hal_subghz_enable_ext_power(void);
 
 /** Turn off the power of the external radio module
  */
 void furi_hal_subghz_disable_ext_power(void);
+
+/** Get the current rolling protocols counter ++ value
+ * @return    uint8_t current value
+ */
+uint8_t furi_hal_subghz_get_rolling_counter_mult(void);
+
+/** Set the current rolling protocols counter ++ value
+ * @param      mult uint8_t = 1, 2, 4, 8
+ */
+void furi_hal_subghz_set_rolling_counter_mult(uint8_t mult);
+
+/** If true - disable 5v power of the external radio module
+ */
+void furi_hal_subghz_set_external_power_disable(bool state);
+
+/** Get the current state of the external power disable flag
+ */
+bool furi_hal_subghz_get_external_power_disable(void);
 
 #ifdef __cplusplus
 }

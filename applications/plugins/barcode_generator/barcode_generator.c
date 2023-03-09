@@ -1,8 +1,3 @@
-#include <furi.h>
-#include <gui/gui.h>
-#include <input/input.h>
-#include <stdlib.h>
-
 #include "barcode_generator.h"
 
 static BarcodeType* barcodeTypes[NUMBER_OF_BARCODE_TYPES];
@@ -103,9 +98,9 @@ int get_menu_text_location(int index) {
 }
 
 int get_barcode_max_index(PluginState* plugin_state) {
-    return plugin_state->doParityCalculation ?
-               barcodeTypes[plugin_state->barcodeTypeIndex]->numberOfDigits - 1 :
-               barcodeTypes[plugin_state->barcodeTypeIndex]->numberOfDigits;
+    return plugin_state->barcode_state.doParityCalculation ?
+               barcodeTypes[plugin_state->barcode_state.barcodeTypeIndex]->numberOfDigits - 1 :
+               barcodeTypes[plugin_state->barcode_state.barcodeTypeIndex]->numberOfDigits;
 }
 
 int calculate_check_digit(PluginState* plugin_state, BarcodeType* type) {
@@ -114,12 +109,12 @@ int calculate_check_digit(PluginState* plugin_state, BarcodeType* type) {
     int checkDigitEven = 0;
     //add all odd positions. Confusing because 0index
     for(int i = 0; i < type->numberOfDigits - 1; i += 2) {
-        checkDigitOdd += plugin_state->barcodeNumeral[i];
+        checkDigitOdd += plugin_state->barcode_state.barcodeNumeral[i];
     }
 
     //add all even positions to above. Confusing because 0index
     for(int i = 1; i < type->numberOfDigits - 1; i += 2) {
-        checkDigitEven += plugin_state->barcodeNumeral[i];
+        checkDigitEven += plugin_state->barcode_state.barcodeNumeral[i];
     }
 
     if(type->bartype == BarTypeEAN13) {
@@ -135,10 +130,9 @@ int calculate_check_digit(PluginState* plugin_state, BarcodeType* type) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(plugin_state == NULL) {
-        return;
-    }
+    furi_assert(ctx);
+    PluginState* plugin_state = ctx;
+    furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 
     if(plugin_state->mode == MenuMode) {
         canvas_set_color(canvas, ColorBlack);
@@ -152,7 +146,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas, 64, get_menu_text_location(2), AlignCenter, AlignCenter, "Parity?");
 
         canvas_draw_frame(canvas, 83, get_menu_text_location(2) - 3, 6, 6);
-        if(plugin_state->doParityCalculation == true) {
+        if(plugin_state->barcode_state.doParityCalculation == true) {
             canvas_draw_box(canvas, 85, get_menu_text_location(2) - 1, 2, 2);
         }
         canvas_draw_str_aligned(
@@ -161,14 +155,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             get_menu_text_location(3),
             AlignCenter,
             AlignCenter,
-            (barcodeTypes[plugin_state->barcodeTypeIndex])->name);
+            (barcodeTypes[plugin_state->barcode_state.barcodeTypeIndex])->name);
         canvas_draw_disc(
             canvas,
             40,
             get_menu_text_location(plugin_state->menuIndex) - 1,
             2); //draw menu cursor
     } else {
-        BarcodeType* type = barcodeTypes[plugin_state->barcodeTypeIndex];
+        BarcodeType* type = barcodeTypes[plugin_state->barcode_state.barcodeTypeIndex];
 
         //start saftey
         canvas_set_color(canvas, ColorBlack);
@@ -181,13 +175,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             startpos++;
             draw_digit(
                 canvas,
-                plugin_state->barcodeNumeral[0],
+                plugin_state->barcode_state.barcodeNumeral[0],
                 BarEncodingTypeRight,
-                get_digit_position(0, barcodeTypes[plugin_state->barcodeTypeIndex]),
+                get_digit_position(0, barcodeTypes[plugin_state->barcode_state.barcodeTypeIndex]),
                 false);
         }
-        if(plugin_state->doParityCalculation) { //calculate the check digit
-            plugin_state->barcodeNumeral[type->numberOfDigits - 1] =
+        if(plugin_state->barcode_state.doParityCalculation) { //calculate the check digit
+            plugin_state->barcode_state.barcodeNumeral[type->numberOfDigits - 1] =
                 calculate_check_digit(plugin_state, type);
         }
         for(int index = startpos; index < endpos; index++) {
@@ -197,7 +191,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                     barEncodingType = BarEncodingTypeRight;
                 } else {
                     barEncodingType =
-                        (FURI_BIT(EAN13ENCODE[plugin_state->barcodeNumeral[0]], index - 1)) ?
+                        (FURI_BIT(
+                            EAN13ENCODE[plugin_state->barcode_state.barcodeNumeral[0]],
+                            index - 1)) ?
                             BarEncodingTypeG :
                             BarEncodingTypeLeft;
                 }
@@ -207,10 +203,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 }
             }
 
-            int digitPosition =
-                get_digit_position(index, barcodeTypes[plugin_state->barcodeTypeIndex]);
+            int digitPosition = get_digit_position(
+                index, barcodeTypes[plugin_state->barcode_state.barcodeTypeIndex]);
             draw_digit(
-                canvas, plugin_state->barcodeNumeral[index], barEncodingType, digitPosition, true);
+                canvas,
+                plugin_state->barcode_state.barcodeNumeral[index],
+                barEncodingType,
+                digitPosition,
+                true);
         }
 
         //central separator
@@ -223,7 +223,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_box(
                 canvas,
                 get_digit_position(
-                    plugin_state->editingIndex, barcodeTypes[plugin_state->barcodeTypeIndex]) -
+                    plugin_state->editingIndex,
+                    barcodeTypes[plugin_state->barcode_state.barcodeTypeIndex]) -
                     1,
                 63,
                 7,
@@ -237,7 +238,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_box(canvas, (endSafetyPosition + 2), BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
     }
 
-    release_mutex((ValueMutex*)ctx, plugin_state);
+    furi_mutex_release(plugin_state->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -247,15 +248,17 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void barcode_generator_state_init(PluginState* const plugin_state) {
-    for(int i = 0; i < BARCODE_MAX_LENS; ++i) {
-        plugin_state->barcodeNumeral[i] = i % 10;
-    }
+static void barcode_generator_state_init(PluginState* plugin_state) {
     plugin_state->editingIndex = 0;
     plugin_state->mode = ViewMode;
-    plugin_state->doParityCalculation = true;
     plugin_state->menuIndex = MENU_INDEX_VIEW;
-    plugin_state->barcodeTypeIndex = 0;
+    if(!LOAD_BARCODE_SETTINGS(&plugin_state->barcode_state)) {
+        for(int i = 0; i < BARCODE_MAX_LENS; ++i) {
+            plugin_state->barcode_state.barcodeNumeral[i] = i % 10;
+        }
+        plugin_state->barcode_state.doParityCalculation = true;
+        plugin_state->barcode_state.barcodeTypeIndex = 0;
+    }
 }
 
 static bool handle_key_press_view(InputKey key, PluginState* plugin_state) {
@@ -277,15 +280,15 @@ static bool handle_key_press_edit(InputKey key, PluginState* plugin_state) {
 
     switch(key) {
     case InputKeyUp:
-        plugin_state->barcodeNumeral[plugin_state->editingIndex] =
-            (plugin_state->barcodeNumeral[plugin_state->editingIndex] + 1) % 10;
+        plugin_state->barcode_state.barcodeNumeral[plugin_state->editingIndex] =
+            (plugin_state->barcode_state.barcodeNumeral[plugin_state->editingIndex] + 1) % 10;
         break;
 
     case InputKeyDown:
-        plugin_state->barcodeNumeral[plugin_state->editingIndex] =
-            (plugin_state->barcodeNumeral[plugin_state->editingIndex] == 0) ?
+        plugin_state->barcode_state.barcodeNumeral[plugin_state->editingIndex] =
+            (plugin_state->barcode_state.barcodeNumeral[plugin_state->editingIndex] == 0) ?
                 9 :
-                plugin_state->barcodeNumeral[plugin_state->editingIndex] - 1;
+                plugin_state->barcode_state.barcodeNumeral[plugin_state->editingIndex] - 1;
         break;
 
     case InputKeyRight:
@@ -324,21 +327,24 @@ static bool handle_key_press_menu(InputKey key, PluginState* plugin_state) {
 
     case InputKeyRight:
         if(plugin_state->menuIndex == MENU_INDEX_TYPE) {
-            plugin_state->barcodeTypeIndex =
-                (plugin_state->barcodeTypeIndex == NUMBER_OF_BARCODE_TYPES - 1) ?
+            plugin_state->barcode_state.barcodeTypeIndex =
+                (plugin_state->barcode_state.barcodeTypeIndex == NUMBER_OF_BARCODE_TYPES - 1) ?
                     0 :
-                    plugin_state->barcodeTypeIndex + 1;
+                    plugin_state->barcode_state.barcodeTypeIndex + 1;
         } else if(plugin_state->menuIndex == MENU_INDEX_PARITY) {
-            plugin_state->doParityCalculation = !plugin_state->doParityCalculation;
+            plugin_state->barcode_state.doParityCalculation =
+                !plugin_state->barcode_state.doParityCalculation;
         }
         break;
     case InputKeyLeft:
         if(plugin_state->menuIndex == MENU_INDEX_TYPE) {
-            plugin_state->barcodeTypeIndex = (plugin_state->barcodeTypeIndex == 0) ?
-                                                 NUMBER_OF_BARCODE_TYPES - 1 :
-                                                 plugin_state->barcodeTypeIndex - 1;
+            plugin_state->barcode_state.barcodeTypeIndex =
+                (plugin_state->barcode_state.barcodeTypeIndex == 0) ?
+                    NUMBER_OF_BARCODE_TYPES - 1 :
+                    plugin_state->barcode_state.barcodeTypeIndex - 1;
         } else if(plugin_state->menuIndex == MENU_INDEX_PARITY) {
-            plugin_state->doParityCalculation = !plugin_state->doParityCalculation;
+            plugin_state->barcode_state.doParityCalculation =
+                !plugin_state->barcode_state.doParityCalculation;
         }
         break;
 
@@ -348,12 +354,13 @@ static bool handle_key_press_menu(InputKey key, PluginState* plugin_state) {
         } else if(plugin_state->menuIndex == MENU_INDEX_EDIT) {
             plugin_state->mode = EditMode;
         } else if(plugin_state->menuIndex == MENU_INDEX_PARITY) {
-            plugin_state->doParityCalculation = !plugin_state->doParityCalculation;
+            plugin_state->barcode_state.doParityCalculation =
+                !plugin_state->barcode_state.doParityCalculation;
         } else if(plugin_state->menuIndex == MENU_INDEX_TYPE) {
-            plugin_state->barcodeTypeIndex =
-                (plugin_state->barcodeTypeIndex == NUMBER_OF_BARCODE_TYPES - 1) ?
+            plugin_state->barcode_state.barcodeTypeIndex =
+                (plugin_state->barcode_state.barcodeTypeIndex == NUMBER_OF_BARCODE_TYPES - 1) ?
                     0 :
-                    plugin_state->barcodeTypeIndex + 1;
+                    plugin_state->barcode_state.barcodeTypeIndex + 1;
         }
         break;
 
@@ -379,8 +386,9 @@ int32_t barcode_generator_app(void* p) {
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     barcode_generator_state_init(plugin_state);
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+
+    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!plugin_state->mutex) {
         FURI_LOG_E("barcode_generator", "cannot create mutex\r\n");
         furi_message_queue_free(event_queue);
         free(plugin_state);
@@ -389,7 +397,7 @@ int32_t barcode_generator_app(void* p) {
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, render_callback, plugin_state);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     // Open GUI and register view_port
@@ -399,7 +407,7 @@ int32_t barcode_generator_app(void* p) {
     PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-        PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -422,7 +430,7 @@ int32_t barcode_generator_app(void* p) {
         }
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, plugin_state);
+        furi_mutex_release(plugin_state->mutex);
     }
 
     view_port_enabled_set(view_port, false);
@@ -430,6 +438,10 @@ int32_t barcode_generator_app(void* p) {
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
+    furi_mutex_free(plugin_state->mutex);
+    // save settings
+    SAVE_BARCODE_SETTINGS(&plugin_state->barcode_state);
+    free(plugin_state);
 
     return 0;
 }

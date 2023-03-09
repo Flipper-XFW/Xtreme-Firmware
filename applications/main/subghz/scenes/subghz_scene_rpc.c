@@ -1,6 +1,10 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
+#include <lib/subghz/protocols/alutech_at_4n.h>
+#include <lib/subghz/protocols/nice_flor_s.h>
+#include <lib/subghz/protocols/somfy_telis.h>
+
 #include "xtreme/assets.h"
 
 typedef enum {
@@ -110,6 +114,10 @@ void subghz_scene_rpc_on_exit(void* context) {
 
     keeloq_reset_mfname();
     keeloq_reset_kl_type();
+    keeloq_reset_original_btn();
+    alutech_reset_original_btn();
+    nice_flors_reset_original_btn();
+    somfy_telis_reset_original_btn();
     star_line_reset_mfname();
     star_line_reset_kl_type();
 }

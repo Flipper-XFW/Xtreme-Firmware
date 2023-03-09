@@ -7,11 +7,11 @@ static void power_settings_scene_battery_info_update_model(PowerSettingsApp* app
         .gauge_voltage = app->info.voltage_gauge,
         .gauge_current = app->info.current_gauge,
         .gauge_temperature = app->info.temperature_gauge,
-        .charging_voltage = app->info.voltage_battery_charging,
+        .charge_voltage_limit = app->info.voltage_battery_charge_limit,
         .charge = app->info.charge,
         .health = app->info.health,
     };
-    battery_info_set_data(app->batery_info, &battery_info_data);
+    battery_info_set_data(app->battery_info, &battery_info_data);
 }
 
 void power_settings_scene_battery_info_on_enter(void* context) {

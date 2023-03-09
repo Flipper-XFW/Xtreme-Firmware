@@ -61,8 +61,11 @@ static ViewPort* bt_pin_code_view_port_alloc(Bt* bt) {
 }
 
 static void bt_pin_code_show(Bt* bt, uint32_t pin_code) {
+    furi_assert(bt);
     bt->pin_code = pin_code;
     notification_message(bt->notification, &sequence_display_backlight_on);
+    if(bt->suppress_pin_screen) return;
+
     gui_view_port_send_to_front(bt->gui, bt->pin_code_view_port);
     view_port_enabled_set(bt->pin_code_view_port, true);
 }
@@ -76,10 +79,10 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
-
-    if(bt_get_profile_pairing_method(bt) == GapPairingNone) return true;
-
+    bt->pin_code = pin;
     notification_message(bt->notification, &sequence_display_backlight_on);
+    if(bt->suppress_pin_screen) return true;
+
     FuriString* pin_str;
     dialog_message_set_icon(bt->dialog_message, XTREME_ASSETS()->I_BLE_Pairing_128x64, 0, 0);
     pin_str = furi_string_alloc_printf("Verify code\n%06lu", pin);
@@ -154,6 +157,8 @@ Bt* bt_alloc() {
     // API evnent
     bt->api_event = furi_event_flag_alloc();
 
+    bt->pin = 0;
+
     return bt;
 }
 
@@ -219,6 +224,7 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     furi_assert(context);
     Bt* bt = context;
     bool ret = false;
+    bt->pin = 0;
 
     if(event.type == GapEventTypeConnected) {
         // Update status bar
@@ -275,12 +281,14 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
             furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         ret = true;
     } else if(event.type == GapEventTypePinCodeShow) {
+        bt->pin = event.data.pin_code;
         BtMessage message = {
             .type = BtMessageTypePinCodeShow, .data.pin_code = event.data.pin_code};
         furi_check(
             furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         ret = true;
     } else if(event.type == GapEventTypePinCodeVerify) {
+        bt->pin = event.data.pin_code;
         ret = bt_pin_code_verify_event_handler(bt, event.data.pin_code);
     } else if(event.type == GapEventTypeUpdateMTU) {
         bt->max_packet_size = event.data.max_packet_size;
@@ -419,17 +427,15 @@ const uint8_t* bt_get_profile_mac_address(Bt* bt) {
     return furi_hal_bt_get_profile_mac_addr(get_hal_bt_profile(bt->profile));
 }
 
-bool bt_remote_rssi(Bt* bt, BtRssi* rssi) {
+bool bt_remote_rssi(Bt* bt, uint8_t* rssi) {
     furi_assert(bt);
-    UNUSED(rssi);
 
     uint8_t rssi_val;
     uint32_t since = furi_hal_bt_get_conn_rssi(&rssi_val);
 
     if(since == 0) return false;
 
-    rssi->rssi = rssi_val;
-    rssi->since = since;
+    *rssi = rssi_val;
 
     return true;
 }
@@ -451,6 +457,7 @@ void bt_disable_peer_key_update(Bt* bt) {
 }
 
 void bt_enable_peer_key_update(Bt* bt) {
+    furi_assert(bt);
     furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 }
 
@@ -459,7 +466,7 @@ int32_t bt_srv(void* p) {
     Bt* bt = bt_alloc();
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
-        FURI_LOG_W(TAG, "Skipped BT init: device in special startup mode");
+        FURI_LOG_W(TAG, "Skipping start in special boot mode");
         ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT);
         furi_record_create(RECORD_BT, bt);
         return 0;

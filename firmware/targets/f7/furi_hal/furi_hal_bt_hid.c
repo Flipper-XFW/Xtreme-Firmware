@@ -64,6 +64,12 @@ static const uint8_t furi_hal_bt_hid_report_map_data[] = {
     HID_REPORT_COUNT(1),
     HID_REPORT_SIZE(8),
     HID_INPUT(HID_IOF_CONSTANT | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+    HID_USAGE_PAGE(HID_PAGE_LED),
+    HID_REPORT_COUNT(8),
+    HID_REPORT_SIZE(1),
+    HID_USAGE_MINIMUM(1),
+    HID_USAGE_MAXIMUM(8),
+    HID_OUTPUT(HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
     HID_REPORT_COUNT(FURI_HAL_BT_HID_KB_MAX_KEYS),
     HID_REPORT_SIZE(8),
     HID_LOGICAL_MINIMUM(0),
@@ -196,6 +202,7 @@ void furi_hal_bt_hid_start() {
     if(!hid_svc_is_started()) {
         hid_svc_start();
     }
+    // Configure HID Keyboard
 
     hid_svc_register_led_state_callback(furi_hal_bt_hid_led_state_cb, &hid_host_led_state);
 

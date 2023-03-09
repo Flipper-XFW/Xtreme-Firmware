@@ -6,6 +6,7 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
+#include <xtreme/settings.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},
@@ -25,6 +26,8 @@ Canvas* canvas_init() {
     u8g2_InitDisplay(&canvas->fb);
     // Wake up display
     u8g2_SetPowerSave(&canvas->fb, 0);
+
+    canvas_set_orientation(canvas, CanvasOrientationHorizontal);
 
     // Clear buffer and send to device
     canvas_clear(canvas);
@@ -58,7 +61,7 @@ uint8_t* canvas_get_buffer(Canvas* canvas) {
     return u8g2_GetBufferPtr(&canvas->fb);
 }
 
-size_t canvas_get_buffer_size(Canvas* canvas) {
+size_t canvas_get_buffer_size(const Canvas* canvas) {
     furi_assert(canvas);
     return u8g2_GetBufferTileWidth(&canvas->fb) * u8g2_GetBufferTileHeight(&canvas->fb) * 8;
 }
@@ -76,17 +79,17 @@ void canvas_frame_set(
     canvas->height = height;
 }
 
-uint8_t canvas_width(Canvas* canvas) {
+uint8_t canvas_width(const Canvas* canvas) {
     furi_assert(canvas);
     return canvas->width;
 }
 
-uint8_t canvas_height(Canvas* canvas) {
+uint8_t canvas_height(const Canvas* canvas) {
     furi_assert(canvas);
     return canvas->height;
 }
 
-uint8_t canvas_current_font_height(Canvas* canvas) {
+uint8_t canvas_current_font_height(const Canvas* canvas) {
     furi_assert(canvas);
     uint8_t font_height = u8g2_GetMaxCharHeight(&canvas->fb);
 
@@ -97,19 +100,30 @@ uint8_t canvas_current_font_height(Canvas* canvas) {
     return font_height;
 }
 
-CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font) {
+const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_assert(canvas);
     furi_assert(font < FontTotalNumber);
-    return (CanvasFontParameters*)&canvas_font_params[font];
+    return &canvas_font_params[font];
 }
 
 void canvas_clear(Canvas* canvas) {
     furi_assert(canvas);
-    u8g2_ClearBuffer(&canvas->fb);
+    if(XTREME_SETTINGS()->dark_mode) {
+        u8g2_FillBuffer(&canvas->fb);
+    } else {
+        u8g2_ClearBuffer(&canvas->fb);
+    }
 }
 
 void canvas_set_color(Canvas* canvas, Color color) {
     furi_assert(canvas);
+    if(XTREME_SETTINGS()->dark_mode) {
+        if(color == ColorBlack) {
+            color = ColorWhite;
+        } else if(color == ColorWhite) {
+            color = ColorBlack;
+        }
+    }
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
@@ -396,6 +410,13 @@ void canvas_set_bitmap_mode(Canvas* canvas, bool alpha) {
 
 void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation) {
     furi_assert(canvas);
+    if(XTREME_SETTINGS()->left_handed) {
+        if(orientation == CanvasOrientationHorizontal) {
+            orientation = CanvasOrientationHorizontalFlip;
+        } else if(orientation == CanvasOrientationHorizontalFlip) {
+            orientation = CanvasOrientationHorizontal;
+        }
+    }
     if(canvas->orientation != orientation) {
         switch(orientation) {
         case CanvasOrientationHorizontal:

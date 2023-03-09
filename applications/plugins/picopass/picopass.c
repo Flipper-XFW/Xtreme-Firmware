@@ -137,9 +137,9 @@ void picopass_text_store_clear(Picopass* picopass) {
     memset(picopass->text_store, 0, sizeof(picopass->text_store));
 }
 
-static const NotificationSequence picopass_sequence_blink_start_blue = {
+static const NotificationSequence picopass_sequence_blink_start_cyan = {
     &message_blink_start_10,
-    &message_blink_set_color_blue,
+    &message_blink_set_color_cyan,
     &message_do_not_reset,
     NULL,
 };
@@ -150,7 +150,7 @@ static const NotificationSequence picopass_sequence_blink_stop = {
 };
 
 void picopass_blink_start(Picopass* picopass) {
-    notification_message(picopass->notifications, &picopass_sequence_blink_start_blue);
+    notification_message(picopass->notifications, &picopass_sequence_blink_start_cyan);
 }
 
 void picopass_blink_stop(Picopass* picopass) {
@@ -171,8 +171,26 @@ void picopass_show_loading_popup(void* context, bool show) {
     }
 }
 
+static void picopass_migrate_from_old_folder() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, "/ext/picopass", STORAGE_APP_DATA_PATH_PREFIX);
+    furi_record_close(RECORD_STORAGE);
+}
+
+bool picopass_is_memset(const uint8_t* data, const uint8_t pattern, size_t size) {
+    bool result = size > 0;
+    while(size > 0) {
+        result &= (*data == pattern);
+        data++;
+        size--;
+    }
+    return result;
+}
+
 int32_t picopass_app(void* p) {
     UNUSED(p);
+    picopass_migrate_from_old_folder();
+
     Picopass* picopass = picopass_alloc();
 
     scene_manager_next_scene(picopass->scene_manager, PicopassSceneStart);

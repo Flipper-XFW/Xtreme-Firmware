@@ -1,7 +1,7 @@
 App(
-    appid="Counter",
+    appid="counter",
     name="Counter",
-    apptype=FlipperAppType.EXTERNAL,
+    apptype=FlipperAppType.PLUGIN,
     entry_point="counterapp",
     requires=[
         "gui",
