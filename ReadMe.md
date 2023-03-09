@@ -162,11 +162,9 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 **This process will NOT delete any saved files and simply ensures the install goes smoothly.**
 <br><br>
 
-- Download the latest release (`.zip`) from [the release page](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Extract the archive. This is now your new firmware folder
-- Open [qFlipper](https://flipperzero.one/update) and connect your Flipper Zero
-- Go to the files tab, into SD Card and delete the `apps` folder
-- Open the `update` folder and drag the new firmware folder there
+- Download the latest release (.zip) from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
+- Extract the archive. This is now your new Firmware folder
+- Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
 - On the Flipper, hit the `Arrow Down` button, this will get you to the file menu. Hit `Arrow Left` once, and then simply search for your updates folder
 - Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called `Update`
 
