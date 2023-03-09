@@ -17,6 +17,6 @@ If you like what you're seeing, **please consider donating to us**. We won't eve
 - **[Direct transfer to my bank](https://bunq.me/ClaraK)**: No account needed, they have a convenient online pay thingy (that hates americans, sowwy)
 - **[Patreon](https://patreon.com/CynthiaLabs)**
 - **[Paypal](https://paypal.me/RdX2020)**
-- **Monero**: 41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T
+- **Monero**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`
 
 **Thanks for all your support <3**
