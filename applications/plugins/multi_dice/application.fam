@@ -1,5 +1,5 @@
 App(
-    appid="Dice",
+    appid="multi_dice",
     name="Multi-Dice",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dice_app",

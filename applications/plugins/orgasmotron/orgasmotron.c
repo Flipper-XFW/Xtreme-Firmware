@@ -6,6 +6,7 @@
 #include <notification/notification_messages.h>
 
 typedef struct {
+    FuriMutex* mutex;
     int mode;
 } PluginState;
 
@@ -39,8 +40,8 @@ int32_t orgasmotron_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!plugin_state->mutex) {
         FURI_LOG_E("Orgasmatron", "cannot create mutex\r\n");
         free(plugin_state);
         return 255;
@@ -63,7 +64,7 @@ int32_t orgasmotron_app(void* p) {
     //while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
     while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-        PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
         if(event_status == FuriStatusOk) {
             if(event.key == InputKeyBack && event.type == InputTypeShort) {
                 //Exit Application
@@ -132,15 +133,15 @@ int32_t orgasmotron_app(void* p) {
                 delay(50);
             }
         }
-        release_mutex(&state_mutex, plugin_state);
+        furi_mutex_release(plugin_state->mutex);
     }
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
+    furi_mutex_free(plugin_state->mutex);
     furi_message_queue_free(event_queue);
 
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-    delete_mutex(&state_mutex);
 
     return 0;
 }

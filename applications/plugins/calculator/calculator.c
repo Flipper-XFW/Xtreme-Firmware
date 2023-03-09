@@ -19,6 +19,7 @@ typedef struct {
 } selectedPosition;
 
 typedef struct {
+    FuriMutex* mutex;
     selectedPosition position;
     //string with the inputted calculator text
     char text[20];
@@ -201,8 +202,10 @@ void generate_calculator_layout(Canvas* canvas) {
 };
 
 void calculator_draw_callback(Canvas* canvas, void* ctx) {
-    const Calculator* calculator_state = acquire_mutex((ValueMutex*)ctx, 25);
-    UNUSED(ctx);
+    furi_assert(ctx);
+    const Calculator* calculator_state = ctx;
+    furi_mutex_acquire(calculator_state->mutex, FuriWaitForever);
+
     canvas_clear(canvas);
 
     //show selected button
@@ -240,7 +243,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     //draw cursor
     canvas_draw_box(canvas, stringWidth + 5, 29, 5, 1);
 
-    release_mutex((ValueMutex*)ctx, calculator_state);
+    furi_mutex_release(calculator_state->mutex);
 }
 
 void calculator_input_callback(InputEvent* input_event, void* ctx) {
@@ -315,8 +318,8 @@ int32_t calculator_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     Calculator* calculator_state = malloc(sizeof(Calculator));
-    ValueMutex calculator_state_mutex;
-    if(!init_mutex(&calculator_state_mutex, calculator_state, sizeof(Calculator))) {
+    calculator_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!calculator_state->mutex) {
         //FURI_LOG_E("calculator", "cannot create mutex\r\n");
         free(calculator_state);
         return -1;
@@ -324,7 +327,7 @@ int32_t calculator_app(void* p) {
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, calculator_draw_callback, &calculator_state_mutex);
+    view_port_draw_callback_set(view_port, calculator_draw_callback, calculator_state);
     view_port_input_callback_set(view_port, calculator_input_callback, event_queue);
     view_port_set_orientation(view_port, ViewPortOrientationVertical);
 
@@ -444,10 +447,12 @@ int32_t calculator_app(void* p) {
     }
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
+    furi_mutex_free(calculator_state->mutex);
     furi_message_queue_free(event_queue);
 
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
+    free(calculator_state);
 
     return 0;
 }

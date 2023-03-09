@@ -4,7 +4,6 @@
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <dolphin/dolphin.h>
 
 #define TAG "Dice Roller"
 
@@ -290,10 +289,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 state->diceQty,
                 state->diceType[0],
                 state->rollTime[0]);
-            // if(state->diceSelect >= 20 && state->diceRoll == state->diceSelect)
-            //     DOLPHIN_DEED(getRandomDeed());
-            // if(state->diceSelect >= 20 && state->diceRoll == state->diceSelect - 1)
-            //     DOLPHIN_DEED(getRandomDeed());
             if(state->diceQty == 1) {
                 snprintf(state->strings[1], sizeof(state->strings[1]), "%d", state->diceRoll);
             } else if(state->diceQty == 2) {
