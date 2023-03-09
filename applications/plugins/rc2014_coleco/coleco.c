@@ -2,7 +2,7 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_power.h>
 #include <gui/gui.h>
-#include "RC2014_Coleco_icons.h"
+#include "coleco_icons.h"
 
 #define CODE_0 0x0A
 #define CODE_1 0x0D
@@ -40,16 +40,16 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
+    FuriMutex* mutex;
     bool dpad;
     int row;
     int column;
 } Coleco;
 
 static void render_callback(Canvas* const canvas, void* context) {
-    Coleco* coleco = acquire_mutex((ValueMutex*)context, 25);
-    if(coleco == NULL) {
-        return;
-    }
+    furi_assert(context);
+    Coleco* coleco = context;
+    furi_mutex_acquire(coleco->mutex, FuriWaitForever);
 
     if(coleco->dpad) {
         canvas_draw_icon(canvas, 4, 16, &I_ColecoJoystick_sel_33x33);
@@ -128,7 +128,7 @@ static void render_callback(Canvas* const canvas, void* context) {
         (coleco->row == 4 && coleco->column == 2) ? &I_ColecoPound_hvr_17x17 :
                                                     &I_ColecoPound_17x17);
 
-    release_mutex((ValueMutex*)context, coleco);
+    furi_mutex_release(coleco->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -191,8 +191,8 @@ int32_t coleco_app(void* p) {
 
     Coleco* coleco = coleco_alloc();
 
-    ValueMutex coleco_mutex;
-    if(!init_mutex(&coleco_mutex, coleco, sizeof(Coleco))) {
+    coleco->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!coleco->mutex) {
         FURI_LOG_E("Coleco", "cannot create mutex\r\n");
         coleco_free(coleco);
         return 255;
@@ -200,7 +200,7 @@ int32_t coleco_app(void* p) {
 
     // set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, &coleco_mutex);
+    view_port_draw_callback_set(view_port, render_callback, coleco);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     // open GUI and register view_port
@@ -214,7 +214,7 @@ int32_t coleco_app(void* p) {
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-        Coleco* coleco = (Coleco*)acquire_mutex_block(&coleco_mutex);
+        furi_mutex_acquire(coleco->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -346,11 +346,9 @@ int32_t coleco_app(void* p) {
 
                 view_port_update(view_port);
             }
-        } else {
-            FURI_LOG_D("Coleco", "FuriMessageQueue: event timeout");
         }
 
-        release_mutex(&coleco_mutex, coleco);
+        furi_mutex_release(coleco->mutex);
     }
 
     furi_hal_power_disable_otg();
@@ -360,7 +358,7 @@ int32_t coleco_app(void* p) {
     furi_record_close("gui");
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    delete_mutex(&coleco_mutex);
+    furi_mutex_free(coleco->mutex);
     coleco_free(coleco);
     return 0;
 }

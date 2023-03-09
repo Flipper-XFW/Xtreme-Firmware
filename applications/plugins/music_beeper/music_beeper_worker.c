@@ -101,8 +101,11 @@ MusicBeeperWorker* music_beeper_worker_alloc() {
 
     NoteBlockArray_init(instance->notes);
 
-    instance->thread = furi_thread_alloc_ex(
-        "MusicBeeperWorker", 1024, music_beeper_worker_thread_callback, instance);
+    instance->thread = furi_thread_alloc();
+    furi_thread_set_name(instance->thread, "MusicBeeperWorker");
+    furi_thread_set_stack_size(instance->thread, 1024);
+    furi_thread_set_context(instance->thread, instance);
+    furi_thread_set_callback(instance->thread, music_beeper_worker_thread_callback);
 
     instance->volume = 1.0f;
 

@@ -19,8 +19,7 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    int x;
-    int y;
+    FuriMutex* mutex;
 } PluginState;
 
 struct FOUND {
