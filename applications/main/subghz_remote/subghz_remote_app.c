@@ -811,12 +811,6 @@ int32_t subghz_remote_app(void* p) {
 
     app->file_result = 3;
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    if(!storage_simply_mkdir(storage, SUBREMOTEMAP_FOLDER)) {
-        FURI_LOG_E(TAG, "Could not create folder %s", SUBREMOTEMAP_FOLDER);
-    }
-    furi_record_close(RECORD_STORAGE);
-
     furi_string_set(app->file_path, SUBREMOTEMAP_FOLDER);
 
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
