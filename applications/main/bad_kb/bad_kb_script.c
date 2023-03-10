@@ -704,14 +704,10 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
         furi_hal_bt_stop_advertising();
     }
 
-    app->connection_init = true;
-
     return 0;
 }
 
 void bad_kb_connection_deinit(BadKbApp* app) {
-    if(!app->connection_init) return;
-
     furi_hal_usb_set_config(app->usb_prev_mode, NULL);
 
     // bt_hid_hold_while_keyboard_buffer_full(6, 3000); // release all keys

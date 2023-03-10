@@ -106,8 +106,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, bad_kb_app_back_event_callback);
 
-    app->connection_init = false;
-
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
     app->bt->suppress_pin_screen = true;
@@ -232,8 +230,8 @@ void bad_kb_app_free(BadKbApp* app) {
     if(app->conn_init_thread) {
         furi_thread_join(app->conn_init_thread);
         furi_thread_free(app->conn_init_thread);
+        bad_kb_connection_deinit(app);
     }
-    bad_kb_connection_deinit(app);
 
     free(app);
 }
