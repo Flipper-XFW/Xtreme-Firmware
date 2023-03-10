@@ -812,13 +812,6 @@ int32_t subghz_remote_app(void* p) {
     app->file_result = 3;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    // Remove old pre-included files to avoid duplicates on migrate
-    storage_simply_remove(storage, EXT_PATH("subghz/unirf/CVS_Walgreens.txt"));
-    storage_simply_remove(storage, EXT_PATH("subghz/unirf/Gas_Sign_Edit.txt"));
-    storage_simply_remove(storage, EXT_PATH("subghz/unirf/Ridin_Dirty.txt"));
-    storage_simply_remove(storage, EXT_PATH("subghz/unirf/Tesla_Handicap.txt"));
-    storage_common_migrate(storage, EXT_PATH("subghz/unirf"), SUBREMOTEMAP_FOLDER);
-
     if(!storage_simply_mkdir(storage, SUBREMOTEMAP_FOLDER)) {
         FURI_LOG_E(TAG, "Could not create folder %s", SUBREMOTEMAP_FOLDER);
     }
