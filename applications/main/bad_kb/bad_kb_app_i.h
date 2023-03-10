@@ -72,7 +72,6 @@ struct BadKbApp {
 
     bool is_bt;
 
-    bool connection_init;
     FuriHalUsbInterface* usb_prev_mode;
     GapPairing bt_prev_mode;
 

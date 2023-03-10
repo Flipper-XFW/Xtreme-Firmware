@@ -84,14 +84,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     }
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    // Remove old pre-included files to avoid duplicates on migrate
-    storage_simply_remove(storage, EXT_PATH("badusb/layouts"));
-    storage_simply_remove(storage, EXT_PATH("badusb/.badusb.settings"));
-    storage_simply_remove(storage, EXT_PATH("badusb/Kiosk-Evasion-Bruteforce.txt"));
-    storage_simply_remove(storage, EXT_PATH("badusb/Wifi-Stealer_ORG.txt"));
-    storage_simply_remove(storage, EXT_PATH("badusb/demo_macos.txt"));
-    storage_simply_remove(storage, EXT_PATH("badusb/demo_windows.txt"));
-    storage_common_migrate(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
     storage_simply_mkdir(storage, BAD_KB_APP_BASE_FOLDER);
     furi_record_close(RECORD_STORAGE);
 
@@ -113,8 +105,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         app->view_dispatcher, bad_kb_app_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, bad_kb_app_back_event_callback);
-
-    app->connection_init = false;
 
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
@@ -166,7 +156,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         scene_manager_next_scene(app->scene_manager, BadKbSceneError);
     } else {
         app->conn_init_thread = furi_thread_alloc_ex(
-            "BadKbConnInit", 512, (FuriThreadCallback)bad_kb_connection_init, app);
+            "BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_connection_init, app);
         furi_thread_start(app->conn_init_thread);
         if(!furi_string_empty(app->file_path)) {
             app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
@@ -226,6 +216,12 @@ void bad_kb_app_free(BadKbApp* app) {
     }
     app->bt->suppress_pin_screen = false;
 
+    if(app->conn_init_thread) {
+        furi_thread_join(app->conn_init_thread);
+        furi_thread_free(app->conn_init_thread);
+        bad_kb_connection_deinit(app);
+    }
+
     // Close records
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
@@ -236,12 +232,6 @@ void bad_kb_app_free(BadKbApp* app) {
 
     furi_string_free(app->file_path);
     furi_string_free(app->keyboard_layout);
-
-    if(app->conn_init_thread) {
-        furi_thread_join(app->conn_init_thread);
-        furi_thread_free(app->conn_init_thread);
-    }
-    bad_kb_connection_deinit(app);
 
     free(app);
 }

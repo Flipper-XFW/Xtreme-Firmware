@@ -1,12 +1,12 @@
 ## ⬇️ Download
->### [🐬 qFlipper Package (.tgz)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{release_tag}/{release_tag}.tgz) [recommended]
+>### [📦 Zipped Archive (.zip)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{release_tag}/{release_tag}.zip) [recommended]
 
->### [📦 Zipped Archive (.zip)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{release_tag}/{release_tag}.zip)
+>### [🐬 qFlipper Package (.tgz)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{release_tag}/{release_tag}.tgz)
 
 >### [🖥️ Web Updater (chrome)](https://lab.flipper.net/?url={webupdater_url}&channel=XFW-Updater&version={release_tag}) [not recommended]
 
-**Remember to delete your `apps` (and `update` if using "Install from file...") folders before updating!**\
-**Check the [install guide](https://github.com/ClaraCrazy/Flipper-Xtreme#install) if you're not sure, or [join our Discord](https://discord.gg/flipper-xtreme) if you have questions!**
+**Remember to delete your `apps` folders before updating!**\
+**Check the [install guide](https://github.com/ClaraCrazy/Flipper-Xtreme#install) if you're not sure, or [join our Discord](https://discord.gg/flipper-xtreme) if you have questions or encounter issues!**
 
 ## 🚀 Changelog
 {changelog}
@@ -17,6 +17,6 @@ If you like what you're seeing, **please consider donating to us**. We won't eve
 - **[Direct transfer to my bank](https://bunq.me/ClaraK)**: No account needed, they have a convenient online pay thingy (that hates americans, sowwy)
 - **[Patreon](https://patreon.com/CynthiaLabs)**
 - **[Paypal](https://paypal.me/RdX2020)**
-- **Monero**: 41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T
+- **Monero**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`
 
 **Thanks for all your support <3**
