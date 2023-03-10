@@ -216,6 +216,12 @@ void bad_kb_app_free(BadKbApp* app) {
     }
     app->bt->suppress_pin_screen = false;
 
+    if(app->conn_init_thread) {
+        furi_thread_join(app->conn_init_thread);
+        furi_thread_free(app->conn_init_thread);
+        bad_kb_connection_deinit(app);
+    }
+
     // Close records
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
@@ -226,12 +232,6 @@ void bad_kb_app_free(BadKbApp* app) {
 
     furi_string_free(app->file_path);
     furi_string_free(app->keyboard_layout);
-
-    if(app->conn_init_thread) {
-        furi_thread_join(app->conn_init_thread);
-        furi_thread_free(app->conn_init_thread);
-        bad_kb_connection_deinit(app);
-    }
 
     free(app);
 }
