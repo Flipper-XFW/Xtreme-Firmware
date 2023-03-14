@@ -64,7 +64,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 canvas_set_color(canvas, ColorWhite);
             }
             if(item->icon) {
-                canvas_draw_icon_animation(canvas, 13 + x_off, 2 + y_off, item->icon);
+                canvas_draw_icon_animation(canvas, 13 + x_off, 3 + y_off, item->icon);
             }
             furi_string_set(name, item->label);
             elements_scrollable_text_line(
