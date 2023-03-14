@@ -30,11 +30,13 @@ static void xtreme_app_scene_misc_dark_mode_changed(VariableItem* item) {
 }
 
 static void xtreme_app_scene_misc_left_handed_changed(VariableItem* item) {
-    XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->left_handed = value;
-    app->save_settings = true;
+    if(value) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagHandOrient);
+    } else {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagHandOrient);
+    }
 }
 
 void xtreme_app_scene_misc_on_enter(void* context) {
@@ -59,8 +61,9 @@ void xtreme_app_scene_misc_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list, "Left Handed", 2, xtreme_app_scene_misc_left_handed_changed, app);
-    variable_item_set_current_value_index(item, xtreme_settings->left_handed);
-    variable_item_set_current_value_text(item, xtreme_settings->left_handed ? "ON" : "OFF");
+    bool value = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
+    variable_item_set_current_value_index(item, value);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_misc_var_item_list_callback, app);

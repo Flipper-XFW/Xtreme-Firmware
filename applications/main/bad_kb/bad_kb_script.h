@@ -5,11 +5,14 @@ extern "C" {
 #endif
 
 #include <furi.h>
+#include <furi_hal.h>
 #include <bt/bt_service/bt_i.h>
 
 typedef struct BadKbApp BadKbApp;
 
-typedef struct BadKbScript BadKbScript;
+#define FILE_BUFFER_LEN 16
+
+extern uint8_t bt_timeout;
 
 typedef enum {
     BadKbStateInit,
@@ -34,6 +37,27 @@ typedef struct {
     char error[64];
 } BadKbState;
 
+typedef struct BadKbScript {
+    FuriHalUsbHidConfig hid_cfg;
+    BadKbState st;
+    FuriString* file_path;
+    FuriString* keyboard_layout;
+    uint32_t defdelay;
+    uint16_t layout[128];
+    uint32_t stringdelay;
+    FuriThread* thread;
+    uint8_t file_buf[FILE_BUFFER_LEN + 1];
+    uint8_t buf_start;
+    uint8_t buf_len;
+    bool file_end;
+    FuriString* line;
+
+    FuriString* line_prev;
+    uint32_t repeat_cnt;
+
+    Bt* bt;
+} BadKbScript;
+
 void bad_kb_config_switch_mode(BadKbApp* app);
 
 void bad_kb_config_switch_remember_mode(BadKbApp* app);
@@ -55,6 +79,12 @@ void bad_kb_script_stop(BadKbScript* bad_kb);
 void bad_kb_script_toggle(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
+
+uint16_t ducky_get_keycode(BadKbScript* bad_kb, const char* param, bool accept_chars);
+
+uint32_t ducky_get_command_len(const char* line);
+
+bool ducky_is_line_end(const char chr);
 
 #ifdef __cplusplus
 }
