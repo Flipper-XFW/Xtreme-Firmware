@@ -57,23 +57,29 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             item_i = shift_position + i;
             if(item_i >= items_count) break;
             item = MenuItemArray_get(model->items, item_i);
-            x_off = (i / 2) * 40 + 5;
+            x_off = (i / 2) * 43 + 1;
             y_off = (i % 2) * 32;
+            if(item_i == position) {
+                elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
+                canvas_set_color(canvas, ColorWhite);
+            }
             if(item->icon) {
-                canvas_draw_icon_animation(canvas, 11 + x_off, 4 + y_off, item->icon);
+                canvas_draw_icon_animation(canvas, 13 + x_off, 2 + y_off, item->icon);
             }
             furi_string_set(name, item->label);
             elements_scrollable_text_line(
                 canvas,
-                18 + x_off,
-                24 + y_off,
-                32,
+                20 + x_off,
+                23 + y_off,
+                36,
                 name,
                 0,
                 false,
                 true);
             if(item_i == position) {
-                elements_frame(canvas, 0 + x_off, 0 + y_off, 36, 30);
+                canvas_set_color(canvas, ColorBlack);
+            } else {
+                elements_frame(canvas, 0 + x_off, 0 + y_off, 40, 30);
             }
         }
         furi_string_free(name);
