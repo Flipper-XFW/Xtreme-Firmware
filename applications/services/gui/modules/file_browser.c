@@ -100,7 +100,7 @@ static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
         }
     }
 
-    return furi_string_cmpi(a->path, b->path);
+    return furi_string_cmpi(a->display_name, b->display_name);
 }
 
 #define M_OPL_BrowserItem_t()                 \
