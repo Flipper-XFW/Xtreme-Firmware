@@ -9,7 +9,7 @@ extern "C" {
 
 #define RECORD_LOADER "loader"
 
-#define FAP_LOADER_APP_NAME "Applications"
+#define FAP_LOADER_APP_NAME "Apps"
 
 typedef struct Loader Loader;
 
