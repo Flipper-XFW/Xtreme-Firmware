@@ -218,6 +218,7 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
  * @param      string    The string
  * @param[in]  scroll    The scroll counter: 0 - no scroll, any other number - scroll. Just count up, everything else will be calculated on the inside.
  * @param[in]  ellipsis  The ellipsis flag: true to add ellipse
+ * @param[in]  centered  The centered flag: true to center text on x and y
  */
 void elements_scrollable_text_line(
     Canvas* canvas,
@@ -226,7 +227,8 @@ void elements_scrollable_text_line(
     uint8_t width,
     FuriString* string,
     size_t scroll,
-    bool ellipsis);
+    bool ellipsis,
+    bool centered);
 
 /** Draw text box element
  *

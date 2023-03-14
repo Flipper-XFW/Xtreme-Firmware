@@ -580,7 +580,8 @@ void elements_scrollable_text_line(
     uint8_t width,
     FuriString* string,
     size_t scroll,
-    bool ellipsis) {
+    bool ellipsis,
+    bool centered) {
     FuriString* line = furi_string_alloc_set(string);
 
     size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
@@ -616,7 +617,11 @@ void elements_scrollable_text_line(
         }
     }
 
-    canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
+    if (centered) {
+        canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignCenter, furi_string_get_cstr(line));
+    } else {
+        canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
+    }
     furi_string_free(line);
 }
 
