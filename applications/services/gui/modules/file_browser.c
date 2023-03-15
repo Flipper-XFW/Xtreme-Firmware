@@ -22,8 +22,6 @@
 
 #define ITEM_LIST_LEN_MAX 50
 
-#define CUSTOM_ICON_MAX_SIZE 32
-
 #define SCROLL_INTERVAL (333)
 #define SCROLL_DELAY (2)
 
