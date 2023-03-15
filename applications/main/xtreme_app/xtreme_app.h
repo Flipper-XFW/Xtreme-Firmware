@@ -11,6 +11,7 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
 #include <lib/toolbox/value_index.h>
+#include <toolbox/stream/file_stream.h>
 #include <namechangersrv/namechangersrv.h>
 #include "scenes/xtreme_app_scene.h"
 #include "dolphin/helpers/dolphin_state.h"

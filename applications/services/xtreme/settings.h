@@ -20,6 +20,8 @@ extern "C" {
 #define XTREME_SETTINGS_PATH EXT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
 
+#define XTREME_APPS_PATH EXT_PATH(XTREME_APPS_FILE_NAME)
+
 // Some settings function backwards (logically) in
 // order to fit the default value we want
 // (values will default to 0 / false)

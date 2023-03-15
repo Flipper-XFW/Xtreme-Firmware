@@ -18,6 +18,19 @@ static bool xtreme_app_back_event_callback(void* context) {
     if(!scene_manager_has_previous_scene(app->scene_manager, XtremeAppSceneStart)) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
 
+        if(app->save_mainmenu_apps) {
+            Stream* stream = file_stream_alloc(storage);
+            if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)){
+                CharList_it_t it;
+                CharList_it(it, app->mainmenu_apps_paths);
+                for(uint i = 0; i < CharList_size(app->mainmenu_apps_paths); i++) {
+                    stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_apps_paths, i));
+                }
+            }
+            file_stream_close(stream);
+            stream_free(stream);
+        }
+
         if(app->save_subghz) {
             furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
         }
@@ -192,6 +205,20 @@ XtremeApp* xtreme_app_alloc() {
 
     CharList_init(app->mainmenu_apps_names);
     CharList_init(app->mainmenu_apps_paths);
+    Stream* stream = file_stream_alloc(storage);
+    FuriString* line = furi_string_alloc();
+    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        while(stream_read_line(stream, line)) {
+            furi_string_replace_all(line, "\r", "");
+            furi_string_replace_all(line, "\n", "");
+            CharList_push_back(app->mainmenu_apps_paths, strdup(furi_string_get_cstr(line)));
+            fap_loader_load_name_and_icon(line, storage, NULL, line);
+            CharList_push_back(app->mainmenu_apps_names, strdup(furi_string_get_cstr(line)));
+        }
+    }
+    furi_string_free(line);
+    file_stream_close(stream);
+    stream_free(stream);
 
     FlipperFormat* file = flipper_format_file_alloc(storage);
     FrequencyList_init(app->subghz_static_frequencies);
