@@ -2,6 +2,8 @@
 
 #include <gui/elements.h>
 #include <assets_icons.h>
+#include <gui/icon_i.h>
+#include <gui/icon_animation_i.h>
 #include <furi.h>
 #include <m-array.h>
 
@@ -64,7 +66,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 canvas_set_color(canvas, ColorWhite);
             }
             if(item->icon) {
-                canvas_draw_icon_animation(canvas, 13 + x_off, 3 + y_off, item->icon);
+                    canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
             }
             furi_string_set(name, item->label);
             elements_scrollable_text_line(
