@@ -2,7 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexHopperFrequency,
-    VarItemListIndexDeleteHopperFreq,
+    VarItemListIndexRemoveHopperFreq,
     VarItemListIndexAddHopperFreq,
 };
 
@@ -45,7 +45,7 @@ void xtreme_app_scene_protocols_frequencies_hopper_on_enter(void* context) {
         variable_item_set_current_value_text(item, "None");
     }
 
-    variable_item_list_add(var_item_list, "Delete Hopper Freq", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Remove Hopper Freq", 0, NULL, app);
 
     variable_item_list_add(var_item_list, "Add Hopper Freq", 0, NULL, app);
 
@@ -69,7 +69,7 @@ bool xtreme_app_scene_protocols_frequencies_hopper_on_event(void* context, Scene
             app->scene_manager, XtremeAppSceneProtocolsFrequenciesHopper, event.event);
         consumed = true;
         switch(event.event) {
-        case VarItemListIndexDeleteHopperFreq:
+        case VarItemListIndexRemoveHopperFreq:
             if(!FrequencyList_size(app->subghz_hopper_frequencies)) break;
             uint32_t value =
                 *FrequencyList_get(app->subghz_hopper_frequencies, app->subghz_hopper_index);

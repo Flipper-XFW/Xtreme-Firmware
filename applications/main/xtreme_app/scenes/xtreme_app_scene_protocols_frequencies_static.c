@@ -2,7 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexStaticFrequency,
-    VarItemListIndexDeleteStaticFreq,
+    VarItemListIndexRemoveStaticFreq,
     VarItemListIndexAddStaticFreq,
 };
 
@@ -45,7 +45,7 @@ void xtreme_app_scene_protocols_frequencies_static_on_enter(void* context) {
         variable_item_set_current_value_text(item, "None");
     }
 
-    variable_item_list_add(var_item_list, "Delete Static Freq", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Remove Static Freq", 0, NULL, app);
 
     variable_item_list_add(var_item_list, "Add Static Freq", 0, NULL, app);
 
@@ -69,7 +69,7 @@ bool xtreme_app_scene_protocols_frequencies_static_on_event(void* context, Scene
             app->scene_manager, XtremeAppSceneProtocolsFrequenciesStatic, event.event);
         consumed = true;
         switch(event.event) {
-        case VarItemListIndexDeleteStaticFreq:
+        case VarItemListIndexRemoveStaticFreq:
             if(!FrequencyList_size(app->subghz_static_frequencies)) break;
             uint32_t value =
                 *FrequencyList_get(app->subghz_static_frequencies, app->subghz_static_index);
