@@ -18,6 +18,7 @@
 #include "dolphin/dolphin_i.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/subghz/subghz_setting.h>
+#include <applications/main/fap_loader/fap_loader_app.h>
 #include <m-array.h>
 #include "xtreme/settings.h"
 #include "xtreme/assets.h"
@@ -36,7 +37,8 @@ typedef struct {
     Popup* popup;
     uint asset_pack;
     CharList_t asset_packs;
-    CharList_t mainmenu_apps;
+    CharList_t mainmenu_apps_names;
+    CharList_t mainmenu_apps_paths;
     uint8_t mainmenu_app_index;
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_frequencies;

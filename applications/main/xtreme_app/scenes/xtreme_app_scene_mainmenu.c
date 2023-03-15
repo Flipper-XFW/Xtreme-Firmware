@@ -16,7 +16,7 @@ void xtreme_app_scene_mainmenu_var_item_list_callback(
 static void xtreme_app_scene_mainmenu_app_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     app->mainmenu_app_index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, *CharList_get(app->mainmenu_apps, app->mainmenu_app_index));
+    variable_item_set_current_value_text(item, *CharList_get(app->mainmenu_apps_names, app->mainmenu_app_index));
 }
 
 void xtreme_app_scene_mainmenu_on_enter(void* context) {
@@ -27,13 +27,13 @@ void xtreme_app_scene_mainmenu_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list,
         "App",
-        CharList_size(app->mainmenu_apps),
+        CharList_size(app->mainmenu_apps_names),
         xtreme_app_scene_mainmenu_app_changed,
         app);
     app->mainmenu_app_index = 0;
     variable_item_set_current_value_index(item, app->mainmenu_app_index);
-    if(CharList_size(app->mainmenu_apps)) {
-        variable_item_set_current_value_text(item, *CharList_get(app->mainmenu_apps, app->mainmenu_app_index));
+    if(CharList_size(app->mainmenu_apps_names)) {
+        variable_item_set_current_value_text(item, *CharList_get(app->mainmenu_apps_names, app->mainmenu_app_index));
     } else {
         variable_item_set_current_value_text(item, "None");
     }
@@ -63,19 +63,12 @@ bool xtreme_app_scene_mainmenu_on_event(void* context, SceneManagerEvent event) 
         consumed = true;
         switch(event.event) {
         case VarItemListIndexRemoveApp:
-            if(!CharList_size(app->mainmenu_apps)) break;
-            char* value =
-                *CharList_get(app->mainmenu_apps, app->mainmenu_app_index);
-            CharList_it_t it;
-            CharList_it(it, app->mainmenu_apps);
-            while(!CharList_end_p(it)) {
-                if(strcmp(*CharList_ref(it), value) == 0) {
-                    CharList_remove(app->mainmenu_apps, it);
-                } else {
-                    CharList_next(it);
-                }
-            }
+            if(!CharList_size(app->mainmenu_apps_names)) break;
+            if(!CharList_size(app->mainmenu_apps_paths)) break;
+            CharList_remove_v(app->mainmenu_apps_names, app->mainmenu_app_index, app->mainmenu_app_index + 1);
+            CharList_remove_v(app->mainmenu_apps_paths, app->mainmenu_app_index, app->mainmenu_app_index + 1);
             app->save_mainmenu_apps = true;
+            app->require_reboot = true;
             scene_manager_previous_scene(app->scene_manager);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMainmenu);
             break;

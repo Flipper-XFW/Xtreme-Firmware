@@ -158,44 +158,9 @@ XtremeApp* xtreme_app_alloc() {
 
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_file_alloc(storage);
-    FrequencyList_init(app->subghz_static_frequencies);
-    FrequencyList_init(app->subghz_hopper_frequencies);
-    app->subghz_use_defaults = true;
-    do {
-        uint32_t temp;
-        if(!flipper_format_file_open_existing(file, EXT_PATH("subghz/assets/setting_user"))) break;
-
-        flipper_format_read_bool(file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
-
-        if(!flipper_format_rewind(file)) break;
-        while(flipper_format_read_uint32(file, "Frequency", &temp, 1)) {
-            if(furi_hal_subghz_is_frequency_valid(temp)) {
-                FrequencyList_push_back(app->subghz_static_frequencies, temp);
-            }
-        }
-
-        if(!flipper_format_rewind(file)) break;
-        while(flipper_format_read_uint32(file, "Hopper_frequency", &temp, 1)) {
-            if(furi_hal_subghz_is_frequency_valid(temp)) {
-                FrequencyList_push_back(app->subghz_hopper_frequencies, temp);
-            }
-        }
-    } while(false);
-    flipper_format_free(file);
-
-    furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
-
-    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-    DolphinStats stats = dolphin_stats(dolphin);
-    app->dolphin_level = stats.level;
-    furi_record_close(RECORD_DOLPHIN);
-
-    strlcpy(app->device_name, furi_hal_version_get_name_ptr(), NAMECHANGER_TEXT_STORE_SIZE);
-
     app->asset_pack = 0;
     CharList_init(app->asset_packs);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* folder = storage_file_alloc(storage);
     FileInfo info;
     char* name = malloc(MAX_PACK_NAME_LEN);
@@ -224,7 +189,45 @@ XtremeApp* xtreme_app_alloc() {
     }
     free(name);
     storage_file_free(folder);
+
+    CharList_init(app->mainmenu_apps_names);
+    CharList_init(app->mainmenu_apps_paths);
+
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+    FrequencyList_init(app->subghz_static_frequencies);
+    FrequencyList_init(app->subghz_hopper_frequencies);
+    app->subghz_use_defaults = true;
+    do {
+        uint32_t temp;
+        if(!flipper_format_file_open_existing(file, EXT_PATH("subghz/assets/setting_user"))) break;
+
+        flipper_format_read_bool(file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
+
+        if(!flipper_format_rewind(file)) break;
+        while(flipper_format_read_uint32(file, "Frequency", &temp, 1)) {
+            if(furi_hal_subghz_is_frequency_valid(temp)) {
+                FrequencyList_push_back(app->subghz_static_frequencies, temp);
+            }
+        }
+
+        if(!flipper_format_rewind(file)) break;
+        while(flipper_format_read_uint32(file, "Hopper_frequency", &temp, 1)) {
+            if(furi_hal_subghz_is_frequency_valid(temp)) {
+                FrequencyList_push_back(app->subghz_hopper_frequencies, temp);
+            }
+        }
+    } while(false);
+    flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+
+    furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
+
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinStats stats = dolphin_stats(dolphin);
+    app->dolphin_level = stats.level;
+    furi_record_close(RECORD_DOLPHIN);
+
+    strlcpy(app->device_name, furi_hal_version_get_name_ptr(), NAMECHANGER_TEXT_STORE_SIZE);
 
     app->version_tag =
         furi_string_alloc_printf("%s  %s", version_get_version(NULL), version_get_builddate(NULL));
@@ -249,14 +252,22 @@ void xtreme_app_free(XtremeApp* app) {
 
     // Settings deinit
 
-    FrequencyList_clear(app->subghz_static_frequencies);
-    FrequencyList_clear(app->subghz_hopper_frequencies);
-
     CharList_it_t it;
     for(CharList_it(it, app->asset_packs); !CharList_end_p(it); CharList_next(it)) {
         free(*CharList_cref(it));
     }
     CharList_clear(app->asset_packs);
+    for(CharList_it(it, app->mainmenu_apps_names); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
+    }
+    CharList_clear(app->mainmenu_apps_names);
+    for(CharList_it(it, app->mainmenu_apps_paths); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
+    }
+    CharList_clear(app->mainmenu_apps_paths);
+
+    FrequencyList_clear(app->subghz_static_frequencies);
+    FrequencyList_clear(app->subghz_hopper_frequencies);
 
     furi_string_free(app->version_tag);
 

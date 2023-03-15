@@ -10,22 +10,15 @@ static bool xtreme_app_scene_mainmenu_add_file_browser_callback(
     uint8_t** icon_ptr,
     FuriString* item_name) {
     UNUSED(context);
-// #ifndef APP_FAP_LOADER
-//     Storage* storage = furi_record_open(RECORD_STORAGE);
-//     bool success = fap_loader_load_name_and_icon(file_path, storage, icon_ptr, item_name);
-//     furi_record_close(RECORD_STORAGE);
-// #else
-    UNUSED(file_path);
-    UNUSED(icon_ptr);
-    UNUSED(item_name);
-    bool success = false;
-// #endif
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool success = fap_loader_load_name_and_icon(file_path, storage, icon_ptr, item_name);
+    furi_record_close(RECORD_STORAGE);
     return success;
 }
 
 void xtreme_app_scene_mainmenu_add_on_enter(void* context) {
     XtremeApp* app = context;
-    FuriString* file_path = furi_string_alloc_set_str(EXT_PATH("apps"));
+    FuriString* string = furi_string_alloc_set_str(EXT_PATH("apps"));
 
     const DialogsFileBrowserOptions browser_options = {
         .extension = ".fap",
@@ -36,12 +29,17 @@ void xtreme_app_scene_mainmenu_add_on_enter(void* context) {
         .base_path = EXT_PATH("apps"),
     };
 
-    if(dialog_file_browser_show(app->dialogs, file_path, file_path, &browser_options)) {
-        CharList_push_back(app->mainmenu_apps, strdup(furi_string_get_cstr(file_path)));
+    if(dialog_file_browser_show(app->dialogs, string, string, &browser_options)) {
+        CharList_push_back(app->mainmenu_apps_paths, strdup(furi_string_get_cstr(string)));
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        fap_loader_load_name_and_icon(string, storage, NULL, string);
+        furi_record_close(RECORD_STORAGE);
+        CharList_push_back(app->mainmenu_apps_names, strdup(furi_string_get_cstr(string)));
         app->save_mainmenu_apps = true;
+        app->require_reboot = true;
     }
 
-    furi_string_free(file_path);
+    furi_string_free(string);
 
     view_dispatcher_send_custom_event(app->view_dispatcher, FileBrowserResultOk);
 }
