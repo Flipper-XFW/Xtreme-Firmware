@@ -16,10 +16,10 @@ static void xtreme_app_scene_graphics_asset_pack_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
-        item, index == 0 ? "SFW" : *asset_packs_get(app->asset_packs, index - 1));
+        item, index == 0 ? "SFW" : *CharList_get(app->asset_packs, index - 1));
     strlcpy(
         XTREME_SETTINGS()->asset_pack,
-        index == 0 ? "" : *asset_packs_get(app->asset_packs, index - 1),
+        index == 0 ? "" : *CharList_get(app->asset_packs, index - 1),
         MAX_PACK_NAME_LEN);
     app->asset_pack = index;
     app->save_settings = true;
@@ -80,13 +80,13 @@ void xtreme_app_scene_graphics_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list,
         "Asset Pack",
-        asset_packs_size(app->asset_packs) + 1,
+        CharList_size(app->asset_packs) + 1,
         xtreme_app_scene_graphics_asset_pack_changed,
         app);
     variable_item_set_current_value_index(item, app->asset_pack);
     variable_item_set_current_value_text(
         item,
-        app->asset_pack == 0 ? "SFW" : *asset_packs_get(app->asset_packs, app->asset_pack - 1));
+        app->asset_pack == 0 ? "SFW" : *CharList_get(app->asset_packs, app->asset_pack - 1));
 
     item = variable_item_list_add(
         var_item_list,

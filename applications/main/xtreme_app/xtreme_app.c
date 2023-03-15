@@ -194,7 +194,7 @@ XtremeApp* xtreme_app_alloc() {
     strlcpy(app->device_name, furi_hal_version_get_name_ptr(), NAMECHANGER_TEXT_STORE_SIZE);
 
     app->asset_pack = 0;
-    asset_packs_init(app->asset_packs);
+    CharList_init(app->asset_packs);
     File* folder = storage_file_alloc(storage);
     FileInfo info;
     char* name = malloc(MAX_PACK_NAME_LEN);
@@ -205,14 +205,14 @@ XtremeApp* xtreme_app_alloc() {
                 strlcpy(copy, name, MAX_PACK_NAME_LEN);
                 uint idx = 0;
                 if(strcmp(copy, "NSFW") != 0) {
-                    for(; idx < asset_packs_size(app->asset_packs); idx++) {
-                        char* comp = *asset_packs_get(app->asset_packs, idx);
+                    for(; idx < CharList_size(app->asset_packs); idx++) {
+                        char* comp = *CharList_get(app->asset_packs, idx);
                         if(strcasecmp(copy, comp) < 0 && strcmp(comp, "NSFW") != 0) {
                             break;
                         }
                     }
                 }
-                asset_packs_push_at(app->asset_packs, idx, copy);
+                CharList_push_at(app->asset_packs, idx, copy);
                 if(app->asset_pack != 0) {
                     if(idx < app->asset_pack) app->asset_pack++;
                 } else {
@@ -251,11 +251,11 @@ void xtreme_app_free(XtremeApp* app) {
     FrequencyList_clear(app->subghz_static_frequencies);
     FrequencyList_clear(app->subghz_hopper_frequencies);
 
-    asset_packs_it_t it;
-    for(asset_packs_it(it, app->asset_packs); !asset_packs_end_p(it); asset_packs_next(it)) {
-        free(*asset_packs_cref(it));
+    CharList_it_t it;
+    for(CharList_it(it, app->asset_packs); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
     }
-    asset_packs_clear(app->asset_packs);
+    CharList_clear(app->asset_packs);
 
     furi_string_free(app->version_tag);
 

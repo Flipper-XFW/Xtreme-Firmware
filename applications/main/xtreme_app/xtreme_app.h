@@ -23,7 +23,7 @@
 
 #define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 6
 
-ARRAY_DEF(asset_packs, char*)
+ARRAY_DEF(CharList, char*)
 
 typedef struct {
     Gui* gui;
@@ -43,7 +43,7 @@ typedef struct {
     int dolphin_level;
     char device_name[NAMECHANGER_TEXT_STORE_SIZE];
     uint asset_pack;
-    asset_packs_t asset_packs;
+    CharList_t asset_packs;
     FuriString* version_tag;
     bool save_subghz;
     bool save_subghz_frequencies;
