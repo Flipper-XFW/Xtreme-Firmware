@@ -7,6 +7,8 @@
 #include <flipper_application/application_manifest.h>
 #include <gui/icon_i.h>
 #include <core/dangerous_defines.h>
+#include <toolbox/stream/file_stream.h>
+#include <xtreme/settings.h>
 
 #define TAG "LoaderSrv"
 
@@ -440,32 +442,6 @@ static void loader_build_menu() {
             loader_menu_callback,
             (void*)&FLIPPER_APPS[i]);
     }
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* folder = storage_file_alloc(storage);
-    FileInfo info;
-    char* name = malloc(100);
-    if(storage_dir_open(folder, EXT_PATH("apps/.Main"))) {
-        FuriString* path = furi_string_alloc();
-        FuriString* appname = furi_string_alloc();
-        while(storage_dir_read(folder, &info, name, 100)) {
-            if(file_info_is_dir(&info)) continue;
-            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), name);
-            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
-            const Icon* icon = loader_get_main_icon(name);
-            menu_add_item(
-                loader_instance->primary_menu,
-                strdup(furi_string_get_cstr(appname)),
-                icon,
-                i++,
-                loader_main_callback,
-                (void*)strdup(furi_string_get_cstr(path)));
-        }
-        furi_string_free(appname);
-        furi_string_free(path);
-    }
-    free(name);
-    storage_file_free(folder);
-    furi_record_close(RECORD_STORAGE);
     if(FLIPPER_PLUGINS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,
@@ -491,6 +467,52 @@ static void loader_build_menu() {
         i++,
         loader_submenu_callback,
         (void*)LoaderMenuViewSettings);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* path = furi_string_alloc();
+    FuriString* appname = furi_string_alloc();
+    File* folder = storage_file_alloc(storage);
+    FileInfo info;
+    char* name = malloc(100);
+    if(storage_dir_open(folder, EXT_PATH("apps/.Main"))) {
+        while(storage_dir_read(folder, &info, name, 100)) {
+            if(file_info_is_dir(&info)) continue;
+            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), name);
+            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
+            const Icon* icon = loader_get_main_icon(name);
+            menu_add_item(
+                loader_instance->primary_menu,
+                strdup(furi_string_get_cstr(appname)),
+                icon,
+                i++,
+                loader_main_callback,
+                (void*)strdup(furi_string_get_cstr(path)));
+        }
+    }
+    free(name);
+    storage_file_free(folder);
+
+    Stream* stream = file_stream_alloc(storage);
+    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        while(stream_read_line(stream, path)) {
+            furi_string_replace_all(path, "\r", "");
+            furi_string_replace_all(path, "\n", "");
+            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
+            const Icon* icon = loader_get_main_icon(name);
+            menu_add_item(
+                loader_instance->primary_menu,
+                strdup(furi_string_get_cstr(appname)),
+                icon,
+                i++,
+                loader_main_callback,
+                (void*)strdup(furi_string_get_cstr(path)));
+        }
+    }
+    file_stream_close(stream);
+    stream_free(stream);
+    furi_string_free(appname);
+    furi_string_free(path);
+    furi_record_close(RECORD_STORAGE);
 }
 
 static void loader_build_submenu() {
