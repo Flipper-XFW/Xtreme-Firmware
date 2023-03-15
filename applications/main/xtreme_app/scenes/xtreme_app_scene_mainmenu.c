@@ -1,6 +1,7 @@
 #include "../xtreme_app.h"
 
 enum VarItemListIndex {
+    VarItemListIndexWiiMenu,
     VarItemListIndexApp,
     VarItemListIndexRemoveApp,
     VarItemListIndexAddApp,
@@ -13,6 +14,14 @@ void xtreme_app_scene_mainmenu_var_item_list_callback(
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
+static void xtreme_app_scene_mainmenu_wii_menu_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->wii_menu = value;
+    app->save_settings = true;
+}
+
 static void xtreme_app_scene_mainmenu_app_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     app->mainmenu_app_index = variable_item_get_current_value_index(item);
@@ -21,8 +30,14 @@ static void xtreme_app_scene_mainmenu_app_changed(VariableItem* item) {
 
 void xtreme_app_scene_mainmenu_on_enter(void* context) {
     XtremeApp* app = context;
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
+
+    item = variable_item_list_add(
+        var_item_list, "Wii menu", 2, xtreme_app_scene_mainmenu_wii_menu_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->wii_menu);
+    variable_item_set_current_value_text(item, xtreme_settings->wii_menu ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,

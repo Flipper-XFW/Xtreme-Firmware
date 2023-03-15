@@ -6,6 +6,7 @@
 #include <gui/icon_animation_i.h>
 #include <furi.h>
 #include <m-array.h>
+#include <xtreme/settings.h>
 
 struct Menu {
     View* view;
@@ -47,51 +48,96 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         MenuItem* item;
         FuriString* name = furi_string_alloc();
         size_t shift_position;
-        if(position < 2) {
-            shift_position = 0;
-        } else if(position >= items_count - 2 + (items_count % 2)) {
-            shift_position = position - (position % 2) - 4;
-        } else {
-            shift_position = position - (position % 2) - 2;
-        }
-        canvas_set_font(canvas, FontSecondary);
-        size_t item_i;
-        size_t x_off, y_off;
-        for(int i = 0; i < 6; i++) {
-            item_i = shift_position + i;
-            if(item_i >= items_count) continue;
-            x_off = (i / 2) * 43 + 1;
-            y_off = (i % 2) * 32;
-            size_t scroll_counter = 0;
-            if(item_i == position) {
-                elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
-                canvas_set_color(canvas, ColorWhite);
-                scroll_counter = model->scroll_counter;
-                if(scroll_counter < 1) {
-                    scroll_counter = 0;
+        if(XTREME_SETTINGS()->wii_menu) {
+            if(position < 2) {
+                shift_position = 0;
+            } else if(position >= items_count - 2 + (items_count % 2)) {
+                shift_position = position - (position % 2) - 4;
+            } else {
+                shift_position = position - (position % 2) - 2;
+            }
+            canvas_set_font(canvas, FontSecondary);
+            size_t item_i;
+            size_t x_off, y_off;
+            for(int i = 0; i < 6; i++) {
+                item_i = shift_position + i;
+                if(item_i >= items_count) continue;
+                x_off = (i / 2) * 43 + 1;
+                y_off = (i % 2) * 32;
+                size_t scroll_counter = 0;
+                if(item_i == position) {
+                    elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
+                    canvas_set_color(canvas, ColorWhite);
+                    scroll_counter = model->scroll_counter;
+                    if(scroll_counter < 1) {
+                        scroll_counter = 0;
+                    } else {
+                        scroll_counter -= 1;
+                    }
+                }
+                item = MenuItemArray_get(model->items, item_i);
+                if(item->icon) {
+                    canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
+                }
+                furi_string_set(name, item->label);
+                elements_scrollable_text_line(
+                    canvas,
+                    20 + x_off,
+                    26 + y_off,
+                    36,
+                    name,
+                    scroll_counter,
+                    false,
+                    true);
+                if(item_i == position) {
+                    canvas_set_color(canvas, ColorBlack);
                 } else {
-                    scroll_counter -= 1;
+                    elements_frame(canvas, 0 + x_off, 0 + y_off, 40, 30);
                 }
             }
-            item = MenuItemArray_get(model->items, item_i);
+        } else {
+            // First line
+            canvas_set_font(canvas, FontSecondary);
+            shift_position = (0 + position + items_count - 1) % items_count;
+            item = MenuItemArray_get(model->items, shift_position);
             if(item->icon) {
-                canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
+                canvas_draw_icon_animation(canvas, 4 + (14 - item->icon->icon->width) / 2, 3 + (14 - item->icon->icon->height) / 2, item->icon);
+            }
+            canvas_draw_str(canvas, 22, 14, item->label);
+            // Second line main
+            canvas_set_font(canvas, FontPrimary);
+            shift_position = (1 + position + items_count - 1) % items_count;
+            item = MenuItemArray_get(model->items, shift_position);
+            if(item->icon) {
+                canvas_draw_icon_animation(canvas, 4 + (14 - item->icon->icon->width) / 2, 25 + (14 - item->icon->icon->height) / 2, item->icon);
+            }
+            size_t scroll_counter = model->scroll_counter;
+            if(scroll_counter < 1) {
+                scroll_counter = 0;
+            } else {
+                scroll_counter -= 1;
             }
             furi_string_set(name, item->label);
             elements_scrollable_text_line(
                 canvas,
-                20 + x_off,
-                26 + y_off,
+                22,
                 36,
+                98,
                 name,
                 scroll_counter,
                 false,
-                true);
-            if(item_i == position) {
-                canvas_set_color(canvas, ColorBlack);
-            } else {
-                elements_frame(canvas, 0 + x_off, 0 + y_off, 40, 30);
+                false);
+            // Third line
+            canvas_set_font(canvas, FontSecondary);
+            shift_position = (2 + position + items_count - 1) % items_count;
+            item = MenuItemArray_get(model->items, shift_position);
+            if(item->icon) {
+                canvas_draw_icon_animation(canvas, 4 + (14 - item->icon->icon->width) / 2, 47 + (14 - item->icon->icon->height) / 2, item->icon);
             }
+            canvas_draw_str(canvas, 22, 58, item->label);
+            // Frame and scrollbar
+            elements_frame(canvas, 0, 21, 128 - 5, 21);
+            elements_scrollbar(canvas, position, items_count);
         }
         furi_string_free(name);
     } else {
@@ -292,23 +338,31 @@ static void menu_process_up(Menu* menu) {
         MenuModel * model,
         {
             size_t count = MenuItemArray_size(model->items);
-            if(!(model->position == count - 1 && count % 2)) {
-                MenuItem* item = MenuItemArray_get(model->items, model->position);
-                if(item && item->icon) {
-                    icon_animation_stop(item->icon);
-                }
+            MenuItem* item = MenuItemArray_get(model->items, model->position);
+            if(item && item->icon) {
+                icon_animation_stop(item->icon);
+            }
 
-                if(model->position % 2) {
+            if(XTREME_SETTINGS()->wii_menu) {
+                if(!(model->position == count - 1 && count % 2)) {
+                    if(model->position % 2) {
+                        model->position--;
+                    } else {
+                        model->position++;
+                    }
+                    model->scroll_counter = 0;
+                }
+            } else {
+                if(model->position > 0) {
                     model->position--;
                 } else {
-                    model->position++;
+                    model->position = count - 1;
                 }
-                model->scroll_counter = 0;
+            }
 
-                item = MenuItemArray_get(model->items, model->position);
-                if(item && item->icon) {
-                    icon_animation_start(item->icon);
-                }
+            item = MenuItemArray_get(model->items, model->position);
+            if(item && item->icon) {
+                icon_animation_start(item->icon);
             }
         },
         true);
@@ -320,29 +374,38 @@ static void menu_process_down(Menu* menu) {
         MenuModel * model,
         {
             size_t count = MenuItemArray_size(model->items);
-            if(!(model->position == count - 1 && count % 2)) {
-                MenuItem* item = MenuItemArray_get(model->items, model->position);
-                if(item && item->icon) {
-                    icon_animation_stop(item->icon);
-                }
+            MenuItem* item = MenuItemArray_get(model->items, model->position);
+            if(item && item->icon) {
+                icon_animation_stop(item->icon);
+            }
 
-                if(model->position % 2) {
-                    model->position--;
-                } else {
+            if(XTREME_SETTINGS()->wii_menu) {
+                if(!(model->position == count - 1 && count % 2)) {
+                    if(model->position % 2) {
+                        model->position--;
+                    } else {
+                        model->position++;
+                    }
+                    model->scroll_counter = 0;
+                }
+            } else {
+                if(model->position < count - 1) {
                     model->position++;
+                } else {
+                    model->position = 0;
                 }
-                model->scroll_counter = 0;
+            }
 
-                item = MenuItemArray_get(model->items, model->position);
-                if(item && item->icon) {
-                    icon_animation_start(item->icon);
-                }
+            item = MenuItemArray_get(model->items, model->position);
+            if(item && item->icon) {
+                icon_animation_start(item->icon);
             }
         },
         true);
 }
 
 static void menu_process_left(Menu* menu) {
+    if(!XTREME_SETTINGS()->wii_menu) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -373,6 +436,7 @@ static void menu_process_left(Menu* menu) {
 }
 
 static void menu_process_right(Menu* menu) {
+    if(!XTREME_SETTINGS()->wii_menu) return;
     with_view_model(
         menu->view,
         MenuModel * model,
