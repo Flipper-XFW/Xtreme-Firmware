@@ -125,6 +125,7 @@ static bool xtreme_app_back_event_callback(void* context) {
 XtremeApp* xtreme_app_alloc() {
     XtremeApp* app = malloc(sizeof(XtremeApp));
     app->gui = furi_record_open(RECORD_GUI);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     // View Dispatcher and Scene Manager
     app->view_dispatcher = view_dispatcher_alloc();
@@ -260,6 +261,7 @@ void xtreme_app_free(XtremeApp* app) {
     furi_string_free(app->version_tag);
 
     // Records
+    furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_GUI);
     free(app);
 }

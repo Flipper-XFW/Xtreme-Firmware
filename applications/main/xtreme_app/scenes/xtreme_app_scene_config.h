@@ -1,5 +1,7 @@
 ADD_SCENE(xtreme_app, start, Start)
 ADD_SCENE(xtreme_app, graphics, Graphics)
+ADD_SCENE(xtreme_app, mainmenu, Mainmenu)
+ADD_SCENE(xtreme_app, mainmenu_add, MainmenuAdd)
 ADD_SCENE(xtreme_app, statusbar, Statusbar)
 ADD_SCENE(xtreme_app, protocols, Protocols)
 ADD_SCENE(xtreme_app, protocols_frequencies, ProtocolsFrequencies)

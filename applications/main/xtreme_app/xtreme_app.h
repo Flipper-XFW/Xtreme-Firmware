@@ -5,6 +5,7 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <dialogs/dialogs.h>
 #include <assets_icons.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
@@ -27,11 +28,16 @@ ARRAY_DEF(CharList, char*)
 
 typedef struct {
     Gui* gui;
+    DialogsApp* dialogs;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
     TextInput* text_input;
     Popup* popup;
+    uint asset_pack;
+    CharList_t asset_packs;
+    CharList_t mainmenu_apps;
+    uint8_t mainmenu_app_index;
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_frequencies;
     uint8_t subghz_static_index;
@@ -42,9 +48,8 @@ typedef struct {
     bool subghz_bypass;
     int dolphin_level;
     char device_name[NAMECHANGER_TEXT_STORE_SIZE];
-    uint asset_pack;
-    CharList_t asset_packs;
     FuriString* version_tag;
+    bool save_mainmenu_apps;
     bool save_subghz;
     bool save_subghz_frequencies;
     bool save_level;

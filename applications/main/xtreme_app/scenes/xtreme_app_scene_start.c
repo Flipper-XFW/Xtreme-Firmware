@@ -2,6 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexGraphics,
+    VarItemListIndexMainmenu,
     VarItemListIndexStatusbar,
     VarItemListIndexProtocols,
     VarItemListIndexDolphin,
@@ -18,6 +19,7 @@ void xtreme_app_scene_start_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
 
     variable_item_list_add(var_item_list, "Graphics", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Mainmenu", 0, NULL, app);
     variable_item_list_add(var_item_list, "Statusbar", 0, NULL, app);
     variable_item_list_add(var_item_list, "Protocols", 0, NULL, app);
     variable_item_list_add(var_item_list, "Dolphin", 0, NULL, app);
@@ -44,6 +46,9 @@ bool xtreme_app_scene_start_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case VarItemListIndexGraphics:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneGraphics);
+            break;
+        case VarItemListIndexMainmenu:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneMainmenu);
             break;
         case VarItemListIndexStatusbar:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneStatusbar);
