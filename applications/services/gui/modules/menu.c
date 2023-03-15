@@ -9,6 +9,7 @@
 
 struct Menu {
     View* view;
+    FuriTimer* scroll_timer;
 };
 
 typedef struct {
@@ -26,6 +27,7 @@ ARRAY_DEF(MenuItemArray, MenuItem, M_POD_OPLIST);
 typedef struct {
     MenuItemArray_t items;
     size_t position;
+    size_t scroll_counter;
 } MenuModel;
 
 static void menu_process_up(Menu* menu);
@@ -57,27 +59,36 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         size_t x_off, y_off;
         for(int i = 0; i < 6; i++) {
             item_i = shift_position + i;
-            if(item_i >= items_count) break;
-            item = MenuItemArray_get(model->items, item_i);
             x_off = (i / 2) * 43 + 1;
             y_off = (i % 2) * 32;
+            size_t scroll_counter = 0;
+
             if(item_i == position) {
                 elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
                 canvas_set_color(canvas, ColorWhite);
+                scroll_counter = model->scroll_counter;
+                if(scroll_counter < 1) {
+                    scroll_counter = 0;
+                } else {
+                    scroll_counter -= 1;
+                }
             }
-            if(item->icon) {
+            if(item_i < items_count) {
+                item = MenuItemArray_get(model->items, item_i);
+                if(item->icon) {
                     canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
+                }
+                furi_string_set(name, item->label);
+                elements_scrollable_text_line(
+                    canvas,
+                    20 + x_off,
+                    26 + y_off,
+                    36,
+                    name,
+                    scroll_counter,
+                    false,
+                    true);
             }
-            furi_string_set(name, item->label);
-            elements_scrollable_text_line(
-                canvas,
-                20 + x_off,
-                23 + y_off,
-                36,
-                name,
-                0,
-                false,
-                true);
             if(item_i == position) {
                 canvas_set_color(canvas, ColorBlack);
             } else {
@@ -146,6 +157,12 @@ static bool menu_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
+static void menu_scroll_timer_callback(void* context) {
+    Menu* menu = context;
+    with_view_model(
+        menu->view, MenuModel * model, { model->scroll_counter++; }, true);
+}
+
 static void menu_enter(void* context) {
     Menu* menu = context;
     with_view_model(
@@ -156,8 +173,10 @@ static void menu_enter(void* context) {
             if(item && item->icon) {
                 icon_animation_start(item->icon);
             }
+            model->scroll_counter = 0;
         },
-        false);
+        true);
+    furi_timer_start(menu->scroll_timer, 333);
 }
 
 static void menu_exit(void* context) {
@@ -172,6 +191,7 @@ static void menu_exit(void* context) {
             }
         },
         false);
+    furi_timer_stop(menu->scroll_timer);
 }
 
 Menu* menu_alloc() {
@@ -183,6 +203,9 @@ Menu* menu_alloc() {
     view_set_input_callback(menu->view, menu_input_callback);
     view_set_enter_callback(menu->view, menu_enter);
     view_set_exit_callback(menu->view, menu_exit);
+
+    menu->scroll_timer =
+        furi_timer_alloc(menu_scroll_timer_callback, FuriTimerTypePeriodic, menu);
 
     with_view_model(
         menu->view,
@@ -200,6 +223,7 @@ void menu_free(Menu* menu) {
     furi_assert(menu);
     menu_reset(menu);
     view_free(menu->view);
+    furi_timer_free(menu->scroll_timer);
     free(menu);
 }
 
@@ -281,6 +305,7 @@ static void menu_process_up(Menu* menu) {
                 } else {
                     model->position++;
                 }
+                model->scroll_counter = 0;
 
                 item = MenuItemArray_get(model->items, model->position);
                 if(item && item->icon) {
@@ -308,6 +333,7 @@ static void menu_process_down(Menu* menu) {
                 } else {
                     model->position++;
                 }
+                model->scroll_counter = 0;
 
                 item = MenuItemArray_get(model->items, model->position);
                 if(item && item->icon) {
@@ -338,6 +364,7 @@ static void menu_process_left(Menu* menu) {
             } else {
                 model->position -= 2;
             }
+            model->scroll_counter = 0;
 
             item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {
@@ -372,6 +399,7 @@ static void menu_process_right(Menu* menu) {
                     model->position = model->position % 2;
                 }
             }
+            model->scroll_counter = 0;
 
             item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {

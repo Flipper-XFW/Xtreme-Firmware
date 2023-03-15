@@ -586,6 +586,8 @@ void elements_scrollable_text_line(
 
     size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
     if(len_px > width) {
+        centered = false;
+        x -= width / 2;
         if(ellipsis) {
             width -= canvas_string_width(canvas, "...");
         }
@@ -618,7 +620,7 @@ void elements_scrollable_text_line(
     }
 
     if (centered) {
-        canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignCenter, furi_string_get_cstr(line));
+        canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignBottom, furi_string_get_cstr(line));
     } else {
         canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
     }
