@@ -59,10 +59,10 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         size_t x_off, y_off;
         for(int i = 0; i < 6; i++) {
             item_i = shift_position + i;
+            if(item_i >= items_count) continue;
             x_off = (i / 2) * 43 + 1;
             y_off = (i % 2) * 32;
             size_t scroll_counter = 0;
-
             if(item_i == position) {
                 elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
                 canvas_set_color(canvas, ColorWhite);
@@ -73,22 +73,20 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     scroll_counter -= 1;
                 }
             }
-            if(item_i < items_count) {
-                item = MenuItemArray_get(model->items, item_i);
-                if(item->icon) {
-                    canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
-                }
-                furi_string_set(name, item->label);
-                elements_scrollable_text_line(
-                    canvas,
-                    20 + x_off,
-                    26 + y_off,
-                    36,
-                    name,
-                    scroll_counter,
-                    false,
-                    true);
+            item = MenuItemArray_get(model->items, item_i);
+            if(item->icon) {
+                canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
             }
+            furi_string_set(name, item->label);
+            elements_scrollable_text_line(
+                canvas,
+                20 + x_off,
+                26 + y_off,
+                36,
+                name,
+                scroll_counter,
+                false,
+                true);
             if(item_i == position) {
                 canvas_set_color(canvas, ColorBlack);
             } else {
