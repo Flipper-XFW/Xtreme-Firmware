@@ -331,7 +331,7 @@ static void menu_process_left(Menu* menu) {
                 if(count % 2) {
                     model->position = count - 1;
                 } else {
-                    model->position = count - 1 + model->position % 2;
+                    model->position = count - 2 + model->position % 2;
                 }
             } else {
                 model->position -= 2;
