@@ -9,6 +9,7 @@
 #include <core/dangerous_defines.h>
 #include <toolbox/stream/file_stream.h>
 #include <xtreme/settings.h>
+#include <gui/modules/file_browser.h>
 
 #define TAG "LoaderSrv"
 
@@ -422,12 +423,34 @@ static void loader_free(Loader* instance) {
     instance = NULL;
 }
 
-const Icon* loader_get_main_icon(char* name) {
-    // Temp solution, not sure how this could be easily improved
-    if(strcmp(name, "xtreme_app.fap") == 0) {
-        return &A_Xtreme_14;
+bool loader_load_fap_meta(Storage* storage, FuriString* path, FuriString* name, const Icon** icon) {
+    *icon = NULL;
+    uint8_t* icon_buf = NULL;
+    // Match main apps as FAPs for buil-in icons
+    if(furi_string_equal_str(path, EXT_PATH("apps/.Main/xtreme_app.fap"))) {
+        *icon = &A_Xtreme_14;
     }
-    return NULL;
+    // Load FAP bundled icon otherwise
+    if(!*icon) {
+        icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
+    }
+    if(!fap_loader_load_name_and_icon(path, storage, &icon_buf, name)) {
+        if(icon_buf) {
+            free(icon_buf);
+            icon_buf = NULL;
+        }
+        return false;
+    }
+    if(icon_buf) {
+        *icon = malloc(sizeof(Icon));
+        FURI_CONST_ASSIGN((*icon)->frame_count, 1);
+        FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
+        FURI_CONST_ASSIGN((*icon)->width, 10);
+        FURI_CONST_ASSIGN((*icon)->height, 10);
+        FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
+        FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
+    }
+    return true;
 }
 
 static void loader_build_menu() {
@@ -470,26 +493,26 @@ static void loader_build_menu() {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* path = furi_string_alloc();
-    FuriString* appname = furi_string_alloc();
+    FuriString* name = furi_string_alloc();
     File* folder = storage_file_alloc(storage);
     FileInfo info;
-    char* name = malloc(100);
     if(storage_dir_open(folder, EXT_PATH("apps/.Main"))) {
-        while(storage_dir_read(folder, &info, name, 100)) {
+        char* temp = malloc(100);
+        while(storage_dir_read(folder, &info, temp, 100)) {
             if(file_info_is_dir(&info)) continue;
-            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), name);
-            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
-            const Icon* icon = loader_get_main_icon(name);
+            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), temp);
+            const Icon* icon;
+            if(!loader_load_fap_meta(storage, path, name, &icon)) continue;
             menu_add_item(
                 loader_instance->primary_menu,
-                strdup(furi_string_get_cstr(appname)),
+                strdup(furi_string_get_cstr(name)),
                 icon,
                 i++,
                 loader_main_callback,
                 (void*)strdup(furi_string_get_cstr(path)));
         }
+        free(temp);
     }
-    free(name);
     storage_file_free(folder);
 
     Stream* stream = file_stream_alloc(storage);
@@ -497,11 +520,11 @@ static void loader_build_menu() {
         while(stream_read_line(stream, path)) {
             furi_string_replace_all(path, "\r", "");
             furi_string_replace_all(path, "\n", "");
-            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
-            const Icon* icon = loader_get_main_icon(name);
+            const Icon* icon;
+            if(!loader_load_fap_meta(storage, path, name, &icon)) continue;
             menu_add_item(
                 loader_instance->primary_menu,
-                strdup(furi_string_get_cstr(appname)),
+                strdup(furi_string_get_cstr(name)),
                 icon,
                 i++,
                 loader_main_callback,
@@ -510,7 +533,7 @@ static void loader_build_menu() {
     }
     file_stream_close(stream);
     stream_free(stream);
-    furi_string_free(appname);
+    furi_string_free(name);
     furi_string_free(path);
     furi_record_close(RECORD_STORAGE);
 }
