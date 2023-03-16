@@ -40,13 +40,13 @@ jobs:
           RELEASE_TAG="${RELEASE_NAME}_${DATE}"
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
 
-          sed "s/VERSION = \"XFW-[[:digit:]]\{4\}\"/VERSION = \"${RELEASE_NAME}\"/g" ./scripts/version.py > ./scripts/version.py.new
-          rm ./scripts/version.py
-          mv ./scripts/version.py.new ./scripts/version.py
+          sed "s/VERSION = \"XFW-[[:digit:]]\{4\}\"/VERSION = \"${RELEASE_NAME}\"/g" scripts/version.py > scripts/version.py.new
+          rm scripts/version.py
+          mv scripts/version.py.new scripts/version.py
 
-          sed "s/DIST_SUFFIX = \"XFW-[[:digit:]]\{4\}_[[:digit:]]\{8\}\"/DIST_SUFFIX = \"${RELEASE_TAG}\"/g" ./fbt_options.py > ./fbt_options.py.new
-          rm ./fbt_options.py
-          mv ./fbt_options.py.new ./fbt_options.py
+          sed "s/DIST_SUFFIX = \"XFW-[[:digit:]]\{4\}_[[:digit:]]\{8\}\"/DIST_SUFFIX = \"${RELEASE_TAG}\"/g" fbt_options.py > fbt_options.py.new
+          rm fbt_options.py
+          mv fbt_options.py.new fbt_options.py
 
       - name: 'Build the firmware'
         run: |
@@ -58,15 +58,12 @@ jobs:
 
       - name: "Make tgz, zip and webupdater"
         run: |
-          cd ./dist/${DEFAULT_TARGET}-*
-          mv flipper-z-${DEFAULT_TARGET}-update-*.tgz ${RELEASE_TAG}.tgz
+          cd dist/${DEFAULT_TARGET}-*
           mv ${DEFAULT_TARGET}-update-* ${RELEASE_TAG}
-          cd ./${RELEASE_TAG}
-          7z a ../${RELEASE_TAG}.zip .
-          cd ..
-          mv ${RELEASE_TAG}.tgz ..
-          mv ${RELEASE_TAG}.zip ..
-          cd ..
+          tar --format=ustar -czvf ../${RELEASE_TAG}.tgz ${RELEASE_TAG}
+          cd ${RELEASE_TAG}
+          7z a ../../${RELEASE_TAG}.zip .
+          cd ../..
           python -m pip install pyncclient
           WEBUPDATER_URL="$(python -c "import nextcloud_client as n;c = n.Client('https://cloud.cynthialabs.net/');c.login('${{ secrets.NC_USER }}', '${{ secrets.NC_PASS }}');c.put_file('XFW-Updater/${RELEASE_TAG}.tgz', '${RELEASE_TAG}.tgz');print(c.share_file_with_link('XFW-Updater/${RELEASE_TAG}.tgz').get_link().rstrip('/') + '/download/${RELEASE_TAG}.tgz', end='')")"
           echo "WEBUPDATER_URL=${WEBUPDATER_URL}" >> $GITHUB_ENV
@@ -80,7 +77,7 @@ jobs:
         with:
           default_author: github_actions
           message: Update version number
-          add: './fbt_options.py ./scripts/version.py'
+          add: 'fbt_options.py scripts/version.py'
 
       - name: "Merge pull request"
         uses: "pascalgn/automerge-action@v0.15.6"
