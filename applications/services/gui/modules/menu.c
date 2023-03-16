@@ -7,6 +7,7 @@
 #include <furi.h>
 #include <m-array.h>
 #include <xtreme/settings.h>
+#include <m-string.h>
 
 struct Menu {
     View* view;
@@ -80,6 +81,12 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
                 }
                 furi_string_set(name, item->label);
+                if(furi_string_start_with_str(name, "[")) {
+                    size_t trim = furi_string_search_str(name, "] ", 1);
+                    if(trim != STRING_FAILURE) {
+                        furi_string_right(name, trim + 2);
+                    }
+                }
                 elements_scrollable_text_line(
                     canvas,
                     20 + x_off,
