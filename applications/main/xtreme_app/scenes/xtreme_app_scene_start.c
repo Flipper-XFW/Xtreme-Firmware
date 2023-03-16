@@ -1,12 +1,10 @@
 #include "../xtreme_app.h"
 
 enum VarItemListIndex {
-    VarItemListIndexGraphics,
-    VarItemListIndexMainmenu,
-    VarItemListIndexStatusbar,
+    VarItemListIndexInterface,
     VarItemListIndexProtocols,
-    VarItemListIndexDolphin,
     VarItemListIndexMisc,
+    VarItemListIndexVersion,
 };
 
 void xtreme_app_scene_start_var_item_list_callback(void* context, uint32_t index) {
@@ -18,13 +16,9 @@ void xtreme_app_scene_start_on_enter(void* context) {
     XtremeApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
 
-    variable_item_list_add(var_item_list, "Graphics", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Mainmenu", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Statusbar", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Interface", 0, NULL, app);
     variable_item_list_add(var_item_list, "Protocols", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Dolphin", 0, NULL, app);
     variable_item_list_add(var_item_list, "Misc", 0, NULL, app);
-
     variable_item_list_add(var_item_list, furi_string_get_cstr(app->version_tag), 0, NULL, app);
 
     variable_item_list_set_enter_callback(
@@ -44,20 +38,11 @@ bool xtreme_app_scene_start_on_event(void* context, SceneManagerEvent event) {
         scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneStart, event.event);
         consumed = true;
         switch(event.event) {
-        case VarItemListIndexGraphics:
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneGraphics);
-            break;
-        case VarItemListIndexMainmenu:
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneMainmenu);
-            break;
-        case VarItemListIndexStatusbar:
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneStatusbar);
+        case VarItemListIndexInterface:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterface);
             break;
         case VarItemListIndexProtocols:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocols);
-            break;
-        case VarItemListIndexDolphin:
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneDolphin);
             break;
         case VarItemListIndexMisc:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMisc);

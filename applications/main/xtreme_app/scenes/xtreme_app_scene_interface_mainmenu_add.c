@@ -4,7 +4,7 @@ enum FileBrowserResult {
     FileBrowserResultOk,
 };
 
-static bool xtreme_app_scene_mainmenu_add_file_browser_callback(
+static bool xtreme_app_scene_interface_mainmenu_add_file_browser_callback(
     FuriString* file_path,
     void* context,
     uint8_t** icon_ptr,
@@ -16,7 +16,7 @@ static bool xtreme_app_scene_mainmenu_add_file_browser_callback(
     return success;
 }
 
-void xtreme_app_scene_mainmenu_add_on_enter(void* context) {
+void xtreme_app_scene_interface_mainmenu_add_on_enter(void* context) {
     XtremeApp* app = context;
     FuriString* string = furi_string_alloc_set_str(EXT_PATH("apps"));
 
@@ -24,17 +24,17 @@ void xtreme_app_scene_mainmenu_add_on_enter(void* context) {
         .extension = ".fap",
         .skip_assets = true,
         .hide_ext = true,
-        .item_loader_callback = xtreme_app_scene_mainmenu_add_file_browser_callback,
+        .item_loader_callback = xtreme_app_scene_interface_mainmenu_add_file_browser_callback,
         .item_loader_context = app,
         .base_path = EXT_PATH("apps"),
     };
 
     if(dialog_file_browser_show(app->dialogs, string, string, &browser_options)) {
-        CharList_push_back(app->mainmenu_apps_paths, strdup(furi_string_get_cstr(string)));
+        CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(string)));
         Storage* storage = furi_record_open(RECORD_STORAGE);
         fap_loader_load_name_and_icon(string, storage, NULL, string);
         furi_record_close(RECORD_STORAGE);
-        CharList_push_back(app->mainmenu_apps_names, strdup(furi_string_get_cstr(string)));
+        CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(string)));
         app->save_mainmenu_apps = true;
         app->require_reboot = true;
     }
@@ -44,7 +44,7 @@ void xtreme_app_scene_mainmenu_add_on_enter(void* context) {
     view_dispatcher_send_custom_event(app->view_dispatcher, FileBrowserResultOk);
 }
 
-bool xtreme_app_scene_mainmenu_add_on_event(void* context, SceneManagerEvent event) {
+bool xtreme_app_scene_interface_mainmenu_add_on_event(void* context, SceneManagerEvent event) {
     XtremeApp* app = context;
     bool consumed = false;
 
@@ -62,6 +62,6 @@ bool xtreme_app_scene_mainmenu_add_on_event(void* context, SceneManagerEvent eve
     return consumed;
 }
 
-void xtreme_app_scene_mainmenu_add_on_exit(void* context) {
+void xtreme_app_scene_interface_mainmenu_add_on_exit(void* context) {
     UNUSED(context);
 }

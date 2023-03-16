@@ -15,16 +15,13 @@ extern "C" {
 
 #define MAX_PACK_NAME_LEN 32
 
-#define XTREME_SETTINGS_VERSION (6)
+#define XTREME_SETTINGS_VERSION (7)
 #define XTREME_SETTINGS_PATH_OLD INT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_PATH EXT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
 
 #define XTREME_APPS_PATH EXT_PATH(XTREME_APPS_FILE_NAME)
 
-// Some settings function backwards (logically) in
-// order to fit the default value we want
-// (values will default to 0 / false)
 typedef struct {
     char asset_pack[MAX_PACK_NAME_LEN];
     uint16_t anim_speed;
@@ -35,11 +32,11 @@ typedef struct {
     bool status_icons;
     bool bar_borders;
     bool bar_background;
+    bool sort_dirs_first;
+    bool dark_mode;
     bool bad_bt;
     bool bad_bt_remember;
     int32_t butthurt_timer;
-    bool sort_dirs_first;
-    bool dark_mode;
 } XtremeSettings;
 
 XtremeSettings* XTREME_SETTINGS();

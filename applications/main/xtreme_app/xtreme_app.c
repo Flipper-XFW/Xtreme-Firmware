@@ -22,17 +22,13 @@ static bool xtreme_app_back_event_callback(void* context) {
             Stream* stream = file_stream_alloc(storage);
             if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)){
                 CharList_it_t it;
-                CharList_it(it, app->mainmenu_apps_paths);
-                for(uint i = 0; i < CharList_size(app->mainmenu_apps_paths); i++) {
-                    stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_apps_paths, i));
+                CharList_it(it, app->mainmenu_app_paths);
+                for(uint i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
+                    stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_app_paths, i));
                 }
             }
             file_stream_close(stream);
             stream_free(stream);
-        }
-
-        if(app->save_subghz) {
-            furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
         }
 
         if(app->save_subghz_frequencies) {
@@ -54,33 +50,28 @@ static bool xtreme_app_back_event_callback(void* context) {
                 if(!flipper_format_rewind(file)) break;
                 while(flipper_format_delete_key(file, "Frequency"))
                     ;
-                FrequencyList_it(it, app->subghz_static_frequencies);
-                for(uint i = 0; i < FrequencyList_size(app->subghz_static_frequencies); i++) {
+                FrequencyList_it(it, app->subghz_static_freqs);
+                for(uint i = 0; i < FrequencyList_size(app->subghz_static_freqs); i++) {
                     flipper_format_write_uint32(
-                        file, "Frequency", FrequencyList_get(app->subghz_static_frequencies, i), 1);
+                        file, "Frequency", FrequencyList_get(app->subghz_static_freqs, i), 1);
                 }
 
                 if(!flipper_format_rewind(file)) break;
                 while(flipper_format_delete_key(file, "Hopper_frequency"))
                     ;
-                for(uint i = 0; i < FrequencyList_size(app->subghz_hopper_frequencies); i++) {
+                for(uint i = 0; i < FrequencyList_size(app->subghz_hopper_freqs); i++) {
                     flipper_format_write_uint32(
                         file,
                         "Hopper_frequency",
-                        FrequencyList_get(app->subghz_hopper_frequencies, i),
+                        FrequencyList_get(app->subghz_hopper_freqs, i),
                         1);
                 }
             } while(false);
             flipper_format_free(file);
         }
 
-        if(app->save_level) {
-            Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-            int xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
-            dolphin->state->data.icounter = xp + 1;
-            dolphin->state->dirty = true;
-            dolphin_state_save(dolphin->state);
-            furi_record_close(RECORD_DOLPHIN);
+        if(app->save_subghz) {
+            furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
         }
 
         if(app->save_name) {
@@ -112,6 +103,15 @@ static bool xtreme_app_back_event_callback(void* context) {
 
                 flipper_format_free(file);
             }
+        }
+
+        if(app->save_level) {
+            Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+            int32_t xp = app->xp_level > 1 ? dolphin_get_levels()[app->xp_level - 2] : 0;
+            dolphin->state->data.icounter = xp + 1;
+            dolphin->state->dirty = true;
+            dolphin_state_save(dolphin->state);
+            furi_record_close(RECORD_DOLPHIN);
         }
 
         if(app->save_settings) {
@@ -171,8 +171,8 @@ XtremeApp* xtreme_app_alloc() {
 
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
-    app->asset_pack = 0;
-    CharList_init(app->asset_packs);
+    app->asset_pack_index = 0;
+    CharList_init(app->asset_pack_names);
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* folder = storage_file_alloc(storage);
     FileInfo info;
@@ -184,18 +184,18 @@ XtremeApp* xtreme_app_alloc() {
                 strlcpy(copy, name, MAX_PACK_NAME_LEN);
                 uint idx = 0;
                 if(strcmp(copy, "NSFW") != 0) {
-                    for(; idx < CharList_size(app->asset_packs); idx++) {
-                        char* comp = *CharList_get(app->asset_packs, idx);
+                    for(; idx < CharList_size(app->asset_pack_names); idx++) {
+                        char* comp = *CharList_get(app->asset_pack_names, idx);
                         if(strcasecmp(copy, comp) < 0 && strcmp(comp, "NSFW") != 0) {
                             break;
                         }
                     }
                 }
-                CharList_push_at(app->asset_packs, idx, copy);
-                if(app->asset_pack != 0) {
-                    if(idx < app->asset_pack) app->asset_pack++;
+                CharList_push_at(app->asset_pack_names, idx, copy);
+                if(app->asset_pack_index != 0) {
+                    if(idx < app->asset_pack_index) app->asset_pack_index++;
                 } else {
-                    if(strcmp(copy, xtreme_settings->asset_pack) == 0) app->asset_pack = idx + 1;
+                    if(strcmp(copy, xtreme_settings->asset_pack) == 0) app->asset_pack_index = idx + 1;
                 }
             }
         }
@@ -203,17 +203,17 @@ XtremeApp* xtreme_app_alloc() {
     free(name);
     storage_file_free(folder);
 
-    CharList_init(app->mainmenu_apps_names);
-    CharList_init(app->mainmenu_apps_paths);
+    CharList_init(app->mainmenu_app_names);
+    CharList_init(app->mainmenu_app_paths);
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
     if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(stream, line)) {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
-            CharList_push_back(app->mainmenu_apps_paths, strdup(furi_string_get_cstr(line)));
+            CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
             fap_loader_load_name_and_icon(line, storage, NULL, line);
-            CharList_push_back(app->mainmenu_apps_names, strdup(furi_string_get_cstr(line)));
+            CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(line)));
         }
     }
     furi_string_free(line);
@@ -221,8 +221,8 @@ XtremeApp* xtreme_app_alloc() {
     stream_free(stream);
 
     FlipperFormat* file = flipper_format_file_alloc(storage);
-    FrequencyList_init(app->subghz_static_frequencies);
-    FrequencyList_init(app->subghz_hopper_frequencies);
+    FrequencyList_init(app->subghz_static_freqs);
+    FrequencyList_init(app->subghz_hopper_freqs);
     app->subghz_use_defaults = true;
     do {
         uint32_t temp;
@@ -233,14 +233,14 @@ XtremeApp* xtreme_app_alloc() {
         if(!flipper_format_rewind(file)) break;
         while(flipper_format_read_uint32(file, "Frequency", &temp, 1)) {
             if(furi_hal_subghz_is_frequency_valid(temp)) {
-                FrequencyList_push_back(app->subghz_static_frequencies, temp);
+                FrequencyList_push_back(app->subghz_static_freqs, temp);
             }
         }
 
         if(!flipper_format_rewind(file)) break;
         while(flipper_format_read_uint32(file, "Hopper_frequency", &temp, 1)) {
             if(furi_hal_subghz_is_frequency_valid(temp)) {
-                FrequencyList_push_back(app->subghz_hopper_frequencies, temp);
+                FrequencyList_push_back(app->subghz_hopper_freqs, temp);
             }
         }
     } while(false);
@@ -249,12 +249,12 @@ XtremeApp* xtreme_app_alloc() {
 
     furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
 
+    strlcpy(app->device_name, furi_hal_version_get_name_ptr(), NAMECHANGER_TEXT_STORE_SIZE);
+
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
-    app->dolphin_level = stats.level;
+    app->xp_level = stats.level;
     furi_record_close(RECORD_DOLPHIN);
-
-    strlcpy(app->device_name, furi_hal_version_get_name_ptr(), NAMECHANGER_TEXT_STORE_SIZE);
 
     app->version_tag =
         furi_string_alloc_printf("%s  %s", version_get_version(NULL), version_get_builddate(NULL));
@@ -280,21 +280,22 @@ void xtreme_app_free(XtremeApp* app) {
     // Settings deinit
 
     CharList_it_t it;
-    for(CharList_it(it, app->asset_packs); !CharList_end_p(it); CharList_next(it)) {
+    for(CharList_it(it, app->asset_pack_names); !CharList_end_p(it); CharList_next(it)) {
         free(*CharList_cref(it));
     }
-    CharList_clear(app->asset_packs);
-    for(CharList_it(it, app->mainmenu_apps_names); !CharList_end_p(it); CharList_next(it)) {
-        free(*CharList_cref(it));
-    }
-    CharList_clear(app->mainmenu_apps_names);
-    for(CharList_it(it, app->mainmenu_apps_paths); !CharList_end_p(it); CharList_next(it)) {
-        free(*CharList_cref(it));
-    }
-    CharList_clear(app->mainmenu_apps_paths);
+    CharList_clear(app->asset_pack_names);
 
-    FrequencyList_clear(app->subghz_static_frequencies);
-    FrequencyList_clear(app->subghz_hopper_frequencies);
+    for(CharList_it(it, app->mainmenu_app_names); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
+    }
+    CharList_clear(app->mainmenu_app_names);
+    for(CharList_it(it, app->mainmenu_app_paths); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
+    }
+    CharList_clear(app->mainmenu_app_paths);
+
+    FrequencyList_clear(app->subghz_static_freqs);
+    FrequencyList_clear(app->subghz_hopper_freqs);
 
     furi_string_free(app->version_tag);
 

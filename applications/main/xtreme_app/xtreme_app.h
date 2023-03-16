@@ -36,27 +36,29 @@ typedef struct {
     VariableItemList* var_item_list;
     TextInput* text_input;
     Popup* popup;
-    uint asset_pack;
-    CharList_t asset_packs;
-    CharList_t mainmenu_apps_names;
-    CharList_t mainmenu_apps_paths;
+
+    CharList_t asset_pack_names;
+    uint8_t asset_pack_index;
+    CharList_t mainmenu_app_names;
+    CharList_t mainmenu_app_paths;
     uint8_t mainmenu_app_index;
     bool subghz_use_defaults;
-    FrequencyList_t subghz_static_frequencies;
+    FrequencyList_t subghz_static_freqs;
     uint8_t subghz_static_index;
-    FrequencyList_t subghz_hopper_frequencies;
+    FrequencyList_t subghz_hopper_freqs;
     uint8_t subghz_hopper_index;
     char subghz_freq_buffer[XTREME_SUBGHZ_FREQ_BUFFER_SIZE];
     bool subghz_extend;
     bool subghz_bypass;
-    int dolphin_level;
     char device_name[NAMECHANGER_TEXT_STORE_SIZE];
+    int32_t xp_level;
     FuriString* version_tag;
+
     bool save_mainmenu_apps;
-    bool save_subghz;
     bool save_subghz_frequencies;
-    bool save_level;
+    bool save_subghz;
     bool save_name;
+    bool save_level;
     bool save_settings;
     bool require_reboot;
 } XtremeApp;

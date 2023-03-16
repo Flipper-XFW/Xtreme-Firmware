@@ -44,11 +44,11 @@ void XTREME_SETTINGS_LOAD() {
             xtreme_settings->status_icons = true; // ON
             xtreme_settings->bar_borders = true; // ON
             xtreme_settings->bar_background = false; // OFF
+            xtreme_settings->sort_dirs_first = true; // ON
+            xtreme_settings->dark_mode = false; // OFF
             xtreme_settings->bad_bt = false; // USB
             xtreme_settings->bad_bt_remember = false; // OFF
             xtreme_settings->butthurt_timer = 43200; // 12 H
-            xtreme_settings->sort_dirs_first = true; // ON
-            xtreme_settings->dark_mode = false; // OFF
         }
     }
 }

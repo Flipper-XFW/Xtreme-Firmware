@@ -17,9 +17,9 @@ static void xtreme_app_scene_protocols_frequencies_add_text_input_callback(void*
     bool is_hopper =
         scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd);
     if(is_hopper) {
-        FrequencyList_push_back(app->subghz_hopper_frequencies, value);
+        FrequencyList_push_back(app->subghz_hopper_freqs, value);
     } else {
-        FrequencyList_push_back(app->subghz_static_frequencies, value);
+        FrequencyList_push_back(app->subghz_static_freqs, value);
     }
     app->save_subghz_frequencies = true;
     view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultOk);
