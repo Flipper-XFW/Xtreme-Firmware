@@ -20,12 +20,14 @@ struct VariableItemList {
     View* view;
     VariableItemListEnterCallback callback;
     void* context;
+    FuriTimer* scroll_timer;
 };
 
 typedef struct {
     VariableItemArray_t items;
     uint8_t position;
     uint8_t window_position;
+    size_t scroll_counter;
 } VariableItemListModel;
 
 static void variable_item_list_process_up(VariableItemList* variable_item_list);
@@ -56,11 +58,18 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
             const VariableItem* item = VariableItemArray_cref(it);
             uint8_t item_y = y_offset + (item_position * item_height);
             uint8_t item_text_y = item_y + item_height - 4;
+            size_t scroll_counter = 0;
 
             if(position == model->position) {
                 canvas_set_color(canvas, ColorBlack);
                 elements_slightly_rounded_box(canvas, 0, item_y + 1, item_width, item_height - 2);
                 canvas_set_color(canvas, ColorWhite);
+                scroll_counter = model->scroll_counter;
+                if(scroll_counter < 1) {
+                    scroll_counter = 0;
+                } else {
+                    scroll_counter -= 1;
+                }
             } else {
                 canvas_set_color(canvas, ColorBlack);
             }
@@ -71,13 +80,15 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 canvas_draw_str(canvas, 73, item_text_y, "<");
             }
 
-            canvas_draw_str_aligned(
+            elements_scrollable_text_line(
                 canvas,
                 (115 + 73) / 2 + 1,
                 item_text_y,
-                AlignCenter,
-                AlignBottom,
-                furi_string_get_cstr(item->current_value_text));
+                37,
+                item->current_value_text,
+                scroll_counter,
+                false,
+                true);
 
             if(item->current_value_index < (item->values_count - 1)) {
                 canvas_draw_str(canvas, 115, item_text_y, ">");
@@ -198,6 +209,7 @@ void variable_item_list_process_up(VariableItemList* variable_item_list) {
                     model->window_position = model->position - (items_on_screen - 1);
                 }
             }
+            model->scroll_counter = 0;
         },
         true);
 }
@@ -219,6 +231,7 @@ void variable_item_list_process_down(VariableItemList* variable_item_list) {
                 model->position = 0;
                 model->window_position = 0;
             }
+            model->scroll_counter = 0;
         },
         true);
 }
@@ -250,6 +263,7 @@ void variable_item_list_process_left(VariableItemList* variable_item_list) {
             VariableItem* item = variable_item_list_get_selected_item(model);
             if(item->current_value_index > 0) {
                 item->current_value_index--;
+                model->scroll_counter = 0;
                 if(item->change_callback) {
                     item->change_callback(item);
                 }
@@ -266,6 +280,7 @@ void variable_item_list_process_right(VariableItemList* variable_item_list) {
             VariableItem* item = variable_item_list_get_selected_item(model);
             if(item->current_value_index < (item->values_count - 1)) {
                 item->current_value_index++;
+                model->scroll_counter = 0;
                 if(item->change_callback) {
                     item->change_callback(item);
                 }
@@ -286,6 +301,12 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
         false);
 }
 
+static void variable_item_list_scroll_timer_callback(void* context) {
+    VariableItemList* variable_item_list = context;
+    with_view_model(
+        variable_item_list->view, VariableItemListModel * model, { model->scroll_counter++; }, true);
+}
+
 VariableItemList* variable_item_list_alloc() {
     VariableItemList* variable_item_list = malloc(sizeof(VariableItemList));
     variable_item_list->view = view_alloc();
@@ -302,8 +323,12 @@ VariableItemList* variable_item_list_alloc() {
             VariableItemArray_init(model->items);
             model->position = 0;
             model->window_position = 0;
+            model->scroll_counter = 0;
         },
         true);
+    variable_item_list->scroll_timer =
+        furi_timer_alloc(variable_item_list_scroll_timer_callback, FuriTimerTypePeriodic, variable_item_list);
+    furi_timer_start(variable_item_list->scroll_timer, 333);
 
     return variable_item_list;
 }
@@ -323,6 +348,8 @@ void variable_item_list_free(VariableItemList* variable_item_list) {
             VariableItemArray_clear(model->items);
         },
         false);
+    furi_timer_stop(variable_item_list->scroll_timer);
+    furi_timer_free(variable_item_list->scroll_timer);
     view_free(variable_item_list->view);
     free(variable_item_list);
 }
