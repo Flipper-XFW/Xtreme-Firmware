@@ -60,7 +60,8 @@ jobs:
         run: |
           cd ./dist/${DEFAULT_TARGET}-*
           mv flipper-z-${DEFAULT_TARGET}-update-*.tgz ${RELEASE_TAG}.tgz
-          cd ./${DEFAULT_TARGET}-update-*
+          mv ${DEFAULT_TARGET}-update-* ${RELEASE_TAG}
+          cd ./${RELEASE_TAG}
           7z a ../${RELEASE_TAG}.zip .
           cd ..
           mv ${RELEASE_TAG}.tgz ..
