@@ -513,16 +513,16 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
        !(value >= 778999847 && value <= 928000000) && !(is_extended)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside regional range");
-        return false;
+        is_allowed = false;
     } else if(
         !(value >= 281000000 && value <= 361000000) &&
         !(value >= 378000000 && value <= 481000000) &&
         !(value >= 749000000 && value <= 962000000) && is_extended) {
         FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
-        return false;
+        is_allowed = false;
     }
 
-    return true;
+    return is_allowed;
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
