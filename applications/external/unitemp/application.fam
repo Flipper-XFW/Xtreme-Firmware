@@ -3,7 +3,6 @@ App(
     name="[GPIO] Unitemp",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="unitemp_app",
-    cdefines=["UNITEMP_APP"],
     requires=[
         "gui",
     ],
