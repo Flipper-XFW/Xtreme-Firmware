@@ -23,6 +23,8 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 - <h4>Stable: Many hours have been spent rewriting core parts of the Flippers firmware as well as some of its apps to ensure stability. A task that was long needed on all Firmware, so we tackled it right away.</h4>
 
 - <h4>Customizable: Dont like the Animations, want to turn on/off the Home screen icons (battery, SD card etc), change the flippers name or anything like that? You absolutely can. No need to mess with code or deal with weird manifest files. Its all done with an App.</h4>
+<br><br>
+<h4 align="center">Note, the below mentioned changes are only a few things we did. For a full list click [here]()</h3>
 
 -----
 <br>
