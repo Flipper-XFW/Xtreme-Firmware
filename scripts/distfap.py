@@ -53,7 +53,7 @@ class Main(App):
                     return 0
 
                 storage.send_and_wait_eol(
-                    f'loader open "Applications" {fap_dst_path}\r'
+                    f'loader open "Apps" {fap_dst_path}\r'
                 )
 
                 if len(result := storage.read.until(storage.CLI_EOL)):
