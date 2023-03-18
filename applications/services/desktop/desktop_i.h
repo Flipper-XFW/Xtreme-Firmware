@@ -5,7 +5,6 @@
 #include "views/desktop_view_pin_timeout.h"
 #include "views/desktop_view_pin_input.h"
 #include "views/desktop_view_locked.h"
-#include "views/desktop_view_lockscreen.h"
 #include "views/desktop_view_main.h"
 #include "views/desktop_view_lock_menu.h"
 #include "views/desktop_view_debug.h"
@@ -48,7 +47,6 @@ struct Desktop {
     DesktopLockMenuView* lock_menu;
     DesktopDebugView* debug_view;
     DesktopViewLocked* locked_view;
-    DesktopLockscreenView* lockscreen_view;
     DesktopMainView* main_view;
     DesktopViewPinTimeout* pin_timeout_view;
     DesktopSlideshowView* slideshow_view;

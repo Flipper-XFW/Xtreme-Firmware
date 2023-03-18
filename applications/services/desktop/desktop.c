@@ -165,7 +165,6 @@ Desktop* desktop_alloc() {
     desktop->debug_view = desktop_debug_alloc();
     desktop->hw_mismatch_popup = popup_alloc();
     desktop->locked_view = desktop_view_locked_alloc();
-    desktop->lockscreen_view = desktop_view_lockscreen_alloc();
     desktop->pin_input_view = desktop_view_pin_input_alloc();
     desktop->pin_timeout_view = desktop_view_pin_timeout_alloc();
     desktop->slideshow_view = desktop_view_slideshow_alloc();
@@ -181,7 +180,7 @@ Desktop* desktop_alloc() {
     /* locked view (as animation view) attends in 2 scenes: main & locked,
      * because it has to draw "Unlocked" label on main scene */
     desktop->locked_view_stack = view_stack_alloc();
-    view_stack_add_view(desktop->locked_view_stack, desktop_view_lockscreen_get_view(desktop->lockscreen_view));
+    view_stack_add_view(desktop->locked_view_stack, dolphin_view);
     view_stack_add_view(
         desktop->locked_view_stack, desktop_view_locked_get_view(desktop->locked_view));
 

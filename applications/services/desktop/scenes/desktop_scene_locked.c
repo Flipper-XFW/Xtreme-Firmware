@@ -60,11 +60,11 @@ void desktop_scene_locked_on_enter(void* context) {
                     desktop->scene_manager, DesktopScenePinTimeout, pin_timeout);
                 switch_to_timeout_scene = true;
             } else {
-                desktop_view_locked_close_doors(desktop->locked_view);
+                desktop_view_locked_close_cover(desktop->locked_view);
             }
         } else {
             desktop_view_locked_lock(desktop->locked_view, false);
-            desktop_view_locked_close_doors(desktop->locked_view);
+            desktop_view_locked_close_cover(desktop->locked_view);
         }
         scene_manager_set_scene_state(
             desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_REPEAT_ENTER);
