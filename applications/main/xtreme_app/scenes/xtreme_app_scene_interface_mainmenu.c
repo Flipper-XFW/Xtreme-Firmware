@@ -17,7 +17,7 @@ void xtreme_app_scene_interface_mainmenu_var_item_list_callback(
 static void xtreme_app_scene_interface_mainmenu_wii_menu_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    variable_item_set_current_value_text(item, value ? "Wii Grid" : "App List");
     XTREME_SETTINGS()->wii_menu = value;
     app->save_settings = true;
 }
@@ -35,9 +35,9 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list, "Wii menu", 2, xtreme_app_scene_interface_mainmenu_wii_menu_changed, app);
+        var_item_list, "Menu Style", 2, xtreme_app_scene_interface_mainmenu_wii_menu_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->wii_menu);
-    variable_item_set_current_value_text(item, xtreme_settings->wii_menu ? "ON" : "OFF");
+    variable_item_set_current_value_text(item, xtreme_settings->wii_menu ? "Wii Grid" : "App List");
 
     item = variable_item_list_add(
         var_item_list,
