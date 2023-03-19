@@ -3,6 +3,7 @@
 enum VarItemListIndex {
     VarItemListIndexGraphics,
     VarItemListIndexMainmenu,
+    VarItemListIndexLockscreen,
     VarItemListIndexStatusbar,
     VarItemListIndexCommon,
 };
@@ -18,6 +19,7 @@ void xtreme_app_scene_interface_on_enter(void* context) {
 
     variable_item_list_add(var_item_list, "Graphics", 0, NULL, app);
     variable_item_list_add(var_item_list, "Mainmenu", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Lockscreen", 0, NULL, app);
     variable_item_list_add(var_item_list, "Statusbar", 0, NULL, app);
     variable_item_list_add(var_item_list, "Common", 0, NULL, app);
 
@@ -43,6 +45,9 @@ bool xtreme_app_scene_interface_on_event(void* context, SceneManagerEvent event)
             break;
         case VarItemListIndexMainmenu:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenu);
+            break;
+        case VarItemListIndexLockscreen:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceLockscreen);
             break;
         case VarItemListIndexStatusbar:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceStatusbar);

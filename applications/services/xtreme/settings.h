@@ -15,7 +15,7 @@ extern "C" {
 
 #define MAX_PACK_NAME_LEN 32
 
-#define XTREME_SETTINGS_VERSION (7)
+#define XTREME_SETTINGS_VERSION (8)
 #define XTREME_SETTINGS_PATH_OLD INT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_PATH EXT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
@@ -28,6 +28,9 @@ typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
     bool wii_menu;
+    bool lockscreen_time;
+    bool lockscreen_date;
+    bool lockscreen_statusbar;
     BatteryIcon battery_icon;
     bool status_icons;
     bool bar_borders;

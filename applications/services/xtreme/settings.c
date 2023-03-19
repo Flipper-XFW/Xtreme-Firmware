@@ -40,6 +40,9 @@ void XTREME_SETTINGS_LOAD() {
             xtreme_settings->cycle_anims = 0; // Meta.txt
             xtreme_settings->unlock_anims = false; // OFF
             xtreme_settings->wii_menu = true; // ON
+            xtreme_settings->lockscreen_time = true; // ON
+            xtreme_settings->lockscreen_date = true; // ON
+            xtreme_settings->lockscreen_statusbar = true; // ON
             xtreme_settings->battery_icon = BatteryIconBarPercent; // Bar %
             xtreme_settings->status_icons = true; // ON
             xtreme_settings->bar_borders = true; // ON

@@ -91,17 +91,23 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         snprintf(date_str, 14, "%.2d-%.2d-%.4d", datetime.day, datetime.month, datetime.year);
     }
 
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     canvas_draw_icon(canvas, 0, 0 + y, XTREME_ASSETS()->I_Lockscreen);
-    canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str(canvas, 0, 64 + y, time_str);
-    int meridian_offset = canvas_string_width(canvas, time_str) + 2;
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 48 + y, date_str);
-    if(time_format == LocaleTimeFormat12h) {
-        canvas_draw_str(canvas, 0 + meridian_offset, 64 + y, meridian_str);
+    if(xtreme_settings->lockscreen_time) {
+        canvas_set_font(canvas, FontBigNumbers);
+        canvas_draw_str(canvas, 0, 64 + y, time_str);
+        if(time_format == LocaleTimeFormat12h) {
+            int meridian_offset = canvas_string_width(canvas, time_str) + 2;
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 0 + meridian_offset, 64 + y, meridian_str);
+        }
     }
-    canvas_set_font(canvas, FontBatteryPercent);
+    if(xtreme_settings->lockscreen_date) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings->lockscreen_time, date_str);
+    }
     if(model->view_state == DesktopViewLockedStateLockedHintShown) {
+        canvas_set_font(canvas, FontBatteryPercent);
         canvas_draw_str_aligned(canvas, 79, 6 + y, AlignRight, AlignCenter, "Press 3x");
         canvas_draw_icon(canvas, 81, 2 + y, &I_Pin_back_arrow_10x8);
     }
