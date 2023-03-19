@@ -13,7 +13,7 @@
 #include "../desktop_i.h"
 #include "desktop_view_locked.h"
 
-#define COVER_MOVING_INTERVAL_MS (1000 / 16)
+#define COVER_MOVING_INTERVAL_MS (50)
 #define LOCKED_HINT_TIMEOUT_MS (1000)
 #define UNLOCKED_HINT_TIMEOUT_MS (2000)
 
@@ -101,19 +101,22 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         canvas_draw_str(canvas, 0 + meridian_offset, 64 + y, meridian_str);
     }
     canvas_set_font(canvas, FontBatteryPercent);
-    canvas_draw_str_aligned(canvas, 64, 6 + y, AlignCenter, AlignCenter, "UP to Unlock");
+    if(model->view_state == DesktopViewLockedStateLockedHintShown) {
+        canvas_draw_str_aligned(canvas, 79, 6 + y, AlignRight, AlignCenter, "Press 3x");
+        canvas_draw_icon(canvas, 81, 2 + y, &I_Pin_back_arrow_10x8);
+    }
 }
 
 static bool desktop_view_locked_cover_move(DesktopViewLockedModel* model, bool down) {
     bool stop = false;
     if(down) {
         if(model->cover_offset < COVER_OFFSET_END) {
-            model->cover_offset = CLAMP(model->cover_offset + 5, COVER_OFFSET_END, COVER_OFFSET_START);
+            model->cover_offset = CLAMP(model->cover_offset + 8, COVER_OFFSET_END, COVER_OFFSET_START);
             stop = true;
         }
     } else {
         if(model->cover_offset > COVER_OFFSET_START) {
-            model->cover_offset = CLAMP(model->cover_offset - 5, COVER_OFFSET_END, COVER_OFFSET_START);
+            model->cover_offset = CLAMP(model->cover_offset - 8, COVER_OFFSET_END, COVER_OFFSET_START);
             stop = true;
         }
     }
@@ -161,22 +164,11 @@ static void desktop_view_locked_draw(Canvas* canvas, void* model) {
     DesktopViewLockedState view_state = m->view_state;
     canvas_set_color(canvas, ColorBlack);
 
-    if(view_state == DesktopViewLockedStateLocked || view_state == DesktopViewLockedStateLockedHintShown || view_state == DesktopViewLockedStateCoverClosing || view_state == DesktopViewLockedStateCoverOpening) {
+    if(view_state == DesktopViewLockedStateLocked ||
+        view_state == DesktopViewLockedStateLockedHintShown ||
+        view_state == DesktopViewLockedStateCoverClosing ||
+        view_state == DesktopViewLockedStateCoverOpening) {
         desktop_view_locked_draw_lockscreen(canvas, m);
-        // canvas_set_font(canvas, FontPrimary);
-        // elements_multiline_text_framed(canvas, 42, 30 + STATUS_BAR_Y_SHIFT, "Locked");
-    } else if(view_state == DesktopViewLockedStateLockedHintShown) {
-        canvas_set_font(canvas, FontSecondary);
-        elements_bold_rounded_frame(canvas, 14, 2 + STATUS_BAR_Y_SHIFT, 99, 48);
-        elements_multiline_text(canvas, 65, 20 + STATUS_BAR_Y_SHIFT, "To unlock\npress:");
-        canvas_draw_icon(canvas, 65, 36 + STATUS_BAR_Y_SHIFT, &I_Pin_back_arrow_10x8);
-        canvas_draw_icon(canvas, 80, 36 + STATUS_BAR_Y_SHIFT, &I_Pin_back_arrow_10x8);
-        canvas_draw_icon(canvas, 95, 36 + STATUS_BAR_Y_SHIFT, &I_Pin_back_arrow_10x8);
-        canvas_draw_icon(canvas, 16, 7 + STATUS_BAR_Y_SHIFT, &I_WarningDolphin_45x42);
-        canvas_draw_dot(canvas, 17, 61);
-    } else if(view_state == DesktopViewLockedStateUnlockedHintShown) {
-        // canvas_set_font(canvas, FontPrimary);
-        // elements_multiline_text_framed(canvas, 42, 30 + STATUS_BAR_Y_SHIFT, "Unlocked");
     }
 }
 
