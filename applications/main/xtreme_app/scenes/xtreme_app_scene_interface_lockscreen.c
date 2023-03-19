@@ -34,6 +34,14 @@ static void xtreme_app_scene_interface_lockscreen_show_statusbar_changed(Variabl
     app->save_settings = true;
 }
 
+static void xtreme_app_scene_interface_lockscreen_unlock_prompt_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->lockscreen_prompt = value;
+    app->save_settings = true;
+}
+
 void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
     XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
@@ -54,6 +62,11 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
         var_item_list, "Show Statusbar", 2, xtreme_app_scene_interface_lockscreen_show_statusbar_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_statusbar);
     variable_item_set_current_value_text(item, xtreme_settings->lockscreen_statusbar ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list, "Unlock Prompt", 2, xtreme_app_scene_interface_lockscreen_unlock_prompt_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->lockscreen_prompt);
+    variable_item_set_current_value_text(item, xtreme_settings->lockscreen_prompt ? "ON" : "OFF");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_interface_lockscreen_var_item_list_callback, app);

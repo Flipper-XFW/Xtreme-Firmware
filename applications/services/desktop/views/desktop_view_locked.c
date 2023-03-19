@@ -106,7 +106,7 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings->lockscreen_time, date_str);
     }
-    if(model->view_state == DesktopViewLockedStateLockedHintShown) {
+    if(model->view_state == DesktopViewLockedStateLockedHintShown && xtreme_settings->lockscreen_prompt) {
         canvas_set_font(canvas, FontSecondary);
         if(model->pin_locked) {
             elements_bubble_str(canvas, 12, 14 + y, "  Press   \nto unlock!", AlignRight, AlignBottom);

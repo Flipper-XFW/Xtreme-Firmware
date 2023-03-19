@@ -43,6 +43,7 @@ void XTREME_SETTINGS_LOAD() {
             xtreme_settings->lockscreen_time = true; // ON
             xtreme_settings->lockscreen_date = true; // ON
             xtreme_settings->lockscreen_statusbar = true; // ON
+            xtreme_settings->lockscreen_prompt = true; // ON
             xtreme_settings->battery_icon = BatteryIconBarPercent; // Bar %
             xtreme_settings->status_icons = true; // ON
             xtreme_settings->bar_borders = true; // ON
