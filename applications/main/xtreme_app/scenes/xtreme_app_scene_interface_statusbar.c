@@ -4,7 +4,7 @@ enum VarItemListIndex {
     VarItemListIndexBatteryIcon,
     VarItemListIndexStatusIcons,
     VarItemListIndexBarBorders,
-    VarItemListIndexbarBackground,
+    VarItemListIndexBarBackground,
 };
 
 void xtreme_app_scene_interface_statusbar_var_item_list_callback(void* context, uint32_t index) {
