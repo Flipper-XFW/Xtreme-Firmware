@@ -107,9 +107,14 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings->lockscreen_time, date_str);
     }
     if(model->view_state == DesktopViewLockedStateLockedHintShown) {
-        canvas_set_font(canvas, FontBatteryPercent);
-        canvas_draw_str_aligned(canvas, 79, 6 + y, AlignRight, AlignCenter, "Press 3x");
-        canvas_draw_icon(canvas, 81, 2 + y, &I_Pin_back_arrow_10x8);
+        canvas_set_font(canvas, FontSecondary);
+        if(model->pin_locked) {
+            elements_bubble_str(canvas, 12, 14 + y, "  Press   \nto unlock!", AlignRight, AlignBottom);
+            canvas_draw_icon(canvas, 45, 16 + y, &I_Pin_arrow_up_7x9);
+        } else {
+            elements_bubble_str(canvas, 2, 14 + y, "Press 3x      \n  to unlock!", AlignRight, AlignBottom);
+            canvas_draw_icon(canvas, 43, 17 + y, &I_Pin_back_arrow_10x8);
+        }
     }
 }
 
@@ -132,8 +137,7 @@ static bool desktop_view_locked_cover_move(DesktopViewLockedModel* model, bool d
 
 static void desktop_view_locked_update_hint_icon_timeout(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
-    const bool change_state = (model->view_state == DesktopViewLockedStateLocked) &&
-                              !model->pin_locked;
+    const bool change_state = (model->view_state == DesktopViewLockedStateLocked);
     if(change_state) {
         model->view_state = DesktopViewLockedStateLockedHintShown;
     }
@@ -202,8 +206,6 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
 
     if(view_state == DesktopViewLockedStateUnlocked) {
         return false;
-    } else if(view_state == DesktopViewLockedStateLocked && pin_locked) {
-        locked_view->callback(DesktopLockedEventShowPinInput, locked_view->context);
     } else if(
         view_state == DesktopViewLockedStateLocked ||
         view_state == DesktopViewLockedStateLockedHintShown) {
@@ -214,16 +216,24 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
 
         desktop_view_locked_update_hint_icon_timeout(locked_view);
 
-        if(event->key == InputKeyBack) {
-            if(event->type == InputTypeShort) {
-                locked_view->lock_lastpress = press_time;
-                locked_view->lock_count++;
-                if(locked_view->lock_count == UNLOCK_CNT) {
-                    locked_view->callback(DesktopLockedEventUnlocked, locked_view->context);
-                }
+        if(pin_locked) {
+            if(event->key == InputKeyUp) {
+                locked_view->callback(DesktopLockedEventShowPinInput, locked_view->context);
+            } else {
+                locked_view->lock_count = 0;
             }
         } else {
-            locked_view->lock_count = 0;
+            if(event->key == InputKeyBack) {
+                if(event->type == InputTypeShort) {
+                    locked_view->lock_lastpress = press_time;
+                    locked_view->lock_count++;
+                    if(locked_view->lock_count == UNLOCK_CNT) {
+                        locked_view->callback(DesktopLockedEventUnlocked, locked_view->context);
+                    }
+                }
+            } else {
+                locked_view->lock_count = 0;
+            }
         }
 
         locked_view->lock_lastpress = press_time;
