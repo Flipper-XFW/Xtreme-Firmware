@@ -268,7 +268,9 @@ static void gui_redraw(Gui* gui) {
             bool need_attention =
                 (gui_view_port_find_enabled(gui->layers[GuiLayerWindow]) != 0 ||
                  gui_view_port_find_enabled(gui->layers[GuiLayerFullscreen]) != 0);
-            gui_redraw_status_bar(gui, need_attention);
+            if(XTREME_SETTINGS()->lockscreen_statusbar) {
+                gui_redraw_status_bar(gui, need_attention);
+            }
         } else {
             if(!gui_redraw_fs(gui)) {
                 if(!gui_redraw_window(gui)) {
