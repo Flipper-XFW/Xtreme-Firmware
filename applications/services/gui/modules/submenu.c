@@ -416,7 +416,7 @@ void submenu_process_ok(Submenu* submenu) {
             }
             if(item && item->locked) {
                 model->locked_message_visible = true;
-                furi_timer_start(submenu->locked_timer, furi_kernel_get_tick_frequency() * 4);
+                furi_timer_start(submenu->locked_timer, furi_kernel_get_tick_frequency() * 3);
             }
         },
         true);
