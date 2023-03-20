@@ -284,6 +284,10 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
 
     elements_button_left(canvas, "Back");
     elements_button_right(canvas, "Next");
+    char uptime[17];
+    uint32_t sec = furi_get_tick() / furi_kernel_get_tick_frequency();
+    snprintf(uptime, sizeof(uptime), "Up %02lu:%02lu:%02lu", sec / 3600, sec / 60 % 60, sec % 60);
+    canvas_draw_str_aligned(canvas, 64, 61, AlignCenter, AlignBottom, uptime);
 }
 
 static bool battery_info_input_callback(InputEvent* event, void* context) {
