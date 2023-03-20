@@ -129,48 +129,50 @@ void subghz_scene_ext_module_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index_pwr);
     variable_item_set_current_value_text(item, ext_mod_power_text[value_index_pwr]);
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        item = variable_item_list_add(
-            subghz->variable_item_list,
-            "Debug Pin",
-            DEBUG_P_COUNT,
-            subghz_scene_receiver_config_set_debug_pin,
-            subghz);
-        value_index_dpin = subghz->txrx->debug_pin_state;
-        variable_item_set_current_value_index(item, value_index_dpin);
-        variable_item_set_current_value_text(item, debug_pin_text[value_index_dpin]);
+    item = variable_item_list_add(
+        subghz->variable_item_list,
+        "Debug Pin",
+        DEBUG_P_COUNT,
+        subghz_scene_receiver_config_set_debug_pin,
+        subghz);
+    value_index_dpin = subghz->txrx->debug_pin_state;
+    variable_item_set_current_value_index(item, value_index_dpin);
+    variable_item_set_current_value_text(item, debug_pin_text[value_index_dpin]);
+    variable_item_set_locked(
+        item, !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug), "Enable\nDebug!");
 
-        item = variable_item_list_add(
-            subghz->variable_item_list,
-            "Counter incr.",
-            DEBUG_COUNTER_COUNT,
-            subghz_scene_receiver_config_set_debug_counter,
-            subghz);
-        switch(furi_hal_subghz_get_rolling_counter_mult()) {
-        case 1:
-            value_index_cnt = 0;
-            break;
-        case 2:
-            value_index_cnt = 1;
-            break;
-        case 3:
-            value_index_cnt = 2;
-            break;
-        case 4:
-            value_index_cnt = 3;
-            break;
-        case 5:
-            value_index_cnt = 4;
-            break;
-        case 10:
-            value_index_cnt = 5;
-            break;
-        default:
-            break;
-        }
-        variable_item_set_current_value_index(item, value_index_cnt);
-        variable_item_set_current_value_text(item, debug_counter_text[value_index_cnt]);
+    item = variable_item_list_add(
+        subghz->variable_item_list,
+        "Counter incr.",
+        DEBUG_COUNTER_COUNT,
+        subghz_scene_receiver_config_set_debug_counter,
+        subghz);
+    switch(furi_hal_subghz_get_rolling_counter_mult()) {
+    case 1:
+        value_index_cnt = 0;
+        break;
+    case 2:
+        value_index_cnt = 1;
+        break;
+    case 3:
+        value_index_cnt = 2;
+        break;
+    case 4:
+        value_index_cnt = 3;
+        break;
+    case 5:
+        value_index_cnt = 4;
+        break;
+    case 10:
+        value_index_cnt = 5;
+        break;
+    default:
+        break;
     }
+    variable_item_set_current_value_index(item, value_index_cnt);
+    variable_item_set_current_value_text(item, debug_counter_text[value_index_cnt]);
+    variable_item_set_locked(
+        item, !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug), "Enable\nDebug!");
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
 }
