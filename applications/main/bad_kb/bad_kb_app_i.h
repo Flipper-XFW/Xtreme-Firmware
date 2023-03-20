@@ -53,8 +53,7 @@ struct BadKbApp {
     NotificationApp* notifications;
     DialogsApp* dialogs;
     Widget* widget;
-    VariableItemList* var_item_list_bt;
-    VariableItemList* var_item_list_usb;
+    VariableItemList* var_item_list;
 
     Bt* bt;
     TextInput* text_input;
@@ -81,8 +80,7 @@ struct BadKbApp {
 typedef enum {
     BadKbAppViewError,
     BadKbAppViewWork,
-    BadKbAppViewConfigBt,
-    BadKbAppViewConfigUsb,
+    BadKbAppViewConfig,
     BadKbAppViewConfigMac,
     BadKbAppViewConfigName
 } BadKbAppView;

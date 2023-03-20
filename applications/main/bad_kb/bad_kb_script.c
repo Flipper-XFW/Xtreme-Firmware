@@ -442,11 +442,10 @@ void bad_kb_config_switch_mode(BadKbApp* app) {
     scene_manager_previous_scene(app->scene_manager);
     if(app->is_bt) {
         furi_hal_bt_start_advertising();
-        scene_manager_next_scene(app->scene_manager, BadKbSceneConfigBt);
     } else {
         furi_hal_bt_stop_advertising();
-        scene_manager_next_scene(app->scene_manager, BadKbSceneConfigUsb);
     }
+    scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
     bad_kb_reload_worker(app);
 }
 

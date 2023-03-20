@@ -125,16 +125,11 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     view_dispatcher_add_view(
         app->view_dispatcher, BadKbAppViewError, widget_get_view(app->widget));
 
-    app->var_item_list_bt = variable_item_list_alloc();
+    app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
-        BadKbAppViewConfigBt,
-        variable_item_list_get_view(app->var_item_list_bt));
-    app->var_item_list_usb = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        BadKbAppViewConfigUsb,
-        variable_item_list_get_view(app->var_item_list_usb));
+        BadKbAppViewConfig,
+        variable_item_list_get_view(app->var_item_list));
 
     app->bad_kb_view = bad_kb_alloc();
     view_dispatcher_add_view(
@@ -188,10 +183,8 @@ void bad_kb_app_free(BadKbApp* app) {
     widget_free(app->widget);
 
     // Variable item list
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigBt);
-    variable_item_list_free(app->var_item_list_bt);
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigUsb);
-    variable_item_list_free(app->var_item_list_usb);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfig);
+    variable_item_list_free(app->var_item_list);
 
     // Text Input
     view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigName);
