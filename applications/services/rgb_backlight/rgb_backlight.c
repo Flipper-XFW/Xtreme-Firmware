@@ -174,3 +174,8 @@ void rgb_backlight_update(uint8_t brightness) {
 
     SK6805_update();
 }
+
+int32_t rgb_backlight_srv(void* p) {
+    UNUSED(p);
+    return 0;
+}

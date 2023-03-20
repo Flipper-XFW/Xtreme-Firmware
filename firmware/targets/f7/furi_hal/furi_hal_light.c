@@ -4,7 +4,7 @@
 #include <lp5562.h>
 #include <stdint.h>
 #include <xtreme/settings.h>
-#include <applications/settings/notification_settings/rgb_backlight.h>
+#include <rgb_backlight/rgb_backlight.h>
 
 #define LED_CURRENT_RED 50
 #define LED_CURRENT_GREEN 50

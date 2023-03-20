@@ -20,6 +20,8 @@
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/subghz/subghz_setting.h>
 #include <applications/main/fap_loader/fap_loader_app.h>
+#include <notification/notification_app.h>
+#include <rgb_backlight/rgb_backlight.h>
 #include <m-array.h>
 #include "xtreme/settings.h"
 #include "xtreme/assets.h"
@@ -31,6 +33,7 @@ ARRAY_DEF(CharList, char*)
 typedef struct {
     Gui* gui;
     DialogsApp* dialogs;
+    NotificationApp* notification;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;

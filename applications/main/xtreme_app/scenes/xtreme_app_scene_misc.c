@@ -12,15 +12,6 @@ void xtreme_app_scene_misc_var_item_list_callback(void* context, uint32_t index)
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void xtreme_app_scene_misc_rgb_backlight_changed(VariableItem* item) {
-    XtremeApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->rgb_backlight = value;
-    app->save_settings = true;
-    app->require_reboot = true;
-}
-
 static void xtreme_app_scene_misc_xp_level_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     app->xp_level = variable_item_get_current_value_index(item) + 1;
@@ -28,6 +19,23 @@ static void xtreme_app_scene_misc_xp_level_changed(VariableItem* item) {
     snprintf(level_str, 4, "%li", app->xp_level);
     variable_item_set_current_value_text(item, level_str);
     app->save_level = true;
+}
+
+static void xtreme_app_scene_misc_rgb_backlight_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->rgb_backlight = value;
+    app->save_settings = true;
+    notification_message(app->notification, &sequence_display_backlight_on);
+}
+
+static void xtreme_app_scene_misc_lcd_color_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, rgb_backlight_get_color_text(index));
+    rgb_backlight_set_color(index);
+    notification_message(app->notification, &sequence_display_backlight_on);
 }
 
 const char* const butthurt_timer_names[] =
@@ -52,11 +60,6 @@ void xtreme_app_scene_misc_on_enter(void* context) {
 
     variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
 
-    item = variable_item_list_add(
-        var_item_list, "RGB Backlight", 2, xtreme_app_scene_misc_rgb_backlight_changed, app);
-    variable_item_set_current_value_index(item, xtreme_settings->rgb_backlight);
-    variable_item_set_current_value_text(item, xtreme_settings->rgb_backlight ? "ON" : "OFF");
-
     char level_str[4];
     snprintf(level_str, 4, "%li", app->xp_level);
     item = variable_item_list_add(
@@ -78,6 +81,18 @@ void xtreme_app_scene_misc_on_enter(void* context) {
         xtreme_settings->butthurt_timer, butthurt_timer_values, COUNT_OF(butthurt_timer_names));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, butthurt_timer_names[value_index]);
+
+    item = variable_item_list_add(
+        var_item_list, "RGB Backlight", 2, xtreme_app_scene_misc_rgb_backlight_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->rgb_backlight);
+    variable_item_set_current_value_text(item, xtreme_settings->rgb_backlight ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list, "LCD Color", rgb_backlight_get_color_count(), xtreme_app_scene_misc_lcd_color_changed, app);
+    value_index = rgb_backlight_get_settings()->display_color_index;
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, rgb_backlight_get_color_text(value_index));
+    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_misc_var_item_list_callback, app);

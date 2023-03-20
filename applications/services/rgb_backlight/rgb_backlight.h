@@ -19,6 +19,10 @@
 #include <furi.h>
 #include "SK6805.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     char* name;
     uint8_t red;
@@ -77,3 +81,7 @@ uint8_t rgb_backlight_get_color_count(void);
  * @return Указатель на строку с названием цвета
  */
 const char* rgb_backlight_get_color_text(uint8_t index);
+
+#ifdef __cplusplus
+}
+#endif
