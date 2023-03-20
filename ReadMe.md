@@ -159,20 +159,37 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 ----
 <br>
 <h2 align="center">Install:</h2>
+<br>
 
-**This is the recommended install procedure. Please follow these steps EXACTLY and CAREFULLY to ensure you install correctly.**
-**This process will NOT delete any saved files and simply ensures the install goes smoothly.**
-<br><br>
+There are 3 methods to install Xtreme, we recommend you use the **Web Updater**, but choose whichever one you prefer:
 
-- Download the latest release (.zip) from [The releases tab](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest)
-- Extract the archive. This is now your new Firmware folder
-- Open [qFlipper](https://flipperzero.one/update), head to `SD/Update` and simply move the firmware folder there
-- On the Flipper, hit the `Arrow Down` button, this will get you to the file menu. In there simply search for your updates folder
-- Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called `Update`
+<br>
 
-- Enjoy!
+> <details><summary><code>Web Updater (Chrome)</code></summary><ul>
+>   <li>Open the <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest">latest release page</a> and click on the <code>Web Updater</code> link</li>
+>   <li>Make sure qFlipper is closed</li>
+>   <li>Click <code>Connect</code> and select your Flipper from the list</li>
+>   <li>Click <code>Install</code> and wait for the update to complete</li>
+> </ul></details>
 
-**If you have issues or crashes with that process, you can try to use `Settings > Storage > Factory Reset` then retry the install.**
+> <details><summary><code>qFlipper Package (.tgz)</code></summary><ul>
+>   <li>Download the qFlipper package (.tgz) from the <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest">latest release page</a></li>
+>   <li>Open <a href="https://flipperzero.one/update">qFlipper</a> and connect your Flipper</li>
+>   <li>Click <code>Install from file</code></li>
+>   <li>Select the .tgz you downloaded and wait for the update to complete</li>
+> </ul></details>
+
+> <details><summary><code>Zipped Archive (.zip)</code></summary><ul>
+>   <li>Download the zipped archive (.zip) from the <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest">latest release page</a></li>
+>   <li>Extract the archive. This is now your new Firmware folder</li>
+>   <li>Open <a href="https://flipperzero.one/update">qFlipper</a>, head to <code>SD/Update</code> and simply move the firmware folder there</li>
+>   <li>On the Flipper, hit the <code>Arrow Down</code> button, this will get you to the file menu. In there simply search for your updates folder</li>
+>   <li>Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called <code>Update</code></li>
+> </ul></details>
+
+<br>
+
+**If you have issues or crashes with the install process, you can try to use `Settings > Storage > Factory Reset` then retry the install.**
 **Doing that will NOT remove your saved files, it will only forget some settings and paired devices.**
 
 ----
