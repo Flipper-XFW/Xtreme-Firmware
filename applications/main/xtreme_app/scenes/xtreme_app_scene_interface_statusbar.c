@@ -62,17 +62,29 @@ void xtreme_app_scene_interface_statusbar_on_enter(void* context) {
     variable_item_set_current_value_text(item, battery_icon_names[xtreme_settings->battery_icon]);
 
     item = variable_item_list_add(
-        var_item_list, "Status Icons", 2, xtreme_app_scene_interface_statusbar_status_icons_changed, app);
+        var_item_list,
+        "Status Icons",
+        2,
+        xtreme_app_scene_interface_statusbar_status_icons_changed,
+        app);
     variable_item_set_current_value_index(item, xtreme_settings->status_icons);
     variable_item_set_current_value_text(item, xtreme_settings->status_icons ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "Bar Borders", 2, xtreme_app_scene_interface_statusbar_bar_borders_changed, app);
+        var_item_list,
+        "Bar Borders",
+        2,
+        xtreme_app_scene_interface_statusbar_bar_borders_changed,
+        app);
     variable_item_set_current_value_index(item, xtreme_settings->bar_borders);
     variable_item_set_current_value_text(item, xtreme_settings->bar_borders ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "Bar Background", 2, xtreme_app_scene_interface_statusbar_bar_background_changed, app);
+        var_item_list,
+        "Bar Background",
+        2,
+        xtreme_app_scene_interface_statusbar_bar_background_changed,
+        app);
     variable_item_set_current_value_index(item, xtreme_settings->bar_background);
     variable_item_set_current_value_text(item, xtreme_settings->bar_background ? "ON" : "OFF");
 
@@ -80,7 +92,8 @@ void xtreme_app_scene_interface_statusbar_on_enter(void* context) {
         var_item_list, xtreme_app_scene_interface_statusbar_var_item_list_callback, app);
 
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneInterfaceStatusbar));
+        var_item_list,
+        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneInterfaceStatusbar));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
@@ -90,7 +103,8 @@ bool xtreme_app_scene_interface_statusbar_on_event(void* context, SceneManagerEv
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneInterfaceStatusbar, event.event);
+        scene_manager_set_scene_state(
+            app->scene_manager, XtremeAppSceneInterfaceStatusbar, event.event);
         consumed = true;
         switch(event.event) {
         default:

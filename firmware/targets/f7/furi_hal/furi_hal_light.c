@@ -47,7 +47,8 @@ void furi_hal_light_set(Light light, uint8_t value) {
         if(XTREME_SETTINGS()->rgb_backlight) {
             rgb_backlight_update(value);
         } else {
-            uint8_t prev = lp5562_get_channel_value(&furi_hal_i2c_handle_power, LP5562ChannelWhite);
+            uint8_t prev =
+                lp5562_get_channel_value(&furi_hal_i2c_handle_power, LP5562ChannelWhite);
             lp5562_execute_ramp(
                 &furi_hal_i2c_handle_power, LP5562Engine1, LP5562ChannelWhite, prev, value, 100);
         }

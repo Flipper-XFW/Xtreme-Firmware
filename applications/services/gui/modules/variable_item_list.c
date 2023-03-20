@@ -177,7 +177,10 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
     if((!(event->type == InputTypePress) && !(event->type == InputTypeRelease)) &&
        locked_message_visible) {
         with_view_model(
-            variable_item_list->view, VariableItemListModel * model, { model->locked_message_visible = false; }, true);
+            variable_item_list->view,
+            VariableItemListModel * model,
+            { model->locked_message_visible = false; },
+            true);
         consumed = true;
     } else if(event->type == InputTypeShort) {
         switch(event->key) {
@@ -301,7 +304,8 @@ void variable_item_list_process_left(VariableItemList* variable_item_list) {
             VariableItem* item = variable_item_list_get_selected_item(model);
             if(item->locked) {
                 model->locked_message_visible = true;
-                furi_timer_start(variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
+                furi_timer_start(
+                    variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
             } else if(item->current_value_index > 0) {
                 item->current_value_index--;
                 model->scroll_counter = 0;
@@ -321,7 +325,8 @@ void variable_item_list_process_right(VariableItemList* variable_item_list) {
             VariableItem* item = variable_item_list_get_selected_item(model);
             if(item->locked) {
                 model->locked_message_visible = true;
-                furi_timer_start(variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
+                furi_timer_start(
+                    variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
             } else if(item->current_value_index < (item->values_count - 1)) {
                 item->current_value_index++;
                 model->scroll_counter = 0;
@@ -341,7 +346,8 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
             VariableItem* item = variable_item_list_get_selected_item(model);
             if(item->locked) {
                 model->locked_message_visible = true;
-                furi_timer_start(variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
+                furi_timer_start(
+                    variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
             } else if(variable_item_list->callback) {
                 variable_item_list->callback(variable_item_list->context, model->position);
             }
@@ -352,7 +358,10 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
 static void variable_item_list_scroll_timer_callback(void* context) {
     VariableItemList* variable_item_list = context;
     with_view_model(
-        variable_item_list->view, VariableItemListModel * model, { model->scroll_counter++; }, true);
+        variable_item_list->view,
+        VariableItemListModel * model,
+        { model->scroll_counter++; },
+        true);
 }
 
 void variable_item_list_locked_timer_callback(void* context) {
@@ -360,7 +369,10 @@ void variable_item_list_locked_timer_callback(void* context) {
     VariableItemList* variable_item_list = context;
 
     with_view_model(
-        variable_item_list->view, VariableItemListModel * model, { model->locked_message_visible = false; }, true);
+        variable_item_list->view,
+        VariableItemListModel * model,
+        { model->locked_message_visible = false; },
+        true);
 }
 
 VariableItemList* variable_item_list_alloc() {
@@ -372,7 +384,8 @@ VariableItemList* variable_item_list_alloc() {
     view_set_draw_callback(variable_item_list->view, variable_item_list_draw_callback);
     view_set_input_callback(variable_item_list->view, variable_item_list_input_callback);
 
-    variable_item_list->locked_timer = furi_timer_alloc(variable_item_list_locked_timer_callback, FuriTimerTypeOnce, variable_item_list);
+    variable_item_list->locked_timer = furi_timer_alloc(
+        variable_item_list_locked_timer_callback, FuriTimerTypeOnce, variable_item_list);
 
     with_view_model(
         variable_item_list->view,
@@ -384,8 +397,8 @@ VariableItemList* variable_item_list_alloc() {
             model->scroll_counter = 0;
         },
         true);
-    variable_item_list->scroll_timer =
-        furi_timer_alloc(variable_item_list_scroll_timer_callback, FuriTimerTypePeriodic, variable_item_list);
+    variable_item_list->scroll_timer = furi_timer_alloc(
+        variable_item_list_scroll_timer_callback, FuriTimerTypePeriodic, variable_item_list);
     furi_timer_start(variable_item_list->scroll_timer, 333);
 
     return variable_item_list;

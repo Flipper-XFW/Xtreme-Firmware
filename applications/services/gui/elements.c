@@ -622,8 +622,9 @@ void elements_scrollable_text_line(
         }
     }
 
-    if (centered) {
-        canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignBottom, furi_string_get_cstr(line));
+    if(centered) {
+        canvas_draw_str_aligned(
+            canvas, x, y, AlignCenter, AlignBottom, furi_string_get_cstr(line));
     } else {
         canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
     }

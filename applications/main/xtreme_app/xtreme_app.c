@@ -20,7 +20,7 @@ static bool xtreme_app_back_event_callback(void* context) {
 
         if(app->save_mainmenu_apps) {
             Stream* stream = file_stream_alloc(storage);
-            if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)){
+            if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
                 CharList_it_t it;
                 CharList_it(it, app->mainmenu_app_paths);
                 for(uint i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
@@ -195,7 +195,8 @@ XtremeApp* xtreme_app_alloc() {
                 if(app->asset_pack_index != 0) {
                     if(idx < app->asset_pack_index) app->asset_pack_index++;
                 } else {
-                    if(strcmp(copy, xtreme_settings->asset_pack) == 0) app->asset_pack_index = idx + 1;
+                    if(strcmp(copy, xtreme_settings->asset_pack) == 0)
+                        app->asset_pack_index = idx + 1;
                 }
             }
         }

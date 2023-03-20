@@ -86,7 +86,9 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
     variable_item_set_current_value_index(item, app->asset_pack_index);
     variable_item_set_current_value_text(
         item,
-        app->asset_pack_index == 0 ? "SFW" : *CharList_get(app->asset_pack_names, app->asset_pack_index - 1));
+        app->asset_pack_index == 0 ?
+            "SFW" :
+            *CharList_get(app->asset_pack_names, app->asset_pack_index - 1));
 
     item = variable_item_list_add(
         var_item_list,
@@ -111,7 +113,11 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
     variable_item_set_current_value_text(item, cycle_anims_names[value_index]);
 
     item = variable_item_list_add(
-        var_item_list, "Unlock Anims", 2, xtreme_app_scene_interface_graphics_unlock_anims_changed, app);
+        var_item_list,
+        "Unlock Anims",
+        2,
+        xtreme_app_scene_interface_graphics_unlock_anims_changed,
+        app);
     variable_item_set_current_value_index(item, xtreme_settings->unlock_anims);
     variable_item_set_current_value_text(item, xtreme_settings->unlock_anims ? "ON" : "OFF");
 
@@ -119,7 +125,8 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
         var_item_list, xtreme_app_scene_interface_graphics_var_item_list_callback, app);
 
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneInterfaceGraphics));
+        var_item_list,
+        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneInterfaceGraphics));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
@@ -129,7 +136,8 @@ bool xtreme_app_scene_interface_graphics_on_event(void* context, SceneManagerEve
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneInterfaceGraphics, event.event);
+        scene_manager_set_scene_state(
+            app->scene_manager, XtremeAppSceneInterfaceGraphics, event.event);
         consumed = true;
         switch(event.event) {
         default:

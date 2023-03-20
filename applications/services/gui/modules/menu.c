@@ -78,7 +78,11 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 }
                 item = MenuItemArray_get(model->items, item_i);
                 if(item->icon) {
-                    canvas_draw_icon_animation(canvas, (40 - item->icon->icon->width) / 2 + x_off, (20 - item->icon->icon->height) / 2 + y_off, item->icon);
+                    canvas_draw_icon_animation(
+                        canvas,
+                        (40 - item->icon->icon->width) / 2 + x_off,
+                        (20 - item->icon->icon->height) / 2 + y_off,
+                        item->icon);
                 }
                 furi_string_set(name, item->label);
                 if(furi_string_start_with_str(name, "[")) {
@@ -88,14 +92,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     }
                 }
                 elements_scrollable_text_line(
-                    canvas,
-                    20 + x_off,
-                    26 + y_off,
-                    36,
-                    name,
-                    scroll_counter,
-                    false,
-                    true);
+                    canvas, 20 + x_off, 26 + y_off, 36, name, scroll_counter, false, true);
                 if(item_i == position) {
                     canvas_set_color(canvas, ColorBlack);
                 } else {
@@ -108,7 +105,11 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             shift_position = (0 + position + items_count - 1) % items_count;
             item = MenuItemArray_get(model->items, shift_position);
             if(item->icon) {
-                canvas_draw_icon_animation(canvas, 4 + (14 - item->icon->icon->width) / 2, 3 + (14 - item->icon->icon->height) / 2, item->icon);
+                canvas_draw_icon_animation(
+                    canvas,
+                    4 + (14 - item->icon->icon->width) / 2,
+                    3 + (14 - item->icon->icon->height) / 2,
+                    item->icon);
             }
             canvas_draw_str(canvas, 22, 14, item->label);
             // Second line main
@@ -116,7 +117,11 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             shift_position = (1 + position + items_count - 1) % items_count;
             item = MenuItemArray_get(model->items, shift_position);
             if(item->icon) {
-                canvas_draw_icon_animation(canvas, 4 + (14 - item->icon->icon->width) / 2, 25 + (14 - item->icon->icon->height) / 2, item->icon);
+                canvas_draw_icon_animation(
+                    canvas,
+                    4 + (14 - item->icon->icon->width) / 2,
+                    25 + (14 - item->icon->icon->height) / 2,
+                    item->icon);
             }
             size_t scroll_counter = model->scroll_counter;
             if(scroll_counter < 1) {
@@ -125,21 +130,17 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 scroll_counter -= 1;
             }
             furi_string_set(name, item->label);
-            elements_scrollable_text_line(
-                canvas,
-                22,
-                36,
-                98,
-                name,
-                scroll_counter,
-                false,
-                false);
+            elements_scrollable_text_line(canvas, 22, 36, 98, name, scroll_counter, false, false);
             // Third line
             canvas_set_font(canvas, FontSecondary);
             shift_position = (2 + position + items_count - 1) % items_count;
             item = MenuItemArray_get(model->items, shift_position);
             if(item->icon) {
-                canvas_draw_icon_animation(canvas, 4 + (14 - item->icon->icon->width) / 2, 47 + (14 - item->icon->icon->height) / 2, item->icon);
+                canvas_draw_icon_animation(
+                    canvas,
+                    4 + (14 - item->icon->icon->width) / 2,
+                    47 + (14 - item->icon->icon->height) / 2,
+                    item->icon);
             }
             canvas_draw_str(canvas, 22, 58, item->label);
             // Frame and scrollbar
@@ -159,49 +160,49 @@ static bool menu_input_callback(InputEvent* event, void* context) {
 
     if(event->type == InputTypeShort) {
         switch(event->key) {
-            case InputKeyUp:
-                consumed = true;
-                menu_process_up(menu);
-                break;
-            case InputKeyDown:
-                consumed = true;
-                menu_process_down(menu);
-                break;
-            case InputKeyLeft:
-                consumed = true;
-                menu_process_left(menu);
-                break;
-            case InputKeyRight:
-                consumed = true;
-                menu_process_right(menu);
-                break;
-            case InputKeyOk:
-                consumed = true;
-                menu_process_ok(menu);
-                break;
-            default:
-                break;
+        case InputKeyUp:
+            consumed = true;
+            menu_process_up(menu);
+            break;
+        case InputKeyDown:
+            consumed = true;
+            menu_process_down(menu);
+            break;
+        case InputKeyLeft:
+            consumed = true;
+            menu_process_left(menu);
+            break;
+        case InputKeyRight:
+            consumed = true;
+            menu_process_right(menu);
+            break;
+        case InputKeyOk:
+            consumed = true;
+            menu_process_ok(menu);
+            break;
+        default:
+            break;
         }
     } else if(event->type == InputTypeRepeat) {
         switch(event->key) {
-            case InputKeyUp:
-                consumed = true;
-                menu_process_up(menu);
-                break;
-            case InputKeyDown:
-                consumed = true;
-                menu_process_down(menu);
-                break;
-            case InputKeyLeft:
-                consumed = true;
-                menu_process_left(menu);
-                break;
-            case InputKeyRight:
-                consumed = true;
-                menu_process_right(menu);
-                break;
-            default:
-                break;
+        case InputKeyUp:
+            consumed = true;
+            menu_process_up(menu);
+            break;
+        case InputKeyDown:
+            consumed = true;
+            menu_process_down(menu);
+            break;
+        case InputKeyLeft:
+            consumed = true;
+            menu_process_left(menu);
+            break;
+        case InputKeyRight:
+            consumed = true;
+            menu_process_right(menu);
+            break;
+        default:
+            break;
         }
     }
 
@@ -255,8 +256,7 @@ Menu* menu_alloc() {
     view_set_enter_callback(menu->view, menu_enter);
     view_set_exit_callback(menu->view, menu_exit);
 
-    menu->scroll_timer =
-        furi_timer_alloc(menu_scroll_timer_callback, FuriTimerTypePeriodic, menu);
+    menu->scroll_timer = furi_timer_alloc(menu_scroll_timer_callback, FuriTimerTypePeriodic, menu);
 
     with_view_model(
         menu->view,
@@ -458,7 +458,7 @@ static void menu_process_right(Menu* menu) {
                 if(model->position == count - 1) {
                     model->position = 0;
                 } else if(model->position == count - 2) {
-                    model->position = count -1;
+                    model->position = count - 1;
                 } else {
                     model->position += 2;
                 }

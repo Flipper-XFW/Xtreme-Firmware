@@ -79,7 +79,8 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     } else {
         bool pm = datetime.hour > 12;
         bool pm12 = datetime.hour >= 12;
-        snprintf(time_str, 9, "%.2d:%.2d", pm ? datetime.hour - 12 : datetime.hour, datetime.minute);
+        snprintf(
+            time_str, 9, "%.2d:%.2d", pm ? datetime.hour - 12 : datetime.hour, datetime.minute);
         snprintf(meridian_str, 3, pm12 ? "PM" : "AM");
     }
 
@@ -106,13 +107,16 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings->lockscreen_time, date_str);
     }
-    if(model->view_state == DesktopViewLockedStateLockedHintShown && xtreme_settings->lockscreen_prompt) {
+    if(model->view_state == DesktopViewLockedStateLockedHintShown &&
+       xtreme_settings->lockscreen_prompt) {
         canvas_set_font(canvas, FontSecondary);
         if(model->pin_locked) {
-            elements_bubble_str(canvas, 12, 14 + y, "  Press   \nto unlock!", AlignRight, AlignBottom);
+            elements_bubble_str(
+                canvas, 12, 14 + y, "  Press   \nto unlock!", AlignRight, AlignBottom);
             canvas_draw_icon(canvas, 45, 16 + y, &I_Pin_arrow_up_7x9);
         } else {
-            elements_bubble_str(canvas, 2, 14 + y, "Press 3x      \n  to unlock!", AlignRight, AlignBottom);
+            elements_bubble_str(
+                canvas, 2, 14 + y, "Press 3x      \n  to unlock!", AlignRight, AlignBottom);
             canvas_draw_icon(canvas, 43, 17 + y, &I_Pin_back_arrow_10x8);
         }
     }
@@ -122,12 +126,14 @@ static bool desktop_view_locked_cover_move(DesktopViewLockedModel* model, bool d
     bool stop = false;
     if(down) {
         if(model->cover_offset < COVER_OFFSET_END) {
-            model->cover_offset = CLAMP(model->cover_offset + 8, COVER_OFFSET_END, COVER_OFFSET_START);
+            model->cover_offset =
+                CLAMP(model->cover_offset + 8, COVER_OFFSET_END, COVER_OFFSET_START);
             stop = true;
         }
     } else {
         if(model->cover_offset > COVER_OFFSET_START) {
-            model->cover_offset = CLAMP(model->cover_offset - 8, COVER_OFFSET_END, COVER_OFFSET_START);
+            model->cover_offset =
+                CLAMP(model->cover_offset - 8, COVER_OFFSET_END, COVER_OFFSET_START);
             stop = true;
         }
     }
@@ -152,10 +158,12 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
     if(view_state == DesktopViewLockedStateCoverClosing &&
        !desktop_view_locked_cover_move(model, true)) {
         model->view_state = DesktopViewLockedStateLocked;
-    } else if(view_state == DesktopViewLockedStateCoverOpening &&
-       !desktop_view_locked_cover_move(model, false)) {
+    } else if(
+        view_state == DesktopViewLockedStateCoverOpening &&
+        !desktop_view_locked_cover_move(model, false)) {
         model->view_state = DesktopViewLockedStateUnlocked;
-        xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(UNLOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
+        xTimerChangePeriod(
+            locked_view->timer, pdMS_TO_TICKS(UNLOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
     } else if(view_state == DesktopViewLockedStateLockedHintShown) {
         model->view_state = DesktopViewLockedStateLocked;
     } else if(view_state == DesktopViewLockedStateUnlockedHintShown) {
@@ -164,7 +172,8 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
 
     view_commit_model(locked_view->view, true);
 
-    if(view_state != DesktopViewLockedStateCoverClosing && view_state != DesktopViewLockedStateCoverOpening) {
+    if(view_state != DesktopViewLockedStateCoverClosing &&
+       view_state != DesktopViewLockedStateCoverOpening) {
         xTimerStop(locked_view->timer, portMAX_DELAY);
     }
 }
@@ -175,9 +184,9 @@ static void desktop_view_locked_draw(Canvas* canvas, void* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(view_state == DesktopViewLockedStateLocked ||
-        view_state == DesktopViewLockedStateLockedHintShown ||
-        view_state == DesktopViewLockedStateCoverClosing ||
-        view_state == DesktopViewLockedStateCoverOpening) {
+       view_state == DesktopViewLockedStateLockedHintShown ||
+       view_state == DesktopViewLockedStateCoverClosing ||
+       view_state == DesktopViewLockedStateCoverOpening) {
         desktop_view_locked_draw_lockscreen(canvas, m);
     }
 }

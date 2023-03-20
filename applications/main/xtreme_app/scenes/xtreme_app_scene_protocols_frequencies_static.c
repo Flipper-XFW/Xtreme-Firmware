@@ -36,8 +36,7 @@ void xtreme_app_scene_protocols_frequencies_static_on_enter(void* context) {
     app->subghz_static_index = 0;
     variable_item_set_current_value_index(item, app->subghz_static_index);
     if(FrequencyList_size(app->subghz_static_freqs)) {
-        uint32_t value =
-            *FrequencyList_get(app->subghz_static_freqs, app->subghz_static_index);
+        uint32_t value = *FrequencyList_get(app->subghz_static_freqs, app->subghz_static_index);
         char text[10] = {0};
         snprintf(text, sizeof(text), "%lu.%02lu", value / 1000000, (value % 1000000) / 10000);
         variable_item_set_current_value_text(item, text);
