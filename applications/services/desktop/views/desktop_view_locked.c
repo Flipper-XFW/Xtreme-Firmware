@@ -289,3 +289,10 @@ void desktop_view_locked_unlock(DesktopViewLocked* locked_view) {
     view_commit_model(locked_view->view, true);
     xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(COVER_MOVING_INTERVAL_MS), portMAX_DELAY);
 }
+
+bool desktop_view_locked_is_locked_hint_visible(DesktopViewLocked* locked_view) {
+    DesktopViewLockedModel* model = view_get_model(locked_view->view);
+    const DesktopViewLockedState view_state = model->view_state;
+    view_commit_model(locked_view->view, false);
+    return view_state == DesktopViewLockedStateLockedHintShown;
+}
