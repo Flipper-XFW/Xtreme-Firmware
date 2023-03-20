@@ -142,20 +142,20 @@ static void submenu_view_draw_callback(Canvas* canvas, void* _model) {
     elements_scrollbar(canvas, model->position, SubmenuItemArray_size(model->items));
 
     if(model->locked_message_visible) {
-        canvas_set_font(canvas, FontSecondary);
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 8, 10, 110, 48);
         canvas_set_color(canvas, ColorBlack);
         canvas_draw_icon(canvas, 10, 14, &I_WarningDolphin_45x42);
         canvas_draw_rframe(canvas, 8, 8, 112, 50, 3);
         canvas_draw_rframe(canvas, 9, 9, 110, 48, 2);
-        elements_multiline_text(
+        elements_multiline_text_aligned(
             canvas,
-            62,
-            20,
+            84,
+            32,
+            AlignCenter,
+            AlignCenter,
             furi_string_get_cstr(
                 SubmenuItemArray_get(model->items, model->position)->locked_message));
-        canvas_set_font(canvas, FontKeyboard);
     }
 }
 
@@ -222,7 +222,7 @@ Submenu* submenu_alloc() {
     view_set_draw_callback(submenu->view, submenu_view_draw_callback);
     view_set_input_callback(submenu->view, submenu_view_input_callback);
 
-    submenu->timer = furi_timer_alloc(submenu_timer_callback, FuriTimerTypeOnce, submenu);
+    submenu->locked_timer = furi_timer_alloc(submenu_timer_callback, FuriTimerTypeOnce, submenu);
 
     with_view_model(
         submenu->view,
@@ -249,8 +249,8 @@ void submenu_free(Submenu* submenu) {
             SubmenuItemArray_clear(model->items);
         },
         true);
-    furi_timer_stop(submenu->timer);
-    furi_timer_free(submenu->timer);
+    furi_timer_stop(submenu->locked_timer);
+    furi_timer_free(submenu->locked_timer);
     view_free(submenu->view);
     free(submenu);
 }
@@ -416,7 +416,7 @@ void submenu_process_ok(Submenu* submenu) {
             }
             if(item && item->locked) {
                 model->locked_message_visible = true;
-                furi_timer_start(submenu->timer, furi_kernel_get_tick_frequency() * 4);
+                furi_timer_start(submenu->locked_timer, furi_kernel_get_tick_frequency() * 4);
             }
         },
         true);

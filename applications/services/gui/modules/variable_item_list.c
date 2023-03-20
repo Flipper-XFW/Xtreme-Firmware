@@ -167,7 +167,19 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
     furi_assert(variable_item_list);
     bool consumed = false;
 
-    if(event->type == InputTypeShort) {
+    bool locked_message_visible = false;
+    with_view_model(
+        variable_item_list->view,
+        VariableItemListModel * model,
+        { locked_message_visible = model->locked_message_visible; },
+        false);
+
+    if((!(event->type == InputTypePress) && !(event->type == InputTypeRelease)) &&
+       locked_message_visible) {
+        with_view_model(
+            variable_item_list->view, VariableItemListModel * model, { model->locked_message_visible = false; }, true);
+        consumed = true;
+    } else if(event->type == InputTypeShort) {
         switch(event->key) {
         case InputKeyUp:
             consumed = true;
@@ -222,9 +234,6 @@ void variable_item_list_process_up(VariableItemList* variable_item_list) {
         variable_item_list->view,
         VariableItemListModel * model,
         {
-            if(model->locked_message_visible) {
-                model->locked_message_visible = false;
-            }
             uint8_t items_on_screen = 4;
             if(model->position > 0) {
                 model->position--;
@@ -248,9 +257,6 @@ void variable_item_list_process_down(VariableItemList* variable_item_list) {
         variable_item_list->view,
         VariableItemListModel * model,
         {
-            if(model->locked_message_visible) {
-                model->locked_message_visible = false;
-            }
             uint8_t items_on_screen = 4;
             if(model->position < (VariableItemArray_size(model->items) - 1)) {
                 model->position++;
@@ -293,9 +299,7 @@ void variable_item_list_process_left(VariableItemList* variable_item_list) {
         VariableItemListModel * model,
         {
             VariableItem* item = variable_item_list_get_selected_item(model);
-            if(model->locked_message_visible) {
-                model->locked_message_visible = false;
-            } else if(item->locked) {
+            if(item->locked) {
                 model->locked_message_visible = true;
                 furi_timer_start(variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
             } else if(item->current_value_index > 0) {
@@ -315,9 +319,7 @@ void variable_item_list_process_right(VariableItemList* variable_item_list) {
         VariableItemListModel * model,
         {
             VariableItem* item = variable_item_list_get_selected_item(model);
-            if(model->locked_message_visible) {
-                model->locked_message_visible = false;
-            } else if(item->locked) {
+            if(item->locked) {
                 model->locked_message_visible = true;
                 furi_timer_start(variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
             } else if(item->current_value_index < (item->values_count - 1)) {
@@ -332,23 +334,19 @@ void variable_item_list_process_right(VariableItemList* variable_item_list) {
 }
 
 void variable_item_list_process_ok(VariableItemList* variable_item_list) {
-    bool update = false;
     with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
             VariableItem* item = variable_item_list_get_selected_item(model);
-            if(model->locked_message_visible) {
-                model->locked_message_visible = false;
-                update = true;
-            } else if(item->locked) {
+            if(item->locked) {
                 model->locked_message_visible = true;
                 furi_timer_start(variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
             } else if(variable_item_list->callback) {
                 variable_item_list->callback(variable_item_list->context, model->position);
             }
         },
-        update);
+        true);
 }
 
 static void variable_item_list_scroll_timer_callback(void* context) {
