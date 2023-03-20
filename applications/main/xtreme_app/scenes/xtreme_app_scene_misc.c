@@ -2,6 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexChangeDeviceName,
+    VarItemListIndexRgbBacklight,
     VarItemListIndexXpLevel,
     VarItemListIndexButthurtTimer,
 };
@@ -9,6 +10,15 @@ enum VarItemListIndex {
 void xtreme_app_scene_misc_var_item_list_callback(void* context, uint32_t index) {
     XtremeApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
+static void xtreme_app_scene_misc_rgb_backlight_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->rgb_backlight = value;
+    app->save_settings = true;
+    app->require_reboot = true;
 }
 
 static void xtreme_app_scene_misc_xp_level_changed(VariableItem* item) {
@@ -41,6 +51,11 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     uint8_t value_index;
 
     variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
+
+    item = variable_item_list_add(
+        var_item_list, "RGB Backlight", 2, xtreme_app_scene_misc_rgb_backlight_changed, app);
+    variable_item_set_current_value_index(item, xtreme_settings->rgb_backlight);
+    variable_item_set_current_value_text(item, xtreme_settings->rgb_backlight ? "ON" : "OFF");
 
     char level_str[4];
     snprintf(level_str, 4, "%li", app->xp_level);

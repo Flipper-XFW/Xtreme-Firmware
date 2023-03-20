@@ -3,6 +3,7 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/view_dispatcher.h>
 #include <lib/toolbox/value_index.h>
+#include "rgb_backlight.h"
 
 #define MAX_NOTIFICATION_SETTINGS 4
 
@@ -119,6 +120,14 @@ static void vibro_changed(VariableItem* item) {
     notification_message(app->notification, &sequence_single_vibro);
 }
 
+static void color_changed(VariableItem* item) {
+    NotificationAppSettings* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    rgb_backlight_set_color(index);
+    variable_item_set_current_value_text(item, rgb_backlight_get_color_text(index));
+    notification_message(app->notification, &sequence_display_backlight_on);
+}
+
 static uint32_t notification_app_settings_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
@@ -137,7 +146,13 @@ static NotificationAppSettings* alloc_settings() {
     uint8_t value_index;
 
     item = variable_item_list_add(
-        app->variable_item_list, "LCD Backlight", BACKLIGHT_COUNT, backlight_changed, app);
+        app->variable_item_list, "LCD Color", rgb_backlight_get_color_count(), color_changed, app);
+    value_index = rgb_backlight_get_settings()->display_color_index;
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, rgb_backlight_get_color_text(value_index));
+
+    item = variable_item_list_add(
+        app->variable_item_list, "LCD Brightness", BACKLIGHT_COUNT, backlight_changed, app);
     value_index = value_index_float(
         app->notification->settings.display_brightness, backlight_value, BACKLIGHT_COUNT);
     variable_item_set_current_value_index(item, value_index);
