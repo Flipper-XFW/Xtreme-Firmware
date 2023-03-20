@@ -26,7 +26,7 @@ void bad_kb_scene_config_bt_remember_callback(VariableItem* item) {
     XTREME_SETTINGS()->bad_bt_remember = bad_kb->bt_remember;
     XTREME_SETTINGS_SAVE();
     variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
-    view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexRemember);
+    view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexBtRemember);
 }
 
 void bad_kb_scene_config_var_item_list_callback(void* context, uint32_t index) {
