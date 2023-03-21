@@ -8,9 +8,19 @@ extern "C" {
 #include <furi_hal.h>
 #include <bt/bt_service/bt_i.h>
 
-typedef struct BadKbApp BadKbApp;
-
 #define FILE_BUFFER_LEN 16
+
+typedef enum {
+    LevelRssi122_100,
+    LevelRssi99_80,
+    LevelRssi79_60,
+    LevelRssi59_40,
+    LevelRssi39_0,
+    LevelRssiNum,
+    LevelRssiError = 0xFF,
+} LevelRssiRange;
+
+extern const uint8_t bt_hid_delays[LevelRssiNum];
 
 extern uint8_t bt_timeout;
 
@@ -21,6 +31,7 @@ typedef enum {
     BadKbStateWillRun,
     BadKbStateRunning,
     BadKbStateDelay,
+    BadKbStateStringDelay,
     BadKbStateDone,
     BadKbStateScriptError,
     BadKbStateFileError,
@@ -37,34 +48,32 @@ typedef struct {
     char error[64];
 } BadKbState;
 
-typedef struct BadKbScript {
+typedef struct {
     FuriHalUsbHidConfig hid_cfg;
+    FuriThread* thread;
     BadKbState st;
+
     FuriString* file_path;
     FuriString* keyboard_layout;
-    uint32_t defdelay;
-    uint16_t layout[128];
-    uint32_t stringdelay;
-    FuriThread* thread;
     uint8_t file_buf[FILE_BUFFER_LEN + 1];
     uint8_t buf_start;
     uint8_t buf_len;
     bool file_end;
-    FuriString* line;
 
+    uint32_t defdelay;
+    uint32_t stringdelay;
+    uint16_t layout[128];
+
+    FuriString* line;
     FuriString* line_prev;
     uint32_t repeat_cnt;
+    uint8_t key_hold_nb;
+
+    FuriString* string_print;
+    size_t string_print_pos;
 
     Bt* bt;
 } BadKbScript;
-
-void bad_kb_config_switch_mode(BadKbApp* app);
-
-void bad_kb_config_switch_remember_mode(BadKbApp* app);
-
-int32_t bad_kb_connection_init(BadKbApp* app);
-
-void bad_kb_connection_deinit(BadKbApp* app);
 
 BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt);
 
@@ -79,12 +88,6 @@ void bad_kb_script_stop(BadKbScript* bad_kb);
 void bad_kb_script_toggle(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
-
-uint16_t ducky_get_keycode(BadKbScript* bad_kb, const char* param, bool accept_chars);
-
-uint32_t ducky_get_command_len(const char* line);
-
-bool ducky_is_line_end(const char chr);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 #include "bad_kb_view.h"
-#include "../bad_kb_script.h"
-#include "../bad_kb_app_i.h"
+#include "../helpers/ducky_script.h"
+#include "../bad_kb_app.h"
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
@@ -98,7 +98,11 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 46, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
-        canvas_draw_str_aligned(canvas, 127, 56, AlignRight, AlignBottom, model->state.error);
+        furi_string_set_str(disp_str, model->state.error);
+        elements_string_fit_width(canvas, disp_str, canvas_width(canvas));
+        canvas_draw_str_aligned(
+            canvas, 127, 56, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
+        furi_string_reset(disp_str);
     } else if(model->state.state == BadKbStateIdle) {
         canvas_draw_icon(canvas, 4, 26, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);

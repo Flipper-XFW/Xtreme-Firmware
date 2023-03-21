@@ -9,6 +9,7 @@ App(
         "nfc",
         "infrared",
         "gpio",
+        "onewire",
         "ibutton",
         "bad_kb",
         "u2f",

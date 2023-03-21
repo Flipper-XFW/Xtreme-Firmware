@@ -1,4 +1,4 @@
-#include "../bad_kb_app_i.h"
+#include "../bad_kb_app.h"
 
 static void bad_kb_scene_config_name_text_input_callback(void* context) {
     BadKbApp* bad_kb = context;

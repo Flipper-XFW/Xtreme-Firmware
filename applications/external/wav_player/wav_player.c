@@ -127,7 +127,7 @@ static void app_free(WavPlayerApp* app) {
 
 // TODO: that works only with 8-bit 2ch audio
 static bool fill_data(WavPlayerApp* app, size_t index) {
-    if(app->num_channels == 1) {
+    if(app->num_channels == 1 && app->bits_per_sample == 8) {
         uint16_t* sample_buffer_start = &app->sample_buffer[index];
         size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count_half);
 
@@ -166,7 +166,108 @@ static bool fill_data(WavPlayerApp* app, size_t index) {
         return count != app->samples_count_half;
     }
 
-    if(app->num_channels == 2) {
+    if(app->num_channels == 1 && app->bits_per_sample == 16) {
+        uint16_t* sample_buffer_start = &app->sample_buffer[index];
+        size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
+
+        for(size_t i = count; i < app->samples_count; i++) {
+            //app->tmp_buffer[i] = 0;
+        }
+
+        for(size_t i = 0; i < app->samples_count; i += 2) {
+            int16_t int_16 =
+                (((int16_t)app->tmp_buffer[i + 1] << 8) + (int16_t)app->tmp_buffer[i]);
+
+            float data = ((float)int_16 / 256.0 + 127.0);
+            data -= UINT8_MAX / 2; // to signed
+            data /= UINT8_MAX / 2; // scale -1..1
+
+            data *= app->volume; // volume
+            data = tanhf(data); // hyperbolic tangent limiter
+
+            data *= UINT8_MAX / 2; // scale -128..127
+            data += UINT8_MAX / 2; // to unsigned
+
+            if(data < 0) {
+                data = 0;
+            }
+
+            if(data > 255) {
+                data = 255;
+            }
+
+            sample_buffer_start[i / 2] = data;
+        }
+
+        wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
+
+        return count != app->samples_count;
+    }
+
+    if(app->num_channels == 2 && app->bits_per_sample == 16) {
+        uint16_t* sample_buffer_start = &app->sample_buffer[index];
+        size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
+
+        for(size_t i = 0; i < app->samples_count; i += 4) {
+            int16_t L = (((int16_t)app->tmp_buffer[i + 1] << 8) + (int16_t)app->tmp_buffer[i]);
+            int16_t R = (((int16_t)app->tmp_buffer[i + 3] << 8) + (int16_t)app->tmp_buffer[i + 2]);
+            int32_t int_16 = L / 2 + R / 2; // (L + R) / 2
+
+            float data = ((float)int_16 / 256.0 + 127.0);
+            data -= UINT8_MAX / 2; // to signed
+            data /= UINT8_MAX / 2; // scale -1..1
+
+            data *= app->volume; // volume
+            data = tanhf(data); // hyperbolic tangent limiter
+
+            data *= UINT8_MAX / 2; // scale -128..127
+            data += UINT8_MAX / 2; // to unsigned
+
+            if(data < 0) {
+                data = 0;
+            }
+
+            if(data > 255) {
+                data = 255;
+            }
+
+            sample_buffer_start[i / 4] = data;
+        }
+
+        count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
+
+        for(size_t i = 0; i < app->samples_count; i += 4) {
+            int16_t L = (((int16_t)app->tmp_buffer[i + 1] << 8) + (int16_t)app->tmp_buffer[i]);
+            int16_t R = (((int16_t)app->tmp_buffer[i + 3] << 8) + (int16_t)app->tmp_buffer[i + 2]);
+            int32_t int_16 = L / 2 + R / 2; // (L + R) / 2
+
+            float data = ((float)int_16 / 256.0 + 127.0);
+            data -= UINT8_MAX / 2; // to signed
+            data /= UINT8_MAX / 2; // scale -1..1
+
+            data *= app->volume; // volume
+            data = tanhf(data); // hyperbolic tangent limiter
+
+            data *= UINT8_MAX / 2; // scale -128..127
+            data += UINT8_MAX / 2; // to unsigned
+
+            if(data < 0) {
+                data = 0;
+            }
+
+            if(data > 255) {
+                data = 255;
+            }
+
+            sample_buffer_start[i / 4 + app->samples_count / 4] = data;
+        }
+
+        wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
+
+        return count != app->samples_count;
+    }
+
+    if(app->num_channels == 2 && app->bits_per_sample == 8) {
         uint16_t* sample_buffer_start = &app->sample_buffer[index];
         size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
 
@@ -270,6 +371,9 @@ static void app_run(WavPlayerApp* app) {
         while(1) {
             if(furi_message_queue_get(app->queue, &event, FuriWaitForever) == FuriStatusOk) {
                 if(event.type == WavPlayerEventHalfTransfer) {
+                    wav_player_view_set_chans(app->view, app->num_channels);
+                    wav_player_view_set_bits(app->view, app->bits_per_sample);
+
                     eof = fill_data(app, 0);
                     wav_player_view_set_current(app->view, stream_tell(app->stream));
                     if(eof) {
@@ -280,6 +384,9 @@ static void app_run(WavPlayerApp* app) {
                     }
 
                 } else if(event.type == WavPlayerEventFullTransfer) {
+                    wav_player_view_set_chans(app->view, app->num_channels);
+                    wav_player_view_set_bits(app->view, app->bits_per_sample);
+
                     eof = fill_data(app, app->samples_count_half);
                     wav_player_view_set_current(app->view, stream_tell(app->stream));
                     if(eof) {
@@ -297,14 +404,20 @@ static void app_run(WavPlayerApp* app) {
                 } else if(event.type == WavPlayerEventCtrlMoveL) {
                     int32_t seek =
                         stream_tell(app->stream) - wav_parser_get_data_start(app->parser);
-                    seek =
-                        MIN(seek, (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
+                    seek = MIN(
+                        seek,
+                        (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) % 2 ?
+                            ((int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) - 1) :
+                            (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
                     stream_seek(app->stream, -seek, StreamOffsetFromCurrent);
                     wav_player_view_set_current(app->view, stream_tell(app->stream));
                 } else if(event.type == WavPlayerEventCtrlMoveR) {
                     int32_t seek = wav_parser_get_data_end(app->parser) - stream_tell(app->stream);
-                    seek =
-                        MIN(seek, (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
+                    seek = MIN(
+                        seek,
+                        (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) % 2 ?
+                            ((int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) - 1) :
+                            (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
                     stream_seek(app->stream, seek, StreamOffsetFromCurrent);
                     wav_player_view_set_current(app->view, stream_tell(app->stream));
                 } else if(event.type == WavPlayerEventCtrlOk) {

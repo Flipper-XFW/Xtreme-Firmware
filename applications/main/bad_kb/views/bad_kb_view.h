@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gui/view.h>
-#include "../bad_kb_script.h"
+#include "../helpers/ducky_script.h"
 
 typedef struct BadKb BadKb;
 typedef void (*BadKbButtonCallback)(InputKey key, void* context);
