@@ -114,6 +114,10 @@ static bool xtreme_app_back_event_callback(void* context) {
             furi_record_close(RECORD_DOLPHIN);
         }
 
+        if(app->save_backlight) {
+            rgb_backlight_save_settings();
+        }
+
         if(app->save_settings) {
             XTREME_SETTINGS_SAVE();
         }

@@ -2525,7 +2525,7 @@ Function,+,rgb_backlight_get_color_count,uint8_t,
 Function,+,rgb_backlight_get_color_text,const char*,uint8_t
 Function,+,rgb_backlight_get_settings,RGBBacklightSettings*,
 Function,-,rgb_backlight_load_settings,void,
-Function,-,rgb_backlight_save_settings,void,
+Function,+,rgb_backlight_save_settings,void,
 Function,+,rgb_backlight_set_color,void,uint8_t
 Function,-,rgb_backlight_update,void,uint8_t
 Function,-,rindex,char*,"const char*, int"

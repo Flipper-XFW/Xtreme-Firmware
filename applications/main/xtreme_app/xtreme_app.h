@@ -62,6 +62,7 @@ typedef struct {
     bool save_subghz;
     bool save_name;
     bool save_level;
+    bool save_backlight;
     bool save_settings;
     bool require_reboot;
 } XtremeApp;

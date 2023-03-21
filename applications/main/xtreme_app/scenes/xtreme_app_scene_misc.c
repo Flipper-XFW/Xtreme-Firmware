@@ -40,6 +40,7 @@ static void xtreme_app_scene_misc_lcd_color_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, rgb_backlight_get_color_text(index));
     rgb_backlight_set_color(index);
+    app->save_backlight = true;
     notification_message(app->notification, &sequence_display_backlight_on);
 }
 
