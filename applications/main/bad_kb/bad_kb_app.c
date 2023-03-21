@@ -215,9 +215,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        BadKbAppViewConfig,
-        variable_item_list_get_view(app->var_item_list));
+        app->view_dispatcher, BadKbAppViewConfig, variable_item_list_get_view(app->var_item_list));
 
     app->bad_kb_view = bad_kb_alloc();
     view_dispatcher_add_view(

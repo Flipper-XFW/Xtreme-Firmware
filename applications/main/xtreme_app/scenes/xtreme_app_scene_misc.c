@@ -88,7 +88,11 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     variable_item_set_current_value_text(item, xtreme_settings->rgb_backlight ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "LCD Color", rgb_backlight_get_color_count(), xtreme_app_scene_misc_lcd_color_changed, app);
+        var_item_list,
+        "LCD Color",
+        rgb_backlight_get_color_count(),
+        xtreme_app_scene_misc_lcd_color_changed,
+        app);
     value_index = rgb_backlight_get_settings()->display_color_index;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rgb_backlight_get_color_text(value_index));

@@ -79,25 +79,25 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
         scene_manager_set_scene_state(bad_kb->scene_manager, BadKbSceneConfig, event.event);
         consumed = true;
         switch(event.event) {
-            case VarItemListIndexKeyboardLayout:
-                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
-                break;
-            case VarItemListIndexConnection:
-                bad_kb_config_switch_mode(bad_kb);
-                break;
-            case VarItemListIndexBtRemember:
-                bad_kb_config_switch_remember_mode(bad_kb);
-                scene_manager_previous_scene(bad_kb->scene_manager);
-                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfig);
-                break;
-            case VarItemListIndexBtDeviceName:
-                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigName);
-                break;
-            case VarItemListIndexBtMacAddress:
-                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigMac);
-                break;
-            default:
-                break;
+        case VarItemListIndexKeyboardLayout:
+            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
+            break;
+        case VarItemListIndexConnection:
+            bad_kb_config_switch_mode(bad_kb);
+            break;
+        case VarItemListIndexBtRemember:
+            bad_kb_config_switch_remember_mode(bad_kb);
+            scene_manager_previous_scene(bad_kb->scene_manager);
+            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfig);
+            break;
+        case VarItemListIndexBtDeviceName:
+            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigName);
+            break;
+        case VarItemListIndexBtMacAddress:
+            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigMac);
+            break;
+        default:
+            break;
         }
     }
 
