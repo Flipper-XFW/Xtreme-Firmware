@@ -7,6 +7,7 @@
 #include <power/power_service/power.h>
 #include <storage/storage.h>
 #include <assets_icons.h>
+#include <assets_dolphin_internal.h>
 
 #include "views/bubble_animation_view.h"
 #include "views/one_shot_animation_view.h"
@@ -387,6 +388,12 @@ static StorageAnimation*
     furi_record_close(RECORD_DOLPHIN);
     uint32_t whole_weight = 0;
 
+    bool fallback = XTREME_SETTINGS()->fallback_anim;
+    if(StorageAnimationList_size(animation_list) == dolphin_internal_size + 1 && !fallback) {
+        // One ext anim and fallback disabled, dont skip current anim (current = only ext one)
+        avoid_animation = NULL;
+    }
+
     StorageAnimationList_it_t it;
     bool unlock = XTREME_SETTINGS()->unlock_anims;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
@@ -397,6 +404,10 @@ static StorageAnimation*
 
         if(avoid_animation != NULL && strcmp(manifest_info->name, avoid_animation) == 0) {
             // Avoid repeating same animation twice
+            valid = false;
+        }
+        if(strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) == 0 && !fallback) {
+            // Skip fallback animation
             valid = false;
         }
 
