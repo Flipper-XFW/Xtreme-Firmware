@@ -438,7 +438,10 @@ static StorageAnimation*
     StorageAnimationList_clear(animation_list);
 
     /* cache animation, if failed - choose reliable animation */
-    if(!animation_storage_get_bubble_animation(selected)) {
+    if(selected == NULL) {
+        FURI_LOG_E(TAG, "Can't find valid animation in manifest");
+        selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
+    } else if(!animation_storage_get_bubble_animation(selected)) {
         const char* name = animation_storage_get_meta(selected)->name;
         FURI_LOG_E(TAG, "Can't upload animation described in manifest: \'%s\'", name);
         animation_storage_free_storage_animation(&selected);
