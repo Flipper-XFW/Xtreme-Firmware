@@ -30,6 +30,10 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop->settings.pin_code.length > 0);
     desktop_lock_menu_set_idx(desktop->lock_menu, 3);
 
+    desktop->lock_menu->save_notification = false;
+    desktop->lock_menu->save_xtreme = false;
+    desktop->lock_menu->save_bt = false;
+
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
 }
 
@@ -120,5 +124,14 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
 }
 
 void desktop_scene_lock_menu_on_exit(void* context) {
-    UNUSED(context);
+    Desktop* desktop = (Desktop*)context;
+    if(desktop->lock_menu->save_notification) {
+        notification_message_save_settings(desktop->lock_menu->notification);
+    }
+    if(desktop->lock_menu->save_xtreme) {
+        XTREME_SETTINGS_SAVE();
+    }
+    if(desktop->lock_menu->save_bt) {
+        bt_settings_save(&desktop->lock_menu->bt->bt_settings);
+    }
 }

@@ -205,65 +205,68 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     UNUSED(idx);
     if(event->key == InputKeyBack) {
         consumed = false;
-    } else if(event->type == InputTypeShort) {
-        if(event->key == InputKeyOk) {
-            DesktopEvent event = 0;
+    } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
+        DesktopEvent event = 0;
+        switch(idx) {
+            case DesktopLockMenuIndexLefthandedMode:
+                if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+                    furi_hal_rtc_reset_flag(FuriHalRtcFlagHandOrient);
+                } else {
+                    furi_hal_rtc_set_flag(FuriHalRtcFlagHandOrient);
+                }
+                break;
+            case DesktopLockMenuIndexSettings:
+                event = DesktopLockMenuEventSettings;
+                break;
+            case DesktopLockMenuIndexDarkMode:
+                XTREME_SETTINGS()->dark_mode = !XTREME_SETTINGS()->dark_mode;
+                lock_menu->save_xtreme = true;
+                break;
+            case DesktopLockMenuIndexLock:
+                event = DesktopLockMenuEventLock;
+                break;
+            case DesktopLockMenuIndexBluetooth:
+                lock_menu->bt->bt_settings.enabled = !lock_menu->bt->bt_settings.enabled;
+                if(lock_menu->bt->bt_settings.enabled) {
+                    furi_hal_bt_start_advertising();
+                } else {
+                    furi_hal_bt_stop_advertising();
+                }
+                lock_menu->save_bt = true;
+                break;
+            case DesktopLockMenuIndexXtreme:
+                event = DesktopLockMenuEventXtreme;
+                break;
+            default:
+                break;
+        }
+        if(event) {
+            lock_menu->callback(event, lock_menu->context);
+        }
+    } else if(idx >= 6 && (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
+        int8_t offset = 0;
+        if(event->key == InputKeyUp) {
+            offset = 1;
+        } else if(event->key == InputKeyDown) {
+            offset = -1;
+        }
+        if(offset) {
+            float value;
             switch(idx) {
-                case DesktopLockMenuIndexLefthandedMode:
-                    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
-                        furi_hal_rtc_reset_flag(FuriHalRtcFlagHandOrient);
-                    } else {
-                        furi_hal_rtc_set_flag(FuriHalRtcFlagHandOrient);
-                    }
+                case DesktopLockMenuIndexBrightness:
+                    value = lock_menu->notification->settings.display_brightness + 0.05 * offset;
+                    lock_menu->notification->settings.display_brightness = value < 0.00f ? 0.00f : (value > 1.00f ? 1.00f : value);
+                    lock_menu->save_notification = true;
+                    notification_message(lock_menu->notification, &sequence_display_backlight_on);
                     break;
-                case DesktopLockMenuIndexSettings:
-                    event = DesktopLockMenuEventSettings;
-                    break;
-                case DesktopLockMenuIndexDarkMode:
-                    XTREME_SETTINGS()->dark_mode = !XTREME_SETTINGS()->dark_mode;
-                    XTREME_SETTINGS_SAVE();
-                    break;
-                case DesktopLockMenuIndexLock:
-                    event = DesktopLockMenuEventLock;
-                    break;
-                case DesktopLockMenuIndexBluetooth:
-                    lock_menu->bt->bt_settings.enabled = !lock_menu->bt->bt_settings.enabled;
-                    bt_settings_save(&lock_menu->bt->bt_settings);
-                    break;
-                case DesktopLockMenuIndexXtreme:
-                    event = DesktopLockMenuEventXtreme;
+                case DesktopLockMenuIndexVolume:
+                    value = lock_menu->notification->settings.speaker_volume + 0.05 * offset;
+                    lock_menu->notification->settings.speaker_volume = value < 0.00f ? 0.00f : (value > 1.00f ? 1.00f : value);
+                    lock_menu->save_notification = true;
+                    notification_message(lock_menu->notification, &sequence_note_c);
                     break;
                 default:
                     break;
-            }
-            if(event) {
-                lock_menu->callback(event, lock_menu->context);
-            }
-        } else if(idx >= 6) {
-            int8_t offset = 0;
-            if(event->key == InputKeyUp) {
-                offset = 1;
-            } else if(event->key == InputKeyDown) {
-                offset = -1;
-            }
-            if(offset) {
-                float value;
-                switch(idx) {
-                    case DesktopLockMenuIndexBrightness:
-                        value = lock_menu->notification->settings.display_brightness + 0.05 * offset;
-                        lock_menu->notification->settings.display_brightness = value < 0.00f ? 0.00f : (value > 1.00f ? 1.00f : value);
-                        notification_message_save_settings(lock_menu->notification);
-                        notification_message(lock_menu->notification, &sequence_display_backlight_on);
-                        break;
-                    case DesktopLockMenuIndexVolume:
-                        value = lock_menu->notification->settings.speaker_volume + 0.05 * offset;
-                        lock_menu->notification->settings.speaker_volume = value < 0.00f ? 0.00f : (value > 1.00f ? 1.00f : value);
-                        notification_message_save_settings(lock_menu->notification);
-                        notification_message(lock_menu->notification, &sequence_note_c);
-                        break;
-                    default:
-                        break;
-                }
             }
         }
     }

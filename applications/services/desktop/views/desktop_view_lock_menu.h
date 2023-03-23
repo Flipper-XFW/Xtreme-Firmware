@@ -16,6 +16,9 @@ struct DesktopLockMenuView {
     DesktopLockMenuViewCallback callback;
     NotificationApp* notification;
     Bt* bt;
+    bool save_notification;
+    bool save_xtreme;
+    bool save_bt;
     void* context;
 };
 
