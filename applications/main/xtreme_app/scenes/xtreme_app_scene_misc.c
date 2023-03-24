@@ -113,13 +113,13 @@ bool xtreme_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
             bool value = XTREME_SETTINGS()->rgb_backlight;
             char* text;
             if(value) {
-                text = "This will disable\nthe RGB backlight!\nAre you sure?";
+                text = "Disabling this requires\nremoving the hardware mod!\nIs it uninstalled?";
             } else {
-                text = "This will enable\nthe RGB backlight!\nAre you sure?";
+                text = "This option requires installing\na hardware modification!\nIs it installed?";
             }
             DialogMessage* msg = dialog_message_alloc();
             dialog_message_set_header(msg, "RGB Backlight", 64, 0, AlignCenter, AlignTop);
-            dialog_message_set_buttons(msg, "Cancel", NULL, "Continue");
+            dialog_message_set_buttons(msg, "No", NULL, "Yes");
             dialog_message_set_text(msg, text, 64, 32, AlignCenter, AlignCenter);
             if(dialog_message_show(app->dialogs, msg) == DialogMessageButtonRight) {
                 XTREME_SETTINGS()->rgb_backlight = !value;
