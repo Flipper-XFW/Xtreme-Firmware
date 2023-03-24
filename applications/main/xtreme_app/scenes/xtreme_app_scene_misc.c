@@ -115,7 +115,8 @@ bool xtreme_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
             if(value) {
                 text = "Disabling this requires\nremoving the hardware mod!\nIs it uninstalled?";
             } else {
-                text = "This option requires installing\na hardware modification!\nIs it installed?";
+                text =
+                    "This option requires installing\na hardware modification!\nIs it installed?";
             }
             DialogMessage* msg = dialog_message_alloc();
             dialog_message_set_header(msg, "RGB Backlight", 64, 0, AlignCenter, AlignTop);
