@@ -34,6 +34,10 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     desktop->lock_menu->save_xtreme = false;
     desktop->lock_menu->save_bt = false;
 
+    Gui* gui = furi_record_open(RECORD_GUI);
+    gui_set_lockmenu(gui, true);
+    furi_record_close(RECORD_GUI);
+
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
 }
 
@@ -134,4 +138,8 @@ void desktop_scene_lock_menu_on_exit(void* context) {
     if(desktop->lock_menu->save_bt) {
         bt_settings_save(&desktop->lock_menu->bt->bt_settings);
     }
+
+    Gui* gui = furi_record_open(RECORD_GUI);
+    gui_set_lockmenu(gui, false);
+    furi_record_close(RECORD_GUI);
 }

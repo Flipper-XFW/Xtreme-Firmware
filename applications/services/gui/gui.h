@@ -106,6 +106,15 @@ size_t gui_get_framebuffer_size(const Gui* gui);
  */
 void gui_set_lockdown(Gui* gui, bool lockdown);
 
+/** Set lockmenu mode
+ *
+ * When lockmenu mode is enabled, the lockmenu is visible and statusbar is hidden.
+ *
+ * @param      gui       Gui instance
+ * @param      lockmenu  bool, true if enabled
+ */
+void gui_set_lockmenu(Gui* gui, bool lockmenu);
+
 /** Acquire Direct Draw lock and get Canvas instance
  *
  * This method return Canvas instance for use in monopoly mode. Direct draw lock

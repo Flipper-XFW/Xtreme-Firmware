@@ -276,7 +276,9 @@ static void gui_redraw(Gui* gui) {
                 if(!gui_redraw_window(gui)) {
                     gui_redraw_desktop(gui);
                 }
-                gui_redraw_status_bar(gui, false);
+                if(!gui->lockmenu) {
+                    gui_redraw_status_bar(gui, false);
+                }
             }
         }
 
@@ -519,6 +521,17 @@ void gui_set_lockdown(Gui* gui, bool lockdown) {
 
     gui_lock(gui);
     gui->lockdown = lockdown;
+    gui_unlock(gui);
+
+    // Request redraw
+    gui_update(gui);
+}
+
+void gui_set_lockmenu(Gui* gui, bool lockmenu) {
+    furi_assert(gui);
+
+    gui_lock(gui);
+    gui->lockmenu = lockmenu;
     gui_unlock(gui);
 
     // Request redraw
