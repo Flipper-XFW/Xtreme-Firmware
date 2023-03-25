@@ -50,6 +50,9 @@ bool loader_is_locked(const Loader* instance);
 /** Show primary loader */
 void loader_show_menu();
 
+/** Show settings menu */
+void loader_show_settings();
+
 /** Show primary loader */
 void loader_update_menu();
 

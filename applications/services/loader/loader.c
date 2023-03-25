@@ -14,7 +14,8 @@
 #define TAG "LoaderSrv"
 
 #define LOADER_THREAD_FLAG_SHOW_MENU (1 << 0)
-#define LOADER_THREAD_FLAG_ALL (LOADER_THREAD_FLAG_SHOW_MENU)
+#define LOADER_THREAD_FLAG_SHOW_SETTINGS (1 << 1)
+#define LOADER_THREAD_FLAG_ALL (LOADER_THREAD_FLAG_SHOW_MENU | LOADER_THREAD_FLAG_SHOW_SETTINGS)
 
 static Loader* loader_instance = NULL;
 
@@ -497,6 +498,11 @@ void loader_show_menu() {
     furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
 }
 
+void loader_show_settings() {
+    furi_assert(loader_instance);
+    furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_SETTINGS);
+}
+
 void loader_update_menu() {
     menu_reset(loader_instance->primary_menu);
     loader_build_menu();
@@ -531,6 +537,14 @@ int32_t loader_srv(void* p) {
             view_dispatcher_switch_to_view(
                 loader_instance->view_dispatcher, LoaderMenuViewPrimary);
             view_dispatcher_run(loader_instance->view_dispatcher);
+        } else if(flags & LOADER_THREAD_FLAG_SHOW_SETTINGS) {
+            view_set_previous_callback(
+                submenu_get_view(loader_instance->settings_menu), loader_hide_menu);
+            view_dispatcher_switch_to_view(
+                loader_instance->view_dispatcher, LoaderMenuViewSettings);
+            view_dispatcher_run(loader_instance->view_dispatcher);
+            view_set_previous_callback(
+                submenu_get_view(loader_instance->settings_menu), loader_back_to_primary_menu);
         }
     }
 

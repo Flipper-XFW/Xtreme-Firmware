@@ -102,8 +102,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             //     break;
 
         case DesktopLockMenuEventSettings:
-            // loader_start(desktop->loader, "Settings", NULL);
-            // view_dispatcher_switch_to_view(desktop->loader->view_dispatcher, LoaderMenuViewSettings);
+            loader_show_settings();
             consumed = true;
             break;
 
