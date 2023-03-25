@@ -46,78 +46,46 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeTick) {
-        int check_pin_changed =
+        bool check_pin_changed =
             scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
         if(check_pin_changed) {
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
             if(desktop->settings.pin_code.length > 0) {
                 desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
-                if(check_pin_changed == 2) {
-                    desktop_pin_lock(&desktop->settings);
-                    desktop_lock(desktop);
-                    Power* power = furi_record_open(RECORD_POWER);
-                    furi_delay_ms(666);
-                    power_off(power);
-                    furi_record_close(RECORD_POWER);
-                }
             }
         }
     } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-            // case DesktopLockMenuEventPinLock:
-            //     if(desktop->settings.pin_code.length > 0) {
-            //         desktop_pin_lock(&desktop->settings);
-            //         desktop_lock(desktop);
-            //     } else {
-            //         LoaderStatus status =
-            //             loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
-            //         if(status == LoaderStatusOk) {
-            //             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
-            //         } else {
-            //             FURI_LOG_E(TAG, "Unable to start desktop settings");
-            //         }
-            //     }
-            //     consumed = true;
-            //     break;
-
-            // case DesktopLockMenuEventPinLockShutdown:
-            //     if(desktop->settings.pin_code.length > 0) {
-            //         desktop_pin_lock(&desktop->settings);
-            //         desktop_lock(desktop);
-            //         Power* power = furi_record_open(RECORD_POWER);
-            //         furi_delay_ms(666);
-            //         power_off(power);
-            //         furi_record_close(RECORD_POWER);
-            //     } else {
-            //         LoaderStatus status =
-            //             loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
-            //         if(status == LoaderStatusOk) {
-            //             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 2);
-            //         } else {
-            //             FURI_LOG_E(TAG, "Unable to start desktop settings");
-            //         }
-            //     }
-            //     consumed = true;
-            //     break;
-
         case DesktopLockMenuEventSettings:
             loader_show_settings();
             consumed = true;
             break;
-
         case DesktopLockMenuEventLock:
             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
             desktop_lock(desktop);
             consumed = true;
             break;
-
+        case DesktopLockMenuEventLockPin:
+            if(desktop->settings.pin_code.length > 0) {
+                desktop_pin_lock(&desktop->settings);
+                desktop_lock(desktop);
+            } else {
+                LoaderStatus status =
+                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                if(status == LoaderStatusOk) {
+                    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
+                } else {
+                    FURI_LOG_E(TAG, "Unable to start desktop settings");
+                }
+            }
+            consumed = true;
+            break;
         case DesktopLockMenuEventXtreme:
             loader_start(
                 desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/.Main/xtreme_app.fap"));
             consumed = true;
             break;
-
         default:
             break;
         }
