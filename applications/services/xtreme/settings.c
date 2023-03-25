@@ -55,6 +55,9 @@ void XTREME_SETTINGS_LOAD() {
             xtreme_settings->bad_bt_remember = false; // OFF
             xtreme_settings->butthurt_timer = 43200; // 12 H
             xtreme_settings->rgb_backlight = false; // OFF
+            if(!skip) {
+                XTREME_SETTINGS_SAVE();
+            }
         }
     }
 }

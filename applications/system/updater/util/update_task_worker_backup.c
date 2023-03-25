@@ -12,6 +12,7 @@
 #include <update_util/resources/manifest.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
+#include <xtreme/settings.h>
 
 #define TAG "UpdWorkerBackup"
 
@@ -197,7 +198,15 @@ static bool update_task_post_update(UpdateTask* update_task) {
             update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 0);
             FuriString* tmp_path;
             tmp_path = furi_string_alloc_set(update_task->update_path);
-            path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
+            if(storage_common_stat(update_task->storage, XTREME_SETTINGS_PATH, NULL) == FSE_NOT_EXIST) {
+                path_append(tmp_path, "xfwfirstboot.bin");
+                if(storage_common_stat(update_task->storage, furi_string_get_cstr(tmp_path), NULL) != FSE_OK) {
+                    furi_string_set(tmp_path, update_task->update_path);
+                    path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
+                }
+            } else {
+                path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
+            }
             if(storage_common_copy(
                    update_task->storage,
                    furi_string_get_cstr(tmp_path),
