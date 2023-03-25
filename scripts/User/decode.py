@@ -1,9 +1,6 @@
-import logging
+import heatshrink2
 import argparse
-import subprocess
-import io
 import os
-import sys
 
 
 def padded_hex(i, l):
@@ -50,10 +47,8 @@ parser.add_argument(
 
 args = vars(parser.parse_args())
 
-r = open(args["infile"], "rb")
-w = open(args["outfile"], "w")
-
-fileStream = r.read()
+with open(args["infile"], "rb") as f:
+    fileStream = f.read()
 filename = os.path.splitext(os.path.basename(args["outfile"]))[0]
 
 
@@ -70,9 +65,7 @@ else:
 
 
 # lzss decompress
-data_decoded_str = subprocess.check_output(
-    ["heatshrink", "-d", "-w8", "-l4"], input=unpad
-)
+data_decoded_str = heatshrink2.decompress(unpad, window_sz2=8, lookahead_sz2=4)
 
 # turn it back into xbm
 
@@ -85,6 +78,5 @@ bytes_out = "static unsigned char " + filename + "_bits[] = {" + str(c) + "};"
 
 data = width_out + height_out + bytes_out
 
-w.write(data)
-r.close()
-w.close()
+with open(args["outfile"], "w") as f:
+    f.write(data)
