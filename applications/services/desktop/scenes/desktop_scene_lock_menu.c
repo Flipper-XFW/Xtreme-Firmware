@@ -53,6 +53,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             if(desktop->settings.pin_code.length > 0) {
                 desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
+                desktop_pin_lock(&desktop->settings);
+                desktop_lock(desktop);
             }
         }
     } else if(event.type == SceneManagerEventTypeCustom) {

@@ -25,6 +25,8 @@ struct DesktopLockMenuView {
 typedef struct {
     uint8_t idx;
     bool pin_is_set;
+    bool pin_lock;
+    bool show_lock_menu;
     DesktopLockMenuView* lock_menu;
 } DesktopLockMenuViewModel;
 
