@@ -288,54 +288,30 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
         const TextInputKey* keys = get_row(keyboards[model->selected_keyboard], row);
 
         for(size_t column = 0; column < column_count; column++) {
+            bool selected = model->selected_row == row && model->selected_column == column;
+            const Icon* icon = NULL;
             if(keys[column].text == ENTER_KEY) {
-                canvas_set_color(canvas, ColorBlack);
-                if(model->selected_row == row && model->selected_column == column) {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeySaveSelected_24x11);
-                } else {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeySave_24x11);
-                }
+                icon = selected
+                    ? &I_KeySaveSelected_24x11
+                    : &I_KeySave_24x11;
             } else if(keys[column].text == SWITCH_KEYBOARD_KEY) {
-                canvas_set_color(canvas, ColorBlack);
-                if(model->selected_row == row && model->selected_column == column) {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeyKeyboardSelected_10x11);
-                } else {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeyKeyboard_10x11);
-                }
+                icon = selected
+                    ? &I_KeyKeyboardSelected_10x11
+                    : &I_KeyKeyboard_10x11;
             } else if(keys[column].text == BACKSPACE_KEY) {
-                canvas_set_color(canvas, ColorBlack);
-                if(model->selected_row == row && model->selected_column == column) {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeyBackspaceSelected_16x9);
-                } else {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeyBackspace_16x9);
-                }
+                icon = selected
+                    ? &I_KeyBackspaceSelected_16x9
+                    : &I_KeyBackspace_16x9;
+            }
+            canvas_set_color(canvas, ColorBlack);
+            if(icon != NULL) {
+                canvas_draw_icon(
+                    canvas,
+                    keyboard_origin_x + keys[column].x,
+                    keyboard_origin_y + keys[column].y,
+                    icon);
             } else {
-                if(model->selected_row == row && model->selected_column == column) {
-                    canvas_set_color(canvas, ColorBlack);
+                if(selected) {
                     canvas_draw_box(
                         canvas,
                         keyboard_origin_x + keys[column].x - 1,
@@ -343,8 +319,6 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                         7,
                         10);
                     canvas_set_color(canvas, ColorWhite);
-                } else {
-                    canvas_set_color(canvas, ColorBlack);
                 }
 
                 if(model->clear_default_text || text_length == 0) {
