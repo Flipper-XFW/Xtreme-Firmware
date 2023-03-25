@@ -24,6 +24,10 @@ typedef struct {
     char* text_buffer;
     size_t text_buffer_size;
     bool clear_default_text;
+    FuriString* temp_str;
+
+    bool cursor_select;
+    size_t cursor_pos;
 
     TextInputCallback callback;
     void* callback_context;
@@ -241,9 +245,13 @@ static char char_to_uppercase(const char letter) {
 }
 
 static void text_input_backspace_cb(TextInputModel* model) {
-    uint8_t text_length = model->clear_default_text ? 1 : strlen(model->text_buffer);
-    if(text_length > 0) {
-        model->text_buffer[text_length - 1] = 0;
+    if(model->clear_default_text) {
+        model->text_buffer[0] = 0;
+    } else if(model->cursor_pos > 0) {
+        furi_string_set_str(model->temp_str, model->text_buffer);
+        furi_string_replace_at(model->temp_str, model->cursor_pos - 1, 1, "");
+        model->cursor_pos--;
+        strcpy(model->text_buffer, furi_string_get_cstr(model->temp_str));
     }
 }
 
@@ -253,33 +261,42 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     uint8_t needed_string_width = canvas_width(canvas) - 8;
     uint8_t start_pos = 4;
 
-    const char* text = model->text_buffer;
-
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
     canvas_draw_str(canvas, 2, 8, model->header);
     elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
 
-    if(canvas_string_width(canvas, text) > needed_string_width) {
-        canvas_draw_str(canvas, start_pos, 22, "...");
-        start_pos += 6;
-        needed_string_width -= 8;
-    }
-
-    while(text != 0 && canvas_string_width(canvas, text) > needed_string_width) {
-        text++;
-    }
+    FuriString* str = model->temp_str;
+    furi_string_set_str(str, model->text_buffer);
+    const char* cstr = furi_string_get_cstr(str);
 
     if(model->clear_default_text) {
         elements_slightly_rounded_box(
-            canvas, start_pos - 1, 14, canvas_string_width(canvas, text) + 2, 10);
+            canvas, start_pos - 1, 14, canvas_string_width(canvas, cstr) + 2, 10);
         canvas_set_color(canvas, ColorWhite);
     } else {
-        canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 1, 22, "|");
-        canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 2, 22, "|");
+        furi_string_replace_at(str, model->cursor_pos, 0, "|");
     }
-    canvas_draw_str(canvas, start_pos, 22, text);
+
+    if(model->cursor_pos > 0 && canvas_string_width(canvas, cstr) > needed_string_width) {
+        canvas_draw_str(canvas, start_pos, 22, "...");
+        start_pos += 6;
+        needed_string_width -= 8;
+        for(uint off = 0; !furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width && off < model->cursor_pos; off++) {
+            furi_string_right(str, 1);
+        }
+    }
+
+    if(canvas_string_width(canvas, cstr) > needed_string_width) {
+        needed_string_width -= 4;
+        while(!furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width) {
+            furi_string_left(str, furi_string_size(str) - 1);
+        }
+        furi_string_cat_str(str, "...");
+    }
+
+    canvas_draw_str(canvas, start_pos, 22, cstr);
 
     canvas_set_font(canvas, FontKeyboard);
 
@@ -288,7 +305,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
         const TextInputKey* keys = get_row(keyboards[model->selected_keyboard], row);
 
         for(size_t column = 0; column < column_count; column++) {
-            bool selected = model->selected_row == row && model->selected_column == column;
+            bool selected = !model->cursor_select && model->selected_row == row && model->selected_column == column;
             const Icon* icon = NULL;
             if(keys[column].text == ENTER_KEY) {
                 icon = selected
@@ -359,12 +376,17 @@ static void text_input_handle_up(TextInput* text_input, TextInputModel* model) {
            model->selected_row == 0) {
             model->selected_column = model->selected_column + 1;
         }
+    } else {
+        model->cursor_select = true;
+        model->clear_default_text = false;
     }
 }
 
 static void text_input_handle_down(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
-    if(model->selected_row < keyboard_row_count - 1) {
+    if(model->cursor_select) {
+        model->cursor_select = false;
+    } else if(model->selected_row < keyboard_row_count - 1) {
         model->selected_row++;
         if(model->selected_column >
                get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 4 &&
@@ -376,7 +398,11 @@ static void text_input_handle_down(TextInput* text_input, TextInputModel* model)
 
 static void text_input_handle_left(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
-    if(model->selected_column > 0) {
+    if(model->cursor_select) {
+        if(model->cursor_pos > 0) {
+            model->cursor_pos = CLAMP(model->cursor_pos - 1, strlen(model->text_buffer), 0u);
+        }
+    } else if(model->selected_column > 0) {
         model->selected_column--;
     } else {
         model->selected_column =
@@ -386,8 +412,10 @@ static void text_input_handle_left(TextInput* text_input, TextInputModel* model)
 
 static void text_input_handle_right(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
-    if(model->selected_column <
-       get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 1) {
+    if(model->cursor_select) {
+        model->cursor_pos = CLAMP(model->cursor_pos + 1, strlen(model->text_buffer), 0u);
+    } else if(model->selected_column <
+        get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 1) {
         model->selected_column++;
     } else {
         model->selected_column = 0;
@@ -395,6 +423,7 @@ static void text_input_handle_right(TextInput* text_input, TextInputModel* model
 }
 
 static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, InputType type) {
+    if(model->cursor_select) return;
     bool shift = type == InputTypeLong;
     bool repeat = type == InputTypeRepeat;
     char selected = get_selected_char(model);
@@ -422,8 +451,15 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
                 if(shift != (text_length == 0)) {
                     selected = char_to_uppercase(selected);
                 }
-                model->text_buffer[text_length] = selected;
-                model->text_buffer[text_length + 1] = 0;
+                if(model->clear_default_text) {
+                    furi_string_set_str(model->temp_str, &selected);
+                    model->cursor_pos = 1;
+                } else {
+                    furi_string_set_str(model->temp_str, model->text_buffer);
+                    furi_string_replace_at(model->temp_str, model->cursor_pos, 0, &selected);
+                    model->cursor_pos++;
+                }
+                strcpy(model->text_buffer, furi_string_get_cstr(model->temp_str));
             }
         }
         model->clear_default_text = false;
@@ -547,7 +583,10 @@ TextInput* text_input_alloc() {
     with_view_model(
         text_input->view,
         TextInputModel * model,
-        { model->validator_text = furi_string_alloc(); },
+        {
+            model->validator_text = furi_string_alloc();
+            model->temp_str = furi_string_alloc();
+        },
         false);
 
     text_input_reset(text_input);
@@ -560,7 +599,10 @@ void text_input_free(TextInput* text_input) {
     with_view_model(
         text_input->view,
         TextInputModel * model,
-        { furi_string_free(model->validator_text); },
+        {
+            furi_string_free(model->validator_text);
+            furi_string_free(model->temp_str);
+        },
         false);
 
     // Send stop command
@@ -584,6 +626,8 @@ void text_input_reset(TextInput* text_input) {
             model->selected_column = 0;
             model->selected_keyboard = 0;
             model->clear_default_text = false;
+            model->cursor_pos = 0;
+            model->cursor_select = false;
             model->text_buffer = NULL;
             model->text_buffer_size = 0;
             model->callback = NULL;
@@ -617,11 +661,15 @@ void text_input_set_result_callback(
             model->text_buffer = text_buffer;
             model->text_buffer_size = text_buffer_size;
             model->clear_default_text = clear_default_text;
+            model->cursor_select = false;
             if(text_buffer && text_buffer[0] != '\0') {
+                model->cursor_pos = strlen(text_buffer);
                 // Set focus on Save
                 model->selected_row = 2;
                 model->selected_column = 9;
                 model->selected_keyboard = 0;
+            } else {
+                model->cursor_pos = 0;
             }
         },
         true);
