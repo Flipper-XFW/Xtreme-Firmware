@@ -87,20 +87,20 @@ jobs:
 
           while [ "$new" != "$sha" ]; do
             sleep 1
-            new="$(curl -s https://api.github.com/repos/${{ github.event.pull_request.base.repo.full_name }}/pulls/${{ github.event.pull_request.number }} | jq -r ".head.sha")"
+            new="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.base.repo.full_name }}/pulls/${{ github.event.pull_request.number }}" | jq -r ".head.sha")"
           done
 
-          checks="$(curl -s https://api.github.com/repos/${{ github.event.pull_request.base.repo.full_name }}/branches/main | jq -r ".protection.required_status_checks.contexts[]")"
+          checks="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.base.repo.full_name }}/branches/main" | jq -r ".protection.required_status_checks.contexts[]")"
           for check in $checks; do
             found=false
             while ! $found; do
               sleep 1
-              suites="$(curl -s https://api.github.com/repos/${{ github.event.pull_request.head.repo.full_name }}/commits/$sha/check-suites | jq -r ".check_suites[].check_runs_url")"
+              suites="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.head.repo.full_name }}/commits/${sha}/check-suites" | jq -r ".check_suites[].check_runs_url")"
               for suite in $suites; do
                 completed=false
                 while ! $completed; do
                   sleep 1
-                  run="$(curl -s $suite | jq -r '.check_runs[] | select(.name == "$check")')"
+                  run="$(curl -s "$suite" | jq -r '.check_runs[] | select(.name == "${check}")')"
                   [ "$run" != "" ] || continue 2
                   found=true
                   [ "$(echo "$run" | jq -r ".status")" = "completed" ] || continue
