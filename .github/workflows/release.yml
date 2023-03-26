@@ -82,30 +82,44 @@ jobs:
 
       - name: "Wait for checks to pass"
         run: |
-          ${{ steps.commit.outputs.pushed }}
-          sha="${{ steps.commit.outputs.commit_long_sha }}"
+          pushed=${{ steps.commit.outputs.pushed }}
+          echo "Commit was pushed: ${pushed}"
+          $pushed
 
+          sha="${{ steps.commit.outputs.commit_long_sha }}"
+          echo "Pushed commit sha: ${sha}"
+
+          echo "Waiting for PR head to sync"
           while [ "$new" != "$sha" ]; do
             sleep 1
             new="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.base.repo.full_name }}/pulls/${{ github.event.pull_request.number }}" | jq -r ".head.sha")"
+            echo "New PR head sha: ${new}"
           done
+          echo "PR synced"
 
-          checks="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.base.repo.full_name }}/branches/main" | jq -r ".protection.required_status_checks.contexts[]")"
+          echo "Finding required status checks"
+          checks="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.base.repo.full_name }}/branches/${{ github.event.pull_request.base.ref }}" | jq -r ".protection.required_status_checks.contexts[]")"
           for check in $checks; do
+            echo "Started waiting for check: ${check}"
             found=false
             while ! $found; do
               sleep 1
-              suites="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.head.repo.full_name }}/commits/${sha}/check-suites" | jq -r ".check_suites[].check_runs_url")"
+              echo "Querying check suites"
+              suites="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.head.repo.full_name }}/commits/${sha}/check-suites" | jq -r ".check_suites[].id")"
               for suite in $suites; do
                 completed=false
                 while ! $completed; do
                   sleep 1
-                  run="$(curl -s "$suite" | jq -r '.check_runs[] | select(.name == "${check}")')"
-                  [ "$run" != "" ] || continue 2
+                  echo "Querying check suite: ${suite}"
+                  run="$(curl -s "https://api.github.com/repos/${{ github.event.pull_request.head.repo.full_name }}/check-suites/${suite}/check-runs" | jq -r '.check_runs[] | select(.name == "${check}")')"
+                  [ "$run" != "" ] || (echo "Check suite ${suite} does not match check: ${check}" && continue 2)
                   found=true
-                  [ "$(echo "$run" | jq -r ".status")" = "completed" ] || continue
+                  [ "$(echo "$run" | jq -r ".status")" = "completed" ] || (echo "Check suite ${suite} not complete yet" && sleep 10 && continue)
                   completed=true
-                  [ "$(echo "$run" | jq -r ".conclusion")" = "success" ]
+                  echo "Check suite ${suite} completed"
+                  [ "$(echo "$run" | jq -r ".conclusion")" = "success" ] || (echo "Check failed: ${check}" && false)
+                  echo "Check passed: ${check}"
+                  continue 3
                 done
               done
             done
@@ -129,4 +143,4 @@ jobs:
             dist/${{ env.RELEASE_TAG }}.zip
           name: "${{ env.RELEASE_TAG }}"
           tag_name: "${{ env.RELEASE_TAG }}"
-          target_commitish: main
+          target_commitish: ${{ github.event.pull_request.base.ref }}
