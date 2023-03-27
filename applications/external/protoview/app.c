@@ -2,6 +2,7 @@
  * See the LICENSE file for information about the license. */
 
 #include "app.h"
+#include <dolphin/dolphin.h>
 
 RawSamplesBuffer *RawSamples, *DetectedSamples;
 extern const SubGhzProtocolRegistry protoview_protocol_registry;
@@ -258,6 +259,7 @@ static bool keyboard_view_dispatcher_navigation_callback(void* ctx) {
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
     ProtoViewApp* app = protoview_app_alloc();
+    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     /* Create a timer. We do data analysis in the callback. */
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);

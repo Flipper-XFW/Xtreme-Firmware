@@ -12,6 +12,7 @@
 #include <dolphin/dolphin.h>
 #include <nrf24.h>
 #include <u8g2.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "nrf24scan"
 #define VERSION "2.2"
@@ -1331,6 +1332,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 int32_t nrf24scan_app(void* p) {
     UNUSED(p);
     APP = malloc(sizeof(Nrf24Scan));
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     APP->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     APP->plugin_state = malloc(sizeof(PluginState));
     APP->plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);

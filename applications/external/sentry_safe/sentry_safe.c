@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 
 #include <furi_hal.h>
 
@@ -84,6 +85,7 @@ int32_t sentry_safe_app(void* p) {
     UNUSED(p);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
+    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     SentryState* sentry_state = malloc(sizeof(SentryState));
 

@@ -5,6 +5,7 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include "spectrum_analyzer.h"
+#include <dolphin/dolphin.h>
 
 #include <lib/drivers/cc1101_regs.h>
 #include "spectrum_analyzer_worker.h"
@@ -400,6 +401,7 @@ void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
 int32_t spectrum_analyzer_app(void* p) {
     UNUSED(p);
 
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     SpectrumAnalyzer* spectrum_analyzer = spectrum_analyzer_alloc();
     InputEvent input;
 

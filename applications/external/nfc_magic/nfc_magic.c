@@ -1,4 +1,5 @@
 #include "nfc_magic_i.h"
+#include <dolphin/dolphin.h>
 
 bool nfc_magic_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -160,6 +161,7 @@ int32_t nfc_magic_app(void* p) {
     UNUSED(p);
     NfcMagic* nfc_magic = nfc_magic_alloc();
 
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneStart);
 
     view_dispatcher_run(nfc_magic->view_dispatcher);

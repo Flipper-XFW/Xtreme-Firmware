@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <dolphin/dolphin.h>
 
 static bool dtmf_dolphin_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -82,6 +83,7 @@ int32_t dtmf_dolphin_app(void* p) {
     UNUSED(p);
     DTMFDolphinApp* app = app_alloc();
 
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     view_dispatcher_run(app->view_dispatcher);
 
     app_free(app);

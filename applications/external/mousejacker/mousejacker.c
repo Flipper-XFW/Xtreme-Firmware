@@ -11,6 +11,7 @@
 #include <nrf24.h>
 #include "mousejacker_ducky.h"
 #include <NRF24_Mouse_Jacker_icons.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "mousejacker"
 #define LOGITECH_MAX_CHANNEL 85
@@ -286,6 +287,7 @@ void start_mjthread(PluginState* plugin_state) {
 int32_t mousejacker_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
+    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     mousejacker_state_init(plugin_state);

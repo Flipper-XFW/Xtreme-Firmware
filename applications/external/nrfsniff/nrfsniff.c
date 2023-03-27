@@ -4,6 +4,7 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
@@ -314,6 +315,7 @@ static void start_sniffing() {
 
 int32_t nrfsniff_app(void* p) {
     UNUSED(p);
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     uint8_t address[5] = {0};
     uint32_t start = 0;
     hexlify(address, 5, top_address);

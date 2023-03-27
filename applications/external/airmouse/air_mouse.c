@@ -1,7 +1,6 @@
 #include "air_mouse.h"
 
 #include <furi.h>
-#include <dolphin/dolphin.h>
 
 #include "tracking/imu/imu.h"
 
@@ -146,7 +145,6 @@ int32_t air_mouse_app(void* p) {
         return -1;
     }
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
     view_dispatcher_run(app->view_dispatcher);
 
     imu_end();

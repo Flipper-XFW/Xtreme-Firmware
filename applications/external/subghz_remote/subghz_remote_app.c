@@ -23,6 +23,7 @@
 #include <lib/subghz/protocols/nice_flor_s.h>
 #include <lib/subghz/protocols/somfy_telis.h>
 #include <lib/subghz/protocols/secplus_v2.h>
+#include <dolphin/dolphin.h>
 
 #define SUBREMOTEMAP_FOLDER "/ext/subghz/remote"
 #define SUBREMOTEMAP_EXTENSION ".txt"
@@ -804,6 +805,7 @@ void subghz_remote_free(SubGHzRemote* app, bool with_subghz) {
 
 int32_t subghz_remote_app(void* p) {
     UNUSED(p);
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     SubGHzRemote* app = subghz_remote_alloc();
 
     app->file_path = furi_string_alloc();

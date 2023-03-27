@@ -5,6 +5,7 @@
 #include "scene/flipfrid_scene_select_field.h"
 #include "scene/flipfrid_scene_run_attack.h"
 #include "scene/flipfrid_scene_load_custom_uids.h"
+#include <dolphin/dolphin.h>
 
 #define RFIDFUZZER_APP_FOLDER "/ext/lrfid/rfidfuzzer"
 
@@ -117,6 +118,7 @@ int32_t flipfrid_start(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(FlipFridEvent));
     FlipFridState* flipfrid_state = flipfrid_alloc();
 
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     flipfrid_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!flipfrid_state->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");

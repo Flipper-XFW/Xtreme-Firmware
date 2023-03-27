@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <dolphin/dolphin.h>
 
 static bool wifi_marauder_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -23,6 +24,7 @@ static void wifi_marauder_app_tick_event_callback(void* context) {
 
 WifiMarauderApp* wifi_marauder_app_alloc() {
     WifiMarauderApp* app = malloc(sizeof(WifiMarauderApp));
+    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);

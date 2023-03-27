@@ -5,6 +5,7 @@
 #include "scene/ibtnfuzzer_scene_select_field.h"
 #include "scene/ibtnfuzzer_scene_run_attack.h"
 #include "scene/ibtnfuzzer_scene_load_custom_uids.h"
+#include <dolphin/dolphin.h>
 
 #define IBTNFUZZER_APP_FOLDER "/ext/ibtnfuzzer"
 
@@ -119,6 +120,7 @@ int32_t ibtnfuzzer_start(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(iBtnFuzzerEvent));
     iBtnFuzzerState* ibtnfuzzer_state = ibtnfuzzer_alloc();
 
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     ibtnfuzzer_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!ibtnfuzzer_state->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
