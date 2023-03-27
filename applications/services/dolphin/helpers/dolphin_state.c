@@ -1,6 +1,5 @@
 #include "dolphin_state.h"
 #include "dolphin/helpers/dolphin_deed.h"
-#include "dolphin_state_filename.h"
 
 #include <stdint.h>
 #include <storage/storage.h>
@@ -11,8 +10,8 @@
 
 #define TAG "DolphinState"
 
-#define DOLPHIN_STATE_OLD_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
-#define DOLPHIN_STATE_PATH EXT_PATH(DOLPHIN_STATE_FILE_NAME)
+#define DOLPHIN_STATE_OLD_PATH INT_PATH(".dolphin.state")
+#define DOLPHIN_STATE_PATH CFG_PATH("dolphin.state")
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
 

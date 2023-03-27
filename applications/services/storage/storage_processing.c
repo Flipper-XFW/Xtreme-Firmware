@@ -500,6 +500,14 @@ void storage_process_alias(
             furi_string_get_cstr(apps_assets_path_with_appsid));
 
         furi_string_free(apps_assets_path_with_appsid);
+    } else if(furi_string_start_with(path, STORAGE_CFG_PATH_PREFIX)) {
+        // Create config folder if it doesn't exist
+        FuriString* config_path = furi_string_alloc_set(STORAGE_CFG_PATH_PREFIX);
+        if(create_folders &&
+           storage_process_common_stat(app, config_path, NULL) != FSE_OK) {
+            storage_process_common_mkdir(app, config_path);
+        }
+        furi_string_free(config_path);
     }
 }
 

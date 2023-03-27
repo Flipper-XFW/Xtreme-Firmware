@@ -4,8 +4,8 @@
 #include <lib/toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define BT_SETTINGS_OLD_PATH INT_PATH(BT_SETTINGS_FILE_NAME)
-#define BT_SETTINGS_PATH EXT_PATH(BT_SETTINGS_FILE_NAME)
+#define BT_SETTINGS_OLD_PATH INT_PATH(".bt.settings")
+#define BT_SETTINGS_PATH CFG_PATH("bt.settings")
 #define BT_SETTINGS_VERSION (0)
 #define BT_SETTINGS_MAGIC (0x19)
 

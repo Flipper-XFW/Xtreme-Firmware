@@ -27,13 +27,23 @@ void XTREME_SETTINGS_LOAD() {
                 sizeof(XtremeSettings),
                 XTREME_SETTINGS_MAGIC,
                 XTREME_SETTINGS_VERSION);
+            if(!loaded) {
+                Storage* storage = furi_record_open(RECORD_STORAGE);
+                storage_common_copy(storage, XTREME_SETTINGS_OLD_PATH, XTREME_SETTINGS_PATH);
+                storage_common_copy(storage, XTREME_SETTINGS_OLD_INT_PATH, XTREME_SETTINGS_PATH);
+                storage_common_remove(storage, XTREME_SETTINGS_OLD_PATH);
+                storage_common_remove(storage, XTREME_SETTINGS_OLD_INT_PATH);
+                furi_record_close(RECORD_STORAGE);
+                loaded = saved_struct_load(
+                    XTREME_SETTINGS_PATH,
+                    xtreme_settings,
+                    sizeof(XtremeSettings),
+                    XTREME_SETTINGS_MAGIC,
+                    XTREME_SETTINGS_VERSION);
+            }
         }
 
         if(!loaded) {
-            if(!skip) {
-                storage_simply_remove(furi_record_open(RECORD_STORAGE), XTREME_SETTINGS_PATH_OLD);
-                furi_record_close(RECORD_STORAGE);
-            }
             memset(xtreme_settings, 0, sizeof(XtremeSettings));
             strlcpy(xtreme_settings->asset_pack, "", MAX_PACK_NAME_LEN); // SFW
             xtreme_settings->anim_speed = 100; // 100%
@@ -55,9 +65,6 @@ void XTREME_SETTINGS_LOAD() {
             xtreme_settings->bad_bt_remember = false; // OFF
             xtreme_settings->butthurt_timer = 43200; // 12 H
             xtreme_settings->rgb_backlight = false; // OFF
-            if(!skip) {
-                XTREME_SETTINGS_SAVE();
-            }
         }
     }
 }

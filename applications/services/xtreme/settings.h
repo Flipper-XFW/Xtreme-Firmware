@@ -1,7 +1,5 @@
 #pragma once
 
-#include "settings_filename.h"
-
 #include <furi_hal.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -16,11 +14,12 @@ extern "C" {
 #define MAX_PACK_NAME_LEN 32
 
 #define XTREME_SETTINGS_VERSION (10)
-#define XTREME_SETTINGS_PATH_OLD INT_PATH(XTREME_SETTINGS_FILE_NAME)
-#define XTREME_SETTINGS_PATH EXT_PATH(XTREME_SETTINGS_FILE_NAME)
 #define XTREME_SETTINGS_MAGIC (0x69)
+#define XTREME_SETTINGS_OLD_INT_PATH INT_PATH(".xtreme.settings")
+#define XTREME_SETTINGS_OLD_PATH EXT_PATH(".xtreme.settings")
+#define XTREME_SETTINGS_PATH CFG_PATH("xtreme.settings")
 
-#define XTREME_APPS_PATH EXT_PATH(XTREME_APPS_FILE_NAME)
+#define XTREME_APPS_PATH CFG_PATH("xtreme_apps.txt")
 
 typedef struct {
     char asset_pack[MAX_PACK_NAME_LEN];

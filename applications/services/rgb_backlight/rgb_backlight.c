@@ -21,8 +21,7 @@
 #include <storage/storage.h>
 
 #define RGB_BACKLIGHT_SETTINGS_VERSION 5
-#define RGB_BACKLIGHT_SETTINGS_FILE_NAME ".rgb_backlight.settings"
-#define RGB_BACKLIGHT_SETTINGS_PATH EXT_PATH(RGB_BACKLIGHT_SETTINGS_FILE_NAME)
+#define RGB_BACKLIGHT_SETTINGS_PATH CFG_PATH("rgb_backlight.settings")
 
 #define COLOR_COUNT (sizeof(colors) / sizeof(RGBBacklightColor))
 
