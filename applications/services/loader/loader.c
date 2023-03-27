@@ -538,6 +538,7 @@ int32_t loader_srv(void* p) {
                 loader_instance->view_dispatcher, LoaderMenuViewPrimary);
             view_dispatcher_run(loader_instance->view_dispatcher);
         } else if(flags & LOADER_THREAD_FLAG_SHOW_SETTINGS) {
+            submenu_set_selected_item(loader_instance->settings_menu, 0);
             view_set_previous_callback(
                 submenu_get_view(loader_instance->settings_menu), loader_hide_menu);
             view_dispatcher_switch_to_view(
