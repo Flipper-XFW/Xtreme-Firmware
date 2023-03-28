@@ -21,7 +21,11 @@ bool bt_settings_load(BtSettings* bt_settings) {
         storage_common_remove(storage, BT_SETTINGS_OLD_PATH);
         furi_record_close(RECORD_STORAGE);
         ret = saved_struct_load(
-            BT_SETTINGS_PATH, bt_settings, sizeof(BtSettings), BT_SETTINGS_MAGIC, BT_SETTINGS_VERSION);
+            BT_SETTINGS_PATH,
+            bt_settings,
+            sizeof(BtSettings),
+            BT_SETTINGS_MAGIC,
+            BT_SETTINGS_VERSION);
     }
 
     return ret;

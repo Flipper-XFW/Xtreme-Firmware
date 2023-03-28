@@ -287,7 +287,10 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str(canvas, start_pos, 22, "...");
         start_pos += 6;
         needed_string_width -= 8;
-        for(uint off = 0; !furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width && off < model->cursor_pos; off++) {
+        for(uint off = 0;
+            !furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width &&
+            off < model->cursor_pos;
+            off++) {
             furi_string_right(str, 1);
         }
     }
@@ -309,20 +312,15 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
         const TextInputKey* keys = get_row(keyboards[model->selected_keyboard], row);
 
         for(size_t column = 0; column < column_count; column++) {
-            bool selected = !model->cursor_select && model->selected_row == row && model->selected_column == column;
+            bool selected = !model->cursor_select && model->selected_row == row &&
+                            model->selected_column == column;
             const Icon* icon = NULL;
             if(keys[column].text == ENTER_KEY) {
-                icon = selected
-                    ? &I_KeySaveSelected_24x11
-                    : &I_KeySave_24x11;
+                icon = selected ? &I_KeySaveSelected_24x11 : &I_KeySave_24x11;
             } else if(keys[column].text == SWITCH_KEYBOARD_KEY) {
-                icon = selected
-                    ? &I_KeyKeyboardSelected_10x11
-                    : &I_KeyKeyboard_10x11;
+                icon = selected ? &I_KeyKeyboardSelected_10x11 : &I_KeyKeyboard_10x11;
             } else if(keys[column].text == BACKSPACE_KEY) {
-                icon = selected
-                    ? &I_KeyBackspaceSelected_16x9
-                    : &I_KeyBackspace_16x9;
+                icon = selected ? &I_KeyBackspaceSelected_16x9 : &I_KeyBackspace_16x9;
             }
             canvas_set_color(canvas, ColorBlack);
             if(icon != NULL) {
@@ -418,7 +416,8 @@ static void text_input_handle_right(TextInput* text_input, TextInputModel* model
     UNUSED(text_input);
     if(model->cursor_select) {
         model->cursor_pos = CLAMP(model->cursor_pos + 1, strlen(model->text_buffer), 0u);
-    } else if(model->selected_column <
+    } else if(
+        model->selected_column <
         get_row_size(keyboards[model->selected_keyboard], model->selected_row) - 1) {
         model->selected_column++;
     } else {

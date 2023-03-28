@@ -115,7 +115,13 @@ bool xtreme_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
                 DialogMessage* msg = dialog_message_alloc();
                 dialog_message_set_header(msg, "RGB Backlight", 64, 0, AlignCenter, AlignTop);
                 dialog_message_set_buttons(msg, "No", NULL, "Yes");
-                dialog_message_set_text(msg, "This option requires installing\na hardware modification!\nIs it installed?", 64, 32, AlignCenter, AlignCenter);
+                dialog_message_set_text(
+                    msg,
+                    "This option requires installing\na hardware modification!\nIs it installed?",
+                    64,
+                    32,
+                    AlignCenter,
+                    AlignCenter);
                 if(dialog_message_show(app->dialogs, msg) == DialogMessageButtonRight) {
                     change = true;
                 }

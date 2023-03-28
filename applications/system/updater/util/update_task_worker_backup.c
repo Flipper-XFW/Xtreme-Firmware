@@ -199,24 +199,27 @@ static bool update_task_post_update(UpdateTask* update_task) {
             update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 0);
             FuriString* tmp_path;
             tmp_path = furi_string_alloc_set(update_task->update_path);
-            if(storage_common_stat(update_task->storage, XFWFIRSTBOOT_FLAG_PATH, NULL) == FSE_NOT_EXIST) {
+            if(storage_common_stat(update_task->storage, XFWFIRSTBOOT_FLAG_PATH, NULL) ==
+               FSE_NOT_EXIST) {
                 File* file = storage_file_alloc(update_task->storage);
-                if(storage_file_open(file, XFWFIRSTBOOT_FLAG_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                if(storage_file_open(
+                       file, XFWFIRSTBOOT_FLAG_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
                     storage_file_close(file);
                 }
                 storage_file_free(file);
                 path_append(tmp_path, "xfwfirstboot.bin");
-                if(storage_common_stat(update_task->storage, furi_string_get_cstr(tmp_path), NULL) != FSE_OK) {
+                if(storage_common_stat(
+                       update_task->storage, furi_string_get_cstr(tmp_path), NULL) != FSE_OK) {
                     furi_string_set(tmp_path, update_task->update_path);
-                    path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
+                    path_append(
+                        tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
                 }
             } else {
                 path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
             }
             if(storage_common_copy(
-                   update_task->storage,
-                   furi_string_get_cstr(tmp_path),
-                   SLIDESHOW_FS_PATH) != FSE_OK) {
+                   update_task->storage, furi_string_get_cstr(tmp_path), SLIDESHOW_FS_PATH) !=
+               FSE_OK) {
                 // actually, not critical
             }
             furi_string_free(tmp_path);

@@ -138,12 +138,14 @@ class Main(App):
                 return 2
 
         if self.args.splash:
-            SlideshowMain(no_exit=True)([
-                "-i",
-                str(pathlib.Path(self.args.splash).parent / "xfwfirstboot"),
-                "-o",
-                join(self.args.directory, "xfwfirstboot.bin"),
-            ])
+            SlideshowMain(no_exit=True)(
+                [
+                    "-i",
+                    str(pathlib.Path(self.args.splash).parent / "xfwfirstboot"),
+                    "-o",
+                    join(self.args.directory, "xfwfirstboot.bin"),
+                ]
+            )
             splash_args = [
                 "-i",
                 self.args.splash,
