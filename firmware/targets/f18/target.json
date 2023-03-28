@@ -27,6 +27,7 @@
         "one_wire",
         "misc",
         "flipper_application",
+        "pulse_reader",
         "flipperformat",
         "toolbox",
         "flipper18"
