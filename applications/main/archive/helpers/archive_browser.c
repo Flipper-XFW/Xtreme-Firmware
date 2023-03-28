@@ -498,8 +498,10 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
         tab = archive_get_tab(browser);
         if(archive_is_dir_exists(browser->path)) {
             bool skip_assets = (strcmp(archive_get_tab_ext(tab), "*") == 0) ? false : true;
-            // Hide dot files everywhere except Browser
-            bool hide_dot_files = (strcmp(archive_get_tab_ext(tab), "*") == 0) ? false : true;
+            // Hide dot files everywhere except Browser if in debug mode
+            bool hide_dot_files = (strcmp(archive_get_tab_ext(tab), "*") == 0) ?
+                                      !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) :
+                                      true;
             archive_file_browser_set_path(
                 browser, browser->path, archive_get_tab_ext(tab), skip_assets, hide_dot_files);
             tab_empty = false; // Empty check will be performed later

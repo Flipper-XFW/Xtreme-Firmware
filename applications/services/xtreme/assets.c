@@ -93,6 +93,8 @@ void swap(XtremeAssets* x, FuriString* p, File* f) {
     icon(&x->I_DolphinWait_61x59, "iButton/DolphinWait_61x59", p, f);
     icon(&x->I_iButtonDolphinVerySuccess_108x52, "iButton/iButtonDolphinVerySuccess_108x52", p, f);
     icon(&x->I_DolphinReadingSuccess_59x63, "Infrared/DolphinReadingSuccess_59x63", p, f);
+    icon(&x->I_Lockscreen, "Interface/Lockscreen", p, f);
+    icon(&x->I_WarningDolphin_45x42, "Interface/WarningDolphin_45x42", p, f);
     icon(&x->I_NFC_dolphin_emulation_47x61, "NFC/NFC_dolphin_emulation_47x61", p, f);
     icon(&x->I_passport_bad_46x49, "Passport/passport_bad_46x49", p, f);
     icon(&x->I_passport_DB, "Passport/passport_DB", p, f);
@@ -123,6 +125,8 @@ void XTREME_ASSETS_LOAD() {
     xtreme_assets->I_DolphinWait_61x59 = &I_DolphinWait_61x59;
     xtreme_assets->I_iButtonDolphinVerySuccess_108x52 = &I_iButtonDolphinVerySuccess_108x52;
     xtreme_assets->I_DolphinReadingSuccess_59x63 = &I_DolphinReadingSuccess_59x63;
+    xtreme_assets->I_Lockscreen = &I_Lockscreen;
+    xtreme_assets->I_WarningDolphin_45x42 = &I_WarningDolphin_45x42;
     xtreme_assets->I_NFC_dolphin_emulation_47x61 = &I_NFC_dolphin_emulation_47x61;
     xtreme_assets->I_passport_bad_46x49 = &I_passport_bad_46x49;
     xtreme_assets->I_passport_DB = &I_passport_DB;

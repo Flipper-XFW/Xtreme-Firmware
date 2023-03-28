@@ -180,128 +180,240 @@ void nfcv_crc(uint8_t* data, uint32_t length) {
     data[length + 1] = crc >> 8;
 }
 
+void nfcv_emu_free_signals(NfcVEmuAirSignals* signals) {
+    furi_assert(signals);
+
+    if(signals->nfcv_resp_one) {
+        digital_signal_free(signals->nfcv_resp_one);
+    }
+    if(signals->nfcv_resp_zero) {
+        digital_signal_free(signals->nfcv_resp_zero);
+    }
+    if(signals->nfcv_resp_sof) {
+        digital_signal_free(signals->nfcv_resp_sof);
+    }
+    if(signals->nfcv_resp_eof) {
+        digital_signal_free(signals->nfcv_resp_eof);
+    }
+    signals->nfcv_resp_one = NULL;
+    signals->nfcv_resp_zero = NULL;
+    signals->nfcv_resp_sof = NULL;
+    signals->nfcv_resp_eof = NULL;
+}
+
+bool nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_t slowdown) {
+    furi_assert(air);
+    furi_assert(signals);
+
+    bool success = true;
+
+    if(!signals->nfcv_resp_one) {
+        /* logical one: unmodulated then 8 pulses */
+        signals->nfcv_resp_one = digital_signal_alloc(
+            slowdown * (air->nfcv_resp_unmod->edge_cnt + 8 * air->nfcv_resp_pulse->edge_cnt));
+        if(!signals->nfcv_resp_one) {
+            return false;
+        }
+        for(size_t i = 0; i < slowdown; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_unmod);
+        }
+        for(size_t i = 0; i < slowdown * 8; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_pulse);
+        }
+        if(!success) {
+            return false;
+        }
+    }
+    if(!signals->nfcv_resp_zero) {
+        /* logical zero: 8 pulses then unmodulated */
+        signals->nfcv_resp_zero = digital_signal_alloc(
+            slowdown * (8 * air->nfcv_resp_pulse->edge_cnt + air->nfcv_resp_unmod->edge_cnt));
+        if(!signals->nfcv_resp_zero) {
+            return false;
+        }
+        for(size_t i = 0; i < slowdown * 8; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_pulse);
+        }
+        for(size_t i = 0; i < slowdown; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_unmod);
+        }
+        if(!success) {
+            return false;
+        }
+    }
+    if(!signals->nfcv_resp_sof) {
+        /* SOF: unmodulated, 24 pulses, logic 1 */
+        signals->nfcv_resp_sof = digital_signal_alloc(
+            slowdown * (3 * air->nfcv_resp_unmod->edge_cnt + 24 * air->nfcv_resp_pulse->edge_cnt) +
+            signals->nfcv_resp_one->edge_cnt);
+        if(!signals->nfcv_resp_sof) {
+            return false;
+        }
+        for(size_t i = 0; i < slowdown * 3; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_unmod);
+        }
+        for(size_t i = 0; i < slowdown * 24; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_pulse);
+        }
+        success &= digital_signal_append(signals->nfcv_resp_sof, signals->nfcv_resp_one);
+        if(!success) {
+            return false;
+        }
+    }
+    if(!signals->nfcv_resp_eof) {
+        /* EOF: logic 0, 24 pulses, unmodulated */
+        signals->nfcv_resp_eof = digital_signal_alloc(
+            signals->nfcv_resp_zero->edge_cnt +
+            slowdown * (24 * air->nfcv_resp_pulse->edge_cnt + 3 * air->nfcv_resp_unmod->edge_cnt) +
+            air->nfcv_resp_unmod->edge_cnt);
+        if(!signals->nfcv_resp_eof) {
+            return false;
+        }
+        success &= digital_signal_append(signals->nfcv_resp_eof, signals->nfcv_resp_zero);
+        for(size_t i = 0; i < slowdown * 23; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_pulse);
+        }
+        /* we don't want to add the last level as we just want a transition to "unmodulated" again */
+        for(size_t i = 0; i < slowdown; i++) {
+            success &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_half_pulse);
+        }
+    }
+    return success;
+}
+
+bool nfcv_emu_alloc(NfcVData* nfcv_data) {
+    furi_assert(nfcv_data);
+
+    if(!nfcv_data->frame) {
+        nfcv_data->frame = malloc(NFCV_FRAMESIZE_MAX);
+        if(!nfcv_data->frame) {
+            return false;
+        }
+    }
+
+    if(!nfcv_data->emu_air.nfcv_signal) {
+        /* assuming max frame length is 255 bytes */
+        nfcv_data->emu_air.nfcv_signal = digital_sequence_alloc(8 * 255 + 2, &gpio_spi_r_mosi);
+        if(!nfcv_data->emu_air.nfcv_signal) {
+            return false;
+        }
+    }
+    if(!nfcv_data->emu_air.nfcv_resp_unmod) {
+        /* unmodulated 256/fc or 1024/fc signal as building block */
+        nfcv_data->emu_air.nfcv_resp_unmod = digital_signal_alloc(4);
+        if(!nfcv_data->emu_air.nfcv_resp_unmod) {
+            return false;
+        }
+        nfcv_data->emu_air.nfcv_resp_unmod->start_level = false;
+        nfcv_data->emu_air.nfcv_resp_unmod->edge_timings[0] =
+            (uint32_t)(NFCV_RESP_SUBC1_UNMOD_256 * DIGITAL_SIGNAL_UNIT_S);
+        nfcv_data->emu_air.nfcv_resp_unmod->edge_cnt = 1;
+    }
+    if(!nfcv_data->emu_air.nfcv_resp_pulse) {
+        /* modulated fc/32 or fc/8 pulse as building block */
+        nfcv_data->emu_air.nfcv_resp_pulse = digital_signal_alloc(4);
+        if(!nfcv_data->emu_air.nfcv_resp_pulse) {
+            return false;
+        }
+        nfcv_data->emu_air.nfcv_resp_pulse->start_level = true;
+        nfcv_data->emu_air.nfcv_resp_pulse->edge_timings[0] =
+            (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
+        nfcv_data->emu_air.nfcv_resp_pulse->edge_timings[1] =
+            (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
+        nfcv_data->emu_air.nfcv_resp_pulse->edge_cnt = 2;
+    }
+
+    if(!nfcv_data->emu_air.nfcv_resp_half_pulse) {
+        /* modulated fc/32 or fc/8 pulse as building block */
+        nfcv_data->emu_air.nfcv_resp_half_pulse = digital_signal_alloc(4);
+        if(!nfcv_data->emu_air.nfcv_resp_half_pulse) {
+            return false;
+        }
+        nfcv_data->emu_air.nfcv_resp_half_pulse->start_level = true;
+        nfcv_data->emu_air.nfcv_resp_half_pulse->edge_timings[0] =
+            (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
+        nfcv_data->emu_air.nfcv_resp_half_pulse->edge_cnt = 1;
+    }
+
+    bool success = true;
+    success &= nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_high, 1);
+    success &= nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_low, 4);
+
+    if(!success) {
+        FURI_LOG_E(TAG, "Failed to allocate signals");
+        return false;
+    }
+
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_SOF,
+        nfcv_data->emu_air.signals_high.nfcv_resp_sof);
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_BIT0,
+        nfcv_data->emu_air.signals_high.nfcv_resp_zero);
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_BIT1,
+        nfcv_data->emu_air.signals_high.nfcv_resp_one);
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_EOF,
+        nfcv_data->emu_air.signals_high.nfcv_resp_eof);
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_LOW_SOF,
+        nfcv_data->emu_air.signals_low.nfcv_resp_sof);
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_LOW_BIT0,
+        nfcv_data->emu_air.signals_low.nfcv_resp_zero);
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_LOW_BIT1,
+        nfcv_data->emu_air.signals_low.nfcv_resp_one);
+    digital_sequence_set_signal(
+        nfcv_data->emu_air.nfcv_signal,
+        NFCV_SIG_LOW_EOF,
+        nfcv_data->emu_air.signals_low.nfcv_resp_eof);
+
+    return true;
+}
+
 void nfcv_emu_free(NfcVData* nfcv_data) {
+    furi_assert(nfcv_data);
+
+    if(nfcv_data->frame) {
+        free(nfcv_data->frame);
+    }
+    if(nfcv_data->emu_protocol_ctx) {
+        free(nfcv_data->emu_protocol_ctx);
+    }
+    if(nfcv_data->emu_air.nfcv_resp_unmod) {
+        digital_signal_free(nfcv_data->emu_air.nfcv_resp_unmod);
+    }
+    if(nfcv_data->emu_air.nfcv_resp_pulse) {
+        digital_signal_free(nfcv_data->emu_air.nfcv_resp_pulse);
+    }
+    if(nfcv_data->emu_air.nfcv_resp_half_pulse) {
+        digital_signal_free(nfcv_data->emu_air.nfcv_resp_half_pulse);
+    }
     if(nfcv_data->emu_air.nfcv_signal) {
         digital_sequence_free(nfcv_data->emu_air.nfcv_signal);
-    }
-    if(nfcv_data->emu_air.nfcv_resp_unmod_256) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_unmod_256);
-    }
-    if(nfcv_data->emu_air.nfcv_resp_pulse_32) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_pulse_32);
-    }
-    if(nfcv_data->emu_air.nfcv_resp_one) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_one);
-    }
-    if(nfcv_data->emu_air.nfcv_resp_zero) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_zero);
-    }
-    if(nfcv_data->emu_air.nfcv_resp_sof) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_sof);
-    }
-    if(nfcv_data->emu_air.nfcv_resp_eof) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_eof);
     }
     if(nfcv_data->emu_air.reader_signal) {
         pulse_reader_free(nfcv_data->emu_air.reader_signal);
     }
 
+    nfcv_data->frame = NULL;
+    nfcv_data->emu_air.nfcv_resp_unmod = NULL;
+    nfcv_data->emu_air.nfcv_resp_pulse = NULL;
+    nfcv_data->emu_air.nfcv_resp_half_pulse = NULL;
     nfcv_data->emu_air.nfcv_signal = NULL;
-    nfcv_data->emu_air.nfcv_resp_unmod_256 = NULL;
-    nfcv_data->emu_air.nfcv_resp_pulse_32 = NULL;
-    nfcv_data->emu_air.nfcv_resp_one = NULL;
-    nfcv_data->emu_air.nfcv_resp_zero = NULL;
-    nfcv_data->emu_air.nfcv_resp_sof = NULL;
-    nfcv_data->emu_air.nfcv_resp_eof = NULL;
     nfcv_data->emu_air.reader_signal = NULL;
-}
 
-void nfcv_emu_alloc(NfcVData* nfcv_data) {
-    if(!nfcv_data->emu_air.nfcv_signal) {
-        /* assuming max frame length is 255 bytes */
-        nfcv_data->emu_air.nfcv_signal = digital_sequence_alloc(8 * 255 + 2, &gpio_spi_r_mosi);
-    }
-
-    if(!nfcv_data->emu_air.nfcv_resp_unmod_256) {
-        /* unmodulated 256/fc signal as building block */
-        nfcv_data->emu_air.nfcv_resp_unmod_256 = digital_signal_alloc(4);
-        nfcv_data->emu_air.nfcv_resp_unmod_256->start_level = false;
-        nfcv_data->emu_air.nfcv_resp_unmod_256->edge_timings[0] =
-            (uint32_t)(NFCV_RESP_SUBC1_UNMOD_256 * DIGITAL_SIGNAL_UNIT_S);
-        nfcv_data->emu_air.nfcv_resp_unmod_256->edge_cnt = 1;
-    }
-    if(!nfcv_data->emu_air.nfcv_resp_pulse_32) {
-        /* modulated fc/32 pulse as building block */
-        nfcv_data->emu_air.nfcv_resp_pulse_32 = digital_signal_alloc(4);
-        nfcv_data->emu_air.nfcv_resp_pulse_32->start_level = true;
-        nfcv_data->emu_air.nfcv_resp_pulse_32->edge_timings[0] =
-            (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
-        nfcv_data->emu_air.nfcv_resp_pulse_32->edge_timings[1] =
-            (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
-        nfcv_data->emu_air.nfcv_resp_pulse_32->edge_cnt = 2;
-    }
-    if(!nfcv_data->emu_air.nfcv_resp_one) {
-        /* logical one: 256/fc unmodulated then 8 pulses fc/32 */
-        nfcv_data->emu_air.nfcv_resp_one = digital_signal_alloc(24);
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_one, nfcv_data->emu_air.nfcv_resp_unmod_256);
-        for(size_t i = 0; i < 8; i++) {
-            digital_signal_append(
-                nfcv_data->emu_air.nfcv_resp_one, nfcv_data->emu_air.nfcv_resp_pulse_32);
-        }
-    }
-    if(!nfcv_data->emu_air.nfcv_resp_zero) {
-        /* logical zero: 8 pulses fc/32 then 256/fc unmodulated */
-        nfcv_data->emu_air.nfcv_resp_zero = digital_signal_alloc(24);
-        for(size_t i = 0; i < 8; i++) {
-            digital_signal_append(
-                nfcv_data->emu_air.nfcv_resp_zero, nfcv_data->emu_air.nfcv_resp_pulse_32);
-        }
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_zero, nfcv_data->emu_air.nfcv_resp_unmod_256);
-    }
-    if(!nfcv_data->emu_air.nfcv_resp_sof) {
-        /* SOF: unmodulated 768/fc, 24 pulses fc/32, logic 1 */
-        nfcv_data->emu_air.nfcv_resp_sof = digital_signal_alloc(128);
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_sof, nfcv_data->emu_air.nfcv_resp_unmod_256);
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_sof, nfcv_data->emu_air.nfcv_resp_unmod_256);
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_sof, nfcv_data->emu_air.nfcv_resp_unmod_256);
-        for(size_t i = 0; i < 24; i++) {
-            digital_signal_append(
-                nfcv_data->emu_air.nfcv_resp_sof, nfcv_data->emu_air.nfcv_resp_pulse_32);
-        }
-        digital_signal_append(nfcv_data->emu_air.nfcv_resp_sof, nfcv_data->emu_air.nfcv_resp_one);
-    }
-    if(!nfcv_data->emu_air.nfcv_resp_eof) {
-        /* EOF: logic 0, 24 pulses fc/32, unmodulated 768/fc */
-        nfcv_data->emu_air.nfcv_resp_eof = digital_signal_alloc(128);
-        digital_signal_append(nfcv_data->emu_air.nfcv_resp_eof, nfcv_data->emu_air.nfcv_resp_zero);
-        for(size_t i = 0; i < 24; i++) {
-            digital_signal_append(
-                nfcv_data->emu_air.nfcv_resp_eof, nfcv_data->emu_air.nfcv_resp_pulse_32);
-        }
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_eof, nfcv_data->emu_air.nfcv_resp_unmod_256);
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_eof, nfcv_data->emu_air.nfcv_resp_unmod_256);
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_eof, nfcv_data->emu_air.nfcv_resp_unmod_256);
-        /* add extra silence */
-        digital_signal_append(
-            nfcv_data->emu_air.nfcv_resp_eof, nfcv_data->emu_air.nfcv_resp_unmod_256);
-    }
-
-    digital_sequence_set_signal(
-        nfcv_data->emu_air.nfcv_signal, NFCV_SIG_SOF, nfcv_data->emu_air.nfcv_resp_sof);
-    digital_sequence_set_signal(
-        nfcv_data->emu_air.nfcv_signal, NFCV_SIG_BIT0, nfcv_data->emu_air.nfcv_resp_zero);
-    digital_sequence_set_signal(
-        nfcv_data->emu_air.nfcv_signal, NFCV_SIG_BIT1, nfcv_data->emu_air.nfcv_resp_one);
-    digital_sequence_set_signal(
-        nfcv_data->emu_air.nfcv_signal, NFCV_SIG_EOF, nfcv_data->emu_air.nfcv_resp_eof);
+    nfcv_emu_free_signals(&nfcv_data->emu_air.signals_high);
+    nfcv_emu_free_signals(&nfcv_data->emu_air.signals_low);
 }
 
 void nfcv_emu_send(
@@ -311,6 +423,9 @@ void nfcv_emu_send(
     uint8_t length,
     NfcVSendFlags flags,
     uint32_t send_time) {
+    furi_assert(tx_rx);
+    furi_assert(nfcv);
+
     /* picked default value (0) to match the most common format */
     if(!flags) {
         flags = NfcVSendFlagsSof | NfcVSendFlagsCrc | NfcVSendFlagsEof |
@@ -322,10 +437,16 @@ void nfcv_emu_send(
         length += 2;
     }
 
+    /* depending on the request flags, send with high or low rate */
+    uint32_t bit0 = (flags & NfcVSendFlagsHighRate) ? NFCV_SIG_BIT0 : NFCV_SIG_LOW_BIT0;
+    uint32_t bit1 = (flags & NfcVSendFlagsHighRate) ? NFCV_SIG_BIT1 : NFCV_SIG_LOW_BIT1;
+    uint32_t sof = (flags & NfcVSendFlagsHighRate) ? NFCV_SIG_SOF : NFCV_SIG_LOW_SOF;
+    uint32_t eof = (flags & NfcVSendFlagsHighRate) ? NFCV_SIG_EOF : NFCV_SIG_LOW_EOF;
+
     digital_sequence_clear(nfcv->emu_air.nfcv_signal);
 
     if(flags & NfcVSendFlagsSof) {
-        digital_sequence_add(nfcv->emu_air.nfcv_signal, NFCV_SIG_SOF);
+        digital_sequence_add(nfcv->emu_air.nfcv_signal, sof);
     }
 
     for(int bit_total = 0; bit_total < length * 8; bit_total++) {
@@ -333,12 +454,11 @@ void nfcv_emu_send(
         uint32_t bit_pos = bit_total % 8;
         uint8_t bit_val = 0x01 << bit_pos;
 
-        digital_sequence_add(
-            nfcv->emu_air.nfcv_signal, (data[byte_pos] & bit_val) ? NFCV_SIG_BIT1 : NFCV_SIG_BIT0);
+        digital_sequence_add(nfcv->emu_air.nfcv_signal, (data[byte_pos] & bit_val) ? bit1 : bit0);
     }
 
     if(flags & NfcVSendFlagsEof) {
-        digital_sequence_add(nfcv->emu_air.nfcv_signal, NFCV_SIG_EOF);
+        digital_sequence_add(nfcv->emu_air.nfcv_signal, eof);
     }
 
     FURI_CRITICAL_ENTER();
@@ -371,6 +491,10 @@ void nfcv_emu_handle_packet(
     FuriHalNfcTxRxContext* tx_rx,
     FuriHalNfcDevData* nfc_data,
     void* nfcv_data_in) {
+    furi_assert(tx_rx);
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data_in);
+
     NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
 
@@ -378,16 +502,41 @@ void nfcv_emu_handle_packet(
         return;
     }
 
+    if(nfcv_data->echo_mode) {
+        nfcv_emu_send(
+            tx_rx,
+            nfcv_data,
+            nfcv_data->frame,
+            nfcv_data->frame_length,
+            NfcVSendFlagsSof | NfcVSendFlagsHighRate | NfcVSendFlagsEof,
+            ctx->send_time);
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "ECHO data");
+        return;
+    }
+
     /* parse the frame data for the upcoming part 3 handling */
     ctx->flags = nfcv_data->frame[0];
     ctx->command = nfcv_data->frame[1];
+    ctx->selected = (ctx->flags & RFAL_NFCV_REQ_FLAG_SELECT);
     ctx->addressed = !(ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) &&
                      (ctx->flags & RFAL_NFCV_REQ_FLAG_ADDRESS);
     ctx->advanced = (ctx->command >= 0xA0);
     ctx->address_offset = 2 + (ctx->advanced ? 1 : 0);
     ctx->payload_offset = ctx->address_offset + (ctx->addressed ? 8 : 0);
-    ctx->response_flags = NfcVSendFlagsNormal;
-    ctx->send_time = nfcv_data->eof_timestamp + NFCV_FDT_FC(4130);
+    ctx->response_flags = NfcVSendFlagsSof | NfcVSendFlagsCrc | NfcVSendFlagsEof;
+    ctx->send_time = nfcv_data->eof_timestamp + NFCV_FDT_FC(4380);
+
+    if(ctx->flags & RFAL_NFCV_REQ_FLAG_DATA_RATE) {
+        ctx->response_flags |= NfcVSendFlagsHighRate;
+    }
+    if(ctx->flags & RFAL_NFCV_REQ_FLAG_SUB_CARRIER) {
+        ctx->response_flags |= NfcVSendFlagsTwoSubcarrier;
+    }
+
+    if(ctx->payload_offset + 2 > nfcv_data->frame_length) {
+        FURI_LOG_D(TAG, "command 0x%02X, but packet is too short", ctx->command);
+        return;
+    }
 
     /* standard behavior is implemented */
     if(ctx->addressed) {
@@ -420,6 +569,14 @@ void nfcv_emu_handle_packet(
         }
     }
 
+    if(ctx->selected && !nfcv_data->selected) {
+        FURI_LOG_D(
+            TAG,
+            "selected card shall execute command 0x%02X, but we were not selected",
+            ctx->command);
+        return;
+    }
+
     /* then give control to the card subtype specific protocol filter */
     if(ctx->emu_protocol_filter != NULL) {
         if(ctx->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
@@ -433,31 +590,114 @@ void nfcv_emu_handle_packet(
 
     switch(ctx->command) {
     case ISO15693_INVENTORY: {
-        ctx->response_buffer[0] = ISO15693_NOERROR;
-        ctx->response_buffer[1] = nfcv_data->dsfid;
-        nfcv_revuidcpy(&ctx->response_buffer[2], nfc_data->uid);
+        if(!nfcv_data->quiet) {
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            ctx->response_buffer[1] = nfcv_data->dsfid;
+            nfcv_revuidcpy(&ctx->response_buffer[2], nfc_data->uid);
 
-        nfcv_emu_send(
-            tx_rx, nfcv_data, ctx->response_buffer, 10, ctx->response_flags, ctx->send_time);
-        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 10, ctx->response_flags, ctx->send_time);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+        } else {
+            snprintf(
+                nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY (quiet)");
+        }
         break;
     }
 
     case ISO15693_STAYQUIET: {
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "STAYQUIET");
+        nfcv_data->quiet = true;
         break;
     }
 
     case ISO15693_LOCKBLOCK: {
-        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCKBLOCK");
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        nfcv_data->security_status[block] |= 0x01;
+        nfcv_data->modified = true;
+
+        ctx->response_buffer[0] = ISO15693_NOERROR;
+        nfcv_emu_send(
+            tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCK BLOCK %d", block);
+        break;
+    }
+
+    case ISO15693_WRITE_DSFID: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+
+        if(!(nfcv_data->security_status[0] & NfcVLockBitDsfid)) {
+            nfcv_data->dsfid = id;
+            nfcv_data->modified = true;
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE DSFID %02X", id);
+        break;
+    }
+
+    case ISO15693_WRITE_AFI: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+
+        if(!(nfcv_data->security_status[0] & NfcVLockBitAfi)) {
+            nfcv_data->afi = id;
+            nfcv_data->modified = true;
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE AFI %02X", id);
+        break;
+    }
+
+    case ISO15693_LOCK_DSFID: {
+        if(!(nfcv_data->security_status[0] & NfcVLockBitDsfid)) {
+            nfcv_data->security_status[0] |= NfcVLockBitDsfid;
+            nfcv_data->modified = true;
+
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCK DSFID");
+        break;
+    }
+
+    case ISO15693_LOCK_AFI: {
+        if(!(nfcv_data->security_status[0] & NfcVLockBitAfi)) {
+            nfcv_data->security_status[0] |= NfcVLockBitAfi;
+            nfcv_data->modified = true;
+
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCK AFI");
         break;
     }
 
     case ISO15693_SELECT: {
         ctx->response_buffer[0] = ISO15693_NOERROR;
+        nfcv_data->selected = true;
+        nfcv_data->quiet = false;
         nfcv_emu_send(
             tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SELECT");
+        break;
+    }
+
+    case ISO15693_RESET_TO_READY: {
+        ctx->response_buffer[0] = ISO15693_NOERROR;
+        nfcv_data->quiet = false;
+        nfcv_emu_send(
+            tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "RESET_TO_READY");
         break;
     }
 
@@ -470,54 +710,64 @@ void nfcv_emu_handle_packet(
             blocks = nfcv_data->frame[ctx->payload_offset + 1] + 1;
         }
 
-        if(block + blocks > nfcv_data->block_num) {
-            ctx->response_buffer[0] = ISO15693_ERROR_CMD_NOT_REC;
-            nfcv_emu_send(
-                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
-        } else {
-            ctx->response_buffer[0] = ISO15693_NOERROR;
-            memcpy(
-                &ctx->response_buffer[1],
-                &nfcv_data->data[nfcv_data->block_size * block],
-                nfcv_data->block_size * blocks);
+        if(block + blocks <= nfcv_data->block_num) {
+            uint8_t buffer_pos = 0;
+
+            ctx->response_buffer[buffer_pos++] = ISO15693_NOERROR;
+
+            for(int block_index = 0; block_index < blocks; block_index++) {
+                int block_current = block + block_index;
+                /* prepend security status */
+                if(ctx->flags & RFAL_NFCV_REQ_FLAG_OPTION) {
+                    ctx->response_buffer[buffer_pos++] =
+                        nfcv_data->security_status[1 + block_current];
+                }
+                /* then the data block */
+                memcpy(
+                    &ctx->response_buffer[buffer_pos],
+                    &nfcv_data->data[nfcv_data->block_size * block_current],
+                    nfcv_data->block_size);
+                buffer_pos += nfcv_data->block_size;
+            }
             nfcv_emu_send(
                 tx_rx,
                 nfcv_data,
                 ctx->response_buffer,
-                1 + nfcv_data->block_size * blocks,
+                buffer_pos,
                 ctx->response_flags,
                 ctx->send_time);
         }
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ BLOCK %d", block);
+
         break;
     }
 
     case ISO15693_WRITE_MULTI_BLOCK:
     case ISO15693_WRITEBLOCK: {
-        uint8_t block = nfcv_data->frame[ctx->payload_offset];
         uint8_t blocks = 1;
-        uint8_t data_pos = 1;
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        uint8_t data_pos = ctx->payload_offset + 1;
 
         if(ctx->command == ISO15693_WRITE_MULTI_BLOCK) {
-            blocks = nfcv_data->frame[ctx->payload_offset + 1] + 1;
+            blocks = nfcv_data->frame[data_pos] + 1;
             data_pos++;
         }
 
-        uint8_t* data = &nfcv_data->frame[ctx->payload_offset + data_pos];
+        uint8_t* data = &nfcv_data->frame[data_pos];
         uint32_t data_len = nfcv_data->block_size * blocks;
 
-        if(block + blocks > nfcv_data->block_num ||
-           ctx->payload_offset + data_len + 2 > nfcv_data->frame_length) {
-            ctx->response_buffer[0] = ISO15693_ERROR_CMD_NOT_REC;
-        } else {
+        if((block + blocks) <= nfcv_data->block_num &&
+           (data_pos + data_len + 2) == nfcv_data->frame_length) {
             ctx->response_buffer[0] = ISO15693_NOERROR;
             memcpy(
                 &nfcv_data->data[nfcv_data->block_size * block],
-                &nfcv_data->frame[ctx->payload_offset + data_pos],
+                &nfcv_data->frame[data_pos],
                 data_len);
+            nfcv_data->modified = true;
+
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
         }
-        nfcv_emu_send(
-            tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
 
         if(ctx->command == ISO15693_WRITE_MULTI_BLOCK) {
             snprintf(
@@ -556,6 +806,27 @@ void nfcv_emu_handle_packet(
         break;
     }
 
+    case ISO15693_CUST_ECHO_MODE: {
+        ctx->response_buffer[0] = ISO15693_NOERROR;
+        nfcv_data->echo_mode = true;
+        nfcv_emu_send(
+            tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "ECHO mode");
+        break;
+    }
+
+    case ISO15693_CUST_ECHO_DATA: {
+        nfcv_emu_send(
+            tx_rx,
+            nfcv_data,
+            &nfcv_data->frame[ctx->payload_offset],
+            nfcv_data->frame_length - ctx->payload_offset - 2,
+            NfcVSendFlagsSof | NfcVSendFlagsHighRate | NfcVSendFlagsEof,
+            ctx->send_time);
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "ECHO data");
+        break;
+    }
+
     default:
         snprintf(
             nfcv_data->last_command,
@@ -570,8 +841,216 @@ void nfcv_emu_handle_packet(
     }
 }
 
+void nfcv_emu_sniff_packet(
+    FuriHalNfcTxRxContext* tx_rx,
+    FuriHalNfcDevData* nfc_data,
+    void* nfcv_data_in) {
+    furi_assert(tx_rx);
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data_in);
+
+    NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
+
+    if(nfcv_data->frame_length < 2) {
+        return;
+    }
+
+    /* parse the frame data for the upcoming part 3 handling */
+    ctx->flags = nfcv_data->frame[0];
+    ctx->command = nfcv_data->frame[1];
+    ctx->selected = (ctx->flags & RFAL_NFCV_REQ_FLAG_SELECT);
+    ctx->addressed = !(ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) &&
+                     (ctx->flags & RFAL_NFCV_REQ_FLAG_ADDRESS);
+    ctx->advanced = (ctx->command >= 0xA0);
+    ctx->address_offset = 2 + (ctx->advanced ? 1 : 0);
+    ctx->payload_offset = ctx->address_offset + (ctx->addressed ? 8 : 0);
+
+    char flags_string[5];
+
+    snprintf(
+        flags_string,
+        5,
+        "%c%c%c%d",
+        (ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) ?
+            'I' :
+            (ctx->addressed ? 'A' : (ctx->selected ? 'S' : '*')),
+        ctx->advanced ? 'X' : ' ',
+        (ctx->flags & RFAL_NFCV_REQ_FLAG_DATA_RATE) ? 'h' : 'l',
+        (ctx->flags & RFAL_NFCV_REQ_FLAG_SUB_CARRIER) ? 2 : 1);
+
+    switch(ctx->command) {
+    case ISO15693_INVENTORY: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s INVENTORY", flags_string);
+        break;
+    }
+
+    case ISO15693_STAYQUIET: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s STAYQUIET", flags_string);
+        nfcv_data->quiet = true;
+        break;
+    }
+
+    case ISO15693_LOCKBLOCK: {
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s LOCK %d",
+            flags_string,
+            block);
+        break;
+    }
+
+    case ISO15693_WRITE_DSFID: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s WR DSFID %d",
+            flags_string,
+            id);
+        break;
+    }
+
+    case ISO15693_WRITE_AFI: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s WR AFI %d",
+            flags_string,
+            id);
+        break;
+    }
+
+    case ISO15693_LOCK_DSFID: {
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s LOCK DSFID",
+            flags_string);
+        break;
+    }
+
+    case ISO15693_LOCK_AFI: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s LOCK AFI", flags_string);
+        break;
+    }
+
+    case ISO15693_SELECT: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s SELECT", flags_string);
+        break;
+    }
+
+    case ISO15693_RESET_TO_READY: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s RESET", flags_string);
+        break;
+    }
+
+    case ISO15693_READ_MULTI_BLOCK:
+    case ISO15693_READBLOCK: {
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        uint8_t blocks = 1;
+
+        if(ctx->command == ISO15693_READ_MULTI_BLOCK) {
+            blocks = nfcv_data->frame[ctx->payload_offset + 1] + 1;
+        }
+
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s READ %d cnt: %d",
+            flags_string,
+            block,
+            blocks);
+
+        break;
+    }
+
+    case ISO15693_WRITE_MULTI_BLOCK:
+    case ISO15693_WRITEBLOCK: {
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        uint8_t blocks = 1;
+        uint8_t data_pos = 1;
+
+        if(ctx->command == ISO15693_WRITE_MULTI_BLOCK) {
+            blocks = nfcv_data->frame[ctx->payload_offset + 1] + 1;
+            data_pos++;
+        }
+
+        uint8_t* data = &nfcv_data->frame[ctx->payload_offset + data_pos];
+
+        if(ctx->command == ISO15693_WRITE_MULTI_BLOCK) {
+            snprintf(
+                nfcv_data->last_command,
+                sizeof(nfcv_data->last_command),
+                "%s WRITE %d, cnd %d",
+                flags_string,
+                block,
+                blocks);
+        } else {
+            snprintf(
+                nfcv_data->last_command,
+                sizeof(nfcv_data->last_command),
+                "%s WRITE %d %02X %02X %02X %02X",
+                flags_string,
+                block,
+                data[0],
+                data[1],
+                data[2],
+                data[3]);
+        }
+        break;
+    }
+
+    case ISO15693_GET_SYSTEM_INFO: {
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s SYSTEMINFO",
+            flags_string);
+        break;
+    }
+
+    default:
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s unsupported: %02X",
+            flags_string,
+            ctx->command);
+        break;
+    }
+
+    if(strlen(nfcv_data->last_command) > 0) {
+        FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);
+    }
+}
+
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
-    nfcv_emu_alloc(nfcv_data);
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data);
+
+    if(!nfcv_emu_alloc(nfcv_data)) {
+        FURI_LOG_E(TAG, "Failed to allocate structures");
+        nfcv_data->ready = false;
+        return;
+    }
+
+    strcpy(nfcv_data->last_command, "");
+    nfcv_data->quiet = false;
+    nfcv_data->selected = false;
+    nfcv_data->modified = false;
+
+    /* everything is initialized */
+    nfcv_data->ready = true;
+
     rfal_platform_spi_acquire();
     /* configure for transparent and passive mode */
     st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
@@ -579,7 +1058,7 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0xC3);
     /* target mode: ISO14443 passive mode */
     st25r3916WriteRegister(ST25R3916_REG_MODE, 0x88);
-    /* let us modulate the field using MOSI, read modulation using MISO */
+    /* let us modulate the field using MOSI, read ASK modulation using IRQ */
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
@@ -587,7 +1066,11 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     /* if not set already, initialize the default protocol handler */
     if(!nfcv_data->emu_protocol_ctx) {
         nfcv_data->emu_protocol_ctx = malloc(sizeof(NfcVEmuProtocolCtx));
-        nfcv_data->emu_protocol_handler = &nfcv_emu_handle_packet;
+        if(nfcv_data->sub_type == NfcVTypeSniff) {
+            nfcv_data->emu_protocol_handler = &nfcv_emu_sniff_packet;
+        } else {
+            nfcv_data->emu_protocol_handler = &nfcv_emu_handle_packet;
+        }
     }
 
     FURI_LOG_D(TAG, "Starting NfcV emulation");
@@ -623,18 +1106,27 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     case NfcVTypePlain:
         FURI_LOG_D(TAG, "  Card type:    Plain");
         break;
+    case NfcVTypeSniff:
+        FURI_LOG_D(TAG, "  Card type:    Sniffing");
+        break;
     }
 
     /* allocate a 512 edge buffer, more than enough */
-    nfcv_data->emu_air.reader_signal = pulse_reader_alloc(&gpio_spi_r_miso, 512);
+    nfcv_data->emu_air.reader_signal = pulse_reader_alloc(&gpio_nfc_irq_rfid_pull, 512);
     /* timebase shall be 1 ns */
     pulse_reader_set_timebase(nfcv_data->emu_air.reader_signal, PulseReaderUnitNanosecond);
     /* and configure to already calculate the number of bits */
     pulse_reader_set_bittime(nfcv_data->emu_air.reader_signal, PULSE_DURATION_NS);
+    /* this IO is fed into the µC via a diode, so we need a pulldown */
+    pulse_reader_set_pull(nfcv_data->emu_air.reader_signal, GpioPullDown);
+
+    /* start sampling */
     pulse_reader_start(nfcv_data->emu_air.reader_signal);
 }
 
 void nfcv_emu_deinit(NfcVData* nfcv_data) {
+    furi_assert(nfcv_data);
+
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     rfal_platform_spi_release();
     nfcv_emu_free(nfcv_data);
@@ -643,6 +1135,10 @@ void nfcv_emu_deinit(NfcVData* nfcv_data) {
         free(nfcv_data->emu_protocol_ctx);
         nfcv_data->emu_protocol_ctx = NULL;
     }
+
+    /* set registers back to how we found them */
+    st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0x00);
+    st25r3916WriteRegister(ST25R3916_REG_MODE, 0x08);
 }
 
 bool nfcv_emu_loop(
@@ -650,34 +1146,49 @@ bool nfcv_emu_loop(
     FuriHalNfcDevData* nfc_data,
     NfcVData* nfcv_data,
     uint32_t timeout_ms) {
+    furi_assert(tx_rx);
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data);
+
     bool ret = false;
     uint32_t frame_state = NFCV_FRAME_STATE_SOF1;
     uint32_t periods_previous = 0;
-    uint8_t frame_payload[128];
     uint32_t frame_pos = 0;
     uint32_t byte_value = 0;
     uint32_t bits_received = 0;
-    char reset_reason[128];
+    uint32_t timeout = timeout_ms * 1000;
+    uint32_t sof_timestamp = 0;
+    uint32_t eof_timestamp = 0;
     bool wait_for_pulse = false;
 
+    if(!nfcv_data->ready) {
+        return false;
+    }
+
+#ifdef NFCV_DIAGNOSTIC_DUMPS
+    uint8_t period_buffer[NFCV_DIAGNOSTIC_DUMP_SIZE];
+    uint32_t period_buffer_pos = 0;
+#endif
+
     while(true) {
-        uint32_t periods =
-            pulse_reader_receive(nfcv_data->emu_air.reader_signal, timeout_ms * 1000);
+        uint32_t periods = pulse_reader_receive(nfcv_data->emu_air.reader_signal, timeout);
         uint32_t timestamp = DWT->CYCCNT;
 
-        if(periods == PULSE_READER_NO_EDGE) {
+        /* when timed out, reset to SOF state */
+        if(periods == PULSE_READER_NO_EDGE || periods == PULSE_READER_LOST_EDGE) {
             break;
         }
 
+#ifdef NFCV_DIAGNOSTIC_DUMPS
+        if(period_buffer_pos < sizeof(period_buffer)) {
+            period_buffer[period_buffer_pos++] = periods;
+        }
+#endif
+
+        /* short helper for detecting a pulse position */
         if(wait_for_pulse) {
             wait_for_pulse = false;
             if(periods != 1) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "SOF: Expected a single low pulse in state %lu, but got %lu",
-                    frame_state,
-                    periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
             }
             continue;
@@ -689,6 +1200,7 @@ bool nfcv_emu_loop(
                 frame_state = NFCV_FRAME_STATE_SOF2;
             } else {
                 frame_state = NFCV_FRAME_STATE_SOF1;
+                sof_timestamp = timestamp;
                 break;
             }
             break;
@@ -704,44 +1216,33 @@ bool nfcv_emu_loop(
                 periods_previous = 2;
                 wait_for_pulse = true;
             } else {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "SOF: Expected 4/6 periods, got %lu",
-                    periods);
-                frame_state = NFCV_FRAME_STATE_SOF1;
+                frame_state = NFCV_FRAME_STATE_RESET;
             }
             break;
 
         case NFCV_FRAME_STATE_CODING_256:
             if(periods_previous > periods) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo256: Missing %lu periods from previous symbol, got %lu",
-                    periods_previous,
-                    periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
+
             /* previous symbol left us with some pulse periods */
             periods -= periods_previous;
 
             if(periods > 512) {
-                snprintf(
-                    reset_reason, sizeof(reset_reason), "1oo256: %lu periods is too much", periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
-            }
-
-            if(periods == 2) {
+            } else if(periods == 2) {
                 frame_state = NFCV_FRAME_STATE_EOF;
+                eof_timestamp = timestamp;
                 break;
             }
 
             periods_previous = 512 - (periods + 1);
             byte_value = (periods - 1) / 2;
-            frame_payload[frame_pos++] = (uint8_t)byte_value;
+            if(frame_pos < NFCV_FRAMESIZE_MAX) {
+                nfcv_data->frame[frame_pos++] = (uint8_t)byte_value;
+            }
 
             wait_for_pulse = true;
 
@@ -749,12 +1250,6 @@ bool nfcv_emu_loop(
 
         case NFCV_FRAME_STATE_CODING_4:
             if(periods_previous > periods) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo4: Missing %lu periods from previous symbol, got %lu",
-                    periods_previous,
-                    periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
@@ -780,19 +1275,17 @@ bool nfcv_emu_loop(
                 periods_previous = 0;
             } else if(periods == 2) {
                 frame_state = NFCV_FRAME_STATE_EOF;
+                eof_timestamp = timestamp;
                 break;
             } else {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo4: Expected 1/3/5/7 low pulses, but got %lu",
-                    periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
 
             if(bits_received >= 8) {
-                frame_payload[frame_pos++] = (uint8_t)byte_value;
+                if(frame_pos < NFCV_FRAMESIZE_MAX) {
+                    nfcv_data->frame[frame_pos++] = (uint8_t)byte_value;
+                }
                 bits_received = 0;
             }
             wait_for_pulse = true;
@@ -802,10 +1295,7 @@ bool nfcv_emu_loop(
         /* post-state-machine cleanup and reset */
         if(frame_state == NFCV_FRAME_STATE_RESET) {
             frame_state = NFCV_FRAME_STATE_SOF1;
-
-            FURI_LOG_D(TAG, "Resetting state machine, reason: '%s'", reset_reason);
         } else if(frame_state == NFCV_FRAME_STATE_EOF) {
-            nfcv_data->frame = frame_payload;
             nfcv_data->frame_length = frame_pos;
             nfcv_data->eof_timestamp = timestamp;
             break;
@@ -816,12 +1306,42 @@ bool nfcv_emu_loop(
         /* we know that this code uses TIM2, so stop pulse reader */
         pulse_reader_stop(nfcv_data->emu_air.reader_signal);
         if(tx_rx->sniff_rx) {
-            tx_rx->sniff_rx(frame_payload, frame_pos * 8, false, tx_rx->sniff_context);
+            tx_rx->sniff_rx(nfcv_data->frame, frame_pos * 8, false, tx_rx->sniff_context);
         }
         nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data);
+
+        /* determine readers fc by analyzing transmission duration */
+        uint32_t duration = eof_timestamp - sof_timestamp;
+        float fc_1024 = (4.0f * duration) / (4 * (frame_pos * 4 + 1) + 1);
+        /* it should be 1024/fc in 64MHz ticks */
+        float fact = fc_1024 / ((1000000.0f * 64.0f * 1024.0f) / NFCV_FC);
+        FURI_LOG_D(TAG, "1024/fc: %f -> %f %%", (double)fc_1024, (double)fact * 100);
+#if 0
+        if(fact > 0.99f && fact < 1.01f) {
+            static float avg_err = 0.0f;
+
+            avg_err = (avg_err * 15.0f + (fact - 1.0f)) / 16.0f;
+            FURI_LOG_D(TAG, "  ==> set %f %%", (1.0f + avg_err) * 100);
+            digital_sequence_timebase_correction(nfcv_data->emu_air.nfcv_signal, 1.0f + avg_err);
+        }
+#endif
+
         pulse_reader_start(nfcv_data->emu_air.reader_signal);
         ret = true;
+    } else {
+        if(frame_state != NFCV_FRAME_STATE_SOF1) {
+            FURI_LOG_T(TAG, "leaving while in state: %lu", frame_state);
+        }
     }
+
+#ifdef NFCV_DIAGNOSTIC_DUMPS
+    if(period_buffer_pos) {
+        FURI_LOG_T(TAG, "pulses:");
+        for(uint32_t pos = 0; pos < period_buffer_pos; pos++) {
+            FURI_LOG_T(TAG, "     #%lu: %u", pos, period_buffer[pos]);
+        }
+    }
+#endif
 
     return ret;
 }

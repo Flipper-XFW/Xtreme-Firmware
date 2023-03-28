@@ -14,7 +14,7 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "XFW-0042_09032023"
+DIST_SUFFIX = "XFW-0043_28032023"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
@@ -71,11 +71,6 @@ FIRMWARE_APPS = {
         "system_apps",
         # Settings
         "settings_apps",
-        # Stock plugins - no longer built into fw, now they're .faps
-        # Yet you can still build them as a part of fw
-        # "basic_plugins",
-        # Debug
-        # "debug_apps",
     ],
     "unit_tests": [
         "basic_services",

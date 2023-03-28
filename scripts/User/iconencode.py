@@ -1,9 +1,6 @@
-import logging
+import heatshrink2
 import argparse
-import subprocess
 import io
-import os
-import sys
 
 
 def padded_hex(i, l):
@@ -46,23 +43,21 @@ parser.add_argument(
 )
 args = vars(parser.parse_args())
 
-r = open(args["infile"], "r")
-infile = args["infile"].split(".")[0]
+filename = args["infile"].split(".")[0]
 
 imageWidth = args["Width"]
 imageHeight = args["Height"]
 dims = str(imageWidth) + "x" + str(imageHeight)
 
-output = subprocess.check_output(["cat", args["infile"]])  # yes this is terrible.
+with open(args["infile"], "rb") as f:
+    output = f.read()
 f = io.StringIO(output.decode().strip())
 
 data = f.read().strip().replace(";", "").replace("{", "").replace("}", "")
 data_str = data.replace(",", "").replace("0x", "")
 data_bin = bytearray.fromhex(data_str)
 
-data_encoded_str = subprocess.check_output(
-    ["heatshrink", "-e", "-w8", "-l4"], input=data_bin
-)
+data_encoded_str = heatshrink2.compress(data_bin, window_sz2=8, lookahead_sz2=4)
 
 b = list(data_encoded_str)
 
@@ -70,7 +65,7 @@ c = ",".join(padded_hex(my_int, 2) for my_int in b)
 
 # a bit ugly.
 
-framename = "_I_" + infile + "_" + dims
+framename = "_I_" + filename + "_" + dims
 print(len(b))
 # d=len(b)
 # if b > 255 split 0x1234 into 0x34,0x12

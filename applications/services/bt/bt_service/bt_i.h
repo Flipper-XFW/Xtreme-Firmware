@@ -18,9 +18,8 @@
 #include <bt/bt_settings.h>
 #include <bt/bt_service/bt_keys_storage.h>
 
-#include "bt_keys_filename.h"
-
-#define BT_KEYS_STORAGE_PATH INT_PATH(BT_KEYS_STORAGE_FILE_NAME)
+#define BT_KEYS_STORAGE_OLD_PATH INT_PATH(".bt.keys")
+#define BT_KEYS_STORAGE_PATH CFG_PATH("bt.keys")
 
 #define BT_API_UNLOCK_EVENT (1UL << 0)
 

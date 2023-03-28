@@ -2,6 +2,8 @@
 
 #include <gui/view.h>
 #include "desktop_events.h"
+#include <bt/bt_service/bt.h>
+#include <bt/bt_service/bt_i.h>
 
 #define HINT_TIMEOUT 2
 
@@ -12,12 +14,20 @@ typedef void (*DesktopLockMenuViewCallback)(DesktopEvent event, void* context);
 struct DesktopLockMenuView {
     View* view;
     DesktopLockMenuViewCallback callback;
+    NotificationApp* notification;
+    Bt* bt;
+    bool save_notification;
+    bool save_xtreme;
+    bool save_bt;
     void* context;
 };
 
 typedef struct {
     uint8_t idx;
     bool pin_is_set;
+    bool pin_lock;
+    bool show_lock_menu;
+    DesktopLockMenuView* lock_menu;
 } DesktopLockMenuViewModel;
 
 void desktop_lock_menu_set_callback(

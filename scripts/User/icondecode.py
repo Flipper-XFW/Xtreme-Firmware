@@ -1,9 +1,6 @@
-import logging
+import heatshrink2
 import argparse
-import subprocess
 import io
-import os
-import sys
 
 
 def padded_hex(i, l):
@@ -55,22 +52,19 @@ parser.add_argument(
 )
 args = vars(parser.parse_args())
 
-r = open(args["infile"], "r")
-w = open(args["outfile"], "w")
 imageWidth = args["Width"]
 imageHeight = args["Height"]
 trimStart = args["Trim"]
 
-output = subprocess.check_output(["cat", args["infile"]])  # yes this is terrible.
+with open(args["infile"], "rb") as f:
+    output = f.read()
 f = io.StringIO(output.decode().strip())
 
 data = f.read().strip().replace(";", "").replace("{", "").replace("}", "")
 data_str = data.replace(",", "").replace("0x", "")
 data_bin = bytearray.fromhex(data_str[trimStart:])
 
-data_decoded_str = subprocess.check_output(
-    ["heatshrink", "-d", "-w8", "-l4"], input=data_bin
-)
+data_decoded_str = heatshrink2.decompress(data_bin, window_sz2=8, lookahead_sz2=4)
 
 b = list(data_decoded_str)
 
@@ -82,6 +76,5 @@ bytes_out = "static unsigned char icon_bits[] = {" + str(c) + "};"
 
 data = width_out + height_out + bytes_out
 
-w.write(data)
-r.close()
-w.close()
+with open(args["outfile"], "w") as f:
+    f.write(data)

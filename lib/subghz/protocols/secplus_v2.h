@@ -1,6 +1,10 @@
 #pragma once
 #include "base.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SUBGHZ_PROTOCOL_SECPLUS_V2_NAME "Security+ 2.0"
 
 typedef struct SubGhzProtocolDecoderSecPlus_v2 SubGhzProtocolDecoderSecPlus_v2;
@@ -9,6 +13,14 @@ typedef struct SubGhzProtocolEncoderSecPlus_v2 SubGhzProtocolEncoderSecPlus_v2;
 extern const SubGhzProtocolDecoder subghz_protocol_secplus_v2_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_secplus_v2_encoder;
 extern const SubGhzProtocol subghz_protocol_secplus_v2;
+
+// Custom buttons
+void secplus2_set_btn(uint8_t b);
+
+uint8_t secplus2_get_original_btn();
+uint8_t secplus2_get_custom_btn();
+
+void secplus2_reset_original_btn();
 
 /**
  * Allocate SubGhzProtocolEncoderSecPlus_v2.
@@ -125,3 +137,7 @@ SubGhzProtocolStatus
  * @param output Resulting text
  */
 void subghz_protocol_decoder_secplus_v2_get_string(void* context, FuriString* output);
+
+#ifdef __cplusplus
+}
+#endif

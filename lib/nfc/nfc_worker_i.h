@@ -7,11 +7,11 @@
 
 #include <lib/nfc/protocols/nfc_util.h>
 #include <lib/nfc/protocols/emv.h>
-#include <lib/nfc/protocols/mrtd.h>
 #include <lib/nfc/protocols/mifare_common.h>
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
+#include <lib/nfc/protocols/felica.h>
 #include <lib/nfc/protocols/nfca.h>
 #include <lib/nfc/protocols/nfcv.h>
 #include <lib/nfc/protocols/slix.h>
@@ -26,7 +26,6 @@ struct NfcWorker {
 
     NfcWorkerCallback callback;
     void* context;
-    void* event_data;
 
     NfcWorkerState state;
 

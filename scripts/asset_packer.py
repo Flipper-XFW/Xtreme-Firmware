@@ -114,7 +114,14 @@ def pack(
             )
             manifest = (source / "Anims/manifest.txt").read_bytes()
             for anim in re.finditer(rb"Name: (.*)", manifest):
-                anim = anim.group(1).decode().replace("\\", "/").replace("/", os.sep)
+                anim = (
+                    anim.group(1)
+                    .decode()
+                    .replace("\\", "/")
+                    .replace("/", os.sep)
+                    .replace("\r", "\n")
+                    .strip()
+                )
                 logger(f"Compile: anim for pack '{source.name}': {anim}")
                 pack_anim(source / "Anims" / anim, packed / "Anims" / anim)
 

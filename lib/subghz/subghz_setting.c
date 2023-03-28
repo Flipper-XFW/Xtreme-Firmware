@@ -73,10 +73,10 @@ static const uint32_t subghz_frequency_list[] = {
 };
 
 static const uint32_t subghz_hopper_frequency_list[] = {
+    310000000,
     315000000,
-    330000000,
-    390000000,
-    433420000,
+    318000000,
+    418000000,
     433920000,
     868350000,
     0,
@@ -448,7 +448,7 @@ uint32_t subghz_setting_get_frequency(SubGhzSetting* instance, size_t idx) {
 
 uint32_t subghz_setting_get_hopper_frequency(SubGhzSetting* instance, size_t idx) {
     furi_assert(instance);
-    if(idx < FrequencyList_size(instance->frequencies)) {
+    if(idx < FrequencyList_size(instance->hopper_frequencies)) {
         return *FrequencyList_get(instance->hopper_frequencies, idx);
     } else {
         return 0;

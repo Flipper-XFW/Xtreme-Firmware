@@ -1,4 +1,4 @@
-#include "bad_kb_app_i.h"
+#include "bad_kb_app.h"
 #include "bad_kb_settings_filename.h"
 #include <furi.h>
 #include <furi_hal.h>
@@ -72,6 +72,94 @@ static void bad_kb_save_settings(BadKbApp* app) {
     storage_file_free(settings_file);
 }
 
+void bad_kb_reload_worker(BadKbApp* app) {
+    bad_kb_script_close(app->bad_kb_script);
+    app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
+    bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
+}
+
+void bad_kb_config_switch_mode(BadKbApp* app) {
+    scene_manager_previous_scene(app->scene_manager);
+    if(app->is_bt) {
+        furi_hal_bt_start_advertising();
+    } else {
+        furi_hal_bt_stop_advertising();
+    }
+    scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
+    bad_kb_reload_worker(app);
+}
+
+void bad_kb_config_switch_remember_mode(BadKbApp* app) {
+    if(app->bt_remember) {
+        // set bouding mac
+        uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        bt_set_profile_mac_address(app->bt, mac); // this also restart bt
+        // enable keys storage
+        bt_enable_peer_key_update(app->bt);
+    } else {
+        // set back user defined mac address
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
+        bt_set_profile_mac_address(app->bt, app->mac);
+        // disable key storage
+        bt_disable_peer_key_update(app->bt);
+    }
+    bad_kb_reload_worker(app);
+}
+
+int32_t bad_kb_connection_init(BadKbApp* app) {
+    app->usb_prev_mode = furi_hal_usb_get_config();
+    furi_hal_usb_set_config(NULL, NULL);
+
+    bt_timeout = bt_hid_delays[LevelRssi39_0];
+    bt_disconnect(app->bt);
+    // furi_delay_ms(200);
+    bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
+    app->bt_prev_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
+    if(app->bt_remember) {
+        uint8_t mac[6] = BAD_KB_BOUND_MAC_ADDRESS;
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, mac);
+        // using GapPairingNone breaks bounding between devices
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+    } else {
+        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
+    }
+
+    bt_set_profile(app->bt, BtProfileHidKeyboard);
+    if(app->is_bt) {
+        furi_hal_bt_start_advertising();
+        if(app->bt_remember) {
+            bt_enable_peer_key_update(app->bt);
+        } else {
+            bt_disable_peer_key_update(app->bt); // disable peer key adding to bt SRAM storage
+        }
+    } else {
+        furi_hal_bt_stop_advertising();
+    }
+
+    return 0;
+}
+
+void bad_kb_connection_deinit(BadKbApp* app) {
+    furi_hal_usb_set_config(app->usb_prev_mode, NULL);
+
+    // bt_hid_hold_while_keyboard_buffer_full(6, 3000); // release all keys
+    bt_disconnect(app->bt); // stop ble
+    // furi_delay_ms(200); // Wait 2nd core to update nvm storage
+    bt_keys_storage_set_default_path(app->bt);
+    if(app->bt_remember) {
+        // hal primitives doesn't restarts ble, that's what we want cuz we are shutting down
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->mac);
+    }
+    bt_enable_peer_key_update(app->bt); // starts saving peer keys (bounded devices)
+    // fails if ble radio stack isn't ready when switching profile
+    // if it happens, maybe we should increase the delay after bt_disconnect
+    bt_set_profile(app->bt, BtProfileSerial);
+    furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, app->bt_prev_mode);
+}
+
 BadKbApp* bad_kb_app_alloc(char* arg) {
     BadKbApp* app = malloc(sizeof(BadKbApp));
 
@@ -125,16 +213,9 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     view_dispatcher_add_view(
         app->view_dispatcher, BadKbAppViewError, widget_get_view(app->widget));
 
-    app->var_item_list_bt = variable_item_list_alloc();
+    app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        BadKbAppViewConfigBt,
-        variable_item_list_get_view(app->var_item_list_bt));
-    app->var_item_list_usb = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        BadKbAppViewConfigUsb,
-        variable_item_list_get_view(app->var_item_list_usb));
+        app->view_dispatcher, BadKbAppViewConfig, variable_item_list_get_view(app->var_item_list));
 
     app->bad_kb_view = bad_kb_alloc();
     view_dispatcher_add_view(
@@ -188,10 +269,8 @@ void bad_kb_app_free(BadKbApp* app) {
     widget_free(app->widget);
 
     // Variable item list
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigBt);
-    variable_item_list_free(app->var_item_list_bt);
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigUsb);
-    variable_item_list_free(app->var_item_list_usb);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfig);
+    variable_item_list_free(app->var_item_list);
 
     // Text Input
     view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigName);

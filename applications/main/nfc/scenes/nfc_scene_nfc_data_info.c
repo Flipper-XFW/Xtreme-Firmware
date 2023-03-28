@@ -26,7 +26,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
     if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) ||
-       (protocol == NfcDeviceProtocolNfcV) || (protocol == NfcDeviceProtocolMifareClassic)) {
+       (protocol == NfcDeviceProtocolMifareClassic) || (protocol == NfcDeviceProtocolNfcV)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -44,8 +44,6 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     // Set tag type
     if(protocol == NfcDeviceProtocolEMV) {
         furi_string_cat_printf(temp_str, "\e#EMV Bank Card\n");
-    } else if(protocol == NfcDeviceProtocolMRTD) {
-        furi_string_cat_printf(temp_str, "\e#Passport/ID\n");
     } else if(protocol == NfcDeviceProtocolMifareUl) {
         furi_string_cat_printf(
             temp_str, "\e#%s\n", nfc_mf_ul_type(dev_data->mf_ul_data.type, true));
@@ -89,8 +87,16 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         }
         furi_string_cat_printf(temp_str, "\n");
 
-        furi_string_cat_printf(temp_str, "DSFID: %02X\n", nfcv_data->dsfid);
-        furi_string_cat_printf(temp_str, "AFI: %02X\n", nfcv_data->afi);
+        furi_string_cat_printf(
+            temp_str,
+            "DSFID: %02X %s\n",
+            nfcv_data->dsfid,
+            (nfcv_data->security_status[0] & NfcVLockBitDsfid) ? "(locked)" : "");
+        furi_string_cat_printf(
+            temp_str,
+            "AFI: %02X %s\n",
+            nfcv_data->afi,
+            (nfcv_data->security_status[0] & NfcVLockBitAfi) ? "(locked)" : "");
         furi_string_cat_printf(temp_str, "IC Ref: %02X\n", nfcv_data->ic_ref);
         furi_string_cat_printf(temp_str, "Blocks: %02X\n", nfcv_data->block_num);
         furi_string_cat_printf(temp_str, "Blocksize: %02X\n", nfcv_data->block_size);
@@ -105,11 +111,12 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         }
 
         for(int block = 0; block < maxBlocks; block++) {
+            const char* status = (nfcv_data->security_status[block] & 0x01) ? "(lck)" : "";
             for(int pos = 0; pos < nfcv_data->block_size; pos++) {
                 furi_string_cat_printf(
                     temp_str, " %02X", nfcv_data->data[block * nfcv_data->block_size + pos]);
             }
-            furi_string_cat_printf(temp_str, "\n");
+            furi_string_cat_printf(temp_str, " %s\n", status);
         }
         furi_string_cat_printf(temp_str, "\n");
 
@@ -194,15 +201,15 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             break;
         }
     } else {
-        char iso_type = FURI_BIT(nfc_data->sak, 5) ? '4' : '3';
+        char iso_type = FURI_BIT(nfc_data->a_data.sak, 5) ? '4' : '3';
         furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
         furi_string_cat_printf(temp_str, "UID:");
         for(size_t i = 0; i < nfc_data->uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
         }
         furi_string_cat_printf(
-            temp_str, "\nATQA: %02X %02X ", nfc_data->atqa[1], nfc_data->atqa[0]);
-        furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->sak);
+            temp_str, "\nATQA: %02X %02X ", nfc_data->a_data.atqa[1], nfc_data->a_data.atqa[0]);
+        furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->a_data.sak);
     }
 
     // Set application specific data
@@ -287,11 +294,11 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
             } else if(protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
                 consumed = true;
-            } else if(protocol == NfcDeviceProtocolNfcV) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVMenu);
-                consumed = true;
             } else if(protocol == NfcDeviceProtocolMifareClassic) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicData);
+                consumed = true;
+            } else if(protocol == NfcDeviceProtocolNfcV) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVMenu);
                 consumed = true;
             }
         }

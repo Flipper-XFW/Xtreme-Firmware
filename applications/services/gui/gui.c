@@ -47,11 +47,18 @@ static bool gui_redraw_fs(Gui* gui) {
 }
 
 static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
+    if(gui->hide_statusbar_count > 0) return;
     ViewPortArray_it_t it;
     uint8_t left_used = 0;
     uint8_t right_used = 0;
     uint8_t width;
-    canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+        canvas_set_orientation(gui->canvas, CanvasOrientationHorizontalFlip);
+    } else {
+        canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
+    }
+
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
 
@@ -262,7 +269,9 @@ static void gui_redraw(Gui* gui) {
             bool need_attention =
                 (gui_view_port_find_enabled(gui->layers[GuiLayerWindow]) != 0 ||
                  gui_view_port_find_enabled(gui->layers[GuiLayerFullscreen]) != 0);
-            gui_redraw_status_bar(gui, need_attention);
+            if(XTREME_SETTINGS()->lockscreen_statusbar) {
+                gui_redraw_status_bar(gui, need_attention);
+            }
         } else {
             if(!gui_redraw_fs(gui)) {
                 if(!gui_redraw_window(gui)) {
@@ -278,6 +287,7 @@ static void gui_redraw(Gui* gui) {
                 p->callback(
                     canvas_get_buffer(gui->canvas),
                     canvas_get_buffer_size(gui->canvas),
+                    canvas_get_orientation(gui->canvas),
                     p->context);
             }
     } while(false);
@@ -504,6 +514,21 @@ void gui_remove_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback,
 size_t gui_get_framebuffer_size(const Gui* gui) {
     furi_assert(gui);
     return canvas_get_buffer_size(gui->canvas);
+}
+
+void gui_set_hide_statusbar(Gui* gui, bool hidden) {
+    furi_assert(gui);
+
+    gui_lock(gui);
+    if(hidden) {
+        gui->hide_statusbar_count++;
+    } else {
+        gui->hide_statusbar_count--;
+    }
+    gui_unlock(gui);
+
+    // Request redraw
+    gui_update(gui);
 }
 
 void gui_set_lockdown(Gui* gui, bool lockdown) {

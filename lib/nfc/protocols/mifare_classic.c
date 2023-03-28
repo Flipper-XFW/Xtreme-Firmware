@@ -291,6 +291,10 @@ bool mf_classic_is_allowed_access_data_block(
     uint8_t* sector_trailer =
         data->block[mf_classic_get_sector_trailer_num_by_block(block_num)].value;
 
+    if(block_num == 0 && action == MfClassicActionDataWrite) {
+        return false;
+    }
+
     uint8_t sector_block;
     if(block_num <= 128) {
         sector_block = block_num & 0x03;
@@ -370,8 +374,10 @@ bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num) {
                 data, block_num, MfClassicKeyB, MfClassicActionDataDec));
 }
 
-bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
-    UNUSED(ATQA1);
+bool mf_classic_check_card_type(FuriHalNfcADevData* data) {
+    uint8_t ATQA0 = data->atqa[0];
+    uint8_t ATQA1 = data->atqa[1];
+    uint8_t SAK = data->sak;
     if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
         return true;
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
@@ -384,8 +390,10 @@ bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     }
 }
 
-MfClassicType mf_classic_get_classic_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
-    UNUSED(ATQA1);
+MfClassicType mf_classic_get_classic_type(FuriHalNfcADevData* data) {
+    uint8_t ATQA0 = data->atqa[0];
+    uint8_t ATQA1 = data->atqa[1];
+    uint8_t SAK = data->sak;
     if((ATQA0 == 0x44 || ATQA0 == 0x04)) {
         if((SAK == 0x08 || SAK == 0x88)) {
             return MfClassicType1k;
@@ -647,22 +655,30 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
         if(!key_a_found) break;
         FURI_LOG_D(TAG, "Try to read blocks with key A");
         key = nfc_util_bytes2num(sec_tr->key_a, sizeof(sec_tr->key_a));
+        if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyA, &crypto, false, 0)) {
+            mf_classic_set_key_not_found(data, sec_num, MfClassicKeyA);
+            FURI_LOG_D(TAG, "Key %dA not found in read", sec_num);
+            break;
+        }
+
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
-                if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyA, &crypto, false, 0)) continue;
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                     mf_classic_set_block_read(data, i, &block_tmp);
                     blocks_read++;
                 } else if(i > start_block) {
                     // Try to re-auth to read block in case prevous block was protected from read
                     furi_hal_nfc_sleep();
-                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyA, &crypto, false, 0)) break;
+                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyA, &crypto, false, 0)) {
+                        mf_classic_set_key_not_found(data, sec_num, MfClassicKeyA);
+                        FURI_LOG_D(TAG, "Key %dA not found in read", sec_num);
+                        break;
+                    }
                     if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                         mf_classic_set_block_read(data, i, &block_tmp);
                         blocks_read++;
                     }
                 }
-                furi_hal_nfc_sleep();
             } else {
                 blocks_read++;
             }
@@ -677,23 +693,30 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
         }
         FURI_LOG_D(TAG, "Try to read blocks with key B");
         key = nfc_util_bytes2num(sec_tr->key_b, sizeof(sec_tr->key_b));
-        if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyB, &crypto, false, 0)) break;
+        if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyB, &crypto, false, 0)) {
+            mf_classic_set_key_not_found(data, sec_num, MfClassicKeyB);
+            FURI_LOG_D(TAG, "Key %dB not found in read", sec_num);
+            break;
+        }
+
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
-                if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyB, &crypto, false, 0)) continue;
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                     mf_classic_set_block_read(data, i, &block_tmp);
                     blocks_read++;
                 } else if(i > start_block) {
                     // Try to re-auth to read block in case prevous block was protected from read
                     furi_hal_nfc_sleep();
-                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyB, &crypto, false, 0)) break;
+                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyB, &crypto, false, 0)) {
+                        mf_classic_set_key_not_found(data, sec_num, MfClassicKeyB);
+                        FURI_LOG_D(TAG, "Key %dB not found in read", sec_num);
+                        break;
+                    }
                     if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                         mf_classic_set_block_read(data, i, &block_tmp);
                         blocks_read++;
                     }
                 }
-                furi_hal_nfc_sleep();
             } else {
                 blocks_read++;
             }

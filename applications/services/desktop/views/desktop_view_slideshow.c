@@ -5,7 +5,6 @@
 #include "desktop_view_slideshow.h"
 #include "../desktop_i.h"
 #include "../helpers/slideshow.h"
-#include "../helpers/slideshow_filename.h"
 
 #define DESKTOP_SLIDESHOW_POWEROFF_SHORT 5000
 #define DESKTOP_SLIDESHOW_POWEROFF_LONG (60 * 60 * 1000)
@@ -15,6 +14,7 @@ struct DesktopSlideshowView {
     DesktopSlideshowViewCallback callback;
     void* context;
     FuriTimer* timer;
+    FuriTimer* auto_timer;
 };
 
 typedef struct {
@@ -37,33 +37,68 @@ static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
 
     DesktopSlideshowViewModel* model = view_get_model(instance->view);
     bool update_view = false;
-    if(event->type == InputTypeShort) {
-        bool end_slideshow = false;
-        switch(event->key) {
-        case InputKeyLeft:
-            slideshow_goback(model->slideshow);
-            break;
-        case InputKeyRight:
-        case InputKeyOk:
-            end_slideshow = !slideshow_advance(model->slideshow);
-            break;
-        case InputKeyBack:
-            end_slideshow = true;
-        default:
-            break;
+    if(model->slideshow->icon.frame_count == 7) {
+        if(event->type == InputTypeShort) {
+            update_view = true;
+            switch(model->slideshow->current_frame) {
+            case 0:
+                if(event->key == InputKeyRight) slideshow_advance(model->slideshow);
+                break;
+            case 1:
+                if(event->key == InputKeyUp) {
+                    slideshow_advance(model->slideshow);
+                    furi_timer_start(instance->auto_timer, 2 * furi_kernel_get_tick_frequency());
+                }
+                break;
+            case 5:
+                furi_timer_stop(instance->auto_timer);
+                if(event->key == InputKeyRight) {
+                    slideshow_advance(model->slideshow);
+                } else if(event->key == InputKeyLeft) {
+                    model->slideshow->current_frame = 2;
+                    furi_timer_start(instance->auto_timer, 2 * furi_kernel_get_tick_frequency());
+                }
+                break;
+            case 6:
+                if(event->key == InputKeyOk) {
+                    instance->callback(DesktopSlideshowCompleted, instance->context);
+                } else if(event->key == InputKeyLeft) {
+                    model->slideshow->current_frame = 0;
+                }
+                break;
+            default:
+                break;
+            }
         }
-        if(end_slideshow) {
-            instance->callback(DesktopSlideshowCompleted, instance->context);
-        }
-        update_view = true;
-    } else if(event->key == InputKeyOk && instance->timer) {
-        if(event->type == InputTypePress) {
-            furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_SHORT);
-        } else if(event->type == InputTypeRelease) {
-            furi_timer_stop(instance->timer);
-            /*if(!slideshow_is_one_page(model->slideshow)) {
-                furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_LONG);
-            }*/
+    } else {
+        if(event->type == InputTypeShort) {
+            bool end_slideshow = false;
+            switch(event->key) {
+            case InputKeyLeft:
+                slideshow_goback(model->slideshow);
+                break;
+            case InputKeyRight:
+            case InputKeyOk:
+                end_slideshow = !slideshow_advance(model->slideshow);
+                break;
+            case InputKeyBack:
+                end_slideshow = true;
+            default:
+                break;
+            }
+            if(end_slideshow) {
+                instance->callback(DesktopSlideshowCompleted, instance->context);
+            }
+            update_view = true;
+        } else if(event->key == InputKeyOk && instance->timer) {
+            if(event->type == InputTypePress) {
+                furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_SHORT);
+            } else if(event->type == InputTypeRelease) {
+                furi_timer_stop(instance->timer);
+                /*if(!slideshow_is_one_page(model->slideshow)) {
+                    furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_LONG);
+                }*/
+            }
         }
     }
     view_commit_model(instance->view, update_view);
@@ -76,12 +111,26 @@ static void desktop_first_start_timer_callback(void* context) {
     instance->callback(DesktopSlideshowPoweroff, instance->context);
 }
 
+static void desktop_first_start_auto_timer_callback(void* context) {
+    DesktopSlideshowView* instance = context;
+    DesktopSlideshowViewModel* model = view_get_model(instance->view);
+    if(model->slideshow->current_frame < 5 && model->slideshow->current_frame > 1) {
+        slideshow_advance(model->slideshow);
+    } else {
+        furi_timer_stop(instance->auto_timer);
+    }
+    view_commit_model(instance->view, true);
+}
+
 static void desktop_view_slideshow_enter(void* context) {
     DesktopSlideshowView* instance = context;
 
     furi_assert(instance->timer == NULL);
     instance->timer =
         furi_timer_alloc(desktop_first_start_timer_callback, FuriTimerTypeOnce, instance);
+
+    instance->auto_timer =
+        furi_timer_alloc(desktop_first_start_auto_timer_callback, FuriTimerTypePeriodic, instance);
 
     DesktopSlideshowViewModel* model = view_get_model(instance->view);
     model->slideshow = slideshow_alloc();
@@ -99,6 +148,10 @@ static void desktop_view_slideshow_exit(void* context) {
     furi_timer_stop(instance->timer);
     furi_timer_free(instance->timer);
     instance->timer = NULL;
+
+    furi_timer_stop(instance->auto_timer);
+    furi_timer_free(instance->auto_timer);
+    instance->auto_timer = NULL;
 
     DesktopSlideshowViewModel* model = view_get_model(instance->view);
     slideshow_free(model->slideshow);

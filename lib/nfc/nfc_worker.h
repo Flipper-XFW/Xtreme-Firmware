@@ -21,6 +21,7 @@ typedef enum {
     NfcWorkerStateNfcVEmulate,
     NfcWorkerStateNfcVUnlock,
     NfcWorkerStateNfcVUnlockAndSave,
+    NfcWorkerStateNfcVSniff,
     // Debug
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
@@ -37,6 +38,7 @@ typedef enum {
     NfcWorkerEventReadUidNfcV,
     NfcWorkerEventReadUidNfcF,
     NfcWorkerEventReadUidNfcA,
+    NfcWorkerEventReadFelica,
     NfcWorkerEventReadMfUltralight,
     NfcWorkerEventReadMfDesfire,
     NfcWorkerEventReadMfClassicDone,
@@ -44,7 +46,6 @@ typedef enum {
     NfcWorkerEventReadMfClassicDictAttackRequired,
     NfcWorkerEventReadNfcV,
     NfcWorkerEventReadBankCard,
-    NfcWorkerEventReadPassport,
 
     // Nfc worker common events
     NfcWorkerEventSuccess,
@@ -76,7 +77,8 @@ typedef enum {
     NfcWorkerEventMfUltralightPassKey, // NFC worker requesting manual key
     NfcWorkerEventMfUltralightPwdAuth, // Reader sent auth command
     NfcWorkerEventNfcVPassKey, // NFC worker requesting manual key
-
+    NfcWorkerEventNfcVCommandExecuted,
+    NfcWorkerEventNfcVContentChanged,
 } NfcWorkerEvent;
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
@@ -84,8 +86,6 @@ typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
 NfcWorker* nfc_worker_alloc();
 
 NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker);
-
-void* nfc_worker_get_event_data(NfcWorker* nfc_worker);
 
 void nfc_worker_free(NfcWorker* nfc_worker);
 
@@ -98,4 +98,5 @@ void nfc_worker_start(
 
 void nfc_worker_stop(NfcWorker* nfc_worker);
 void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker);
-void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker);
+void nfc_worker_nfcv_emulate(NfcWorker* nfc_worker);
+void nfc_worker_nfcv_sniff(NfcWorker* nfc_worker);

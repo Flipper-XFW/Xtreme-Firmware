@@ -10,6 +10,7 @@ import shutil
 import zlib
 import tarfile
 import math
+import pathlib
 
 from slideshow import Main as SlideshowMain
 
@@ -125,6 +126,17 @@ class Main(App):
             )
         if self.args.resources:
             resources_basename = self.RESOURCE_FILE_NAME
+            SlideshowMain(no_exit=True)(
+                [
+                    "-i",
+                    str(
+                        pathlib.Path(self.args.resources).parent
+                        / "slideshow/xfwfirstboot"
+                    ),
+                    "-o",
+                    str(pathlib.Path(self.args.resources) / "dolphin/xfwfirstboot.bin"),
+                ]
+            )
             if not self.package_resources(
                 self.args.resources, join(self.args.directory, resources_basename)
             ):
@@ -137,6 +149,14 @@ class Main(App):
                 return 2
 
         if self.args.splash:
+            SlideshowMain(no_exit=True)(
+                [
+                    "-i",
+                    str(pathlib.Path(self.args.splash).parent / "xfwfirstboot"),
+                    "-o",
+                    join(self.args.directory, "xfwfirstboot.bin"),
+                ]
+            )
             splash_args = [
                 "-i",
                 self.args.splash,

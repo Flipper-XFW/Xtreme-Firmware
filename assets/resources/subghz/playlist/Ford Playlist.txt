@@ -1,3 +1,0 @@
-# Ford Playlist
-sub: /ext/subghz/Vehicles/Ford/ford_signal_block_1.sub
-sub: /ext/subghz/Vehicles/Ford/ford_signal_block_2.sub

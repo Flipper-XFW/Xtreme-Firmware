@@ -1,7 +1,7 @@
 App(
     appid="xtreme_app",
-    name="Xtreme Settings",
-    apptype=FlipperAppType.EXTERNAL,
+    name="Xtreme",
+    apptype=FlipperAppType.EXTMAINAPP,
     entry_point="xtreme_app",
     cdefines=["APP_XTREME"],
     requires=[
@@ -10,7 +10,9 @@ App(
         "xtreme",
     ],
     stack_size=2 * 1024,
-    # icon="A_Xtreme_14",
+    icon="A_Xtreme_14",
     order=90,
+    fap_libs=["assets"],
     fap_category=".Main",
+    fap_icon="xtreme_app_10px.png",
 )

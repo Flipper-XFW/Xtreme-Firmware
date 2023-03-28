@@ -20,6 +20,8 @@ typedef struct {
     const Icon* I_DolphinWait_61x59;
     const Icon* I_iButtonDolphinVerySuccess_108x52;
     const Icon* I_DolphinReadingSuccess_59x63;
+    const Icon* I_Lockscreen;
+    const Icon* I_WarningDolphin_45x42;
     const Icon* I_NFC_dolphin_emulation_47x61;
     const Icon* I_passport_bad_46x49;
     const Icon* I_passport_DB;

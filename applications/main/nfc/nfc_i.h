@@ -21,7 +21,6 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
-#include <gui/modules/variable_item_list.h>
 
 #include <lib/nfc/nfc_types.h>
 #include <lib/nfc/nfc_worker.h>
@@ -40,12 +39,22 @@
 
 #include "rpc/rpc_app.h"
 
+#include <m-list.h>
 #include <m-array.h>
 
-ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
+ARRAY_DEF(FelicaAreaPath, FelicaArea*, M_PTR_OPLIST)
+ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST)
 
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_APP_FOLDER ANY_PATH("nfc")
+
+typedef struct {
+    FelicaSystem* selected_system;
+
+    FelicaAreaPath_t selected_areas;
+
+    FelicaService* selected_service;
+} FelicaSelectState;
 
 typedef enum {
     NfcRpcStateIdle,
@@ -66,6 +75,7 @@ struct Nfc {
     FuriString* text_box_store;
     uint8_t byte_input_store[6];
     MfClassicUserKeys_t mfc_key_strs; // Used in MFC key listing
+    FelicaSelectState felica_select;
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
@@ -78,7 +88,6 @@ struct Nfc {
     TextInput* text_input;
     ByteInput* byte_input;
     TextBox* text_box;
-    VariableItemList* variable_item_list;
     Widget* widget;
     DictAttack* dict_attack;
     DetectReader* detect_reader;
@@ -94,7 +103,6 @@ typedef enum {
     NfcViewTextInput,
     NfcViewByteInput,
     NfcViewTextBox,
-    NfcViewVarItemList,
     NfcViewWidget,
     NfcViewDictAttack,
     NfcViewDetectReader,

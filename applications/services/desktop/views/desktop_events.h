@@ -39,11 +39,10 @@ typedef enum {
     DesktopDebugEventSaveState,
     DesktopDebugEventExit,
 
+    DesktopLockMenuEventSettings,
     DesktopLockMenuEventLock,
-    DesktopLockMenuEventPinLock,
-    DesktopLockMenuEventPinLockShutdown,
-    DesktopLockMenuEventExit,
-    DesktopLockMenuEventXtremeSettings,
+    DesktopLockMenuEventLockPin,
+    DesktopLockMenuEventXtreme,
 
     DesktopAnimationEventCheckAnimation,
     DesktopAnimationEventNewIdleAnimation,

@@ -9,7 +9,7 @@ extern "C" {
 
 #define RECORD_LOADER "loader"
 
-#define FAP_LOADER_APP_NAME "Applications"
+#define FAP_LOADER_APP_NAME "Apps"
 
 typedef struct Loader Loader;
 
@@ -49,6 +49,9 @@ bool loader_is_locked(const Loader* instance);
 
 /** Show primary loader */
 void loader_show_menu();
+
+/** Show settings menu */
+void loader_show_settings();
 
 /** Show primary loader */
 void loader_update_menu();

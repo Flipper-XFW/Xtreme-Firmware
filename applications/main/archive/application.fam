@@ -6,6 +6,5 @@ App(
     cdefines=["APP_ARCHIVE"],
     requires=["gui"],
     stack_size=6 * 1024,
-    icon="A_FileManager_14",
     order=0,
 )

@@ -1,3 +1,6 @@
 /core2_firmware
 /resources/Manifest
 /resources/apps/*
+/resources/dolphin/*
+/resources/dolphin_custom/*
+/resources/apps_data/**/*.fal

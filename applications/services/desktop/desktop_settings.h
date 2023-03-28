@@ -1,7 +1,5 @@
 #pragma once
 
-#include "desktop_settings_filename.h"
-
 #include <furi_hal.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -11,27 +9,12 @@
 
 #define DESKTOP_SETTINGS_VER (7)
 
-#define DESKTOP_SETTINGS_PATH INT_PATH(DESKTOP_SETTINGS_FILE_NAME)
+#define DESKTOP_SETTINGS_OLD_PATH INT_PATH(".desktop.settings")
+#define DESKTOP_SETTINGS_PATH CFG_PATH("desktop.settings")
 #define DESKTOP_SETTINGS_MAGIC (0x17)
 #define PIN_MAX_LENGTH 12
 
 #define DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG "run_pin_setup"
-
-#define DESKTOP_SETTINGS_SAVE(x) \
-    saved_struct_save(           \
-        DESKTOP_SETTINGS_PATH,   \
-        (x),                     \
-        sizeof(DesktopSettings), \
-        DESKTOP_SETTINGS_MAGIC,  \
-        DESKTOP_SETTINGS_VER)
-
-#define DESKTOP_SETTINGS_LOAD(x) \
-    saved_struct_load(           \
-        DESKTOP_SETTINGS_PATH,   \
-        (x),                     \
-        sizeof(DesktopSettings), \
-        DESKTOP_SETTINGS_MAGIC,  \
-        DESKTOP_SETTINGS_VER)
 
 #define MAX_PIN_SIZE 10
 #define MIN_PIN_SIZE 4
@@ -55,3 +38,7 @@ typedef struct {
     uint32_t auto_lock_delay_ms;
     bool auto_lock_with_pin;
 } DesktopSettings;
+
+bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);
+
+bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x);

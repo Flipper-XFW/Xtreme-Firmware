@@ -1,4 +1,0 @@
-# Walgreens Playlist
-sub: /ext/subghz/Stores/Walgreens/Walgreens_Cough.sub
-sub: /ext/subghz/Stores/Walgreens/Walgreens_Skincare.sub
-sub: /ext/subghz/Stores/Walgreens/Walgreens_Vitamin.sub

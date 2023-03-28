@@ -7,16 +7,37 @@
 #include <flipper_application/application_manifest.h>
 #include <gui/icon_i.h>
 #include <core/dangerous_defines.h>
+#include <toolbox/stream/file_stream.h>
+#include <xtreme/settings.h>
+#include <gui/modules/file_browser.h>
 
 #define TAG "LoaderSrv"
 
 #define LOADER_THREAD_FLAG_SHOW_MENU (1 << 0)
-#define LOADER_THREAD_FLAG_ALL (LOADER_THREAD_FLAG_SHOW_MENU)
+#define LOADER_THREAD_FLAG_SHOW_SETTINGS (1 << 1)
+#define LOADER_THREAD_FLAG_ALL (LOADER_THREAD_FLAG_SHOW_MENU | LOADER_THREAD_FLAG_SHOW_SETTINGS)
 
 static Loader* loader_instance = NULL;
 
+static FlipperApplication const* loader_find_application_by_name_in_list(
+    const char* name,
+    const FlipperApplication* list,
+    const uint32_t n_apps) {
+    for(size_t i = 0; i < n_apps; i++) {
+        if(strcmp(name, list[i].name) == 0) {
+            return &list[i];
+        }
+    }
+    return NULL;
+}
+
 static bool
     loader_start_application(const FlipperApplication* application, const char* arguments) {
+    if(application->app == NULL) {
+        arguments = application->appid;
+        application = loader_find_application_by_name_in_list(
+            FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+    }
     loader_instance->application = application;
 
     furi_assert(loader_instance->application_arguments == NULL);
@@ -48,25 +69,9 @@ static bool
     return true;
 }
 
-static FlipperApplication const* loader_find_application_by_name_in_list(
-    const char* name,
-    const FlipperApplication* list,
-    const uint32_t n_apps) {
-    for(size_t i = 0; i < n_apps; i++) {
-        if(strcmp(name, list[i].name) == 0) {
-            return &list[i];
-        }
-    }
-    return NULL;
-}
-
 const FlipperApplication* loader_find_application_by_name(const char* name) {
     const FlipperApplication* application = NULL;
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
-    if(!application) {
-        application =
-            loader_find_application_by_name_in_list(name, FLIPPER_PLUGINS, FLIPPER_PLUGINS_COUNT);
-    }
     if(!application) {
         application = loader_find_application_by_name_in_list(
             name, FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT);
@@ -74,10 +79,6 @@ const FlipperApplication* loader_find_application_by_name(const char* name) {
     if(!application) {
         application = loader_find_application_by_name_in_list(
             name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
-    }
-    if(!application) {
-        application = loader_find_application_by_name_in_list(
-            name, FLIPPER_DEBUG_APPS, FLIPPER_DEBUG_APPS_COUNT);
     }
 
     return application;
@@ -98,7 +99,7 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
     loader_start_application(application, NULL);
 }
 
-static void loader_main_callback(void* _ctx, uint32_t index) {
+static void loader_external_callback(void* _ctx, uint32_t index) {
     UNUSED(index);
     const char* path = _ctx;
     const FlipperApplication* app = loader_find_application_by_name_in_list(
@@ -180,18 +181,6 @@ static void loader_cli_list(Cli* cli, FuriString* args, Loader* instance) {
     printf("Applications:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
-    }
-
-    printf("Plugins:\r\n");
-    for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_PLUGINS[i].name);
-    }
-
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        printf("Debug:\r\n");
-        for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
-            printf("\t%s\r\n", FLIPPER_DEBUG_APPS[i].name);
-        }
     }
 }
 
@@ -362,22 +351,6 @@ static Loader* loader_alloc() {
     view_set_previous_callback(menu_get_view(instance->primary_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewPrimary, menu_get_view(instance->primary_menu));
-    // Plugins menu
-    instance->plugins_menu = submenu_alloc();
-    view_set_context(submenu_get_view(instance->plugins_menu), instance->plugins_menu);
-    view_set_previous_callback(
-        submenu_get_view(instance->plugins_menu), loader_back_to_primary_menu);
-    view_dispatcher_add_view(
-        instance->view_dispatcher,
-        LoaderMenuViewPlugins,
-        submenu_get_view(instance->plugins_menu));
-    // Debug menu
-    instance->debug_menu = submenu_alloc();
-    view_set_context(submenu_get_view(instance->debug_menu), instance->debug_menu);
-    view_set_previous_callback(
-        submenu_get_view(instance->debug_menu), loader_back_to_primary_menu);
-    view_dispatcher_add_view(
-        instance->view_dispatcher, LoaderMenuViewDebug, submenu_get_view(instance->debug_menu));
     // Settings menu
     instance->settings_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->settings_menu), instance->settings_menu);
@@ -406,10 +379,6 @@ static void loader_free(Loader* instance) {
 
     menu_free(loader_instance->primary_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPrimary);
-    submenu_free(loader_instance->plugins_menu);
-    view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPlugins);
-    submenu_free(loader_instance->debug_menu);
-    view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewDebug);
     submenu_free(loader_instance->settings_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewSettings);
     view_dispatcher_free(loader_instance->view_dispatcher);
@@ -420,12 +389,22 @@ static void loader_free(Loader* instance) {
     instance = NULL;
 }
 
-const Icon* loader_get_main_icon(char* name) {
-    // Temp solution, not sure how this could be easily improved
-    if(strcmp(name, "xtreme_app.fap") == 0) {
-        return &A_Xtreme_14;
+bool loader_load_fap_meta(Storage* storage, FuriString* path, FuriString* name, const Icon** icon) {
+    *icon = NULL;
+    uint8_t* icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
+    if(!fap_loader_load_name_and_icon(path, storage, &icon_buf, name)) {
+        free(icon_buf);
+        icon_buf = NULL;
+        return false;
     }
-    return NULL;
+    *icon = malloc(sizeof(Icon));
+    FURI_CONST_ASSIGN((*icon)->frame_count, 1);
+    FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
+    FURI_CONST_ASSIGN((*icon)->width, 10);
+    FURI_CONST_ASSIGN((*icon)->height, 10);
+    FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
+    FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
+    return true;
 }
 
 static void loader_build_menu() {
@@ -440,50 +419,6 @@ static void loader_build_menu() {
             loader_menu_callback,
             (void*)&FLIPPER_APPS[i]);
     }
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* folder = storage_file_alloc(storage);
-    FileInfo info;
-    char* name = malloc(100);
-    if(storage_dir_open(folder, EXT_PATH("apps/.Main"))) {
-        FuriString* path = furi_string_alloc();
-        FuriString* appname = furi_string_alloc();
-        while(storage_dir_read(folder, &info, name, 100)) {
-            if(file_info_is_dir(&info)) continue;
-            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), name);
-            if(!fap_loader_load_name_and_icon(path, storage, NULL, appname)) continue;
-            const Icon* icon = loader_get_main_icon(name);
-            menu_add_item(
-                loader_instance->primary_menu,
-                strdup(furi_string_get_cstr(appname)),
-                icon,
-                i++,
-                loader_main_callback,
-                (void*)strdup(furi_string_get_cstr(path)));
-        }
-        furi_string_free(appname);
-        furi_string_free(path);
-    }
-    free(name);
-    storage_file_free(folder);
-    furi_record_close(RECORD_STORAGE);
-    if(FLIPPER_PLUGINS_COUNT != 0) {
-        menu_add_item(
-            loader_instance->primary_menu,
-            "Plugins",
-            &A_Plugins_14,
-            i++,
-            loader_submenu_callback,
-            (void*)LoaderMenuViewPlugins);
-    }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && (FLIPPER_DEBUG_APPS_COUNT > 0)) {
-        menu_add_item(
-            loader_instance->primary_menu,
-            "Debug Tools",
-            &A_Debug_14,
-            i++,
-            loader_submenu_callback,
-            (void*)LoaderMenuViewDebug);
-    }
     menu_add_item(
         loader_instance->primary_menu,
         "Settings",
@@ -491,32 +426,36 @@ static void loader_build_menu() {
         i++,
         loader_submenu_callback,
         (void*)LoaderMenuViewSettings);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* path = furi_string_alloc();
+    FuriString* name = furi_string_alloc();
+    Stream* stream = file_stream_alloc(storage);
+    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        while(stream_read_line(stream, path)) {
+            furi_string_replace_all(path, "\r", "");
+            furi_string_replace_all(path, "\n", "");
+            const Icon* icon;
+            if(!loader_load_fap_meta(storage, path, name, &icon)) continue;
+            menu_add_item(
+                loader_instance->primary_menu,
+                strdup(furi_string_get_cstr(name)),
+                icon,
+                i++,
+                loader_external_callback,
+                (void*)strdup(furi_string_get_cstr(path)));
+        }
+    }
+    file_stream_close(stream);
+    stream_free(stream);
+    furi_string_free(name);
+    furi_string_free(path);
+    furi_record_close(RECORD_STORAGE);
 }
 
 static void loader_build_submenu() {
-    FURI_LOG_I(TAG, "Building plugins menu");
-    size_t i;
-    for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
-        submenu_add_item(
-            loader_instance->plugins_menu,
-            FLIPPER_PLUGINS[i].name,
-            i,
-            loader_menu_callback,
-            (void*)&FLIPPER_PLUGINS[i]);
-    }
-
-    FURI_LOG_I(TAG, "Building debug menu");
-    for(i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
-        submenu_add_item(
-            loader_instance->debug_menu,
-            FLIPPER_DEBUG_APPS[i].name,
-            i,
-            loader_menu_callback,
-            (void*)&FLIPPER_DEBUG_APPS[i]);
-    }
-
     FURI_LOG_I(TAG, "Building settings menu");
-    for(i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
+    for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         submenu_add_item(
             loader_instance->settings_menu,
             FLIPPER_SETTINGS_APPS[i].name,
@@ -529,6 +468,11 @@ static void loader_build_submenu() {
 void loader_show_menu() {
     furi_assert(loader_instance);
     furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
+}
+
+void loader_show_settings() {
+    furi_assert(loader_instance);
+    furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_SETTINGS);
 }
 
 void loader_update_menu() {
@@ -565,6 +509,15 @@ int32_t loader_srv(void* p) {
             view_dispatcher_switch_to_view(
                 loader_instance->view_dispatcher, LoaderMenuViewPrimary);
             view_dispatcher_run(loader_instance->view_dispatcher);
+        } else if(flags & LOADER_THREAD_FLAG_SHOW_SETTINGS) {
+            submenu_set_selected_item(loader_instance->settings_menu, 0);
+            view_set_previous_callback(
+                submenu_get_view(loader_instance->settings_menu), loader_hide_menu);
+            view_dispatcher_switch_to_view(
+                loader_instance->view_dispatcher, LoaderMenuViewSettings);
+            view_dispatcher_run(loader_instance->view_dispatcher);
+            view_set_previous_callback(
+                submenu_get_view(loader_instance->settings_menu), loader_back_to_primary_menu);
         }
     }
 
