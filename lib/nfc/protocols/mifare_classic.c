@@ -659,7 +659,6 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
 
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
-                if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyA, &crypto, false, 0)) continue;
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                     mf_classic_set_block_read(data, i, &block_tmp);
                     blocks_read++;
@@ -676,7 +675,6 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
                         blocks_read++;
                     }
                 }
-                furi_hal_nfc_sleep();
             } else {
                 blocks_read++;
             }
@@ -699,7 +697,6 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
 
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
-                if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyB, &crypto, false, 0)) continue;
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                     mf_classic_set_block_read(data, i, &block_tmp);
                     blocks_read++;
@@ -716,7 +713,6 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
                         blocks_read++;
                     }
                 }
-                furi_hal_nfc_sleep();
             } else {
                 blocks_read++;
             }
