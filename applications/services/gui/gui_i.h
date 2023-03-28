@@ -62,8 +62,8 @@ struct Gui {
     FuriMutex* mutex;
 
     // Layers and Canvas
+    uint16_t hide_statusbar_count;
     bool lockdown;
-    bool lockmenu;
     bool direct_draw;
     ViewPortArray_t layers[GuiLayerMAX];
     Canvas* canvas;

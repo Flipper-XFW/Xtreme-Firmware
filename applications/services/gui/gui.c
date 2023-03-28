@@ -47,6 +47,7 @@ static bool gui_redraw_fs(Gui* gui) {
 }
 
 static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
+    if(gui->hide_statusbar_count > 0) return;
     ViewPortArray_it_t it;
     uint8_t left_used = 0;
     uint8_t right_used = 0;
@@ -276,9 +277,7 @@ static void gui_redraw(Gui* gui) {
                 if(!gui_redraw_window(gui)) {
                     gui_redraw_desktop(gui);
                 }
-                if(!gui->lockmenu) {
-                    gui_redraw_status_bar(gui, false);
-                }
+                gui_redraw_status_bar(gui, false);
             }
         }
 
@@ -517,22 +516,26 @@ size_t gui_get_framebuffer_size(const Gui* gui) {
     return canvas_get_buffer_size(gui->canvas);
 }
 
-void gui_set_lockdown(Gui* gui, bool lockdown) {
+void gui_set_hide_statusbar(Gui* gui, bool hidden) {
     furi_assert(gui);
 
     gui_lock(gui);
-    gui->lockdown = lockdown;
+    if(hidden) {
+        gui->hide_statusbar_count++;
+    } else {
+        gui->hide_statusbar_count--;
+    }
     gui_unlock(gui);
 
     // Request redraw
     gui_update(gui);
 }
 
-void gui_set_lockmenu(Gui* gui, bool lockmenu) {
+void gui_set_lockdown(Gui* gui, bool lockdown) {
     furi_assert(gui);
 
     gui_lock(gui);
-    gui->lockmenu = lockmenu;
+    gui->lockdown = lockdown;
     gui_unlock(gui);
 
     // Request redraw
