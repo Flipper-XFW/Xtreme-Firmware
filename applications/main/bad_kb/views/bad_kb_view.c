@@ -61,6 +61,8 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         elements_button_left(canvas, "Config");
     } else if((model->state.state == BadKbStateRunning) || (model->state.state == BadKbStateDelay)) {
         elements_button_center(canvas, "Stop");
+    } else if(model->state.state == BadKbStateWaitForBtn) {
+        elements_button_center(canvas, "Press to continue");
     } else if(model->state.state == BadKbStateWillRun) {
         elements_button_center(canvas, "Cancel");
     }

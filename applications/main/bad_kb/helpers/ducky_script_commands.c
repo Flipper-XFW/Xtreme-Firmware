@@ -160,6 +160,14 @@ static int32_t ducky_fnc_release(BadKbScript* bad_kb, const char* line, int32_t 
     return 0;
 }
 
+static int32_t ducky_fnc_waitforbutton(BadKbScript* bad_kb, const char* line, int32_t param) {
+    UNUSED(param);
+    UNUSED(bad_kb);
+    UNUSED(line);
+
+    return SCRIPT_STATE_WAIT_FOR_BTN;
+}
+
 static const DuckyCmd ducky_commands[] = {
     {"REM ", NULL, -1},
     {"ID ", NULL, -1},
@@ -177,7 +185,11 @@ static const DuckyCmd ducky_commands[] = {
     {"ALTCODE ", ducky_fnc_altstring, -1},
     {"HOLD ", ducky_fnc_hold, -1},
     {"RELEASE ", ducky_fnc_release, -1},
+    {"WAIT_FOR_BUTTON_PRESS", ducky_fnc_waitforbutton, -1},
 };
+
+#define TAG "BadKB"
+#define WORKER_TAG TAG "Worker"
 
 int32_t ducky_execute_cmd(BadKbScript* bad_kb, const char* line) {
     for(size_t i = 0; i < COUNT_OF(ducky_commands); i++) {

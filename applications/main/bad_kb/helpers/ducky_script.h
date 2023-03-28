@@ -32,6 +32,7 @@ typedef enum {
     BadKbStateRunning,
     BadKbStateDelay,
     BadKbStateStringDelay,
+    BadKbStateWaitForBtn,
     BadKbStateDone,
     BadKbStateScriptError,
     BadKbStateFileError,

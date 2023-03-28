@@ -13,6 +13,7 @@ extern "C" {
 #define SCRIPT_STATE_NEXT_LINE (-3)
 #define SCRIPT_STATE_CMD_UNKNOWN (-4)
 #define SCRIPT_STATE_STRING_START (-5)
+#define SCRIPT_STATE_WAIT_FOR_BTN (-6)
 
 uint16_t ducky_get_keycode(BadKbScript* bad_kb, const char* param, bool accept_chars);
 
