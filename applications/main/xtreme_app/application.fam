@@ -14,4 +14,5 @@ App(
     order=90,
     fap_libs=["assets"],
     fap_category=".Main",
+    fap_icon="xtreme_app_10px.png",
 )
