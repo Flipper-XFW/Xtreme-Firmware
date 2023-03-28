@@ -24,7 +24,7 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 
 - <h4>Customizable: Dont like the Animations, want to turn on/off the Home screen icons (battery, SD card etc), change the flippers name or anything like that? You absolutely can. No need to mess with code or deal with weird manifest files. Its all done with an App.</h4>
 <br><br>
-Note, the below mentioned changes are only a few things we did. For a full list click [here](https://github.com/ClaraCrazy/Flipper-Xtreme/blob/main/customization.md)
+Note, the below mentioned changes are only a few things we did. For a full list click [here](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/Customization)
 
 -----
 <br>
