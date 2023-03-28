@@ -19,8 +19,25 @@
 
 static Loader* loader_instance = NULL;
 
+static FlipperApplication const* loader_find_application_by_name_in_list(
+    const char* name,
+    const FlipperApplication* list,
+    const uint32_t n_apps) {
+    for(size_t i = 0; i < n_apps; i++) {
+        if(strcmp(name, list[i].name) == 0) {
+            return &list[i];
+        }
+    }
+    return NULL;
+}
+
 static bool
     loader_start_application(const FlipperApplication* application, const char* arguments) {
+    if(application->app == NULL) {
+        arguments = application->appid;
+        application = loader_find_application_by_name_in_list(
+            FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+    }
     loader_instance->application = application;
 
     furi_assert(loader_instance->application_arguments == NULL);
@@ -50,18 +67,6 @@ static bool
     furi_thread_start(loader_instance->application_thread);
 
     return true;
-}
-
-static FlipperApplication const* loader_find_application_by_name_in_list(
-    const char* name,
-    const FlipperApplication* list,
-    const uint32_t n_apps) {
-    for(size_t i = 0; i < n_apps; i++) {
-        if(strcmp(name, list[i].name) == 0) {
-            return &list[i];
-        }
-    }
-    return NULL;
 }
 
 const FlipperApplication* loader_find_application_by_name(const char* name) {
@@ -94,7 +99,7 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
     loader_start_application(application, NULL);
 }
 
-static void loader_main_callback(void* _ctx, uint32_t index) {
+static void loader_external_callback(void* _ctx, uint32_t index) {
     UNUSED(index);
     const char* path = _ctx;
     const FlipperApplication* app = loader_find_application_by_name_in_list(
@@ -386,31 +391,19 @@ static void loader_free(Loader* instance) {
 
 bool loader_load_fap_meta(Storage* storage, FuriString* path, FuriString* name, const Icon** icon) {
     *icon = NULL;
-    uint8_t* icon_buf = NULL;
-    // Match main apps as FAPs for buil-in icons
-    if(furi_string_equal_str(path, EXT_PATH("apps/.Main/xtreme_app.fap"))) {
-        *icon = &A_Xtreme_14;
-    }
-    // Load FAP bundled icon otherwise
-    if(!*icon) {
-        icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
-    }
+    uint8_t* icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
     if(!fap_loader_load_name_and_icon(path, storage, &icon_buf, name)) {
-        if(icon_buf) {
-            free(icon_buf);
-            icon_buf = NULL;
-        }
+        free(icon_buf);
+        icon_buf = NULL;
         return false;
     }
-    if(icon_buf) {
-        *icon = malloc(sizeof(Icon));
-        FURI_CONST_ASSIGN((*icon)->frame_count, 1);
-        FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
-        FURI_CONST_ASSIGN((*icon)->width, 10);
-        FURI_CONST_ASSIGN((*icon)->height, 10);
-        FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
-        FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
-    }
+    *icon = malloc(sizeof(Icon));
+    FURI_CONST_ASSIGN((*icon)->frame_count, 1);
+    FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
+    FURI_CONST_ASSIGN((*icon)->width, 10);
+    FURI_CONST_ASSIGN((*icon)->height, 10);
+    FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
+    FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
     return true;
 }
 
@@ -437,27 +430,6 @@ static void loader_build_menu() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* path = furi_string_alloc();
     FuriString* name = furi_string_alloc();
-    File* folder = storage_file_alloc(storage);
-    FileInfo info;
-    if(storage_dir_open(folder, EXT_PATH("apps/.Main"))) {
-        char* temp = malloc(100);
-        while(storage_dir_read(folder, &info, temp, 100)) {
-            if(file_info_is_dir(&info)) continue;
-            furi_string_printf(path, EXT_PATH("apps/.Main/%s"), temp);
-            const Icon* icon;
-            if(!loader_load_fap_meta(storage, path, name, &icon)) continue;
-            menu_add_item(
-                loader_instance->primary_menu,
-                strdup(furi_string_get_cstr(name)),
-                icon,
-                i++,
-                loader_main_callback,
-                (void*)strdup(furi_string_get_cstr(path)));
-        }
-        free(temp);
-    }
-    storage_file_free(folder);
-
     Stream* stream = file_stream_alloc(storage);
     if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(stream, path)) {
@@ -470,7 +442,7 @@ static void loader_build_menu() {
                 strdup(furi_string_get_cstr(name)),
                 icon,
                 i++,
-                loader_main_callback,
+                loader_external_callback,
                 (void*)strdup(furi_string_get_cstr(path)));
         }
     }
