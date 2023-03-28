@@ -1410,9 +1410,9 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             // Write ATQA, SAK
             if(!flipper_format_write_comment_cstr(file, "ISO14443 specific fields")) break;
             // Save ATQA in MSB order for correct companion apps display
-            uint8_t atqa[2] = {data->atqa[1], data->atqa[0]};
+            uint8_t atqa[2] = {data->a_data.atqa[1], data->a_data.atqa[0]};
             if(!flipper_format_write_hex(file, "ATQA", atqa, 2)) break;
-            if(!flipper_format_write_hex(file, "SAK", &data->sak, 1)) break;
+            if(!flipper_format_write_hex(file, "SAK", &data->a_data.sak, 1)) break;
         }
 
         // Save more data if necessary
@@ -1503,22 +1503,22 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
         if(!flipper_format_read_hex(file, "UID", data->uid, data->uid_len)) break;
         if(dev->format != NfcDeviceSaveFormatNfcV) {
             if(version == version_with_lsb_atqa) {
-                if(!flipper_format_read_hex(file, "ATQA", data->atqa, 2)) break;
+                if(!flipper_format_read_hex(file, "ATQA", data->a_data.atqa, 2)) break;
             } else {
                 uint8_t atqa[2] = {};
                 if(!flipper_format_read_hex(file, "ATQA", atqa, 2)) break;
-                data->atqa[0] = atqa[1];
-                data->atqa[1] = atqa[0];
+                data->a_data.atqa[0] = atqa[1];
+                data->a_data.atqa[1] = atqa[0];
             }
-            if(!flipper_format_read_hex(file, "SAK", &data->sak, 1)) break;
+            if(!flipper_format_read_hex(file, "SAK", &data->a_data.sak, 1)) break;
         }
         // Load CUID
         uint8_t* cuid_start = data->uid;
         if(data->uid_len == 7) {
             cuid_start = &data->uid[3];
         }
-        data->cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
-                     (cuid_start[3]);
+        data->a_data.cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
+                            (cuid_start[3]);
         // Parse other data
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
             if(!nfc_device_load_mifare_ul_data(file, dev)) break;
@@ -1614,6 +1614,8 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
         mf_ul_reset(&dev_data->mf_ul_data);
     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
         memset(&dev_data->emv_data, 0, sizeof(EmvData));
+    } else if(dev_data->protocol == NfcDeviceProtocolFelica) {
+        felica_clear(&dev_data->felica_data);
     }
     memset(&dev_data->nfc_data, 0, sizeof(FuriHalNfcDevData));
     dev_data->protocol = NfcDeviceProtocolUnknown;

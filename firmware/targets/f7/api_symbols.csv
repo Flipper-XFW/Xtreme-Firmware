@@ -896,6 +896,21 @@ Function,-,fdim,double,"double, double"
 Function,-,fdimf,float,"float, float"
 Function,-,fdiml,long double,"long double, long double"
 Function,-,fdopen,FILE*,"int, const char*"
+Function,-,felica_check_ic_type,_Bool,uint8_t*
+Function,-,felica_clear,void,FelicaData*
+Function,-,felica_define_normal_block,void,"FelicaService*, uint16_t, uint8_t*"
+Function,-,felica_get_ic_type,FelicaICType,uint8_t*
+Function,-,felica_get_service_name,FuriString*,FelicaService*
+Function,-,felica_get_system_name,FuriString*,FelicaSystem*
+Function,-,felica_lite_can_read_without_mac,_Bool,"uint8_t*, uint8_t"
+Function,-,felica_lite_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, _Bool, const uint8_t*, uint8_t"
+Function,-,felica_lite_prepare_unencrypted_write,uint8_t,"uint8_t*, const FelicaReader*, const uint8_t*, uint8_t, const uint8_t*"
+Function,-,felica_parse_unencrypted_read,uint16_t,"uint8_t*, uint8_t, FelicaReader*, uint8_t*, uint16_t"
+Function,-,felica_parse_unencrypted_write,_Bool,"uint8_t*, uint8_t, FelicaReader*"
+Function,-,felica_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, const uint16_t*, uint8_t, const uint32_t*, uint8_t"
+Function,-,felica_prepare_unencrypted_write,uint8_t,"uint8_t*, FelicaReader*, const uint16_t*, uint8_t, const uint32_t*, uint8_t, const uint8_t*"
+Function,-,felica_read_card,_Bool,"FuriHalNfcTxRxContext*, FelicaData*, uint8_t*, uint8_t*"
+Function,-,felica_read_lite_system,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaData*, FelicaSystem*"
 Function,-,feof,int,FILE*
 Function,-,feof_unlocked,int,FILE*
 Function,-,ferror,int,FILE*
@@ -2011,7 +2026,7 @@ Function,-,mf_classic_auth_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicB
 Function,-,mf_classic_authenticate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey"
 Function,-,mf_classic_authenticate_skip_activate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey, _Bool, uint32_t"
 Function,-,mf_classic_block_to_value,_Bool,"const uint8_t*, int32_t*, uint8_t*"
-Function,-,mf_classic_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
+Function,-,mf_classic_check_card_type,_Bool,FuriHalNfcADevData*
 Function,-,mf_classic_dict_add_key,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_add_key_str,_Bool,"MfClassicDict*, FuriString*"
 Function,-,mf_classic_dict_alloc,MfClassicDict*,MfClassicDictType
@@ -2029,7 +2044,7 @@ Function,-,mf_classic_dict_is_key_present,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_is_key_present_str,_Bool,"MfClassicDict*, FuriString*"
 Function,-,mf_classic_dict_rewind,_Bool,MfClassicDict*
 Function,-,mf_classic_emulator,_Bool,"MfClassicEmulator*, FuriHalNfcTxRxContext*"
-Function,-,mf_classic_get_classic_type,MfClassicType,"uint8_t, uint8_t, uint8_t"
+Function,-,mf_classic_get_classic_type,MfClassicType,FuriHalNfcADevData*
 Function,-,mf_classic_get_read_sectors_and_keys,void,"MfClassicData*, uint8_t*, uint8_t*"
 Function,-,mf_classic_get_sector_by_block,uint8_t,uint8_t
 Function,-,mf_classic_get_sector_trailer_block_num_by_sector,uint8_t,uint8_t
@@ -2070,7 +2085,7 @@ Function,-,mf_df_cat_file,void,"MifareDesfireFile*, FuriString*"
 Function,-,mf_df_cat_free_mem,void,"MifareDesfireFreeMemory*, FuriString*"
 Function,-,mf_df_cat_key_settings,void,"MifareDesfireKeySettings*, FuriString*"
 Function,-,mf_df_cat_version,void,"MifareDesfireVersion*, FuriString*"
-Function,-,mf_df_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
+Function,-,mf_df_check_card_type,_Bool,FuriHalNfcADevData*
 Function,-,mf_df_clear,void,MifareDesfireData*
 Function,-,mf_df_parse_get_application_ids_response,_Bool,"uint8_t*, uint16_t, MifareDesfireApplication**"
 Function,-,mf_df_parse_get_file_ids_response,_Bool,"uint8_t*, uint16_t, MifareDesfireFile**"
@@ -2093,7 +2108,7 @@ Function,-,mf_df_prepare_read_data,uint16_t,"uint8_t*, uint8_t, uint32_t, uint32
 Function,-,mf_df_prepare_read_records,uint16_t,"uint8_t*, uint8_t, uint32_t, uint32_t"
 Function,-,mf_df_prepare_select_application,uint16_t,"uint8_t*, uint8_t[3]"
 Function,-,mf_df_read_card,_Bool,"FuriHalNfcTxRxContext*, MifareDesfireData*"
-Function,-,mf_ul_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
+Function,-,mf_ul_check_card_type,_Bool,FuriHalNfcADevData*
 Function,-,mf_ul_is_full_capture,_Bool,MfUltralightData*
 Function,-,mf_ul_prepare_emulation,void,"MfUltralightEmulator*, MfUltralightData*"
 Function,-,mf_ul_prepare_emulation_response,_Bool,"uint8_t*, uint16_t, uint8_t*, uint16_t*, uint32_t*, void*"

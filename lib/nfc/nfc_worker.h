@@ -38,6 +38,7 @@ typedef enum {
     NfcWorkerEventReadUidNfcV,
     NfcWorkerEventReadUidNfcF,
     NfcWorkerEventReadUidNfcA,
+    NfcWorkerEventReadFelica,
     NfcWorkerEventReadMfUltralight,
     NfcWorkerEventReadMfDesfire,
     NfcWorkerEventReadMfClassicDone,
