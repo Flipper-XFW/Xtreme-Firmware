@@ -208,8 +208,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
         }
         furi_string_cat_printf(
-            
-        temp_str, "\nATQA: %02X %02X ", nfc_data->a_data.atqa[1], nfc_data->a_data.atqa[0]);
+            temp_str, "\nATQA: %02X %02X ", nfc_data->a_data.atqa[1], nfc_data->a_data.atqa[0]);
         furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->a_data.sak);
     }
 
