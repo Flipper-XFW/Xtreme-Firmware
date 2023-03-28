@@ -1,5 +1,3 @@
-# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
-
 App(
     appid="usb_hid_autofire",
     name="USB HID Autofire",

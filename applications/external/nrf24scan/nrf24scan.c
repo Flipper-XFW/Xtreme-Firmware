@@ -532,6 +532,7 @@ static void prepare_nrf24(bool fsend_packet) {
                 nrf24_HANDLE,
                 REG_FEATURE,
                 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+                // EN_DYN_ACK(0x01)  for W_TX_PAYLOAD_NOACK cmd broke AA on some fake nRF24l01+ modules
         } else if(setup_from_log) { // Scan
             nrf24_write_reg(
                 nrf24_HANDLE,
@@ -544,8 +545,8 @@ static void prepare_nrf24(bool fsend_packet) {
                 nrf24_HANDLE,
                 REG_FEATURE,
                 *(rec + 2 + addr_size) >> 2 != 0x33 ?
-                    4 + 1 :
-                    1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+                    4 :
+                    0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
             if(*(rec + 1) & 0b100) { // ESB
                 nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0x01); // Automatic Retransmission
                 nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x3F); // Auto acknowledgement
@@ -570,8 +571,8 @@ static void prepare_nrf24(bool fsend_packet) {
                 nrf24_HANDLE,
                 REG_FEATURE,
                 NRF_DPL ?
-                    4 + 1 :
-                    1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+                    4 :
+                    0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
             nrf24_write_reg(
                 nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
             nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
@@ -909,7 +910,7 @@ bool nrf24_send_packet() {
         nrf24_set_maclen(nrf24_HANDLE, 2);
         nrf24_set_mac(REG_RX_ADDR_P0, adr, 2);
         nrf24_set_mac(REG_TX_ADDR, adr, 2);
-        last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2 + 2, 32 - 2, false);
+        last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2 + 2, 32 - 2, true);
     } else {
         nrf24_write_reg(
             nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x11 : 0); // Automatic Retransmission
@@ -943,7 +944,7 @@ bool nrf24_send_packet() {
                      NRF_CRC == 2 ? 0b1100 :
                                     0))); // Mask all interrupts
         nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
-        last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2, a, false);
+        last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2, a, true);
     }
     last_packet_send = view_log_arr_idx;
     notification_message(
@@ -954,10 +955,9 @@ bool nrf24_send_packet() {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    furi_assert(ctx);
     const PluginState* plugin_state = ctx;
-    furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
-
+    if(plugin_state == NULL) return;
+    if(furi_mutex_acquire(plugin_state->mutex, 25) != FuriStatusOk) return;
     //canvas_draw_frame(canvas, 0, 0, 128, 64); // border around the edge of the screen
     if(what_doing == 0) {
         canvas_set_font(canvas, FontSecondary); // 8x10 font, 6 lines
@@ -1334,12 +1334,12 @@ int32_t nrf24scan_app(void* p) {
     APP = malloc(sizeof(Nrf24Scan));
     DOLPHIN_DEED(DolphinDeedPluginStart);
     APP->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
-    APP->plugin_state = malloc(sizeof(PluginState));
-    APP->plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!APP->plugin_state->mutex) {
+    PluginState* plugin_state = malloc(sizeof(PluginState));
+    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!plugin_state->mutex) {
         furi_message_queue_free(APP->event_queue);
         FURI_LOG_E(TAG, "cannot create mutex");
-        free(APP->plugin_state);
+        free(plugin_state);
         return 255;
     }
     APP->log_arr = malloc(LOG_REC_SIZE * MAX_LOG_RECORDS);
@@ -1365,7 +1365,7 @@ int32_t nrf24scan_app(void* p) {
 
     // Set system callbacks
     APP->view_port = view_port_alloc();
-    view_port_draw_callback_set(APP->view_port, render_callback, APP->plugin_state);
+    view_port_draw_callback_set(APP->view_port, render_callback, plugin_state);
     view_port_input_callback_set(APP->view_port, input_callback, APP->event_queue);
 
     // Open GUI and register view_port
@@ -1406,7 +1406,7 @@ int32_t nrf24scan_app(void* p) {
     PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(APP->event_queue, &event, 100);
-        furi_mutex_acquire(APP->plugin_state->mutex, FuriWaitForever);
+        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -1633,7 +1633,7 @@ int32_t nrf24scan_app(void* p) {
         }
 
         view_port_update(APP->view_port);
-        furi_mutex_release(APP->plugin_state->mutex);
+        furi_mutex_release(plugin_state->mutex);
     }
     nrf24_set_idle(nrf24_HANDLE);
     if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
@@ -1648,11 +1648,11 @@ int32_t nrf24scan_app(void* p) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_STORAGE);
     view_port_free(APP->view_port);
-    furi_mutex_free(APP->plugin_state->mutex);
     furi_message_queue_free(APP->event_queue);
-    free(APP->plugin_state);
     if(APP->log_arr) free(APP->log_arr);
     if(APP->found) free(APP->found);
+    furi_mutex_free(plugin_state->mutex);
+    free(plugin_state);
     free(APP);
     return 0;
 }
