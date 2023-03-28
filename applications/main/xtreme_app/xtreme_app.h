@@ -65,6 +65,7 @@ typedef struct {
     bool save_level;
     bool save_backlight;
     bool save_settings;
+    bool show_slideshow;
     bool require_reboot;
 } XtremeApp;
 
@@ -73,3 +74,5 @@ typedef enum {
     XtremeAppViewTextInput,
     XtremeAppViewPopup,
 } XtremeAppView;
+
+bool xtreme_app_apply(XtremeApp* app);

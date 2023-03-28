@@ -47,6 +47,13 @@ bool xtreme_app_scene_start_on_event(void* context, SceneManagerEvent event) {
         case VarItemListIndexMisc:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMisc);
             break;
+        case VarItemListIndexVersion: {
+            if(storage_common_copy(furi_record_open(RECORD_STORAGE), EXT_PATH("dolphin/xfwfirstboot.bin"), EXT_PATH(".slideshow"))) {
+                app->show_slideshow = true;
+                xtreme_app_apply(app);
+            }
+            break;
+        }
         default:
             break;
         }
