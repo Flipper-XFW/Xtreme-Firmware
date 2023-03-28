@@ -61,7 +61,7 @@ void animation_storage_cache_animation(StorageAnimation* storage_animation);
  * @name        name of animation
  * @return      found animation. NULL if nothing found.
  */
-StorageAnimation* animation_storage_find_animation(const char* name);
+StorageAnimation* animation_storage_find_animation(const char* name, bool force_stock);
 
 /**
  * Get meta information of storage animation.
