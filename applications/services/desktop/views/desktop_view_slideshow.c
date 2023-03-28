@@ -5,7 +5,6 @@
 #include "desktop_view_slideshow.h"
 #include "../desktop_i.h"
 #include "../helpers/slideshow.h"
-#include "../helpers/slideshow_filename.h"
 
 #define DESKTOP_SLIDESHOW_POWEROFF_SHORT 5000
 #define DESKTOP_SLIDESHOW_POWEROFF_LONG (60 * 60 * 1000)
