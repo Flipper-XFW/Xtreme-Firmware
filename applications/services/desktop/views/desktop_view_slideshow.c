@@ -41,33 +41,33 @@ static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
         if(event->type == InputTypeShort) {
             update_view = true;
             switch(model->slideshow->current_frame) {
-                case 0:
-                    if(event->key == InputKeyRight) slideshow_advance(model->slideshow);
-                    break;
-                case 1:
-                    if(event->key == InputKeyUp) {
-                        slideshow_advance(model->slideshow);
-                        furi_timer_start(instance->auto_timer, 2 * furi_kernel_get_tick_frequency());
-                    }
-                    break;
-                case 5:
-                    furi_timer_stop(instance->auto_timer);
-                    if(event->key == InputKeyRight) {
-                        slideshow_advance(model->slideshow);
-                    } else if(event->key == InputKeyLeft) {
-                        model->slideshow->current_frame = 2;
-                        furi_timer_start(instance->auto_timer, 2 * furi_kernel_get_tick_frequency());
-                    }
-                    break;
-                case 6:
-                    if(event->key == InputKeyOk) {
-                        instance->callback(DesktopSlideshowCompleted, instance->context);
-                    } else if(event->key == InputKeyLeft) {
-                        model->slideshow->current_frame = 0;
-                    }
-                    break;
-                default:
-                    break;
+            case 0:
+                if(event->key == InputKeyRight) slideshow_advance(model->slideshow);
+                break;
+            case 1:
+                if(event->key == InputKeyUp) {
+                    slideshow_advance(model->slideshow);
+                    furi_timer_start(instance->auto_timer, 2 * furi_kernel_get_tick_frequency());
+                }
+                break;
+            case 5:
+                furi_timer_stop(instance->auto_timer);
+                if(event->key == InputKeyRight) {
+                    slideshow_advance(model->slideshow);
+                } else if(event->key == InputKeyLeft) {
+                    model->slideshow->current_frame = 2;
+                    furi_timer_start(instance->auto_timer, 2 * furi_kernel_get_tick_frequency());
+                }
+                break;
+            case 6:
+                if(event->key == InputKeyOk) {
+                    instance->callback(DesktopSlideshowCompleted, instance->context);
+                } else if(event->key == InputKeyLeft) {
+                    model->slideshow->current_frame = 0;
+                }
+                break;
+            default:
+                break;
             }
         }
     } else {

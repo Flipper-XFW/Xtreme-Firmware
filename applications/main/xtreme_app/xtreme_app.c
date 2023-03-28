@@ -35,7 +35,7 @@ bool xtreme_app_apply(XtremeApp* app) {
                 break;
 
             if(!flipper_format_write_header_cstr(
-                    file, SUBGHZ_SETTING_FILE_TYPE, SUBGHZ_SETTING_FILE_VERSION))
+                   file, SUBGHZ_SETTING_FILE_TYPE, SUBGHZ_SETTING_FILE_VERSION))
                 break;
 
             while(flipper_format_delete_key(file, "Add_standard_frequencies"))
@@ -57,10 +57,7 @@ bool xtreme_app_apply(XtremeApp* app) {
                 ;
             for(uint i = 0; i < FrequencyList_size(app->subghz_hopper_freqs); i++) {
                 flipper_format_write_uint32(
-                    file,
-                    "Hopper_frequency",
-                    FrequencyList_get(app->subghz_hopper_freqs, i),
-                    1);
+                    file, "Hopper_frequency", FrequencyList_get(app->subghz_hopper_freqs, i), 1);
             }
         } while(false);
         flipper_format_free(file);
@@ -82,15 +79,14 @@ bool xtreme_app_apply(XtremeApp* app) {
                 if(!flipper_format_write_header_cstr(file, NAMECHANGER_HEADER, 1)) break;
 
                 if(!flipper_format_write_comment_cstr(
-                        file,
-                        "Changing the value below will change your FlipperZero device name."))
+                       file, "Changing the value below will change your FlipperZero device name."))
                     break;
                 if(!flipper_format_write_comment_cstr(
-                        file,
-                        "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _"))
+                       file,
+                       "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _"))
                     break;
                 if(!flipper_format_write_comment_cstr(
-                        file, "It cannot contain any other characters."))
+                       file, "It cannot contain any other characters."))
                     break;
 
                 if(!flipper_format_write_string_cstr(file, "Name", app->device_name)) break;
