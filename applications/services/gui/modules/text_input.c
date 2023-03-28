@@ -268,7 +268,11 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
 
     FuriString* str = model->temp_str;
-    furi_string_set_str(str, model->text_buffer);
+    if(model->text_buffer) {
+        furi_string_set_str(str, model->text_buffer);
+    } else {
+        furi_string_reset(str);
+    }
     const char* cstr = furi_string_get_cstr(str);
 
     if(model->clear_default_text) {
