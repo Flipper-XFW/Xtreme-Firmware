@@ -4,7 +4,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
-#include <desktop/helpers/slideshow_filename.h>
+#include <desktop/views/desktop_view_slideshow.h>
 #include <toolbox/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/lfs_backup.h>
@@ -216,7 +216,7 @@ static bool update_task_post_update(UpdateTask* update_task) {
             if(storage_common_copy(
                    update_task->storage,
                    furi_string_get_cstr(tmp_path),
-                   INT_PATH(SLIDESHOW_FILE_NAME)) != FSE_OK) {
+                   SLIDESHOW_FS_PATH) != FSE_OK) {
                 // actually, not critical
             }
             furi_string_free(tmp_path);
