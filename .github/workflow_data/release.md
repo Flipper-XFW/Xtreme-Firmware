@@ -11,6 +11,14 @@
 ## 🚀 Changelog
 {CHANGELOG}
 
+<!--- <HOTFIXES>
+### Hotfixes:
+
+  [//]: <NEXT_HOTFIX>
+
+  **If you have any of the above issues, please re-download and re-install!**
+<HOTFIXES> -->
+
 ## ❤️ Support
 If you like what you're seeing, **please consider donating to us**. We won't ever put this behind a paywall, but we'd still appreciate a few bucks!
 
