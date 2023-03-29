@@ -4,8 +4,8 @@ import os
 
 if __name__ == "__main__":
     notes_path = '.github/workflow_data/release.md'
-    with open(os.environ['GITHUB_EVENT_PATH']) as f:
-        changelog = json.load(f.read())['pull_request']['body']
+    with open(os.environ['GITHUB_EVENT_PATH'], "r") as f:
+        changelog = json.load(f)['pull_request']['body']
     with open(notes_path, "r") as f:
         template = f.read()
     notes = template.format(
