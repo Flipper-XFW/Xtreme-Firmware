@@ -10,7 +10,6 @@ static bool xtreme_app_scene_interface_mainmenu_add_file_browser_callback(
     uint8_t** icon_ptr,
     FuriString* item_name) {
     XtremeApp* app = context;
-    if(furi_string_end_with(file_path, app->fap_name)) return false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = fap_loader_load_name_and_icon(file_path, storage, icon_ptr, item_name);
     furi_record_close(RECORD_STORAGE);
