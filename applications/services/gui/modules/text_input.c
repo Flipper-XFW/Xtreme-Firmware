@@ -247,6 +247,7 @@ static char char_to_uppercase(const char letter) {
 static void text_input_backspace_cb(TextInputModel* model) {
     if(model->clear_default_text) {
         model->text_buffer[0] = 0;
+        model->cursor_pos = 0;
     } else if(model->cursor_pos > 0) {
         furi_string_set_str(model->temp_str, model->text_buffer);
         furi_string_replace_at(model->temp_str, model->cursor_pos - 1, 1, "");
