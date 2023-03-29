@@ -32,7 +32,8 @@ bool fap_loader_load_name_and_icon(
     uint8_t** icon_ptr,
     FuriString* item_name) {
     StorageData* storage_data;
-    if(storage_get_data(storage, path, &storage_data) == FSE_OK && storage_path_already_open(path, storage_data)) {
+    if(storage_get_data(storage, path, &storage_data) == FSE_OK &&
+       storage_path_already_open(path, storage_data)) {
         size_t offset = furi_string_search_rchar(path, '/');
         if(offset != FURI_STRING_FAILURE) {
             furi_string_set_n(item_name, path, offset + 1, furi_string_size(path) - offset - 1);
@@ -49,7 +50,8 @@ bool fap_loader_load_name_and_icon(
 
     bool load_success = false;
 
-    if(preload_res == FlipperApplicationPreloadStatusSuccess || preload_res == FlipperApplicationPreloadStatusApiMismatch) {
+    if(preload_res == FlipperApplicationPreloadStatusSuccess ||
+       preload_res == FlipperApplicationPreloadStatusApiMismatch) {
         const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
         if(manifest->has_icon && icon_ptr != NULL && *icon_ptr != NULL) {
             memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
