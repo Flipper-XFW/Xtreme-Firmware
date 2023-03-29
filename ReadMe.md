@@ -32,17 +32,16 @@ Note, the below mentioned changes are only a few things we did. For a full list 
 
 We wrote a powerful yet easy-to-use application specifically for our Firmware, that gives you easy-access to all the fancy things we implemented:
 
-<img src="https://user-images.githubusercontent.com/55334727/222941141-32e3ef23-1dad-473f-86ee-45bef66ebd77.gif" align="left" width="400px"/>
+<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" width="400px"/>
 
-<details><summary><code>Graphics:</code></summary>Change the animation package (more on that below), the play speed of them, cycle duration and bypass level-bassed animations</details>
+<ins><b>Interface:</b></ins>
+Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style, statusbar items and screen options like dark mode and lefty mode(yes, we thought about you :3 ).
 
-<details><summary><code>Statusbar:</code></summary>Modify the design of the statusbar seen on the main Screen. Toggle Icons, their background, the top line and modify the battery icon to your liking.</details>
+<ins><b>Protocols:</b></ins>
+Here you can toggle USB & Bluetooth mode for our Bad-Keyboard app, and manage Subghz settings like custom frequencies and extend options.
 
-<details><summary><code>Protocols:</code></summary>Here you can cycle between USB & Bluetooth mode for our Bad-Keyboard app, and toggle Subghz settings.</details>
-
-<details><summary><code>Dolphin:</code></summary>Two simple yet sought after features: Simply change the level of your Flipper and disable / change the "Butthurt timer", aka. the time it takes for the Flipper to get sad when its not used.</details>
-
-<details><summary><code>Misc:</code></summary>All the other options that dont fit elsewhere. Toggles for our custom dark mode & left-handed mode (yes, we thought about you :3 ), an option to change the Flippers name and a switch for file sorting.</details>
+<ins><b>Misc:</b></ins>
+All the other options that don't fit elsewhere. Change your Flipper's name, change xp level, and manage settings for RGB backlight.
 
 <br clear="left"/>
 
