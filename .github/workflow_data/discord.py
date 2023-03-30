@@ -24,8 +24,12 @@ if __name__ == "__main__":
                 else f"{count} New Commit{'' if count == 1 else 's'}"
             )
             desc = f"[**{change}**]({event['compare']}) | [{branch}]({event['repository']['html_url']}/tree/{branch})\n"
-            for commit in event["commits"]:
-                desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {commit['message'].splitlines()[0]} - [__{commit['author']['username']}__](https://github.com/{commit['author']['username']})"
+            for commit in event["commits"][:10]:
+                msg = commit['message'].splitlines()[0]
+                msg = msg[:50] + ("..." if len(msg) > 50 else "")
+                desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {msg} - [__{commit['author']['username']}__](https://github.com/{commit['author']['username']})"
+            if count > 10:
+                desc += f"\n+ {count - 10} more commits"
             url = event["compare"]
             color = 16723712 if event["forced"] else 3669797
 
@@ -41,10 +45,7 @@ if __name__ == "__main__":
             title = f"Pull Request {event['action'].title()} ({branch}): {name}"
             match event["action"]:
                 case "opened":
-                    max_len = 2045
-                    desc = event["body"][:max_len] + (
-                        "..." if len(event["body"]) > max_len else ""
-                    )
+                    desc = (event["body"][:2045] + "...") if len(event["body"]) > 2048 else event["body"]
                     color = 3669797
 
                     fields.append(
@@ -80,6 +81,7 @@ if __name__ == "__main__":
             match event["action"]:
                 case "published":
                     webhook = "DEV_DISCORD_WEBHOOK"
+                    color = 13845998
                     title = f"New Release published: {event['name']}"
                     desc += f"Changelog:"
 
@@ -131,18 +133,18 @@ if __name__ == "__main__":
             "content": None,
             "embeds": [
                 {
-                    "title": title,
-                    "description": desc,
+                    "title": title[:256],
+                    "description": desc[:2048],
                     "url": url,
                     "color": color,
+                    "fields": fields[:25],
                     "author": {
-                        "name": event["sender"]["login"],
+                        "name": event["sender"]["login"][:256],
                         "url": event["sender"]["html_url"],
                         "icon_url": event["sender"]["avatar_url"],
-                        "fields": fields,
                     },
                 }
             ],
-            "attachments": [],  # TODO: attach artifacts
+            "attachments": [],
         },
     )
