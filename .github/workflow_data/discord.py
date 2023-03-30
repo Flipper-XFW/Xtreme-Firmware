@@ -14,6 +14,7 @@ if __name__ == "__main__":
     desc = ""
     url = ""
     color = 0
+    fields = []
 
     match os.environ["GITHUB_EVENT_NAME"]:
         case "push":
@@ -22,8 +23,12 @@ if __name__ == "__main__":
             branch = push["ref"].removeprefix("refs/heads/")
             change = "Force Push" if push["forced"] and not count else f"{count} New Commit{'' if count == 1 else 's'}"
             desc = f"[**{change}**]({push['compare']}) on [{branch}]({push['repository']['html_url']}/tree/{branch}) branch\n"
-            for commit in push["commits"]:
-                desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {commit['message'].splitlines()[0]} - [__{commit['author']['username']}__](https://github.com/{commit['author']['username']})"
+            for commit in push["commits"][:10]:
+                msg = commit['message'].splitlines()[0]
+                msg = msg[:50] + ("..." if len(msg) > 50 else "")
+                desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {msg} - [__{commit['author']['username']}__](https://github.com/{commit['author']['username']})"
+            if count > 10:
+                desc += f"\n+ {count - 10} more commits"
             url = push["compare"]
             color = 16711680 if push["forced"] else 3669797
 
@@ -31,13 +36,28 @@ if __name__ == "__main__":
             pr = event["pull_request"]
             url = pr["html_url"]
             branch = pr['base']['ref'] + ('' if pr['base']['full_name'] != pr['head']['full_name'] else f" <- {pr['head']['ref']}")
-            title = f"Pull Request {event['action'].title()} ({branch}): {pr['title']}"
-            if event['action'] != "closed":
-                max_len = 2045
-                desc = pr["body"][:max_len] + ("..." if len(pr["body"]) > max_len else "")
-                color = 3669797
-            else:
+            name = pr['title'][:50] + ("..." if len(pr['title']) > 50 else "")
+            title = f"Pull Request {event['action'].title()} ({branch}): {name}"
+            if event['action'] == "closed":
                 color = 16711680
+            else:
+                color = 3669797
+                desc = pr["body"][:2045] + ("..." if len(pr["body"]) > 2045 else "")
+                fields.append({
+                    "name": "Files",
+                    "value": str(pr["changed_files"]),
+                    "inline": True
+                })
+                fields.append({
+                    "name": "Added",
+                    "value": "+" + str(pr["additions"]),
+                    "inline": True
+                })
+                fields.append({
+                    "name": "Removed",
+                    "value": "-" + str(pr["deletions"]),
+                    "inline": True
+                })
 
         # case "release":
         #     webhook = "DEV_DISCORD_WEBHOOK"
@@ -63,12 +83,13 @@ if __name__ == "__main__":
             "content": None,
             "embeds": [
                 {
-                    "title": title,
-                    "description": desc,
+                    "title": title[:256],
+                    "description": desc[:2048],
                     "url": url,
                     "color": color,
+                    "fields": fields[:25],
                     "author": {
-                        "name": event["sender"]["login"],
+                        "name": event["sender"]["login"][:256],
                         "url": event["sender"]["html_url"],
                         "icon_url": event["sender"]["avatar_url"]
                     }
