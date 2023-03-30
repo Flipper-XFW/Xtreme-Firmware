@@ -1,6 +1,26 @@
 name: Discord webhook
 
-on: [push]
+on:
+  push:
+  pull_request:
+    types:
+      - "opened"
+      - "closed"
+      - "reopened"
+  release:
+    types:
+      - "published"
+  check_suite:
+    types:
+      - "completed"
+  issues:
+    types:
+      - "opened"
+      - "closed"
+      - "reopened"
+  issue_comment:
+    types:
+      - "created"
 
 jobs:
   webhook:
