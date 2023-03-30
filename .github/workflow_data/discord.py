@@ -17,22 +17,24 @@ if __name__ == "__main__":
 
     match os.environ["GITHUB_EVENT_NAME"]:
         case "push":
-            count = len(event['commits'])
-            branch = event["ref"].removeprefix("refs/heads/")
-            change = "Force Push" if event["forced"] and not count else f"{count} New Commit{'' if count == 1 else 's'}"
-            desc = f"[**{change}**]({event['compare']}) on [{branch}]({event['repository']['html_url']}/tree/{branch}) branch\n"
-            for commit in event["commits"]:
+            push = event
+            count = len(push['commits'])
+            branch = push["ref"].removeprefix("refs/heads/")
+            change = "Force Push" if push["forced"] and not count else f"{count} New Commit{'' if count == 1 else 's'}"
+            desc = f"[**{change}**]({push['compare']}) on [{branch}]({push['repository']['html_url']}/tree/{branch}) branch\n"
+            for commit in push["commits"]:
                 desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {commit['message'].splitlines()[0]} - [__{commit['author']['username']}__](https://github.com/{commit['author']['username']})"
-            url = event["compare"]
-            color = 16711680 if event["forced"] else 3669797
+            url = push["compare"]
+            color = 16711680 if push["forced"] else 3669797
 
         case "pull_request":
-            url = event["html_url"]
-            branch = event['base']['ref'] + ('' if event['base']['full_name'] != event['head']['full_name'] else f" <- {event['head']['ref']}")
-            title = f"Pull Request {event['action'].title()} ({branch}): {event['title']}"
+            pr = event["pull_request"]
+            url = pr["html_url"]
+            branch = pr['base']['ref'] + ('' if pr['base']['full_name'] != pr['head']['full_name'] else f" <- {pr['head']['ref']}")
+            title = f"Pull Request {event['action'].title()} ({branch}): {pr['title']}"
             if event['action'] != "closed":
                 max_len = 2045
-                desc = event["body"][:max_len] + ("..." if len(event["body"]) > max_len else "")
+                desc = pr["body"][:max_len] + ("..." if len(pr["body"]) > max_len else "")
                 color = 3669797
             else:
                 color = 16711680
