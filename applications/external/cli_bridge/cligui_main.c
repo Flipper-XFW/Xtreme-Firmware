@@ -65,6 +65,9 @@ static void input_callback_wrapper(InputEvent* event, void* context) {
 
 int32_t cligui_main(void* p) {
     UNUSED(p);
+    loader_unlock(furi_record_open(RECORD_LOADER));
+    furi_record_close(RECORD_LOADER);
+
     CliguiApp* cligui = malloc(sizeof(CliguiApp));
     cligui->data = malloc(sizeof(CliguiData));
 
