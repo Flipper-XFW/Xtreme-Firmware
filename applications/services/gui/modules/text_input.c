@@ -262,6 +262,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     uint8_t needed_string_width = canvas_width(canvas) - 8;
     uint8_t start_pos = 4;
 
+    model->cursor_pos = model->cursor_pos > text_length ? text_length : model->cursor_pos;
+
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
