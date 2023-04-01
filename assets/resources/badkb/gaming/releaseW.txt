@@ -1,0 +1,3 @@
+HOLD w
+DELAY 1
+RELEASE w

