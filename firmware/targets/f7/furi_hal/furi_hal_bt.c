@@ -206,12 +206,12 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
         if(profile == FuriHalBtProfileSerial) {
             // Set mac address
             memcpy(
-                profile_config[profile].config.mac_address,
+                config->mac_address,
                 furi_hal_version_get_ble_mac(),
-                sizeof(profile_config[profile].config.mac_address));
+                sizeof(config->mac_address));
             // Set advertise name
             strlcpy(
-                profile_config[profile].config.adv_name,
+                config->adv_name,
                 furi_hal_version_get_ble_local_device_name_ptr(),
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
 
@@ -223,13 +223,12 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
                 config->mac_address[2]++;
             }
             // Change name Flipper -> Control
-            if(strlen(&config->adv_name[1]) == 0) {
-                snprintf(
-                    &config->adv_name[1],
-                    strlen("Control ") + FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                    "Control %s",
-                    furi_hal_version_get_ble_local_device_name_ptr());
-            }
+            snprintf(
+                config->adv_name,
+                strlen("Control ") + FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
+                "%cControl %s",
+                *furi_hal_version_get_ble_local_device_name_ptr(),
+                furi_hal_version_get_ble_local_device_name_ptr() + 1);
         }
         if(!gap_init(config, event_cb, context)) {
             gap_thread_stop();
