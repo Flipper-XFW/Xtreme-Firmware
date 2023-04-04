@@ -2,6 +2,7 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
+#include <assets_icons.h>
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
@@ -9,6 +10,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/variable_item_list.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/button_menu.h>
@@ -31,8 +33,6 @@
 #include "views/infrared_debug_view.h"
 
 #include "rpc/rpc_app.h"
-
-#include <assets_icons.h>
 
 #define INFRARED_FILE_NAME_SIZE 100
 #define INFRARED_TEXT_STORE_NUM 2
@@ -70,6 +70,7 @@ typedef struct {
     InfraredEditTarget edit_target : 8;
     InfraredEditMode edit_mode : 8;
     int32_t current_button_index;
+    uint32_t last_transmit_time;
 } InfraredAppState;
 
 struct Infrared {
@@ -87,6 +88,7 @@ struct Infrared {
 
     Submenu* submenu;
     TextInput* text_input;
+    VariableItemList* variable_item_list;
     DialogEx* dialog_ex;
     ButtonMenu* button_menu;
     Popup* popup;
@@ -108,6 +110,7 @@ struct Infrared {
 typedef enum {
     InfraredViewSubmenu,
     InfraredViewTextInput,
+    InfraredViewVariableItemList,
     InfraredViewDialogEx,
     InfraredViewButtonMenu,
     InfraredViewPopup,

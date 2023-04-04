@@ -3,13 +3,9 @@
 //#include "subghz_i.h"
 
 #include <furi.h>
-#include <m-list.h>
 #include <furi_hal_subghz_configs.h>
 
 #define TAG "SubGhzSetting"
-
-#define SUBGHZ_SETTING_FILE_TYPE "Flipper SubGhz Setting File"
-#define SUBGHZ_SETTING_FILE_VERSION 1
 
 #define FREQUENCY_FLAG_DEFAULT (1 << 31)
 #define FREQUENCY_MASK (0xFFFFFFFF ^ FREQUENCY_FLAG_DEFAULT)
@@ -77,10 +73,10 @@ static const uint32_t subghz_frequency_list[] = {
 };
 
 static const uint32_t subghz_hopper_frequency_list[] = {
+    310000000,
     315000000,
-    330000000,
-    390000000,
-    433420000,
+    318000000,
+    418000000,
     433920000,
     868350000,
     0,
@@ -96,10 +92,6 @@ ARRAY_DEF(SubGhzSettingCustomPresetItemArray, SubGhzSettingCustomPresetItem, M_P
 
 #define M_OPL_SubGhzSettingCustomPresetItemArray_t() \
     ARRAY_OPLIST(SubGhzSettingCustomPresetItemArray, M_POD_OPLIST)
-
-LIST_DEF(FrequencyList, uint32_t)
-
-#define M_OPL_FrequencyList_t() LIST_OPLIST(FrequencyList)
 
 typedef struct {
     SubGhzSettingCustomPresetItemArray_t data;
@@ -456,7 +448,7 @@ uint32_t subghz_setting_get_frequency(SubGhzSetting* instance, size_t idx) {
 
 uint32_t subghz_setting_get_hopper_frequency(SubGhzSetting* instance, size_t idx) {
     furi_assert(instance);
-    if(idx < FrequencyList_size(instance->frequencies)) {
+    if(idx < FrequencyList_size(instance->hopper_frequencies)) {
         return *FrequencyList_get(instance->hopper_frequencies, idx);
     } else {
         return 0;

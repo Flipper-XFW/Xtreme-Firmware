@@ -2,6 +2,10 @@
 
 #include "base.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SUBGHZ_PROTOCOL_STAR_LINE_NAME "Star Line"
 
 typedef struct SubGhzProtocolDecoderStarLine SubGhzProtocolDecoderStarLine;
@@ -54,7 +58,8 @@ bool subghz_protocol_star_line_create_data(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_star_line_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_star_line_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -108,9 +113,9 @@ uint8_t subghz_protocol_decoder_star_line_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderStarLine instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_star_line_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_star_line_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -119,9 +124,10 @@ bool subghz_protocol_decoder_star_line_serialize(
  * Deserialize data SubGhzProtocolDecoderStarLine.
  * @param context Pointer to a SubGhzProtocolDecoderStarLine instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_star_line_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_star_line_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
@@ -129,3 +135,7 @@ bool subghz_protocol_decoder_star_line_deserialize(void* context, FlipperFormat*
  * @param output Resulting text
  */
 void subghz_protocol_decoder_star_line_get_string(void* context, FuriString* output);
+
+#ifdef __cplusplus
+}
+#endif

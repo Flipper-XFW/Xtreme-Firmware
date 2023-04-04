@@ -1,4 +1,4 @@
-#include "../bad_kb_app_i.h"
+#include "../bad_kb_app.h"
 
 static void bad_kb_scene_config_name_text_input_callback(void* context) {
     BadKbApp* bad_kb = context;
@@ -10,7 +10,7 @@ void bad_kb_scene_config_name_on_enter(void* context) {
     BadKbApp* bad_kb = context;
     TextInput* text_input = bad_kb->text_input;
 
-    text_input_set_header_text(text_input, "Set BLE adv name");
+    text_input_set_header_text(text_input, "Set BT device name");
 
     text_input_set_result_callback(
         text_input,

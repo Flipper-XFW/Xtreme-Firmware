@@ -6,6 +6,7 @@ App(
     requires=[
         "gui",
         "storage",
+        "rgb_backlight",
     ],
     conflicts=["desktop"],
     entry_point="updater_srv",

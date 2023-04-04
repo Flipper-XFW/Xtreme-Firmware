@@ -1,8 +1,13 @@
 #pragma once
 
 #include <gui/canvas.h>
+#include <gui/icon_i.h>
 
-typedef struct Slideshow Slideshow;
+typedef struct {
+    Icon icon;
+    uint32_t current_frame;
+    bool loaded;
+} Slideshow;
 
 Slideshow* slideshow_alloc();
 

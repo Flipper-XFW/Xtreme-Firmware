@@ -41,13 +41,11 @@ struct ReaderAnalyzer {
 static FuriHalNfcDevData reader_analyzer_nfc_data[] = {
     //XXX
     [ReaderAnalyzerNfcDataMfClassic] =
-        {.sak = 0x08,
-         .atqa = {0x44, 0x00},
-         .interface = FuriHalNfcInterfaceRf,
+        {.interface = FuriHalNfcInterfaceRf,
          .type = FuriHalNfcTypeA,
          .uid_len = 7,
          .uid = {0x04, 0x77, 0x70, 0x2A, 0x23, 0x4F, 0x80},
-         .cuid = 0x2A234F80},
+         .a_data = {.sak = 0x08, .atqa = {0x44, 0x00}, .cuid = 0x2A234F80}},
 };
 
 void reader_analyzer_parse(ReaderAnalyzer* instance, uint8_t* buffer, size_t size) {
@@ -100,7 +98,7 @@ int32_t reader_analyzer_thread(void* context) {
 
 ReaderAnalyzer* reader_analyzer_alloc() {
     ReaderAnalyzer* instance = malloc(sizeof(ReaderAnalyzer));
-    reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].cuid = rand(); //XXX
+    reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].a_data.cuid = rand(); //XXX
     furi_hal_random_fill_buf(
         (uint8_t*)&reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].uid, 7);
     instance->nfc_data = reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic];
@@ -134,7 +132,7 @@ void reader_analyzer_start(ReaderAnalyzer* instance, ReaderAnalyzerMode mode) {
         instance->debug_log = nfc_debug_log_alloc();
     }
     if(mode & ReaderAnalyzerModeMfkey) {
-        instance->mfkey32 = mfkey32_alloc(instance->nfc_data.cuid);
+        instance->mfkey32 = mfkey32_alloc(instance->nfc_data.a_data.cuid);
         if(instance->mfkey32) {
             mfkey32_set_callback(instance->mfkey32, reader_analyzer_mfkey_callback, instance);
         }

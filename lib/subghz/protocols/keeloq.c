@@ -85,7 +85,29 @@ const SubGhzProtocol subghz_protocol_keeloq = {
 };
 
 static const char* mfname;
-static int kl_type;
+static uint8_t kl_type;
+static uint8_t btn_temp_id;
+static uint8_t btn_temp_id_original;
+static uint8_t klq_prog_mode;
+static uint16_t temp_counter;
+
+void keeloq_set_btn(uint8_t b) {
+    btn_temp_id = b;
+}
+
+uint8_t keeloq_get_original_btn() {
+    return btn_temp_id_original;
+}
+
+uint8_t keeloq_get_custom_btn() {
+    return btn_temp_id;
+}
+
+void keeloq_reset_original_btn() {
+    btn_temp_id_original = 0;
+    temp_counter = 0;
+    klq_prog_mode = 0;
+}
 
 void keeloq_reset_mfname() {
     mfname = "";
@@ -136,17 +158,11 @@ void subghz_protocol_encoder_keeloq_free(void* context) {
  * @param instance Pointer to a SubGhzProtocolEncoderKeeloq* instance
  * @param btn Button number, 4 bit
  */
-static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instance, uint8_t btn) {
-    if(instance->generic.cnt < 0xFFFF) {
-        instance->generic.cnt++;
-    } else if(instance->generic.cnt >= 0xFFFF) {
-        instance->generic.cnt = 0;
-    }
+static bool subghz_protocol_keeloq_gen_data(
+    SubGhzProtocolEncoderKeeloq* instance,
+    uint8_t btn,
+    bool counter_up) {
     uint32_t fix = (uint32_t)btn << 28 | instance->generic.serial;
-    uint32_t decrypt = (uint32_t)btn << 28 |
-                       (instance->generic.serial & 0x3FF)
-                           << 16 | //ToDo in some protocols the discriminator is 0
-                       instance->generic.cnt;
     uint32_t hop = 0;
     uint64_t man = 0;
     uint64_t code_found_reverse;
@@ -155,31 +171,93 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
         instance->manufacture_name = "";
     }
 
-    // DTM Neo uses 12bit -> simple learning -- FAAC_RC,XT , Mutanco_Mutancode -> 12bit normal learning
-    if((strcmp(instance->manufacture_name, "DTM_Neo") == 0) ||
-       (strcmp(instance->manufacture_name, "FAAC_RC,XT") == 0) ||
-       (strcmp(instance->manufacture_name, "Mutanco_Mutancode") == 0)) {
-        decrypt = btn << 28 | (instance->generic.serial & 0xFFF) << 16 | instance->generic.cnt;
+    // BFT programming mode on / off conditions
+    if((strcmp(instance->manufacture_name, "BFT") == 0) && (btn == 0xF)) {
+        klq_prog_mode = 1;
     }
-
-    // Nice Smilo, MHouse, JCM, Normstahl -> 8bit serial - simple learning
-    if((strcmp(instance->manufacture_name, "NICE_Smilo") == 0) ||
-       (strcmp(instance->manufacture_name, "NICE_MHOUSE") == 0) ||
-       (strcmp(instance->manufacture_name, "JCM_Tech") == 0) ||
-       (strcmp(instance->manufacture_name, "Normstahl") == 0)) {
-        decrypt = btn << 28 | (instance->generic.serial & 0xFF) << 16 | instance->generic.cnt;
+    if((strcmp(instance->manufacture_name, "BFT") == 0) && (btn != 0xF) && (klq_prog_mode == 1)) {
+        klq_prog_mode = 0;
     }
+    // Aprimatic programming mode on / off conditions
+    if((strcmp(instance->manufacture_name, "Aprimatic") == 0) && (btn == 0xF)) {
+        klq_prog_mode = 2;
+    }
+    if((strcmp(instance->manufacture_name, "Aprimatic") == 0) && (btn != 0xF) &&
+       (klq_prog_mode == 2)) {
+        klq_prog_mode = 0;
+    }
+    // If we using BFT programming mode we will trasmit its seed in hop part like original remote
+    if(klq_prog_mode == 1) {
+        hop = instance->generic.seed;
+    } else if(klq_prog_mode == 2) {
+        // If we using Aprimatic programming mode we will trasmit some strange looking hop value, why? cuz manufacturer did it this way :)
+        hop = 0x1A2B3C4D;
+    }
+    if(counter_up && klq_prog_mode == 0) {
+        if(instance->generic.cnt < 0xFFFF) {
+            if((instance->generic.cnt + furi_hal_subghz_get_rolling_counter_mult()) >= 0xFFFF) {
+                instance->generic.cnt = 0;
+            } else {
+                instance->generic.cnt += furi_hal_subghz_get_rolling_counter_mult();
+            }
+        } else if(instance->generic.cnt >= 0xFFFF) {
+            instance->generic.cnt = 0;
+        }
+    }
+    if(klq_prog_mode == 0) {
+        uint32_t decrypt = (uint32_t)btn << 28 |
+                           (instance->generic.serial & 0x3FF)
+                               << 16 | //ToDo in some protocols the discriminator is 0
+                           instance->generic.cnt;
 
-    if(strcmp(instance->manufacture_name, "Unknown") == 0) {
-        code_found_reverse = subghz_protocol_blocks_reverse_key(
-            instance->generic.data, instance->generic.data_count_bit);
-        hop = code_found_reverse & 0x00000000ffffffff;
-    } else if(strcmp(instance->manufacture_name, "AN-Motors") == 0) {
-        hop = (instance->generic.cnt & 0xFF) << 24 | (instance->generic.cnt & 0xFF) << 16 |
-              (instance->generic.btn & 0xF) << 12 | 0x404;
-    } else if(strcmp(instance->manufacture_name, "HCS101") == 0) {
-        hop = instance->generic.cnt << 16 | (instance->generic.btn & 0xF) << 12 | 0x000;
-    } else {
+        if(strcmp(instance->manufacture_name, "Aprimatic") == 0) {
+            // Aprimatic uses 12bit serial number + 2bit APR1 "parity" bit in front of it replacing first 2 bits of serial
+            // Thats in theory! We need to check if this is true for all Aprimatic remotes but we got only 3 recordings to test
+            // For now lets assume that this is true for all Aprimatic remotes, if not we will need to add some more code here
+            uint32_t apri_serial = instance->generic.serial;
+            uint8_t apr1 = 0;
+            for(uint16_t i = 1; i != 0b10000000000; i <<= 1) {
+                if(apri_serial & i) apr1++;
+            }
+            apri_serial &= 0b00001111111111;
+            if(apr1 % 2 == 0) {
+                apri_serial |= 0b110000000000;
+            }
+            decrypt = btn << 28 | (apri_serial & 0xFFF) << 16 | instance->generic.cnt;
+        }
+
+        // DTM Neo, Came_Space uses 12bit -> simple learning -- FAAC_RC,XT , Mutanco_Mutancode, Stilmatic(Schellenberg) -> 12bit normal learning
+        if((strcmp(instance->manufacture_name, "DTM_Neo") == 0) ||
+           (strcmp(instance->manufacture_name, "FAAC_RC,XT") == 0) ||
+           (strcmp(instance->manufacture_name, "Mutanco_Mutancode") == 0) ||
+           (strcmp(instance->manufacture_name, "Stilmatic") == 0) ||
+           (strcmp(instance->manufacture_name, "Came_Space") == 0)) {
+            decrypt = btn << 28 | (instance->generic.serial & 0xFFF) << 16 | instance->generic.cnt;
+        }
+
+        // Nice Smilo, MHouse, JCM, Normstahl -> 8bit serial - simple learning
+        if((strcmp(instance->manufacture_name, "NICE_Smilo") == 0) ||
+           (strcmp(instance->manufacture_name, "NICE_MHOUSE") == 0) ||
+           (strcmp(instance->manufacture_name, "JCM_Tech") == 0) ||
+           (strcmp(instance->manufacture_name, "Normstahl") == 0)) {
+            decrypt = btn << 28 | (instance->generic.serial & 0xFF) << 16 | instance->generic.cnt;
+        }
+
+        // Beninca -> 4bit serial - simple XOR
+        if(strcmp(instance->manufacture_name, "Beninca") == 0) {
+            decrypt = btn << 28 | (instance->generic.serial & 0xF) << 16 | instance->generic.cnt;
+        }
+
+        if(strcmp(instance->manufacture_name, "Unknown") == 0) {
+            code_found_reverse = subghz_protocol_blocks_reverse_key(
+                instance->generic.data, instance->generic.data_count_bit);
+            hop = code_found_reverse & 0x00000000ffffffff;
+        } else if(strcmp(instance->manufacture_name, "AN-Motors") == 0) {
+            hop = (instance->generic.cnt & 0xFF) << 24 | (instance->generic.cnt & 0xFF) << 16 |
+                  (btn & 0xF) << 12 | 0x404;
+        } else if(strcmp(instance->manufacture_name, "HCS101") == 0) {
+            hop = instance->generic.cnt << 16 | (btn & 0xF) << 12 | 0x000;
+        } else {
     for
         M_EACH(manufacture_code, *subghz_keystore_get_data(instance->keystore), SubGhzKeyArray_t) {
             res = strcmp(furi_string_get_cstr(manufacture_code->name), instance->manufacture_name);
@@ -238,6 +316,7 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
                 break;
             }
         }
+        }
     }
     if(hop) {
         uint64_t yek = (uint64_t)fix << 32 | hop;
@@ -261,9 +340,10 @@ bool subghz_protocol_keeloq_create_data(
     instance->generic.cnt = cnt;
     instance->manufacture_name = manufacture_name;
     instance->generic.data_count_bit = 64;
-    bool res = subghz_protocol_keeloq_gen_data(instance, btn);
+    bool res = subghz_protocol_keeloq_gen_data(instance, btn, false);
     if(res) {
-        res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+        return SubGhzProtocolStatusOk ==
+               subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
     }
     return res;
 }
@@ -286,9 +366,10 @@ bool subghz_protocol_keeloq_bft_create_data(
     instance->manufacture_name = manufacture_name;
     instance->generic.data_count_bit = 64;
     // roguuemaster don't steal.!!!!
-    bool res = subghz_protocol_keeloq_gen_data(instance, btn);
+    bool res = subghz_protocol_keeloq_gen_data(instance, btn, false);
     if(res) {
-        res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+        return SubGhzProtocolStatusOk ==
+               subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
     }
     return res;
 }
@@ -302,9 +383,139 @@ static bool
     subghz_protocol_encoder_keeloq_get_upload(SubGhzProtocolEncoderKeeloq* instance, uint8_t btn) {
     furi_assert(instance);
 
-    //gen new key
-    if(subghz_protocol_keeloq_gen_data(instance, btn)) {
-        //ToDo if you need to add a callback to automatically update the data on the display
+    // Save original button
+    if(btn_temp_id_original == 0) {
+        btn_temp_id_original = btn;
+    }
+
+    if(instance->manufacture_name == 0x0) {
+        instance->manufacture_name = "";
+    }
+    if(klq_prog_mode == 1) {
+        instance->manufacture_name = "BFT";
+    } else if(klq_prog_mode == 2) {
+        instance->manufacture_name = "Aprimatic";
+    }
+    uint8_t klq_last_custom_btn = 0xA;
+    if((strcmp(instance->manufacture_name, "BFT") == 0) ||
+       (strcmp(instance->manufacture_name, "Aprimatic") == 0)) {
+        klq_last_custom_btn = 0xF;
+    }
+
+    // Set custom button
+    if(btn_temp_id == 1) {
+        switch(btn_temp_id_original) {
+        case 0x1:
+            btn = 0x2;
+            break;
+        case 0x2:
+            btn = 0x1;
+            break;
+        case 0xA:
+            btn = 0x1;
+            break;
+        case 0x4:
+            btn = 0x1;
+            break;
+        case 0x8:
+            btn = 0x1;
+            break;
+        case 0xF:
+            btn = 0x1;
+            break;
+
+        default:
+            btn = 0x1;
+            break;
+        }
+    }
+    if(btn_temp_id == 2) {
+        switch(btn_temp_id_original) {
+        case 0x1:
+            btn = 0x4;
+            break;
+        case 0x2:
+            btn = 0x4;
+            break;
+        case 0xA:
+            btn = 0x4;
+            break;
+        case 0x4:
+            btn = klq_last_custom_btn;
+            break;
+        case 0x8:
+            btn = 0x4;
+            break;
+        case 0xF:
+            btn = 0x4;
+            break;
+
+        default:
+            btn = 0x4;
+            break;
+        }
+    }
+    if(btn_temp_id == 3) {
+        switch(btn_temp_id_original) {
+        case 0x1:
+            btn = 0x8;
+            break;
+        case 0x2:
+            btn = 0x8;
+            break;
+        case 0xA:
+            btn = 0x8;
+            break;
+        case 0x4:
+            btn = 0x8;
+            break;
+        case 0x8:
+            btn = 0x2;
+            break;
+        case 0xF:
+            btn = 0x8;
+            break;
+
+        default:
+            btn = 0x8;
+            break;
+        }
+    }
+    if(btn_temp_id == 4) {
+        switch(btn_temp_id_original) {
+        case 0x1:
+            btn = klq_last_custom_btn;
+            break;
+        case 0x2:
+            btn = klq_last_custom_btn;
+            break;
+        case 0xA:
+            btn = 0x2;
+            break;
+        case 0x4:
+            btn = 0x2;
+            break;
+        case 0x8:
+            btn = klq_last_custom_btn;
+            break;
+        case 0xF:
+            btn = 0x2;
+            break;
+
+        default:
+            btn = 0x2;
+            break;
+        }
+    }
+
+    if((btn_temp_id == 0) && (btn_temp_id_original != 0)) {
+        btn = btn_temp_id_original;
+    }
+
+    // Generate new key
+
+    if(subghz_protocol_keeloq_gen_data(instance, btn, true)) {
+        // OK
     } else {
         return false;
     }
@@ -360,13 +571,17 @@ static bool
     return true;
 }
 
-bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            subghz_protocol_keeloq_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(instance->generic.data_count_bit !=
@@ -385,6 +600,10 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 |
                                  seed_data[3];
 
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
         // Read manufacturer from file
         if(flipper_format_read_string(
                flipper_format, "Manufacture", instance->manufacture_from_file)) {
@@ -406,10 +625,13 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        if(!subghz_protocol_encoder_keeloq_get_upload(instance, instance->generic.btn)) break;
-
+        if(!subghz_protocol_encoder_keeloq_get_upload(instance, instance->generic.btn)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
@@ -418,15 +640,14 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         }
         if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Unable to add Key");
+            ret = SubGhzProtocolStatusErrorParserKey;
             break;
         }
 
         instance->encoder.is_running = true;
-
-        res = true;
     } while(false);
 
-    return res;
+    return ret;
 }
 
 void subghz_protocol_encoder_keeloq_stop(void* context) {
@@ -458,6 +679,8 @@ void* subghz_protocol_decoder_keeloq_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
     instance->keystore = subghz_environment_get_keystore(environment);
     instance->manufacture_from_file = furi_string_alloc();
+
+    klq_prog_mode = 0;
 
     return instance;
 }
@@ -575,7 +798,7 @@ void subghz_protocol_decoder_keeloq_feed(void* context, bool level, uint32_t dur
 /**
  * Validation of decrypt data.
  * @param instance Pointer to a SubGhzBlockGeneric instance
- * @param decrypt Decrypd data
+ * @param decrypt Decrypted data
  * @param btn Button number, 4 bit
  * @param end_serial decrement the last 10 bits of the serial number
  * @return true On success
@@ -957,23 +1180,42 @@ static void subghz_protocol_keeloq_check_remote_controller(
     uint64_t key = subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit);
     uint32_t key_fix = key >> 32;
     uint32_t key_hop = key & 0x00000000ffffffff;
-    // Check key AN-Motors
-    if((key_hop >> 24) == ((key_hop >> 16) & 0x00ff) &&
-       (key_fix >> 28) == ((key_hop >> 12) & 0x0f) && (key_hop & 0xFFF) == 0x404) {
-        *manufacture_name = "AN-Motors";
+
+    // If we are in BFT programming mode we will set previous remembered counter and skip mf keys check
+    if(klq_prog_mode == 0) {
+        // Check key AN-Motors
+        if((key_hop >> 24) == ((key_hop >> 16) & 0x00ff) &&
+           (key_fix >> 28) == ((key_hop >> 12) & 0x0f) && (key_hop & 0xFFF) == 0x404) {
+            *manufacture_name = "AN-Motors";
+            mfname = *manufacture_name;
+            instance->cnt = key_hop >> 16;
+        } else if((key_hop & 0xFFF) == (0x000) && (key_fix >> 28) == ((key_hop >> 12) & 0x0f)) {
+            *manufacture_name = "HCS101";
+            mfname = *manufacture_name;
+            instance->cnt = key_hop >> 16;
+        } else {
+            subghz_protocol_keeloq_check_remote_controller_selector(
+                instance, key_fix, key_hop, keystore, manufacture_name);
+        }
+        temp_counter = instance->cnt;
+
+    } else if(klq_prog_mode == 1) {
+        *manufacture_name = "BFT";
         mfname = *manufacture_name;
-        instance->cnt = key_hop >> 16;
-    } else if((key_hop & 0xFFF) == (0x000) && (key_fix >> 28) == ((key_hop >> 12) & 0x0f)) {
-        *manufacture_name = "HCS101";
+        instance->cnt = temp_counter;
+    } else if(klq_prog_mode == 2) {
+        *manufacture_name = "Aprimatic";
         mfname = *manufacture_name;
-        instance->cnt = key_hop >> 16;
-    } else {
-        subghz_protocol_keeloq_check_remote_controller_selector(
-            instance, key_fix, key_hop, keystore, manufacture_name);
+        instance->cnt = temp_counter;
     }
 
     instance->serial = key_fix & 0x0FFFFFFF;
     instance->btn = key_fix >> 28;
+
+    // Save original button for later use
+    if(btn_temp_id_original == 0) {
+        btn_temp_id_original = instance->btn;
+    }
 }
 
 uint8_t subghz_protocol_decoder_keeloq_get_hash_data(void* context) {
@@ -983,14 +1225,15 @@ uint8_t subghz_protocol_decoder_keeloq_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_keeloq_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_keeloq_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderKeeloq* instance = context;
 
-    bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+    SubGhzProtocolStatus res =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     subghz_protocol_keeloq_check_remote_controller(
         &instance->generic, instance->keystore, &instance->manufacture_name);
@@ -1000,28 +1243,32 @@ bool subghz_protocol_decoder_keeloq_serialize(
         for(size_t i = 0; i < sizeof(uint32_t); i++) {
             seed_data[sizeof(uint32_t) - i - 1] = (instance->generic.seed >> i * 8) & 0xFF;
         }
-        if(res && !flipper_format_write_hex(flipper_format, "Seed", seed_data, sizeof(uint32_t))) {
+        if((res == SubGhzProtocolStatusOk) &&
+           !flipper_format_write_hex(flipper_format, "Seed", seed_data, sizeof(uint32_t))) {
             FURI_LOG_E(TAG, "DECODER Serialize: Unable to add Seed");
-            res = false;
+            res = SubGhzProtocolStatusError;
         }
         instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 |
                                  seed_data[3];
     }
 
-    if(res && !flipper_format_write_string_cstr(
-                  flipper_format, "Manufacture", instance->manufacture_name)) {
+    if((res == SubGhzProtocolStatusOk) &&
+       !flipper_format_write_string_cstr(
+           flipper_format, "Manufacture", instance->manufacture_name)) {
         FURI_LOG_E(TAG, "DECODER Serialize: Unable to add manufacture name");
-        res = false;
+        res = SubGhzProtocolStatusError;
     }
     return res;
 }
 
-bool subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderKeeloq* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+        if(SubGhzProtocolStatusOk !=
+           subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
@@ -1041,6 +1288,10 @@ bool subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* fl
         instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 |
                                  seed_data[3];
 
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
         // Read manufacturer from file
         if(flipper_format_read_string(
                flipper_format, "Manufacture", instance->manufacture_from_file)) {
@@ -1055,7 +1306,7 @@ bool subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* fl
             break;
         }
 
-        res = true;
+        res = SubGhzProtocolStatusOk;
     } while(false);
 
     return res;

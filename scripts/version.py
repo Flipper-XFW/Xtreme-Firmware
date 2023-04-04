@@ -1,4 +1,5 @@
 #!/usb/bin/env python3
+VERSION = "XFW-0043"
 
 from flipper.app import App
 
@@ -9,26 +10,16 @@ from datetime import date, datetime
 
 
 class GitVersion:
+    REVISION_SUFFIX_LENGTH = 8
+
     def __init__(self, source_dir):
         self.source_dir = source_dir
-        self.gitlist = [
-            ("commit", "rev-parse --short HEAD"),
-            ("branch", "rev-parse --abbrev-ref"),
-            ("branch_num", "rev-list -count HEAD"),
-        ]
 
     def get_version_info(self):
-        commit = branch = branch_num = "XFW-0041"
-
-        # We dont use an `or` in commands that we expect to fail. It will serve no function.
-        # We also dont try;exept an entire block of code. This is bad practise. We only try the single part that we expect to fail!
-        # Furthermore, traceback.format_exc() is a thing. Fucking use it. JFC
-
-        for git_tuple in self.gitlist:
-            try:
-                exec(f"{git_tuple[0]} = {self._exec_git(git_tuple[1])}")
-            except:
-                exec(f'{git_tuple[0]} = "Unknown"')
+        commit = (
+            self._exec_git(f"rev-parse --short={self.REVISION_SUFFIX_LENGTH} HEAD")
+            or "unknown"
+        )
 
         dirty = False
         try:
@@ -39,11 +30,20 @@ class GitVersion:
 
         # If WORKFLOW_BRANCH_OR_TAG is set in environment, is has precedence
         # (set by CI)
+        branch = (
+            os.environ.get("WORKFLOW_BRANCH_OR_TAG", None)
+            or VERSION
+            or self._exec_git("rev-parse --abbrev-ref HEAD")
+            or "unknown"
+        )
+
+        branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
+
+        version = os.environ.get("DIST_SUFFIX", None) or VERSION or "unknown"
 
         custom_fz_name = os.environ.get("CUSTOM_FLIPPER_NAME", None) or ""
 
         force_no_dirty = os.environ.get("FORCE_NO_DIRTY", None) or ""
-
         if force_no_dirty != "":
             dirty = False
 
@@ -55,19 +55,19 @@ class GitVersion:
         ):
             return {
                 "GIT_COMMIT": commit,
-                "GIT_BRANCH": "dev",
+                "GIT_BRANCH": branch,
                 "GIT_BRANCH_NUM": branch_num,
                 "FURI_CUSTOM_FLIPPER_NAME": custom_fz_name,
-                "VERSION": "0.74.3",
-                "BUILD_DIRTY": 0,
+                "VERSION": version,
+                "BUILD_DIRTY": dirty and 1 or 0,
             }
         else:
             return {
                 "GIT_COMMIT": commit,
-                "GIT_BRANCH": "dev",
+                "GIT_BRANCH": branch,
                 "GIT_BRANCH_NUM": branch_num,
-                "VERSION": "0.74.3",
-                "BUILD_DIRTY": 0,
+                "VERSION": version,
+                "BUILD_DIRTY": dirty and 1 or 0,
             }
 
     def _exec_git(self, args):

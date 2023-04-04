@@ -14,7 +14,7 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "XFW-0041_02142023"
+DIST_SUFFIX = "XFW-0043_28032023"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
@@ -32,7 +32,7 @@ COPRO_STACK_TYPE = "ble_light"
 # Leave 0 to let scripts automatically calculate it
 COPRO_STACK_ADDR = "0x0"
 
-# If you override COPRO_CUBE_DIR on commandline, override this as well
+# If you override COPRO_CUBE_DIR on command-line, override this as well
 COPRO_STACK_BIN_DIR = posixpath.join(
     COPRO_CUBE_DIR,
     "Projects",
@@ -71,11 +71,6 @@ FIRMWARE_APPS = {
         "system_apps",
         # Settings
         "settings_apps",
-        # Stock plugins - no longer built into fw, now they're .faps
-        # Yet you can still build them as a part of fw
-        # "basic_plugins",
-        # Debug
-        # "debug_apps",
     ],
     "unit_tests": [
         "basic_services",
@@ -86,7 +81,7 @@ FIRMWARE_APPS = {
         # Svc
         "basic_services",
         # Apps
-        "main_apps_default",
+        "main_apps",
         "system_apps",
         # Settings
         "settings_apps",

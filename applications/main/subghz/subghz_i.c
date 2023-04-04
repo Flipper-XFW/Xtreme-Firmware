@@ -154,7 +154,6 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
             FURI_LOG_E(TAG, "Missing Protocol");
             break;
         }
-        //ToDo FIX
         if(!flipper_format_insert_or_update_uint32(flipper_format, "Repeat", &repeat, 1)) {
             FURI_LOG_E(TAG, "Unable Repeat");
             break;
@@ -164,7 +163,8 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
             subghz->txrx->environment, furi_string_get_cstr(temp_str));
 
         if(subghz->txrx->transmitter) {
-            if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format)) {
+            if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format) ==
+               SubGhzProtocolStatusOk) {
                 if(strcmp(furi_string_get_cstr(subghz->txrx->preset->name), "") != 0) {
                     subghz_begin(
                         subghz,
@@ -187,7 +187,12 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
                     //Start TX
                     furi_hal_subghz_start_async_tx(
                         subghz_transmitter_yield, subghz->txrx->transmitter);
+                } else {
+                    subghz_dialog_message_show_only_rx(subghz);
                 }
+            } else {
+                dialog_message_show_storage_error(
+                    subghz->dialogs, "Error in protocol\nparameters\ndescription");
             }
         }
         if(!ret) {
@@ -335,8 +340,10 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
             subghz->txrx->receiver, furi_string_get_cstr(temp_str));
         if(subghz->txrx->decoder_result) {
-            if(!subghz_protocol_decoder_base_deserialize(
-                   subghz->txrx->decoder_result, subghz->txrx->fff_data)) {
+            SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(
+                subghz->txrx->decoder_result, subghz->txrx->fff_data);
+            if(status != SubGhzProtocolStatusOk) {
+                load_key_state = SubGhzLoadKeyStateProtocolDescriptionErr;
                 break;
             }
         } else {
@@ -355,6 +362,12 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     case SubGhzLoadKeyStateParseErr:
         if(show_dialog) {
             dialog_message_show_storage_error(subghz->dialogs, "Cannot parse\nfile");
+        }
+        return false;
+    case SubGhzLoadKeyStateProtocolDescriptionErr:
+        if(show_dialog) {
+            dialog_message_show_storage_error(
+                subghz->dialogs, "Error in protocol\nparameters\ndescription");
         }
         return false;
 
@@ -575,7 +588,7 @@ void subghz_hopper_update(SubGhz* subghz) {
             return;
         }
     } else {
-        subghz->txrx->hopper_state = SubGhzHopperStateRunnig;
+        subghz->txrx->hopper_state = SubGhzHopperStateRunning;
     }
     // Select next frequency
     if(subghz->txrx->hopper_idx_frequency <
@@ -598,7 +611,7 @@ void subghz_hopper_update(SubGhz* subghz) {
 
 void subghz_speaker_on(SubGhz* subghz) {
     if(subghz->txrx->debug_pin_state) {
-        furi_hal_subghz_set_async_mirror_pin(&gpio_ext_pa7);
+        furi_hal_subghz_set_async_mirror_pin(&ibutton_gpio);
     }
 
     if(subghz->txrx->speaker_state == SubGhzSpeakerStateEnable) {
@@ -643,7 +656,7 @@ void subghz_speaker_mute(SubGhz* subghz) {
 
 void subghz_speaker_unmute(SubGhz* subghz) {
     if(subghz->txrx->debug_pin_state) {
-        furi_hal_subghz_set_async_mirror_pin(&gpio_ext_pa7);
+        furi_hal_subghz_set_async_mirror_pin(&ibutton_gpio);
     }
     if(subghz->txrx->speaker_state == SubGhzSpeakerStateEnable) {
         if(furi_hal_speaker_is_mine()) {

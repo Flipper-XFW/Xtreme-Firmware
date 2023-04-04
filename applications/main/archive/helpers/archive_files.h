@@ -84,7 +84,7 @@ static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
 }
 
 static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
-    if(!XTREME_SETTINGS()->sort_ignore_dirs) {
+    if(XTREME_SETTINGS()->sort_dirs_first) {
         if(a->type == ArchiveFileTypeFolder && b->type != ArchiveFileTypeFolder) {
             return -1;
         }
@@ -93,7 +93,9 @@ static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
         }
     }
 
-    return furi_string_cmpi(a->path, b->path);
+    return furi_string_cmpi(
+        furi_string_empty(a->custom_name) ? a->path : a->custom_name,
+        furi_string_empty(b->custom_name) ? b->path : b->custom_name);
 }
 
 #define M_OPL_ArchiveFile_t()                 \

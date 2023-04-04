@@ -13,16 +13,13 @@ void namechanger_on_system_start() {
         FuriString* NAMEHEADER;
         NAMEHEADER = furi_string_alloc_set("Flipper Name File");
 
-        FuriString* filepath;
-        filepath = furi_string_alloc_set("/ext/dolphin/name.txt");
-
         bool result = false;
 
         FuriString* data;
         data = furi_string_alloc();
 
         do {
-            if(!flipper_format_file_open_existing(file, furi_string_get_cstr(filepath))) {
+            if(!flipper_format_file_open_existing(file, NAMECHANGER_PATH)) {
                 break;
             }
 
@@ -59,7 +56,7 @@ void namechanger_on_system_start() {
 
             do {
                 // Open file for write
-                if(!flipper_format_file_open_always(file, furi_string_get_cstr(filepath))) {
+                if(!flipper_format_file_open_always(file, NAMECHANGER_PATH)) {
                     break;
                 }
 
@@ -109,7 +106,7 @@ void namechanger_on_system_start() {
 
                 do {
                     // Open file for write
-                    if(!flipper_format_file_open_always(file, furi_string_get_cstr(filepath))) {
+                    if(!flipper_format_file_open_always(file, NAMECHANGER_PATH)) {
                         break;
                     }
 
@@ -161,7 +158,6 @@ void namechanger_on_system_start() {
 
         furi_string_free(data);
 
-        furi_string_free(filepath);
         furi_record_close(RECORD_STORAGE);
     }
 }

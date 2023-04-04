@@ -35,10 +35,12 @@
         "appframe",
         "assets",
         "one_wire",
+        "ibutton",
         "misc",
         "mbedtls",
         "lfrfid",
         "flipper_application",
+        "pulse_reader",
         "flipperformat",
         "toolbox"
     ]

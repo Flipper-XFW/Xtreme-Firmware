@@ -4,6 +4,8 @@
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
 
+#define TAG "FuriHalResources"
+
 const GpioPin vibro_gpio = {.port = GPIOA, .pin = LL_GPIO_PIN_8};
 const GpioPin ibutton_gpio = {.port = GPIOB, .pin = LL_GPIO_PIN_14};
 
@@ -198,4 +200,30 @@ void furi_hal_resources_init() {
 
     NVIC_SetPriority(EXTI15_10_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
     NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+    FURI_LOG_I(TAG, "Init OK");
+}
+
+int32_t furi_hal_resources_get_ext_pin_number(const GpioPin* gpio) {
+    // TODO: describe second ROW
+    if(gpio == &gpio_ext_pa7)
+        return 2;
+    else if(gpio == &gpio_ext_pa6)
+        return 3;
+    else if(gpio == &gpio_ext_pa4)
+        return 4;
+    else if(gpio == &gpio_ext_pb3)
+        return 5;
+    else if(gpio == &gpio_ext_pb2)
+        return 6;
+    else if(gpio == &gpio_ext_pc3)
+        return 7;
+    else if(gpio == &gpio_ext_pc1)
+        return 15;
+    else if(gpio == &gpio_ext_pc0)
+        return 16;
+    else if(gpio == &ibutton_gpio)
+        return 17;
+    else
+        return -1;
 }

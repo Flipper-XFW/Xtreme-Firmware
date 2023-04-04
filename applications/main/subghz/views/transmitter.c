@@ -4,6 +4,12 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
+#include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/alutech_at_4n.h>
+#include <lib/subghz/protocols/nice_flor_s.h>
+#include <lib/subghz/protocols/somfy_telis.h>
+#include <lib/subghz/protocols/secplus_v2.h>
+
 struct SubGhzViewTransmitter {
     View* view;
     SubGhzViewTransmitterCallback callback;
@@ -15,6 +21,8 @@ typedef struct {
     FuriString* preset_str;
     FuriString* key_str;
     uint8_t show_button;
+    FuriString* temp_button_id;
+    bool draw_temp_button;
 } SubGhzViewTransmitterModel;
 
 void subghz_view_transmitter_set_callback(
@@ -89,6 +97,12 @@ void subghz_view_transmitter_draw(Canvas* canvas, SubGhzViewTransmitterModel* mo
     canvas_draw_str(canvas, 78, 7, furi_string_get_cstr(model->frequency_str));
     canvas_draw_str(canvas, 113, 7, furi_string_get_cstr(model->preset_str));
 
+    if(model->draw_temp_button) {
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str(canvas, 117, 40, furi_string_get_cstr(model->temp_button_id));
+        canvas_set_font(canvas, FontSecondary);
+    }
+
     if(model->show_button) {
         canvas_draw_str(canvas, 58, 62, furi_hal_subghz_get_radio_type() ? "R: Ext" : "R: Int");
         subghz_view_transmitter_button_right(canvas, "Send");
@@ -108,7 +122,9 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
                 furi_string_reset(model->frequency_str);
                 furi_string_reset(model->preset_str);
                 furi_string_reset(model->key_str);
+                furi_string_reset(model->temp_button_id);
                 model->show_button = 0;
+                model->draw_temp_button = false;
             },
             false);
         return false;
@@ -125,10 +141,156 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
         true);
 
     if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
+        with_view_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
+                furi_string_reset(model->temp_button_id);
+                model->draw_temp_button = false;
+            },
+            true);
         subghz_transmitter->callback(
             SubGhzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
         return true;
     } else if(can_be_sent && event->key == InputKeyOk && event->type == InputTypeRelease) {
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
+        return true;
+    }
+
+    // Temp Buttons (UP)
+    if(can_be_sent && event->key == InputKeyUp && event->type == InputTypePress) {
+        keeloq_set_btn(1);
+        alutech_set_btn(1);
+        nice_flors_set_btn(1);
+        somfy_telis_set_btn(1);
+        secplus2_set_btn(1);
+        with_view_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
+                furi_string_reset(model->temp_button_id);
+                if(keeloq_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", keeloq_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(alutech_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", alutech_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(nice_flors_get_original_btn() != 0) {
+                    furi_string_printf(
+                        model->temp_button_id, "%01X", nice_flors_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(somfy_telis_get_original_btn() != 0) {
+                    furi_string_printf(
+                        model->temp_button_id, "%01X", somfy_telis_get_original_btn());
+                    model->draw_temp_button = true;
+                }
+            },
+            true);
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
+        return true;
+    } else if(can_be_sent && event->key == InputKeyUp && event->type == InputTypeRelease) {
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
+        return true;
+    }
+    // Down
+    if(can_be_sent && event->key == InputKeyDown && event->type == InputTypePress) {
+        keeloq_set_btn(2);
+        alutech_set_btn(2);
+        nice_flors_set_btn(2);
+        somfy_telis_set_btn(2);
+        secplus2_set_btn(2);
+        with_view_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
+                furi_string_reset(model->temp_button_id);
+                if(keeloq_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", keeloq_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(alutech_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", alutech_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(nice_flors_get_original_btn() != 0) {
+                    furi_string_printf(
+                        model->temp_button_id, "%01X", nice_flors_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(somfy_telis_get_original_btn() != 0) {
+                    furi_string_printf(
+                        model->temp_button_id, "%01X", somfy_telis_get_original_btn());
+                    model->draw_temp_button = true;
+                }
+            },
+            true);
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
+        return true;
+    } else if(can_be_sent && event->key == InputKeyDown && event->type == InputTypeRelease) {
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
+        return true;
+    }
+    // Left
+    if(can_be_sent && event->key == InputKeyLeft && event->type == InputTypePress) {
+        keeloq_set_btn(3);
+        alutech_set_btn(3);
+        nice_flors_set_btn(3);
+        somfy_telis_set_btn(3);
+        secplus2_set_btn(3);
+        with_view_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
+                furi_string_reset(model->temp_button_id);
+                if(keeloq_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", keeloq_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(alutech_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", alutech_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(nice_flors_get_original_btn() != 0) {
+                    furi_string_printf(
+                        model->temp_button_id, "%01X", nice_flors_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(somfy_telis_get_original_btn() != 0) {
+                    furi_string_printf(
+                        model->temp_button_id, "%01X", somfy_telis_get_original_btn());
+                    model->draw_temp_button = true;
+                }
+            },
+            true);
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
+        return true;
+    } else if(can_be_sent && event->key == InputKeyLeft && event->type == InputTypeRelease) {
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
+        return true;
+    }
+    // Right
+    if(can_be_sent && event->key == InputKeyRight && event->type == InputTypePress) {
+        keeloq_set_btn(4);
+        alutech_set_btn(4);
+        with_view_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
+                furi_string_reset(model->temp_button_id);
+                if(keeloq_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", keeloq_get_original_btn());
+                    model->draw_temp_button = true;
+                } else if(alutech_get_original_btn() != 0) {
+                    furi_string_printf(model->temp_button_id, "%01X", alutech_get_original_btn());
+                    model->draw_temp_button = true;
+                }
+            },
+            true);
+        subghz_transmitter->callback(
+            SubGhzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
+        return true;
+    } else if(can_be_sent && event->key == InputKeyRight && event->type == InputTypeRelease) {
         subghz_transmitter->callback(
             SubGhzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
         return true;
@@ -166,6 +328,7 @@ SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
             model->frequency_str = furi_string_alloc();
             model->preset_str = furi_string_alloc();
             model->key_str = furi_string_alloc();
+            model->temp_button_id = furi_string_alloc();
         },
         true);
     return subghz_transmitter;
@@ -181,6 +344,7 @@ void subghz_view_transmitter_free(SubGhzViewTransmitter* subghz_transmitter) {
             furi_string_free(model->frequency_str);
             furi_string_free(model->preset_str);
             furi_string_free(model->key_str);
+            furi_string_free(model->temp_button_id);
         },
         true);
     view_free(subghz_transmitter->view);

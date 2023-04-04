@@ -7,6 +7,7 @@
 
 #include "canvas.h"
 #include <u8g2.h>
+#include <toolbox/compress.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +22,7 @@ struct Canvas {
     uint8_t offset_y;
     uint8_t width;
     uint8_t height;
+    CompressIcon* compress_icon;
 };
 
 /** Allocate memory and initialize canvas
@@ -49,7 +51,7 @@ uint8_t* canvas_get_buffer(Canvas* canvas);
  *
  * @return     size of canvas in bytes
  */
-size_t canvas_get_buffer_size(Canvas* canvas);
+size_t canvas_get_buffer_size(const Canvas* canvas);
 
 /** Set drawing region relative to real screen buffer
  *

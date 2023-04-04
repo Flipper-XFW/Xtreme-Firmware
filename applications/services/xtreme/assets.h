@@ -4,6 +4,10 @@
 #include <gui/icon_i.h>
 #include <toolbox/path.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PACKS_DIR EXT_PATH("dolphin_custom")
 
 typedef struct {
@@ -16,6 +20,8 @@ typedef struct {
     const Icon* I_DolphinWait_61x59;
     const Icon* I_iButtonDolphinVerySuccess_108x52;
     const Icon* I_DolphinReadingSuccess_59x63;
+    const Icon* I_Lockscreen;
+    const Icon* I_WarningDolphin_45x42;
     const Icon* I_NFC_dolphin_emulation_47x61;
     const Icon* I_passport_bad_46x49;
     const Icon* I_passport_DB;
@@ -25,6 +31,7 @@ typedef struct {
     const Icon* I_RFIDDolphinSend_97x61;
     const Icon* I_RFIDDolphinSuccess_108x57;
     const Icon* I_Cry_dolph_55x52;
+    const Icon* I_Fishing_123x52;
     const Icon* I_Scanning_123x52;
     const Icon* I_Auth_62x31;
     const Icon* I_Connect_me_62x31;
@@ -35,3 +42,7 @@ typedef struct {
 void XTREME_ASSETS_LOAD();
 
 XtremeAssets* XTREME_ASSETS();
+
+#ifdef __cplusplus
+}
+#endif

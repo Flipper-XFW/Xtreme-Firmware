@@ -1,7 +1,5 @@
 #pragma once
 
-#include "bt_settings_filename.h"
-
 #include <stdint.h>
 #include <stdbool.h>
 

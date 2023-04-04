@@ -2,6 +2,10 @@
 
 #include "base.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SUBGHZ_PROTOCOL_NICE_FLOR_S_NAME "Nice FloR-S"
 
 typedef struct SubGhzProtocolDecoderNiceFlorS SubGhzProtocolDecoderNiceFlorS;
@@ -10,6 +14,14 @@ typedef struct SubGhzProtocolEncoderNiceFlorS SubGhzProtocolEncoderNiceFlorS;
 extern const SubGhzProtocolDecoder subghz_protocol_nice_flor_s_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_nice_flor_s_encoder;
 extern const SubGhzProtocol subghz_protocol_nice_flor_s;
+
+// Custom buttons
+void nice_flors_set_btn(uint8_t b);
+
+uint8_t nice_flors_get_original_btn();
+uint8_t nice_flors_get_custom_btn();
+
+void nice_flors_reset_original_btn();
 
 /**
  * Allocate SubGhzProtocolEncoderNiceFlorS.
@@ -30,7 +42,8 @@ void subghz_protocol_encoder_nice_flor_s_free(void* context);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -55,6 +68,7 @@ uint64_t subghz_protocol_nice_flor_s_encrypt(uint64_t data, const char* file_nam
  * @param btn Button number, 4 bit
  * @param cnt Counter value, 16 bit
  * @param preset Modulation, SubGhzRadioPreset
+ * @param nice_one Nice One if true, Nice Flor S if false
  * @return true On success
  */
 bool subghz_protocol_nice_flor_s_create_data(
@@ -63,7 +77,8 @@ bool subghz_protocol_nice_flor_s_create_data(
     uint32_t serial,
     uint8_t btn,
     uint16_t cnt,
-    SubGhzRadioPreset* preset);
+    SubGhzRadioPreset* preset,
+    bool nice_one);
 
 /**
  * Allocate SubGhzProtocolDecoderNiceFlorS.
@@ -104,9 +119,9 @@ uint8_t subghz_protocol_decoder_nice_flor_s_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderNiceFlorS instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_nice_flor_s_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_nice_flor_s_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -115,9 +130,10 @@ bool subghz_protocol_decoder_nice_flor_s_serialize(
  * Deserialize data SubGhzProtocolDecoderNiceFlorS.
  * @param context Pointer to a SubGhzProtocolDecoderNiceFlorS instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
@@ -125,3 +141,7 @@ bool subghz_protocol_decoder_nice_flor_s_deserialize(void* context, FlipperForma
  * @param output Resulting text
  */
 void subghz_protocol_decoder_nice_flor_s_get_string(void* context, FuriString* output);
+
+#ifdef __cplusplus
+}
+#endif

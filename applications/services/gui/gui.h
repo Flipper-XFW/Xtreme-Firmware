@@ -27,7 +27,11 @@ typedef enum {
 } GuiLayer;
 
 /** Gui Canvas Commit Callback */
-typedef void (*GuiCanvasCommitCallback)(uint8_t* data, size_t size, void* context);
+typedef void (*GuiCanvasCommitCallback)(
+    uint8_t* data,
+    size_t size,
+    CanvasOrientation orientation,
+    void* context);
 
 #define RECORD_GUI "gui"
 
@@ -94,7 +98,16 @@ void gui_remove_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback,
  * @param      gui       Gui instance
  * @return     size_t    size of frame buffer in bytes
  */
-size_t gui_get_framebuffer_size(Gui* gui);
+size_t gui_get_framebuffer_size(const Gui* gui);
+
+/** Set hidden statusbar
+ *
+ * Hide the statusbar (stacks if called multiple times).
+ *
+ * @param      gui       Gui instance
+ * @param      hinned    bool, true if hidden
+ */
+void gui_set_hide_statusbar(Gui* gui, bool hidden);
 
 /** Set lockdown mode
  *

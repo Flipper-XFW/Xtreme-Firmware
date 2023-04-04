@@ -5,7 +5,6 @@ from flipper.app import App
 from flipper.assets.icon import file2image
 
 import os
-import shutil
 import pathlib
 
 ICONS_SUPPORTED_FORMATS = ["png"]
@@ -289,7 +288,6 @@ class Main(App):
         self.logger.info(f"Packing")
         dolphin.pack(self.args.output_directory, self.args.symbol_name)
         self.logger.info(f"Complete")
-        __import__("time").sleep(2)
 
         return 0
 

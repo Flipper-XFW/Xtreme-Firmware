@@ -17,7 +17,7 @@ void nfc_scene_set_sak_on_enter(void* context) {
         nfc_scene_set_sak_byte_input_callback,
         NULL,
         nfc,
-        &nfc->dev->dev_data.nfc_data.sak,
+        &nfc->dev->dev_data.nfc_data.a_data.sak,
         1);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewByteInput);
 }
@@ -28,7 +28,7 @@ bool nfc_scene_set_sak_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventByteInputDone) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetAtqua);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetAtqa);
             consumed = true;
         }
     }

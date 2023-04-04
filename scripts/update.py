@@ -10,6 +10,7 @@ import shutil
 import zlib
 import tarfile
 import math
+import pathlib
 
 from slideshow import Main as SlideshowMain
 
@@ -125,6 +126,17 @@ class Main(App):
             )
         if self.args.resources:
             resources_basename = self.RESOURCE_FILE_NAME
+            SlideshowMain(no_exit=True)(
+                [
+                    "-i",
+                    str(
+                        pathlib.Path(self.args.resources).parent
+                        / "slideshow/xfwfirstboot"
+                    ),
+                    "-o",
+                    str(pathlib.Path(self.args.resources) / "dolphin/xfwfirstboot.bin"),
+                ]
+            )
             if not self.package_resources(
                 self.args.resources, join(self.args.directory, resources_basename)
             ):
@@ -137,6 +149,14 @@ class Main(App):
                 return 2
 
         if self.args.splash:
+            SlideshowMain(no_exit=True)(
+                [
+                    "-i",
+                    str(pathlib.Path(self.args.splash).parent / "xfwfirstboot"),
+                    "-o",
+                    join(self.args.directory, "xfwfirstboot.bin"),
+                ]
+            )
             splash_args = [
                 "-i",
                 self.args.splash,
@@ -199,7 +219,7 @@ class Main(App):
 
     def disclaimer(self):
         self.logger.error(
-            "You might brick you device into a state in which you'd need an SWD programmer to fix it."
+            "You might brick your device into a state in which you'd need an SWD programmer to fix it."
         )
         self.logger.error(
             "Please confirm that you REALLY want to do that with --I-understand-what-I-am-doing=yes"

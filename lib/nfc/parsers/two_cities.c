@@ -71,8 +71,8 @@ bool two_cities_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
     furi_assert(nfc_worker);
 
     MfClassicReader reader = {};
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+    FuriHalNfcADevData* nfc_a_data = &nfc_worker->dev_data->nfc_data.a_data;
+    reader.type = mf_classic_get_classic_type(nfc_a_data);
     for(size_t i = 0; i < COUNT_OF(two_cities_keys_4k); i++) {
         mf_classic_reader_add_sector(
             &reader,
@@ -136,7 +136,7 @@ bool two_cities_parser_parse(NfcDeviceData* dev_data) {
 
     furi_string_printf(
         dev_data->parsed_data,
-        "\e#Troika+Plantain\nPN: %llu-\nPB: %ld rur.\nTN: %ld\nTB: %d rur.\n",
+        "\e#Troika+Plantain\nPN: %llu-\nPB: %lu rur.\nTN: %lu\nTB: %u rur.\n",
         card_number,
         balance,
         troika_number,

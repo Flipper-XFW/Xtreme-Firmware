@@ -1,6 +1,10 @@
 #pragma once
 #include "base.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SUBGHZ_PROTOCOL_SECPLUS_V2_NAME "Security+ 2.0"
 
 typedef struct SubGhzProtocolDecoderSecPlus_v2 SubGhzProtocolDecoderSecPlus_v2;
@@ -9,6 +13,14 @@ typedef struct SubGhzProtocolEncoderSecPlus_v2 SubGhzProtocolEncoderSecPlus_v2;
 extern const SubGhzProtocolDecoder subghz_protocol_secplus_v2_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_secplus_v2_encoder;
 extern const SubGhzProtocol subghz_protocol_secplus_v2;
+
+// Custom buttons
+void secplus2_set_btn(uint8_t b);
+
+uint8_t secplus2_get_original_btn();
+uint8_t secplus2_get_custom_btn();
+
+void secplus2_reset_original_btn();
 
 /**
  * Allocate SubGhzProtocolEncoderSecPlus_v2.
@@ -27,9 +39,10 @@ void subghz_protocol_encoder_secplus_v2_free(void* context);
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderSecPlus_v2 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_encoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -102,9 +115,9 @@ uint8_t subghz_protocol_decoder_secplus_v2_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v2 instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_secplus_v2_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_secplus_v2_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -113,9 +126,10 @@ bool subghz_protocol_decoder_secplus_v2_serialize(
  * Deserialize data SubGhzProtocolDecoderSecPlus_v2.
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v2 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
@@ -123,3 +137,7 @@ bool subghz_protocol_decoder_secplus_v2_deserialize(void* context, FlipperFormat
  * @param output Resulting text
  */
 void subghz_protocol_decoder_secplus_v2_get_string(void* context, FuriString* output);
+
+#ifdef __cplusplus
+}
+#endif

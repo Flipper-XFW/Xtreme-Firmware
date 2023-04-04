@@ -1,6 +1,5 @@
 #include "dolphin_state.h"
 #include "dolphin/helpers/dolphin_deed.h"
-#include "dolphin_state_filename.h"
 
 #include <stdint.h>
 #include <storage/storage.h>
@@ -11,7 +10,8 @@
 
 #define TAG "DolphinState"
 
-#define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
+#define DOLPHIN_STATE_OLD_PATH INT_PATH(".dolphin.state")
+#define DOLPHIN_STATE_PATH CFG_PATH("dolphin.state")
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
 
@@ -60,6 +60,19 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
         sizeof(DolphinStoreData),
         DOLPHIN_STATE_HEADER_MAGIC,
         DOLPHIN_STATE_HEADER_VERSION);
+
+    if(!success) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        storage_common_copy(storage, DOLPHIN_STATE_OLD_PATH, DOLPHIN_STATE_PATH);
+        storage_common_remove(storage, DOLPHIN_STATE_OLD_PATH);
+        furi_record_close(RECORD_STORAGE);
+        success = saved_struct_load(
+            DOLPHIN_STATE_PATH,
+            &dolphin_state->data,
+            sizeof(DolphinStoreData),
+            DOLPHIN_STATE_HEADER_MAGIC,
+            DOLPHIN_STATE_HEADER_VERSION);
+    }
 
     if(success) {
         if((dolphin_state->data.butthurt > BUTTHURT_MAX) ||
@@ -170,7 +183,7 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     int32_t new_butthurt = ((int32_t)dolphin_state->data.butthurt) -
                            (butthurt_icounter_level_old != butthurt_icounter_level_new);
     new_butthurt = CLAMP(new_butthurt, BUTTHURT_MAX, BUTTHURT_MIN);
-    if(new_butthurt >= 7) new_butthurt = BUTTHURT_MIN; // FLIPPER STAYS HAPPY
+
     dolphin_state->data.butthurt = new_butthurt;
     dolphin_state->data.timestamp = dolphin_state_timestamp();
     dolphin_state->dirty = true;

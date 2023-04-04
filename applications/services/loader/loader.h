@@ -9,6 +9,8 @@ extern "C" {
 
 #define RECORD_LOADER "loader"
 
+#define FAP_LOADER_APP_NAME "Apps"
+
 typedef struct Loader Loader;
 
 typedef enum {
@@ -43,10 +45,13 @@ bool loader_lock(Loader* instance);
 void loader_unlock(Loader* instance);
 
 /** Get loader lock status */
-bool loader_is_locked(Loader* instance);
+bool loader_is_locked(const Loader* instance);
 
 /** Show primary loader */
 void loader_show_menu();
+
+/** Show settings menu */
+void loader_show_settings();
 
 /** Show primary loader */
 void loader_update_menu();

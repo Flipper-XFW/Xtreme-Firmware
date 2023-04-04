@@ -44,6 +44,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
         }
     } else if(
         nfc->dev->format == NfcDeviceSaveFormatMifareUl ||
+        nfc->dev->format == NfcDeviceSaveFormatNfcV ||
         nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
         submenu_add_item(
             submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_saved_menu_submenu_callback, nfc);
@@ -52,20 +53,20 @@ void nfc_scene_saved_menu_on_enter(void* context) {
         if(!mf_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data)) {
             submenu_add_item(
                 submenu,
-                "Detect reader",
+                "Detect Reader",
                 SubmenuIndexDetectReader,
                 nfc_scene_saved_menu_submenu_callback,
                 nfc);
         }
         submenu_add_item(
             submenu,
-            "Write To Initial Card",
+            "Write to Initial Card",
             SubmenuIndexWrite,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
         submenu_add_item(
             submenu,
-            "Update From Initial Card",
+            "Update from Initial Card",
             SubmenuIndexUpdate,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
@@ -76,13 +77,13 @@ void nfc_scene_saved_menu_on_enter(void* context) {
        !mf_ul_is_full_capture(&nfc->dev->dev_data.mf_ul_data)) {
         submenu_add_item(
             submenu,
-            "Unlock With Reader",
+            "Unlock with Reader",
             SubmenuIndexMfUlUnlockByReader,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
         submenu_add_item(
             submenu,
-            "Unlock With Password",
+            "Unlock with Password",
             SubmenuIndexMfUlUnlockByPassword,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
@@ -118,7 +119,7 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
             } else if(nfc->dev->format == NfcDeviceSaveFormatNfcV) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateNfcV);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVEmulate);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
             }
@@ -152,6 +153,8 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
                 dev_data->protocol == NfcDeviceProtocolMifareUl) {
                 application_info_present = nfc_supported_card_verify_and_parse(dev_data);
             }
+
+            FURI_LOG_I("nfc", "application_info_present: %d", application_info_present);
 
             if(application_info_present) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);

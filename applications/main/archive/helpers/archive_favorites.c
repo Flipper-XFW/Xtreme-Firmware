@@ -140,6 +140,13 @@ bool archive_favorites_read(void* context) {
 
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
+    if(!result) {
+        storage_file_close(file);
+        storage_common_copy(storage, ARCHIVE_FAV_OLD_PATH, ARCHIVE_FAV_PATH);
+        storage_common_remove(storage, ARCHIVE_FAV_OLD_PATH);
+        result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    }
+
     if(result) {
         while(1) {
             if(!archive_favorites_read_line(file, buffer)) {
@@ -160,7 +167,7 @@ bool archive_favorites_read(void* context) {
                 if(storage_file_exists(storage, furi_string_get_cstr(buffer))) {
                     storage_common_stat(storage, furi_string_get_cstr(buffer), &file_info);
                     archive_add_file_item(
-                        browser, (file_info.flags & FSF_DIRECTORY), furi_string_get_cstr(buffer));
+                        browser, file_info_is_dir(&file_info), furi_string_get_cstr(buffer));
                     file_count++;
                 } else {
                     need_refresh = true;

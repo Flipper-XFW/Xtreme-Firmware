@@ -24,8 +24,10 @@
         "usb_stm32",
         "appframe",
         "assets",
+        "one_wire",
         "misc",
         "flipper_application",
+        "pulse_reader",
         "flipperformat",
         "toolbox",
         "flipper18"
@@ -45,10 +47,10 @@
         "furi_hal_subghz_configs.h"
     ],
     "excluded_modules": [
-        "one_wire",
         "nfc",
         "lfrfid",
         "subghz",
+        "ibutton",
         "infrared",
         "st25rfal002"
     ]

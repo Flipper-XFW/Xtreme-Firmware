@@ -4,7 +4,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
-#include <desktop/helpers/slideshow_filename.h>
+#include <desktop/views/desktop_view_slideshow.h>
 #include <toolbox/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/lfs_backup.h>
@@ -12,6 +12,8 @@
 #include <update_util/resources/manifest.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
+
+#define XFWFIRSTBOOT_FLAG_PATH CFG_PATH("xfwfirstboot.flag")
 
 #define TAG "UpdWorkerBackup"
 
@@ -97,7 +99,16 @@ static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_
                 path_concat(
                     STORAGE_EXT_PATH_PREFIX, furi_string_get_cstr(entry_ptr->name), file_path);
                 FURI_LOG_D(TAG, "Removing %s", furi_string_get_cstr(file_path));
-                storage_simply_remove(update_task->storage, furi_string_get_cstr(file_path));
+
+                FS_Error result =
+                    storage_common_remove(update_task->storage, furi_string_get_cstr(file_path));
+                if(result != FSE_OK && result != FSE_EXIST) {
+                    FURI_LOG_E(
+                        TAG,
+                        "%s remove failed, cause %s",
+                        furi_string_get_cstr(file_path),
+                        storage_error_get_desc(result));
+                }
                 furi_string_free(file_path);
             } else if(entry_ptr->type == ResourceManifestEntryTypeDirectory) {
                 n_dir_entries++;
@@ -116,7 +127,6 @@ static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_
                             n_dir_entries);
 
                 FuriString* folder_path = furi_string_alloc();
-                File* folder_file = storage_file_alloc(update_task->storage);
 
                 do {
                     path_concat(
@@ -125,24 +135,17 @@ static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_
                         folder_path);
 
                     FURI_LOG_D(TAG, "Removing folder %s", furi_string_get_cstr(folder_path));
-                    if(!storage_dir_open(folder_file, furi_string_get_cstr(folder_path))) {
-                        FURI_LOG_W(
+                    FS_Error result = storage_common_remove(
+                        update_task->storage, furi_string_get_cstr(folder_path));
+                    if(result != FSE_OK && result != FSE_EXIST) {
+                        FURI_LOG_E(
                             TAG,
-                            "%s can't be opened, skipping",
-                            furi_string_get_cstr(folder_path));
-                        break;
+                            "%s remove failed, cause %s",
+                            furi_string_get_cstr(folder_path),
+                            storage_error_get_desc(result));
                     }
-
-                    if(storage_dir_read(folder_file, NULL, NULL, 0)) {
-                        FURI_LOG_I(
-                            TAG, "%s is not empty, skipping", furi_string_get_cstr(folder_path));
-                        break;
-                    }
-
-                    storage_simply_remove(update_task->storage, furi_string_get_cstr(folder_path));
                 } while(false);
 
-                storage_file_free(folder_file);
                 furi_string_free(folder_path);
             }
         }
@@ -196,11 +199,27 @@ static bool update_task_post_update(UpdateTask* update_task) {
             update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 0);
             FuriString* tmp_path;
             tmp_path = furi_string_alloc_set(update_task->update_path);
-            path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
+            if(storage_common_stat(update_task->storage, XFWFIRSTBOOT_FLAG_PATH, NULL) ==
+               FSE_NOT_EXIST) {
+                File* file = storage_file_alloc(update_task->storage);
+                if(storage_file_open(
+                       file, XFWFIRSTBOOT_FLAG_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                    storage_file_close(file);
+                }
+                storage_file_free(file);
+                path_append(tmp_path, "xfwfirstboot.bin");
+                if(storage_common_stat(
+                       update_task->storage, furi_string_get_cstr(tmp_path), NULL) != FSE_OK) {
+                    furi_string_set(tmp_path, update_task->update_path);
+                    path_append(
+                        tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
+                }
+            } else {
+                path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
+            }
             if(storage_common_copy(
-                   update_task->storage,
-                   furi_string_get_cstr(tmp_path),
-                   INT_PATH(SLIDESHOW_FILE_NAME)) != FSE_OK) {
+                   update_task->storage, furi_string_get_cstr(tmp_path), SLIDESHOW_FS_PATH) !=
+               FSE_OK) {
                 // actually, not critical
             }
             furi_string_free(tmp_path);

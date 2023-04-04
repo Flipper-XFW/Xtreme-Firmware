@@ -1,3 +1,4 @@
+*~
 *.swp
 *.swo
 *.gdb_history
@@ -34,6 +35,10 @@ Brewfile.lock.json
 # Visual Studio
 .vs/
 
+# Kate
+.kateproject
+.kateconfig
+
 # legendary cmake's
 build
 CMakeLists.txt
@@ -68,9 +73,8 @@ PVS-Studio.log
 # Automate files, etc
 automate.py
 deployments/
-fbt_options.py
 commitnotes.md
-lib/STM32CubeWB
+fbt_options.py
 
 # Asset packs
 assets/dolphin/custom/*

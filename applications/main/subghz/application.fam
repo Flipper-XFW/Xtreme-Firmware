@@ -1,6 +1,6 @@
 App(
     appid="subghz",
-    name="Sub-GHz",
+    name="SubGHz",
     apptype=FlipperAppType.APP,
     targets=["f7"],
     entry_point="subghz_app",

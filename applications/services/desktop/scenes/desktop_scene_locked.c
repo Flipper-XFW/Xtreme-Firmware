@@ -60,11 +60,11 @@ void desktop_scene_locked_on_enter(void* context) {
                     desktop->scene_manager, DesktopScenePinTimeout, pin_timeout);
                 switch_to_timeout_scene = true;
             } else {
-                desktop_view_locked_close_doors(desktop->locked_view);
+                desktop_view_locked_close_cover(desktop->locked_view);
             }
         } else {
             desktop_view_locked_lock(desktop->locked_view, false);
-            desktop_view_locked_close_doors(desktop->locked_view);
+            desktop_view_locked_close_cover(desktop->locked_view);
         }
         scene_manager_set_scene_state(
             desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_REPEAT_ENTER);
@@ -89,7 +89,8 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockedEventUpdate:
             if(desktop_view_locked_is_locked_hint_visible(desktop->locked_view)) {
-                notification_message(desktop->notification, &sequence_display_backlight_off);
+                notification_message(
+                    desktop->notification, &sequence_display_backlight_off_delay_1000);
             }
             desktop_view_locked_update(desktop->locked_view);
             consumed = true;

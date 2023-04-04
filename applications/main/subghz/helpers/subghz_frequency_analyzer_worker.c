@@ -117,16 +117,17 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
         // First stage: coarse scan
         for(size_t i = 0; i < subghz_setting_get_frequency_count(instance->setting); i++) {
-            if(furi_hal_subghz_is_frequency_valid(
-                   subghz_setting_get_frequency(instance->setting, i)) &&
+            uint32_t current_frequency = subghz_setting_get_frequency(instance->setting, i);
+            if(furi_hal_subghz_is_frequency_valid(current_frequency) &&
+               (current_frequency != 467750000) && (current_frequency != 464000000) &&
                !((furi_hal_subghz.radio_type == SubGhzRadioExternal) &&
-                 (subghz_setting_get_frequency(instance->setting, i) >= 311900000 &&
-                  subghz_setting_get_frequency(instance->setting, i) <= 312200000))) {
+                 ((current_frequency == 390000000) || (current_frequency == 312000000) ||
+                  (current_frequency == 312100000) || (current_frequency == 312200000) ||
+                  (current_frequency == 440175000)))) {
                 furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
                 cc1101_switch_to_idle(furi_hal_subghz.spi_bus_handle);
-                frequency = cc1101_set_frequency(
-                    furi_hal_subghz.spi_bus_handle,
-                    subghz_setting_get_frequency(instance->setting, i));
+                frequency =
+                    cc1101_set_frequency(furi_hal_subghz.spi_bus_handle, current_frequency);
 
                 cc1101_calibrate(furi_hal_subghz.spi_bus_handle);
                 do {
