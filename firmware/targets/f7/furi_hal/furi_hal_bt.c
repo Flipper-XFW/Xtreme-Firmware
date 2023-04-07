@@ -477,7 +477,7 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
 void furi_hal_bt_set_profile_adv_name(
     FuriHalBtProfile profile,
-    const char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1]) {
+    const char name[FURI_HAL_BT_ADV_NAME_LENGTH]) {
     furi_assert(profile < FuriHalBtProfileNumber);
     furi_assert(name);
 
@@ -491,7 +491,7 @@ void furi_hal_bt_set_profile_adv_name(
         memcpy(
             &(profile_config[profile].config.adv_name[1]),
             name,
-            FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1);
+            FURI_HAL_BT_ADV_NAME_LENGTH);
     }
 }
 

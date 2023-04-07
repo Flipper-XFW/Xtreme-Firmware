@@ -21,8 +21,8 @@
 #define BAD_KB_APP_SCRIPT_EXTENSION ".txt"
 #define BAD_KB_APP_LAYOUT_EXTENSION ".kl"
 
-#define BAD_KB_MAC_ADDRESS_LEN 6 // need replace with MAC size maccro
-#define BAD_KB_ADV_NAME_MAX_LEN 18
+#define BAD_KB_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
+#define BAD_KB_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
 
 typedef enum {
     BadKbAppErrorNoFiles,

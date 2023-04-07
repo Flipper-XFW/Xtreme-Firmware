@@ -402,7 +402,7 @@ void bt_set_profile_adv_name(Bt* bt, const char* fmt, ...) {
     furi_assert(bt);
     furi_assert(fmt);
 
-    char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH];
+    char name[FURI_HAL_BT_ADV_NAME_LENGTH];
     va_list args;
     va_start(args, fmt);
     vsnprintf(name, sizeof(name), fmt, args);
