@@ -192,7 +192,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenClock: {
-            LoaderStatus status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/Misc/Nightstand.fap"));
+            LoaderStatus status = loader_start(
+                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/Misc/Nightstand.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }

@@ -13,7 +13,8 @@
 #define BAD_KB_SETTINGS_PATH BAD_KB_APP_BASE_FOLDER "/" BAD_KB_SETTINGS_FILE_NAME
 
 // this is the MAC address used when we do not forget paired device (BOUND STATE)
-const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] = {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
+const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
+    {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
 
 static bool bad_kb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -36,7 +37,10 @@ static void bad_kb_app_tick_event_callback(void* context) {
 static void bad_kb_load_settings(BadKbApp* app) {
     furi_string_reset(app->keyboard_layout);
     strcpy(app->config.bt_name, "");
-    memcpy(app->config.bt_mac, furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard), BAD_KB_MAC_ADDRESS_LEN);
+    memcpy(
+        app->config.bt_mac,
+        furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
+        BAD_KB_MAC_ADDRESS_LEN);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -50,8 +54,12 @@ static void bad_kb_load_settings(BadKbApp* app) {
         } else {
             strcpy(app->config.bt_name, "");
         }
-        if(!flipper_format_read_hex(file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN)) {
-            memcpy(app->config.bt_mac, furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard), BAD_KB_MAC_ADDRESS_LEN);
+        if(!flipper_format_read_hex(
+               file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN)) {
+            memcpy(
+                app->config.bt_mac,
+                furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
+                BAD_KB_MAC_ADDRESS_LEN);
         }
         furi_string_free(tmp_str);
         flipper_format_file_close(file);
@@ -80,7 +88,8 @@ static void bad_kb_save_settings(BadKbApp* app) {
     if(flipper_format_file_open_always(file, BAD_KB_SETTINGS_PATH)) {
         flipper_format_write_string(file, "Keyboard_Layout", app->keyboard_layout);
         flipper_format_write_string_cstr(file, "Bt_Name", app->config.bt_name);
-        flipper_format_write_hex(file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN);
+        flipper_format_write_hex(
+            file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN);
         flipper_format_file_close(file);
     }
     flipper_format_free(file);
@@ -106,7 +115,8 @@ void bad_kb_config_switch_mode(BadKbApp* app) {
 
 void bad_kb_config_switch_remember_mode(BadKbApp* app) {
     if(app->bt_remember) {
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
         bt_set_profile_mac_address(app->bt, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
         bt_enable_peer_key_update(app->bt);
     } else {
@@ -121,8 +131,12 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
     app->prev_config.usb_mode = furi_hal_usb_get_config();
     furi_hal_usb_set_config(NULL, NULL);
 
-    strcpy(app->prev_config.bt_name, furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
-    memcpy(app->prev_config.bt_mac, furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard), BAD_KB_MAC_ADDRESS_LEN);
+    strcpy(
+        app->prev_config.bt_name, furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
+    memcpy(
+        app->prev_config.bt_mac,
+        furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
+        BAD_KB_MAC_ADDRESS_LEN);
     app->prev_config.bt_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
 
     bt_timeout = bt_hid_delays[LevelRssi39_0];
@@ -132,8 +146,10 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->config.bt_name);
     }
     if(app->bt_remember) {
-        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        furi_hal_bt_set_profile_mac_addr(
+            FuriHalBtProfileHidKeyboard, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
     } else {
         furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->config.bt_mac);
         furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);

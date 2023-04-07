@@ -206,9 +206,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
         if(profile == FuriHalBtProfileSerial) {
             // Set mac address
             memcpy(
-                config->mac_address,
-                furi_hal_version_get_ble_mac(),
-                sizeof(config->mac_address));
+                config->mac_address, furi_hal_version_get_ble_mac(), sizeof(config->mac_address));
             // Set advertise name
             strlcpy(
                 config->adv_name,
@@ -488,10 +486,7 @@ void furi_hal_bt_set_profile_adv_name(
             strlen(&(profile_config[profile].config.adv_name[1])));
     } else {
         profile_config[profile].config.adv_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
-        memcpy(
-            &(profile_config[profile].config.adv_name[1]),
-            name,
-            FURI_HAL_BT_ADV_NAME_LENGTH);
+        memcpy(&(profile_config[profile].config.adv_name[1]), name, FURI_HAL_BT_ADV_NAME_LENGTH);
     }
 }
 
