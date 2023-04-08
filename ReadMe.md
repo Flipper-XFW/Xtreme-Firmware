@@ -227,7 +227,7 @@ $ ./fbt resources icons dolphin_ext
 ## ❤️ Support
 If you like what you're seeing, **please consider donating to us**. We won't ever put this behind a paywall, but we'd still appreciate a few bucks!
 
-- **[Direct Wire-transfer](https://bunq.me/ClaraK)**: No account needed, they have a convenient online pay thingy (that hates americans, sowwy)
+- **[Direct Wire-transfer](https://bunq.me/ClaraK)**: No account needed, just specify amount and hit send
 - **[Patreon](https://patreon.com/CynthiaLabs)**
 - **[Paypal](https://paypal.me/RdX2020)**
 - **Monero**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`
