@@ -24,7 +24,7 @@ typedef struct {
     bool is_connected;
 #if TOTP_TARGET_FIRMWARE == TOTP_FIRMWARE_XTREME
     uint8_t bt_mac[TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN];
-    char previous_bt_name[TOTP_BT_WORKER_BT_ADV_NAME_MAX_LEN + 1];
+    char previous_bt_name[TOTP_BT_WORKER_BT_ADV_NAME_MAX_LEN];
     uint8_t previous_bt_mac[TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN];
 #endif
 } TotpBtTypeCodeWorkerContext;
