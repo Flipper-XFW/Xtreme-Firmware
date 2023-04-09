@@ -21,11 +21,8 @@
 #define BAD_KB_APP_SCRIPT_EXTENSION ".txt"
 #define BAD_KB_APP_LAYOUT_EXTENSION ".kl"
 
-#define BAD_KB_MAC_ADDRESS_LEN 6 // need replace with MAC size maccro
-#define BAD_KB_ADV_NAME_MAX_LEN 18
-
-// this is the MAC address used when we do not forget paired device (BOUND STATE)
-#define BAD_KB_BOUND_MAC_ADDRESS {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
+#define BAD_KB_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
+#define BAD_KB_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
 
 typedef enum {
     BadKbAppErrorNoFiles,
@@ -39,10 +36,11 @@ typedef enum BadKbCustomEvent {
 } BadKbCustomEvent;
 
 typedef struct {
-    //uint8_t bounded_mac[BAD_KB_MAC_ADDRESS_LEN];
-    uint8_t mac[BAD_KB_MAC_ADDRESS_LEN];
-    char name[BAD_KB_ADV_NAME_MAX_LEN + 1];
-} BadKbBtConfig;
+    char bt_name[BAD_KB_ADV_NAME_MAX_LEN + 1];
+    uint8_t bt_mac[BAD_KB_MAC_ADDRESS_LEN];
+    FuriHalUsbInterface* usb_mode;
+    GapPairing bt_mode;
+} BadKbConfig;
 
 typedef struct {
     Gui* gui;
@@ -52,14 +50,8 @@ typedef struct {
     DialogsApp* dialogs;
     Widget* widget;
     VariableItemList* var_item_list;
-
-    Bt* bt;
     TextInput* text_input;
     ByteInput* byte_input;
-    uint8_t mac[BAD_KB_MAC_ADDRESS_LEN];
-    char name[BAD_KB_ADV_NAME_MAX_LEN + 1];
-    bool bt_remember; // weither we remember paired devices or not
-    BadKbBtConfig bt_old_config;
 
     BadKbAppError error;
     FuriString* file_path;
@@ -67,11 +59,11 @@ typedef struct {
     BadKb* bad_kb_view;
     BadKbScript* bad_kb_script;
 
+    Bt* bt;
     bool is_bt;
-
-    FuriHalUsbInterface* usb_prev_mode;
-    GapPairing bt_prev_mode;
-
+    bool bt_remember;
+    BadKbConfig config;
+    BadKbConfig prev_config;
     FuriThread* conn_init_thread;
 } BadKbApp;
 

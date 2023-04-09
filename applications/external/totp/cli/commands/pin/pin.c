@@ -2,11 +2,12 @@
 
 #include <stdlib.h>
 #include <lib/toolbox/args.h>
+#include <linked_list.h>
 #include "../../../types/token_info.h"
 #include "../../../types/user_pin_codes.h"
 #include "../../../services/config/config.h"
 #include "../../cli_helpers.h"
-#include "../../../lib/polyfills/memset_s.h"
+#include <memset_s.h>
 #include "../../../services/crypto/crypto.h"
 #include "../../../ui/scene_director.h"
 
@@ -118,6 +119,19 @@ void totp_cli_command_pin_handle(PluginState* plugin_state, FuriString* args, Cl
             } else if(do_remove) {
                 new_pin_length = 0;
                 memset(&new_pin[0], 0, TOTP_IV_SIZE);
+            }
+
+            char* backup_path = totp_config_file_backup();
+            if(backup_path != NULL) {
+                TOTP_CLI_PRINTF_WARNING("Backup conf file %s has been created\r\n", backup_path);
+                TOTP_CLI_PRINTF_WARNING(
+                    "Once you make sure everything is fine and works as expected, please delete this backup file\r\n");
+                free(backup_path);
+            } else {
+                memset_s(&new_pin[0], TOTP_IV_SIZE, 0, TOTP_IV_SIZE);
+                TOTP_CLI_PRINTF_ERROR(
+                    "An error has occurred during taking backup of config file\r\n");
+                break;
             }
 
             if(plugin_state->current_scene == TotpSceneGenerateToken) {

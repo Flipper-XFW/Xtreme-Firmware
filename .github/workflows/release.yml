@@ -29,13 +29,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: "Read version number"
-        run: |
-          RELEASE_TAG="$(grep -o "DIST_SUFFIX = .*" fbt_options.py | cut -d'"' -f2)"
-          echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Build the firmware'
         run: |
@@ -45,21 +39,22 @@ jobs:
             ./fbt TARGET_HW=$TARGET updater_package
           done
 
-      - name: "Make tgz, zip and webupdater"
+      - name: "Check for uncommitted changes"
         run: |
-          cd dist/${DEFAULT_TARGET}-*
-          mv ${DEFAULT_TARGET}-update-* ${RELEASE_TAG}
-          tar --format=ustar -czvf ../${RELEASE_TAG}.tgz ${RELEASE_TAG}
-          cd ${RELEASE_TAG}
-          7z a ../../${RELEASE_TAG}.zip .
-          cd ../..
-          python -m pip install pyncclient
-          WEBUPDATER_URL="$(python -c "import nextcloud_client as n;c = n.Client('https://cloud.cynthialabs.net/');c.login('${{ secrets.NC_USER }}', '${{ secrets.NC_PASS }}');c.put_file('XFW-Updater/${RELEASE_TAG}.tgz', '${RELEASE_TAG}.tgz');print(c.share_file_with_link('XFW-Updater/${RELEASE_TAG}.tgz').get_link().rstrip('/') + '/download/${RELEASE_TAG}.tgz', end='')")"
-          echo "WEBUPDATER_URL=${WEBUPDATER_URL}" >> $GITHUB_ENV
+          git diff --exit-code
+
+      - name: "Read version tag"
+        run: bash .github/workflow_data/version.sh
+
+      - name: "Make tgz, zip and webupdater"
+        run: bash .github/workflow_data/package.sh
+        env:
+          NC_HOST: "https://cloud.cynthialabs.net/"
+          NC_USER: "${{ secrets.NC_USER }}"
+          NC_PASS: "${{ secrets.NC_PASS }}"
 
       - name: "Update release notes"
-        run: |
-          python -c "import json, os;f = '.github/workflow_data/release.md';c = json.load(open(os.environ['GITHUB_EVENT_PATH']))['pull_request']['body'];f_ = open(f);n = f_.read().format(release_tag='${RELEASE_TAG}', webupdater_url='${WEBUPDATER_URL}', changelog=c);f_.close();f_ = open(f, 'w');f_.write(n);f_.close()"
+        run: python .github/workflow_data/release.py
 
       - name: "Merge pull request"
         uses: "pascalgn/automerge-action@v0.15.6"
@@ -74,8 +69,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            dist/${{ env.RELEASE_TAG }}.tgz
-            dist/${{ env.RELEASE_TAG }}.zip
-          name: "${{ env.RELEASE_TAG }}"
-          tag_name: "${{ env.RELEASE_TAG }}"
+            dist/${{ env.ARTIFACT_TGZ }}
+            dist/${{ env.ARTIFACT_ZIP }}
+          name: "${{ env.VERSION_TAG }}"
+          tag_name: "${{ env.VERSION_TAG }}"
           target_commitish: ${{ github.event.pull_request.base.ref }}

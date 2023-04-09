@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,20.0,,
+Version,+,21.0,,
 Header,+,applications/main/fap_loader/fap_loader_app.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -200,6 +200,7 @@ Header,+,lib/toolbox/args.h,,
 Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
 Header,+,lib/toolbox/float_tools.h,,
+Header,+,lib/toolbox/hex.h,,
 Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
 Header,+,lib/toolbox/md5.h,,
@@ -517,10 +518,6 @@ Function,-,acosl,long double,long double
 Function,-,aligned_alloc,void*,"size_t, size_t"
 Function,+,aligned_free,void,void*
 Function,+,aligned_malloc,void*,"size_t, size_t"
-Function,-,alutech_get_custom_btn,uint8_t,
-Function,-,alutech_get_original_btn,uint8_t,
-Function,+,alutech_reset_original_btn,void,
-Function,-,alutech_set_btn,void,uint8_t
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
@@ -658,12 +655,14 @@ Function,+,canvas_draw_glyph,void,"Canvas*, uint8_t, uint8_t, uint16_t"
 Function,+,canvas_draw_icon,void,"Canvas*, uint8_t, uint8_t, const Icon*"
 Function,+,canvas_draw_icon_animation,void,"Canvas*, uint8_t, uint8_t, IconAnimation*"
 Function,+,canvas_draw_icon_bitmap,void,"Canvas*, uint8_t, uint8_t, int16_t, int16_t, const Icon*"
+Function,+,canvas_draw_icon_ex,void,"Canvas*, uint8_t, uint8_t, const Icon*, IconRotation"
 Function,+,canvas_draw_line,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,canvas_draw_rbox,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,canvas_draw_rframe,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,canvas_draw_str,void,"Canvas*, uint8_t, uint8_t, const char*"
 Function,+,canvas_draw_str_aligned,void,"Canvas*, uint8_t, uint8_t, Align, Align, const char*"
 Function,+,canvas_draw_triangle,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, CanvasDirection"
+Function,+,canvas_draw_u8g2_bitmap,void,"u8g2_t*, uint8_t, uint8_t, uint8_t, uint8_t, const uint8_t*, uint8_t"
 Function,+,canvas_draw_xbm,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, const uint8_t*"
 Function,-,canvas_frame_set,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,-,canvas_free,void,Canvas*
@@ -1125,7 +1124,7 @@ Function,+,furi_hal_bt_serial_start,void,
 Function,+,furi_hal_bt_serial_stop,void,
 Function,+,furi_hal_bt_serial_tx,_Bool,"uint8_t*, uint16_t"
 Function,+,furi_hal_bt_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
-Function,+,furi_hal_bt_set_profile_adv_name,void,"FuriHalBtProfile, const char[( 1 + ( 8 + 1 ) ) + 9 - 1]"
+Function,+,furi_hal_bt_set_profile_adv_name,void,"FuriHalBtProfile, const char[( 18 + 1 )]"
 Function,+,furi_hal_bt_set_profile_mac_addr,void,"FuriHalBtProfile, const uint8_t[( 6 )]"
 Function,+,furi_hal_bt_set_profile_pairing_method,void,"FuriHalBtProfile, GapPairing"
 Function,+,furi_hal_bt_start_advertising,void,
@@ -1716,6 +1715,10 @@ Function,+,gui_view_port_send_to_front,void,"Gui*, ViewPort*"
 Function,+,hal_sd_detect,_Bool,
 Function,+,hal_sd_detect_init,void,
 Function,+,hal_sd_detect_set_low,void,
+Function,+,hex_char_to_hex_nibble,_Bool,"char, uint8_t*"
+Function,+,hex_char_to_uint8,_Bool,"char, char, uint8_t*"
+Function,+,hex_chars_to_uint64,_Bool,"const char*, uint64_t*"
+Function,+,hex_chars_to_uint8,_Bool,"const char*, uint8_t*"
 Function,-,hypot,double,"double, double"
 Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
@@ -1854,12 +1857,9 @@ Function,-,j1f,float,float
 Function,-,jn,double,"int, double"
 Function,-,jnf,float,"int, float"
 Function,-,jrand48,long,unsigned short[3]
-Function,-,keeloq_get_custom_btn,uint8_t,
-Function,-,keeloq_get_original_btn,uint8_t,
 Function,+,keeloq_reset_kl_type,void,
 Function,+,keeloq_reset_mfname,void,
 Function,+,keeloq_reset_original_btn,void,
-Function,-,keeloq_set_btn,void,uint8_t
 Function,-,l64a,char*,long
 Function,-,labs,long,long
 Function,-,lcong48,void,unsigned short[7]
@@ -2181,10 +2181,6 @@ Function,-,nfcv_inventory,ReturnCode,uint8_t*
 Function,-,nfcv_read_blocks,ReturnCode,"NfcVReader*, NfcVData*"
 Function,-,nfcv_read_card,_Bool,"NfcVReader*, FuriHalNfcDevData*, NfcVData*"
 Function,-,nfcv_read_sysinfo,ReturnCode,"FuriHalNfcDevData*, NfcVData*"
-Function,-,nice_flors_get_custom_btn,uint8_t,
-Function,-,nice_flors_get_original_btn,uint8_t,
-Function,+,nice_flors_reset_original_btn,void,
-Function,-,nice_flors_set_btn,void,uint8_t
 Function,+,notification_internal_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_internal_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
@@ -2568,10 +2564,6 @@ Function,+,scene_manager_search_and_switch_to_previous_scene_one_of,_Bool,"Scene
 Function,+,scene_manager_set_scene_state,void,"SceneManager*, uint32_t, uint32_t"
 Function,+,scene_manager_stop,void,SceneManager*
 Function,+,sd_api_get_fs_type_text,const char*,SDFsType
-Function,-,secplus2_get_custom_btn,uint8_t,
-Function,-,secplus2_get_original_btn,uint8_t,
-Function,+,secplus2_reset_original_btn,void,
-Function,-,secplus2_set_btn,void,uint8_t
 Function,-,secure_getenv,char*,const char*
 Function,-,seed48,unsigned short*,unsigned short[3]
 Function,-,select,int,"int, fd_set*, fd_set*, fd_set*, timeval*"
@@ -2607,10 +2599,6 @@ Function,-,siprintf,int,"char*, const char*, ..."
 Function,-,siscanf,int,"const char*, const char*, ..."
 Function,-,sniprintf,int,"char*, size_t, const char*, ..."
 Function,+,snprintf,int,"char*, size_t, const char*, ..."
-Function,-,somfy_telis_get_custom_btn,uint8_t,
-Function,-,somfy_telis_get_original_btn,uint8_t,
-Function,+,somfy_telis_reset_original_btn,void,
-Function,-,somfy_telis_set_btn,void,uint8_t
 Function,-,sprintf,int,"char*, const char*, ..."
 Function,-,sqrt,double,double
 Function,-,sqrtf,float,float
@@ -2767,6 +2755,12 @@ Function,+,subghz_block_generic_deserialize,SubGhzProtocolStatus,"SubGhzBlockGen
 Function,+,subghz_block_generic_deserialize_check_count_bit,SubGhzProtocolStatus,"SubGhzBlockGeneric*, FlipperFormat*, uint16_t"
 Function,+,subghz_block_generic_get_preset_name,void,"const char*, FuriString*"
 Function,+,subghz_block_generic_serialize,SubGhzProtocolStatus,"SubGhzBlockGeneric*, FlipperFormat*, SubGhzRadioPreset*"
+Function,-,subghz_custom_btn_get,uint8_t,
+Function,-,subghz_custom_btn_get_original,uint8_t,
+Function,-,subghz_custom_btn_set,void,uint8_t
+Function,-,subghz_custom_btn_set_max,void,uint8_t
+Function,-,subghz_custom_btn_set_original,void,uint8_t
+Function,+,subghz_custom_btns_reset,void,
 Function,+,subghz_environment_alloc,SubGhzEnvironment*,
 Function,+,subghz_environment_free,void,SubGhzEnvironment*
 Function,+,subghz_environment_get_alutech_at_4n_rainbow_table_file_name,const char*,SubGhzEnvironment*
@@ -4559,6 +4553,7 @@ Function,-,uECC_sign_deterministic,int,"const uint8_t*, const uint8_t*, unsigned
 Function,-,uECC_valid_public_key,int,"const uint8_t*, uECC_Curve"
 Function,-,uECC_verify,int,"const uint8_t*, const uint8_t*, unsigned, const uint8_t*, uECC_Curve"
 Function,-,ucStreamBufferGetStreamBufferType,uint8_t,StreamBufferHandle_t
+Function,+,uint8_to_hex_chars,void,"const uint8_t*, uint8_t*, int"
 Function,-,ulTaskGenericNotifyTake,uint32_t,"UBaseType_t, BaseType_t, TickType_t"
 Function,-,ulTaskGenericNotifyValueClear,uint32_t,"TaskHandle_t, UBaseType_t, uint32_t"
 Function,-,ulTaskGetIdleRunTimeCounter,uint32_t,
@@ -4881,7 +4876,7 @@ Variable,+,gpio_usart_rx,const GpioPin,
 Variable,+,gpio_usart_tx,const GpioPin,
 Variable,+,gpio_usb_dm,const GpioPin,
 Variable,+,gpio_usb_dp,const GpioPin,
-Variable,+,ibutton_gpio,const GpioPin,
+Variable,+,gpio_ibutton,const GpioPin,
 Variable,+,input_pins,const InputPin[],
 Variable,+,input_pins_count,const size_t,
 Variable,+,lfrfid_protocols,const ProtocolBase*[],
@@ -5030,7 +5025,7 @@ Variable,+,message_red_255,const NotificationMessage,
 Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
-Variable,+,periph_power,const GpioPin,
+Variable,+,gpio_periph_power,const GpioPin,
 Variable,+,sequence_audiovisual_alert,const NotificationSequence,
 Variable,+,sequence_blink_blue_10,const NotificationSequence,
 Variable,+,sequence_blink_blue_100,const NotificationSequence,
@@ -7037,4 +7032,4 @@ Variable,+,usb_cdc_single,FuriHalUsbInterface,
 Variable,+,usb_hid,FuriHalUsbInterface,
 Variable,+,usb_hid_u2f,FuriHalUsbInterface,
 Variable,+,usbd_devfs,const usbd_driver,
-Variable,+,vibro_gpio,const GpioPin,
+Variable,+,gpio_vibro,const GpioPin,

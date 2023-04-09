@@ -1,0 +1,36 @@
+name: Discord webhook
+
+on:
+  push:
+  pull_request:
+    types:
+      - "opened"
+      - "closed"
+      - "reopened"
+  release:
+    types:
+      - "published"
+  check_suite:
+    types:
+      - "completed"
+  issues:
+    types:
+      - "opened"
+      - "closed"
+      - "reopened"
+  issue_comment:
+    types:
+      - "created"
+
+jobs:
+  webhook:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+
+      - name: Send webhook
+        env:
+          DEV_DISCORD_WEBHOOK: "https://discord.com/api/webhooks/${{ secrets.DEV_WEBHOOK_ID }}/${{ secrets.DEV_WEBHOOK_TOKEN }}"
+        run: python .github/workflow_data/discord.py

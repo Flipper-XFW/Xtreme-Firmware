@@ -1,6 +1,7 @@
 #include "usb_type_code.h"
 #include "../../services/convert/convert.h"
-#include "../constants.h"
+#include "../../types/token_info.h"
+#include "../common.h"
 
 static void totp_type_code_worker_restore_usb_mode(TotpUsbTypeCodeWorkerContext* context) {
     if(context->usb_mode_prev != NULL) {
@@ -25,18 +26,12 @@ static void totp_type_code_worker_type_code(TotpUsbTypeCodeWorkerContext* contex
 
     if(furi_hal_hid_is_connected() &&
        furi_mutex_acquire(context->string_sync, 500) == FuriStatusOk) {
-        furi_delay_ms(500);
-        i = 0;
-        while(i < context->string_length && context->string[i] != 0) {
-            uint8_t digit = CONVERT_CHAR_TO_DIGIT(context->string[i]);
-            if(digit > 9) break;
-            uint8_t hid_kb_key = hid_number_keys[digit];
-            furi_hal_hid_kb_press(hid_kb_key);
-            furi_delay_ms(30);
-            furi_hal_hid_kb_release(hid_kb_key);
-            i++;
-        }
-
+        totp_type_code_worker_execute_automation(
+            &furi_hal_hid_kb_press,
+            &furi_hal_hid_kb_release,
+            context->string,
+            context->string_length,
+            context->flags);
         furi_mutex_release(context->string_sync);
 
         furi_delay_ms(100);
@@ -46,7 +41,7 @@ static void totp_type_code_worker_type_code(TotpUsbTypeCodeWorkerContext* contex
 }
 
 static int32_t totp_type_code_worker_callback(void* context) {
-    furi_assert(context);
+    furi_check(context);
     FuriMutex* context_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(context_mutex == NULL) {
         return 251;
@@ -94,7 +89,7 @@ TotpUsbTypeCodeWorkerContext* totp_usb_type_code_worker_start(
 }
 
 void totp_usb_type_code_worker_stop(TotpUsbTypeCodeWorkerContext* context) {
-    furi_assert(context != NULL);
+    furi_check(context != NULL);
     furi_thread_flags_set(furi_thread_get_id(context->thread), TotpUsbTypeCodeWorkerEventStop);
     furi_thread_join(context->thread);
     furi_thread_free(context->thread);
@@ -104,7 +99,9 @@ void totp_usb_type_code_worker_stop(TotpUsbTypeCodeWorkerContext* context) {
 
 void totp_usb_type_code_worker_notify(
     TotpUsbTypeCodeWorkerContext* context,
-    TotpUsbTypeCodeWorkerEvent event) {
-    furi_assert(context != NULL);
+    TotpUsbTypeCodeWorkerEvent event,
+    uint8_t flags) {
+    furi_check(context != NULL);
+    context->flags = flags;
     furi_thread_flags_set(furi_thread_get_id(context->thread), event);
 }

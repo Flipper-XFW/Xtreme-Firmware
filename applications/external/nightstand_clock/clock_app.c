@@ -277,6 +277,13 @@ int32_t clock_app(void* p) {
 
     clock_state_init(plugin_state);
 
+    notif = furi_record_open(RECORD_NOTIFICATION);
+    float tmpBrightness = notif->settings.display_brightness;
+    brightness = tmpBrightness * 100; // Keep current brightness by default
+
+    notification_message(notif, &sequence_display_backlight_enforce_on);
+    notification_message(notif, &led_off);
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
@@ -300,13 +307,6 @@ int32_t clock_app(void* p) {
 
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
     //FURI_LOG_D(TAG, "Timer started");
-
-    notif = furi_record_open(RECORD_NOTIFICATION);
-    float tmpBrightness = notif->settings.display_brightness;
-    brightness = tmpBrightness * 100; // Keep current brightness by default
-
-    notification_message(notif, &sequence_display_backlight_enforce_on);
-    notification_message(notif, &led_off);
 
     // Main loop
     PluginEvent event;
@@ -354,6 +354,7 @@ int32_t clock_app(void* p) {
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
     view_port_free(view_port);
     furi_message_queue_free(plugin_state->event_queue);
     furi_mutex_free(plugin_state->mutex);

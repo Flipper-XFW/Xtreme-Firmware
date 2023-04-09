@@ -247,6 +247,7 @@ static char char_to_uppercase(const char letter) {
 static void text_input_backspace_cb(TextInputModel* model) {
     if(model->clear_default_text) {
         model->text_buffer[0] = 0;
+        model->cursor_pos = 0;
     } else if(model->cursor_pos > 0) {
         furi_string_set_str(model->temp_str, model->text_buffer);
         furi_string_replace_at(model->temp_str, model->cursor_pos - 1, 1, "");
@@ -260,6 +261,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     uint8_t text_length = model->text_buffer ? strlen(model->text_buffer) : 0;
     uint8_t needed_string_width = canvas_width(canvas) - 8;
     uint8_t start_pos = 4;
+
+    model->cursor_pos = model->cursor_pos > text_length ? text_length : model->cursor_pos;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);

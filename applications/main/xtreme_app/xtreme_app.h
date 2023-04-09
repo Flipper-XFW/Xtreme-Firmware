@@ -31,7 +31,6 @@
 ARRAY_DEF(CharList, char*)
 
 typedef struct {
-    char fap_name[32];
     Gui* gui;
     DialogsApp* dialogs;
     NotificationApp* notification;
