@@ -19,7 +19,7 @@
 #ifdef TOTP_BADBT_TYPE_ENABLED
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
-#include "../../fonts/mode-nine/mode-nine.h"
+#include "../../fonts/mode_nine/mode_nine.h"
 
 #define PROGRESS_BAR_MARGIN (3)
 #define PROGRESS_BAR_HEIGHT (4)
