@@ -15,6 +15,8 @@
 // this is the MAC address used when we do not forget paired device (BOUND STATE)
 const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
     {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
+const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
+    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 static bool bad_kb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -151,12 +153,17 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
         furi_hal_bt_set_profile_pairing_method(
             FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
     } else {
-        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->config.bt_mac);
+        if(memcmp(app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) != 0) {
+            furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->config.bt_mac);
+        }
         furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
     }
     bt_set_profile(app->bt, BtProfileHidKeyboard);
     if(strcmp(app->config.bt_name, "") == 0) {
         strcpy(app->config.bt_name, furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
+    }
+    if(memcmp(app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) == 0) {
+        memcpy(app->config.bt_mac, furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard), BAD_KB_MAC_ADDRESS_LEN);
     }
     if(app->is_bt) {
         furi_hal_bt_start_advertising();
