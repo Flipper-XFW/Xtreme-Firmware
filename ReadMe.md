@@ -123,7 +123,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Custom subghz presets
 - Multiple NFC protocols
 - Multiple Sub-Ghz protocols | Merged from Unleashed, thanks @xMasterX
-- Subghz and IR signal replication via gpio | Credits to @ankris812
+- Subghz and IR signal replication via gpio | Credits to @xMasterX
 
 - New API Routes for Locale settings
 ```
