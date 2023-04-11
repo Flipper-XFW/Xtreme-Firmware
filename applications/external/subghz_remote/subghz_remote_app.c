@@ -8,7 +8,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include <SubGHz_Remote_icons.h>
+#include <assets_icons.h>
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/path.h>
@@ -19,11 +19,9 @@
 #include <lib/subghz/types.h>
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
-#include <lib/subghz/protocols/alutech_at_4n.h>
-#include <lib/subghz/protocols/nice_flor_s.h>
-#include <lib/subghz/protocols/somfy_telis.h>
-#include <lib/subghz/protocols/secplus_v2.h>
 #include <dolphin/dolphin.h>
+
+#include <lib/subghz/blocks/custom_btn.h>
 
 #define SUBREMOTEMAP_FOLDER "/ext/subghz/remote"
 #define SUBREMOTEMAP_EXTENSION ".txt"
@@ -388,17 +386,35 @@ bool subghz_remote_key_load(
             FURI_LOG_E(TAG, "Could not read Protocol.");
             break;
         }
+
         if(!furi_string_cmp_str(preset->protocol, "RAW")) {
             subghz_protocol_raw_gen_fff_data(fff_data, path);
+            // repeat
+            if(!flipper_format_insert_or_update_uint32(fff_data, "Repeat", &preset->repeat, 1)) {
+                FURI_LOG_E(TAG, "Unable to insert or update Repeat");
+                break;
+            }
+            if(!flipper_format_rewind(fff_data)) {
+                FURI_LOG_E(TAG, "Rewind error");
+                return false;
+            }
         } else {
             stream_copy_full(
                 flipper_format_get_raw_stream(fff_file), flipper_format_get_raw_stream(fff_data));
+            // repeat
+            if(!flipper_format_insert_or_update_uint32(fff_data, "Repeat", &preset->repeat, 1)) {
+                FURI_LOG_E(TAG, "Unable to insert or update Repeat");
+                break;
+            }
+            if(!flipper_format_rewind(fff_data)) {
+                FURI_LOG_E(TAG, "Rewind error");
+                return false;
+            }
         }
 
-        // repeat
-        if(!flipper_format_insert_or_update_uint32(fff_file, "Repeat", &preset->repeat, 1)) {
-            FURI_LOG_E(TAG, "Unable to insert or update Repeat");
-            break;
+        if(!flipper_format_rewind(fff_file)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            return false;
         }
 
         preset->decoder = subghz_receiver_search_decoder_base_by_name(
@@ -437,9 +453,6 @@ bool subghz_remote_save_protocol_to_file(FlipperFormat* fff_file, const char* de
 
     path_extract_dirname(dev_file_name, file_dir);
     do {
-        flipper_format_delete_key(fff_file, "Repeat");
-        //flipper_format_delete_key(fff_file, "Manufacture");
-
         if(!storage_simply_mkdir(storage, furi_string_get_cstr(file_dir))) {
             FURI_LOG_E(TAG, "(save) Cannot mkdir");
             break;
@@ -477,23 +490,24 @@ void subghz_remote_tx_stop(SubGHzRemote* app) {
     //FURI_LOG_I(TAG, "TX Done!");
     subghz_transmitter_stop(app->tx_transmitter);
 
-    FURI_LOG_D(TAG, "Checking if protocol is dynamic");
+    //FURI_LOG_D(TAG, "Checking if protocol is dynamic");
     const SubGhzProtocolRegistry* protocol_registry_items =
         subghz_environment_get_protocol_registry(app->environment);
     const SubGhzProtocol* proto = subghz_protocol_registry_get_by_name(
         protocol_registry_items, furi_string_get_cstr(app->txpreset->protocol));
-    FURI_LOG_D(TAG, "Protocol-TYPE %d", proto->type);
+    //FURI_LOG_D(TAG, "Protocol-TYPE %d", proto->type);
+
     if(proto && proto->type == SubGhzProtocolTypeDynamic) {
-        FURI_LOG_D(TAG, "Protocol is dynamic. Saving key");
+        //FURI_LOG_D(TAG, "Protocol is dynamic. Saving key");
+        // Remove repeat if it was present
+        flipper_format_delete_key(app->tx_fff_data, "Repeat");
+
         subghz_remote_save_protocol_to_file(app->tx_fff_data, app->tx_file_path);
 
         keeloq_reset_mfname();
         keeloq_reset_kl_type();
         keeloq_reset_original_btn();
-        alutech_reset_original_btn();
-        nice_flors_reset_original_btn();
-        somfy_telis_reset_original_btn();
-        secplus2_reset_original_btn();
+        subghz_custom_btns_reset();
         star_line_reset_mfname();
         star_line_reset_kl_type();
     }
@@ -687,15 +701,15 @@ static void render_callback(Canvas* canvas, void* ctx) {
             break;
         case 2:
             canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
-            canvas_draw_icon(canvas, 116, 17, &I_Pin_arrow_down_7x9);
+            canvas_draw_icon_ex(canvas, 116, 17, &I_Pin_arrow_up_7x9, IconRotation180);
             break;
         case 3:
             canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
-            canvas_draw_icon(canvas, 115, 18, &I_Pin_arrow_right_9x7);
+            canvas_draw_icon_ex(canvas, 115, 18, &I_Pin_arrow_up_7x9, IconRotation90);
             break;
         case 4:
             canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
-            canvas_draw_icon(canvas, 115, 18, &I_Pin_arrow_left_9x7);
+            canvas_draw_icon_ex(canvas, 115, 18, &I_Pin_arrow_up_7x9, IconRotation270);
             break;
         case 5:
             canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
@@ -819,6 +833,13 @@ int32_t subghz_remote_app(void* p) {
     app->ok_file = furi_string_alloc();
 
     app->file_result = 3;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    if(!storage_simply_mkdir(storage, SUBREMOTEMAP_FOLDER)) {
+        FURI_LOG_E(TAG, "Could not create folder %s", SUBREMOTEMAP_FOLDER);
+    }
+    furi_record_close(RECORD_STORAGE);
 
     furi_string_set(app->file_path, SUBREMOTEMAP_FOLDER);
 

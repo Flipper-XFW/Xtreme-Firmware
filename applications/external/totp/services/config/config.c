@@ -1,44 +1,18 @@
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
-#include "../list/list.h"
+#include <linked_list.h>
 #include "../../types/common.h"
 #include "../../types/token_info.h"
 #include "../../features_config.h"
-#include "migrations/config_migration_v1_to_v2.h"
-#include "migrations/config_migration_v2_to_v3.h"
+#include "migrations/common_migration.h"
 
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/authenticator")
 #define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/totp.conf"
-#define CONFIG_FILE_BACKUP_PATH CONFIG_FILE_PATH ".backup"
+#define CONFIG_FILE_BACKUP_BASE_PATH CONFIG_FILE_PATH ".backup"
 #define CONFIG_FILE_TEMP_PATH CONFIG_FILE_PATH ".tmp"
 #define CONFIG_FILE_ORIG_PATH CONFIG_FILE_PATH ".orig"
 #define CONFIG_FILE_PATH_PREVIOUS EXT_PATH("apps/Misc") "/totp.conf"
-
-static char* token_info_get_algo_as_cstr(const TokenInfo* token_info) {
-    switch(token_info->algo) {
-    case SHA1:
-        return TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME;
-    case SHA256:
-        return TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME;
-    case SHA512:
-        return TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME;
-    default:
-        break;
-    }
-
-    return NULL;
-}
-
-static void token_info_set_algo_from_str(TokenInfo* token_info, const FuriString* str) {
-    if(furi_string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME) == 0) {
-        token_info->algo = SHA1;
-    } else if(furi_string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME) == 0) {
-        token_info->algo = SHA256;
-    } else if(furi_string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME) == 0) {
-        token_info->algo = SHA512;
-    }
-}
 
 /**
  * @brief Opens storage record
@@ -63,6 +37,34 @@ static void totp_close_config_file(FlipperFormat* file) {
     if(file == NULL) return;
     flipper_format_file_close(file);
     flipper_format_free(file);
+}
+
+/**
+ * @brief Tries to take a config file backup
+ * @param storage storage record
+ * @return backup path if backup successfully taken; \c NULL otherwise
+ */
+static char* totp_config_file_backup_i(Storage* storage) {
+    uint8_t backup_path_size = sizeof(CONFIG_FILE_BACKUP_BASE_PATH) + 5;
+    char* backup_path = malloc(backup_path_size);
+    furi_check(backup_path != NULL);
+    memcpy(backup_path, CONFIG_FILE_BACKUP_BASE_PATH, sizeof(CONFIG_FILE_BACKUP_BASE_PATH));
+    uint16_t i = 1;
+    bool backup_file_exists;
+    while((backup_file_exists = storage_common_exists(storage, backup_path)) && i <= 9999) {
+        snprintf(backup_path, backup_path_size, CONFIG_FILE_BACKUP_BASE_PATH ".%" PRIu16, i);
+        i++;
+    }
+
+    if(backup_file_exists ||
+       !storage_common_copy(storage, CONFIG_FILE_PATH, backup_path) == FSE_OK) {
+        FURI_LOG_E(LOGGING_TAG, "Unable to take a backup");
+        free(backup_path);
+        return NULL;
+    }
+
+    FURI_LOG_I(LOGGING_TAG, "Took config file backup to %s", backup_path);
+    return backup_path;
 }
 
 /**
@@ -165,20 +167,21 @@ static TotpConfigFileOpenResult totp_open_config_file(Storage* storage, FlipperF
 
         furi_string_printf(
             temp_str,
-            " # Token hashing algorithm to use during code generation. Supported options are %s, %s and %s. If you are not use which one to use - use %s",
-            TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME,
-            TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME,
-            TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME,
-            TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME);
+            " # Token hashing algorithm to use during code generation. Supported options are %s, %s, %s, and %s. If you are not use which one to use - use %s",
+            TOTP_TOKEN_ALGO_SHA1_NAME,
+            TOTP_TOKEN_ALGO_SHA256_NAME,
+            TOTP_TOKEN_ALGO_SHA512_NAME,
+            TOTP_TOKEN_ALGO_STEAM_NAME,
+            TOTP_TOKEN_ALGO_SHA1_NAME);
         flipper_format_write_comment(fff_data_file, temp_str);
         furi_string_printf(
-            temp_str, "%s: %s", TOTP_CONFIG_KEY_TOKEN_ALGO, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME);
+            temp_str, "%s: %s", TOTP_CONFIG_KEY_TOKEN_ALGO, TOTP_TOKEN_ALGO_SHA1_NAME);
         flipper_format_write_comment(fff_data_file, temp_str);
         flipper_format_write_comment_cstr(fff_data_file, " ");
 
         flipper_format_write_comment_cstr(
             fff_data_file,
-            "# How many digits there should be in generated code. Available options are 6 and 8. Majority websites requires 6 digits code, however some rare websites wants to get 8 digits code. If you are not sure which one to use - use 6");
+            "# How many digits there should be in generated code. Available options are 5, 6 and 8. Majority websites requires 6 digits code, however some rare websites wants to get 8 digits code. If you are not sure which one to use - use 6");
         furi_string_printf(temp_str, "%s: 6", TOTP_CONFIG_KEY_TOKEN_DIGITS);
         flipper_format_write_comment(fff_data_file, temp_str);
         flipper_format_write_comment_cstr(fff_data_file, " ");
@@ -187,6 +190,13 @@ static TotpConfigFileOpenResult totp_open_config_file(Storage* storage, FlipperF
             fff_data_file,
             "# Token lifetime duration in seconds. Should be between 15 and 255. Majority websites requires 30, however some rare websites may require custom lifetime. If you are not sure which one to use - use 30");
         furi_string_printf(temp_str, "%s: 30", TOTP_CONFIG_KEY_TOKEN_DURATION);
+        flipper_format_write_comment(fff_data_file, temp_str);
+        flipper_format_write_comment_cstr(fff_data_file, " ");
+
+        flipper_format_write_comment_cstr(
+            fff_data_file,
+            "# Token input automation features (0 - None, 1 - press \"Enter\" key at the end of automation)");
+        furi_string_printf(temp_str, "%s: 0", TOTP_CONFIG_KEY_TOKEN_AUTOMATION_FEATURES);
         flipper_format_write_comment(fff_data_file, temp_str);
         flipper_format_write_comment_cstr(fff_data_file, " ");
 
@@ -255,10 +265,24 @@ static TotpConfigFileUpdateResult
             break;
         }
 
+        tmp_uint32 = token_info->automation_features;
+        if(!flipper_format_write_uint32(
+               file, TOTP_CONFIG_KEY_TOKEN_AUTOMATION_FEATURES, &tmp_uint32, 1)) {
+            update_result = TotpConfigFileUpdateError;
+            break;
+        }
+
         update_result = TotpConfigFileUpdateSuccess;
     } while(false);
 
     return update_result;
+}
+
+char* totp_config_file_backup() {
+    Storage* storage = totp_open_storage();
+    char* result = totp_config_file_backup_i(storage);
+    totp_close_storage();
+    return result;
 }
 
 TotpConfigFileUpdateResult totp_config_file_save_new_token(const TokenInfo* token_info) {
@@ -524,59 +548,46 @@ TotpConfigFileOpenResult totp_config_file_load_base(PluginState* const plugin_st
                 CONFIG_FILE_ACTUAL_VERSION);
             totp_close_config_file(fff_data_file);
 
-            if(storage_common_stat(storage, CONFIG_FILE_BACKUP_PATH, NULL) == FSE_OK) {
-                storage_simply_remove(storage, CONFIG_FILE_BACKUP_PATH);
-            }
+            char* backup_path = totp_config_file_backup_i(storage);
 
-            if(storage_common_copy(storage, CONFIG_FILE_PATH, CONFIG_FILE_BACKUP_PATH) == FSE_OK) {
-                FURI_LOG_I(LOGGING_TAG, "Took config file backup to %s", CONFIG_FILE_BACKUP_PATH);
+            if(backup_path != NULL) {
                 if(totp_open_config_file(storage, &fff_data_file) != TotpConfigFileOpenSuccess) {
                     result = TotpConfigFileOpenError;
                     break;
                 }
 
                 FlipperFormat* fff_backup_data_file = flipper_format_file_alloc(storage);
-                if(!flipper_format_file_open_existing(
-                       fff_backup_data_file, CONFIG_FILE_BACKUP_PATH)) {
+                if(!flipper_format_file_open_existing(fff_backup_data_file, backup_path)) {
                     flipper_format_file_close(fff_backup_data_file);
                     flipper_format_free(fff_backup_data_file);
                     result = TotpConfigFileOpenError;
                     break;
                 }
 
-                if(file_version == 1) {
-                    if(totp_config_migrate_v1_to_v2(fff_data_file, fff_backup_data_file)) {
-                        FURI_LOG_I(LOGGING_TAG, "Applied migration from v1 to v2");
-                        file_version = 2;
-                    } else {
-                        FURI_LOG_W(
-                            LOGGING_TAG, "An error occurred during migration from v1 to v2");
-                        result = TotpConfigFileOpenError;
-                        break;
-                    }
-                }
-
-                if(file_version == 2) {
-                    if(totp_config_migrate_v2_to_v3(fff_data_file, fff_backup_data_file)) {
-                        FURI_LOG_I(LOGGING_TAG, "Applied migration from v2 to v3");
-                        file_version = 3;
-                    } else {
-                        FURI_LOG_W(
-                            LOGGING_TAG, "An error occurred during migration from v2 to v3");
-                        result = TotpConfigFileOpenError;
-                        break;
-                    }
+                if(totp_config_migrate_to_latest(fff_data_file, fff_backup_data_file)) {
+                    FURI_LOG_I(
+                        LOGGING_TAG,
+                        "Applied migration to version %" PRId16,
+                        CONFIG_FILE_ACTUAL_VERSION);
+                    file_version = CONFIG_FILE_ACTUAL_VERSION;
+                } else {
+                    FURI_LOG_W(
+                        LOGGING_TAG,
+                        "An error occurred during migration to version %" PRId16,
+                        CONFIG_FILE_ACTUAL_VERSION);
+                    result = TotpConfigFileOpenError;
+                    break;
                 }
 
                 flipper_format_file_close(fff_backup_data_file);
                 flipper_format_free(fff_backup_data_file);
                 flipper_format_rewind(fff_data_file);
+                free(backup_path);
             } else {
                 FURI_LOG_E(
                     LOGGING_TAG,
-                    "An error occurred during taking backup of %s into %s before migration",
-                    CONFIG_FILE_PATH,
-                    CONFIG_FILE_BACKUP_PATH);
+                    "An error occurred during taking backup of %s before migration",
+                    CONFIG_FILE_PATH);
                 result = TotpConfigFileOpenError;
                 break;
             }
@@ -707,6 +718,7 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
                        tokenInfo,
                        furi_string_get_cstr(temp_str),
                        furi_string_size(temp_str),
+                       PLAIN_TOKEN_ENCODING_BASE32,
                        &plugin_state->iv[0])) {
                     FURI_LOG_W(LOGGING_TAG, "Token \"%s\" has plain secret", tokenInfo->name);
                 } else {
@@ -743,9 +755,8 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
             }
         }
 
-        if(flipper_format_read_string(fff_data_file, TOTP_CONFIG_KEY_TOKEN_ALGO, temp_str)) {
-            token_info_set_algo_from_str(tokenInfo, temp_str);
-        } else {
+        if(!flipper_format_read_string(fff_data_file, TOTP_CONFIG_KEY_TOKEN_ALGO, temp_str) ||
+           !token_info_set_algo_from_str(tokenInfo, temp_str)) {
             tokenInfo->algo = SHA1;
         }
 
@@ -759,6 +770,13 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
                fff_data_file, TOTP_CONFIG_KEY_TOKEN_DURATION, &temp_data32, 1) ||
            !token_info_set_duration_from_int(tokenInfo, temp_data32)) {
             tokenInfo->duration = TOTP_TOKEN_DURATION_DEFAULT;
+        }
+
+        if(flipper_format_read_uint32(
+               fff_data_file, TOTP_CONFIG_KEY_TOKEN_AUTOMATION_FEATURES, &temp_data32, 1)) {
+            tokenInfo->automation_features = temp_data32;
+        } else {
+            tokenInfo->automation_features = TOKEN_AUTOMATION_FEATURE_NONE;
         }
 
         FURI_LOG_D(LOGGING_TAG, "Found token \"%s\"", tokenInfo->name);

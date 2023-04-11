@@ -6,13 +6,13 @@
 #include "../../constants.h"
 #include "../../scene_director.h"
 #include "../../../services/config/config.h"
-#include "../../../lib/list/list.h"
+#include <linked_list.h>
 #include "../../../types/token_info.h"
 #include "../generate_token/totp_scene_generate_token.h"
 #include "../add_new_token/totp_scene_add_new_token.h"
 #include "../app_settings/totp_app_settings.h"
 #include "../../../types/nullable.h"
-#include "../../../lib/roll_value/roll_value.h"
+#include <roll_value.h>
 
 #define SCREEN_HEIGHT_THIRD (SCREEN_HEIGHT / 3)
 #define SCREEN_HEIGHT_THIRD_CENTER (SCREEN_HEIGHT_THIRD >> 1)
@@ -23,10 +23,6 @@ typedef struct {
     Control selected_control;
     TotpNullable_uint16_t current_token_index;
 } SceneState;
-
-void totp_scene_token_menu_init(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
-}
 
 void totp_scene_token_menu_activate(
     PluginState* plugin_state,
@@ -203,8 +199,4 @@ void totp_scene_token_menu_deactivate(PluginState* plugin_state) {
 
     free(plugin_state->current_scene_state);
     plugin_state->current_scene_state = NULL;
-}
-
-void totp_scene_token_menu_free(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
 }

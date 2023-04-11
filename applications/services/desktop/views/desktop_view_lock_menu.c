@@ -160,10 +160,11 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
 
     if(m->show_lock_menu) {
         canvas_set_font(canvas, FontSecondary);
-        elements_bold_rounded_frame(canvas, 24, 10, 80, 44);
-        canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Keypad Lock");
-        canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, "PIN Code Lock");
-        elements_frame(canvas, 30, m->pin_lock ? 32 : 16, 68, 15);
+        elements_bold_rounded_frame(canvas, 24, 4, 80, 56);
+        canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, "Keypad Lock");
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "PIN Code Lock");
+        canvas_draw_str_aligned(canvas, 64, 48, AlignCenter, AlignCenter, "PIN Lock + OFF");
+        elements_frame(canvas, 28, 8 + m->pin_lock * 16, 72, 15);
     }
 }
 
@@ -178,7 +179,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
 
     DesktopLockMenuView* lock_menu = context;
     uint8_t idx = 0;
-    bool pin_lock = false;
+    int pin_lock = 0;
     bool show_lock_menu = false;
     bool consumed = true;
 
@@ -189,8 +190,16 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             show_lock_menu = model->show_lock_menu;
             if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
                 if(model->show_lock_menu) {
-                    if(event->key == InputKeyUp || event->key == InputKeyDown) {
-                        model->pin_lock = !model->pin_lock;
+                    if(event->key == InputKeyUp) {
+                        model->pin_lock--;
+                        if(model->pin_lock < 0) {
+                            model->pin_lock = 2;
+                        }
+                    } else if(event->key == InputKeyDown) {
+                        model->pin_lock++;
+                        if(model->pin_lock > 2) {
+                            model->pin_lock = 0;
+                        }
                     } else if(event->key == InputKeyBack || event->key == InputKeyOk) {
                         model->show_lock_menu = false;
                     }
@@ -238,10 +247,18 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     DesktopEvent desktop_event = 0;
     if(show_lock_menu) {
         if(event->key == InputKeyOk && event->type == InputTypeShort) {
-            if(pin_lock) {
-                desktop_event = DesktopLockMenuEventLockPin;
-            } else {
+            switch(pin_lock) {
+            case 0:
                 desktop_event = DesktopLockMenuEventLock;
+                break;
+            case 1:
+                desktop_event = DesktopLockMenuEventLockPin;
+                break;
+            case 2:
+                desktop_event = DesktopLockMenuEventLockPinOff;
+                break;
+            default:
+                break;
             }
         }
     } else {

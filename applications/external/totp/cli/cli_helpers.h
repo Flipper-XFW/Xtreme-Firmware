@@ -14,24 +14,13 @@
 #define DOCOPT_OPTIONS "[options]"
 #define DOCOPT_DEFAULT(val) "[default: " val "]"
 
-#define TOTP_CLI_PRINTF(format, ...)                                        \
-    do {                                                                    \
-        _Pragma(STRINGIFY(GCC diagnostic push))                             \
-            _Pragma(STRINGIFY(GCC diagnostic ignored "-Wdouble-promotion")) \
-                printf(format, ##__VA_ARGS__);                              \
-        _Pragma(STRINGIFY(GCC diagnostic pop))                              \
-    } while(false)
+#define TOTP_CLI_PRINTF(format, ...) printf(format, ##__VA_ARGS__)
 
-#define TOTP_CLI_PRINTF_COLORFUL(color, format, ...)                        \
-    do {                                                                    \
-        _Pragma(STRINGIFY(GCC diagnostic push))                             \
-            _Pragma(STRINGIFY(GCC diagnostic ignored "-Wdouble-promotion")) \
-                printf("\e[%s", color);                                     \
-        printf(format, ##__VA_ARGS__);                                      \
-        printf("\e[0m");                                                    \
-        fflush(stdout);                                                     \
-        _Pragma(STRINGIFY(GCC diagnostic pop))                              \
-    } while(false)
+#define TOTP_CLI_PRINTF_COLORFUL(color, format, ...) \
+    printf("\e[%s", color);                          \
+    printf(format, ##__VA_ARGS__);                   \
+    printf("\e[0m");                                 \
+    fflush(stdout)
 
 #define TOTP_CLI_COLOR_ERROR "91m"
 #define TOTP_CLI_COLOR_WARNING "93m"
@@ -89,3 +78,17 @@ void totp_cli_force_close_app(FuriMessageQueue* event_queue);
  * @return \c true if line successfully read and confirmed; \c false otherwise
  */
 bool totp_cli_read_line(Cli* cli, FuriString* out_str, bool mask_user_input);
+
+/**
+ * @brief Extracts \c uint8_t value and trims arguments string
+ * @param args arguments string
+ * @param[out] value parsed value
+ * @return \c true if value successfully read and parsed as \c uint8_t ; \c false otherwise
+ */
+bool args_read_uint8_and_trim(FuriString* args, uint8_t* value);
+
+/**
+ * @brief Free \c FuriString instance in a secure manner by clearing it first
+ * @param str instance to free
+ */
+void furi_string_secure_free(FuriString* str);

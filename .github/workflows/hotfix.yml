@@ -1,0 +1,63 @@
+name: "Hotfix integration"
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+
+jobs:
+  hotfix:
+    if: |
+      github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name &&
+      endsWith(github.event.pull_request.title, ' Hotfix') &&
+      github.event.review.author_association == 'OWNER' &&
+      startsWith(github.event.pull_request.title, 'V') &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.ref == 'dev' &&
+      github.event.pull_request.state == 'open' &&
+      github.event.pull_request.draft == false &&
+      github.event.review.state == 'APPROVED'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Build the firmware'
+        run: |
+          set -e
+          for TARGET in ${TARGETS}; do
+            TARGET="$(echo "${TARGET}" | sed 's/f//')"; \
+            ./fbt TARGET_HW=$TARGET updater_package
+          done
+
+      - name: "Check for uncommitted changes"
+        run: |
+          git diff --exit-code
+
+      - name: "Read version tag"
+        run: bash .github/workflow_data/version.sh
+
+      - name: "Make tgz, zip and webupdater"
+        run: bash .github/workflow_data/package.sh
+        env:
+          NC_HOST: "https://cloud.cynthialabs.net/"
+          NC_USER: "${{ secrets.NC_USER }}"
+          NC_PASS: "${{ secrets.NC_PASS }}"
+
+      - name: "Upload hotfix"
+        run: python .github/workflow_data/hotfix.py
+
+      - name: "Merge pull request"
+        uses: "pascalgn/automerge-action@v0.15.6"
+        env:
+          MERGE_LABELS: ""
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

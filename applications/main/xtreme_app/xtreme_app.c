@@ -322,7 +322,6 @@ void xtreme_app_free(XtremeApp* app) {
 extern int32_t xtreme_app(void* p) {
     UNUSED(p);
     XtremeApp* app = xtreme_app_alloc();
-    snprintf(app->fap_name, 32, "%s.fap", furi_thread_get_appid(furi_thread_get_current_id()));
     scene_manager_next_scene(app->scene_manager, XtremeAppSceneStart);
     view_dispatcher_run(app->view_dispatcher);
     xtreme_app_free(app);

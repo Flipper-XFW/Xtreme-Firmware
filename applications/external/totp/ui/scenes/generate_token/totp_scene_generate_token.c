@@ -19,9 +19,11 @@
 #ifdef TOTP_BADBT_TYPE_ENABLED
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
+#include "../../fonts/mode_nine/mode_nine.h"
 
-static const uint8_t PROGRESS_BAR_MARGIN = 3;
-static const uint8_t PROGRESS_BAR_HEIGHT = 4;
+#define PROGRESS_BAR_MARGIN (3)
+#define PROGRESS_BAR_HEIGHT (4)
+static const char* STEAM_ALGO_ALPHABET = "23456789BCDFGHJKMNPQRTVWXY";
 
 typedef struct {
     uint16_t current_token_index;
@@ -121,13 +123,21 @@ static const NotificationSequence*
     return (NotificationSequence*)scene_state->notification_sequence_badusb;
 }
 
-static void int_token_to_str(uint32_t i_token_code, char* str, TokenDigitsCount len) {
+static void
+    int_token_to_str(uint64_t i_token_code, char* str, TokenDigitsCount len, TokenHashAlgo algo) {
     if(i_token_code == OTP_ERROR) {
         memset(&str[0], '-', len);
     } else {
-        for(int i = len - 1; i >= 0; i--) {
-            str[i] = CONVERT_DIGIT_TO_CHAR(i_token_code % 10);
-            i_token_code = i_token_code / 10;
+        if(algo == STEAM) {
+            for(uint8_t i = 0; i < len; i++) {
+                str[i] = STEAM_ALGO_ALPHABET[i_token_code % 26];
+                i_token_code = i_token_code / 26;
+            }
+        } else {
+            for(int8_t i = len - 1; i >= 0; i--) {
+                str[i] = CONVERT_DIGIT_TO_CHAR(i_token_code % 10);
+                i_token_code = i_token_code / 10;
+            }
         }
     }
 
@@ -137,6 +147,7 @@ static void int_token_to_str(uint32_t i_token_code, char* str, TokenDigitsCount 
 static TOTP_ALGO get_totp_algo_impl(TokenHashAlgo algo) {
     switch(algo) {
     case SHA1:
+    case STEAM:
         return TOTP_ALGO_SHA1;
     case SHA256:
         return TOTP_ALGO_SHA256;
@@ -161,8 +172,26 @@ static void update_totp_params(PluginState* const plugin_state) {
     }
 }
 
-void totp_scene_generate_token_init(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
+static void draw_totp_code(Canvas* const canvas, const SceneState* const scene_state) {
+    uint8_t code_length = scene_state->current_token->digits;
+    uint8_t char_width = modeNine_15ptFontInfo.charInfo[0].width;
+    uint8_t total_length = code_length * (char_width + modeNine_15ptFontInfo.spacePixels);
+    uint8_t offset_x = (SCREEN_WIDTH - total_length) >> 1;
+    uint8_t offset_x_inc = char_width + modeNine_15ptFontInfo.spacePixels;
+    uint8_t offset_y = SCREEN_HEIGHT_CENTER - (modeNine_15ptFontInfo.height >> 1);
+    for(uint8_t i = 0; i < code_length; i++) {
+        char ch = scene_state->last_code[i];
+        uint8_t char_index = ch - modeNine_15ptFontInfo.startChar;
+        canvas_draw_xbm(
+            canvas,
+            offset_x,
+            offset_y,
+            char_width,
+            modeNine_15ptFontInfo.height,
+            &modeNine_15ptFontInfo.data[modeNine_15ptFontInfo.charInfo[char_index].offset]);
+
+        offset_x += offset_x_inc;
+    }
 }
 
 void totp_scene_generate_token_activate(
@@ -274,19 +303,19 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             int_token_to_str(
                 totp_at(
                     get_totp_algo_impl(tokenInfo->algo),
-                    tokenInfo->digits,
                     key,
                     key_length,
                     curr_ts,
                     plugin_state->timezone_offset,
                     tokenInfo->duration),
                 scene_state->last_code,
-                tokenInfo->digits);
+                tokenInfo->digits,
+                tokenInfo->algo);
             memset_s(key, key_length, 0, key_length);
             free(key);
         } else {
             furi_mutex_acquire(scene_state->last_code_update_sync, FuriWaitForever);
-            int_token_to_str(0, scene_state->last_code, tokenInfo->digits);
+            int_token_to_str(0, scene_state->last_code, tokenInfo->digits, tokenInfo->algo);
         }
 
         furi_mutex_release(scene_state->last_code_update_sync);
@@ -322,14 +351,7 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
         canvas_set_color(canvas, ColorBlack);
     }
 
-    canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(
-        canvas,
-        SCREEN_WIDTH_CENTER,
-        SCREEN_HEIGHT_CENTER,
-        AlignCenter,
-        AlignCenter,
-        scene_state->last_code);
+    draw_totp_code(canvas, scene_state);
 
     const uint8_t TOKEN_LIFETIME = scene_state->current_token->duration;
     float percentDone = (float)(TOKEN_LIFETIME - curr_ts % TOKEN_LIFETIME) / (float)TOKEN_LIFETIME;
@@ -350,13 +372,33 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             canvas, SCREEN_WIDTH - 9, SCREEN_HEIGHT_CENTER - 24, &I_totp_arrow_right_8x9);
     }
 
-#if defined(TOTP_BADBT_TYPE_ENABLED) && defined(TOTP_BADBT_TYPE_ICON_ENABLED)
+#ifdef TOTP_AUTOMATION_ICONS_ENABLED
+    if(plugin_state->automation_method & AutomationMethodBadUsb) {
+        canvas_draw_icon(
+            canvas,
+#ifdef TOTP_BADBT_TYPE_ENABLED
+            SCREEN_WIDTH_CENTER -
+                (plugin_state->automation_method & AutomationMethodBadBt ? 33 : 15),
+#else
+            SCREEN_WIDTH_CENTER - 15,
+#endif
+
+            SCREEN_HEIGHT_CENTER + 12,
+            &I_hid_usb_31x9);
+    }
+
+#ifdef TOTP_BADBT_TYPE_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadBt &&
        plugin_state->bt_type_code_worker_context != NULL &&
        plugin_state->bt_type_code_worker_context->is_advertising) {
         canvas_draw_icon(
-            canvas, SCREEN_WIDTH_CENTER - 5, SCREEN_HEIGHT_CENTER + 13, &I_hid_ble_10x7);
+            canvas,
+            SCREEN_WIDTH_CENTER +
+                (plugin_state->automation_method & AutomationMethodBadUsb ? 2 : -15),
+            SCREEN_HEIGHT_CENTER + 12,
+            &I_hid_ble_31x9);
     }
+#endif
 #endif
 }
 
@@ -377,7 +419,9 @@ bool totp_scene_generate_token_handle_event(
            plugin_state->automation_method & AutomationMethodBadUsb) {
             scene_state = (SceneState*)plugin_state->current_scene_state;
             totp_usb_type_code_worker_notify(
-                scene_state->usb_type_code_worker_context, TotpUsbTypeCodeWorkerEventType);
+                scene_state->usb_type_code_worker_context,
+                TotpUsbTypeCodeWorkerEventType,
+                scene_state->current_token->automation_features);
             notification_message(
                 plugin_state->notification_app,
                 get_notification_sequence_automation(plugin_state, scene_state));
@@ -389,7 +433,9 @@ bool totp_scene_generate_token_handle_event(
             plugin_state->automation_method & AutomationMethodBadBt) {
             scene_state = (SceneState*)plugin_state->current_scene_state;
             totp_bt_type_code_worker_notify(
-                plugin_state->bt_type_code_worker_context, TotpBtTypeCodeWorkerEventType);
+                plugin_state->bt_type_code_worker_context,
+                TotpBtTypeCodeWorkerEventType,
+                scene_state->current_token->automation_features);
             notification_message(
                 plugin_state->notification_app,
                 get_notification_sequence_automation(plugin_state, scene_state));
@@ -468,8 +514,4 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
 
     free(scene_state);
     plugin_state->current_scene_state = NULL;
-}
-
-void totp_scene_generate_token_free(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
 }

@@ -8,7 +8,7 @@
 #include "../../constants.h"
 #include "../../../services/config/config.h"
 #include "../../../services/convert/convert.h"
-#include "../../../lib/roll_value/roll_value.h"
+#include <roll_value.h>
 #include "../../../types/nullable.h"
 #include "../../../features_config.h"
 #ifdef TOTP_BADBT_TYPE_ENABLED
@@ -43,10 +43,6 @@ typedef struct {
     TotpNullable_uint16_t current_token_index;
     Control selected_control;
 } SceneState;
-
-void totp_scene_app_settings_init(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
-}
 
 void totp_scene_app_settings_activate(
     PluginState* plugin_state,
@@ -331,8 +327,4 @@ void totp_scene_app_settings_deactivate(PluginState* plugin_state) {
 
     free(plugin_state->current_scene_state);
     plugin_state->current_scene_state = NULL;
-}
-
-void totp_scene_app_settings_free(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
 }
