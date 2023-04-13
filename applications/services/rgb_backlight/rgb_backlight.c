@@ -63,8 +63,7 @@ const char* rgb_backlight_get_color_text(uint8_t index) {
 
 void rgb_backlight_load_settings(void) {
     //Не загружать данные из внутренней памяти при загрузке в режиме DFU
-    FuriHalRtcBootMode bm = furi_hal_rtc_get_boot_mode();
-    if(bm == FuriHalRtcBootModeDfu) {
+    if(!furi_hal_is_normal_boot()) {
         rgb_settings.settings_is_loaded = true;
         return;
     }

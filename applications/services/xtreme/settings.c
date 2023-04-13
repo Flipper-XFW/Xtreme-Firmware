@@ -15,9 +15,8 @@ void XTREME_SETTINGS_LOAD() {
     if(xtreme_settings == NULL) {
         xtreme_settings = malloc(sizeof(XtremeSettings));
         bool loaded = false;
-        bool skip = furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal;
 
-        if(skip) {
+        if(!furi_hal_is_normal_boot()) {
             FURI_LOG_W(TAG, "Load skipped. Device is in special startup mode.");
             loaded = false;
         } else {
@@ -74,7 +73,7 @@ bool XTREME_SETTINGS_SAVE() {
         XTREME_SETTINGS_LOAD();
     }
 
-    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+    if(!furi_hal_is_normal_boot()) {
         return true;
     }
 

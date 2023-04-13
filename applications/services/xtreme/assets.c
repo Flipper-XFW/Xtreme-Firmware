@@ -143,7 +143,7 @@ void XTREME_ASSETS_LOAD() {
     xtreme_assets->I_Connected_62x31 = &I_Connected_62x31;
     xtreme_assets->I_Error_62x31 = &I_Error_62x31;
 
-    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+    if(!furi_hal_is_normal_boot()) {
         FURI_LOG_W(TAG, "Load skipped. Device is in special startup mode.");
         return;
     }
