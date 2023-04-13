@@ -42,6 +42,9 @@ struct STOP_EXTERNING_ME {};
 extern "C" {
 #endif
 
+/** True if normally with all subsystems */
+bool furi_hal_is_normal_boot();
+
 /** Early FuriHal init, only essential subsystems */
 void furi_hal_init_early();
 
