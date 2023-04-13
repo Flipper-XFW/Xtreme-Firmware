@@ -478,6 +478,8 @@ int32_t infrared_app(void* p) {
 
     view_dispatcher_run(infrared->view_dispatcher);
 
+    furi_hal_power_disable_otg();
+
     infrared_free(infrared);
     return 0;
 }
