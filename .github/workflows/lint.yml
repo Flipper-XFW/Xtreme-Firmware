@@ -1,4 +1,4 @@
-name: 'Lint formatting'
+name: 'Lint'
 
 on:
   push:
