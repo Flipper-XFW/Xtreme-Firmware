@@ -1,4 +1,4 @@
-name: 'Check submodules'
+name: 'Submodules'
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  check_protobuf:
+  submodules:
     runs-on: ubuntu-latest
     steps:
 

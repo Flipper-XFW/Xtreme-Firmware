@@ -1,4 +1,4 @@
-name: "Release integration"
+name: 'Release'
 
 on:
   pull_request_review:

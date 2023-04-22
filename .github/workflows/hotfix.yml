@@ -1,4 +1,4 @@
-name: "Hotfix integration"
+name: "Hotfix"
 
 on:
   pull_request_review:
