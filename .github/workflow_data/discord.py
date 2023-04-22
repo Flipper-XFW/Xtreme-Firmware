@@ -9,7 +9,7 @@ if __name__ == "__main__":
     with open(os.environ["GITHUB_EVENT_PATH"], "r") as f:
         event = json.load(f)
 
-    webhook = "DEV_DISCORD_WEBHOOK"
+    webhook = "DEV_WEBHOOK"
     title = desc = url = ""
     color = 0
     fields = []
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             title = f"Pull Request {event['action'].title()} ({branch}): {name}"
             match event["action"]:
                 case "opened":
-                    desc = (event["body"][:2045] + "...") if len(event["body"]) > 2048 else event["body"]
+                    desc = (pr["body"][:2045] + "...") if len(pr["body"]) > 2048 else pr["body"]
                     color = 3669797
 
                     fields.append(
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         case "release":
             match event["action"]:
                 case "published":
-                    webhook = "DEV_DISCORD_WEBHOOK"
+                    webhook = "RELEASE_WEBHOOK"
                     color = 13845998
                     title = f"New Release published: {event['name']}"
                     desc += f"Changelog:"
@@ -122,6 +122,45 @@ if __name__ == "__main__":
                         )
                 case _:
                     sys.exit(1)
+
+        case "workflow_run":
+            run = event["workflow_run"]
+            url = run["html_url"]
+            title = "Workflow "
+            match run["conclusion"]:
+                case "action_required":
+                    title += "Requires Attention"
+                    color = 16751872
+                case "failure":
+                    title += "Failed"
+                    color = 16723712
+                case _:
+                    sys.exit(0)
+            title += f": {run['name']}"
+
+        case "issues":
+            issue = event["issue"]
+            url = issue["html_url"]
+            name = issue["title"][:50] + ("..." if len(issue["title"]) > 50 else "")
+            title = f"Issue {event['action'].title()}: {name}"
+            match event["action"]:
+                case "opened":
+                    desc = (issue["body"][:2045] + "...") if len(issue["body"]) > 2048 else issue["body"]
+                    color = 3669797
+                case "closed":
+                    color = 16723712
+                case "reopened":
+                    color = 16751872
+                case _:
+                    sys.exit(1)
+
+        case "issue_comment":
+            comment = event["comment"]
+            issue = event["issue"]
+            url = comment["html_url"]
+            title = f"New Comment on Issue: {issue['title']}"
+            color = 3669797
+            desc = (comment["body"][:2045] + "...") if len(comment["body"]) > 2048 else comment["body"]
 
         case _:
             sys.exit(1)
