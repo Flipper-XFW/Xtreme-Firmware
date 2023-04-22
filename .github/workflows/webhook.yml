@@ -18,7 +18,6 @@ on:
       - "Release"
       - "SonarCloud"
       - "Submodules"
-      - "Webhook"
     types:
       - "completed"
   issues:
