@@ -21,6 +21,7 @@ static const char* flipper_app_name[] = {
     [ArchiveFileTypeU2f] = "U2F",
     [ArchiveFileTypeApplication] = "Apps",
     [ArchiveFileTypeUpdateManifest] = "UpdaterApp",
+    [ArchiveFileTypeFolder] = "Archive",
 };
 
 static void archive_loader_callback(const void* message, void* context) {
@@ -107,7 +108,11 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
-            if(archive_is_known_app(selected->type)) {
+            if(selected->type == ArchiveFileTypeFolder) {
+                archive_switch_tab(browser, TAB_LEFT);
+                archive_show_file_menu(browser, false);
+                archive_enter_dir(browser, selected->path);
+            } else if(archive_is_known_app(selected->type)) {
                 archive_run_in_app(browser, selected);
                 archive_show_file_menu(browser, false);
             }
