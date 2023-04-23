@@ -23,6 +23,7 @@ typedef struct {
     const char* header;
     char* text_buffer;
     size_t text_buffer_size;
+    size_t minimum_length;
     bool clear_default_text;
     FuriString* temp_str;
 
@@ -441,7 +442,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
                model->text_buffer, model->validator_text, model->validator_callback_context))) {
             model->validator_message_visible = true;
             furi_timer_start(text_input->timer, furi_kernel_get_tick_frequency() * 4);
-        } else if(model->callback != 0 && text_length > 0) {
+        } else if(model->callback != 0 && text_length >= model->minimum_length) {
             model->callback(model->callback_context);
         }
     } else if(selected == SWITCH_KEYBOARD_KEY) {
@@ -631,6 +632,7 @@ void text_input_reset(TextInput* text_input) {
             model->selected_row = 0;
             model->selected_column = 0;
             model->selected_keyboard = 0;
+            model->minimum_length = 1;
             model->clear_default_text = false;
             model->cursor_pos = 0;
             model->cursor_select = false;
@@ -677,6 +679,18 @@ void text_input_set_result_callback(
             } else {
                 model->cursor_pos = 0;
             }
+        },
+        true);
+}
+
+void text_input_set_minimum_length(
+    TextInput* text_input,
+    size_t minimum_length) {
+    with_view_model(
+        text_input->view,
+        TextInputModel * model,
+        {
+            model->minimum_length = minimum_length;
         },
         true);
 }
