@@ -24,12 +24,13 @@ if __name__ == "__main__":
                 else f"{count} New Commit{'' if count == 1 else 's'}"
             )
             desc = f"[**{change}**]({event['compare']}) | [{branch}]({event['repository']['html_url']}/tree/{branch})\n"
-            for commit in event["commits"][:10]:
-                msg = commit['message'].splitlines()[0]
+            for i, commit in enumerate(event["commits"]):
+                msg = commit['message'].splitlines()[0].replace("`", "")
                 msg = msg[:50] + ("..." if len(msg) > 50 else "")
                 desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {msg} - [__{commit['author']['username']}__](https://github.com/{commit['author']['username']})"
-            if count > 10:
-                desc += f"\n+ {count - 10} more commits"
+                if len(desc) > 2020:
+                    desc = desc.rsplit("\n", 1)[0] + f"\n+ {count - i} more commits"
+                    break
             url = event["compare"]
             color = 16723712 if event["forced"] else 3669797
 
