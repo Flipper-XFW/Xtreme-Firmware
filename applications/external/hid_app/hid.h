@@ -17,11 +17,13 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include "views/hid_keynote.h"
+#include "views/hid_keynote_vertical.h"
 #include "views/hid_keyboard.h"
 #include "views/hid_media.h"
 #include "views/hid_mouse.h"
 #include "views/hid_mouse_jiggler.h"
 #include "views/hid_tiktok.h"
+#include "views/hid_ytshorts.h"
 
 #define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
@@ -40,11 +42,13 @@ struct Hid {
     Submenu* device_type_submenu;
     DialogEx* dialog;
     HidKeynote* hid_keynote;
+    HidKeynoteVertical* hid_keynote_vertical;
     HidKeyboard* hid_keyboard;
     HidMedia* hid_media;
     HidMouse* hid_mouse;
     HidMouseJiggler* hid_mouse_jiggler;
     HidTikTok* hid_tiktok;
+    HidYTShorts* hid_ytshorts;
 
     HidTransport transport;
     uint32_t view_id;

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,21.0,,
+Version,+,23.0,,
 Header,+,applications/main/fap_loader/fap_loader_app.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -219,17 +219,17 @@ Header,+,lib/toolbox/value_index.h,,
 Header,+,lib/toolbox/version.h,,
 Header,+,lib/u8g2/u8g2.h,,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
-Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, LL_ADC_CommonInitTypeDef*"
+Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, const LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
 Function,-,LL_ADC_DeInit,ErrorStatus,ADC_TypeDef*
-Function,-,LL_ADC_INJ_Init,ErrorStatus,"ADC_TypeDef*, LL_ADC_INJ_InitTypeDef*"
+Function,-,LL_ADC_INJ_Init,ErrorStatus,"ADC_TypeDef*, const LL_ADC_INJ_InitTypeDef*"
 Function,-,LL_ADC_INJ_StructInit,void,LL_ADC_INJ_InitTypeDef*
-Function,-,LL_ADC_Init,ErrorStatus,"ADC_TypeDef*, LL_ADC_InitTypeDef*"
-Function,-,LL_ADC_REG_Init,ErrorStatus,"ADC_TypeDef*, LL_ADC_REG_InitTypeDef*"
+Function,-,LL_ADC_Init,ErrorStatus,"ADC_TypeDef*, const LL_ADC_InitTypeDef*"
+Function,-,LL_ADC_REG_Init,ErrorStatus,"ADC_TypeDef*, const LL_ADC_REG_InitTypeDef*"
 Function,-,LL_ADC_REG_StructInit,void,LL_ADC_REG_InitTypeDef*
 Function,-,LL_ADC_StructInit,void,LL_ADC_InitTypeDef*
 Function,-,LL_COMP_DeInit,ErrorStatus,COMP_TypeDef*
-Function,+,LL_COMP_Init,ErrorStatus,"COMP_TypeDef*, LL_COMP_InitTypeDef*"
+Function,+,LL_COMP_Init,ErrorStatus,"COMP_TypeDef*, const LL_COMP_InitTypeDef*"
 Function,-,LL_COMP_StructInit,void,LL_COMP_InitTypeDef*
 Function,-,LL_CRC_DeInit,ErrorStatus,CRC_TypeDef*
 Function,-,LL_CRS_DeInit,ErrorStatus,
@@ -248,10 +248,10 @@ Function,-,LL_I2C_StructInit,void,LL_I2C_InitTypeDef*
 Function,-,LL_Init1msTick,void,uint32_t
 Function,+,LL_LPTIM_DeInit,ErrorStatus,LPTIM_TypeDef*
 Function,-,LL_LPTIM_Disable,void,LPTIM_TypeDef*
-Function,+,LL_LPTIM_Init,ErrorStatus,"LPTIM_TypeDef*, LL_LPTIM_InitTypeDef*"
+Function,+,LL_LPTIM_Init,ErrorStatus,"LPTIM_TypeDef*, const LL_LPTIM_InitTypeDef*"
 Function,-,LL_LPTIM_StructInit,void,LL_LPTIM_InitTypeDef*
-Function,-,LL_LPUART_DeInit,ErrorStatus,USART_TypeDef*
-Function,+,LL_LPUART_Init,ErrorStatus,"USART_TypeDef*, LL_LPUART_InitTypeDef*"
+Function,-,LL_LPUART_DeInit,ErrorStatus,const USART_TypeDef*
+Function,+,LL_LPUART_Init,ErrorStatus,"USART_TypeDef*, const LL_LPUART_InitTypeDef*"
 Function,-,LL_LPUART_StructInit,void,LL_LPUART_InitTypeDef*
 Function,-,LL_PKA_DeInit,ErrorStatus,PKA_TypeDef*
 Function,-,LL_PKA_Init,ErrorStatus,"PKA_TypeDef*, LL_PKA_InitTypeDef*"
@@ -296,23 +296,23 @@ Function,+,LL_SPI_Init,ErrorStatus,"SPI_TypeDef*, LL_SPI_InitTypeDef*"
 Function,-,LL_SPI_StructInit,void,LL_SPI_InitTypeDef*
 Function,-,LL_SetFlashLatency,ErrorStatus,uint32_t
 Function,+,LL_SetSystemCoreClock,void,uint32_t
-Function,-,LL_TIM_BDTR_Init,ErrorStatus,"TIM_TypeDef*, LL_TIM_BDTR_InitTypeDef*"
+Function,-,LL_TIM_BDTR_Init,ErrorStatus,"TIM_TypeDef*, const LL_TIM_BDTR_InitTypeDef*"
 Function,-,LL_TIM_BDTR_StructInit,void,LL_TIM_BDTR_InitTypeDef*
 Function,+,LL_TIM_DeInit,ErrorStatus,TIM_TypeDef*
-Function,-,LL_TIM_ENCODER_Init,ErrorStatus,"TIM_TypeDef*, LL_TIM_ENCODER_InitTypeDef*"
+Function,-,LL_TIM_ENCODER_Init,ErrorStatus,"TIM_TypeDef*, const LL_TIM_ENCODER_InitTypeDef*"
 Function,-,LL_TIM_ENCODER_StructInit,void,LL_TIM_ENCODER_InitTypeDef*
-Function,-,LL_TIM_HALLSENSOR_Init,ErrorStatus,"TIM_TypeDef*, LL_TIM_HALLSENSOR_InitTypeDef*"
+Function,-,LL_TIM_HALLSENSOR_Init,ErrorStatus,"TIM_TypeDef*, const LL_TIM_HALLSENSOR_InitTypeDef*"
 Function,-,LL_TIM_HALLSENSOR_StructInit,void,LL_TIM_HALLSENSOR_InitTypeDef*
-Function,-,LL_TIM_IC_Init,ErrorStatus,"TIM_TypeDef*, uint32_t, LL_TIM_IC_InitTypeDef*"
+Function,-,LL_TIM_IC_Init,ErrorStatus,"TIM_TypeDef*, uint32_t, const LL_TIM_IC_InitTypeDef*"
 Function,-,LL_TIM_IC_StructInit,void,LL_TIM_IC_InitTypeDef*
-Function,+,LL_TIM_Init,ErrorStatus,"TIM_TypeDef*, LL_TIM_InitTypeDef*"
-Function,+,LL_TIM_OC_Init,ErrorStatus,"TIM_TypeDef*, uint32_t, LL_TIM_OC_InitTypeDef*"
+Function,+,LL_TIM_Init,ErrorStatus,"TIM_TypeDef*, const LL_TIM_InitTypeDef*"
+Function,+,LL_TIM_OC_Init,ErrorStatus,"TIM_TypeDef*, uint32_t, const LL_TIM_OC_InitTypeDef*"
 Function,-,LL_TIM_OC_StructInit,void,LL_TIM_OC_InitTypeDef*
 Function,-,LL_TIM_StructInit,void,LL_TIM_InitTypeDef*
-Function,-,LL_USART_ClockInit,ErrorStatus,"USART_TypeDef*, LL_USART_ClockInitTypeDef*"
+Function,-,LL_USART_ClockInit,ErrorStatus,"USART_TypeDef*, const LL_USART_ClockInitTypeDef*"
 Function,-,LL_USART_ClockStructInit,void,LL_USART_ClockInitTypeDef*
-Function,-,LL_USART_DeInit,ErrorStatus,USART_TypeDef*
-Function,+,LL_USART_Init,ErrorStatus,"USART_TypeDef*, LL_USART_InitTypeDef*"
+Function,-,LL_USART_DeInit,ErrorStatus,const USART_TypeDef*
+Function,+,LL_USART_Init,ErrorStatus,"USART_TypeDef*, const LL_USART_InitTypeDef*"
 Function,-,LL_USART_StructInit,void,LL_USART_InitTypeDef*
 Function,-,LL_mDelay,void,uint32_t
 Function,-,SK6805_get_led_count,uint8_t,
@@ -1179,6 +1179,7 @@ Function,+,furi_hal_crypto_verify_enclave,_Bool,"uint8_t*, uint8_t*"
 Function,+,furi_hal_crypto_verify_key,_Bool,uint8_t
 Function,+,furi_hal_debug_disable,void,
 Function,+,furi_hal_debug_enable,void,
+Function,+,furi_hal_debug_is_gdb_session_active,_Bool,
 Function,-,furi_hal_deinit_early,void,
 Function,-,furi_hal_flash_erase,void,uint8_t
 Function,-,furi_hal_flash_get_base,size_t,
@@ -1312,7 +1313,6 @@ Function,-,furi_hal_os_init,void,
 Function,+,furi_hal_os_tick,void,
 Function,+,furi_hal_power_check_otg_status,void,
 Function,+,furi_hal_power_debug_get,void,"PropertyValueCallback, void*"
-Function,+,furi_hal_power_deep_sleep_available,_Bool,
 Function,+,furi_hal_power_disable_external_3_3v,void,
 Function,+,furi_hal_power_disable_otg,void,
 Function,+,furi_hal_power_enable_external_3_3v,void,
@@ -1413,6 +1413,7 @@ Function,+,furi_hal_rtc_set_locale_units,void,FuriHalRtcLocaleUnits
 Function,+,furi_hal_rtc_set_log_level,void,uint8_t
 Function,+,furi_hal_rtc_set_pin_fails,void,uint32_t
 Function,+,furi_hal_rtc_set_register,void,"FuriHalRtcRegister, uint32_t"
+Function,+,furi_hal_rtc_sync_shadow,void,
 Function,+,furi_hal_rtc_validate_datetime,_Bool,FuriHalRtcDateTime*
 Function,+,furi_hal_speaker_acquire,_Bool,uint32_t
 Function,-,furi_hal_speaker_deinit,void,
@@ -1448,6 +1449,7 @@ Function,+,furi_hal_subghz_get_lqi,uint8_t,
 Function,+,furi_hal_subghz_get_radio_type,SubGhzRadioType,
 Function,+,furi_hal_subghz_get_rolling_counter_mult,uint8_t,
 Function,+,furi_hal_subghz_get_rssi,float,
+Function,+,furi_hal_subghz_get_timestamp_file_names,_Bool,
 Function,+,furi_hal_subghz_idle,void,
 Function,-,furi_hal_subghz_init,void,
 Function,+,furi_hal_subghz_init_check,_Bool,
@@ -1471,6 +1473,7 @@ Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
 Function,+,furi_hal_subghz_set_radio_type,_Bool,SubGhzRadioType
 Function,+,furi_hal_subghz_set_rolling_counter_mult,void,uint8_t
+Function,+,furi_hal_subghz_set_timestamp_file_names,void,_Bool
 Function,-,furi_hal_subghz_shutdown,void,
 Function,+,furi_hal_subghz_sleep,void,
 Function,+,furi_hal_subghz_start_async_rx,void,"FuriHalSubGhzCaptureCallback, void*"
@@ -2265,6 +2268,7 @@ Function,+,power_get_settings_events_pubsub,FuriPubSub*,Power*
 Function,+,power_is_battery_healthy,_Bool,Power*
 Function,+,power_off,void,Power*
 Function,+,power_reboot,void,PowerBootMode
+Function,+,power_trigger_ui_update,void,Power*
 Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
@@ -2523,7 +2527,8 @@ Function,-,roundl,long double,long double
 Function,+,rpc_session_close,void,RpcSession*
 Function,+,rpc_session_feed,size_t,"RpcSession*, uint8_t*, size_t, TickType_t"
 Function,+,rpc_session_get_available_size,size_t,RpcSession*
-Function,+,rpc_session_open,RpcSession*,Rpc*
+Function,+,rpc_session_get_owner,RpcOwner,RpcSession*
+Function,+,rpc_session_open,RpcSession*,"Rpc*, RpcOwner"
 Function,+,rpc_session_set_buffer_is_empty_callback,void,"RpcSession*, RpcBufferIsEmptyCallback"
 Function,+,rpc_session_set_close_callback,void,"RpcSession*, RpcSessionClosedCallback"
 Function,+,rpc_session_set_context,void,"RpcSession*, void*"
@@ -2758,7 +2763,7 @@ Function,+,subghz_block_generic_get_preset_name,void,"const char*, FuriString*"
 Function,+,subghz_block_generic_serialize,SubGhzProtocolStatus,"SubGhzBlockGeneric*, FlipperFormat*, SubGhzRadioPreset*"
 Function,-,subghz_custom_btn_get,uint8_t,
 Function,-,subghz_custom_btn_get_original,uint8_t,
-Function,-,subghz_custom_btn_set,void,uint8_t
+Function,+,subghz_custom_btn_set,void,uint8_t
 Function,-,subghz_custom_btn_set_max,void,uint8_t
 Function,-,subghz_custom_btn_set_original,void,uint8_t
 Function,+,subghz_custom_btns_reset,void,
@@ -4876,6 +4881,8 @@ Variable,+,gpio_spi_r_sck,const GpioPin,
 Variable,+,gpio_spi_r_sck_ext,const GpioPin,
 Variable,+,gpio_subghz_cs,const GpioPin,
 Variable,+,gpio_subghz_cs_ext,const GpioPin,
+Variable,+,gpio_swclk,const GpioPin,
+Variable,+,gpio_swdio,const GpioPin,
 Variable,+,gpio_usart_rx,const GpioPin,
 Variable,+,gpio_usart_tx,const GpioPin,
 Variable,+,gpio_usb_dm,const GpioPin,

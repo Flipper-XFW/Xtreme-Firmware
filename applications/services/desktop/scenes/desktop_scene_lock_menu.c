@@ -28,6 +28,8 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
     desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop->settings.pin_code.length > 0);
+    desktop_lock_menu_set_stealth_mode_state(
+        desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
     desktop_lock_menu_set_idx(desktop->lock_menu, 3);
 
     Gui* gui = furi_record_open(RECORD_GUI);
@@ -128,6 +130,12 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             loader_start(
                 desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/.Main/xtreme_app.fap"));
             consumed = true;
+            break;
+        case DesktopLockMenuEventStealthModeOn:
+            desktop_set_stealth_mode_state(desktop, true);
+            break;
+        case DesktopLockMenuEventStealthModeOff:
+            desktop_set_stealth_mode_state(desktop, false);
             break;
         default:
             break;

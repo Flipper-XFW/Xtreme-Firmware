@@ -52,6 +52,10 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
 
 void subghz_scene_transmitter_on_enter(void* context) {
     SubGhz* subghz = context;
+
+    keeloq_reset_original_btn();
+    subghz_custom_btns_reset();
+
     if(!subghz_scene_transmitter_update_data_show(subghz)) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventViewTransmitterError);
@@ -74,9 +78,7 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
             }
             if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
-                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
-                } else {
+                if(subghz_tx_start(subghz, subghz->txrx->fff_data)) {
                     subghz->state_notifications = SubGhzNotificationStateTx;
                     subghz_scene_transmitter_update_data_show(subghz);
                     DOLPHIN_DEED(DolphinDeedSubGhzSend);

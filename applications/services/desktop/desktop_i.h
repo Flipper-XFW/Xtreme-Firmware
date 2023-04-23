@@ -58,6 +58,7 @@ struct Desktop {
     DesktopViewPinInput* pin_input_view;
 
     ViewPort* lock_icon_viewport;
+    ViewPort* stealth_mode_icon_viewport;
 
     AnimationManager* animation_manager;
 
@@ -77,3 +78,4 @@ Desktop* desktop_alloc();
 void desktop_free(Desktop* desktop);
 void desktop_lock(Desktop* desktop);
 void desktop_unlock(Desktop* desktop);
+void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled);

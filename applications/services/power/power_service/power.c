@@ -512,6 +512,10 @@ static void power_check_battery_level_change(Power* power) {
     }
 }
 
+void power_trigger_ui_update(Power* power) {
+    view_port_update(power->battery_view_port);
+}
+
 int32_t power_srv(void* p) {
     UNUSED(p);
 
@@ -543,7 +547,9 @@ int32_t power_srv(void* p) {
         power_check_battery_level_change(power);
 
         // Update battery view port
-        if(need_refresh) view_port_update(power->battery_view_port);
+        if(need_refresh) {
+            view_port_update(power->battery_view_port);
+        }
 
         // Check OTG status and disable it in case of fault
         if(furi_hal_power_is_otg_enabled()) {
