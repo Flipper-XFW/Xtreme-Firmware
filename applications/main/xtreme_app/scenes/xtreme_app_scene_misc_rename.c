@@ -34,6 +34,8 @@ void xtreme_app_scene_misc_rename_on_enter(void* context) {
 
     text_input_set_validator(text_input, xtreme_app_scene_misc_rename_validator, NULL);
 
+    text_input_set_minimum_length(text_input, 0);
+
     text_input_set_result_callback(
         text_input,
         xtreme_app_scene_misc_rename_text_input_callback,
