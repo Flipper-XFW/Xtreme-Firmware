@@ -39,7 +39,7 @@ if __name__ == "__main__":
             url = pr["html_url"]
             branch = pr["base"]["ref"] + (
                 ""
-                if pr["base"]["full_name"] != pr["head"]["full_name"]
+                if pr["base"]["repo"]["full_name"] != pr["head"]["repo"]["full_name"]
                 else f" <- {pr['head']['ref']}"
             )
             name = pr["title"][:50] + ("..." if len(pr["title"]) > 50 else "")
