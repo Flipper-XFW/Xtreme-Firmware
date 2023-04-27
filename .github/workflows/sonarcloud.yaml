@@ -1,4 +1,4 @@
-name: 'SonarCloud analysis'
+name: 'SonarCloud'
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ env:
   DEFAULT_TARGET: f7
 
 jobs:
-  analyze:
+  sonarcloud:
     runs-on: ubuntu-latest
     env:
       SONAR_SCANNER_VERSION: 4.7.0.2747

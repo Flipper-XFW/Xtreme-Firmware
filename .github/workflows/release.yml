@@ -1,4 +1,4 @@
-name: "Release integration"
+name: 'Release'
 
 on:
   pull_request_review:
@@ -69,8 +69,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            dist/${{ env.ARTIFACT_TGZ }}
-            dist/${{ env.ARTIFACT_ZIP }}
+            ${{ env.ARTIFACT_TGZ }}
+            ${{ env.ARTIFACT_ZIP }}
           name: "${{ env.VERSION_TAG }}"
           tag_name: "${{ env.VERSION_TAG }}"
           target_commitish: ${{ github.event.pull_request.base.ref }}

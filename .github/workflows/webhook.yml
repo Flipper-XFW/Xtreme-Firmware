@@ -1,4 +1,4 @@
-name: Discord webhook
+name: 'Webhook'
 
 on:
   push:
@@ -10,7 +10,14 @@ on:
   release:
     types:
       - "published"
-  check_suite:
+  workflow_run:
+    workflows:
+      - "Build"
+      - "Hotfix"
+      - "Lint"
+      - "Release"
+      - "SonarCloud"
+      - "Submodules"
     types:
       - "completed"
   issues:
@@ -32,5 +39,5 @@ jobs:
 
       - name: Send webhook
         env:
-          DEV_DISCORD_WEBHOOK: "https://discord.com/api/webhooks/${{ secrets.DEV_WEBHOOK_ID }}/${{ secrets.DEV_WEBHOOK_TOKEN }}"
-        run: python .github/workflow_data/discord.py
+          DEV_WEBHOOK: "https://discord.com/api/webhooks/${{ secrets.DEV_WEBHOOK_ID }}/${{ secrets.DEV_WEBHOOK_TOKEN }}"
+        run: python .github/workflow_data/webhook.py

@@ -1,4 +1,4 @@
-name: 'Build artifact'
+name: 'Build'
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
         with:
           name: updater
           path: |
-            dist/${{ env.DEFAULT_TARGET }}-*
+            dist/${{ env.DEFAULT_TARGET }}-*/${{ env.DEFAULT_TARGET }}-update-*/
 
       # - name: 'Find Previous Comment'
       #   if: ${{ github.event.pull_request }}
