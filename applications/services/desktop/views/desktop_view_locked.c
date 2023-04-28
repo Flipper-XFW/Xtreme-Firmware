@@ -67,22 +67,24 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     DesktopViewLockedModel* model = m;
     int y = model->cover_offset;
     char time_str[9];
+    char second_str[5];
     char date_str[14];
     char meridian_str[3];
     FuriHalRtcDateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     LocaleTimeFormat time_format = locale_get_time_format();
     LocaleDateFormat date_format = locale_get_date_format();
+    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
+    bool pm;
     if(time_format == LocaleTimeFormat24h) {
-        snprintf(time_str, 9, "%.2d:%.2d", datetime.hour, datetime.minute);
+        pm = false;
     } else {
-        bool pm = datetime.hour > 12;
-        bool pm12 = datetime.hour >= 12;
-        snprintf(
-            time_str, 9, "%.2d:%.2d", pm ? datetime.hour - 12 : datetime.hour, datetime.minute);
-        snprintf(meridian_str, 3, pm12 ? "PM" : "AM");
+        pm = datetime.hour > 12;
+        snprintf(meridian_str, 3, datetime.hour >= 12 ? "PM" : "AM");
     }
+    snprintf(time_str, 9, "%.2d:%.2d", pm ? datetime.hour - 12 : datetime.hour, datetime.minute);
+    snprintf(second_str, 5, ":%.2d", datetime.second);
 
     if(date_format == LocaleDateFormatYMD) {
         snprintf(date_str, 14, "%.4d-%.2d-%.2d", datetime.year, datetime.month, datetime.day);
@@ -92,15 +94,19 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         snprintf(date_str, 14, "%.2d-%.2d-%.4d", datetime.day, datetime.month, datetime.year);
     }
 
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     canvas_draw_icon(canvas, 0, 0 + y, XTREME_ASSETS()->I_Lockscreen);
     if(xtreme_settings->lockscreen_time) {
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str(canvas, 0, 64 + y, time_str);
-        if(time_format == LocaleTimeFormat12h) {
-            int meridian_offset = canvas_string_width(canvas, time_str) + 2;
+        int offset = canvas_string_width(canvas, time_str) + 2;
+        if(xtreme_settings->lockscreen_seconds) {
             canvas_set_font(canvas, FontSecondary);
-            canvas_draw_str(canvas, 0 + meridian_offset, 64 + y, meridian_str);
+            canvas_draw_str(canvas, 0 + offset, 64 + y, second_str);
+            offset += canvas_string_width(canvas, ":00") + 2;
+        }
+        if(time_format == LocaleTimeFormat12h) {
+            canvas_set_font(canvas, FontKeyboard);
+            canvas_draw_str(canvas, 0 + offset, 64 + y, meridian_str);
         }
     }
     if(xtreme_settings->lockscreen_date) {

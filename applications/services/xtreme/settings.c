@@ -51,6 +51,7 @@ void XTREME_SETTINGS_LOAD() {
             xtreme_settings->fallback_anim = true; // ON
             xtreme_settings->wii_menu = true; // ON
             xtreme_settings->lockscreen_time = true; // ON
+            xtreme_settings->lockscreen_seconds = false; // ON
             xtreme_settings->lockscreen_date = true; // ON
             xtreme_settings->lockscreen_statusbar = true; // ON
             xtreme_settings->lockscreen_prompt = true; // ON

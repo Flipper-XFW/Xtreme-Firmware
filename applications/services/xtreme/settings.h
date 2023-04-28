@@ -13,7 +13,7 @@ extern "C" {
 
 #define MAX_PACK_NAME_LEN 32
 
-#define XTREME_SETTINGS_VERSION (10)
+#define XTREME_SETTINGS_VERSION (11)
 #define XTREME_SETTINGS_MAGIC (0x69)
 #define XTREME_SETTINGS_OLD_INT_PATH INT_PATH(".xtreme.settings")
 #define XTREME_SETTINGS_OLD_PATH EXT_PATH(".xtreme.settings")
@@ -29,6 +29,7 @@ typedef struct {
     bool fallback_anim;
     bool wii_menu;
     bool lockscreen_time;
+    bool lockscreen_seconds;
     bool lockscreen_date;
     bool lockscreen_statusbar;
     bool lockscreen_prompt;
