@@ -243,7 +243,8 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
                     if(lfs_file_open(lfs, &file, ".cnt.u2f", LFS_O_WRONLY | LFS_O_CREAT) == 0) {
                         lfs_file_write(lfs, &file, cnt, cnt_size);
                         lfs_file_close(lfs, &file);
-                        if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_WRONLY | LFS_O_CREAT) == 0) {
+                        if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_WRONLY | LFS_O_CREAT) ==
+                           0) {
                             lfs_file_write(lfs, &file, key, key_size);
                             lfs_file_close(lfs, &file);
                         }
