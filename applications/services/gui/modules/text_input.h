@@ -70,9 +70,7 @@ void text_input_set_validator(
     TextInputValidatorCallback callback,
     void* callback_context);
 
-void text_input_set_minimum_length(
-    TextInput* text_input,
-    size_t minimum_length);
+void text_input_set_minimum_length(TextInput* text_input, size_t minimum_length);
 
 TextInputValidatorCallback text_input_get_validator_callback(TextInput* text_input);
 

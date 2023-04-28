@@ -228,8 +228,8 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
                 value,
                 sizeof(value),
                 "%lu.%luV",
-                    (uint32_t)(info->voltage_battery_charge_limit),
-                    (uint32_t)(info->voltage_battery_charge_limit * 10) % 10);
+                (uint32_t)(info->voltage_battery_charge_limit),
+                (uint32_t)(info->voltage_battery_charge_limit * 10) % 10);
         } else {
             snprintf(header, sizeof(header), "Charged!");
         }

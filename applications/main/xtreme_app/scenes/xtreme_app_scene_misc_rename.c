@@ -12,7 +12,8 @@ static void xtreme_app_scene_misc_rename_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultOk);
 }
 
-static bool xtreme_app_scene_misc_rename_validator(const char* text, FuriString* error, void* context) {
+static bool
+    xtreme_app_scene_misc_rename_validator(const char* text, FuriString* error, void* context) {
     UNUSED(context);
 
     for(; *text; ++text) {

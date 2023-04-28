@@ -303,7 +303,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 desktop_event = DesktopLockMenuEventXtreme;
                 break;
             case DesktopLockMenuIndexVolume:
-                desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff : DesktopLockMenuEventStealthModeOn;
+                desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :
+                                               DesktopLockMenuEventStealthModeOn;
                 break;
             default:
                 break;
