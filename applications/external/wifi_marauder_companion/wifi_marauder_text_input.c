@@ -1,6 +1,6 @@
 #include "wifi_marauder_text_input.h"
 #include <gui/elements.h>
-#include "assets_icons.h"
+#include "ESP32_WiFi_Marauder_icons.h"
 #include "wifi_marauder_app_i.h"
 #include <furi.h>
 

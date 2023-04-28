@@ -20,6 +20,8 @@
 #define TOTP_TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME "tab"
 #define TOTP_TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME "slower"
 
+#define TOTP_TOKEN_DIGITS_MAX_COUNT (8)
+
 typedef uint8_t TokenHashAlgo;
 typedef uint8_t TokenDigitsCount;
 typedef uint8_t TokenAutomationFeature;
@@ -32,22 +34,22 @@ enum TokenHashAlgos {
     /**
      * @brief SHA1 hashing algorithm
      */
-    SHA1,
+    SHA1 = 0,
 
     /**
      * @brief SHA256 hashing algorithm
      */
-    SHA256,
+    SHA256 = 1,
 
     /**
      * @brief SHA512 hashing algorithm
      */
-    SHA512,
+    SHA512 = 2,
 
     /**
      * @brief Algorithm used by Steam (Valve)
      */
-    STEAM
+    STEAM = 3
 };
 
 /**
@@ -55,19 +57,19 @@ enum TokenHashAlgos {
  */
 enum TokenDigitsCounts {
     /**
-     * @brief 6 digits
+     * @brief 5 digits
      */
-    TOTP_5_DIGITS = 5,
+    TotpFiveDigitsCount = 5,
 
     /**
      * @brief 6 digits
      */
-    TOTP_6_DIGITS = 6,
+    TotpSixDigitsCount = 6,
 
     /**
      * @brief 8 digits
      */
-    TOTP_8_DIGITS = 8
+    TotpEightDigitsCount = 8
 };
 
 /**
@@ -77,22 +79,22 @@ enum TokenAutomationFeatures {
     /**
      * @brief No features enabled
      */
-    TOKEN_AUTOMATION_FEATURE_NONE = 0b000,
+    TokenAutomationFeatureNone = 0b000,
 
     /**
      * @brief Press "Enter" key at the end as a part of token input automation
      */
-    TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END = 0b001,
+    TokenAutomationFeatureEnterAtTheEnd = 0b001,
 
     /**
      * @brief Press "Tab" key at the end as a part of token input automation
      */
-    TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END = 0b010,
+    TokenAutomationFeatureTabAtTheEnd = 0b010,
 
     /**
      * @brief Press keys slower and wait longer between keystrokes
      */
-    TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER = 0b100
+    TokenAutomationFeatureTypeSlower = 0b100
 };
 
 /**
@@ -103,15 +105,13 @@ enum PlainTokenSecretEncodings {
     /**
      * @brief Base32 encoding
      */
-    PLAIN_TOKEN_ENCODING_BASE32 = 0,
+    PlainTokenSecretEncodingBase32 = 0,
 
     /**
      * @brief Base64 encoding
      */
-    PLAIN_TOKEN_ENCODING_BASE64 = 1
+    PlainTokenSecretEncodingBase64 = 1
 };
-
-#define TOTP_TOKEN_DIGITS_MAX_COUNT (8)
 
 /**
  * @brief TOTP token information
@@ -130,7 +130,7 @@ typedef struct {
     /**
      * @brief User-friendly token name 
      */
-    char* name;
+    FuriString* name;
 
     /**
      * @brief Hashing algorithm
@@ -168,7 +168,7 @@ void token_info_free(TokenInfo* token_info);
 /**
  * @brief Encrypts & sets plain token secret to the given instance of \c TokenInfo
  * @param token_info instance where secret should be updated
- * @param base32_token_secret plain token secret in Base32 format
+ * @param plain_token_secret plain token secret
  * @param token_secret_length plain token secret length
  * @param plain_token_secret_encoding plain token secret encoding
  * @param iv initialization vecor (IV) to be used for encryption
@@ -201,9 +201,17 @@ bool token_info_set_duration_from_int(TokenInfo* token_info, uint8_t duration);
  * @brief Sets token hashing algorithm from \c str value
  * @param token_info instance whichs token hashing algorithm should be updated
  * @param str desired token algorithm
- * @return \c true if token hahsing algorithm has been updated; \c false otherwise
+ * @return \c true if token hashing algorithm has been updated; \c false otherwise
  */
 bool token_info_set_algo_from_str(TokenInfo* token_info, const FuriString* str);
+
+/**
+ * @brief Sets token hashing algorithm from \c algo_code code
+ * @param token_info instance whichs token hashing algorithm should be updated
+ * @param algo_code desired token algorithm code
+ * @return \c true if token hashing algorithm has been updated; \c false otherwise
+ */
+bool token_info_set_algo_from_int(TokenInfo* token_info, uint8_t algo_code);
 
 /**
  * @brief Gets token hahsing algorithm name as C-string
@@ -226,3 +234,9 @@ bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const Fur
  * @return cloned instance
  */
 TokenInfo* token_info_clone(const TokenInfo* src);
+
+/**
+ * @brief Sets default values to all the properties of \c token_info
+ * @param token_info instance to set defaults to
+ */
+void token_info_set_defaults(TokenInfo* token_info);
