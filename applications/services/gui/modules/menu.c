@@ -47,9 +47,9 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
     size_t items_count = MenuItemArray_size(model->items);
     if(items_count) {
         MenuItem* item;
-        FuriString* name = furi_string_alloc();
         size_t shift_position;
         if(XTREME_SETTINGS()->wii_menu) {
+            FuriString* name = furi_string_alloc();
             if(position < 2) {
                 shift_position = 0;
             } else if(position >= items_count - 2 + (items_count % 2)) {
@@ -99,6 +99,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     elements_frame(canvas, 0 + x_off, 0 + y_off, 40, 30);
                 }
             }
+            furi_string_free(name);
         } else {
             // First line
             canvas_set_font(canvas, FontSecondary);
@@ -129,8 +130,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             } else {
                 scroll_counter -= 1;
             }
-            furi_string_set(name, item->label);
-            elements_scrollable_text_line(canvas, 22, 36, 98, name, scroll_counter, false, false);
+            elements_scrollable_text_line_str(canvas, 22, 36, 98, item->label, scroll_counter, false, false);
             // Third line
             canvas_set_font(canvas, FontSecondary);
             shift_position = (2 + position + items_count - 1) % items_count;
@@ -147,7 +147,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             elements_frame(canvas, 0, 21, 128 - 5, 21);
             elements_scrollbar(canvas, position, items_count);
         }
-        furi_string_free(name);
     } else {
         canvas_draw_str(canvas, 2, 32, "Empty");
         elements_scrollbar(canvas, 0, 0);
