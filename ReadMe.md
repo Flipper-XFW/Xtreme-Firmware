@@ -40,7 +40,7 @@ Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it f
 -->
 
 <img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" height="160vh"/>
-<img align="left" height="160vh" width="15" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/1_120_transparent.png">
+<img align="left" height="180vh" width="10" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/1_120_transparent.png">
 
 - <ins><b>Interface:</b></ins> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style etc.
 
