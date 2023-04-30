@@ -39,15 +39,20 @@ Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it f
 
 -->
 
-<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" height="160vh"/>
+<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" height="200vh"/>
 <img align="left" height="160vh" width="10" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/1_120_transparent.png">
 
+<details open>
+<summary><ins><b>Interface:</b></ins></summary> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style, statusbar items and screen options like dark mode and lefty mode.
+</details>
 
-- <ins><b>Interface:</b></ins> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style, statusbar items and screen options like dark mode and lefty mode.
+<details open>
+<summary><ins><b>Protocols:</b></ins></summary> Here you can toggle USB & Bluetooth mode for our Bad-Keyboard app, and manage Subghz settings like custom frequencies and extend options.
+</details>
 
-- <ins><b>Protocols:</b></ins> Here you can toggle USB & Bluetooth mode for our Bad-Keyboard app, and manage Subghz settings like custom frequencies and extend options.
-
-- <ins><b>Misc:</b></ins> All the other options that don't fit elsewhere. Change your Flipper's name, change xp level, and manage settings for RGB backlight.
+<details open>
+<summary><ins><b>Misc:</b></ins></summary> All the other options that don't fit elsewhere. Change your Flipper's name, change xp level, and manage settings for RGB backlight.
+</details>
 
 <br clear="left"/>
 
