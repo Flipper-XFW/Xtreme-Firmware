@@ -25,6 +25,7 @@ void XTREME_SETTINGS_LOAD() {
         xtreme_settings->unlock_anims = false; // OFF
         xtreme_settings->fallback_anim = true; // ON
         xtreme_settings->wii_menu = true; // ON
+        xtreme_settings->bad_pins_format = false; // OFF
         xtreme_settings->lockscreen_time = true; // ON
         xtreme_settings->lockscreen_seconds = false; // OFF
         xtreme_settings->lockscreen_date = true; // ON
@@ -64,6 +65,8 @@ void XTREME_SETTINGS_LOAD() {
             flipper_format_read_bool(file, "fallback_anim", &xtreme_settings->fallback_anim, 1);
             flipper_format_rewind(file);
             flipper_format_read_bool(file, "wii_menu", &xtreme_settings->wii_menu, 1);
+            flipper_format_rewind(file);
+            flipper_format_read_bool(file, "bad_pins_format", &xtreme_settings->bad_pins_format, 1);
             flipper_format_rewind(file);
             flipper_format_read_bool(file, "lockscreen_time", &xtreme_settings->lockscreen_time, 1);
             flipper_format_rewind(file);
@@ -118,6 +121,7 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "unlock_anims", &xtreme_settings->unlock_anims, 1);
         flipper_format_write_bool(file, "fallback_anim", &xtreme_settings->fallback_anim, 1);
         flipper_format_write_bool(file, "wii_menu", &xtreme_settings->wii_menu, 1);
+        flipper_format_write_bool(file, "bad_pins_format", &xtreme_settings->bad_pins_format, 1);
         flipper_format_write_bool(file, "lockscreen_time", &xtreme_settings->lockscreen_time, 1);
         flipper_format_write_bool(file, "lockscreen_seconds", &xtreme_settings->lockscreen_seconds, 1);
         flipper_format_write_bool(file, "lockscreen_date", &xtreme_settings->lockscreen_date, 1);

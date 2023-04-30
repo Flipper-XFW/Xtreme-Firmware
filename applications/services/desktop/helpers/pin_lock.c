@@ -10,6 +10,7 @@
 #include "../desktop_i.h"
 #include <cli/cli.h>
 #include <cli/cli_vcp.h>
+#include <xtreme/settings.h>
 
 static const NotificationSequence sequence_pin_fail = {
     &message_display_backlight_on,
@@ -98,6 +99,16 @@ bool desktop_pin_lock_verify(const PinCode* pin_set, const PinCode* pin_entered)
         result = true;
     } else {
         uint32_t pin_fails = furi_hal_rtc_get_pin_fails();
+        if(pin_fails >= 9 && XTREME_SETTINGS()->bad_pins_format) {
+            furi_hal_rtc_set_pin_fails(0);
+            furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            storage_simply_remove(storage, INT_PATH(".cnt.u2f"));
+            storage_simply_remove(storage, INT_PATH(".key.u2f"));
+            storage_sd_format(storage);
+            furi_record_close(RECORD_STORAGE);
+            power_reboot(PowerBootModeNormal);
+        }
         furi_hal_rtc_set_pin_fails(pin_fails + 1);
         result = false;
     }
