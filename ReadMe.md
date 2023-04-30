@@ -46,7 +46,7 @@ Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it f
 
 - <ins><b>Protocols:</b></ins> Here you can toggle between USB & Bluetooth mode for <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/Generic-Guides#badbt--kb">BadKB</a>, and manage custom Subghz frequencies.
 
-- <ins><b>Misc:</b></ins> All the other options that don't fit elsewhere. Change your Flipper's name, xp level, and manage settings for RGB backlight.
+- <ins><b>Misc:</b></ins> All the other options that don't fit elsewhere. Change your Flipper's name, xp level, and configure the <a href="https://github.com/Z3BRO/Flipper-Zero-RGB-Backlight">RGB backlight</a>.
 
 <br>
 
