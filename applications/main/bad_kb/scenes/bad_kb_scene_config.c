@@ -9,6 +9,7 @@ enum VarItemListIndex {
     VarItemListIndexBtRemember,
     VarItemListIndexBtDeviceName,
     VarItemListIndexBtMacAddress,
+    VarItemListIndexRandomizeBtMac,
 };
 
 void bad_kb_scene_config_connection_callback(VariableItem* item) {
@@ -62,6 +63,13 @@ void bad_kb_scene_config_on_enter(void* context) {
         variable_item_set_locked(item, true, "Remember\nmust be Off!");
     }
 
+    item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
+    if(!bad_kb->is_bt) {
+        variable_item_set_locked(item, true, "Only in\nBT mode!");
+    } else if(bad_kb->bt_remember) {
+        variable_item_set_locked(item, true, "Remember\nmust be Off!");
+    }
+
     variable_item_list_set_enter_callback(
         var_item_list, bad_kb_scene_config_var_item_list_callback, bad_kb);
 
@@ -95,6 +103,10 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
             break;
         case VarItemListIndexBtMacAddress:
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigMac);
+            break;
+        case VarItemListIndexRandomizeBtMac:
+            furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN);
+            bt_set_profile_mac_address(bad_kb->bt, bad_kb->config.bt_mac);
             break;
         default:
             break;
