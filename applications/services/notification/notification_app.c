@@ -538,8 +538,10 @@ int32_t notification_srv(void* p) {
     UNUSED(p);
     NotificationApp* app = notification_app_alloc();
 
-    if(!notification_load_settings(app)) {
-        notification_save_settings(app);
+    if(furi_hal_is_normal_boot()) {
+        if(!notification_load_settings(app)) {
+            notification_save_settings(app);
+        }
     }
 
     notification_vibro_off();
