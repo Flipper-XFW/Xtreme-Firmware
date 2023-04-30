@@ -3,7 +3,6 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 #include <power/power_service/power.h>
 
@@ -13,17 +12,13 @@ extern "C" {
 
 #define MAX_PACK_NAME_LEN 32
 
-#define XTREME_SETTINGS_VERSION (11)
-#define XTREME_SETTINGS_MAGIC (0x69)
-#define XTREME_SETTINGS_OLD_INT_PATH INT_PATH(".xtreme.settings")
-#define XTREME_SETTINGS_OLD_PATH EXT_PATH(".xtreme.settings")
-#define XTREME_SETTINGS_PATH CFG_PATH("xtreme.settings")
+#define XTREME_SETTINGS_PATH CFG_PATH("xtreme_settings.txt")
 
 #define XTREME_APPS_PATH CFG_PATH("xtreme_apps.txt")
 
 typedef struct {
     char asset_pack[MAX_PACK_NAME_LEN];
-    uint16_t anim_speed;
+    uint32_t anim_speed;
     int32_t cycle_anims;
     bool unlock_anims;
     bool fallback_anim;
@@ -49,7 +44,7 @@ XtremeSettings* XTREME_SETTINGS();
 
 void XTREME_SETTINGS_LOAD();
 
-bool XTREME_SETTINGS_SAVE();
+void XTREME_SETTINGS_SAVE();
 
 #ifdef __cplusplus
 }
