@@ -8,6 +8,10 @@
 
 bool normal_boot = false;
 
+void furi_hal_set_is_normal_boot(bool value) {
+    normal_boot = value;
+}
+
 bool furi_hal_is_normal_boot() {
     return normal_boot;
 }
@@ -32,7 +36,6 @@ void furi_hal_deinit_early() {
 }
 
 void furi_hal_init() {
-    normal_boot = true;
     furi_hal_mpu_init();
     furi_hal_clock_init();
     furi_hal_console_init();
