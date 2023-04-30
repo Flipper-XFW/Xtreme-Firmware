@@ -640,8 +640,9 @@ void elements_scrollable_text_line(
     size_t scroll,
     bool ellipsis,
     bool centered) {
-        elements_scrollable_text_line_str(canvas, x, y, width, furi_string_get_cstr(string), scroll, ellipsis, centered);
-    }
+    elements_scrollable_text_line_str(
+        canvas, x, y, width, furi_string_get_cstr(string), scroll, ellipsis, centered);
+}
 
 void elements_text_box(
     Canvas* canvas,

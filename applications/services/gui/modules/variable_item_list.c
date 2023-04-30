@@ -84,14 +84,7 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 canvas_draw_str(canvas, 6, item_text_y, item->label);
             } else {
                 elements_scrollable_text_line_str(
-                    canvas,
-                    6,
-                    item_text_y,
-                    66,
-                    item->label,
-                    scroll_counter,
-                    false,
-                    false);
+                    canvas, 6, item_text_y, 66, item->label, scroll_counter, false, false);
             }
 
             if(item->locked) {

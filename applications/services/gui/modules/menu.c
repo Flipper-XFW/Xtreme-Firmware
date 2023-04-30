@@ -130,7 +130,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             } else {
                 scroll_counter -= 1;
             }
-            elements_scrollable_text_line_str(canvas, 22, 36, 98, item->label, scroll_counter, false, false);
+            elements_scrollable_text_line_str(
+                canvas, 22, 36, 98, item->label, scroll_counter, false, false);
             // Third line
             canvas_set_font(canvas, FontSecondary);
             shift_position = (2 + position + items_count - 1) % items_count;
