@@ -52,10 +52,10 @@ void bad_kb_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
     variable_item_set_locked(item, !bad_kb->is_bt, "Only in\nBT mode!");
 
-    item = variable_item_list_add(var_item_list, "BT device name", 0, NULL, bad_kb);
+    item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
     variable_item_set_locked(item, !bad_kb->is_bt, "Only in\nBT mode!");
 
-    item = variable_item_list_add(var_item_list, "BT MAC address", 0, NULL, bad_kb);
+    item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
     if(!bad_kb->is_bt) {
         variable_item_set_locked(item, true, "Only in\nBT mode!");
     } else if(bad_kb->bt_remember) {
