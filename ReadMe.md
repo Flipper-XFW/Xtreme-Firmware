@@ -37,22 +37,15 @@ We wrote a powerful yet easy-to-use application specifically for our Firmware, t
 This image needs to be updated!
 Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it fits all our bulletpoints without issues
 
-<img align="right" height="160vh" width="10" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/1_120_transparent.png">
 -->
 
-<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="right" height="160vh" width="320vw"/>
+<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" height="160vh"/>
+<img align="left" height="160vh" width="10" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/1_120_transparent.png">
 
-<details open>
-<summary><ins><b>Interface:</b></ins></summary> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style etc. <b><ins>Everything</b></ins> can be modified.
-</details>
+- <ins><b>Interface:</b></ins> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style etc. <b><ins>Everything</b></ins> can be modified.
 
-<details open>
-<summary><ins><b>Protocols:</b></ins></summary> Here you can toggle between USB & Bluetooth mode for <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/Generic-Guides#badbt--kb">BadKB</a>, and manage custom Subghz frequencies.
-</details>
-
-<details open>
-<summary><ins><b>Misc:</b></ins></summary> All the other options that don't fit elsewhere. Change your Flipper's name, xp level, and manage settings for RGB backlight.
-</details>
+- <ins><b>Protocols:</b></ins> Here you can toggle between USB & Bluetooth mode for <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/Generic-Guides#badbt--kb">BadKB</a>, and manage custom Subghz frequencies.
+- <ins><b>Misc:</b></ins> All the other options that don't fit elsewhere. Change your Flipper's name, xp level, and manage settings for RGB backlight.
 
 <br clear="left"/>
 
