@@ -348,7 +348,6 @@ int32_t desktop_srv(void* p) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagResetPin);
     }
 
-    // furi_delay_ms(1000);
     XTREME_SETTINGS_LOAD();
     XTREME_ASSETS_LOAD();
 
