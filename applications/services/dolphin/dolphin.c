@@ -6,7 +6,7 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <furi.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
 
 #define TAG "Dolphin"

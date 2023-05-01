@@ -4,7 +4,7 @@
 
 #include <lib/subghz/blocks/custom_btn.h>
 
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 typedef enum {
     SubGhzRpcStateIdle,

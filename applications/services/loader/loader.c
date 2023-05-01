@@ -8,7 +8,7 @@
 #include <gui/icon_i.h>
 #include <core/dangerous_defines.h>
 #include <toolbox/stream/file_stream.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 #include <gui/modules/file_browser.h>
 
 #define TAG "LoaderSrv"

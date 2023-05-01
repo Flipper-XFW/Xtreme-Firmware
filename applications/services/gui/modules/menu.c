@@ -6,7 +6,7 @@
 #include <gui/icon_animation_i.h>
 #include <furi.h>
 #include <m-array.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 #include <m-string.h>
 
 struct Menu {

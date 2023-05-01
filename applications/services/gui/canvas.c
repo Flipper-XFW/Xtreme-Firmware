@@ -7,7 +7,7 @@
 #include <furi_hal_rtc.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},

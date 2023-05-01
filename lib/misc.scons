@@ -11,6 +11,7 @@ env.Append(
         "#/lib/micro-ecc",
         "#/lib/nanopb",
         "#/lib/u8g2",
+        "#/lib/xtreme",
     ],
     CPPDEFINES=[
         "PB_ENABLE_MALLOC",
@@ -32,6 +33,7 @@ libs_recurse = [
     "micro-ecc",
     "u8g2",
     "update_util",
+    "xtreme",
 ]
 
 for lib in libs_recurse:

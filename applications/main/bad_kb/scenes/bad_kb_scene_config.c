@@ -1,7 +1,7 @@
 #include "../bad_kb_app.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
-#include <xtreme/settings.h>
+#include <xtreme.h>
 
 enum VarItemListIndex {
     VarItemListIndexKeyboardLayout,

@@ -40,8 +40,6 @@ Header,+,applications/services/power/power_service/power.h,,
 Header,+,applications/services/rgb_backlight/rgb_backlight.h,,
 Header,+,applications/services/rpc/rpc_app.h,,
 Header,+,applications/services/storage/storage.h,,
-Header,+,applications/services/xtreme/assets.h,,
-Header,+,applications/services/xtreme/settings.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_clock.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_console.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_flash.h,,
@@ -218,6 +216,7 @@ Header,+,lib/toolbox/tar/tar_archive.h,,
 Header,+,lib/toolbox/value_index.h,,
 Header,+,lib/toolbox/version.h,,
 Header,+,lib/u8g2/u8g2.h,,
+Header,+,lib/xtreme/xtreme.h,,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
@@ -322,9 +321,7 @@ Function,-,SK6805_update,void,
 Function,-,SystemCoreClockUpdate,void,
 Function,-,SystemInit,void,
 Function,+,XTREME_ASSETS,XtremeAssets*,
-Function,-,XTREME_ASSETS_LOAD,void,
 Function,+,XTREME_SETTINGS,XtremeSettings*,
-Function,-,XTREME_SETTINGS_LOAD,void,
 Function,+,XTREME_SETTINGS_SAVE,void,
 Function,-,_Exit,void,int
 Function,-,__assert,void,"const char*, int, const char*"

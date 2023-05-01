@@ -1,12 +1,40 @@
-#include "assets.h"
+#include "xtreme.h"
+#include "private.h"
 #include <assets_icons.h>
+#include <storage/storage.h>
 #include <core/dangerous_defines.h>
 
 #define TAG "XtremeAssets"
 
-#define ICONS_FMT PACKS_DIR "/%s/Icons/%s"
+#define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 
-XtremeAssets* xtreme_assets = NULL;
+XtremeAssets xtreme_assets = {
+    .A_Levelup_128x64 = &A_Levelup_128x64,
+    .I_BLE_Pairing_128x64 = &I_BLE_Pairing_128x64,
+    .I_DolphinCommon_56x48 = &I_DolphinCommon_56x48,
+    .I_DolphinMafia_115x62 = &I_DolphinMafia_115x62,
+    .I_DolphinNice_96x59 = &I_DolphinNice_96x59,
+    .I_DolphinWait_61x59 = &I_DolphinWait_61x59,
+    .I_iButtonDolphinVerySuccess_108x52 = &I_iButtonDolphinVerySuccess_108x52,
+    .I_DolphinReadingSuccess_59x63 = &I_DolphinReadingSuccess_59x63,
+    .I_Lockscreen = &I_Lockscreen,
+    .I_WarningDolphin_45x42 = &I_WarningDolphin_45x42,
+    .I_NFC_dolphin_emulation_47x61 = &I_NFC_dolphin_emulation_47x61,
+    .I_passport_bad_46x49 = &I_passport_bad_46x49,
+    .I_passport_DB = &I_passport_DB,
+    .I_passport_happy_46x49 = &I_passport_happy_46x49,
+    .I_passport_okay_46x49 = &I_passport_okay_46x49,
+    .I_RFIDDolphinReceive_97x61 = &I_RFIDDolphinReceive_97x61,
+    .I_RFIDDolphinSend_97x61 = &I_RFIDDolphinSend_97x61,
+    .I_RFIDDolphinSuccess_108x57 = &I_RFIDDolphinSuccess_108x57,
+    .I_Cry_dolph_55x52 = &I_Cry_dolph_55x52,
+    .I_Fishing_123x52 = &I_Fishing_123x52,
+    .I_Scanning_123x52 = &I_Scanning_123x52,
+    .I_Auth_62x31 = &I_Auth_62x31,
+    .I_Connect_me_62x31 = &I_Connect_me_62x31,
+    .I_Connected_62x31 = &I_Connected_62x31,
+    .I_Error_62x31 = &I_Error_62x31,
+};
 
 void anim(const Icon** replace, const char* name, FuriString* path, File* file) {
     do {
@@ -113,44 +141,9 @@ void swap(XtremeAssets* x, FuriString* p, File* f) {
 }
 
 void XTREME_ASSETS_LOAD() {
-    if(xtreme_assets != NULL) return;
-
-    xtreme_assets = malloc(sizeof(XtremeAssets));
-
-    xtreme_assets->A_Levelup_128x64 = &A_Levelup_128x64;
-    xtreme_assets->I_BLE_Pairing_128x64 = &I_BLE_Pairing_128x64;
-    xtreme_assets->I_DolphinCommon_56x48 = &I_DolphinCommon_56x48;
-    xtreme_assets->I_DolphinMafia_115x62 = &I_DolphinMafia_115x62;
-    xtreme_assets->I_DolphinNice_96x59 = &I_DolphinNice_96x59;
-    xtreme_assets->I_DolphinWait_61x59 = &I_DolphinWait_61x59;
-    xtreme_assets->I_iButtonDolphinVerySuccess_108x52 = &I_iButtonDolphinVerySuccess_108x52;
-    xtreme_assets->I_DolphinReadingSuccess_59x63 = &I_DolphinReadingSuccess_59x63;
-    xtreme_assets->I_Lockscreen = &I_Lockscreen;
-    xtreme_assets->I_WarningDolphin_45x42 = &I_WarningDolphin_45x42;
-    xtreme_assets->I_NFC_dolphin_emulation_47x61 = &I_NFC_dolphin_emulation_47x61;
-    xtreme_assets->I_passport_bad_46x49 = &I_passport_bad_46x49;
-    xtreme_assets->I_passport_DB = &I_passport_DB;
-    xtreme_assets->I_passport_happy_46x49 = &I_passport_happy_46x49;
-    xtreme_assets->I_passport_okay_46x49 = &I_passport_okay_46x49;
-    xtreme_assets->I_RFIDDolphinReceive_97x61 = &I_RFIDDolphinReceive_97x61;
-    xtreme_assets->I_RFIDDolphinSend_97x61 = &I_RFIDDolphinSend_97x61;
-    xtreme_assets->I_RFIDDolphinSuccess_108x57 = &I_RFIDDolphinSuccess_108x57;
-    xtreme_assets->I_Cry_dolph_55x52 = &I_Cry_dolph_55x52;
-    xtreme_assets->I_Fishing_123x52 = &I_Fishing_123x52;
-    xtreme_assets->I_Scanning_123x52 = &I_Scanning_123x52;
-    xtreme_assets->I_Auth_62x31 = &I_Auth_62x31;
-    xtreme_assets->I_Connect_me_62x31 = &I_Connect_me_62x31;
-    xtreme_assets->I_Connected_62x31 = &I_Connected_62x31;
-    xtreme_assets->I_Error_62x31 = &I_Error_62x31;
-
-    if(!furi_hal_is_normal_boot()) {
-        FURI_LOG_W(TAG, "Load skipped. Device is in special startup mode.");
-        return;
-    }
-
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     if(xtreme_settings->asset_pack[0] == '\0') return;
-    xtreme_assets->is_nsfw = strncmp(xtreme_settings->asset_pack, "NSFW", strlen("NSFW")) == 0;
+    xtreme_assets.is_nsfw = strncmp(xtreme_settings->asset_pack, "NSFW", strlen("NSFW")) == 0;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     int32_t timeout = 5000;
@@ -162,11 +155,11 @@ void XTREME_ASSETS_LOAD() {
 
     FileInfo info;
     FuriString* path = furi_string_alloc();
-    furi_string_printf(path, PACKS_DIR "/%s", xtreme_settings->asset_pack);
+    furi_string_printf(path, XTREME_ASSETS_PATH "/%s", xtreme_settings->asset_pack);
     if(storage_common_stat(storage, furi_string_get_cstr(path), &info) == FSE_OK &&
        info.flags & FSF_DIRECTORY) {
         File* file = storage_file_alloc(storage);
-        swap(xtreme_assets, path, file);
+        swap(&xtreme_assets, path, file);
         storage_file_free(file);
     }
     furi_string_free(path);
@@ -174,8 +167,5 @@ void XTREME_ASSETS_LOAD() {
 }
 
 XtremeAssets* XTREME_ASSETS() {
-    if(xtreme_assets == NULL) {
-        XTREME_ASSETS_LOAD();
-    }
-    return xtreme_assets;
+    return &xtreme_assets;
 }

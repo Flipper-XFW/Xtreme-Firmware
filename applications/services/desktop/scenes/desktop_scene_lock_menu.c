@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <loader/loader.h>
 // #include <loader/loader_i.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 
 #include "../desktop_i.h"
 #include <desktop/desktop_settings.h>

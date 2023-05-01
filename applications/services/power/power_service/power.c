@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include "xtreme/settings.h"
+#include <xtreme.h>
 
 #define POWER_OFF_TIMEOUT 90
 #define TAG "Power"

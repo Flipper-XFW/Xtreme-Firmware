@@ -7,7 +7,7 @@
 #include <assets_icons.h>
 #include <portmacro.h>
 #include <locale/locale.h>
-#include <xtreme/assets.h>
+#include <xtreme.h>
 
 #include <desktop/desktop_settings.h>
 #include "../desktop_i.h"

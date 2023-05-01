@@ -7,7 +7,7 @@
 #include <assets_icons.h>
 #include <m-array.h>
 
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 111

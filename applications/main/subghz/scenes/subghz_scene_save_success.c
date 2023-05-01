@@ -1,6 +1,6 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 void subghz_scene_save_success_popup_callback(void* context) {
     SubGhz* subghz = context;
