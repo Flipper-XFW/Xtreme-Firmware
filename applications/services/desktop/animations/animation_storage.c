@@ -36,7 +36,8 @@ void animation_handler_select_manifest(bool force_stock) {
     FuriString* manifest = furi_string_alloc();
     bool use_asset_pack = !force_stock && xtreme_settings->asset_pack[0] != '\0';
     if(use_asset_pack) {
-        furi_string_printf(anim_dir, "%s/%s/Anims", XTREME_ASSETS_PATH, xtreme_settings->asset_pack);
+        furi_string_printf(
+            anim_dir, "%s/%s/Anims", XTREME_ASSETS_PATH, xtreme_settings->asset_pack);
         furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
         Storage* storage = furi_record_open(RECORD_STORAGE);
         if(storage_common_stat(storage, furi_string_get_cstr(manifest), NULL) == FSE_OK) {
