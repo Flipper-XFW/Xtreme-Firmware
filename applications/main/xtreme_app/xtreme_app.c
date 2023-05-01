@@ -189,7 +189,7 @@ XtremeApp* xtreme_app_alloc() {
     File* folder = storage_file_alloc(storage);
     FileInfo info;
     char* name = malloc(XTREME_ASSETS_PACK_NAME_LEN);
-    if(storage_dir_open(folder, PACKS_DIR)) {
+    if(storage_dir_open(folder, XTREME_ASSETS_PATH)) {
         while(storage_dir_read(folder, &info, name, XTREME_ASSETS_PACK_NAME_LEN)) {
             if(info.flags & FSF_DIRECTORY) {
                 char* copy = malloc(XTREME_ASSETS_PACK_NAME_LEN);
