@@ -100,19 +100,19 @@ static void bad_kb_save_settings(BadKbApp* app) {
 
 void bad_kb_reload_worker(BadKbApp* app) {
     bad_kb_script_close(app->bad_kb_script);
-    app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
+    app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
     bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
 }
 
-void bad_kb_config_switch_mode(BadKbApp* app) {
-    scene_manager_previous_scene(app->scene_manager);
-    if(app->is_bt) {
-        furi_hal_bt_start_advertising();
-    } else {
-        furi_hal_bt_stop_advertising();
-    }
-    scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
+int32_t bad_kb_config_switch_mode(BadKbApp* app) {
+    if(!app->is_bt) furi_hal_bt_stop_advertising();
+    XTREME_SETTINGS()->bad_bt = app->is_bt;
+    XTREME_SETTINGS_SAVE();
     bad_kb_reload_worker(app);
+    if(app->is_bt) furi_hal_bt_start_advertising();
+    scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
+    scene_manager_previous_scene(app->scene_manager);
+    return 0;
 }
 
 void bad_kb_config_switch_remember_mode(BadKbApp* app) {
@@ -269,7 +269,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
             "BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_connection_init, app);
         furi_thread_start(app->conn_init_thread);
         if(!furi_string_empty(app->file_path)) {
-            app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL);
+            app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
             bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
             scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
         } else {

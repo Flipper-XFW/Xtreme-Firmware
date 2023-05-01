@@ -8,6 +8,13 @@ extern "C" {
 #include <furi_hal.h>
 #include <bt/bt_service/bt_i.h>
 
+#include <gui/view_dispatcher.h>
+#include <gui/modules/widget.h>
+#include <gui/modules/variable_item_list.h>
+#include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
+#include "../views/bad_kb_view.h"
+
 #define FILE_BUFFER_LEN 16
 
 typedef enum {
@@ -38,7 +45,7 @@ typedef enum {
     BadKbStateFileError,
 } BadKbWorkerState;
 
-typedef struct {
+struct BadKbState {
     BadKbWorkerState state;
     bool is_bt;
     uint32_t pin;
@@ -47,7 +54,9 @@ typedef struct {
     uint32_t delay_remain;
     uint16_t error_line;
     char error[64];
-} BadKbState;
+};
+
+typedef struct BadKbApp BadKbApp;
 
 typedef struct {
     FuriHalUsbHidConfig hid_cfg;
@@ -74,9 +83,10 @@ typedef struct {
     size_t string_print_pos;
 
     Bt* bt;
+    BadKbApp* app;
 } BadKbScript;
 
-BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt);
+BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt, BadKbApp* app);
 
 void bad_kb_script_close(BadKbScript* bad_kb);
 
@@ -89,6 +99,48 @@ void bad_kb_script_stop(BadKbScript* bad_kb);
 void bad_kb_script_toggle(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
+
+#define BAD_KB_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
+#define BAD_KB_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
+
+typedef enum {
+    BadKbAppErrorNoFiles,
+    BadKbAppErrorCloseRpc,
+} BadKbAppError;
+
+typedef struct {
+    char bt_name[BAD_KB_ADV_NAME_MAX_LEN + 1];
+    uint8_t bt_mac[BAD_KB_MAC_ADDRESS_LEN];
+    FuriHalUsbInterface* usb_mode;
+    GapPairing bt_mode;
+} BadKbConfig;
+
+struct BadKbApp {
+    Gui* gui;
+    ViewDispatcher* view_dispatcher;
+    SceneManager* scene_manager;
+    NotificationApp* notifications;
+    DialogsApp* dialogs;
+    Widget* widget;
+    VariableItemList* var_item_list;
+    TextInput* text_input;
+    ByteInput* byte_input;
+
+    BadKbAppError error;
+    FuriString* file_path;
+    FuriString* keyboard_layout;
+    BadKb* bad_kb_view;
+    BadKbScript* bad_kb_script;
+
+    Bt* bt;
+    bool is_bt;
+    bool bt_remember;
+    BadKbConfig config;
+    BadKbConfig prev_config;
+    FuriThread* conn_init_thread;
+};
+
+int32_t bad_kb_config_switch_mode(BadKbApp* app);
 
 #ifdef __cplusplus
 }

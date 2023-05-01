@@ -8,12 +8,6 @@
 
 #define MAX_NAME_LEN 64
 
-struct BadKb {
-    View* view;
-    BadKbButtonCallback callback;
-    void* context;
-};
-
 typedef struct {
     char file_name[MAX_NAME_LEN];
     char layout[MAX_NAME_LEN];

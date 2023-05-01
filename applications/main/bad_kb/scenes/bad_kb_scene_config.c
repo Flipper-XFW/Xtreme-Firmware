@@ -1,4 +1,5 @@
 #include "../bad_kb_app.h"
+#include "../helpers/ducky_script.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
 #include <xtreme.h>
@@ -15,8 +16,6 @@ enum VarItemListIndex {
 void bad_kb_scene_config_connection_callback(VariableItem* item) {
     BadKbApp* bad_kb = variable_item_get_context(item);
     bad_kb->is_bt = variable_item_get_current_value_index(item);
-    XTREME_SETTINGS()->bad_bt = bad_kb->is_bt;
-    XTREME_SETTINGS_SAVE();
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
     view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexConnection);
 }
