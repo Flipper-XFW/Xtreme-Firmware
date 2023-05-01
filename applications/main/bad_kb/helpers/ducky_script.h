@@ -138,6 +138,7 @@ struct BadKbApp {
     BadKbConfig config;
     BadKbConfig prev_config;
     FuriThread* conn_init_thread;
+    FuriThread* switch_mode_thread;
 };
 
 int32_t bad_kb_config_switch_mode(BadKbApp* app);

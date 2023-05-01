@@ -377,17 +377,22 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
     } while(ret > 0);
 
     const char* line_tmp = furi_string_get_cstr(bad_kb->line);
+    if(bad_kb->app->switch_mode_thread) {
+        furi_thread_join(bad_kb->app->switch_mode_thread);
+        furi_thread_free(bad_kb->app->switch_mode_thread);
+        bad_kb->app->switch_mode_thread = NULL;
+    }
     // Looking for ID or BT_ID command at first line
     bool reset_bt_id = !!bad_kb->bt;
     if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
         if(bad_kb->bt) {
             bad_kb->app->is_bt = false;
-            FuriThread* thread = furi_thread_alloc_ex(
+            bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
                 "BadKbSwitchMode",
                 1024,
                 (FuriThreadCallback)bad_kb_config_switch_mode,
                 bad_kb->app);
-            furi_thread_start(thread);
+            furi_thread_start(bad_kb->app->switch_mode_thread);
             return false;
         }
         if(ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1])) {
@@ -398,12 +403,12 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
     } else if(strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0) {
         if(!bad_kb->bt) {
             bad_kb->app->is_bt = true;
-            FuriThread* thread = furi_thread_alloc_ex(
+            bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
                 "BadKbSwitchMode",
                 1024,
                 (FuriThreadCallback)bad_kb_config_switch_mode,
                 bad_kb->app);
-            furi_thread_start(thread);
+            furi_thread_start(bad_kb->app->switch_mode_thread);
             return false;
         }
         if(!bad_kb->app->bt_remember) {
