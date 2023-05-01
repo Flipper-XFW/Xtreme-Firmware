@@ -269,7 +269,8 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
             "BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_connection_init, app);
         furi_thread_start(app->conn_init_thread);
         if(!furi_string_empty(app->file_path)) {
-            app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
+            app->bad_kb_script =
+                bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
             bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
             scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
         } else {

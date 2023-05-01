@@ -338,7 +338,8 @@ static bool ducky_set_bt_id(BadKbScript* bad_kb, const char* line) {
     for(size_t i = 0; i < BAD_KB_MAC_ADDRESS_LEN; i++) {
         char a = line[i * 3];
         char b = line[i * 3 + 1];
-        if((a < 'A' && a > 'F') || (a < '0' && a > '9') || (b < 'A' && b > 'F') || (b < '0' && b > '9') || !hex_char_to_uint8(a, b, &mac[i])) {
+        if((a < 'A' && a > 'F') || (a < '0' && a > '9') || (b < 'A' && b > 'F') ||
+           (b < '0' && b > '9') || !hex_char_to_uint8(a, b, &mac[i])) {
             return false;
         }
     }
@@ -382,7 +383,10 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         if(bad_kb->bt) {
             bad_kb->app->is_bt = false;
             FuriThread* thread = furi_thread_alloc_ex(
-                "BadKbSwitchMode", 1024, (FuriThreadCallback)bad_kb_config_switch_mode, bad_kb->app);
+                "BadKbSwitchMode",
+                1024,
+                (FuriThreadCallback)bad_kb_config_switch_mode,
+                bad_kb->app);
             furi_thread_start(thread);
             return false;
         }
@@ -395,7 +399,10 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         if(!bad_kb->bt) {
             bad_kb->app->is_bt = true;
             FuriThread* thread = furi_thread_alloc_ex(
-                "BadKbSwitchMode", 1024, (FuriThreadCallback)bad_kb_config_switch_mode, bad_kb->app);
+                "BadKbSwitchMode",
+                1024,
+                (FuriThreadCallback)bad_kb_config_switch_mode,
+                bad_kb->app);
             furi_thread_start(thread);
             return false;
         }
@@ -407,7 +414,6 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bad_kb->app->config.bt_name);
         bt_set_profile_mac_address(bad_kb->bt, bad_kb->app->config.bt_mac);
     }
-
 
     storage_file_seek(script_file, 0, true);
     furi_string_reset(bad_kb->line);
