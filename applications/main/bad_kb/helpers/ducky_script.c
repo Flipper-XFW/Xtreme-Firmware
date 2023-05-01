@@ -343,11 +343,8 @@ static bool ducky_set_bt_id(BadKbScript* bad_kb, const char* line) {
         }
     }
 
-    strncpy(bad_kb->app->config.bt_name, line + mac_len, BAD_KB_ADV_NAME_MAX_LEN);
-    memcpy(bad_kb->app->config.bt_mac, mac, BAD_KB_MAC_ADDRESS_LEN);
-
-    furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bad_kb->app->config.bt_name);
-    bt_set_profile_mac_address(bad_kb->bt, bad_kb->app->config.bt_mac);
+    furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, line + mac_len);
+    bt_set_profile_mac_address(bad_kb->bt, mac);
     return true;
 }
 
@@ -380,6 +377,7 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
 
     const char* line_tmp = furi_string_get_cstr(bad_kb->line);
     // Looking for ID or BT_ID command at first line
+    bool reset_bt_id = !!bad_kb->bt;
     if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
         if(bad_kb->bt) {
             bad_kb->app->is_bt = false;
@@ -402,8 +400,12 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             return false;
         }
         if(!bad_kb->app->bt_remember) {
-            ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
+            reset_bt_id = !ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
         }
+    }
+    if(reset_bt_id) {
+        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bad_kb->app->config.bt_name);
+        bt_set_profile_mac_address(bad_kb->bt, bad_kb->app->config.bt_mac);
     }
 
 
