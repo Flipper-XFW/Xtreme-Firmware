@@ -40,17 +40,12 @@ void tracker_speaker_stop() {
 }
 
 void tracker_speaker_init() {
-    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
-        furi_hal_speaker_start(200.0f, 0.01f);
-        tracker_speaker_stop();
-    }
+    furi_hal_speaker_start(200.0f, 0.01f);
+    tracker_speaker_stop();
 }
 
 void tracker_speaker_deinit() {
-    if(furi_hal_speaker_is_mine()) {
-        furi_hal_speaker_stop();
-        furi_hal_speaker_release();
-    }
+    furi_hal_speaker_stop();
 }
 
 static FuriHalInterruptISR tracker_isr;

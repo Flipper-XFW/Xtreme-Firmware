@@ -10,4 +10,5 @@ App(
     order=20,
     fap_icon="zero_tracker.png",
     fap_category="Music",
+    fap_icon_assets="icons",
 )
