@@ -36,7 +36,7 @@ void notification_message_save_settings(NotificationApp* app) {
     furi_event_flag_wait(
         m.back_event, NOTIFICATION_EVENT_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
     furi_event_flag_free(m.back_event);
-};
+}
 
 // internal layer
 void notification_apply_internal_led_layer(NotificationLedLayer* layer, uint8_t layer_value) {
@@ -336,7 +336,7 @@ void notification_process_notification_message(
         }
         notification_message_index++;
         notification_message = (*message->sequence)[notification_message_index];
-    };
+    }
 
     // send and do minimal delay
     if(led_active) {
@@ -447,7 +447,7 @@ static bool notification_load_settings(NotificationApp* app) {
     furi_record_close(RECORD_STORAGE);
 
     return fs_result;
-};
+}
 
 static bool notification_save_settings(NotificationApp* app) {
     NotificationSettings settings;
@@ -482,7 +482,7 @@ static bool notification_save_settings(NotificationApp* app) {
     furi_record_close(RECORD_STORAGE);
 
     return fs_result;
-};
+}
 
 static void input_event_callback(const void* value, void* context) {
     furi_assert(value);
@@ -531,7 +531,7 @@ static NotificationApp* notification_app_alloc() {
     notification_message(app, &sequence_display_backlight_on);
 
     return app;
-};
+}
 
 // App
 int32_t notification_srv(void* p) {

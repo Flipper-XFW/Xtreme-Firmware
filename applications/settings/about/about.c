@@ -179,7 +179,7 @@ static void draw_stat(Canvas* canvas, int x, int y, const Icon* icon, char* val)
     canvas_draw_box(canvas, x - 4, y + 16, 24, 6);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_str_aligned(canvas, x + 8, y + 22, AlignCenter, AlignBottom, val);
-};
+}
 
 static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
     char header[20] = {};
@@ -245,7 +245,7 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
         canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
         canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
     }
-};
+}
 
 static void battery_info_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);

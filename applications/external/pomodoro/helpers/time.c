@@ -7,7 +7,7 @@ const int TIME_MINUTES_IN_HOUR = 60;
 
 uint32_t time_now() {
     return furi_hal_rtc_get_timestamp();
-};
+}
 
 TimeDifference time_difference_seconds(uint32_t begin, uint32_t end) {
     const uint32_t duration_seconds = end - begin;
@@ -17,4 +17,4 @@ TimeDifference time_difference_seconds(uint32_t begin, uint32_t end) {
 
     return (
         TimeDifference){.total_seconds = duration_seconds, .minutes = minutes, .seconds = seconds};
-};
+}

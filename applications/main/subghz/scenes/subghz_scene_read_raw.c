@@ -152,7 +152,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
             //Stop save file
             subghz_protocol_raw_save_to_file_stop(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
@@ -196,7 +196,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             consumed = true;
             break;
@@ -305,7 +305,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
 
             size_t spl_count = subghz_protocol_raw_get_sample_write(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
@@ -439,7 +439,7 @@ void subghz_scene_read_raw_on_exit(void* context) {
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
         subghz_sleep(subghz);
-    };
+    }
     subghz->state_notifications = SubGhzNotificationStateIDLE;
     notification_message(subghz->notifications, &sequence_reset_rgb);
 
