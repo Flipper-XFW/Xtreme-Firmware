@@ -11,7 +11,7 @@ bool process_favorite_launch(char** args) {
 
 void favorite_timeout_callback(void* _ctx) {
     FavoriteTImeoutCtx* ctx = _ctx;
-    while(scene_manager_handle_back_event(ctx->scene_manager))
+    while(scene_manager_previous_scene(ctx->scene_manager))
         ;
     view_dispatcher_stop(ctx->view_dispatcher);
 }
