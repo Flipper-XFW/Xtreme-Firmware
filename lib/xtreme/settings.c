@@ -6,6 +6,7 @@
 #define TAG "XtremeSettings"
 
 XtremeSettings xtreme_settings = {
+    .loaded = false,
     .asset_pack = "",
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
@@ -27,7 +28,7 @@ XtremeSettings xtreme_settings = {
     .favorite_timeout = 0, // OFF
     .bad_bt = false, // USB
     .bad_bt_remember = false, // OFF
-    .butthurt_timer = 43200, // 12 H
+    .butthurt_timer = 21600, // 6 H
     .rgb_backlight = false, // OFF
 };
 
@@ -88,6 +89,8 @@ void XTREME_SETTINGS_LOAD() {
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+
+    xtreme_settings.loaded = true;
 }
 
 void XTREME_SETTINGS_SAVE() {
@@ -126,5 +129,14 @@ void XTREME_SETTINGS_SAVE() {
 }
 
 XtremeSettings* XTREME_SETTINGS() {
+    return &xtreme_settings;
+}
+
+XtremeSettings* XTREME_SETTINGS_WAIT() {
+    if(furi_hal_is_normal_boot()) {
+        while(!xtreme_settings.loaded) {
+            furi_delay_ms(50);
+        }
+    }
     return &xtreme_settings;
 }
