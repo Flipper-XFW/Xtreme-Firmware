@@ -482,6 +482,8 @@ int32_t subghz_app(char* p) {
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
                 } else {
                     //Load transmitter TX
+                    scene_manager_set_scene_state(
+                        subghz->scene_manager, SubGhzSceneTransmitter, is_favorite);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
                 }
             } else {
