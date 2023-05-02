@@ -1,5 +1,5 @@
 #!/usb/bin/env python3
-VERSION = "XFW-0044"
+VERSION = "XFW-0045"
 
 from flipper.app import App
 
