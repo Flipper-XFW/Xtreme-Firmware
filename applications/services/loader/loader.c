@@ -43,9 +43,10 @@ static bool
     furi_assert(loader_instance->application_arguments == NULL);
     if(arguments && strlen(arguments) > 0) {
         loader_instance->application_arguments = strdup(arguments);
+        FURI_LOG_I(TAG, "Starting: %s, args: %s", loader_instance->application->name, arguments);
+    } else {
+        FURI_LOG_I(TAG, "Starting: %s", loader_instance->application->name);
     }
-
-    FURI_LOG_I(TAG, "Starting: %s", loader_instance->application->name);
 
     FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
     if(mode > FuriHalRtcHeapTrackModeNone) {
