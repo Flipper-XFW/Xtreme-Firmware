@@ -84,12 +84,11 @@ void subghz_scene_transmitter_on_enter(void* context) {
         with_view_model(
             subghz->subghz_transmitter->view,
             SubGhzViewTransmitterModel * model,
-            {
-                model->show_button = false;
-            },
+            { model->show_button = false; },
             true);
         fav_timer = furi_timer_alloc(fav_timer_callback, FuriTimerTypeOnce, subghz);
-        furi_timer_start(fav_timer, XTREME_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency());
+        furi_timer_start(
+            fav_timer, XTREME_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency());
         subghz->state_notifications = SubGhzNotificationStateTx;
     }
 }

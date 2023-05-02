@@ -1310,7 +1310,6 @@ bool nfcv_emu_loop(
         }
         nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data);
 
-
         /* determine readers fc by analyzing transmission duration */
         uint32_t duration = eof_timestamp - sof_timestamp;
         float fc_1024 = (4.0f * duration) / (4 * (frame_pos * 4 + 1) + 1);
@@ -1346,4 +1345,3 @@ bool nfcv_emu_loop(
 
     return ret;
 }
-

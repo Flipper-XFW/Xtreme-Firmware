@@ -204,7 +204,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             furi_string_cat_printf(temp_str, "\e#ISO15693 (unknown)\n");
             break;
         }
-    // Set tag general data
+        // Set tag general data
     } else if(type == FuriHalNfcTypeF) {
         // Set NFC-F data
         furi_string_cat_printf(temp_str, "ISO 18092 (NFC-F)\n");
