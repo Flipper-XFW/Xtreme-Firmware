@@ -33,7 +33,7 @@ static void
     updater_main_model_set_state(main_view, message, progress, failed);
 }
 
-Updater* updater_alloc(const char* arg) {
+Updater* updater_alloc(char* arg) {
     Updater* updater = malloc(sizeof(Updater));
     process_favorite_launch(&arg);
     if(arg && strlen(arg)) {
