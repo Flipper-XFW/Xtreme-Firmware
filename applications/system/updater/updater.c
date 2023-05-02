@@ -7,6 +7,7 @@
 #include <furi_hal.h>
 #include <portmacro.h>
 #include <stdint.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 static bool updater_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -34,6 +35,7 @@ static void
 
 Updater* updater_alloc(const char* arg) {
     Updater* updater = malloc(sizeof(Updater));
+    process_favorite_launch(&arg);
     if(arg && strlen(arg)) {
         updater->startup_arg = furi_string_alloc_set(arg);
         furi_string_replace(updater->startup_arg, ANY_PATH(""), EXT_PATH(""));
@@ -118,10 +120,8 @@ void updater_free(Updater* updater) {
     free(updater);
 }
 
-int32_t updater_srv(void* p) {
-    const char* cfgpath = p;
-
-    Updater* updater = updater_alloc(cfgpath);
+int32_t updater_srv(char* p) {
+    Updater* updater = updater_alloc(p);
     view_dispatcher_run(updater->view_dispatcher);
     updater_free(updater);
 

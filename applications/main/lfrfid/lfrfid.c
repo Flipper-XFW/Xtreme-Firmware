@@ -1,5 +1,6 @@
 #include "lfrfid_i.h"
 #include <dolphin/dolphin.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 static bool lfrfid_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -168,12 +169,12 @@ static void lfrfid_free(LfRfid* lfrfid) {
     free(lfrfid);
 }
 
-int32_t lfrfid_app(void* p) {
+int32_t lfrfid_app(char* args) {
     LfRfid* app = lfrfid_alloc();
-    char* args = p;
 
     lfrfid_make_app_folder(app);
 
+    bool is_favorite = process_favorite_launch(&args);
     if(args && strlen(args)) {
         uint32_t rpc_ctx_ptr = 0;
         if(sscanf(args, "RPC %lX", &rpc_ctx_ptr) == 1) {
@@ -199,7 +200,11 @@ int32_t lfrfid_app(void* p) {
         scene_manager_next_scene(app->scene_manager, LfRfidSceneStart);
     }
 
-    view_dispatcher_run(app->view_dispatcher);
+    if(is_favorite) {
+        favorite_timeout_run(app->view_dispatcher, app->scene_manager);
+    } else {
+        view_dispatcher_run(app->view_dispatcher);
+    }
 
     lfrfid_free(app);
 

@@ -1,6 +1,7 @@
 #include "nfc_i.h"
 #include <furi_hal_nfc.h>
 #include <dolphin/dolphin.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -263,14 +264,14 @@ static bool nfc_is_hal_ready() {
     }
 }
 
-int32_t nfc_app(void* p) {
+int32_t nfc_app(char* p) {
     if(!nfc_is_hal_ready()) return 0;
 
     Nfc* nfc = nfc_alloc();
-    char* args = p;
 
     // Check argument and run corresponding scene
-    if(args && strlen(args)) {
+    bool is_favorite = process_favorite_launch(&p);
+    if(p && strlen(p)) {
         nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
@@ -311,7 +312,11 @@ int32_t nfc_app(void* p) {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 
-    view_dispatcher_run(nfc->view_dispatcher);
+    if(is_favorite) {
+        favorite_timeout_run(nfc->view_dispatcher, nfc->scene_manager);
+    } else {
+        view_dispatcher_run(nfc->view_dispatcher);
+    }
 
     nfc_free(nfc);
 

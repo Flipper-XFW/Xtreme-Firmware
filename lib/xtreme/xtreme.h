@@ -31,6 +31,7 @@ typedef struct {
     bool bar_background;
     bool sort_dirs_first;
     bool dark_mode;
+    uint32_t favorite_timeout;
     bool bad_bt;
     bool bad_bt_remember;
     int32_t butthurt_timer;

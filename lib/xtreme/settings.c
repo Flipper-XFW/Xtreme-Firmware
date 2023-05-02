@@ -24,6 +24,7 @@ XtremeSettings xtreme_settings = {
     .bar_background = false, // OFF
     .sort_dirs_first = true, // ON
     .dark_mode = false, // OFF
+    .favorite_timeout = 0, // OFF
     .bad_bt = false, // USB
     .bad_bt_remember = false, // OFF
     .butthurt_timer = 43200, // 12 H
@@ -75,6 +76,8 @@ void XTREME_SETTINGS_LOAD() {
         flipper_format_rewind(file);
         flipper_format_read_bool(file, "dark_mode", &x->dark_mode, 1);
         flipper_format_rewind(file);
+        flipper_format_read_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
+        flipper_format_rewind(file);
         flipper_format_read_bool(file, "bad_bt", &x->bad_bt, 1);
         flipper_format_rewind(file);
         flipper_format_read_bool(file, "bad_bt_remember", &x->bad_bt_remember, 1);
@@ -112,6 +115,7 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "bar_background", &x->bar_background, 1);
         flipper_format_write_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
         flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);
+        flipper_format_write_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
         flipper_format_write_bool(file, "bad_bt", &x->bad_bt, 1);
         flipper_format_write_bool(file, "bad_bt_remember", &x->bad_bt_remember, 1);
         flipper_format_write_int32(file, "butthurt_timer", &x->butthurt_timer, 1);

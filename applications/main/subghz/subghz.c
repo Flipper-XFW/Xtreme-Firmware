@@ -4,6 +4,7 @@
 #include <lib/toolbox/path.h>
 #include "subghz_i.h"
 #include <lib/subghz/protocols/protocol_items.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 #define TAG "SubGhzApp"
 
@@ -423,7 +424,7 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     free(subghz);
 }
 
-int32_t subghz_app(void* p) {
+int32_t subghz_app(char* p) {
     bool alloc_for_tx;
     if(p && strlen(p)) {
         alloc_for_tx = true;
@@ -455,6 +456,7 @@ int32_t subghz_app(void* p) {
         furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
     }
     // Check argument and run corresponding scene
+    process_favorite_launch(&p);
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
 

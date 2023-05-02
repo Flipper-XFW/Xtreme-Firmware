@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <dolphin/dolphin.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 #define INFRARED_TX_MIN_INTERVAL_MS 50U
 
@@ -435,7 +436,7 @@ void infrared_popup_closed_callback(void* context) {
         infrared->view_dispatcher, InfraredCustomEventTypePopupClosed);
 }
 
-int32_t infrared_app(void* p) {
+int32_t infrared_app(char* p) {
     Infrared* infrared = infrared_alloc();
 
     infrared_make_app_folder(infrared);
@@ -443,6 +444,7 @@ int32_t infrared_app(void* p) {
     bool is_remote_loaded = false;
     bool is_rpc_mode = false;
 
+    process_favorite_launch(&p);
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {

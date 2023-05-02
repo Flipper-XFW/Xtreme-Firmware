@@ -6,6 +6,7 @@
 #include <lib/toolbox/path.h>
 #include <xtreme.h>
 #include <lib/flipper_format/flipper_format.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 #include <bt/bt_service/bt_i.h>
 #include <bt/bt_service/bt.h>
@@ -204,6 +205,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->file_path = furi_string_alloc();
     app->keyboard_layout = furi_string_alloc();
+    process_favorite_launch(&arg);
     if(arg && strlen(arg)) {
         furi_string_set(app->file_path, arg);
     }
@@ -336,8 +338,8 @@ void bad_kb_app_free(BadKbApp* app) {
     free(app);
 }
 
-int32_t bad_kb_app(void* p) {
-    BadKbApp* bad_kb_app = bad_kb_app_alloc((char*)p);
+int32_t bad_kb_app(char* p) {
+    BadKbApp* bad_kb_app = bad_kb_app_alloc(p);
 
     view_dispatcher_run(bad_kb_app->view_dispatcher);
 
