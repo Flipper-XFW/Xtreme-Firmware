@@ -122,6 +122,19 @@ void subghz_scene_read_raw_on_enter(void* context) {
     //set filter RAW feed
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_RAW);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
+
+    // Start sending immediately with favorites
+    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW)) {
+        with_view_model(
+            subghz->subghz_read_raw->view,
+            SubGhzReadRAWModel * model,
+            {
+                scene_manager_handle_custom_event(
+                    subghz->scene_manager, SubGhzCustomEventViewReadRAWSendStart);
+                model->status = SubGhzReadRAWStatusTXRepeat;
+            },
+            true);
+    }
 }
 
 bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
@@ -278,6 +291,13 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz_sleep(subghz);
             }
             subghz_read_raw_stop_send(subghz->subghz_read_raw);
+
+            // Exit / stop with favorites
+            if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW)) {
+                while(scene_manager_handle_back_event(subghz->scene_manager))
+                    ;
+                view_dispatcher_stop(subghz->view_dispatcher);
+            }
             consumed = true;
             break;
 

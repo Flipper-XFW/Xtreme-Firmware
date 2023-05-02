@@ -11,28 +11,6 @@
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
 #define TAG "SubGhzReadRAW"
 
-struct SubGhzReadRAW {
-    View* view;
-    SubGhzReadRAWCallback callback;
-    void* context;
-};
-
-typedef struct {
-    FuriString* frequency_str;
-    FuriString* preset_str;
-    FuriString* sample_write;
-    FuriString* file_name;
-    uint8_t* rssi_history;
-    uint8_t rssi_current;
-    bool rssi_history_end;
-    uint8_t ind_write;
-    uint8_t ind_sin;
-    SubGhzReadRAWStatus status;
-    bool raw_send_only;
-    float raw_threshold_rssi;
-    bool not_showing_samples;
-} SubGhzReadRAWModel;
-
 void subghz_read_raw_set_callback(
     SubGhzReadRAW* subghz_read_raw,
     SubGhzReadRAWCallback callback,

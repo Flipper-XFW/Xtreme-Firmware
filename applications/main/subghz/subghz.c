@@ -5,6 +5,7 @@
 #include "subghz_i.h"
 #include <lib/subghz/protocols/protocol_items.h>
 #include <applications/main/archive/helpers/favorite_timeout.h>
+#include <xtreme.h>
 
 #define TAG "SubGhzApp"
 
@@ -456,7 +457,7 @@ int32_t subghz_app(char* p) {
         furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
     }
     // Check argument and run corresponding scene
-    process_favorite_launch(&p);
+    bool is_favorite = process_favorite_launch(&p) && XTREME_SETTINGS()->favorite_timeout;
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
 
@@ -476,6 +477,8 @@ int32_t subghz_app(char* p) {
                 if((!strcmp(subghz->txrx->decoder_result->protocol->name, "RAW"))) {
                     //Load Raw TX
                     subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
+                    scene_manager_set_scene_state(
+                        subghz->scene_manager, SubGhzSceneReadRAW, is_favorite);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
                 } else {
                     //Load transmitter TX
