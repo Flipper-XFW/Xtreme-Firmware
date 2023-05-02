@@ -69,16 +69,18 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str(canvas, 13, 55, "AUTO");
     }
 
-    //canvas_draw_icon(canvas, 90, 17, &I_ButtonUp_7x4);
-    //canvas_draw_icon(canvas, 100, 17, &I_ButtonDown_7x4);
-    //canvas_draw_icon(canvas, 27, 17, &I_ButtonLeftSmall_3x5);
-    //canvas_draw_icon(canvas, 37, 17, &I_ButtonRightSmall_3x5);
-    //canvas_draw_icon(canvas, 3, 48, &I_Pin_star_7x7);
+    if(Work) {
+        canvas_draw_icon(canvas, 85, 41, &I_ButtonUpHollow_7x4);
+        canvas_draw_icon(canvas, 85, 57, &I_ButtonDownHollow_7x4);
+        canvas_draw_icon(canvas, 59, 48, &I_ButtonLeftHollow_4x7);
+        canvas_draw_icon(canvas, 72, 48, &I_ButtonRightHollow_4x7);
+    } else {
+        canvas_draw_icon(canvas, 85, 41, &I_ButtonUp_7x4);
+        canvas_draw_icon(canvas, 85, 57, &I_ButtonDown_7x4);
+        canvas_draw_icon(canvas, 59, 48, &I_ButtonLeft_4x7);
+        canvas_draw_icon(canvas, 72, 48, &I_ButtonRight_4x7);
+    }
 
-    canvas_draw_icon(canvas, 85, 41, &I_ButtonUp_7x4);
-    canvas_draw_icon(canvas, 85, 57, &I_ButtonDown_7x4);
-    canvas_draw_icon(canvas, 59, 48, &I_ButtonLeft_4x7);
-    canvas_draw_icon(canvas, 72, 48, &I_ButtonRight_4x7);
     canvas_draw_icon(canvas, 3, 48, &I_Pin_star_7x7);
 
     canvas_set_font(canvas, FontPrimary);
@@ -87,8 +89,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 85, 55, "S");
 
-    canvas_draw_icon(canvas, 59, 48, &I_ButtonLeft_4x7);
-    canvas_draw_icon(canvas, 72, 48, &I_ButtonRight_4x7);
+    //canvas_draw_icon(canvas, 59, 48, &I_ButtonLeft_4x7);
+    //canvas_draw_icon(canvas, 72, 48, &I_ButtonRight_4x7);
 
     if(Work) {
         canvas_draw_icon(canvas, 106, 46, &I_loading_10px);
@@ -151,6 +153,10 @@ int32_t zeitraffer_app(void* p) {
     FlipperFormat* load = flipper_format_file_alloc(storage);
 
     do {
+        if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
+            notification_message(notifications, &sequence_error);
+            break;
+        }
         if(!flipper_format_file_open_existing(load, CONFIG_FILE_PATH)) {
             notification_message(notifications, &sequence_error);
             break;
@@ -246,6 +252,8 @@ int32_t zeitraffer_app(void* p) {
                         if(WorkCount == 0) WorkCount = Count;
 
                         if(WorkTime == 0) WorkTime = Delay;
+
+                        if(Count == 1) WorkTime = Time;
 
                         if(Count == 0) {
                             InfiniteShot = true;
@@ -390,7 +398,7 @@ int32_t zeitraffer_app(void* p) {
         }
         if(!flipper_format_write_comment_cstr(
                save,
-               "Zeitraffer app settings: n of frames, interval time, backlight type, Delay")) {
+               "Zeitraffer app settings: № of frames, interval time, backlight type, Delay")) {
             notification_message(notifications, &sequence_error);
             break;
         }

@@ -78,6 +78,7 @@ void flipp_pomodoro_app_free(FlippPomodoroApp* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
     flipp_pomodoro_view_timer_free(app->timer_view);
+    flipp_pomodoro__destroy(app->state);
     free(app);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
