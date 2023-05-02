@@ -603,7 +603,7 @@ void subghz_hopper_update(SubGhz* subghz) {
 
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
-    };
+    }
     if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
         subghz_receiver_reset(subghz->txrx->receiver);
         subghz->txrx->preset->frequency = subghz_setting_get_hopper_frequency(

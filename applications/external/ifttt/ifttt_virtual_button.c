@@ -129,7 +129,7 @@ void send_serial_command_config(ESerialCommand command, Settings* settings) {
             break;
         default:
             return;
-        };
+        }
 
         furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
     }

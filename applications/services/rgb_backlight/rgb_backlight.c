@@ -103,7 +103,7 @@ void rgb_backlight_load_settings(void) {
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
     rgb_settings.settings_is_loaded = true;
-};
+}
 
 void rgb_backlight_save_settings(void) {
     RGBBacklightSettings settings;
@@ -134,7 +134,7 @@ void rgb_backlight_save_settings(void) {
     storage_file_close(file);
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
-};
+}
 
 RGBBacklightSettings* rgb_backlight_get_settings(void) {
     if(!rgb_settings.settings_is_loaded) {

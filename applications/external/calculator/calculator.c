@@ -199,7 +199,7 @@ void generate_calculator_layout(Canvas* canvas) {
     canvas_draw_str(canvas, 19, 118, " 0");
     canvas_draw_str(canvas, 35, 118, "   .");
     canvas_draw_str(canvas, 51, 118, " =");
-};
+}
 
 void calculator_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);

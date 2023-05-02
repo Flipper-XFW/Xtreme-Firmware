@@ -57,7 +57,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     elements_button_center(canvas, "New");
 
     elements_button_left(canvas, notifications_enabled ? "On" : "Off");
-};
+}
 
 static void input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
