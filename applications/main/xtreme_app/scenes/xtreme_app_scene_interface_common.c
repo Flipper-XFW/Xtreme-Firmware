@@ -78,7 +78,11 @@ void xtreme_app_scene_interface_common_on_enter(void* context) {
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "Favorite Timeout", 61, xtreme_app_scene_interface_common_favorite_timeout_changed, app);
+        var_item_list,
+        "Favorite Timeout",
+        61,
+        xtreme_app_scene_interface_common_favorite_timeout_changed,
+        app);
     variable_item_set_current_value_index(item, xtreme_settings->favorite_timeout);
     char text[4];
     snprintf(text, sizeof(text), "%lu S", xtreme_settings->favorite_timeout);

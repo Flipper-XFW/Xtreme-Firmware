@@ -36,7 +36,8 @@ static void archive_loader_callback(const void* message, void* context) {
     }
 }
 
-static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected, bool favorites) {
+static void
+    archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected, bool favorites) {
     UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
 
@@ -48,13 +49,13 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
         }
         status = loader_start(loader, flipper_app_name[selected->type], param);
     } else {
+        const char* str = furi_string_get_cstr(selected->path);
         if(favorites) {
-            const char* str = furi_string_get_cstr(selected->path);
             char arg[strlen(str) + 4];
             snprintf(arg, sizeof(arg), "fav%s", str);
             status = loader_start(loader, flipper_app_name[selected->type], arg);
         } else {
-            status = loader_start(loader, flipper_app_name[selected->type], furi_string_get_cstr(selected->path));
+            status = loader_start(loader, flipper_app_name[selected->type], str);
         }
     }
 

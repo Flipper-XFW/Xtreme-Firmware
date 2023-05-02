@@ -11,7 +11,8 @@ bool process_favorite_launch(char** args) {
 
 void favorite_timeout_callback(void* _ctx) {
     FavoriteTImeoutCtx* ctx = _ctx;
-    while(scene_manager_handle_back_event(ctx->scene_manager));
+    while(scene_manager_handle_back_event(ctx->scene_manager))
+        ;
     view_dispatcher_stop(ctx->view_dispatcher);
 }
 
@@ -22,10 +23,7 @@ void favorite_timeout_run(ViewDispatcher* view_dispatcher, SceneManager* scene_m
         return;
     }
 
-    FavoriteTImeoutCtx ctx = {
-        .view_dispatcher = view_dispatcher,
-        .scene_manager = scene_manager
-    };
+    FavoriteTImeoutCtx ctx = {.view_dispatcher = view_dispatcher, .scene_manager = scene_manager};
     FuriTimer* timer = furi_timer_alloc(favorite_timeout_callback, FuriTimerTypeOnce, &ctx);
     furi_timer_start(timer, timeout * furi_kernel_get_tick_frequency());
     view_dispatcher_run(view_dispatcher);
