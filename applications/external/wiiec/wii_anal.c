@@ -488,13 +488,13 @@ int32_t wii_ec_anal(void) {
 
 bail:
     // 10. Release system notification queue
-    if(state->notify) {
+    if(state && state->notify) {
         furi_record_close(RECORD_NOTIFICATION);
         state->notify = NULL;
     }
 
     // 9. Stop the timer
-    if(state->timer) {
+    if(state && state->timer) {
         (void)furi_timer_stop(state->timer);
         furi_timer_free(state->timer);
         state->timer = NULL;
@@ -515,7 +515,7 @@ bail:
     }
 
     // 5. Free the mutex
-    if(state->mutex) {
+    if(state && state->mutex) {
         furi_mutex_free(state->mutex);
         state->mutex = NULL;
     }
