@@ -28,6 +28,7 @@ XtremeAssets xtreme_assets = {
     .I_RFIDDolphinSend_97x61 = &I_RFIDDolphinSend_97x61,
     .I_RFIDDolphinSuccess_108x57 = &I_RFIDDolphinSuccess_108x57,
     .I_Cry_dolph_55x52 = &I_Cry_dolph_55x52,
+    .I_Background_128x11 = &I_Background_128x11,
     .I_Fishing_123x52 = &I_Fishing_123x52,
     .I_Scanning_123x52 = &I_Scanning_123x52,
     .I_Auth_62x31 = &I_Auth_62x31,
@@ -132,6 +133,7 @@ void swap(XtremeAssets* x, FuriString* p, File* f) {
     icon(&x->I_RFIDDolphinSend_97x61, "RFID/RFIDDolphinSend_97x61", p, f);
     icon(&x->I_RFIDDolphinSuccess_108x57, "RFID/RFIDDolphinSuccess_108x57", p, f);
     icon(&x->I_Cry_dolph_55x52, "Settings/Cry_dolph_55x52", p, f);
+    icon(&x->I_Background_128x11, "StatusBar/Background_128x11", p, f);
     icon(&x->I_Fishing_123x52, "SubGhz/Fishing_123x52", p, f);
     icon(&x->I_Scanning_123x52, "SubGhz/Scanning_123x52", p, f);
     icon(&x->I_Auth_62x31, "U2F/Auth_62x31", p, f);
