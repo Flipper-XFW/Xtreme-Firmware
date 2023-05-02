@@ -1401,18 +1401,17 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             break;
         nfc_device_prepare_format_string(dev, temp_str);
         if(!flipper_format_write_string(file, "Device type", temp_str)) break;
-        // Write UID, ATQA, SAK
-        if(!flipper_format_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
-            break;
+        // Write UID
+        if(!flipper_format_write_comment_cstr(file, "UID is common for all formats")) break;
         if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
 
         if(dev->format != NfcDeviceSaveFormatNfcV) {
             // Write ATQA, SAK
             if(!flipper_format_write_comment_cstr(file, "ISO14443 specific fields")) break;
             // Save ATQA in MSB order for correct companion apps display
-            uint8_t atqa[2] = {data->a_data.atqa[1], data->a_data.atqa[0]};
+            uint8_t atqa[2] = {data->atqa[1], data->atqa[0]};
             if(!flipper_format_write_hex(file, "ATQA", atqa, 2)) break;
-            if(!flipper_format_write_hex(file, "SAK", &data->a_data.sak, 1)) break;
+            if(!flipper_format_write_hex(file, "SAK", &data->sak, 1)) break;
         }
 
         // Save more data if necessary
@@ -1503,14 +1502,14 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
         if(!flipper_format_read_hex(file, "UID", data->uid, data->uid_len)) break;
         if(dev->format != NfcDeviceSaveFormatNfcV) {
             if(version == version_with_lsb_atqa) {
-                if(!flipper_format_read_hex(file, "ATQA", data->a_data.atqa, 2)) break;
+                if(!flipper_format_read_hex(file, "ATQA", data->atqa, 2)) break;
             } else {
                 uint8_t atqa[2] = {};
                 if(!flipper_format_read_hex(file, "ATQA", atqa, 2)) break;
-                data->a_data.atqa[0] = atqa[1];
-                data->a_data.atqa[1] = atqa[0];
+                data->atqa[0] = atqa[1];
+                data->atqa[1] = atqa[0];
             }
-            if(!flipper_format_read_hex(file, "SAK", &data->a_data.sak, 1)) break;
+            if(!flipper_format_read_hex(file, "SAK", &data->sak, 1)) break;
         }
         // Load CUID
         uint8_t* cuid_start = data->uid;
