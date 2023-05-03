@@ -106,9 +106,11 @@ static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_hal_gpio_write(furi_hal_subghz.cc1101_g0_pin, false);
     furi_hal_gpio_init(
         furi_hal_subghz.cc1101_g0_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    subghz_speaker_on(subghz);
     bool ret = furi_hal_subghz_tx();
-    subghz->txrx->txrx_state = SubGhzTxRxStateTx;
+    if(ret) {
+        subghz_speaker_on(subghz);
+        subghz->txrx->txrx_state = SubGhzTxRxStateTx;
+    }
     return ret;
 }
 
@@ -116,6 +118,7 @@ void subghz_idle(SubGhz* subghz) {
     furi_assert(subghz);
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
+    subghz_speaker_off(subghz);
     subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
@@ -600,7 +603,7 @@ void subghz_hopper_update(SubGhz* subghz) {
 
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
-    };
+    }
     if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
         subghz_receiver_reset(subghz->txrx->receiver);
         subghz->txrx->preset->frequency = subghz_setting_get_hopper_frequency(

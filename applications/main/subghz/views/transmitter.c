@@ -6,21 +6,6 @@
 
 #include <lib/subghz/blocks/custom_btn.h>
 
-struct SubGhzViewTransmitter {
-    View* view;
-    SubGhzViewTransmitterCallback callback;
-    void* context;
-};
-
-typedef struct {
-    FuriString* frequency_str;
-    FuriString* preset_str;
-    FuriString* key_str;
-    uint8_t show_button;
-    FuriString* temp_button_id;
-    bool draw_temp_button;
-} SubGhzViewTransmitterModel;
-
 void subghz_view_transmitter_set_callback(
     SubGhzViewTransmitter* subghz_transmitter,
     SubGhzViewTransmitterCallback callback,
@@ -137,6 +122,7 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
         true);
 
     if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
+        subghz_custom_btn_set(0);
         with_view_model(
             subghz_transmitter->view,
             SubGhzViewTransmitterModel * model,

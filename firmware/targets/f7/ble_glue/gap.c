@@ -121,6 +121,8 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             FURI_LOG_I(
                 TAG, "Disconnect from client. Reason: %02X", disconnection_complete_event->Reason);
         }
+        // Enterprise sleep
+        furi_delay_us(666 + 666);
         if(gap->enable_adv) {
             // Restart advertising
             gap_advertise_start(GapStateAdvFast);
@@ -312,8 +314,6 @@ static void gap_init_svc(Gap* gap) {
     tBleStatus status;
     uint32_t srd_bd_addr[2];
 
-    // HCI Reset to synchronise BLE Stack
-    hci_reset();
     // Configure mac address
     aci_hal_write_config_data(
         CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, gap->config->mac_address);

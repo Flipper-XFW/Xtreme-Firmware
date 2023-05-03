@@ -29,7 +29,7 @@ void bad_kb_scene_file_select_on_enter(void* context) {
 
     if(bad_kb_file_select(bad_kb)) {
         bad_kb->bad_kb_script =
-            bad_kb_script_open(bad_kb->file_path, bad_kb->is_bt ? bad_kb->bt : NULL);
+            bad_kb_script_open(bad_kb->file_path, bad_kb->is_bt ? bad_kb->bt : NULL, bad_kb);
         bad_kb_script_set_keyboard_layout(bad_kb->bad_kb_script, bad_kb->keyboard_layout);
 
         scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneWork);

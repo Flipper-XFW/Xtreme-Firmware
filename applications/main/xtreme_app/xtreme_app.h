@@ -23,8 +23,7 @@
 #include <notification/notification_app.h>
 #include <rgb_backlight/rgb_backlight.h>
 #include <m-array.h>
-#include "xtreme/settings.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 #define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 6
 

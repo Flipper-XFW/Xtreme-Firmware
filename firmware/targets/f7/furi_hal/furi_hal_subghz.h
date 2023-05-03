@@ -79,6 +79,7 @@ typedef struct {
     const GpioPin* cc1101_g0_pin;
     uint8_t rolling_counter_mult;
     bool ext_module_power_disabled;
+    bool timestamp_file_names;
 } FuriHalSubGhz;
 
 extern volatile FuriHalSubGhz furi_hal_subghz;
@@ -305,7 +306,7 @@ void furi_hal_subghz_stop_async_tx();
  * @param      state SubGhzRadioInternal or SubGhzRadioExternal
  * @return     true if switching is successful
  */
-bool furi_hal_subghz_set_radio_type(SubGhzRadioType state);
+bool furi_hal_subghz_init_radio_type(SubGhzRadioType state);
 
 /** Get current radio
  * @return     SubGhzRadioInternal or SubGhzRadioExternal
@@ -343,6 +344,18 @@ void furi_hal_subghz_set_external_power_disable(bool state);
 /** Get the current state of the external power disable flag
  */
 bool furi_hal_subghz_get_external_power_disable(void);
+
+/** If true - disable generation of random name and add timestamp to filenames instead
+ */
+void furi_hal_subghz_set_timestamp_file_names(bool state);
+
+/** Get the current state of the timestamp instead of random name flag
+ */
+bool furi_hal_subghz_get_timestamp_file_names(void);
+
+/** Set what radio module we will be using
+ */
+void furi_hal_subghz_select_radio_type(SubGhzRadioType state);
 
 #ifdef __cplusplus
 }

@@ -58,7 +58,7 @@ static void
         remaining_stage_time_string);
 
     furi_string_free(timer_string);
-};
+}
 
 static void draw_str_with_drop_shadow(
     Canvas* canvas,
@@ -92,7 +92,7 @@ static void
 static void flipp_pomodoro_view_timer_draw_callback(Canvas* canvas, void* _model) {
     if(!_model) {
         return;
-    };
+    }
 
     FlippPomodoroTimerViewModel* model = _model;
 
@@ -109,7 +109,7 @@ static void flipp_pomodoro_view_timer_draw_callback(Canvas* canvas, void* _model
 
     canvas_set_font(canvas, FontSecondary);
     elements_button_right(canvas, flipp_pomodoro__next_stage_label(model->state));
-};
+}
 
 bool flipp_pomodoro_view_timer_input_callback(InputEvent* event, void* ctx) {
     furi_assert(ctx);
@@ -125,15 +125,15 @@ bool flipp_pomodoro_view_timer_input_callback(InputEvent* event, void* ctx) {
         furi_assert(timer->right_cb_ctx);
         timer->right_cb(timer->right_cb_ctx);
         return ViewInputConsumed;
-    };
+    }
 
     return ViewInputNotConusmed;
-};
+}
 
 View* flipp_pomodoro_view_timer_get_view(FlippPomodoroTimerView* timer) {
     furi_assert(timer);
     return timer->view;
-};
+}
 
 void flipp_pomodoro_view_timer_assign_animation(View* view) {
     with_view_model(
@@ -162,7 +162,7 @@ FlippPomodoroTimerView* flipp_pomodoro_view_timer_alloc() {
     view_set_input_callback(timer->view, flipp_pomodoro_view_timer_input_callback);
 
     return timer;
-};
+}
 
 void flipp_pomodoro_view_timer_set_on_right_cb(
     FlippPomodoroTimerView* timer,
@@ -172,7 +172,7 @@ void flipp_pomodoro_view_timer_set_on_right_cb(
     furi_assert(right_cb_ctx);
     timer->right_cb = right_cb;
     timer->right_cb_ctx = right_cb_ctx;
-};
+}
 
 void flipp_pomodoro_view_timer_set_state(View* view, FlippPomodoroState* state) {
     furi_assert(view);
@@ -180,7 +180,7 @@ void flipp_pomodoro_view_timer_set_state(View* view, FlippPomodoroState* state) 
     with_view_model(
         view, FlippPomodoroTimerViewModel * model, { model->state = state; }, false);
     flipp_pomodoro_view_timer_assign_animation(view);
-};
+}
 
 void flipp_pomodoro_view_timer_free(FlippPomodoroTimerView* timer) {
     furi_assert(timer);
@@ -192,4 +192,4 @@ void flipp_pomodoro_view_timer_free(FlippPomodoroTimerView* timer) {
     view_free(timer->view);
 
     free(timer);
-};
+}

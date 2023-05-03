@@ -40,13 +40,22 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .cc1101_g0_pin = &gpio_cc1101_g0,
     .rolling_counter_mult = 1,
     .ext_module_power_disabled = false,
+    .timestamp_file_names = false,
 };
 
-bool furi_hal_subghz_set_radio_type(SubGhzRadioType state) {
+void furi_hal_subghz_select_radio_type(SubGhzRadioType state) {
     furi_hal_subghz.radio_type = state;
+}
+
+bool furi_hal_subghz_init_radio_type(SubGhzRadioType state) {
+    if(state == SubGhzRadioInternal && furi_hal_subghz.cc1101_g0_pin == &gpio_cc1101_g0) {
+        return true;
+    } else if(state == SubGhzRadioExternal && furi_hal_subghz.cc1101_g0_pin == &gpio_cc1101_g0_ext) {
+        return true;
+    }
     furi_hal_spi_bus_handle_deinit(furi_hal_subghz.spi_bus_handle);
 
-    if(furi_hal_subghz.radio_type == SubGhzRadioInternal) {
+    if(state == SubGhzRadioInternal) {
         furi_hal_subghz.spi_bus_handle = &furi_hal_spi_bus_handle_subghz;
         furi_hal_subghz.cc1101_g0_pin = &gpio_cc1101_g0;
     } else {
@@ -77,6 +86,14 @@ void furi_hal_subghz_set_external_power_disable(bool state) {
 
 bool furi_hal_subghz_get_external_power_disable(void) {
     return furi_hal_subghz.ext_module_power_disabled;
+}
+
+void furi_hal_subghz_set_timestamp_file_names(bool state) {
+    furi_hal_subghz.timestamp_file_names = state;
+}
+
+bool furi_hal_subghz_get_timestamp_file_names(void) {
+    return furi_hal_subghz.timestamp_file_names;
 }
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
@@ -110,6 +127,8 @@ void furi_hal_subghz_disable_ext_power(void) {
 
 bool furi_hal_subghz_check_radio(void) {
     bool result = true;
+
+    furi_hal_subghz_init_radio_type(furi_hal_subghz.radio_type);
 
     furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
 
@@ -702,11 +721,12 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
             GpioModeInterruptRiseFall,
             GpioPullUp,
             GpioSpeedVeryHigh);
+        furi_hal_gpio_disable_int_callback(furi_hal_subghz.cc1101_g0_pin);
+        furi_hal_gpio_remove_int_callback(furi_hal_subghz.cc1101_g0_pin);
         furi_hal_gpio_add_int_callback(
             furi_hal_subghz.cc1101_g0_pin,
             furi_hal_subghz_capture_ext_ISR,
             furi_hal_subghz_capture_callback);
-        furi_hal_gpio_enable_int_callback(furi_hal_subghz.cc1101_g0_pin);
     }
 
     // Start timer

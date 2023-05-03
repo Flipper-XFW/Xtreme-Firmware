@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 #include <furi_hal_rtc.h>
 
 #include "../desktop_i.h"
@@ -45,6 +45,14 @@ void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is
             model->pin_is_set = pin_is_set;
             model->pin_lock = pin_is_set;
         },
+        true);
+}
+
+void desktop_lock_menu_set_stealth_mode_state(DesktopLockMenuView* lock_menu, bool stealth_mode) {
+    with_view_model(
+        lock_menu->view,
+        DesktopLockMenuViewModel * model,
+        { model->stealth_mode = stealth_mode; },
         true);
 }
 
@@ -110,7 +118,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             value = total - m->lock_menu->notification->settings.display_brightness * total;
             break;
         case DesktopLockMenuIndexVolume:
-            icon = &I_Volup_8x6;
+            icon = m->stealth_mode ? &I_Muted_8x8 : &I_Volup_8x6;
             value = total - m->lock_menu->notification->settings.speaker_volume * total;
             break;
         default:
@@ -181,6 +189,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     uint8_t idx = 0;
     int pin_lock = 0;
     bool show_lock_menu = false;
+    bool stealth_mode = false;
     bool consumed = true;
 
     with_view_model(
@@ -188,6 +197,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
         DesktopLockMenuViewModel * model,
         {
             show_lock_menu = model->show_lock_menu;
+            stealth_mode = model->stealth_mode;
             if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
                 if(model->show_lock_menu) {
                     if(event->key == InputKeyUp) {
@@ -291,6 +301,10 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 break;
             case DesktopLockMenuIndexXtreme:
                 desktop_event = DesktopLockMenuEventXtreme;
+                break;
+            case DesktopLockMenuIndexVolume:
+                desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :
+                                               DesktopLockMenuEventStealthModeOn;
                 break;
             default:
                 break;

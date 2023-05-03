@@ -8,7 +8,7 @@
 #include <gui/icon_i.h>
 #include <core/dangerous_defines.h>
 #include <toolbox/stream/file_stream.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 #include <gui/modules/file_browser.h>
 
 #define TAG "LoaderSrv"
@@ -43,9 +43,10 @@ static bool
     furi_assert(loader_instance->application_arguments == NULL);
     if(arguments && strlen(arguments) > 0) {
         loader_instance->application_arguments = strdup(arguments);
+        FURI_LOG_I(TAG, "Starting: %s, args: %s", loader_instance->application->name, arguments);
+    } else {
+        FURI_LOG_I(TAG, "Starting: %s", loader_instance->application->name);
     }
-
-    FURI_LOG_I(TAG, "Starting: %s", loader_instance->application->name);
 
     FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
     if(mode > FuriHalRtcHeapTrackModeNone) {

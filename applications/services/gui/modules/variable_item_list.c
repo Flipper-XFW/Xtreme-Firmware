@@ -79,7 +79,13 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 canvas_set_color(canvas, ColorBlack);
             }
 
-            canvas_draw_str(canvas, 6, item_text_y, item->label);
+            if(item->current_value_index == 0 && furi_string_empty(item->current_value_text)) {
+                // Only left text, no right text
+                canvas_draw_str(canvas, 6, item_text_y, item->label);
+            } else {
+                elements_scrollable_text_line_str(
+                    canvas, 6, item_text_y, 66, item->label, scroll_counter, false, false);
+            }
 
             if(item->locked) {
                 canvas_draw_icon(canvas, 110, item_text_y - 8, &I_Lock_7x8);

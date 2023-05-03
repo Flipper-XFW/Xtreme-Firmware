@@ -1,5 +1,5 @@
 #include "../lfrfid_i.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 void lfrfid_scene_rpc_on_enter(void* context) {
     LfRfid* app = context;

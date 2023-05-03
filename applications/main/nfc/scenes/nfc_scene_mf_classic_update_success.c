@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 void nfc_scene_mf_classic_update_success_popup_callback(void* context) {
     Nfc* nfc = context;

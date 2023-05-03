@@ -6,6 +6,7 @@ typedef enum {
     SubmenuIndexPSK,
     SubmenuIndexClearT5577,
     SubmenuIndexRAW,
+    SubmenuIndexRAWEmulate,
 } SubmenuIndex;
 
 static void lfrfid_scene_extra_actions_submenu_callback(void* context, uint32_t index) {
@@ -45,6 +46,14 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
         app,
         !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug),
         "Enable\nDebug!");
+    submenu_add_lockable_item(
+        submenu,
+        "Emulate RAW RFID data",
+        SubmenuIndexRAWEmulate,
+        lfrfid_scene_extra_actions_submenu_callback,
+        app,
+        !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug),
+        "Enable\nDebug!");
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, LfRfidSceneExtraActions));
@@ -73,10 +82,13 @@ bool lfrfid_scene_extra_actions_on_event(void* context, SceneManagerEvent event)
             DOLPHIN_DEED(DolphinDeedRfidRead);
             consumed = true;
         } else if(event.event == SubmenuIndexClearT5577) {
-            scene_manager_next_scene(app->scene_manager, LfRfidSceneClearT5577);
+            scene_manager_next_scene(app->scene_manager, LfRfidSceneClearT5577Confirm);
             consumed = true;
         } else if(event.event == SubmenuIndexRAW) {
             scene_manager_next_scene(app->scene_manager, LfRfidSceneRawName);
+            consumed = true;
+        } else if(event.event == SubmenuIndexRAWEmulate) {
+            scene_manager_next_scene(app->scene_manager, LfRfidSceneSelectRawKey);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, LfRfidSceneExtraActions, event.event);

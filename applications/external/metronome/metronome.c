@@ -178,7 +178,7 @@ static void timer_callback(void* ctx) {
         case Silent:
             break;
         }
-    };
+    }
 
     // this is a bit of a kludge... if we are on vibro and unpronounced, stop vibro after half the usual duration
     switch(metronome_state->output_mode) {

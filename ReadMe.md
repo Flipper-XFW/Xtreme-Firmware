@@ -32,18 +32,23 @@ Note, the below mentioned changes are only a few things we did. For a full list 
 
 We wrote a powerful yet easy-to-use application specifically for our Firmware, that gives you easy-access to all the fancy things we implemented:
 
-<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" width="400px"/>
+<!--
 
-<ins><b>Interface:</b></ins>
-Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style, statusbar items and screen options like dark mode and lefty mode(yes, we thought about you :3 ).
+This image needs to be updated!
+Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it fits all our bulletpoints without issues
 
-<ins><b>Protocols:</b></ins>
-Here you can toggle USB & Bluetooth mode for our Bad-Keyboard app, and manage Subghz settings like custom frequencies and extend options.
+-->
 
-<ins><b>Misc:</b></ins>
-All the other options that don't fit elsewhere. Change your Flipper's name, change xp level, and manage settings for RGB backlight.
+<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" height="160vh"/>
+<img align="left" height="180vh" width="10" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/1_120_transparent.png">
 
-<br clear="left"/>
+- <ins><b>Interface:</b></ins> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style etc.
+
+- <ins><b>Protocols:</b></ins> Here you can toggle between USB & Bluetooth mode for <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/Generic-Guides#badbt--kb">BadKB</a>, and manage custom Subghz frequencies.
+
+- <ins><b>Misc:</b></ins> All the other options that don't fit elsewhere. Change your Flipper's name, xp level, and configure the <a href="https://github.com/Z3BRO/Flipper-Zero-RGB-Backlight">RGB backlight</a>.
+
+<br>
 
 -----
 <br>

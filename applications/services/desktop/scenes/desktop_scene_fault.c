@@ -1,7 +1,7 @@
 #include <furi_hal.h>
 
 #include "../desktop_i.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 #define DesktopFaultEventExit 0x00FF00FF
 

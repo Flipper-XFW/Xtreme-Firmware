@@ -9,14 +9,14 @@ static bool flipp_pomodoro_app_back_event_callback(void* ctx) {
     furi_assert(ctx);
     FlippPomodoroApp* app = ctx;
     return scene_manager_handle_back_event(app->scene_manager);
-};
+}
 
 static void flipp_pomodoro_app_tick_event_callback(void* ctx) {
     furi_assert(ctx);
     FlippPomodoroApp* app = ctx;
 
     scene_manager_handle_custom_event(app->scene_manager, FlippPomodoroAppCustomEventTimerTick);
-};
+}
 
 static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) {
     furi_assert(ctx);
@@ -40,7 +40,7 @@ static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) 
         break;
     }
     return scene_manager_handle_custom_event(app->scene_manager, event);
-};
+}
 
 FlippPomodoroApp* flipp_pomodoro_app_alloc() {
     FlippPomodoroApp* app = malloc(sizeof(FlippPomodoroApp));
@@ -71,17 +71,18 @@ FlippPomodoroApp* flipp_pomodoro_app_alloc() {
     scene_manager_next_scene(app->scene_manager, FlippPomodoroSceneTimer);
 
     return app;
-};
+}
 
 void flipp_pomodoro_app_free(FlippPomodoroApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, FlippPomodoroAppViewTimer);
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
     flipp_pomodoro_view_timer_free(app->timer_view);
+    flipp_pomodoro__destroy(app->state);
     free(app);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
-};
+}
 
 int32_t flipp_pomodoro_app(void* p) {
     UNUSED(p);
@@ -92,4 +93,4 @@ int32_t flipp_pomodoro_app(void* p) {
     flipp_pomodoro_app_free(app);
 
     return 0;
-};
+}

@@ -1,5 +1,5 @@
 #include "../ibutton_i.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 static void ibutton_scene_write_success_popup_callback(void* context) {
     iButton* ibutton = context;

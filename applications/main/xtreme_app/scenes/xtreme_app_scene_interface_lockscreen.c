@@ -10,11 +10,27 @@ void xtreme_app_scene_interface_lockscreen_var_item_list_callback(void* context,
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
+static void xtreme_app_scene_interface_lockscreen_bad_pins_format_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->bad_pins_format = value;
+    app->save_settings = true;
+}
+
 static void xtreme_app_scene_interface_lockscreen_show_time_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->lockscreen_time = value;
+    app->save_settings = true;
+}
+
+static void xtreme_app_scene_interface_lockscreen_show_seconds_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->lockscreen_seconds = value;
     app->save_settings = true;
 }
 
@@ -50,12 +66,30 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
+        "Format on 10 bad PINs",
+        2,
+        xtreme_app_scene_interface_lockscreen_bad_pins_format_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings->bad_pins_format);
+    variable_item_set_current_value_text(item, xtreme_settings->bad_pins_format ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
         "Show Time",
         2,
         xtreme_app_scene_interface_lockscreen_show_time_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_time);
     variable_item_set_current_value_text(item, xtreme_settings->lockscreen_time ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Show Seconds",
+        2,
+        xtreme_app_scene_interface_lockscreen_show_seconds_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings->lockscreen_seconds);
+    variable_item_set_current_value_text(item, xtreme_settings->lockscreen_seconds ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,

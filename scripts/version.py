@@ -1,5 +1,5 @@
 #!/usb/bin/env python3
-VERSION = "XFW-0044"
+VERSION = "XFW-0045"
 
 from flipper.app import App
 
@@ -152,6 +152,7 @@ class Main(App):
             "firmware_commit": current_info["GIT_COMMIT"],
             "firmware_branch": current_info["GIT_BRANCH"],
             "firmware_target": current_info["TARGET"],
+            "firmware_version": current_info["VERSION"],
         }
         with open(version_json_name, "w", newline="\n") as file:
             json.dump(version_json, file, indent=4)

@@ -7,7 +7,7 @@
 #include <furi_hal_rtc.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},
@@ -140,18 +140,25 @@ void canvas_invert_color(Canvas* canvas) {
 void canvas_set_font(Canvas* canvas, Font font) {
     furi_assert(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
-    if(font == FontPrimary) {
+    switch(font) {
+    case FontPrimary:
         u8g2_SetFont(&canvas->fb, u8g2_font_helvB08_tr);
-    } else if(font == FontSecondary) {
+        break;
+    case FontSecondary:
         u8g2_SetFont(&canvas->fb, u8g2_font_haxrcorp4089_tr);
-    } else if(font == FontKeyboard) {
+        break;
+    case FontKeyboard:
         u8g2_SetFont(&canvas->fb, u8g2_font_profont11_mr);
-    } else if(font == FontBigNumbers) {
+        break;
+    case FontBigNumbers:
         u8g2_SetFont(&canvas->fb, u8g2_font_profont22_tn);
-    } else if(font == FontBatteryPercent) {
+        break;
+    case FontBatteryPercent:
         u8g2_SetFont(&canvas->fb, u8g2_font_5x7_tf); //u8g2_font_micro_tr);
-    } else {
+        break;
+    default:
         furi_crash(NULL);
+        break;
     }
 }
 

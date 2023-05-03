@@ -111,7 +111,7 @@ void rShift() {
 
         memset((tmp + stackSize) - BF_STACK_STEP_SIZE, 0x00, BF_STACK_STEP_SIZE);
         bfStack = (uint8_t*)tmp;
-    };
+    }
     if(stackPtr > stackSizeReal) {
         stackSizeReal = stackPtr;
     }

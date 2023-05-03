@@ -10,6 +10,7 @@
 #include "ducky_script.h"
 #include "ducky_script_i.h"
 #include <dolphin/dolphin.h>
+#include <toolbox/hex.h>
 
 #define TAG "BadKB"
 #define WORKER_TAG TAG "Worker"
@@ -67,6 +68,7 @@ typedef enum {
 } WorkerEvtFlags;
 
 static const char ducky_cmd_id[] = {"ID"};
+static const char ducky_cmd_bt_id[] = {"BT_ID"};
 
 static const uint8_t numpad_keys[10] = {
     HID_KEYPAD_0,
@@ -327,6 +329,26 @@ static bool ducky_set_usb_id(BadKbScript* bad_kb, const char* line) {
     return false;
 }
 
+static bool ducky_set_bt_id(BadKbScript* bad_kb, const char* line) {
+    size_t line_len = strlen(line);
+    size_t mac_len = BAD_KB_MAC_ADDRESS_LEN * 3;
+    if(line_len < mac_len + 1) return false; // MAC + at least 1 char for name
+
+    uint8_t mac[BAD_KB_MAC_ADDRESS_LEN];
+    for(size_t i = 0; i < BAD_KB_MAC_ADDRESS_LEN; i++) {
+        char a = line[i * 3];
+        char b = line[i * 3 + 1];
+        if((a < 'A' && a > 'F') || (a < '0' && a > '9') || (b < 'A' && b > 'F') ||
+           (b < '0' && b > '9') || !hex_char_to_uint8(a, b, &mac[i])) {
+            return false;
+        }
+    }
+
+    furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, line + mac_len);
+    bt_set_profile_mac_address(bad_kb->bt, mac);
+    return true;
+}
+
 static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
     uint8_t ret = 0;
     uint32_t line_len = 0;
@@ -354,18 +376,48 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         }
     } while(ret > 0);
 
-    if(!bad_kb->bt) {
-        const char* line_tmp = furi_string_get_cstr(bad_kb->line);
-        bool id_set = false; // Looking for ID command at first line
-        if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
-            id_set = ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1]);
+    const char* line_tmp = furi_string_get_cstr(bad_kb->line);
+    if(bad_kb->app->switch_mode_thread) {
+        furi_thread_join(bad_kb->app->switch_mode_thread);
+        furi_thread_free(bad_kb->app->switch_mode_thread);
+        bad_kb->app->switch_mode_thread = NULL;
+    }
+    // Looking for ID or BT_ID command at first line
+    bool reset_bt_id = !!bad_kb->bt;
+    if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
+        if(bad_kb->bt) {
+            bad_kb->app->is_bt = false;
+            bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
+                "BadKbSwitchMode",
+                1024,
+                (FuriThreadCallback)bad_kb_config_switch_mode,
+                bad_kb->app);
+            furi_thread_start(bad_kb->app->switch_mode_thread);
+            return false;
         }
-
-        if(id_set) {
+        if(ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1])) {
             furi_check(furi_hal_usb_set_config(&usb_hid, &bad_kb->hid_cfg));
         } else {
             furi_check(furi_hal_usb_set_config(&usb_hid, NULL));
         }
+    } else if(strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0) {
+        if(!bad_kb->bt) {
+            bad_kb->app->is_bt = true;
+            bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
+                "BadKbSwitchMode",
+                1024,
+                (FuriThreadCallback)bad_kb_config_switch_mode,
+                bad_kb->app);
+            furi_thread_start(bad_kb->app->switch_mode_thread);
+            return false;
+        }
+        if(!bad_kb->app->bt_remember) {
+            reset_bt_id = !ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
+        }
+    }
+    if(reset_bt_id) {
+        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bad_kb->app->config.bt_name);
+        bt_set_profile_mac_address(bad_kb->bt, bad_kb->app->config.bt_mac);
     }
 
     storage_file_seek(script_file, 0, true);
@@ -766,10 +818,11 @@ static void bad_kb_script_set_default_keyboard_layout(BadKbScript* bad_kb) {
     memcpy(bad_kb->layout, hid_asciimap, MIN(sizeof(hid_asciimap), sizeof(bad_kb->layout)));
 }
 
-BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt) {
+BadKbScript* bad_kb_script_open(FuriString* file_path, Bt* bt, BadKbApp* app) {
     furi_assert(file_path);
 
     BadKbScript* bad_kb = malloc(sizeof(BadKbScript));
+    bad_kb->app = app;
     bad_kb->file_path = furi_string_alloc();
     furi_string_set(bad_kb->file_path, file_path);
     bad_kb->keyboard_layout = furi_string_alloc();

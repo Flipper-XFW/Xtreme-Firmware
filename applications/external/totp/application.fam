@@ -20,7 +20,6 @@ App(
         Lib(
             name="base64",
         ),
-        Lib(name="linked_list"),
         Lib(
             name="timezone_utils",
         ),

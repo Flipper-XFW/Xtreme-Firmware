@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 void nfc_scene_rpc_on_enter(void* context) {
     Nfc* nfc = context;
