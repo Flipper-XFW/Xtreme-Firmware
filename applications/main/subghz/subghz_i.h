@@ -131,6 +131,9 @@ struct SubGhz {
     SubGhzDecodeRawState decode_raw_state;
     SubGhzFileEncoderWorker* decode_raw_file_worker_encoder;
 
+    bool fav_timeout;
+    FuriTimer* fav_timer;
+
     void* rpc_ctx;
 };
 
