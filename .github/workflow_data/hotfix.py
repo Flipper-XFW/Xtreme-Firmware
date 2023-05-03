@@ -12,7 +12,7 @@ if __name__ == "__main__":
         event = json.load(f)
 
     release = requests.get(
-        event["repository"]["releases_url"].rsplit("{/")[0] + "latest",
+        event["repository"]["releases_url"].rsplit("{/")[0] + "/latest",
         headers={
             "Accept": "application/vnd.github.v3+json",
             "Authorization": f"token {os.environ['GITHUB_TOKEN']}"
