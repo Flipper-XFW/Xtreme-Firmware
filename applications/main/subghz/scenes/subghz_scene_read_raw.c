@@ -124,7 +124,7 @@ void subghz_scene_read_raw_on_enter(void* context) {
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
 
     // Start sending immediately with favorites
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW)) {
+    if(subghz->fav_timeout) {
         with_view_model(
             subghz->subghz_read_raw->view,
             SubGhzReadRAWModel * model,
@@ -293,7 +293,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_read_raw_stop_send(subghz->subghz_read_raw);
 
             // Exit / stop with favorites
-            if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW)) {
+            if(subghz->fav_timeout) {
                 while(scene_manager_handle_back_event(subghz->scene_manager))
                     ;
                 view_dispatcher_stop(subghz->view_dispatcher);

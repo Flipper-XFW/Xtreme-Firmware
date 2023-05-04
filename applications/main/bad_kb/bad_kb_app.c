@@ -13,12 +13,6 @@
 
 #define BAD_KB_SETTINGS_PATH BAD_KB_APP_BASE_FOLDER "/" BAD_KB_SETTINGS_FILE_NAME
 
-// this is the MAC address used when we do not forget paired device (BOUND STATE)
-const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
-    {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
-const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
-    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
 static bool bad_kb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     BadKbApp* app = context;

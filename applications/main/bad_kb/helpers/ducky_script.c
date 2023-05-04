@@ -12,6 +12,11 @@
 #include <dolphin/dolphin.h>
 #include <toolbox/hex.h>
 
+const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
+    {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
+const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
+    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
 #define TAG "BadKB"
 #define WORKER_TAG TAG "Worker"
 
@@ -383,7 +388,8 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         bad_kb->app->switch_mode_thread = NULL;
     }
     // Looking for ID or BT_ID command at first line
-    bool reset_bt_id = !!bad_kb->bt;
+    bool usb_id = false;
+    bool bt_id = false;
     if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
         if(bad_kb->bt) {
             bad_kb->app->is_bt = false;
@@ -395,11 +401,7 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             furi_thread_start(bad_kb->app->switch_mode_thread);
             return false;
         }
-        if(ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1])) {
-            furi_check(furi_hal_usb_set_config(&usb_hid, &bad_kb->hid_cfg));
-        } else {
-            furi_check(furi_hal_usb_set_config(&usb_hid, NULL));
-        }
+        usb_id = ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1]);
     } else if(strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0) {
         if(!bad_kb->bt) {
             bad_kb->app->is_bt = true;
@@ -412,12 +414,39 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             return false;
         }
         if(!bad_kb->app->bt_remember) {
-            reset_bt_id = !ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
+            bt_id = ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
         }
     }
-    if(reset_bt_id) {
-        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bad_kb->app->config.bt_name);
-        bt_set_profile_mac_address(bad_kb->bt, bad_kb->app->config.bt_mac);
+
+    if(bad_kb->bt) {
+        if(!bt_id) {
+            const char* bt_name = bad_kb->app->config.bt_name;
+            const uint8_t* bt_mac = bad_kb->app->bt_remember ?
+                                        (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS :
+                                        bad_kb->app->config.bt_mac;
+            bool reset_name = strncmp(
+                bt_name,
+                furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard),
+                BAD_KB_ADV_NAME_MAX_LEN);
+            bool reset_mac = memcmp(
+                bt_mac,
+                furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
+                BAD_KB_MAC_ADDRESS_LEN);
+            if(reset_name && reset_mac) {
+                furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bt_name);
+            } else if(reset_name) {
+                bt_set_profile_adv_name(bad_kb->bt, bt_name);
+            }
+            if(reset_mac) {
+                bt_set_profile_mac_address(bad_kb->bt, bt_mac);
+            }
+        }
+    } else {
+        if(usb_id) {
+            furi_check(furi_hal_usb_set_config(&usb_hid, &bad_kb->hid_cfg));
+        } else {
+            furi_check(furi_hal_usb_set_config(&usb_hid, NULL));
+        }
     }
 
     storage_file_seek(script_file, 0, true);

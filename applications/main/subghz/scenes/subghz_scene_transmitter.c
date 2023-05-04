@@ -51,8 +51,6 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
     return ret;
 }
 
-FuriTimer* fav_timer = NULL;
-
 void fav_timer_callback(void* context) {
     SubGhz* subghz = context;
     scene_manager_handle_custom_event(
@@ -77,7 +75,7 @@ void subghz_scene_transmitter_on_enter(void* context) {
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
 
     // Auto send and exit with favorites
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneTransmitter)) {
+    if(subghz->fav_timeout) {
         subghz_custom_btn_set(0);
         scene_manager_handle_custom_event(
             subghz->scene_manager, SubGhzCustomEventViewTransmitterSendStart);
@@ -86,9 +84,10 @@ void subghz_scene_transmitter_on_enter(void* context) {
             SubGhzViewTransmitterModel * model,
             { model->show_button = false; },
             true);
-        fav_timer = furi_timer_alloc(fav_timer_callback, FuriTimerTypeOnce, subghz);
+        subghz->fav_timer = furi_timer_alloc(fav_timer_callback, FuriTimerTypeOnce, subghz);
         furi_timer_start(
-            fav_timer, XTREME_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency());
+            subghz->fav_timer,
+            XTREME_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency());
         subghz->state_notifications = SubGhzNotificationStateTx;
     }
 }
@@ -134,11 +133,7 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
                 subghz_sleep(subghz);
                 furi_hal_subghz_set_rolling_counter_mult(tmp_counter);
             }
-            if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneTransmitter)) {
-                if(fav_timer) {
-                    furi_timer_stop(fav_timer);
-                    furi_timer_free(fav_timer);
-                }
+            if(subghz->fav_timeout) {
                 while(scene_manager_handle_back_event(subghz->scene_manager))
                     ;
                 view_dispatcher_stop(subghz->view_dispatcher);

@@ -474,16 +474,13 @@ int32_t subghz_app(char* p) {
             if(subghz_key_load(subghz, p, true)) {
                 furi_string_set(subghz->file_path, (const char*)p);
 
+                subghz->fav_timeout = is_favorite;
                 if((!strcmp(subghz->txrx->decoder_result->protocol->name, "RAW"))) {
                     //Load Raw TX
                     subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
-                    scene_manager_set_scene_state(
-                        subghz->scene_manager, SubGhzSceneReadRAW, is_favorite);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
                 } else {
                     //Load transmitter TX
-                    scene_manager_set_scene_state(
-                        subghz->scene_manager, SubGhzSceneTransmitter, is_favorite);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
                 }
             } else {
@@ -511,6 +508,11 @@ int32_t subghz_app(char* p) {
     furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(subghz->view_dispatcher);
+
+    if(subghz->fav_timer) {
+        furi_timer_stop(subghz->fav_timer);
+        furi_timer_free(subghz->fav_timer);
+    }
 
     furi_hal_power_suppress_charge_exit();
     // Disable power for External CC1101 if it was enabled and module is connected

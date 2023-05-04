@@ -55,6 +55,8 @@ jobs:
 
       - name: "Upload hotfix"
         run: python .github/workflow_data/hotfix.py
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: "Merge pull request"
         uses: "pascalgn/automerge-action@v0.15.6"

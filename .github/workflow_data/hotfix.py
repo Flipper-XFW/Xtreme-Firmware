@@ -12,37 +12,37 @@ if __name__ == "__main__":
         event = json.load(f)
 
     release = requests.get(
-        event["repository"]["releases_url"].rsplit("{/")[0] + "latest",
+        event["repository"]["releases_url"].rsplit("{/")[0] + "/latest",
         headers={
             "Accept": "application/vnd.github.v3+json",
             "Authorization": f"token {os.environ['GITHUB_TOKEN']}"
         }
     ).json()
 
-    artifacts = (
-        os.environ['ARTIFACT_TGZ'],
-        os.environ['ARTIFACT_ZIP']
-    )
+    artifacts = {
+        os.environ['ARTIFACT_TGZ']: "application/gzip",
+        os.environ['ARTIFACT_ZIP']: "application/zip"
+    }
 
     for asset in release["assets"]:
-        if asset["name"] in artifacts:
-            req = requests.delete(
-                asset["url"],
-                headers={
-                    "Accept": "application/vnd.github.v3+json",
-                    "Authorization": f"token {os.environ['GITHUB_TOKEN']}"
-                }
-            )
-            if not req.ok:
-                print(f"{req.url = }\n{req.status_code = }\n{req.content = }")
-                sys.exit(1)
+        req = requests.delete(
+            asset["url"],
+            headers={
+                "Accept": "application/vnd.github.v3+json",
+                "Authorization": f"token {os.environ['GITHUB_TOKEN']}"
+            }
+        )
+        if not req.ok:
+            print(f"{req.url = }\n{req.status_code = }\n{req.content = }")
+            sys.exit(1)
 
-    for artifact in artifacts:
+    for artifact, mediatype in artifacts.items():
         req = requests.post(
             release["upload_url"].rsplit("{?", 1)[0],
             headers={
                 "Accept": "application/vnd.github.v3+json",
-                "Authorization": f"token {os.environ['GITHUB_TOKEN']}"
+                "Authorization": f"token {os.environ['GITHUB_TOKEN']}",
+                "Content-Type": mediatype
             },
             params={
                 "name": artifact
@@ -59,8 +59,13 @@ if __name__ == "__main__":
 
     body = release["body"]
     body = re.sub(
-        r"(https://lab\.flipper\.net/\?url=).*?(&channel=XFW-Updater&version=" + os.environ['VERSION_TAG'] + r")",
-        r"\1" + os.environ['ARTIFACT_WEB'] + r"\2",
+        r"(https://lab\.flipper\.net/\?url=).*?(&channel=XFW-Updater&version=)[A-Za-z0-9_-]+",
+        r"\1" + os.environ['ARTIFACT_WEB'] + r"\2" + os.environ['VERSION_TAG'],
+        body
+    )
+    body = re.sub(
+        r"(https://github\.com/ClaraCrazy/Flipper-Xtreme/releases/download/[A-Za-z0-9_-]+?/)[A-Za-z0-9_-]+",
+        r"\1" + os.environ['VERSION_TAG'],
         body
     )
     body = body.replace("<!--- <HOTFIXES>\n", "")
