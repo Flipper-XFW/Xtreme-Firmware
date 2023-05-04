@@ -71,7 +71,7 @@ if __name__ == "__main__":
     body = body.replace("<!--- <HOTFIXES>\n", "")
     body = body.replace("\n<HOTFIXES> -->", "")
     insert = body.find("\n  [//]: <NEXT_HOTFIX>\n")
-    body = body[:insert] + hotfix + body[:insert]
+    body = body[:insert] + hotfix + body[insert:]
 
     req = requests.patch(
         release["url"],
