@@ -228,6 +228,7 @@ Hid* hid_app_alloc_view(void* context) {
         app->view_dispatcher,
         HidViewMouseClicker,
         hid_mouse_clicker_get_view(app->hid_mouse_clicker));
+
     // Mouse jiggler view
     app->hid_mouse_jiggler = hid_mouse_jiggler_alloc(app);
     view_set_previous_callback(
