@@ -388,9 +388,8 @@ static void bt_close_connection(Bt* bt) {
 static inline FuriHalBtProfile get_hal_bt_profile(BtProfile profile) {
     if(profile == BtProfileHidKeyboard) {
         return FuriHalBtProfileHidKeyboard;
-    } else {
-        return FuriHalBtProfileSerial;
     }
+    return FuriHalBtProfileSerial;
 }
 
 static void bt_restart(Bt* bt) {
