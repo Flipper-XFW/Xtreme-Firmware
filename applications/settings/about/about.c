@@ -212,7 +212,9 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
             (uint32_t)(info->voltage_vbus),
             (uint32_t)(info->voltage_vbus * 10) % 10,
             current);
-    } else if(current < 0) {
+    } else if(current < -5) {
+        // Often gauge reports anything in the range 1~5ma as 5ma
+        // That brings confusion, so we'll treat it as Napping
         snprintf(header, sizeof(header), "%s", "Consumption is");
         snprintf(
             value,
