@@ -43,7 +43,6 @@ static void debug_changed(VariableItem* item) {
     } else {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
     }
-    loader_update_menu();
 }
 
 const char* const heap_trace_mode_text[] = {

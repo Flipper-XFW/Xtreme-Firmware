@@ -1,7 +1,5 @@
 #pragma once
-
-#include <core/pubsub.h>
-#include <stdbool.h>
+#include <furi.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,16 +43,13 @@ bool loader_lock(Loader* instance);
 void loader_unlock(Loader* instance);
 
 /** Get loader lock status */
-bool loader_is_locked(const Loader* instance);
+bool loader_is_locked(Loader* instance);
 
 /** Show primary loader */
-void loader_show_menu();
+void loader_show_menu(Loader* instance);
 
 /** Show settings menu */
-void loader_show_settings();
-
-/** Show primary loader */
-void loader_update_menu();
+void loader_show_settings(Loader* loader);
 
 /** Show primary loader */
 FuriPubSub* loader_get_pubsub(Loader* instance);
