@@ -1,5 +1,6 @@
 #pragma once
 #include <furi.h>
+#include "loader_extmainapp.h"
 
 #ifdef __cplusplus
 extern "C" {

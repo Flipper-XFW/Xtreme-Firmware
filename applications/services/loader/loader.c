@@ -3,6 +3,11 @@
 #include "loader_menu.h"
 #include <applications.h>
 #include <furi_hal.h>
+#include <core/dangerous_defines.h>
+#include <gui/modules/file_browser.h>
+#include <toolbox/stream/file_stream.h>
+#include "applications/main/fap_loader/fap_loader_app.h"
+#include <xtreme.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
@@ -107,6 +112,28 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
     }
 }
 
+bool loader_menu_load_fap_meta(
+    Storage* storage,
+    FuriString* path,
+    FuriString* name,
+    const Icon** icon) {
+    *icon = NULL;
+    uint8_t* icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
+    if(!fap_loader_load_name_and_icon(path, storage, &icon_buf, name)) {
+        free(icon_buf);
+        icon_buf = NULL;
+        return false;
+    }
+    *icon = malloc(sizeof(Icon));
+    FURI_CONST_ASSIGN((*icon)->frame_count, 1);
+    FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
+    FURI_CONST_ASSIGN((*icon)->width, 10);
+    FURI_CONST_ASSIGN((*icon)->height, 10);
+    FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
+    FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
+    return true;
+}
+
 // implementation
 
 static Loader* loader_alloc() {
@@ -118,6 +145,31 @@ static Loader* loader_alloc() {
     loader->app.name = NULL;
     loader->app.thread = NULL;
     loader->app.insomniac = false;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* path = furi_string_alloc();
+    FuriString* name = furi_string_alloc();
+    Stream* stream = file_stream_alloc(storage);
+    ExtMainAppList_init(loader->ext_main_apps);
+    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        while(stream_read_line(stream, path)) {
+            furi_string_replace_all(path, "\r", "");
+            furi_string_replace_all(path, "\n", "");
+            const Icon* icon;
+            if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
+            ExtMainAppList_push_back(
+                loader->ext_main_apps,
+                (ExtMainApp){
+                    .name = strdup(furi_string_get_cstr(name)),
+                    .path = strdup(furi_string_get_cstr(path)),
+                    .icon = icon});
+        }
+    }
+    file_stream_close(stream);
+    stream_free(stream);
+    furi_string_free(name);
+    furi_string_free(path);
+    furi_record_close(RECORD_STORAGE);
     return loader;
 }
 
@@ -204,7 +256,7 @@ static void loader_do_menu_show(Loader* loader, bool settings) {
         loader->loader_menu = loader_menu_alloc();
         loader_menu_set_closed_callback(loader->loader_menu, loader_menu_closed_callback, loader);
         loader_menu_set_click_callback(loader->loader_menu, loader_menu_click_callback, loader);
-        loader_menu_start(loader->loader_menu, settings);
+        loader_menu_start(loader->loader_menu, settings, &loader->ext_main_apps);
     }
 }
 

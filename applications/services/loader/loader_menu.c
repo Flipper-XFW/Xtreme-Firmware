@@ -4,11 +4,6 @@
 #include <gui/modules/submenu.h>
 #include <assets_icons.h>
 #include <applications.h>
-#include <core/dangerous_defines.h>
-#include <gui/modules/file_browser.h>
-#include <toolbox/stream/file_stream.h>
-#include "applications/main/fap_loader/fap_loader_app.h"
-#include <xtreme.h>
 
 #include "loader_menu.h"
 
@@ -19,7 +14,9 @@ struct LoaderMenu {
     ViewDispatcher* view_dispatcher;
     Menu* primary_menu;
     Submenu* settings_menu;
+
     bool settings;
+    ExtMainAppList_t* ext_main_apps;
 
     void (*closed_callback)(void*);
     void* closed_callback_context;
@@ -59,10 +56,11 @@ void loader_menu_free(LoaderMenu* loader_menu) {
     free(loader_menu);
 }
 
-void loader_menu_start(LoaderMenu* loader_menu, bool settings) {
+void loader_menu_start(LoaderMenu* loader_menu, bool settings, ExtMainAppList_t* ext_main_apps) {
     furi_assert(loader_menu);
     furi_assert(!loader_menu->thread);
     loader_menu->settings = settings;
+    loader_menu->ext_main_apps = ext_main_apps;
     loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
     furi_thread_start(loader_menu->thread);
 }
@@ -132,28 +130,6 @@ static uint32_t loader_menu_exit(void* context) {
     return VIEW_NONE;
 }
 
-bool loader_menu_load_fap_meta(
-    Storage* storage,
-    FuriString* path,
-    FuriString* name,
-    const Icon** icon) {
-    *icon = NULL;
-    uint8_t* icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
-    if(!fap_loader_load_name_and_icon(path, storage, &icon_buf, name)) {
-        free(icon_buf);
-        icon_buf = NULL;
-        return false;
-    }
-    *icon = malloc(sizeof(Icon));
-    FURI_CONST_ASSIGN((*icon)->frame_count, 1);
-    FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
-    FURI_CONST_ASSIGN((*icon)->width, 10);
-    FURI_CONST_ASSIGN((*icon)->height, 10);
-    FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
-    FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
-    return true;
-}
-
 static void loader_menu_build_menu(LoaderMenu* loader_menu) {
     size_t i;
     for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
@@ -173,30 +149,16 @@ static void loader_menu_build_menu(LoaderMenu* loader_menu) {
         loader_menu_switch_to_settings,
         loader_menu);
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriString* path = furi_string_alloc();
-    FuriString* name = furi_string_alloc();
-    Stream* stream = file_stream_alloc(storage);
-    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        while(stream_read_line(stream, path)) {
-            furi_string_replace_all(path, "\r", "");
-            furi_string_replace_all(path, "\n", "");
-            const Icon* icon;
-            if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
-            menu_add_item(
-                loader_menu->primary_menu,
-                strdup(furi_string_get_cstr(name)),
-                icon,
-                (uint32_t)strdup(furi_string_get_cstr(path)),
-                loader_menu_external_callback,
-                (void*)loader_menu);
-        }
+    for(i = 0; i < ExtMainAppList_size(*loader_menu->ext_main_apps); i++) {
+        const ExtMainApp* app = ExtMainAppList_get(*loader_menu->ext_main_apps, i);
+        menu_add_item(
+            loader_menu->primary_menu,
+            app->name,
+            app->icon,
+            (uint32_t)app->path,
+            loader_menu_external_callback,
+            (void*)loader_menu);
     }
-    file_stream_close(stream);
-    stream_free(stream);
-    furi_string_free(name);
-    furi_string_free(path);
-    furi_record_close(RECORD_STORAGE);
 };
 
 static void loader_menu_build_submenu(LoaderMenu* loader_menu) {
