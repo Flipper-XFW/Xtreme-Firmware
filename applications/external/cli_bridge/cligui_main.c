@@ -65,7 +65,13 @@ static void input_callback_wrapper(InputEvent* event, void* context) {
 
 int32_t cligui_main(void* p) {
     UNUSED(p);
-    loader_unlock(furi_record_open(RECORD_LOADER));
+
+    // Unlock loader-lock and save app thread
+    FuriThread* temp_save_appthr;
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    Loader_internal* loader_i = (Loader_internal*)loader;
+    temp_save_appthr = loader_i->app.thread;
+    loader_unlock(loader);
     furi_record_close(RECORD_LOADER);
 
     CliguiApp* cligui = malloc(sizeof(CliguiApp));
@@ -131,6 +137,13 @@ int32_t cligui_main(void* p) {
 
     free(cligui->data);
     free(cligui);
+
+    // Don't touch system loader!!! We restoring previous app thread here, we love kostily and velosipedy, bydlo kod forever!
+
+    Loader* loader1 = furi_record_open(RECORD_LOADER);
+    Loader_internal* loader_ii = (Loader_internal*)loader1;
+    loader_ii->app.thread = temp_save_appthr;
+    furi_record_close(RECORD_LOADER);
 
     return 0;
 }

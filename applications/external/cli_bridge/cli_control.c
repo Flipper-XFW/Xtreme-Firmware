@@ -72,12 +72,7 @@ void latch_tx_handler() {
     session.is_connected = &session_connected;
     cli_session_close(global_cli);
     cli_session_open(global_cli, &session);
-    // Unlock loader-lock
-    Loader* loader = furi_record_open(RECORD_LOADER);
-    Loader_internal* loader_i = (Loader_internal*)loader;
-    loader_i->lock_count = 0;
     furi_record_close(RECORD_CLI);
-    furi_record_close(RECORD_LOADER);
 }
 void unlatch_tx_handler(bool persist) {
     Cli* global_cli = furi_record_open(RECORD_CLI);
