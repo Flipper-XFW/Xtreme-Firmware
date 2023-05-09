@@ -217,25 +217,25 @@ static bool animation_manager_check_blocking(AnimationManager* animation_manager
     FS_Error sd_status = storage_sd_status(storage);
 
     if(sd_status == FSE_INTERNAL) {
-        blocking_animation = animation_storage_find_animation(BAD_SD_ANIMATION_NAME, false);
+        blocking_animation = animation_storage_find_animation(BAD_SD_ANIMATION_NAME);
         furi_assert(blocking_animation);
     } else if(sd_status == FSE_NOT_READY) {
         animation_manager->sd_shown_sd_ok = false;
         animation_manager->sd_shown_no_db = false;
     } else if(sd_status == FSE_OK) {
         if(!animation_manager->sd_shown_sd_ok) {
-            blocking_animation = animation_storage_find_animation(SD_OK_ANIMATION_NAME, false);
+            blocking_animation = animation_storage_find_animation(SD_OK_ANIMATION_NAME);
             furi_assert(blocking_animation);
             animation_manager->sd_shown_sd_ok = true;
         } else if(!animation_manager->sd_shown_no_db) {
             if(!storage_file_exists(storage, EXT_PATH("Manifest"))) {
-                blocking_animation = animation_storage_find_animation(NO_DB_ANIMATION_NAME, false);
+                blocking_animation = animation_storage_find_animation(NO_DB_ANIMATION_NAME);
                 furi_assert(blocking_animation);
                 animation_manager->sd_shown_no_db = true;
                 animation_manager->sd_show_url = true;
             }
         } else if(animation_manager->sd_show_url) {
-            blocking_animation = animation_storage_find_animation(URL_ANIMATION_NAME, false);
+            blocking_animation = animation_storage_find_animation(URL_ANIMATION_NAME);
             furi_assert(blocking_animation);
             animation_manager->sd_show_url = false;
         }
@@ -245,7 +245,7 @@ static bool animation_manager_check_blocking(AnimationManager* animation_manager
     DolphinStats stats = dolphin_stats(dolphin);
     furi_record_close(RECORD_DOLPHIN);
     if(!blocking_animation && stats.level_up_is_pending) {
-        blocking_animation = animation_storage_find_animation(NEW_MAIL_ANIMATION_NAME, false);
+        blocking_animation = animation_storage_find_animation(NEW_MAIL_ANIMATION_NAME);
         furi_check(blocking_animation);
         animation_manager->levelup_pending = true;
     }
@@ -446,22 +446,12 @@ static StorageAnimation*
     /* cache animation, if failed - choose reliable animation */
     if(selected == NULL) {
         FURI_LOG_E(TAG, "Can't find valid animation in manifest");
-        selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME, false);
+        selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
     } else if(!animation_storage_get_bubble_animation(selected)) {
         const char* name = animation_storage_get_meta(selected)->name;
         FURI_LOG_E(TAG, "Can't upload animation described in manifest: \'%s\'", name);
         animation_storage_free_storage_animation(&selected);
-        selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME, false);
-    } else {
-        FuriHalRtcDateTime date;
-        furi_hal_rtc_get_datetime(&date);
-        if(date.month == 4 && date.day == 1 && furi_hal_random_get() % 2) {
-            animation_storage_free_storage_animation(&selected);
-            selected = animation_storage_find_animation("L3_Sunflower_128x64", true);
-            if(selected == NULL) {
-                selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME, false);
-            }
-        }
+        selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
     }
 
     furi_assert(selected);
@@ -520,7 +510,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
 
     if(animation_manager->state == AnimationManagerStateFreezedBlocked) {
         StorageAnimation* restore_animation = animation_storage_find_animation(
-            furi_string_get_cstr(animation_manager->freezed_animation_name), false);
+            furi_string_get_cstr(animation_manager->freezed_animation_name));
         /* all blocked animations must be in flipper -> we can
          * always find blocking animation */
         furi_assert(restore_animation);
@@ -532,7 +522,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
         if(!blocked) {
             /* if no blocking - try restore last one idle */
             StorageAnimation* restore_animation = animation_storage_find_animation(
-                furi_string_get_cstr(animation_manager->freezed_animation_name), false);
+                furi_string_get_cstr(animation_manager->freezed_animation_name));
             if(restore_animation) {
                 Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
                 DolphinStats stats = dolphin_stats(dolphin);
