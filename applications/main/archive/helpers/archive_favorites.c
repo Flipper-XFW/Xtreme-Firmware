@@ -140,13 +140,6 @@ bool archive_favorites_read(void* context) {
 
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
-    if(!result) {
-        storage_file_close(file);
-        storage_common_copy(storage, ARCHIVE_FAV_OLD_PATH, ARCHIVE_FAV_PATH);
-        storage_common_remove(storage, ARCHIVE_FAV_OLD_PATH);
-        result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
-    }
-
     if(result) {
         while(1) {
             if(!archive_favorites_read_line(file, buffer)) {

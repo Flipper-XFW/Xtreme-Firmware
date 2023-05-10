@@ -421,27 +421,12 @@ static bool notification_save_settings(NotificationApp* app) {
 }
 
 static bool notification_load_settings(NotificationApp* app) {
-    bool ret = saved_struct_load(
+    return saved_struct_load(
         NOTIFICATION_SETTINGS_PATH,
         &app->settings,
         sizeof(NotificationSettings),
         NOTIFICATION_SETTINGS_MAGIC,
         NOTIFICATION_SETTINGS_VERSION);
-
-    if(!ret) {
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        storage_common_copy(storage, NOTIFICATION_SETTINGS_OLD_PATH, NOTIFICATION_SETTINGS_PATH);
-        storage_common_remove(storage, NOTIFICATION_SETTINGS_OLD_PATH);
-        furi_record_close(RECORD_STORAGE);
-        ret = saved_struct_load(
-            NOTIFICATION_SETTINGS_PATH,
-            &app->settings,
-            sizeof(NotificationSettings),
-            NOTIFICATION_SETTINGS_MAGIC,
-            NOTIFICATION_SETTINGS_VERSION);
-    }
-
-    return ret;
 }
 
 static void input_event_callback(const void* value, void* context) {
