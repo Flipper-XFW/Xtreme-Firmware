@@ -43,6 +43,7 @@ void flipper_migrate_files() {
 
     // Revert cringe
     storage_common_remove(storage, INT_PATH(".passport.settings"));
+    storage_common_remove(storage, INT_PATH(".region_data"));
 
     // Migrate files
     storage_common_copy(storage, ARCHIVE_FAV_OLD_PATH, ARCHIVE_FAV_PATH);

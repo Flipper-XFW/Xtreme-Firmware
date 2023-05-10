@@ -51,7 +51,6 @@ typedef struct {
     uint8_t subghz_hopper_index;
     char subghz_freq_buffer[XTREME_SUBGHZ_FREQ_BUFFER_SIZE];
     bool subghz_extend;
-    bool subghz_bypass;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
     int32_t xp_level;
     FuriString* version_tag;

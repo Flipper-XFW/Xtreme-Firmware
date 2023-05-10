@@ -64,7 +64,7 @@ bool xtreme_app_apply(XtremeApp* app) {
     }
 
     if(app->save_subghz) {
-        furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
+        furi_hal_subghz_set_is_extended(app->subghz_extend);
     }
 
     if(app->save_name) {
@@ -247,7 +247,7 @@ XtremeApp* xtreme_app_alloc() {
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 
-    furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
+    app->subghz_extend = furi_hal_subghz_get_is_extended();
 
     strlcpy(app->device_name, furi_hal_version_get_name_ptr(), FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
 

@@ -1361,7 +1361,6 @@ Function,+,furi_hal_random_get,uint32_t,
 Function,+,furi_hal_region_get,const FuriHalRegion*,
 Function,+,furi_hal_region_get_band,const FuriHalRegionBand*,uint32_t
 Function,+,furi_hal_region_get_name,const char*,
-Function,+,furi_hal_region_init,void,
 Function,+,furi_hal_region_is_frequency_allowed,_Bool,uint32_t
 Function,+,furi_hal_region_is_provisioned,_Bool,
 Function,+,furi_hal_region_set,void,FuriHalRegion*
@@ -1453,8 +1452,8 @@ Function,-,furi_hal_subghz_dump_state,void,
 Function,+,furi_hal_subghz_enable_ext_power,_Bool,
 Function,+,furi_hal_subghz_flush_rx,void,
 Function,+,furi_hal_subghz_flush_tx,void,
-Function,+,furi_hal_subghz_get_extend_settings,void,"_Bool*, _Bool*"
 Function,+,furi_hal_subghz_get_external_power_disable,_Bool,
+Function,+,furi_hal_subghz_get_is_extended,_Bool,
 Function,+,furi_hal_subghz_get_lqi,uint8_t,
 Function,+,furi_hal_subghz_get_radio_type,SubGhzRadioType,
 Function,+,furi_hal_subghz_get_rolling_counter_mult,uint8_t,
@@ -1478,10 +1477,10 @@ Function,+,furi_hal_subghz_rx,void,
 Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
 Function,+,furi_hal_subghz_select_radio_type,void,SubGhzRadioType
 Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
-Function,+,furi_hal_subghz_set_extend_settings,void,"_Bool, _Bool"
 Function,+,furi_hal_subghz_set_external_power_disable,void,_Bool
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
+Function,+,furi_hal_subghz_set_is_extended,void,_Bool
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
 Function,+,furi_hal_subghz_set_rolling_counter_mult,void,uint8_t
 Function,+,furi_hal_subghz_set_timestamp_file_names,void,_Bool
