@@ -12,7 +12,6 @@
 #include <gui/modules/popup.h>
 #include <lib/toolbox/value_index.h>
 #include <toolbox/stream/file_stream.h>
-#include <namechangersrv/namechangersrv.h>
 #include "scenes/xtreme_app_scene.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"
@@ -23,6 +22,7 @@
 #include <notification/notification_app.h>
 #include <rgb_backlight/rgb_backlight.h>
 #include <m-array.h>
+#include <namespoof.h>
 #include <xtreme.h>
 
 #define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 6
@@ -52,7 +52,7 @@ typedef struct {
     char subghz_freq_buffer[XTREME_SUBGHZ_FREQ_BUFFER_SIZE];
     bool subghz_extend;
     bool subghz_bypass;
-    char device_name[NAMECHANGER_TEXT_STORE_SIZE];
+    char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
     int32_t xp_level;
     FuriString* version_tag;
 

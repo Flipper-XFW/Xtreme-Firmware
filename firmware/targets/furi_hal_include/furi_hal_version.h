@@ -159,7 +159,7 @@ FuriHalVersionDisplay furi_hal_version_get_hw_display();
 uint32_t furi_hal_version_get_hw_timestamp();
 
 // Set custom name
-void furi_hal_version_set_custom_name(const char* name);
+void furi_hal_version_set_name(const char* name);
 
 /** Get pointer to target name
  *

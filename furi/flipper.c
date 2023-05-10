@@ -33,11 +33,11 @@ void flipper_start_service(const FlipperApplication* service) {
 
     FuriThread* thread =
         furi_thread_alloc_ex(service->name, service->stack_size, service->app, NULL);
-        furi_thread_mark_as_service(thread);
+    furi_thread_mark_as_service(thread);
     furi_thread_set_appid(thread, service->appid);
 
-        furi_thread_start(thread);
-    }
+    furi_thread_start(thread);
+}
 
 void flipper_init() {
     flipper_print_version("Firmware", furi_hal_version_get_firmware_version());
@@ -47,6 +47,7 @@ void flipper_init() {
     // Start storage service first, thanks OFW :/
     flipper_start_service(&FLIPPER_SERVICES[0]);
 
+    NAMESPOOF_INIT();
     XTREME_SETTINGS_LOAD();
     XTREME_ASSETS_LOAD();
 
