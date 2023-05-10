@@ -23,8 +23,6 @@ const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
 #define BADKB_ASCII_TO_KEY(script, x) \
     (((uint8_t)x < 128) ? (script->layout[(uint8_t)x]) : HID_KEYBOARD_NONE)
 
-#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Tools/.bt_hid.keys")
-
 /**
  * Delays for waiting between HID key press and key release
 */

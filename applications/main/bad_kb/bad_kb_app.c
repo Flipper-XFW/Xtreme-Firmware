@@ -1,5 +1,4 @@
 #include "bad_kb_app.h"
-#include "bad_kb_settings_filename.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
@@ -10,8 +9,6 @@
 
 #include <bt/bt_service/bt_i.h>
 #include <bt/bt_service/bt.h>
-
-#define BAD_KB_SETTINGS_PATH BAD_KB_APP_BASE_FOLDER "/" BAD_KB_SETTINGS_FILE_NAME
 
 static bool bad_kb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -138,7 +135,7 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
 
     bt_timeout = bt_hid_delays[LevelRssi39_0];
     bt_disconnect(app->bt);
-    bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
+    bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
     if(strcmp(app->config.bt_name, "") != 0) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->config.bt_name);
     }

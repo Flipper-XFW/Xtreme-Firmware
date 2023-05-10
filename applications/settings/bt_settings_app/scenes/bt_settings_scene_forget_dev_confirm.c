@@ -1,6 +1,7 @@
 #include "../bt_settings_app.h"
 #include <furi_hal_bt.h>
-#include <applications/main/bad_kb/bad_kb_settings_filename.h>
+#include <applications/main/bad_kb/bad_kb_paths.h>
+#include <applications/external/hid_app/hid_path.h>
 
 void bt_settings_scene_forget_dev_confirm_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
@@ -31,8 +32,11 @@ bool bt_settings_scene_forget_dev_confirm_on_event(void* context, SceneManagerEv
             consumed = scene_manager_previous_scene(app->scene_manager);
         } else if(event.event == DialogExResultRight) {
             bt_forget_bonded_devices(app->bt);
-            // also removes keys of badkb bonded devices
-            bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
+            // also remove keys of badkb and bt remote
+            bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
+            bt_forget_bonded_devices(app->bt);
+            bt_keys_storage_set_storage_path(
+                app->bt, EXT_PATH("apps_data/hid_ble") "/" HID_BT_KEYS_STORAGE_NAME);
             bt_forget_bonded_devices(app->bt);
             bt_keys_storage_set_default_path(app->bt);
 

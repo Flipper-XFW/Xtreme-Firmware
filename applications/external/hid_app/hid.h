@@ -27,7 +27,7 @@
 #include "views/hid_ytshorts.h"
 #include "views/hid_mouse_clicker.h"
 
-#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
+#include "hid_path.h"
 
 typedef enum {
     HidTransportUsb,
