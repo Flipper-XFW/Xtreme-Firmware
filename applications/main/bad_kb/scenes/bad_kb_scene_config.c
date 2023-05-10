@@ -45,28 +45,36 @@ void bad_kb_scene_config_on_enter(void* context) {
         var_item_list, "Connection", 2, bad_kb_scene_config_connection_callback, bad_kb);
     variable_item_set_current_value_index(item, bad_kb->is_bt);
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
-
-    item = variable_item_list_add(
-        var_item_list, "BT Remember", 2, bad_kb_scene_config_bt_remember_callback, bad_kb);
-    variable_item_set_current_value_index(item, bad_kb->bt_remember);
-    variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
-    variable_item_set_locked(item, !bad_kb->is_bt, "Only in\nBT mode!");
-
-    item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
-    variable_item_set_locked(item, !bad_kb->is_bt, "Only in\nBT mode!");
-
-    item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
-    if(!bad_kb->is_bt) {
-        variable_item_set_locked(item, true, "Only in\nBT mode!");
-    } else if(bad_kb->bt_remember) {
-        variable_item_set_locked(item, true, "Remember\nmust be Off!");
+    if(bad_kb->bad_kb_script->has_usb_id) {
+        variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nUSB Mode!");
+    } else if(bad_kb->bad_kb_script->has_bt_id) {
+        variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nBT Mode!");
     }
 
-    item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
-    if(!bad_kb->is_bt) {
-        variable_item_set_locked(item, true, "Only in\nBT mode!");
-    } else if(bad_kb->bt_remember) {
-        variable_item_set_locked(item, true, "Remember\nmust be Off!");
+    if(bad_kb->is_bt) {
+        item = variable_item_list_add(
+            var_item_list, "BT Remember", 2, bad_kb_scene_config_bt_remember_callback, bad_kb);
+        variable_item_set_current_value_index(item, bad_kb->bt_remember);
+        variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
+
+        item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
+        if(bad_kb->bad_kb_script->set_bt_id) {
+            variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset Name!");
+        }
+
+        item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
+        if(bad_kb->bt_remember) {
+            variable_item_set_locked(item, true, "Remember\nmust be Off!");
+        } else if(bad_kb->bad_kb_script->set_bt_id) {
+            variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
+        }
+
+        item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
+        if(bad_kb->bt_remember) {
+            variable_item_set_locked(item, true, "Remember\nmust be Off!");
+        } else if(bad_kb->bad_kb_script->set_bt_id) {
+            variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
+        }
     }
 
     variable_item_list_set_enter_callback(

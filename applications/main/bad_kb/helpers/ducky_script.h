@@ -82,6 +82,11 @@ typedef struct {
     FuriString* string_print;
     size_t string_print_pos;
 
+    bool set_usb_id;
+    bool set_bt_id;
+    bool has_usb_id;
+    bool has_bt_id;
+
     Bt* bt;
     BadKbApp* app;
 } BadKbScript;
@@ -146,6 +151,8 @@ struct BadKbApp {
 };
 
 int32_t bad_kb_config_switch_mode(BadKbApp* app);
+
+void bad_kb_config_refresh_menu(BadKbApp* app);
 
 #ifdef __cplusplus
 }

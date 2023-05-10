@@ -102,9 +102,13 @@ int32_t bad_kb_config_switch_mode(BadKbApp* app) {
     XTREME_SETTINGS_SAVE();
     bad_kb_reload_worker(app);
     if(app->is_bt) furi_hal_bt_start_advertising();
+    bad_kb_config_refresh_menu(app);
+    return 0;
+}
+
+void bad_kb_config_refresh_menu(BadKbApp* app) {
     scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
     scene_manager_previous_scene(app->scene_manager);
-    return 0;
 }
 
 void bad_kb_config_switch_remember_mode(BadKbApp* app) {
