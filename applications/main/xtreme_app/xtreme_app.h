@@ -20,7 +20,7 @@
 #include <lib/subghz/subghz_setting.h>
 #include <applications/main/fap_loader/fap_loader_app.h>
 #include <notification/notification_app.h>
-#include <rgb_backlight/rgb_backlight.h>
+#include <rgb_backlight.h>
 #include <m-array.h>
 #include <namespoof.h>
 #include <xtreme.h>

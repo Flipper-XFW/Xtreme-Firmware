@@ -6,7 +6,6 @@ App(
     requires=[
         "gui",
         "storage",
-        "rgb_backlight",
         "archive",
     ],
     conflicts=["desktop"],
