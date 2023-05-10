@@ -13,7 +13,6 @@ extern "C" {
 #define XTREME_ASSETS_PACK_NAME_LEN 32
 
 typedef struct {
-    bool loaded;
     char asset_pack[XTREME_ASSETS_PACK_NAME_LEN];
     uint32_t anim_speed;
     int32_t cycle_anims;
@@ -41,7 +40,6 @@ typedef struct {
 
 void XTREME_SETTINGS_SAVE();
 XtremeSettings* XTREME_SETTINGS();
-XtremeSettings* XTREME_SETTINGS_WAIT();
 
 typedef struct {
     bool is_nsfw;

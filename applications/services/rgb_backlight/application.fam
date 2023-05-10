@@ -3,6 +3,7 @@ App(
     name="RGB Backlight",
     apptype=FlipperAppType.SERVICE,
     entry_point="rgb_backlight_srv",
+    order=10,
     sdk_headers=[
         "rgb_backlight.h",
     ],

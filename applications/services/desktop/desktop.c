@@ -15,7 +15,6 @@
 #include "desktop/views/desktop_view_pin_timeout.h"
 #include "desktop_i.h"
 #include "helpers/pin_lock.h"
-#include <xtreme/private.h>
 
 #define TAG "Desktop"
 
@@ -346,9 +345,6 @@ int32_t desktop_srv(void* p) {
         furi_record_close(RECORD_STORAGE);
         furi_hal_rtc_reset_flag(FuriHalRtcFlagResetPin);
     }
-
-    XTREME_SETTINGS_LOAD();
-    XTREME_ASSETS_LOAD();
 
     Desktop* desktop = desktop_alloc();
 

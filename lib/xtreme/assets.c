@@ -148,13 +148,6 @@ void XTREME_ASSETS_LOAD() {
     xtreme_assets.is_nsfw = strncmp(xtreme_settings->asset_pack, "NSFW", strlen("NSFW")) == 0;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    int32_t timeout = 5000;
-    while(timeout > 0) {
-        if(storage_sd_status(storage) == FSE_OK) break;
-        furi_delay_ms(250);
-        timeout -= 250;
-    }
-
     FileInfo info;
     FuriString* path = furi_string_alloc();
     furi_string_printf(path, XTREME_ASSETS_PATH "/%s", xtreme_settings->asset_pack);

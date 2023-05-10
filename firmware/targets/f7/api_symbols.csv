@@ -325,7 +325,6 @@ Function,-,SystemInit,void,
 Function,+,XTREME_ASSETS,XtremeAssets*,
 Function,+,XTREME_SETTINGS,XtremeSettings*,
 Function,+,XTREME_SETTINGS_SAVE,void,
-Function,+,XTREME_SETTINGS_WAIT,XtremeSettings*,
 Function,-,_Exit,void,int
 Function,-,__assert,void,"const char*, int, const char*"
 Function,+,__assert_func,void,"const char*, int, const char*, const char*"

@@ -54,10 +54,6 @@ Storage* storage_app_alloc() {
     view_port_draw_callback_set(app->sd_gui.view_port, storage_app_sd_icon_draw_callback, app);
     view_port_enabled_set(app->sd_gui.view_port, false);
 
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, app->sd_gui.view_port, GuiLayerStatusBarLeft);
-    furi_record_close(RECORD_GUI);
-
     return app;
 }
 
