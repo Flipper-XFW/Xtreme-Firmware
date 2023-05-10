@@ -119,10 +119,6 @@ void pulse_reader_set_pull(PulseReader* signal, GpioPull pull) {
 void pulse_reader_free(PulseReader* signal) {
     furi_assert(signal);
 
-    if(!signal) {
-        return;
-    }
-
     free(signal->timer_buffer);
     free(signal->gpio_buffer);
     free(signal);
@@ -213,8 +209,8 @@ uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
 
             /* probably larger values, so choose a wider data type */
             if(signal->unit_divider > 1) {
-                delta_unit =
-                    (uint32_t)((uint64_t)delta * (uint64_t)signal->unit_multiplier / signal->unit_divider);
+                delta_unit = (uint32_t)((uint64_t)delta * (uint64_t)signal->unit_multiplier /
+                                        signal->unit_divider);
             } else {
                 delta_unit = delta * signal->unit_multiplier;
             }

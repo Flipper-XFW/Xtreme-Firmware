@@ -56,7 +56,6 @@ class GitVersion:
             return {
                 "GIT_COMMIT": commit,
                 "GIT_BRANCH": branch,
-                "GIT_BRANCH_NUM": branch_num,
                 "FURI_CUSTOM_FLIPPER_NAME": custom_fz_name,
                 "VERSION": version,
                 "BUILD_DIRTY": dirty and 1 or 0,
@@ -65,7 +64,6 @@ class GitVersion:
             return {
                 "GIT_COMMIT": commit,
                 "GIT_BRANCH": branch,
-                "GIT_BRANCH_NUM": branch_num,
                 "VERSION": version,
                 "BUILD_DIRTY": dirty and 1 or 0,
             }
