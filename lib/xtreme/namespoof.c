@@ -17,7 +17,8 @@ void NAMESPOOF_INIT() {
         if(version != NAMESPOOF_VERSION) break;
 
         if(!flipper_format_read_string(file, "Name", str)) break;
-        furi_hal_version_set_name(furi_string_get_cstr(str));
+        version_set_custom_name(NULL, strdup(furi_string_get_cstr(str)));
+        furi_hal_version_set_name(version_get_custom_name(NULL));
     } while(false);
 
     flipper_format_free(file);

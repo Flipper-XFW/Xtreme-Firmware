@@ -4669,6 +4669,7 @@ Function,+,version_get_gitbranchnum,const char*,const Version*
 Function,+,version_get_githash,const char*,const Version*
 Function,+,version_get_target,uint8_t,const Version*
 Function,+,version_get_version,const char*,const Version*
+Function,-,version_set_custom_name,void,"Version*, const char*"
 Function,-,vfiprintf,int,"FILE*, const char*, __gnuc_va_list"
 Function,-,vfiscanf,int,"FILE*, const char*, __gnuc_va_list"
 Function,-,vfprintf,int,"FILE*, const char*, __gnuc_va_list"

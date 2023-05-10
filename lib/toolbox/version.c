@@ -24,7 +24,7 @@ struct Version {
 };
 
 /* version of current running firmware (bootloader/flipper) */
-static const Version version = {
+static Version version = {
     .magic = VERSION_MAGIC,
     .major = VERSION_MAJOR,
     .minor = VERSION_MINOR,
@@ -72,6 +72,12 @@ const char* version_get_version(const Version* v) {
 
 const char* version_get_custom_name(const Version* v) {
     return v ? v->custom_flipper_name : version.custom_flipper_name;
+}
+
+void version_set_custom_name(Version* v, const char* name) {
+    Version* ver = v ? v : &version;
+    ver->custom_flipper_name = name;
+    return;
 }
 
 uint8_t version_get_target(const Version* v) {

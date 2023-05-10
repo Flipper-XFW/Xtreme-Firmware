@@ -74,6 +74,14 @@ const char* version_get_version(const Version* v);
  */
 const char* version_get_custom_name(const Version* v);
 
+/** Get custom flipper name if set in ENV
+ *
+ * @param      v     pointer to Version data. NULL for currently running
+ *                   software.
+ * @param      custom name or NULL
+ */
+void version_set_custom_name(Version* v, const char* name);
+
 /** Get hardware target this firmware was built for
  *
  * @param      v     pointer to Version data. NULL for currently running
