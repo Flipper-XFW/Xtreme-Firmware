@@ -480,7 +480,9 @@ int32_t infrared_app(char* p) {
 
     view_dispatcher_run(infrared->view_dispatcher);
 
-    furi_hal_power_disable_otg();
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     infrared_free(infrared);
     return 0;
