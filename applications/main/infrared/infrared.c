@@ -247,6 +247,11 @@ static void infrared_free(Infrared* infrared) {
 
     furi_string_free(infrared->file_path);
 
+    // Disable 5v power if was enabled for external module
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+
     free(infrared);
 }
 
@@ -479,10 +484,6 @@ int32_t infrared_app(char* p) {
     }
 
     view_dispatcher_run(infrared->view_dispatcher);
-
-    if(furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_disable_otg();
-    }
 
     infrared_free(infrared);
     return 0;
