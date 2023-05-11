@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 #include <furi_hal_rtc.h>
 
 #include "../desktop_i.h"
@@ -45,6 +45,14 @@ void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is
             model->pin_is_set = pin_is_set;
             model->pin_lock = pin_is_set;
         },
+        true);
+}
+
+void desktop_lock_menu_set_stealth_mode_state(DesktopLockMenuView* lock_menu, bool stealth_mode) {
+    with_view_model(
+        lock_menu->view,
+        DesktopLockMenuViewModel * model,
+        { model->stealth_mode = stealth_mode; },
         true);
 }
 
@@ -110,7 +118,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             value = total - m->lock_menu->notification->settings.display_brightness * total;
             break;
         case DesktopLockMenuIndexVolume:
-            icon = &I_Volup_8x6;
+            icon = m->stealth_mode ? &I_Muted_8x8 : &I_Volup_8x6;
             value = total - m->lock_menu->notification->settings.speaker_volume * total;
             break;
         default:
@@ -160,10 +168,11 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
 
     if(m->show_lock_menu) {
         canvas_set_font(canvas, FontSecondary);
-        elements_bold_rounded_frame(canvas, 24, 10, 80, 44);
-        canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Keypad Lock");
-        canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, "PIN Code Lock");
-        elements_frame(canvas, 30, m->pin_lock ? 32 : 16, 68, 15);
+        elements_bold_rounded_frame(canvas, 24, 4, 80, 56);
+        canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, "Keypad Lock");
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "PIN Code Lock");
+        canvas_draw_str_aligned(canvas, 64, 48, AlignCenter, AlignCenter, "PIN Lock + OFF");
+        elements_frame(canvas, 28, 8 + m->pin_lock * 16, 72, 15);
     }
 }
 
@@ -178,8 +187,9 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
 
     DesktopLockMenuView* lock_menu = context;
     uint8_t idx = 0;
-    bool pin_lock = false;
+    int pin_lock = 0;
     bool show_lock_menu = false;
+    bool stealth_mode = false;
     bool consumed = true;
 
     with_view_model(
@@ -187,10 +197,19 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
         DesktopLockMenuViewModel * model,
         {
             show_lock_menu = model->show_lock_menu;
+            stealth_mode = model->stealth_mode;
             if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
                 if(model->show_lock_menu) {
-                    if(event->key == InputKeyUp || event->key == InputKeyDown) {
-                        model->pin_lock = !model->pin_lock;
+                    if(event->key == InputKeyUp) {
+                        model->pin_lock--;
+                        if(model->pin_lock < 0) {
+                            model->pin_lock = 2;
+                        }
+                    } else if(event->key == InputKeyDown) {
+                        model->pin_lock++;
+                        if(model->pin_lock > 2) {
+                            model->pin_lock = 0;
+                        }
                     } else if(event->key == InputKeyBack || event->key == InputKeyOk) {
                         model->show_lock_menu = false;
                     }
@@ -238,10 +257,18 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     DesktopEvent desktop_event = 0;
     if(show_lock_menu) {
         if(event->key == InputKeyOk && event->type == InputTypeShort) {
-            if(pin_lock) {
-                desktop_event = DesktopLockMenuEventLockPin;
-            } else {
+            switch(pin_lock) {
+            case 0:
                 desktop_event = DesktopLockMenuEventLock;
+                break;
+            case 1:
+                desktop_event = DesktopLockMenuEventLockPin;
+                break;
+            case 2:
+                desktop_event = DesktopLockMenuEventLockPinOff;
+                break;
+            default:
+                break;
             }
         }
     } else {
@@ -274,6 +301,10 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 break;
             case DesktopLockMenuIndexXtreme:
                 desktop_event = DesktopLockMenuEventXtreme;
+                break;
+            case DesktopLockMenuIndexVolume:
+                desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :
+                                               DesktopLockMenuEventStealthModeOn;
                 break;
             default:
                 break;

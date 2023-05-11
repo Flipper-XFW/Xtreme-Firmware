@@ -84,9 +84,7 @@ void furi_hal_bt_init() {
     }
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {
-        furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
-    }
+    furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     // Start Core2
     ble_glue_init();
@@ -129,9 +127,7 @@ bool furi_hal_bt_start_radio_stack() {
     furi_mutex_acquire(furi_hal_bt_core2_mtx, FuriWaitForever);
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {
-        furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
-    }
+    furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     do {
         // Wait until C2 is started or timeout
@@ -206,12 +202,10 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
         if(profile == FuriHalBtProfileSerial) {
             // Set mac address
             memcpy(
-                profile_config[profile].config.mac_address,
-                furi_hal_version_get_ble_mac(),
-                sizeof(profile_config[profile].config.mac_address));
+                config->mac_address, furi_hal_version_get_ble_mac(), sizeof(config->mac_address));
             // Set advertise name
             strlcpy(
-                profile_config[profile].config.adv_name,
+                config->adv_name,
                 furi_hal_version_get_ble_local_device_name_ptr(),
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
 
@@ -223,12 +217,14 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
                 config->mac_address[2]++;
             }
             // Change name Flipper -> Control
-            if(strlen(&config->adv_name[1]) == 0) {
+            if(strnlen(config->adv_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH) < 2 ||
+               strnlen(config->adv_name + 1, FURI_HAL_VERSION_DEVICE_NAME_LENGTH) < 1) {
                 snprintf(
-                    &config->adv_name[1],
-                    strlen("Control ") + FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                    "Control %s",
-                    furi_hal_version_get_ble_local_device_name_ptr());
+                    config->adv_name,
+                    FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
+                    "%cControl %s",
+                    *furi_hal_version_get_ble_local_device_name_ptr(),
+                    furi_hal_version_get_ble_local_device_name_ptr() + 1);
             }
         }
         if(!gap_init(config, event_cb, context)) {
@@ -475,7 +471,7 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
 void furi_hal_bt_set_profile_adv_name(
     FuriHalBtProfile profile,
-    const char name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1]) {
+    const char name[FURI_HAL_BT_ADV_NAME_LENGTH]) {
     furi_assert(profile < FuriHalBtProfileNumber);
     furi_assert(name);
 
@@ -486,10 +482,7 @@ void furi_hal_bt_set_profile_adv_name(
             strlen(&(profile_config[profile].config.adv_name[1])));
     } else {
         profile_config[profile].config.adv_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
-        memcpy(
-            &(profile_config[profile].config.adv_name[1]),
-            name,
-            FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1);
+        memcpy(&(profile_config[profile].config.adv_name[1]), name, FURI_HAL_BT_ADV_NAME_LENGTH);
     }
 }
 

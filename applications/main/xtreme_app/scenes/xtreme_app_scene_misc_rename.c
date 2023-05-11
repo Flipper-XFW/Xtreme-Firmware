@@ -12,11 +12,30 @@ static void xtreme_app_scene_misc_rename_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultOk);
 }
 
+static bool
+    xtreme_app_scene_misc_rename_validator(const char* text, FuriString* error, void* context) {
+    UNUSED(context);
+
+    for(; *text; ++text) {
+        const char c = *text;
+        if((c < '0' || c > '9') && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z')) {
+            furi_string_printf(error, "Please only\nenter letters\nand numbers!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void xtreme_app_scene_misc_rename_on_enter(void* context) {
     XtremeApp* app = context;
     TextInput* text_input = app->text_input;
 
     text_input_set_header_text(text_input, "Leave empty for default");
+
+    text_input_set_validator(text_input, xtreme_app_scene_misc_rename_validator, NULL);
+
+    text_input_set_minimum_length(text_input, 0);
 
     text_input_set_result_callback(
         text_input,

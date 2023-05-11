@@ -39,14 +39,10 @@ const NotificationSequence subghz_sequence_rx_locked = {
 
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
-    FuriString* history_stat_str;
-    history_stat_str = furi_string_alloc();
+    FuriString* history_stat_str = furi_string_alloc();
     if(!subghz_history_get_text_space_left(subghz->txrx->history, history_stat_str)) {
-        FuriString* frequency_str;
-        FuriString* modulation_str;
-
-        frequency_str = furi_string_alloc();
-        modulation_str = furi_string_alloc();
+        FuriString* frequency_str = furi_string_alloc();
+        FuriString* modulation_str = furi_string_alloc();
 
 #ifdef SUBGHZ_EXT_PRESET_NAME
         if(subghz_history_get_last_index(subghz->txrx->history) > 0) {
@@ -90,35 +86,40 @@ static void subghz_scene_add_to_history_callback(
     SubGhzProtocolDecoderBase* decoder_base,
     void* context) {
     furi_assert(context);
+
     SubGhz* subghz = context;
-    FuriString* str_buff;
-    str_buff = furi_string_alloc();
+
+    FuriString* item_name = furi_string_alloc();
+    FuriString* item_time = furi_string_alloc();
+    uint16_t idx = subghz_history_get_item(subghz->txrx->history);
 
     if(subghz_history_add_to_history(subghz->txrx->history, decoder_base, subghz->txrx->preset)) {
-        furi_string_reset(str_buff);
+        furi_string_reset(item_name);
+        furi_string_reset(item_time);
 
         subghz->state_notifications = SubGhzNotificationStateRxDone;
 
-        subghz_history_get_text_item_menu(
-            subghz->txrx->history, str_buff, subghz_history_get_item(subghz->txrx->history) - 1);
+        subghz_history_get_text_item_menu(subghz->txrx->history, item_name, idx);
+        subghz_history_get_time_item_menu(subghz->txrx->history, item_time, idx);
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
-            furi_string_get_cstr(str_buff),
-            subghz_history_get_type_protocol(
-                subghz->txrx->history, subghz_history_get_item(subghz->txrx->history) - 1));
+            furi_string_get_cstr(item_name),
+            furi_string_get_cstr(item_time),
+            subghz_history_get_type_protocol(subghz->txrx->history, idx));
 
         subghz_scene_receiver_update_statusbar(subghz);
     }
     subghz_receiver_reset(receiver);
-    furi_string_free(str_buff);
+    furi_string_free(item_name);
+    furi_string_free(item_time);
     subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
 }
 
 void subghz_scene_receiver_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    FuriString* str_buff;
-    str_buff = furi_string_alloc();
+    FuriString* item_name = furi_string_alloc();
+    FuriString* item_time = furi_string_alloc();
 
     if(subghz->txrx->rx_key_state == SubGhzRxKeyStateIDLE) {
         subghz_preset_init(subghz, "AM650", subghz->last_settings->frequency, NULL, 0);
@@ -132,20 +133,61 @@ void subghz_scene_receiver_on_enter(void* context) {
     //Load history to receiver
     subghz_view_receiver_exit(subghz->subghz_receiver);
     for(uint8_t i = 0; i < subghz_history_get_item(subghz->txrx->history); i++) {
-        furi_string_reset(str_buff);
-        subghz_history_get_text_item_menu(subghz->txrx->history, str_buff, i);
+        furi_string_reset(item_name);
+        furi_string_reset(item_time);
+        subghz_history_get_text_item_menu(subghz->txrx->history, item_name, i);
+        subghz_history_get_time_item_menu(subghz->txrx->history, item_time, i);
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
-            furi_string_get_cstr(str_buff),
+            furi_string_get_cstr(item_name),
+            furi_string_get_cstr(item_time),
             subghz_history_get_type_protocol(subghz->txrx->history, i));
         subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
     }
-    furi_string_free(str_buff);
+    furi_string_free(item_name);
+    furi_string_free(item_time);
     subghz_scene_receiver_update_statusbar(subghz);
     subghz_view_receiver_set_callback(
         subghz->subghz_receiver, subghz_scene_receiver_callback, subghz);
     subghz_receiver_set_rx_callback(
         subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
+
+    // TODO: Replace with proper solution based on protocol flags, remove kostily and velosipedy from here
+    // Needs to be done after subghz refactoring merge!!!
+    if(subghz->txrx->ignore_starline == true) {
+        SubGhzProtocolDecoderBase* protocoldecoderbase = NULL;
+        protocoldecoderbase =
+            subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, "Star Line");
+        if(protocoldecoderbase) {
+            subghz_protocol_decoder_base_set_decoder_callback(
+                protocoldecoderbase, NULL, subghz->txrx->receiver);
+        }
+    }
+    if(subghz->txrx->ignore_auto_alarms == true) {
+        SubGhzProtocolDecoderBase* protocoldecoderbase = NULL;
+        protocoldecoderbase =
+            subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, "KIA Seed");
+        if(protocoldecoderbase) {
+            subghz_protocol_decoder_base_set_decoder_callback(
+                protocoldecoderbase, NULL, subghz->txrx->receiver);
+        }
+        protocoldecoderbase = NULL;
+        protocoldecoderbase =
+            subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, "Scher-Khan");
+        if(protocoldecoderbase) {
+            subghz_protocol_decoder_base_set_decoder_callback(
+                protocoldecoderbase, NULL, subghz->txrx->receiver);
+        }
+    }
+    if(subghz->txrx->ignore_magellan == true) {
+        SubGhzProtocolDecoderBase* protocoldecoderbase = NULL;
+        protocoldecoderbase =
+            subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, "Magellan");
+        if(protocoldecoderbase) {
+            subghz_protocol_decoder_base_set_decoder_callback(
+                protocoldecoderbase, NULL, subghz->txrx->receiver);
+        }
+    }
 
     subghz->state_notifications = SubGhzNotificationStateRx;
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {

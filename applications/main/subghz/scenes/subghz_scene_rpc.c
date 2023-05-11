@@ -1,12 +1,10 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
-#include <lib/subghz/protocols/alutech_at_4n.h>
-#include <lib/subghz/protocols/nice_flor_s.h>
-#include <lib/subghz/protocols/somfy_telis.h>
-#include <lib/subghz/protocols/secplus_v2.h>
 
-#include "xtreme/assets.h"
+#include <lib/subghz/blocks/custom_btn.h>
+
+#include <xtreme.h>
 
 typedef enum {
     SubGhzRpcStateIdle,
@@ -75,8 +73,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateLoaded);
                     furi_string_set(subghz->file_path, arg);
                     result = true;
-                    FuriString* file_name;
-                    file_name = furi_string_alloc();
+                    FuriString* file_name = furi_string_alloc();
                     path_extract_filename(subghz->file_path, file_name, true);
 
                     snprintf(
@@ -116,10 +113,7 @@ void subghz_scene_rpc_on_exit(void* context) {
     keeloq_reset_mfname();
     keeloq_reset_kl_type();
     keeloq_reset_original_btn();
-    alutech_reset_original_btn();
-    nice_flors_reset_original_btn();
-    somfy_telis_reset_original_btn();
-    secplus2_reset_original_btn();
+    subghz_custom_btns_reset();
     star_line_reset_mfname();
     star_line_reset_kl_type();
 }

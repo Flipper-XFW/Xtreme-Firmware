@@ -37,6 +37,16 @@ static void xtreme_app_scene_interface_common_left_handed_changed(VariableItem* 
     }
 }
 
+static void xtreme_app_scene_interface_common_favorite_timeout_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint32_t value = variable_item_get_current_value_index(item);
+    char text[6];
+    snprintf(text, sizeof(text), "%lu S", value);
+    variable_item_set_current_value_text(item, value ? text : "OFF");
+    XTREME_SETTINGS()->favorite_timeout = value;
+    app->save_settings = true;
+}
+
 void xtreme_app_scene_interface_common_on_enter(void* context) {
     XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
@@ -66,6 +76,17 @@ void xtreme_app_scene_interface_common_on_enter(void* context) {
     bool value = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
     variable_item_set_current_value_index(item, value);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Favorite Timeout",
+        61,
+        xtreme_app_scene_interface_common_favorite_timeout_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings->favorite_timeout);
+    char text[4];
+    snprintf(text, sizeof(text), "%lu S", xtreme_settings->favorite_timeout);
+    variable_item_set_current_value_text(item, xtreme_settings->favorite_timeout ? text : "OFF");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_interface_common_var_item_list_callback, app);

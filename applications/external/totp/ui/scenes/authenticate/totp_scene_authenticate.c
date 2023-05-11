@@ -18,10 +18,6 @@ typedef struct {
     uint8_t code_length;
 } SceneState;
 
-void totp_scene_authenticate_init(PluginState* plugin_state) {
-    memset(&plugin_state->iv[0], 0, TOTP_IV_SIZE);
-}
-
 void totp_scene_authenticate_activate(PluginState* plugin_state) {
     SceneState* scene_state = malloc(sizeof(SceneState));
     furi_check(scene_state != NULL);
@@ -118,12 +114,18 @@ bool totp_scene_authenticate_handle_event(
             scene_state->code_length++;
         }
         break;
-    case InputKeyOk:
-        totp_crypto_seed_iv(plugin_state, &scene_state->code_input[0], scene_state->code_length);
+    case InputKeyOk: {
+        CryptoSeedIVResult seed_result = totp_crypto_seed_iv(
+            plugin_state, &scene_state->code_input[0], scene_state->code_length);
+
+        if(seed_result & CryptoSeedIVResultFlagSuccess &&
+           seed_result & CryptoSeedIVResultFlagNewCryptoVerifyData) {
+            totp_config_file_update_crypto_signatures(plugin_state);
+        }
 
         if(totp_crypto_verify_key(plugin_state)) {
             FURI_LOG_D(LOGGING_TAG, "PIN is valid");
-            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
         } else {
             FURI_LOG_D(LOGGING_TAG, "PIN is NOT valid");
             memset(&scene_state->code_input[0], 0, MAX_CODE_LENGTH);
@@ -144,6 +146,7 @@ bool totp_scene_authenticate_handle_event(
             dialog_message_free(message);
         }
         break;
+    }
     case InputKeyBack:
         if(scene_state->code_length > 0) {
             scene_state->code_input[scene_state->code_length - 1] = 0;
@@ -161,8 +164,4 @@ void totp_scene_authenticate_deactivate(PluginState* plugin_state) {
     if(plugin_state->current_scene_state == NULL) return;
     free(plugin_state->current_scene_state);
     plugin_state->current_scene_state = NULL;
-}
-
-void totp_scene_authenticate_free(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
 }

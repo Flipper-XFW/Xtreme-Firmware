@@ -220,6 +220,15 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
  * @param[in]  ellipsis  The ellipsis flag: true to add ellipse
  * @param[in]  centered  The centered flag: true to center text on x and y
  */
+void elements_scrollable_text_line_str(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    const char* string,
+    size_t scroll,
+    bool ellipsis,
+    bool centered);
 void elements_scrollable_text_line(
     Canvas* canvas,
     uint8_t x,

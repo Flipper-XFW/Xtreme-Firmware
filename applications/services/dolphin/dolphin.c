@@ -6,7 +6,7 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <furi.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
 
 #define TAG "Dolphin"
@@ -80,7 +80,7 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     dolphin->event_queue = furi_message_queue_alloc(8, sizeof(DolphinEvent));
     dolphin->pubsub = furi_pubsub_alloc();
-    int32_t butthurt = XTREME_SETTINGS()->butthurt_timer;
+    int32_t butthurt = XTREME_SETTINGS_WAIT()->butthurt_timer;
     dolphin->butthurt_timer = xTimerCreate(
         NULL,
         (butthurt > 0) ? (butthurt * 1000) : -1,
@@ -161,7 +161,7 @@ static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin) {
 int32_t dolphin_srv(void* p) {
     UNUSED(p);
 
-    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+    if(!furi_hal_is_normal_boot()) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
         return 0;
     }

@@ -12,8 +12,7 @@
 bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
     bool ret = false;
     //set the path to read the file
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    FuriString* temp_str = furi_string_alloc();
     do {
         if(!flipper_format_rewind(subghz->txrx->fff_data)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -38,11 +37,8 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
 
-    FuriString* frequency_str;
-    FuriString* modulation_str;
-
-    frequency_str = furi_string_alloc();
-    modulation_str = furi_string_alloc();
+    FuriString* frequency_str = furi_string_alloc();
+    FuriString* modulation_str = furi_string_alloc();
 
 #ifdef SUBGHZ_EXT_PRESET_NAME
     subghz_get_frequency_modulation(subghz, frequency_str, NULL);
@@ -74,8 +70,7 @@ void subghz_scene_read_raw_callback_end_tx(void* context) {
 
 void subghz_scene_read_raw_on_enter(void* context) {
     SubGhz* subghz = context;
-    FuriString* file_name;
-    file_name = furi_string_alloc();
+    FuriString* file_name = furi_string_alloc();
 
     switch(subghz->txrx->rx_key_state) {
     case SubGhzRxKeyStateBack:
@@ -122,6 +117,19 @@ void subghz_scene_read_raw_on_enter(void* context) {
     //set filter RAW feed
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_RAW);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
+
+    // Start sending immediately with favorites
+    if(subghz->fav_timeout) {
+        with_view_model(
+            subghz->subghz_read_raw->view,
+            SubGhzReadRAWModel * model,
+            {
+                scene_manager_handle_custom_event(
+                    subghz->scene_manager, SubGhzCustomEventViewReadRAWSendStart);
+                model->status = SubGhzReadRAWStatusTXRepeat;
+            },
+            true);
+    }
 }
 
 bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
@@ -139,7 +147,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
             //Stop save file
             subghz_protocol_raw_save_to_file_stop(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
@@ -183,7 +191,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             consumed = true;
             break;
@@ -239,7 +247,11 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                    (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                     if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
                         subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
-                        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
+                        subghz_read_raw_set_status(
+                            subghz->subghz_read_raw,
+                            SubGhzReadRAWStatusIDLE,
+                            "",
+                            subghz->txrx->raw_threshold_rssi);
                     } else {
                         if(scene_manager_has_previous_scene(
                                subghz->scene_manager, SubGhzSceneSaved) ||
@@ -274,6 +286,13 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz_sleep(subghz);
             }
             subghz_read_raw_stop_send(subghz->subghz_read_raw);
+
+            // Exit / stop with favorites
+            if(subghz->fav_timeout) {
+                while(scene_manager_handle_back_event(subghz->scene_manager))
+                    ;
+                view_dispatcher_stop(subghz->view_dispatcher);
+            }
             consumed = true;
             break;
 
@@ -281,7 +300,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
 
             size_t spl_count = subghz_protocol_raw_get_sample_write(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
@@ -289,8 +308,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_protocol_raw_save_to_file_stop(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
 
-            FuriString* temp_str;
-            temp_str = furi_string_alloc();
+            FuriString* temp_str = furi_string_alloc();
             furi_string_printf(
                 temp_str, "%s/%s%s", SUBGHZ_RAW_FOLDER, RAW_FILE_NAME, SUBGHZ_APP_EXTENSION);
             subghz_protocol_raw_gen_fff_data(
@@ -415,7 +433,7 @@ void subghz_scene_read_raw_on_exit(void* context) {
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
         subghz_sleep(subghz);
-    };
+    }
     subghz->state_notifications = SubGhzNotificationStateIDLE;
     notification_message(subghz->notifications, &sequence_reset_rgb);
 

@@ -1,5 +1,5 @@
 #include "../infrared_i.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 void infrared_scene_learn_done_on_enter(void* context) {
     Infrared* infrared = context;

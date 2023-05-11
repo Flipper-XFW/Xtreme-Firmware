@@ -1,5 +1,5 @@
 #include "../lfrfid_i.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 #define RAW_READ_TIME 5000
 

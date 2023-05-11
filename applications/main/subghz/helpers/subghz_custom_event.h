@@ -13,6 +13,8 @@ typedef enum {
     SubmenuIndexSomfyTelis,
     SubmenuIndexBeninca433,
     SubmenuIndexBeninca868,
+    SubmenuIndexAllmatic433,
+    SubmenuIndexAllmatic868,
     SubmenuIndexIronLogic,
     SubmenuIndexElmesElectronic,
     SubmenuIndexSommer_FM_434,
@@ -100,6 +102,9 @@ typedef enum {
     SubGhzCustomEventViewTransmitterSendStart,
     SubGhzCustomEventViewTransmitterSendStop,
     SubGhzCustomEventViewTransmitterError,
+
+    SubGhzCustomEventViewFreqAnalOkShort,
+    SubGhzCustomEventViewFreqAnalOkLong,
 
     SubGhzCustomEventByteInputDone,
 } SubGhzCustomEvent;

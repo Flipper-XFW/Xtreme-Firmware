@@ -4,15 +4,15 @@
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include "../features_config.h"
-#include "../lib/list/list.h"
 #include "../ui/totp_scenes_enum.h"
+#include "../services/config/config_file_context.h"
 #include "notification_method.h"
 #include "automation_method.h"
 #ifdef TOTP_BADBT_TYPE_ENABLED
 #include "../workers/bt_type_code/bt_type_code.h"
 #endif
 
-#define TOTP_IV_SIZE 16
+#define TOTP_IV_SIZE (16)
 
 /**
  * @brief Application state structure
@@ -48,20 +48,7 @@ typedef struct {
      */
     float timezone_offset;
 
-    /**
-     * @brief Token list head node 
-     */
-    ListNode* tokens_list;
-
-    /**
-     * @brief Whether token list is loaded or not 
-     */
-    bool token_list_loaded;
-
-    /**
-     * @brief Tokens list length 
-     */
-    uint16_t tokens_count;
+    ConfigFileContext* config_file_context;
 
     /**
      * @brief Encrypted well-known string data

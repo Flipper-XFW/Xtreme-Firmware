@@ -6,6 +6,9 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexHopping,
     SubGhzSettingIndexModulation,
     SubGhzSettingIndexBinRAW,
+    SubGhzSettingIndexIgnoreStarline,
+    SubGhzSettingIndexIgnoreCars,
+    SubGhzSettingIndexIgnoreMagellan,
     SubGhzSettingIndexSound,
     SubGhzSettingIndexLock,
     SubGhzSettingIndexRAWThresholdRSSI,
@@ -67,6 +70,23 @@ const char* const bin_raw_text[BIN_RAW_COUNT] = {
 const uint32_t bin_raw_value[BIN_RAW_COUNT] = {
     SubGhzProtocolFlag_Decodable,
     SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW,
+};
+#define STARLINE_COUNT 2
+const char* const starline_text[STARLINE_COUNT] = {
+    "OFF",
+    "ON",
+};
+
+#define AUTO_ALARMS_COUNT 2
+const char* const auto_alarms_text[AUTO_ALARMS_COUNT] = {
+    "OFF",
+    "ON",
+};
+
+#define MAGELLAN_COUNT 2
+const char* const magellan_text[MAGELLAN_COUNT] = {
+    "OFF",
+    "ON",
 };
 
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {
@@ -217,6 +237,30 @@ static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* it
     subghz->txrx->raw_threshold_rssi = raw_threshold_rssi_value[index];
 }
 
+static void subghz_scene_receiver_config_set_starline(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, starline_text[index]);
+    subghz->txrx->ignore_starline = (index == 1);
+}
+
+static void subghz_scene_receiver_config_set_auto_alarms(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, auto_alarms_text[index]);
+    subghz->txrx->ignore_auto_alarms = (index == 1);
+}
+
+static void subghz_scene_receiver_config_set_magellan(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, magellan_text[index]);
+    subghz->txrx->ignore_magellan = (index == 1);
+}
+
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -289,6 +333,42 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         value_index = value_index_uint32(subghz->txrx->filter, bin_raw_value, BIN_RAW_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, bin_raw_text[value_index]);
+    }
+
+    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+       SubGhzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Starline:",
+            STARLINE_COUNT,
+            subghz_scene_receiver_config_set_starline,
+            subghz);
+
+        value_index = subghz->txrx->ignore_starline;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, starline_text[value_index]);
+
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Cars:",
+            AUTO_ALARMS_COUNT,
+            subghz_scene_receiver_config_set_auto_alarms,
+            subghz);
+
+        value_index = subghz->txrx->ignore_auto_alarms;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, auto_alarms_text[value_index]);
+
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Magellan:",
+            MAGELLAN_COUNT,
+            subghz_scene_receiver_config_set_magellan,
+            subghz);
+
+        value_index = subghz->txrx->ignore_magellan;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, magellan_text[value_index]);
     }
 
     // Enable speaker, will send all incoming noises and signals to speaker so you can listen how your remote sounds like :)

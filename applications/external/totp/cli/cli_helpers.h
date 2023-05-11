@@ -14,29 +14,18 @@
 #define DOCOPT_OPTIONS "[options]"
 #define DOCOPT_DEFAULT(val) "[default: " val "]"
 
-#define TOTP_CLI_PRINTF(format, ...)                                        \
-    do {                                                                    \
-        _Pragma(STRINGIFY(GCC diagnostic push))                             \
-            _Pragma(STRINGIFY(GCC diagnostic ignored "-Wdouble-promotion")) \
-                printf(format, ##__VA_ARGS__);                              \
-        _Pragma(STRINGIFY(GCC diagnostic pop))                              \
-    } while(false)
+extern const char* TOTP_CLI_COLOR_ERROR;
+extern const char* TOTP_CLI_COLOR_WARNING;
+extern const char* TOTP_CLI_COLOR_SUCCESS;
+extern const char* TOTP_CLI_COLOR_INFO;
 
-#define TOTP_CLI_PRINTF_COLORFUL(color, format, ...)                        \
-    do {                                                                    \
-        _Pragma(STRINGIFY(GCC diagnostic push))                             \
-            _Pragma(STRINGIFY(GCC diagnostic ignored "-Wdouble-promotion")) \
-                printf("\e[%s", color);                                     \
-        printf(format, ##__VA_ARGS__);                                      \
-        printf("\e[0m");                                                    \
-        fflush(stdout);                                                     \
-        _Pragma(STRINGIFY(GCC diagnostic pop))                              \
-    } while(false)
+#define TOTP_CLI_PRINTF(format, ...) printf(format, ##__VA_ARGS__)
 
-#define TOTP_CLI_COLOR_ERROR "91m"
-#define TOTP_CLI_COLOR_WARNING "93m"
-#define TOTP_CLI_COLOR_SUCCESS "92m"
-#define TOTP_CLI_COLOR_INFO "96m"
+#define TOTP_CLI_PRINTF_COLORFUL(color, format, ...) \
+    printf("\e[%s", color);                          \
+    printf(format, ##__VA_ARGS__);                   \
+    printf("\e[0m");                                 \
+    fflush(stdout)
 
 #define TOTP_CLI_PRINTF_ERROR(format, ...) \
     TOTP_CLI_PRINTF_COLORFUL(TOTP_CLI_COLOR_ERROR, format, ##__VA_ARGS__)
@@ -47,24 +36,12 @@
 #define TOTP_CLI_PRINTF_INFO(format, ...) \
     TOTP_CLI_PRINTF_COLORFUL(TOTP_CLI_COLOR_INFO, format, ##__VA_ARGS__)
 
-#define TOTP_CLI_DELETE_LAST_LINE()    \
-    TOTP_CLI_PRINTF("\033[A\33[2K\r"); \
-    fflush(stdout)
+#define TOTP_CLI_LOCK_UI(plugin_state)                    \
+    Scene __previous_scene = plugin_state->current_scene; \
+    totp_scene_director_activate_scene(plugin_state, TotpSceneStandby)
 
-#define TOTP_CLI_DELETE_CURRENT_LINE() \
-    TOTP_CLI_PRINTF("\33[2K\r");       \
-    fflush(stdout)
-
-#define TOTP_CLI_DELETE_LAST_CHAR() \
-    TOTP_CLI_PRINTF("\b \b");       \
-    fflush(stdout)
-
-#define TOTP_CLI_PRINT_INVALID_ARGUMENTS() \
-    TOTP_CLI_PRINTF_ERROR(                 \
-        "Invalid command arguments. use \"help\" command to get list of available commands")
-
-#define TOTP_CLI_PRINT_ERROR_UPDATING_CONFIG_FILE() \
-    TOTP_CLI_PRINTF_ERROR("An error has occurred during updating config file\r\n")
+#define TOTP_CLI_UNLOCK_UI(plugin_state) \
+    totp_scene_director_activate_scene(plugin_state, __previous_scene)
 
 /**
  * @brief Checks whether user is authenticated and entered correct PIN.
@@ -89,3 +66,52 @@ void totp_cli_force_close_app(FuriMessageQueue* event_queue);
  * @return \c true if line successfully read and confirmed; \c false otherwise
  */
 bool totp_cli_read_line(Cli* cli, FuriString* out_str, bool mask_user_input);
+
+/**
+ * @brief Extracts \c uint8_t value and trims arguments string
+ * @param args arguments string
+ * @param[out] value parsed value
+ * @return \c true if value successfully read and parsed as \c uint8_t ; \c false otherwise
+ */
+bool args_read_uint8_and_trim(FuriString* args, uint8_t* value);
+
+/**
+ * @brief Free \c FuriString instance in a secure manner by clearing it first
+ * @param str instance to free
+ */
+void furi_string_secure_free(FuriString* str);
+
+/**
+ * @brief Deletes last printed line in console
+ */
+void totp_cli_delete_last_line();
+
+/**
+ * @brief Deletes current printed line in console
+ */
+void totp_cli_delete_current_line();
+
+/**
+ * @brief Deletes last printed char in console
+ */
+void totp_cli_delete_last_char();
+
+/**
+ * @brief Prints error message about invalid command arguments
+ */
+void totp_cli_print_invalid_arguments();
+
+/**
+ * @brief Prints error message about config file update error
+ */
+void totp_cli_print_error_updating_config_file();
+
+/**
+ * @brief Prints error message about config file loading error
+ */
+void totp_cli_print_error_loading_token_info();
+
+/**
+ * @brief Prints message to let user knwo that command is processing now
+ */
+void totp_cli_print_processing();

@@ -157,7 +157,7 @@ static bool text_viewer_open_file(TextViewer* text_viewer, const char* file_path
             FURI_LOG_E(TAG, "Unable to open stream: %s", file_path);
             isOk = false;
             break;
-        };
+        }
 
         text_viewer->model->file_size = stream_size(text_viewer->model->stream);
     } while(false);

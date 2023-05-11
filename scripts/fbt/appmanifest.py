@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Callable
-from enum import Enum
 import os
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Callable, List, Optional, Tuple
 
 
 class FlipperManifestException(Exception):
@@ -94,7 +94,7 @@ class AppManager:
     def get(self, appname: str):
         try:
             return self.known_apps[appname]
-        except KeyError as _:
+        except KeyError:
             raise FlipperManifestException(
                 f"Missing application manifest for '{appname}'"
             )
@@ -298,7 +298,7 @@ class AppBuildset:
                 try:
                     parent_app = self.appmgr.get(parent_app_id)
                     parent_app._plugins.append(extension_app)
-                except FlipperManifestException as e:
+                except FlipperManifestException:
                     self._writer(
                         f"Module {extension_app.appid} has unknown parent {parent_app_id}"
                     )

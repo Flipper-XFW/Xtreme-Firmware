@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <bt/bt_service/bt.h>
+#include <bt/bt_service/bt_i.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
@@ -24,7 +25,6 @@ enum BtSettingsCustomEvent {
 };
 
 typedef struct {
-    BtSettings settings;
     Bt* bt;
     Gui* gui;
     SceneManager* scene_manager;

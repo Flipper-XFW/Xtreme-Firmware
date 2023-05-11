@@ -5,7 +5,7 @@
 #include <m-algo.h>
 #include <storage/storage.h>
 #include "toolbox/path.h"
-#include "xtreme/settings.h"
+#include <xtreme.h>
 
 #define FAP_MANIFEST_MAX_ICON_SIZE 32
 

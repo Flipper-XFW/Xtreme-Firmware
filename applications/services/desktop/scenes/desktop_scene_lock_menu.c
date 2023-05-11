@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <loader/loader.h>
 // #include <loader/loader_i.h>
-#include <xtreme/settings.h>
+#include <xtreme.h>
 
 #include "../desktop_i.h"
 #include <desktop/desktop_settings.h>
@@ -28,6 +28,8 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
     desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop->settings.pin_code.length > 0);
+    desktop_lock_menu_set_stealth_mode_state(
+        desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
     desktop_lock_menu_set_idx(desktop->lock_menu, 3);
 
     Gui* gui = furi_record_open(RECORD_GUI);
@@ -57,7 +59,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeTick) {
-        bool check_pin_changed =
+        int check_pin_changed =
             scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
         if(check_pin_changed) {
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
@@ -66,13 +68,20 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
                 desktop_pin_lock(&desktop->settings);
                 desktop_lock(desktop);
+                if(check_pin_changed == 2) {
+                    Power* power = furi_record_open(RECORD_POWER);
+                    furi_delay_ms(500);
+                    power_off(power);
+                    furi_record_close(RECORD_POWER);
+                }
             }
         }
     } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DesktopLockMenuEventSettings:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_show_settings();
+            loader_show_settings(furi_record_open(RECORD_LOADER));
+            furi_record_close(RECORD_LOADER);
             consumed = true;
             break;
         case DesktopLockMenuEventLock:
@@ -97,11 +106,37 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
             break;
+        case DesktopLockMenuEventLockPinOff:
+            desktop_scene_lock_menu_save_settings(desktop);
+            if(desktop->settings.pin_code.length > 0) {
+                desktop_pin_lock(&desktop->settings);
+                desktop_lock(desktop);
+                Power* power = furi_record_open(RECORD_POWER);
+                furi_delay_ms(500);
+                power_off(power);
+                furi_record_close(RECORD_POWER);
+            } else {
+                LoaderStatus status =
+                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                if(status == LoaderStatusOk) {
+                    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 2);
+                } else {
+                    FURI_LOG_E(TAG, "Unable to start desktop settings");
+                }
+            }
+            consumed = true;
+            break;
         case DesktopLockMenuEventXtreme:
             desktop_scene_lock_menu_save_settings(desktop);
             loader_start(
                 desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/.Main/xtreme_app.fap"));
             consumed = true;
+            break;
+        case DesktopLockMenuEventStealthModeOn:
+            desktop_set_stealth_mode_state(desktop, true);
+            break;
+        case DesktopLockMenuEventStealthModeOff:
+            desktop_set_stealth_mode_state(desktop, false);
             break;
         default:
             break;

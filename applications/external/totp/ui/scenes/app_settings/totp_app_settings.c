@@ -8,8 +8,7 @@
 #include "../../constants.h"
 #include "../../../services/config/config.h"
 #include "../../../services/convert/convert.h"
-#include "../../../lib/roll_value/roll_value.h"
-#include "../../../types/nullable.h"
+#include <roll_value.h>
 #include "../../../features_config.h"
 #ifdef TOTP_BADBT_TYPE_ENABLED
 #include "../../../workers/bt_type_code/bt_type_code.h"
@@ -40,25 +39,13 @@ typedef struct {
     bool badbt_enabled;
 #endif
     uint8_t y_offset;
-    TotpNullable_uint16_t current_token_index;
     Control selected_control;
 } SceneState;
 
-void totp_scene_app_settings_init(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
-}
-
-void totp_scene_app_settings_activate(
-    PluginState* plugin_state,
-    const AppSettingsSceneContext* context) {
+void totp_scene_app_settings_activate(PluginState* plugin_state) {
     SceneState* scene_state = malloc(sizeof(SceneState));
     furi_check(scene_state != NULL);
     plugin_state->current_scene_state = scene_state;
-    if(context != NULL) {
-        TOTP_NULLABLE_VALUE(scene_state->current_token_index, context->current_token_index);
-    } else {
-        TOTP_NULLABLE_NULL(scene_state->current_token_index);
-    }
 
     float off_int;
     float off_dec = modff(plugin_state->timezone_offset, &off_int);
@@ -285,8 +272,7 @@ bool totp_scene_app_settings_handle_event(
                                                                             AutomationMethodNone;
 #endif
 
-            if(totp_config_file_update_user_settings(plugin_state) !=
-               TotpConfigFileUpdateSuccess) {
+            if(!totp_config_file_update_user_settings(plugin_state)) {
                 totp_dialogs_config_updating_error(plugin_state);
                 return false;
             }
@@ -298,25 +284,11 @@ bool totp_scene_app_settings_handle_event(
             }
 #endif
 
-            if(!scene_state->current_token_index.is_null) {
-                TokenMenuSceneContext generate_scene_context = {
-                    .current_token_index = scene_state->current_token_index.value};
-                totp_scene_director_activate_scene(
-                    plugin_state, TotpSceneTokenMenu, &generate_scene_context);
-            } else {
-                totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu, NULL);
-            }
+            totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
         }
         break;
     case InputKeyBack: {
-        if(!scene_state->current_token_index.is_null) {
-            TokenMenuSceneContext generate_scene_context = {
-                .current_token_index = scene_state->current_token_index.value};
-            totp_scene_director_activate_scene(
-                plugin_state, TotpSceneTokenMenu, &generate_scene_context);
-        } else {
-            totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu, NULL);
-        }
+        totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
         break;
     }
     default:
@@ -331,8 +303,4 @@ void totp_scene_app_settings_deactivate(PluginState* plugin_state) {
 
     free(plugin_state->current_scene_state);
     plugin_state->current_scene_state = NULL;
-}
-
-void totp_scene_app_settings_free(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
 }

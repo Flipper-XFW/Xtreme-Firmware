@@ -169,8 +169,8 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
 #include <locale/locale.h>
 #include <power/power_service/power.h>
 
-#define LOW_CHARGE_THRESHOLD 10
-#define HIGH_DRAIN_CURRENT_THRESHOLD 100
+#define LOW_CHARGE_THRESHOLD (10)
+#define HIGH_DRAIN_CURRENT_THRESHOLD (-100)
 
 static void draw_stat(Canvas* canvas, int x, int y, const Icon* icon, char* val) {
     canvas_draw_frame(canvas, x - 7, y + 7, 30, 13);
@@ -179,20 +179,19 @@ static void draw_stat(Canvas* canvas, int x, int y, const Icon* icon, char* val)
     canvas_draw_box(canvas, x - 4, y + 16, 24, 6);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_str_aligned(canvas, x + 8, y + 22, AlignCenter, AlignBottom, val);
-};
+}
 
 static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
     char header[20] = {};
     char value[20] = {};
 
-    int32_t drain_current = info->current_gauge * (-1000);
-    uint32_t charge_current = info->current_gauge * 1000;
+    int32_t current = 1000.0f * info->current_gauge;
 
     // Draw battery
     canvas_draw_icon(canvas, x, y, &I_BatteryBody_52x28);
-    if(charge_current > 0) {
+    if(current > 0) {
         canvas_draw_icon(canvas, x + 16, y + 7, &I_FaceCharging_29x14);
-    } else if(drain_current > HIGH_DRAIN_CURRENT_THRESHOLD) {
+    } else if(current < HIGH_DRAIN_CURRENT_THRESHOLD) {
         canvas_draw_icon(canvas, x + 16, y + 7, &I_FaceConfused_29x14);
     } else if(info->charge < LOW_CHARGE_THRESHOLD) {
         canvas_draw_icon(canvas, x + 16, y + 7, &I_FaceNopower_29x14);
@@ -204,7 +203,7 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
     elements_bubble(canvas, x + 53, y + 0, 71, 28);
 
     // Set text
-    if(charge_current > 0) {
+    if(current > 0) {
         snprintf(header, sizeof(header), "%s", "Charging at");
         snprintf(
             value,
@@ -212,28 +211,32 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
             "%lu.%luV   %lumA",
             (uint32_t)(info->voltage_vbus),
             (uint32_t)(info->voltage_vbus * 10) % 10,
-            charge_current);
-    } else if(drain_current > 0) {
+            current);
+    } else if(current < -5) {
+        // Often gauge reports anything in the range 1~5ma as 5ma
+        // That brings confusion, so we'll treat it as Napping
         snprintf(header, sizeof(header), "%s", "Consumption is");
         snprintf(
             value,
             sizeof(value),
             "%ld %s",
-            drain_current,
-            drain_current > HIGH_DRAIN_CURRENT_THRESHOLD ? "mA!" : "mA");
-    } else if(drain_current != 0) {
-        snprintf(header, 20, "...");
-    } else if(info->voltage_battery_charge_limit < 4.2) {
-        // Non-default battery charging limit, mention it
-        snprintf(header, sizeof(header), "Limited to");
-        snprintf(
-            value,
-            sizeof(value),
-            "%lu.%luV",
-            (uint32_t)(info->voltage_battery_charge_limit),
-            (uint32_t)(info->voltage_battery_charge_limit * 10) % 10);
+            ABS(current),
+            current < HIGH_DRAIN_CURRENT_THRESHOLD ? "mA!" : "mA");
+    } else if(info->voltage_vbus > 0) {
+        if(info->voltage_battery_charge_limit < 4.2) {
+            // Non-default battery charging limit, mention it
+            snprintf(header, sizeof(header), "Limited to");
+            snprintf(
+                value,
+                sizeof(value),
+                "%lu.%luV",
+                (uint32_t)(info->voltage_battery_charge_limit),
+                (uint32_t)(info->voltage_battery_charge_limit * 10) % 10);
+        } else {
+            snprintf(header, sizeof(header), "Charged!");
+        }
     } else {
-        snprintf(header, sizeof(header), "Charged!");
+        snprintf(header, sizeof(header), "Napping...");
     }
 
     if(!strcmp(value, "")) {
@@ -244,7 +247,7 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
         canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
         canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
     }
-};
+}
 
 static void battery_info_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);

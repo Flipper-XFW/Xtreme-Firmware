@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include "xtreme/settings.h"
+#include <xtreme.h>
 
 #define POWER_OFF_TIMEOUT 90
 #define TAG "Power"
@@ -512,10 +512,14 @@ static void power_check_battery_level_change(Power* power) {
     }
 }
 
+void power_trigger_ui_update(Power* power) {
+    view_port_update(power->battery_view_port);
+}
+
 int32_t power_srv(void* p) {
     UNUSED(p);
 
-    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+    if(!furi_hal_is_normal_boot()) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
         return 0;
     }
@@ -543,7 +547,9 @@ int32_t power_srv(void* p) {
         power_check_battery_level_change(power);
 
         // Update battery view port
-        if(need_refresh) view_port_update(power->battery_view_port);
+        if(need_refresh) {
+            view_port_update(power->battery_view_port);
+        }
 
         // Check OTG status and disable it in case of fault
         if(furi_hal_power_is_otg_enabled()) {

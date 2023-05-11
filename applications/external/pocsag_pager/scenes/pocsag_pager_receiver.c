@@ -133,7 +133,7 @@ void pocsag_pager_scene_receiver_on_enter(void* context) {
 
     if(app->txrx->txrx_state == PCSGTxRxStateRx) {
         pcsg_rx_end(app);
-    };
+    }
     if((app->txrx->txrx_state == PCSGTxRxStateIDLE) ||
        (app->txrx->txrx_state == PCSGTxRxStateSleep)) {
         pcsg_begin(
@@ -158,7 +158,7 @@ bool pocsag_pager_scene_receiver_on_event(void* context, SceneManagerEvent event
             if(app->txrx->txrx_state == PCSGTxRxStateRx) {
                 pcsg_rx_end(app);
                 pcsg_sleep(app);
-            };
+            }
             app->txrx->hopper_state = PCSGHopperStateOFF;
             app->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(app->txrx->receiver, NULL, app);

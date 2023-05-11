@@ -188,12 +188,12 @@ XtremeApp* xtreme_app_alloc() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* folder = storage_file_alloc(storage);
     FileInfo info;
-    char* name = malloc(MAX_PACK_NAME_LEN);
-    if(storage_dir_open(folder, PACKS_DIR)) {
-        while(storage_dir_read(folder, &info, name, MAX_PACK_NAME_LEN)) {
+    char* name = malloc(XTREME_ASSETS_PACK_NAME_LEN);
+    if(storage_dir_open(folder, XTREME_ASSETS_PATH)) {
+        while(storage_dir_read(folder, &info, name, XTREME_ASSETS_PACK_NAME_LEN)) {
             if(info.flags & FSF_DIRECTORY) {
-                char* copy = malloc(MAX_PACK_NAME_LEN);
-                strlcpy(copy, name, MAX_PACK_NAME_LEN);
+                char* copy = malloc(XTREME_ASSETS_PACK_NAME_LEN);
+                strlcpy(copy, name, XTREME_ASSETS_PACK_NAME_LEN);
                 uint idx = 0;
                 if(strcmp(copy, "NSFW") != 0) {
                     for(; idx < CharList_size(app->asset_pack_names); idx++) {
@@ -322,7 +322,6 @@ void xtreme_app_free(XtremeApp* app) {
 extern int32_t xtreme_app(void* p) {
     UNUSED(p);
     XtremeApp* app = xtreme_app_alloc();
-    snprintf(app->fap_name, 32, "%s.fap", furi_thread_get_appid(furi_thread_get_current_id()));
     scene_manager_next_scene(app->scene_manager, XtremeAppSceneStart);
     view_dispatcher_run(app->view_dispatcher);
     xtreme_app_free(app);

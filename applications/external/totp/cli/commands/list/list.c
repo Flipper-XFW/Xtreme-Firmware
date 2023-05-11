@@ -1,24 +1,10 @@
 #include "list.h"
 #include <stdlib.h>
-#include "../../../lib/list/list.h"
 #include "../../../types/token_info.h"
 #include "../../../services/config/constants.h"
+#include "../../../services/config/config.h"
+#include "../../../ui/scene_director.h"
 #include "../../cli_helpers.h"
-
-static char* get_algo_as_cstr(TokenHashAlgo algo) {
-    switch(algo) {
-    case SHA1:
-        return TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME;
-    case SHA256:
-        return TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME;
-    case SHA512:
-        return TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME;
-    default:
-        break;
-    }
-
-    return "UNKNOWN";
-}
 
 void totp_cli_command_list_docopt_commands() {
     TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_LIST ", " TOTP_CLI_COMMAND_LIST_ALT
@@ -35,26 +21,36 @@ void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
         return;
     }
 
-    if(plugin_state->tokens_list == NULL) {
+    TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
+    size_t total_count = totp_token_info_iterator_get_total_count(iterator_context);
+    if(total_count <= 0) {
         TOTP_CLI_PRINTF("There are no tokens");
         return;
     }
 
+    TOTP_CLI_LOCK_UI(plugin_state);
+
+    size_t original_index = totp_token_info_iterator_get_current_token_index(iterator_context);
+
     TOTP_CLI_PRINTF("+-----+---------------------------+--------+----+-----+\r\n");
-    TOTP_CLI_PRINTF(
-        "| %-*s | %-*s | %-*s | %-s | %-s |\r\n", 3, "#", 25, "Name", 6, "Algo", "Ln", "Dur");
+    TOTP_CLI_PRINTF("| %-3s | %-25s | %-6s | %-s | %-s |\r\n", "#", "Name", "Algo", "Ln", "Dur");
     TOTP_CLI_PRINTF("+-----+---------------------------+--------+----+-----+\r\n");
-    uint16_t index = 1;
-    TOTP_LIST_FOREACH(plugin_state->tokens_list, node, {
-        TokenInfo* token_info = (TokenInfo*)node->data;
+    for(size_t i = 0; i < total_count; i++) {
+        totp_token_info_iterator_go_to(iterator_context, i);
+        const TokenInfo* token_info = totp_token_info_iterator_get_current_token(iterator_context);
         TOTP_CLI_PRINTF(
             "| %-3" PRIu16 " | %-25.25s | %-6s | %-2" PRIu8 " | %-3" PRIu8 " |\r\n",
-            index,
-            token_info->name,
-            get_algo_as_cstr(token_info->algo),
+            i + 1,
+            furi_string_get_cstr(token_info->name),
+            token_info_get_algo_as_cstr(token_info),
             token_info->digits,
             token_info->duration);
-        index++;
-    });
+    }
+
     TOTP_CLI_PRINTF("+-----+---------------------------+--------+----+-----+\r\n");
+
+    totp_token_info_iterator_go_to(iterator_context, original_index);
+
+    TOTP_CLI_UNLOCK_UI(plugin_state);
 }

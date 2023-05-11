@@ -146,7 +146,7 @@ void ws_hopper_update(WeatherStationApp* app) {
 
     if(app->txrx->txrx_state == WSTxRxStateRx) {
         ws_rx_end(app);
-    };
+    }
     if(app->txrx->txrx_state == WSTxRxStateIDLE) {
         subghz_receiver_reset(app->txrx->receiver);
         app->txrx->preset->frequency =

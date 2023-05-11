@@ -1,7 +1,8 @@
 #include "../bad_kb_app.h"
+#include "../helpers/ducky_script.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
-#include <xtreme/settings.h>
+#include <xtreme.h>
 
 enum VarItemListIndex {
     VarItemListIndexKeyboardLayout,
@@ -9,13 +10,12 @@ enum VarItemListIndex {
     VarItemListIndexBtRemember,
     VarItemListIndexBtDeviceName,
     VarItemListIndexBtMacAddress,
+    VarItemListIndexRandomizeBtMac,
 };
 
 void bad_kb_scene_config_connection_callback(VariableItem* item) {
     BadKbApp* bad_kb = variable_item_get_context(item);
     bad_kb->is_bt = variable_item_get_current_value_index(item);
-    XTREME_SETTINGS()->bad_bt = bad_kb->is_bt;
-    XTREME_SETTINGS_SAVE();
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
     view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexConnection);
 }
@@ -52,10 +52,17 @@ void bad_kb_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
     variable_item_set_locked(item, !bad_kb->is_bt, "Only in\nBT mode!");
 
-    item = variable_item_list_add(var_item_list, "BT device name", 0, NULL, bad_kb);
+    item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
     variable_item_set_locked(item, !bad_kb->is_bt, "Only in\nBT mode!");
 
-    item = variable_item_list_add(var_item_list, "BT MAC address", 0, NULL, bad_kb);
+    item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
+    if(!bad_kb->is_bt) {
+        variable_item_set_locked(item, true, "Only in\nBT mode!");
+    } else if(bad_kb->bt_remember) {
+        variable_item_set_locked(item, true, "Remember\nmust be Off!");
+    }
+
+    item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
     if(!bad_kb->is_bt) {
         variable_item_set_locked(item, true, "Only in\nBT mode!");
     } else if(bad_kb->bt_remember) {
@@ -95,6 +102,10 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
             break;
         case VarItemListIndexBtMacAddress:
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigMac);
+            break;
+        case VarItemListIndexRandomizeBtMac:
+            furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN);
+            bt_set_profile_mac_address(bad_kb->bt, bad_kb->config.bt_mac);
             break;
         default:
             break;

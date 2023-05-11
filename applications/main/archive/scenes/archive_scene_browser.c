@@ -21,6 +21,7 @@ static const char* flipper_app_name[] = {
     [ArchiveFileTypeU2f] = "U2F",
     [ArchiveFileTypeApplication] = "Apps",
     [ArchiveFileTypeUpdateManifest] = "UpdaterApp",
+    [ArchiveFileTypeFolder] = "Archive",
 };
 
 static void archive_loader_callback(const void* message, void* context) {
@@ -35,7 +36,8 @@ static void archive_loader_callback(const void* message, void* context) {
     }
 }
 
-static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected) {
+static void
+    archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected, bool favorites) {
     UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
 
@@ -47,8 +49,14 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
         }
         status = loader_start(loader, flipper_app_name[selected->type], param);
     } else {
-        status = loader_start(
-            loader, flipper_app_name[selected->type], furi_string_get_cstr(selected->path));
+        const char* str = furi_string_get_cstr(selected->path);
+        if(favorites) {
+            char arg[strlen(str) + 4];
+            snprintf(arg, sizeof(arg), "fav%s", str);
+            status = loader_start(loader, flipper_app_name[selected->type], arg);
+        } else {
+            status = loader_start(loader, flipper_app_name[selected->type], str);
+        }
     }
 
     if(status != LoaderStatusOk) {
@@ -107,8 +115,12 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
-            if(archive_is_known_app(selected->type)) {
-                archive_run_in_app(browser, selected);
+            if(selected->type == ArchiveFileTypeFolder) {
+                archive_switch_tab(browser, TAB_LEFT);
+                archive_show_file_menu(browser, false);
+                archive_enter_dir(browser, selected->path);
+            } else if(archive_is_known_app(selected->type)) {
+                archive_run_in_app(browser, selected, favorites);
                 archive_show_file_menu(browser, false);
             }
             consumed = true;

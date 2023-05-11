@@ -1,5 +1,5 @@
 #include "../infrared_i.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 void infrared_scene_edit_rename_done_on_enter(void* context) {
     Infrared* infrared = context;

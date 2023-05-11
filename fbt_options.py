@@ -14,7 +14,7 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "XFW-0043_28032023"
+DIST_SUFFIX = "XFW-0046_06052023"
 DIST_SUFFIX += "-domx4q"
 
 # Coprocessor firmware

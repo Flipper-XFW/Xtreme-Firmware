@@ -12,7 +12,7 @@
 #define MENU_ITEMS 4u
 #define UNLOCK_CNT 3
 
-#define SUBGHZ_RAW_TRESHOLD_MIN -90.0f
+#define SUBGHZ_RAW_THRESHOLD_MIN -90.0f
 
 typedef struct {
     FuriString* item_str;
@@ -69,10 +69,10 @@ void pcsg_receiver_rssi(PCSGReceiver* instance, float rssi) {
         instance->view,
         PCSGReceiverModel * model,
         {
-            if(rssi < SUBGHZ_RAW_TRESHOLD_MIN) {
+            if(rssi < SUBGHZ_RAW_THRESHOLD_MIN) {
                 model->u_rssi = 0;
             } else {
-                model->u_rssi = (uint8_t)(rssi - SUBGHZ_RAW_TRESHOLD_MIN);
+                model->u_rssi = (uint8_t)(rssi - SUBGHZ_RAW_THRESHOLD_MIN);
             }
         },
         true);
@@ -207,6 +207,8 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
+    bool ext_module = furi_hal_subghz_get_radio_type();
+
     PCSGReceiverMenuItem* item_menu;
 
     for(size_t i = 0; i < MIN(model->history_item, MENU_ITEMS); ++i) {
@@ -232,11 +234,11 @@ void pcsg_view_receiver_draw(Canvas* canvas, PCSGReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(model->history_item == 0) {
-        canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
+        canvas_draw_icon(canvas, 0, 0, ext_module ? &I_Fishing_123x52 : &I_Scanning_123x52);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 63, 46, "Scanning...");
-        //canvas_draw_line(canvas, 46, 51, 125, 51);
         canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 44, 10, ext_module ? "Ext" : "Int");
     }
 
     // Draw RSSI

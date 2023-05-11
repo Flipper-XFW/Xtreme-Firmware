@@ -163,7 +163,7 @@ static bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
             FURI_LOG_E(TAG, "Unable to open stream: %s", file_path);
             isOk = false;
             break;
-        };
+        }
 
         hex_viewer->model->file_size = stream_size(hex_viewer->model->stream);
     } while(false);

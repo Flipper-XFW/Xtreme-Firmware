@@ -66,8 +66,35 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
             furi_string_set(item_pin, "Unpin");
         }
 
-        if(selected->type == ArchiveFileTypeFolder) {
+        if(model->tab_idx == ArchiveTabFavorites) {
+            //FURI_LOG_D(TAG, "ArchiveTabFavorites");
+
+            furi_string_set(item_rename, "Move");
+
+            archive_menu_add_item(
+                menu_array_push_raw(model->context_menu),
+                item_run,
+                ArchiveBrowserEventFileMenuRun);
+            archive_menu_add_item(
+                menu_array_push_raw(model->context_menu),
+                item_pin,
+                ArchiveBrowserEventFileMenuPin);
+            if(selected->type <= ArchiveFileTypeBadKb) {
+                archive_menu_add_item(
+                    menu_array_push_raw(model->context_menu),
+                    item_show,
+                    ArchiveBrowserEventFileMenuShow);
+            }
+            archive_menu_add_item(
+                menu_array_push_raw(model->context_menu),
+                item_rename,
+                ArchiveBrowserEventFileMenuRename);
+        } else if(selected->type == ArchiveFileTypeFolder) {
             //FURI_LOG_D(TAG, "Directory type");
+            archive_menu_add_item(
+                menu_array_push_raw(model->context_menu),
+                item_pin,
+                ArchiveBrowserEventFileMenuPin);
             archive_menu_add_item(
                 menu_array_push_raw(model->context_menu),
                 item_rename,
@@ -97,29 +124,6 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 menu_array_push_raw(model->context_menu),
                 item_delete,
                 ArchiveBrowserEventFileMenuDelete);
-        } else if(model->tab_idx == ArchiveTabFavorites) {
-            //FURI_LOG_D(TAG, "ArchiveTabFavorites");
-
-            furi_string_set(item_rename, "Move");
-
-            archive_menu_add_item(
-                menu_array_push_raw(model->context_menu),
-                item_run,
-                ArchiveBrowserEventFileMenuRun);
-            archive_menu_add_item(
-                menu_array_push_raw(model->context_menu),
-                item_pin,
-                ArchiveBrowserEventFileMenuPin);
-            if(selected->type <= ArchiveFileTypeBadKb) {
-                archive_menu_add_item(
-                    menu_array_push_raw(model->context_menu),
-                    item_show,
-                    ArchiveBrowserEventFileMenuShow);
-            }
-            archive_menu_add_item(
-                menu_array_push_raw(model->context_menu),
-                item_rename,
-                ArchiveBrowserEventFileMenuRename);
         } else if(selected->is_app) {
             //FURI_LOG_D(TAG, "3 types");
             archive_menu_add_item(
@@ -320,7 +324,7 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
 
     const char* tab_name = ArchiveTabNames[model->tab_idx];
 
-    canvas_draw_icon(canvas, 0, 0, &I_Background_128x11);
+    canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->I_Background_128x11);
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 50, 13);

@@ -79,7 +79,7 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
             printf("%s", furi_string_get_cstr(*CliCommandTree_ref(it_right)->key_ptr));
             CliCommandTree_next(it_right);
         }
-    };
+    }
 
     if(furi_string_size(args) > 0) {
         cli_nl();
@@ -230,11 +230,9 @@ void cli_command_sysctl_debug(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     if(!furi_string_cmp(args, "0")) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
-        loader_update_menu();
         printf("Debug disabled.");
     } else if(!furi_string_cmp(args, "1")) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
-        loader_update_menu();
         printf("Debug enabled.");
     } else {
         cli_print_usage("sysctl debug", "<1|0>", furi_string_get_cstr(args));

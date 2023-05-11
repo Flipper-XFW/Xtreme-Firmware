@@ -356,7 +356,7 @@ void flipfrid_scene_run_attack_on_tick(FlipFridState* context) {
                             stream_rewind(context->uids_stream);
                             end_of_list = true;
                             break;
-                        };
+                        }
                         if(furi_string_get_char(context->data_str, 0) == '#') continue;
                         if(furi_string_size(context->data_str) != 11) break;
                         break;
@@ -370,7 +370,7 @@ void flipfrid_scene_run_attack_on_tick(FlipFridState* context) {
                         notification_message(context->notify, &sequence_blink_stop);
                         notification_message(context->notify, &sequence_error);
                         break;
-                    };
+                    }
 
                     // string is valid, parse it in context->payload
                     for(uint8_t i = 0; i < 5; i++) {
@@ -394,7 +394,7 @@ void flipfrid_scene_run_attack_on_tick(FlipFridState* context) {
                             stream_rewind(context->uids_stream);
                             end_of_list = true;
                             break;
-                        };
+                        }
                         if(furi_string_get_char(context->data_str, 0) == '#') continue;
                         if(furi_string_size(context->data_str) != 9) break;
                         break;
@@ -408,7 +408,7 @@ void flipfrid_scene_run_attack_on_tick(FlipFridState* context) {
                         notification_message(context->notify, &sequence_blink_stop);
                         notification_message(context->notify, &sequence_error);
                         break;
-                    };
+                    }
 
                     // string is valid, parse it in context->payload
                     for(uint8_t i = 0; i < 4; i++) {

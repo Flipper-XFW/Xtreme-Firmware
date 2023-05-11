@@ -5,7 +5,7 @@
   <img src="https://user-images.githubusercontent.com/55334727/215170306-051eeb8f-8f72-437f-8c2d-0e4be009bdad.png">
 </p>
 
-[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations--Asset-Packs) | [Wiki](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-pending) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme)
+[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations--Asset-Packs) | [Wiki](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-pending) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme) | [Donate](https://github.com/ClaraCrazy/Flipper-Xtreme#%EF%B8%8F-support)
 -----
 
 This firmware is a complete overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and also features lots of awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
@@ -32,19 +32,23 @@ Note, the below mentioned changes are only a few things we did. For a full list 
 
 We wrote a powerful yet easy-to-use application specifically for our Firmware, that gives you easy-access to all the fancy things we implemented:
 
-<img src="https://user-images.githubusercontent.com/55334727/222941141-32e3ef23-1dad-473f-86ee-45bef66ebd77.gif" align="left" width="400px"/>
+<!--
 
-<details><summary><code>Graphics:</code></summary>Change the animation package (more on that below), the play speed of them, cycle duration and bypass level-bassed animations</details>
+This image needs to be updated!
+Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it fits all our bulletpoints without issues
 
-<details><summary><code>Statusbar:</code></summary>Modify the design of the statusbar seen on the main Screen. Toggle Icons, their background, the top line and modify the battery icon to your liking.</details>
+-->
 
-<details><summary><code>Protocols:</code></summary>Here you can cycle between USB & Bluetooth mode for our Bad-Keyboard app, and toggle Subghz settings.</details>
+<img src="https://user-images.githubusercontent.com/49810075/228392945-1e68b996-4e2c-46c6-8aae-d0aadd8ea001.gif" align="left" height="160vh"/>
+<img align="left" height="180vh" width="10" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/1_120_transparent.png">
 
-<details><summary><code>Dolphin:</code></summary>Two simple yet sought after features: Simply change the level of your Flipper and disable / change the "Butthurt timer", aka. the time it takes for the Flipper to get sad when its not used.</details>
+- <ins><b>Interface:</b></ins> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style etc.
 
-<details><summary><code>Misc:</code></summary>All the other options that dont fit elsewhere. Toggles for our custom dark mode & left-handed mode (yes, we thought about you :3 ), an option to change the Flippers name and a switch for file sorting.</details>
+- <ins><b>Protocols:</b></ins> Here you can toggle between USB & Bluetooth mode for <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki/Generic-Guides#badbt--kb">BadKB</a>, and manage custom Subghz frequencies.
 
-<br clear="left"/>
+- <ins><b>Misc:</b></ins> All the other options that don't fit elsewhere. Change your Flipper's name, xp level, and configure the <a href="https://github.com/Z3BRO/Flipper-Zero-RGB-Backlight">RGB backlight</a>.
+
+<br>
 
 -----
 <br>
@@ -124,7 +128,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Custom subghz presets
 - Multiple NFC protocols
 - Multiple Sub-Ghz protocols | Merged from Unleashed, thanks @xMasterX
-- Subghz and IR signal replication via gpio | Credits to @ankris812
+- Subghz and IR signal replication via gpio | Credits to @xMasterX
 
 - New API Routes for Locale settings
 ```
@@ -225,12 +229,15 @@ $ ./fbt resources icons dolphin_ext
 [![Contributors](https://user-images.githubusercontent.com/49810075/228231815-8f0a267d-ac1a-494c-9cd0-1cd57568fc79.svg)](https://github.com/ClaraCrazy/Flipper-Xtreme/graphs/contributors)
 
 
-----
-## SAST Tools
+## ❤️ Support
+If you like what you're seeing, **please consider donating to us**. We won't ever put this behind a paywall, but we'd still appreciate a few bucks!
 
-This helps us a lot, thanks for the free license for this project!
+- **[Direct Wire-transfer](https://bunq.me/ClaraK)**: No account needed, just specify amount and hit send
+- **[Patreon](https://patreon.com/CynthiaLabs)**
+- **[Paypal](https://paypal.me/RdX2020)**
+- **Monero**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`
 
-[PVS-Studio](https://pvs-studio.com/en/pvs-studio/?utm_source=github&utm_medium=organic&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
+**Thanks for all your support <3**
 
 ----
 <p align="center"> "What we do for ourselves dies with us. What we do for others and the world remains and is immortal.” ― Albert Pine </p>

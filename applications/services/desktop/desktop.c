@@ -15,6 +15,7 @@
 #include "desktop/views/desktop_view_pin_timeout.h"
 #include "desktop_i.h"
 #include "helpers/pin_lock.h"
+#include <xtreme/private.h>
 
 #define TAG "Desktop"
 
@@ -36,7 +37,13 @@ static void desktop_loader_callback(const void* message, void* context) {
 static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     furi_assert(canvas);
-    canvas_draw_icon(canvas, 0, 0, &I_Lock_8x8);
+    canvas_draw_icon(canvas, 0, 0, &I_Lock_7x8);
+}
+
+static void desktop_stealth_mode_icon_draw_callback(Canvas* canvas, void* context) {
+    UNUSED(context);
+    furi_assert(canvas);
+    canvas_draw_icon(canvas, 0, 0, &I_Muted_8x8);
 }
 
 static bool desktop_custom_event_callback(void* context, uint32_t event) {
@@ -126,7 +133,6 @@ void desktop_lock(Desktop* desktop) {
     scene_manager_set_scene_state(
         desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
-    notification_message(desktop->notification, &sequence_display_backlight_off_delay_1000);
 }
 
 void desktop_unlock(Desktop* desktop) {
@@ -137,6 +143,18 @@ void desktop_unlock(Desktop* desktop) {
     desktop_view_locked_unlock(desktop->locked_view);
     scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
     desktop_auto_lock_arm(desktop);
+}
+
+void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
+    desktop->in_transition = true;
+    if(enabled) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagStealthMode);
+    } else {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagStealthMode);
+    }
+    desktop_lock_menu_set_stealth_mode_state(desktop->lock_menu, enabled);
+    view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
+    desktop->in_transition = false;
 }
 
 Desktop* desktop_alloc() {
@@ -216,11 +234,23 @@ Desktop* desktop_alloc() {
 
     // Lock icon
     desktop->lock_icon_viewport = view_port_alloc();
-    view_port_set_width(desktop->lock_icon_viewport, icon_get_width(&I_Lock_8x8));
+    view_port_set_width(desktop->lock_icon_viewport, icon_get_width(&I_Lock_7x8));
     view_port_draw_callback_set(
         desktop->lock_icon_viewport, desktop_lock_icon_draw_callback, desktop);
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     gui_add_view_port(desktop->gui, desktop->lock_icon_viewport, GuiLayerStatusBarLeft);
+
+    // Stealth mode icon
+    desktop->stealth_mode_icon_viewport = view_port_alloc();
+    view_port_set_width(desktop->stealth_mode_icon_viewport, icon_get_width(&I_Muted_8x8));
+    view_port_draw_callback_set(
+        desktop->stealth_mode_icon_viewport, desktop_stealth_mode_icon_draw_callback, desktop);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) {
+        view_port_enabled_set(desktop->stealth_mode_icon_viewport, true);
+    } else {
+        view_port_enabled_set(desktop->stealth_mode_icon_viewport, false);
+    }
+    gui_add_view_port(desktop->gui, desktop->stealth_mode_icon_viewport, GuiLayerStatusBarLeft);
 
     // Special case: autostart application is already running
     desktop->loader = furi_record_open(RECORD_LOADER);
@@ -304,10 +334,21 @@ static bool desktop_check_file_flag(const char* flag_path) {
 int32_t desktop_srv(void* p) {
     UNUSED(p);
 
-    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+    if(!furi_hal_is_normal_boot()) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
         return 0;
     }
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagResetPin)) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        storage_common_remove(storage, DESKTOP_SETTINGS_PATH);
+        storage_common_remove(storage, DESKTOP_SETTINGS_OLD_PATH);
+        furi_record_close(RECORD_STORAGE);
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagResetPin);
+    }
+
+    XTREME_SETTINGS_LOAD();
+    XTREME_ASSETS_LOAD();
 
     Desktop* desktop = desktop_alloc();
 

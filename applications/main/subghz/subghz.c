@@ -4,6 +4,8 @@
 #include <lib/toolbox/path.h>
 #include "subghz_i.h"
 #include <lib/subghz/protocols/protocol_items.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
+#include <xtreme.h>
 
 #define TAG "SubGhzApp"
 
@@ -423,7 +425,7 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     free(subghz);
 }
 
-int32_t subghz_app(void* p) {
+int32_t subghz_app(char* p) {
     bool alloc_for_tx;
     if(p && strlen(p)) {
         alloc_for_tx = true;
@@ -451,9 +453,11 @@ int32_t subghz_app(void* p) {
     // Auto switch to internal radio if external radio is not available
     if(!furi_hal_subghz_check_radio()) {
         subghz->last_settings->external_module_enabled = false;
-        furi_hal_subghz_set_radio_type(SubGhzRadioInternal);
+        furi_hal_subghz_select_radio_type(SubGhzRadioInternal);
+        furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
     }
     // Check argument and run corresponding scene
+    bool is_favorite = process_favorite_launch(&p) && XTREME_SETTINGS()->favorite_timeout;
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
 
@@ -470,6 +474,7 @@ int32_t subghz_app(void* p) {
             if(subghz_key_load(subghz, p, true)) {
                 furi_string_set(subghz->file_path, (const char*)p);
 
+                subghz->fav_timeout = is_favorite;
                 if((!strcmp(subghz->txrx->decoder_result->protocol->name, "RAW"))) {
                     //Load Raw TX
                     subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
@@ -504,9 +509,16 @@ int32_t subghz_app(void* p) {
 
     view_dispatcher_run(subghz->view_dispatcher);
 
+    if(subghz->fav_timer) {
+        furi_timer_stop(subghz->fav_timer);
+        furi_timer_free(subghz->fav_timer);
+    }
+
     furi_hal_power_suppress_charge_exit();
     // Disable power for External CC1101 if it was enabled and module is connected
     furi_hal_subghz_disable_ext_power();
+    // Reinit SPI handles for internal radio / nfc
+    furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
 
     subghz_free(subghz, alloc_for_tx);
 

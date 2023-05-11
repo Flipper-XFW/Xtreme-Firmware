@@ -45,6 +45,7 @@ env.Append(
             )
         ),
         File("u8g2/u8g2.h"),
+        File("xtreme/xtreme.h"),
     ],
     CPPDEFINES=[
         '"M_MEMORY_FULL(x)=abort()"',

@@ -1,6 +1,6 @@
 #include "../lfrfid_i.h"
 #include "../helpers/rfid_writer.h"
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 static void writer_initialize(T55xxTiming* t55xxtiming) {
     t55xxtiming->wait_time = 400;
@@ -85,10 +85,11 @@ bool lfrfid_scene_clear_t5577_on_event(void* context, SceneManagerEvent event) {
     LfRfid* app = context;
     bool consumed = false;
 
-    const uint32_t prev_scene = LfRfidSceneExtraActions;
-
-    if(event.type == SceneManagerEventTypeCustom && event.event == LfRfidEventPopupClosed) {
-        scene_manager_search_and_switch_to_previous_scene(app->scene_manager, prev_scene);
+    if(event.type == SceneManagerEventTypeBack) {
+        consumed = true; // Ignore Back button presses
+    } else if(event.type == SceneManagerEventTypeCustom && event.event == LfRfidEventPopupClosed) {
+        scene_manager_search_and_switch_to_previous_scene(
+            app->scene_manager, LfRfidSceneExtraActions);
         consumed = true;
     }
     return consumed;

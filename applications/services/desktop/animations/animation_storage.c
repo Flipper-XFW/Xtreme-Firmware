@@ -11,7 +11,7 @@
 #include "animation_storage_i.h"
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
-#include "xtreme/assets.h"
+#include <xtreme.h>
 #define ANIMATION_META_FILE "meta.txt"
 #define BASE_ANIMATION_DIR EXT_PATH("dolphin")
 #define TAG "AnimationStorage"
@@ -20,7 +20,7 @@
 #define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 
 */
-// 59 Max length = strlen("/ext/dolphin_custom//Anims") + MAX_PACK_NAME_LEN + 1 (Null terminator)
+// 59 Max length = strlen("/ext/dolphin_custom//Anims") + XTREME_ASSETS_PACK_NAME_LEN + 1 (Null terminator)
 char ANIMATION_DIR[59];
 // 72 Max length = ANIMATION_DIR + strlen("/manifest.txt")
 char ANIMATION_MANIFEST_FILE[72];
@@ -36,7 +36,8 @@ void animation_handler_select_manifest(bool force_stock) {
     FuriString* manifest = furi_string_alloc();
     bool use_asset_pack = !force_stock && xtreme_settings->asset_pack[0] != '\0';
     if(use_asset_pack) {
-        furi_string_printf(anim_dir, "%s/%s/Anims", PACKS_DIR, xtreme_settings->asset_pack);
+        furi_string_printf(
+            anim_dir, "%s/%s/Anims", XTREME_ASSETS_PATH, xtreme_settings->asset_pack);
         furi_string_printf(manifest, "%s/manifest.txt", furi_string_get_cstr(anim_dir));
         Storage* storage = furi_record_open(RECORD_STORAGE);
         if(storage_common_stat(storage, furi_string_get_cstr(manifest), NULL) == FSE_OK) {

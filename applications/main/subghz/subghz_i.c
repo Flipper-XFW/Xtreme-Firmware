@@ -106,9 +106,11 @@ static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_hal_gpio_write(furi_hal_subghz.cc1101_g0_pin, false);
     furi_hal_gpio_init(
         furi_hal_subghz.cc1101_g0_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    subghz_speaker_on(subghz);
     bool ret = furi_hal_subghz_tx();
-    subghz->txrx->txrx_state = SubGhzTxRxStateTx;
+    if(ret) {
+        subghz_speaker_on(subghz);
+        subghz->txrx->txrx_state = SubGhzTxRxStateTx;
+    }
     return ret;
 }
 
@@ -116,6 +118,7 @@ void subghz_idle(SubGhz* subghz) {
     furi_assert(subghz);
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
+    subghz_speaker_off(subghz);
     subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
@@ -142,8 +145,7 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
     furi_assert(subghz);
 
     bool ret = false;
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    FuriString* temp_str = furi_string_alloc();
     uint32_t repeat = 200;
     do {
         if(!flipper_format_rewind(flipper_format)) {
@@ -251,8 +253,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     Stream* fff_data_stream = flipper_format_get_raw_stream(subghz->txrx->fff_data);
 
     SubGhzLoadKeyState load_key_state = SubGhzLoadKeyStateParseErr;
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
 
     do {
@@ -390,13 +391,9 @@ bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
     furi_assert(subghz);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriString* temp_str;
-    FuriString* file_name;
-    FuriString* file_path;
-
-    temp_str = furi_string_alloc();
-    file_name = furi_string_alloc();
-    file_path = furi_string_alloc();
+    FuriString* temp_str = furi_string_alloc();
+    FuriString* file_name = furi_string_alloc();
+    FuriString* file_path = furi_string_alloc();
 
     bool res = false;
 
@@ -443,8 +440,7 @@ bool subghz_save_protocol_to_file(
     Stream* flipper_format_stream = flipper_format_get_raw_stream(flipper_format);
 
     bool saved = false;
-    FuriString* file_dir;
-    file_dir = furi_string_alloc();
+    FuriString* file_dir = furi_string_alloc();
 
     path_extract_dirname(dev_file_name, file_dir);
     do {
@@ -475,8 +471,7 @@ bool subghz_save_protocol_to_file(
 bool subghz_load_protocol_from_file(SubGhz* subghz) {
     furi_assert(subghz);
 
-    FuriString* file_path;
-    file_path = furi_string_alloc();
+    FuriString* file_path = furi_string_alloc();
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_EXTENSION, &I_sub1_10px);
@@ -600,7 +595,7 @@ void subghz_hopper_update(SubGhz* subghz) {
 
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
-    };
+    }
     if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
         subghz_receiver_reset(subghz->txrx->receiver);
         subghz->txrx->preset->frequency = subghz_setting_get_hopper_frequency(
@@ -611,7 +606,7 @@ void subghz_hopper_update(SubGhz* subghz) {
 
 void subghz_speaker_on(SubGhz* subghz) {
     if(subghz->txrx->debug_pin_state) {
-        furi_hal_subghz_set_async_mirror_pin(&ibutton_gpio);
+        furi_hal_subghz_set_async_mirror_pin(&gpio_ibutton);
     }
 
     if(subghz->txrx->speaker_state == SubGhzSpeakerStateEnable) {
@@ -656,7 +651,7 @@ void subghz_speaker_mute(SubGhz* subghz) {
 
 void subghz_speaker_unmute(SubGhz* subghz) {
     if(subghz->txrx->debug_pin_state) {
-        furi_hal_subghz_set_async_mirror_pin(&ibutton_gpio);
+        furi_hal_subghz_set_async_mirror_pin(&gpio_ibutton);
     }
     if(subghz->txrx->speaker_state == SubGhzSpeakerStateEnable) {
         if(furi_hal_speaker_is_mine()) {

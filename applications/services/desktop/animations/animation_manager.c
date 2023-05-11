@@ -14,7 +14,7 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
-#include "xtreme/assets.h"
+#include <xtreme.h>
 
 #define TAG "AnimationManager"
 

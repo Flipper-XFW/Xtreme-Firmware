@@ -20,7 +20,7 @@ static void xtreme_app_scene_interface_graphics_asset_pack_changed(VariableItem*
     strlcpy(
         XTREME_SETTINGS()->asset_pack,
         index == 0 ? "" : *CharList_get(app->asset_pack_names, index - 1),
-        MAX_PACK_NAME_LEN);
+        XTREME_ASSETS_PACK_NAME_LEN);
     app->asset_pack_index = index;
     app->save_settings = true;
     app->require_reboot = true;
