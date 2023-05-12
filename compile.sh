@@ -63,7 +63,7 @@ case "$1" in
   -c | --clean) clean; exit;;
   -a | --apps) version; apps; exit;;
   -f | --firmware) version; firmware; exit;;
-  -h | --help) version; exit;;
+  -h | --help) help; exit;;
 esac
 
 clean; apps; firmware; exit
