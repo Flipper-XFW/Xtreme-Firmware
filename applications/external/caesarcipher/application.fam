@@ -9,6 +9,6 @@ App(
     ],
     stack_size=2 * 1024,
     fap_icon="caesar_cipher_icon.png",
-    fap_category="Misc",
+    fap_category="Tools/Misc",
     order=20,
 )

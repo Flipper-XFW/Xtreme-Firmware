@@ -34,3 +34,12 @@
 [submodule "lib/heatshrink"]
 	path = lib/heatshrink
 	url = https://github.com/flipperdevices/heatshrink.git
+[submodule "applications/external/dice-dnd"]
+	path = applications/external/dice-dnd
+	url = https://github.com/Ka3u6y6a/flipper-zero-dice/
+[submodule "applications/external/hex_editor"]
+	path = applications/external/hex_editor
+	url = https://github.com/dunaevai135/flipper-zero-hex_editor/tree/efb3032c5573b7f657d3f81232dfb491262d0eab
+[submodule "applications/external/schip"]
+	path = applications/external/schip
+	url = https://github.com/Milk-Cool/fz-schip/tree/4589f6c8a829ce6c202129adec2730f5952e677b

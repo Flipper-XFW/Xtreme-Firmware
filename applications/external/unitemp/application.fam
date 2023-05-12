@@ -1,6 +1,6 @@
 App(
     appid="unitemp",
-    name="[GPIO] Unitemp",
+    name="Unitemp",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="unitemp_app",
     requires=[

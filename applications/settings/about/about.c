@@ -44,9 +44,9 @@ static DialogMessageButton product_screen(DialogsApp* dialogs, DialogMessage* me
 static DialogMessageButton address_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_text = "Flipper Devices Inc\n"
+    const char* screen_text = "Fwippew Devices Inc\n"
                               "Suite B #551, 2803\n"
-                              "Philadelphia Pike, Claymont\n"
+                              "Phiwadewphia Pike, Cwaymont\n"
                               "DE, USA 19703\n";
 
     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
@@ -59,8 +59,8 @@ static DialogMessageButton address_screen(DialogsApp* dialogs, DialogMessage* me
 static DialogMessageButton compliance_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_text = "For all compliance\n"
-                              "certificates please visit:\n"
+    const char* screen_text = "Fow aww compwiance\n"
+                              "cewtificates pwease visit:\n"
                               "www.flipp.dev/compliance";
 
     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
@@ -107,13 +107,13 @@ static DialogMessageButton hw_version_screen(DialogsApp* dialogs, DialogMessage*
         furi_hal_region_get_name(),
         my_name ? my_name : "Unknown");
 
-    furi_string_cat_printf(buffer, "Serial Number:\n");
+    furi_string_cat_printf(buffer, "Sewiaw Numbew:\n");
     const uint8_t* uid = furi_hal_version_uid();
     for(size_t i = 0; i < furi_hal_version_uid_size(); i++) {
         furi_string_cat_printf(buffer, "%02X", uid[i]);
     }
 
-    dialog_message_set_header(message, "Hardware Info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, "Hawdwawe Info:", 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, furi_string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
@@ -149,10 +149,10 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
             version_get_gitbranch(ver));
     }
 
-    dialog_message_set_header(message, "Firmware Info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, "Firmwawe Info:\nCoolOS version 4.0", 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(
         message,
-        "XFW - Xtreme Firmware\nGithub.com/ClaraCrazy/Flipper-Xtreme",
+        "\ngithub.com/o1001100/coolos\nIt's cool as fuck!",
         0,
         13,
         AlignLeft,

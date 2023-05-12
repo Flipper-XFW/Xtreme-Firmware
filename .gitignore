@@ -85,3 +85,6 @@ assets/dolphin/custom/*
 assets/resources/dolphin_custom/*
 !assets/resources/dolphin_custom/NSFW/
 !assets/resources/dolphin_custom/WatchDogs/
+
+applications_user/*
+release
