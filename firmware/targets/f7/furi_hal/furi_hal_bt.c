@@ -214,8 +214,12 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             config->adv_service_uuid |= furi_hal_version_get_hw_color();
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
-            uint8_t default_mac[GAP_MAC_ADDR_SIZE] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
-            if(memcmp(config->mac_address, default_mac, 6) == 0) {
+            uint8_t default_mac[sizeof(config->mac_address)] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
+            const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
+            if(memcmp(config->mac_address, default_mac, sizeof(config->mac_address)) == 0) {
+                memcpy(config->mac_address, normal_mac, sizeof(config->mac_address));
+            }
+            if(memcmp(config->mac_address, normal_mac, sizeof(config->mac_address)) == 0) {
                 config->mac_address[2]++;
             }
             // Change name Flipper -> Control
