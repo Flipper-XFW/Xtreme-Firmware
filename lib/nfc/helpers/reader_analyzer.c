@@ -116,11 +116,15 @@ ReaderAnalyzer* reader_analyzer_alloc() {
     ReaderAnalyzer* instance = malloc(sizeof(ReaderAnalyzer));
 
     // Generate a random 7-byte UID for the reader analyzer
-    //furi_hal_random_fill_buf(Uid.full_uid, READER_ANALYZER_UID_SIZE);
+    furi_hal_random_fill_buf(Uid.full_uid, READER_ANALYZER_UID_SIZE);
 
     // Use the Uid union to assign the UID and CUID
-    //memcpy(reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].uid, Uid.full_uid, READER_ANALYZER_UID_SIZE);
-    //reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].a_data.cuid = nfc_util_bytes2num(Uid.uid_converter.cuid, READER_ANALYZER_CUID_SIZE);
+    memcpy(
+        reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].uid,
+        Uid.full_uid,
+        READER_ANALYZER_UID_SIZE);
+    reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].a_data.cuid =
+        nfc_util_bytes2num(Uid.uid_converter.cuid, READER_ANALYZER_CUID_SIZE);
 
     instance->nfc_data = reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic];
     instance->alive = false;
