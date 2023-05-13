@@ -21,9 +21,6 @@ typedef struct {
     FuriHalRegionBand bands[];
 } FuriHalRegion;
 
-/** Initialize region */
-void furi_hal_region_init();
-
 /** Get Region Data.
  * 
  * Region data may be allocated in Flash or in RAM.

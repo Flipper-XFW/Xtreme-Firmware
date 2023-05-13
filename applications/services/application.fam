@@ -9,7 +9,5 @@ App(
         "desktop",
         "loader",
         "power",
-        "rgb_backlight",
-        "namechangersrv",
     ],
 )

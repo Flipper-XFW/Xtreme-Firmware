@@ -52,7 +52,7 @@ typedef struct {
     int32_t idle_ticks;
 } Updater;
 
-Updater* updater_alloc(const char* arg);
+Updater* updater_alloc(char* arg);
 
 void updater_free(Updater* updater);
 

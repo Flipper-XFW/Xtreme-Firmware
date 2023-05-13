@@ -7,6 +7,7 @@
 #include <furi_hal_version.h>
 #include <furi_hal_region.h>
 #include <furi_hal_bt.h>
+#include <furi_hal_info.h>
 
 int screen_index;
 
@@ -98,13 +99,12 @@ static DialogMessageButton hw_version_screen(DialogsApp* dialogs, DialogMessage*
 
     furi_string_cat_printf(
         buffer,
-        "%d.F%dB%dC%d %s:%s %s\n",
+        "%d.F%dB%dC%d %s %s\n",
         furi_hal_version_get_hw_version(),
         furi_hal_version_get_hw_target(),
         furi_hal_version_get_hw_body(),
         furi_hal_version_get_hw_connect(),
         furi_hal_version_get_hw_region_name_otp(),
-        furi_hal_region_get_name(),
         my_name ? my_name : "Unknown");
 
     furi_string_cat_printf(buffer, "Serial Number:\n");
@@ -136,14 +136,17 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
     if(!ver) { //-V1051
         furi_string_cat_printf(buffer, "No info\n");
     } else {
+        uint16_t api_major, api_minor;
+        furi_hal_info_get_api_version(&api_major, &api_minor);
         furi_string_cat_printf(
             buffer,
-            "%s [%s]\n%s%s [%s] %s\n[%d] %s",
+            "%s [%s]\n%s%s [%d.%d] %s\n[%d] %s",
             version_get_version(ver),
             version_get_builddate(ver),
             version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
-            version_get_gitbranchnum(ver),
+            api_major,
+            api_minor,
             c2_ver ? c2_ver->StackTypeString : "<none>",
             version_get_target(ver),
             version_get_gitbranch(ver));
@@ -179,7 +182,7 @@ static void draw_stat(Canvas* canvas, int x, int y, const Icon* icon, char* val)
     canvas_draw_box(canvas, x - 4, y + 16, 24, 6);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_str_aligned(canvas, x + 8, y + 22, AlignCenter, AlignBottom, val);
-};
+}
 
 static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
     char header[20] = {};
@@ -212,7 +215,9 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
             (uint32_t)(info->voltage_vbus),
             (uint32_t)(info->voltage_vbus * 10) % 10,
             current);
-    } else if(current < 0) {
+    } else if(current < -5) {
+        // Often gauge reports anything in the range 1~5ma as 5ma
+        // That brings confusion, so we'll treat it as Napping
         snprintf(header, sizeof(header), "%s", "Consumption is");
         snprintf(
             value,
@@ -245,7 +250,7 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
         canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
         canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
     }
-};
+}
 
 static void battery_info_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);

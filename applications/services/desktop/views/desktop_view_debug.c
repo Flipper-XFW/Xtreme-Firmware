@@ -37,13 +37,12 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         snprintf(
             buffer,
             sizeof(buffer),
-            "%d.F%dB%dC%d %s:%s %s",
+            "%d.F%dB%dC%d %s %s",
             furi_hal_version_get_hw_version(),
             furi_hal_version_get_hw_target(),
             furi_hal_version_get_hw_body(),
             furi_hal_version_get_hw_connect(),
             furi_hal_version_get_hw_region_name_otp(),
-            furi_hal_region_get_name(),
             my_name ? my_name : "Unknown");
         canvas_draw_str(canvas, 0, 19 + STATUS_BAR_Y_SHIFT, buffer);
 
@@ -65,13 +64,16 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             version_get_builddate(ver));
         canvas_draw_str(canvas, 0, 30 + STATUS_BAR_Y_SHIFT, buffer);
 
+        uint16_t api_major, api_minor;
+        furi_hal_info_get_api_version(&api_major, &api_minor);
         snprintf(
             buffer,
             sizeof(buffer),
-            "%s%s [%s] %s",
+            "%s%s [%d.%d] %s",
             version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
-            version_get_gitbranchnum(ver),
+            api_major,
+            api_minor,
             c2_ver ? c2_ver->StackTypeString : "<none>");
         canvas_draw_str(canvas, 0, 40 + STATUS_BAR_Y_SHIFT, buffer);
 

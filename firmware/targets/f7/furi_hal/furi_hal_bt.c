@@ -19,6 +19,8 @@
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
 
+#define FURI_HAL_BT_HARDFAULT_INFO_MAGIC 0x1170FD0F
+
 FuriMutex* furi_hal_bt_core2_mtx = NULL;
 static FuriHalBtStack furi_hal_bt_stack = FuriHalBtStackUnknown;
 
@@ -212,8 +214,12 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             config->adv_service_uuid |= furi_hal_version_get_hw_color();
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
-            uint8_t default_mac[GAP_MAC_ADDR_SIZE] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
-            if(memcmp(config->mac_address, default_mac, 6) == 0) {
+            uint8_t default_mac[sizeof(config->mac_address)] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
+            const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
+            if(memcmp(config->mac_address, default_mac, sizeof(config->mac_address)) == 0) {
+                memcpy(config->mac_address, normal_mac, sizeof(config->mac_address));
+            }
+            if(memcmp(config->mac_address, normal_mac, sizeof(config->mac_address)) == 0) {
                 config->mac_address[2]++;
             }
             // Change name Flipper -> Control
@@ -467,6 +473,15 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
     FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
     return false;
+}
+
+const FuriHalBtHardfaultInfo* furi_hal_bt_get_hardfault_info() {
+    /* AN5289, 4.8.2 */
+    const FuriHalBtHardfaultInfo* info = (FuriHalBtHardfaultInfo*)(SRAM2A_BASE);
+    if(info->magic != FURI_HAL_BT_HARDFAULT_INFO_MAGIC) {
+        return NULL;
+    }
+    return info;
 }
 
 void furi_hal_bt_set_profile_adv_name(

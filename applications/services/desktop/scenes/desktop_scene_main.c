@@ -9,7 +9,6 @@
 #include "../views/desktop_view_main.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
-#include "../helpers/pin_lock.h"
 
 #define TAG "DesktopSrv"
 
@@ -90,10 +89,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case DesktopMainEventOpenMenu:
-            loader_show_menu();
+        case DesktopMainEventOpenMenu: {
+            Loader* loader = furi_record_open(RECORD_LOADER);
+            loader_show_menu(loader);
+            furi_record_close(RECORD_LOADER);
             consumed = true;
-            break;
+        } break;
 
         case DesktopMainEventOpenLockMenu:
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
@@ -106,11 +107,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventLock:
-            if(desktop->settings.pin_code.length > 0) {
-                desktop_pin_lock(&desktop->settings);
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
-            }
-            desktop_lock(desktop);
+            desktop_lock(desktop, true);
             consumed = true;
             break;
 

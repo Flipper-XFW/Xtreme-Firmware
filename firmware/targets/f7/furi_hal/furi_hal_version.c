@@ -90,26 +90,13 @@ typedef struct {
 
 static FuriHalVersion furi_hal_version = {0};
 
-void furi_hal_version_set_custom_name(const char* name) {
-    if((name != NULL) && ((strlen(name) >= 1) && (strlen(name) <= 8))) {
+void furi_hal_version_set_name(const char* name) {
+    if(name != NULL && strlen(name)) {
         strlcpy(furi_hal_version.name, name, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
         snprintf(
             furi_hal_version.device_name,
             FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-            "x%s", // Someone tell me why that X is needed
-            name);
-
-        furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
-    }
-}
-
-static void furi_hal_version_set_name(const char* name) {
-    if(name != NULL) {
-        strlcpy(furi_hal_version.name, name, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-        snprintf(
-            furi_hal_version.device_name,
-            FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-            "x%s", // Someone tell me why that X is needed
+            "x%s", // Someone tell me why that X is needed - it's for BLE adv name type (6 lines below)
             furi_hal_version.name);
     } else {
         snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper");
@@ -119,12 +106,16 @@ static void furi_hal_version_set_name(const char* name) {
 
     // BLE Mac address
     uint32_t udn = LL_FLASH_GetUDN();
-    if(version_get_custom_name(NULL) != NULL) {
-        udn = *((uint32_t*)version_get_custom_name(NULL));
+    if(name != NULL) {
+        udn = *((uint32_t*)name);
     }
 
     uint32_t company_id = LL_FLASH_GetSTCompanyID();
-    uint32_t device_id = LL_FLASH_GetDeviceID();
+    // uint32_t device_id = LL_FLASH_GetDeviceID();
+    // Somehow some new flippers return 0x27 instead of 0x26
+    // Mobile apps expects it to return 0x26 (and clearly STM too)
+    // Temporarely hardcoded until cause / fix is found
+    uint32_t device_id = 0x26;
     furi_hal_version.ble_mac[0] = (uint8_t)(udn & 0x000000FF);
     furi_hal_version.ble_mac[1] = (uint8_t)((udn & 0x0000FF00) >> 8);
     furi_hal_version.ble_mac[2] = (uint8_t)((udn & 0x00FF0000) >> 16);

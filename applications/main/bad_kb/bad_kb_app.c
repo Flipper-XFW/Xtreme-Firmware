@@ -1,22 +1,14 @@
 #include "bad_kb_app.h"
-#include "bad_kb_settings_filename.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <xtreme.h>
 #include <lib/flipper_format/flipper_format.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 #include <bt/bt_service/bt_i.h>
 #include <bt/bt_service/bt.h>
-
-#define BAD_KB_SETTINGS_PATH BAD_KB_APP_BASE_FOLDER "/" BAD_KB_SETTINGS_FILE_NAME
-
-// this is the MAC address used when we do not forget paired device (BOUND STATE)
-const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
-    {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
-const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
-    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 static bool bad_kb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -110,9 +102,13 @@ int32_t bad_kb_config_switch_mode(BadKbApp* app) {
     XTREME_SETTINGS_SAVE();
     bad_kb_reload_worker(app);
     if(app->is_bt) furi_hal_bt_start_advertising();
+    bad_kb_config_refresh_menu(app);
+    return 0;
+}
+
+void bad_kb_config_refresh_menu(BadKbApp* app) {
     scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
     scene_manager_previous_scene(app->scene_manager);
-    return 0;
 }
 
 void bad_kb_config_switch_remember_mode(BadKbApp* app) {
@@ -143,7 +139,7 @@ int32_t bad_kb_connection_init(BadKbApp* app) {
 
     bt_timeout = bt_hid_delays[LevelRssi39_0];
     bt_disconnect(app->bt);
-    bt_keys_storage_set_storage_path(app->bt, BAD_KB_APP_PATH_BOUND_KEYS_FILE);
+    bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
     if(strcmp(app->config.bt_name, "") != 0) {
         furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->config.bt_name);
     }
@@ -204,6 +200,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->file_path = furi_string_alloc();
     app->keyboard_layout = furi_string_alloc();
+    process_favorite_launch(&arg);
     if(arg && strlen(arg)) {
         furi_string_set(app->file_path, arg);
     }
@@ -336,8 +333,8 @@ void bad_kb_app_free(BadKbApp* app) {
     free(app);
 }
 
-int32_t bad_kb_app(void* p) {
-    BadKbApp* bad_kb_app = bad_kb_app_alloc((char*)p);
+int32_t bad_kb_app(char* p) {
+    BadKbApp* bad_kb_app = bad_kb_app_alloc(p);
 
     view_dispatcher_run(bad_kb_app->view_dispatcher);
 

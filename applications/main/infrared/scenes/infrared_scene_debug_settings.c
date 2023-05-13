@@ -27,7 +27,9 @@ static void infrared_scene_debug_settings_power_changed(VariableItem* item) {
             furi_delay_ms(10);
         }
     } else {
-        furi_hal_power_disable_otg();
+        if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
+        }
     }
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
 }

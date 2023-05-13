@@ -31,14 +31,15 @@ typedef struct {
     bool bar_background;
     bool sort_dirs_first;
     bool dark_mode;
+    uint32_t favorite_timeout;
     bool bad_bt;
     bool bad_bt_remember;
     int32_t butthurt_timer;
     bool rgb_backlight;
 } XtremeSettings;
 
-XtremeSettings* XTREME_SETTINGS();
 void XTREME_SETTINGS_SAVE();
+XtremeSettings* XTREME_SETTINGS();
 
 typedef struct {
     bool is_nsfw;
@@ -61,6 +62,7 @@ typedef struct {
     const Icon* I_RFIDDolphinSend_97x61;
     const Icon* I_RFIDDolphinSuccess_108x57;
     const Icon* I_Cry_dolph_55x52;
+    const Icon* I_Background_128x11;
     const Icon* I_Fishing_123x52;
     const Icon* I_Scanning_123x52;
     const Icon* I_Auth_62x31;

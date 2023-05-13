@@ -82,6 +82,11 @@ typedef struct {
     FuriString* string_print;
     size_t string_print_pos;
 
+    bool set_usb_id;
+    bool set_bt_id;
+    bool has_usb_id;
+    bool has_bt_id;
+
     Bt* bt;
     BadKbApp* app;
 } BadKbScript;
@@ -102,6 +107,10 @@ BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 
 #define BAD_KB_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
 #define BAD_KB_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
+
+// this is the MAC address used when we do not forget paired device (BOUND STATE)
+extern const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN];
+extern const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN];
 
 typedef enum {
     BadKbAppErrorNoFiles,
@@ -142,6 +151,8 @@ struct BadKbApp {
 };
 
 int32_t bad_kb_config_switch_mode(BadKbApp* app);
+
+void bad_kb_config_refresh_menu(BadKbApp* app);
 
 #ifdef __cplusplus
 }

@@ -42,7 +42,7 @@ void xtreme_app_scene_misc_rename_on_enter(void* context) {
         xtreme_app_scene_misc_rename_text_input_callback,
         app,
         app->device_name,
-        NAMECHANGER_TEXT_STORE_SIZE,
+        FURI_HAL_VERSION_ARRAY_NAME_LENGTH,
         true);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewTextInput);

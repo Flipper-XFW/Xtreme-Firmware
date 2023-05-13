@@ -242,7 +242,7 @@ void ibtnfuzzer_scene_run_attack_on_tick(iBtnFuzzerState* context) {
                             stream_rewind(context->uids_stream);
                             end_of_list = true;
                             break;
-                        };
+                        }
                         if(furi_string_get_char(context->data_str, 0) == '#') continue;
                         if(furi_string_size(context->data_str) != 17) break;
                         break;
@@ -256,7 +256,7 @@ void ibtnfuzzer_scene_run_attack_on_tick(iBtnFuzzerState* context) {
                         notification_message(context->notify, &sequence_blink_stop);
                         notification_message(context->notify, &sequence_error);
                         break;
-                    };
+                    }
 
                     // string is valid, parse it in context->payload
                     for(uint8_t i = 0; i < 8; i++) {
@@ -280,7 +280,7 @@ void ibtnfuzzer_scene_run_attack_on_tick(iBtnFuzzerState* context) {
                             stream_rewind(context->uids_stream);
                             end_of_list = true;
                             break;
-                        };
+                        }
                         if(furi_string_get_char(context->data_str, 0) == '#') continue;
                         if(furi_string_size(context->data_str) != 5) break;
                         break;
@@ -294,7 +294,7 @@ void ibtnfuzzer_scene_run_attack_on_tick(iBtnFuzzerState* context) {
                         notification_message(context->notify, &sequence_blink_stop);
                         notification_message(context->notify, &sequence_error);
                         break;
-                    };
+                    }
 
                     // string is valid, parse it in context->payload
                     for(uint8_t i = 0; i < 2; i++) {
@@ -318,7 +318,7 @@ void ibtnfuzzer_scene_run_attack_on_tick(iBtnFuzzerState* context) {
                             stream_rewind(context->uids_stream);
                             end_of_list = true;
                             break;
-                        };
+                        }
                         if(furi_string_get_char(context->data_str, 0) == '#') continue;
                         if(furi_string_size(context->data_str) != 9) break;
                         break;
@@ -332,7 +332,7 @@ void ibtnfuzzer_scene_run_attack_on_tick(iBtnFuzzerState* context) {
                         notification_message(context->notify, &sequence_blink_stop);
                         notification_message(context->notify, &sequence_error);
                         break;
-                    };
+                    }
 
                     // string is valid, parse it in context->payload
                     for(uint8_t i = 0; i < 4; i++) {

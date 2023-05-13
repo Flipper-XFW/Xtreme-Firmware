@@ -1,6 +1,6 @@
 #include <furi_hal_subghz.h>
 #include <furi_hal_subghz_configs.h>
-#include <furi_hal_region.h>
+
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_spi.h>
@@ -448,22 +448,21 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     return value;
 }
 
-void furi_hal_subghz_get_extend_settings(bool* extend, bool* bypass) {
-    *extend = false;
-    *bypass = false;
+bool furi_hal_subghz_get_is_extended() {
+    bool is_extended = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
     if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(file, "use_ext_range_at_own_risk", extend, 1);
-        flipper_format_read_bool(file, "ignore_default_tx_region", bypass, 1);
+        flipper_format_read_bool(file, "use_ext_range_at_own_risk", &is_extended, 1);
     }
 
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+    return is_extended;
 }
 
-void furi_hal_subghz_set_extend_settings(bool extend, bool bypass) {
+void furi_hal_subghz_set_is_extended(bool is_extended) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
@@ -473,11 +472,7 @@ void furi_hal_subghz_set_extend_settings(bool extend, bool bypass) {
         if(!flipper_format_write_comment_cstr(
                file, "Whether to allow extended ranges that can break your flipper"))
             break;
-        if(!flipper_format_write_bool(file, "use_ext_range_at_own_risk", &extend, 1)) break;
-        if(!flipper_format_write_comment_cstr(
-               file, "Whether to ignore the default TX region settings"))
-            break;
-        if(!flipper_format_write_bool(file, "ignore_default_tx_region", &bypass, 1)) break;
+        if(!flipper_format_write_bool(file, "use_ext_range_at_own_risk", &is_extended, 1)) break;
     } while(0);
 
     flipper_format_free(file);
@@ -485,63 +480,22 @@ void furi_hal_subghz_set_extend_settings(bool extend, bool bypass) {
 }
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
-    bool is_extended;
-    bool is_allowed;
-    furi_hal_subghz_get_extend_settings(&is_extended, &is_allowed);
+    bool is_extended = furi_hal_subghz_get_is_extended();
 
-    switch(furi_hal_version_get_hw_region_otp()) {
-    case FuriHalVersionRegionEuRu:
-        //433,05..434,79; 868,15..868,55
-        if(!(value >= 433050000 && value <= 434790000) &&
-           !(value >= 868150000 && value <= 868550000)) {
-        } else {
-            is_allowed = true;
-        }
-        break;
-    case FuriHalVersionRegionUsCaAu:
-        //304,10..321,95; 433,05..434,79; 915,00..928,00
-        if(!(value >= 304100000 && value <= 321950000) &&
-           !(value >= 433050000 && value <= 434790000) &&
-           !(value >= 915000000 && value <= 928000000)) {
-        } else {
-            if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-                if(value <= 321950000 &&
-                   ((furi_hal_subghz.preset == FuriHalSubGhzPresetOok270Async) ||
-                    (furi_hal_subghz.preset == FuriHalSubGhzPresetOok650Async))) {
-                    furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
-                }
-            }
-            is_allowed = true;
-        }
-        break;
-    case FuriHalVersionRegionJp:
-        //312,00..315,25; 920,50..923,50
-        if(!(value >= 312000000 && value <= 315250000) &&
-           !(value >= 920500000 && value <= 923500000)) {
-        } else {
-            is_allowed = true;
-        }
-        break;
-
-    default:
-        is_allowed = true;
-        break;
-    }
-    // No flag - test original range, flag set, test extended range
     if(!(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
        !(value >= 778999847 && value <= 928000000) && !(is_extended)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside regional range");
-        is_allowed = false;
+        FURI_LOG_I(TAG, "Frequency blocked - outside default range");
+        return false;
     } else if(
         !(value >= 281000000 && value <= 361000000) &&
         !(value >= 378000000 && value <= 481000000) &&
         !(value >= 749000000 && value <= 962000000) && is_extended) {
         FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
-        is_allowed = false;
+        return false;
     }
 
-    return is_allowed;
+    return true;
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {

@@ -12,13 +12,16 @@
 #include <dolphin/dolphin.h>
 #include <toolbox/hex.h>
 
+const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
+    {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
+const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
+    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
 #define TAG "BadKB"
 #define WORKER_TAG TAG "Worker"
 
 #define BADKB_ASCII_TO_KEY(script, x) \
     (((uint8_t)x < 128) ? (script->layout[(uint8_t)x]) : HID_KEYBOARD_NONE)
-
-#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Tools/.bt_hid.keys")
 
 /**
  * Delays for waiting between HID key press and key release
@@ -383,8 +386,11 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         bad_kb->app->switch_mode_thread = NULL;
     }
     // Looking for ID or BT_ID command at first line
-    bool reset_bt_id = !!bad_kb->bt;
-    if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
+    bad_kb->set_usb_id = false;
+    bad_kb->set_bt_id = false;
+    bad_kb->has_usb_id = strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0;
+    bad_kb->has_bt_id = strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0;
+    if(bad_kb->has_usb_id) {
         if(bad_kb->bt) {
             bad_kb->app->is_bt = false;
             bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
@@ -395,12 +401,8 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             furi_thread_start(bad_kb->app->switch_mode_thread);
             return false;
         }
-        if(ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1])) {
-            furi_check(furi_hal_usb_set_config(&usb_hid, &bad_kb->hid_cfg));
-        } else {
-            furi_check(furi_hal_usb_set_config(&usb_hid, NULL));
-        }
-    } else if(strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0) {
+        bad_kb->set_usb_id = ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1]);
+    } else if(bad_kb->has_bt_id) {
         if(!bad_kb->bt) {
             bad_kb->app->is_bt = true;
             bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
@@ -412,12 +414,40 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             return false;
         }
         if(!bad_kb->app->bt_remember) {
-            reset_bt_id = !ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
+            bad_kb->set_bt_id = ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
         }
     }
-    if(reset_bt_id) {
-        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bad_kb->app->config.bt_name);
-        bt_set_profile_mac_address(bad_kb->bt, bad_kb->app->config.bt_mac);
+    bad_kb_config_refresh_menu(bad_kb->app);
+
+    if(bad_kb->bt) {
+        if(!bad_kb->set_bt_id) {
+            const char* bt_name = bad_kb->app->config.bt_name;
+            const uint8_t* bt_mac = bad_kb->app->bt_remember ?
+                                        (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS :
+                                        bad_kb->app->config.bt_mac;
+            bool reset_name = strncmp(
+                bt_name,
+                furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard),
+                BAD_KB_ADV_NAME_MAX_LEN);
+            bool reset_mac = memcmp(
+                bt_mac,
+                furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
+                BAD_KB_MAC_ADDRESS_LEN);
+            if(reset_name && reset_mac) {
+                furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bt_name);
+            } else if(reset_name) {
+                bt_set_profile_adv_name(bad_kb->bt, bt_name);
+            }
+            if(reset_mac) {
+                bt_set_profile_mac_address(bad_kb->bt, bt_mac);
+            }
+        }
+    } else {
+        if(bad_kb->set_usb_id) {
+            furi_check(furi_hal_usb_set_config(&usb_hid, &bad_kb->hid_cfg));
+        } else {
+            furi_check(furi_hal_usb_set_config(&usb_hid, NULL));
+        }
     }
 
     storage_file_seek(script_file, 0, true);

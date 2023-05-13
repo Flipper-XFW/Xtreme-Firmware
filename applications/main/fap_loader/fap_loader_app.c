@@ -12,6 +12,7 @@
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
 #include <storage/storage_processing.h>
+#include <applications/main/archive/helpers/favorite_timeout.h>
 
 #define TAG "FapLoader"
 
@@ -241,8 +242,9 @@ static void fap_loader_free(FapLoader* loader) {
     free(loader);
 }
 
-int32_t fap_loader_app(void* p) {
+int32_t fap_loader_app(char* p) {
     FapLoader* loader;
+    process_favorite_launch(&p);
     if(p) {
         loader = fap_loader_alloc((const char*)p);
         view_dispatcher_switch_to_view(loader->view_dispatcher, 0);
@@ -256,7 +258,7 @@ int32_t fap_loader_app(void* p) {
             if(fap_loader_run_selected_app(loader, false)) {
                 fap_loader_run_selected_app(loader, true);
             }
-        };
+        }
     }
 
     fap_loader_free(loader);

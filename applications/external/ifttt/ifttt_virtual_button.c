@@ -38,6 +38,11 @@ void save_settings_file(FlipperFormat* file, Settings* settings) {
 Settings* load_settings() {
     Settings* settings = malloc(sizeof(Settings));
 
+    settings->save_ssid = "";
+    settings->save_password = "";
+    settings->save_key = "";
+    settings->save_event = "";
+
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
@@ -53,29 +58,14 @@ Settings* load_settings() {
     text_event_value = furi_string_alloc();
 
     if(storage_common_stat(storage, CONFIG_FILE_PATH, NULL) != FSE_OK) {
-        if(!flipper_format_file_open_new(file, CONFIG_FILE_PATH)) {
-            flipper_format_file_close(file);
-        } else {
-            settings->save_ssid = malloc(1);
-            settings->save_password = malloc(1);
-            settings->save_key = malloc(1);
-            settings->save_event = malloc(1);
-
-            settings->save_ssid[0] = '\0';
-            settings->save_password[0] = '\0';
-            settings->save_key[0] = '\0';
-            settings->save_event[0] = '\0';
-
+        if(flipper_format_file_open_new(file, CONFIG_FILE_PATH)) {
             save_settings_file(file, settings);
-            flipper_format_file_close(file);
         }
+        flipper_format_file_close(file);
     } else {
-        if(!flipper_format_file_open_existing(file, CONFIG_FILE_PATH)) {
-            flipper_format_file_close(file);
-        } else {
+        if(flipper_format_file_open_existing(file, CONFIG_FILE_PATH)) {
             uint32_t value;
-            if(!flipper_format_read_header(file, string_value, &value)) {
-            } else {
+            if(flipper_format_read_header(file, string_value, &value)) {
                 if(flipper_format_read_string(file, CONF_SSID, text_ssid_value)) {
                     settings->save_ssid = malloc(furi_string_size(text_ssid_value) + 1);
                     strcpy(settings->save_ssid, furi_string_get_cstr(text_ssid_value));
@@ -93,8 +83,8 @@ Settings* load_settings() {
                     strcpy(settings->save_event, furi_string_get_cstr(text_event_value));
                 }
             }
-            flipper_format_file_close(file);
         }
+        flipper_format_file_close(file);
     }
 
     furi_string_free(text_ssid_value);
@@ -139,7 +129,7 @@ void send_serial_command_config(ESerialCommand command, Settings* settings) {
             break;
         default:
             return;
-        };
+        }
 
         furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
     }

@@ -168,31 +168,22 @@ static char char_to_uppercase(const char letter) {
     switch(letter) {
     case '_':
         return 0x20;
-        break;
     case '(':
         return 0x29;
-        break;
     case '{':
         return 0x7d;
-        break;
     case '[':
         return 0x5d;
-        break;
     case '/':
         return 0x5c;
-        break;
     case ';':
         return 0x3a;
-        break;
     case '.':
         return 0x2c;
-        break;
     case '!':
         return 0x3f;
-        break;
     case '<':
         return 0x3e;
-        break;
     }
     if(char_is_lowercase(letter)) {
         return (letter - 0x20);
