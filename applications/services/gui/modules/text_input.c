@@ -246,7 +246,7 @@ static void text_input_backspace_cb(TextInputModel* model) {
         model->cursor_pos = 0;
     } else if(model->cursor_pos > 0) {
         char* move = model->text_buffer + model->cursor_pos;
-        memmove(move, move + 1, strlen(move));
+        memmove(move - 1, move, strlen(move) + 1);
         model->cursor_pos--;
     }
 }
@@ -472,7 +472,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
                     model->cursor_pos = 1;
                 } else {
                     char* move = model->text_buffer + model->cursor_pos;
-                    memmove(move + 1, move, strlen(move));
+                    memmove(move + 1, move, strlen(move) + 1);
                     model->text_buffer[model->cursor_pos] = selected;
                     model->cursor_pos++;
                 }
