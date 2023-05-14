@@ -155,6 +155,7 @@ void desktop_unlock(Desktop* desktop) {
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+        furi_hal_rtc_set_pin_fails(0);
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_open(cli, &cli_vcp);
         furi_record_close(RECORD_CLI);
