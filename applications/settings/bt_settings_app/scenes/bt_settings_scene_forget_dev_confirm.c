@@ -39,6 +39,7 @@ bool bt_settings_scene_forget_dev_confirm_on_event(void* context, SceneManagerEv
             storage_simply_remove(storage, BAD_KB_KEYS_PATH);
             storage_simply_remove(
                 storage, EXT_PATH("apps_data/hid_ble/") HID_BT_KEYS_STORAGE_NAME);
+            storage_simply_remove(storage, EXT_PATH("authenticator/.bt_hid.keys"));
             furi_record_close(RECORD_STORAGE);
 
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevSuccess);

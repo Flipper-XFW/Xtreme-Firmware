@@ -65,7 +65,7 @@ const char* version_get_builddate(const Version* v);
  */
 const char* version_get_version(const Version* v);
 
-/** Get custom flipper name if set in ENV
+/** Get custom flipper name if set in version_set_custom_name
  *
  * @param      v     pointer to Version data. NULL for currently running
  *                   software.
@@ -74,11 +74,11 @@ const char* version_get_version(const Version* v);
  */
 const char* version_get_custom_name(const Version* v);
 
-/** Get custom flipper name if set in ENV
+/** Set custom flipper name
  *
  * @param      v     pointer to Version data. NULL for currently running
  *                   software.
- * @param      custom name or NULL
+ * @param      name  Custom name or NULL
  */
 void version_set_custom_name(Version* v, const char* name);
 

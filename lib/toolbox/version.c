@@ -31,11 +31,7 @@ static Version version = {
     .git_hash = GIT_COMMIT,
     .git_branch = GIT_BRANCH,
     .build_date = BUILD_DATE,
-#ifdef FURI_CUSTOM_FLIPPER_NAME
-    .custom_flipper_name = FURI_CUSTOM_FLIPPER_NAME,
-#else
     .custom_flipper_name = NULL,
-#endif
     .version = VERSION
 #ifdef FURI_RAM_EXEC
     " (RAM)"

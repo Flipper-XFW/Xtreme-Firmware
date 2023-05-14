@@ -164,7 +164,7 @@ FuriHalBtHidLedState hid_host_led_state = {.s_value = 0};
 uint16_t furi_hal_bt_hid_led_state_cb(uint8_t state, void* ctx) {
     FuriHalBtHidLedState* led_state = (FuriHalBtHidLedState*)ctx;
 
-    FURI_LOG_D("HalBtHid", "LED state updated !");
+    //FURI_LOG_D("HalBtHid", "LED state updated !");
 
     led_state->s_value = state;
 
@@ -172,7 +172,7 @@ uint16_t furi_hal_bt_hid_led_state_cb(uint8_t state, void* ctx) {
 }
 
 uint8_t furi_hal_bt_hid_get_led_state(void) {
-    FURI_LOG_D(
+    /*FURI_LOG_D(
         "HalBtHid",
         "LED state: RFU=%d NUMLOCK=%d CAPSLOCK=%d SCROLLLOCK=%d COMPOSE=%d KANA=%d POWER=%d SHIFT=%d",
         hid_host_led_state.s_undefined,
@@ -183,6 +183,7 @@ uint8_t furi_hal_bt_hid_get_led_state(void) {
         hid_host_led_state.s_kana,
         hid_host_led_state.s_power,
         hid_host_led_state.s_shift);
+        */
 
     return (hid_host_led_state.s_value >> 1); // bit 0 is undefined (after shift bit location
         // match with HID led state bits defines)
@@ -203,7 +204,6 @@ void furi_hal_bt_hid_start() {
         hid_svc_start();
     }
     // Configure HID Keyboard
-
     hid_svc_register_led_state_callback(furi_hal_bt_hid_led_state_cb, &hid_host_led_state);
 
     kb_report = malloc(sizeof(FuriHalBtHidKbReport));

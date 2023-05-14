@@ -389,7 +389,7 @@ static inline FuriHalBtProfile get_hal_bt_profile(BtProfile profile) {
     }
 }
 
-static void bt_restart(Bt* bt) {
+void bt_restart(Bt* bt) {
     furi_hal_bt_change_app(get_hal_bt_profile(bt->profile), bt_on_gap_event_callback, bt);
     furi_hal_bt_start_advertising();
 }

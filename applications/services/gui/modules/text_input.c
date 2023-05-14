@@ -467,12 +467,13 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
                 if(shift != (text_length == 0)) {
                     selected = char_to_uppercase(selected);
                 }
+                const char replace[2] = {selected, 0};
                 if(model->clear_default_text) {
-                    furi_string_set_str(model->temp_str, &selected);
+                    furi_string_set_str(model->temp_str, replace);
                     model->cursor_pos = 1;
                 } else {
                     furi_string_set_str(model->temp_str, model->text_buffer);
-                    furi_string_replace_at(model->temp_str, model->cursor_pos, 0, &selected);
+                    furi_string_replace_at(model->temp_str, model->cursor_pos, 0, replace);
                     model->cursor_pos++;
                 }
                 strcpy(model->text_buffer, furi_string_get_cstr(model->temp_str));
@@ -602,6 +603,9 @@ TextInput* text_input_alloc() {
         {
             model->validator_text = furi_string_alloc();
             model->temp_str = furi_string_alloc();
+            model->minimum_length = 1;
+            model->cursor_pos = 0;
+            model->cursor_select = false;
         },
         false);
 
