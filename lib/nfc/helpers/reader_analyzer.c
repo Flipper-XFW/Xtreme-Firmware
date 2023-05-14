@@ -54,7 +54,7 @@ struct ReaderAnalyzer {
     NfcDebugPcap* pcap;
 };
 
-const FuriHalNfcDevData reader_analyzer_nfc_data[] = {
+static FuriHalNfcDevData reader_analyzer_nfc_data[] = {
     [ReaderAnalyzerNfcDataMfClassic] =
         {.interface = FuriHalNfcInterfaceRf,
          .type = FuriHalNfcTypeA,
