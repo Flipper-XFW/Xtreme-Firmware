@@ -18,9 +18,6 @@ const int DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT] = {100,  200,  300,  450,  600,  7
                                                  3700, 4050, 4450, 4850, 5250, 5700, 6150, 6600,
                                                  7100, 7600, 8100, 8650, 9200};
 
-#define BUTTHURT_MAX 14
-#define BUTTHURT_MIN 0
-
 DolphinState* dolphin_state_alloc() {
     return malloc(sizeof(DolphinState));
 }

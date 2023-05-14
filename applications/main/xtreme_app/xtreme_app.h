@@ -52,7 +52,8 @@ typedef struct {
     char subghz_freq_buffer[XTREME_SUBGHZ_FREQ_BUFFER_SIZE];
     bool subghz_extend;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
-    int32_t xp_level;
+    int32_t dolphin_level;
+    int32_t dolphin_angry;
     FuriString* version_tag;
 
     bool save_mainmenu_apps;
@@ -60,6 +61,7 @@ typedef struct {
     bool save_subghz;
     bool save_name;
     bool save_level;
+    bool save_angry;
     bool save_backlight;
     bool save_settings;
     bool show_slideshow;

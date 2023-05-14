@@ -14,6 +14,9 @@ extern "C" {
 
 #define DOLPHIN_LEVEL_COUNT 29
 
+#define BUTTHURT_MAX 14
+#define BUTTHURT_MIN 0
+
 typedef struct DolphinState DolphinState;
 typedef struct {
     uint8_t icounter_daily_limit[DolphinAppMAX];

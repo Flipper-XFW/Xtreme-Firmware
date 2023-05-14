@@ -84,10 +84,15 @@ bool xtreme_app_apply(XtremeApp* app) {
         }
     }
 
-    if(app->save_level) {
+    if(app->save_level || app->save_angry) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-        int32_t xp = app->xp_level > 1 ? dolphin_get_levels()[app->xp_level - 2] : 0;
-        dolphin->state->data.icounter = xp + 1;
+        if(app->save_level) {
+            int32_t xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+            dolphin->state->data.icounter = xp + 1;
+        }
+        if(app->save_angry) {
+            dolphin->state->data.butthurt = app->dolphin_angry;
+        }
         dolphin->state->dirty = true;
         dolphin_state_save(dolphin->state);
         furi_record_close(RECORD_DOLPHIN);
@@ -253,7 +258,8 @@ XtremeApp* xtreme_app_alloc() {
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
-    app->xp_level = stats.level;
+    app->dolphin_level = stats.level;
+    app->dolphin_angry = stats.butthurt;
     furi_record_close(RECORD_DOLPHIN);
 
     app->version_tag =
