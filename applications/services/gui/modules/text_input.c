@@ -25,7 +25,6 @@ typedef struct {
     size_t text_buffer_size;
     size_t minimum_length;
     bool clear_default_text;
-    FuriString* temp_str;
 
     bool cursor_select;
     size_t cursor_pos;
@@ -265,11 +264,9 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, 2, 8, model->header);
     elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
 
-    FuriString* str = model->temp_str;
+    FuriString* str = furi_string_alloc();
     if(model->text_buffer) {
         furi_string_set_str(str, model->text_buffer);
-    } else {
-        furi_string_reset(str);
     }
     const char* cstr = furi_string_get_cstr(str);
 
@@ -302,6 +299,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     }
 
     canvas_draw_str(canvas, start_pos, 22, cstr);
+
+    furi_string_free(str);
 
     canvas_set_font(canvas, FontKeyboard);
 
@@ -601,7 +600,6 @@ TextInput* text_input_alloc() {
         TextInputModel * model,
         {
             model->validator_text = furi_string_alloc();
-            model->temp_str = furi_string_alloc();
             model->minimum_length = 1;
             model->cursor_pos = 0;
             model->cursor_select = false;
@@ -618,10 +616,7 @@ void text_input_free(TextInput* text_input) {
     with_view_model(
         text_input->view,
         TextInputModel * model,
-        {
-            furi_string_free(model->validator_text);
-            furi_string_free(model->temp_str);
-        },
+        { furi_string_free(model->validator_text); },
         false);
 
     // Send stop command
