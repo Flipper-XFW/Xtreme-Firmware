@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <furi/core/mutex.h>
 
+#define TOTP_BT_KEYS_STORAGE_PATH EXT_PATH("authenticator/.bt_hid.keys")
+
 typedef uint8_t TotpBtTypeCodeWorkerEvent;
 
 typedef struct TotpBtTypeCodeWorkerContext TotpBtTypeCodeWorkerContext;

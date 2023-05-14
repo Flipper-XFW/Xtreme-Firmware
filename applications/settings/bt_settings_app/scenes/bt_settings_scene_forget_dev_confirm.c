@@ -2,6 +2,7 @@
 #include <furi_hal_bt.h>
 #include <applications/main/bad_kb/bad_kb_paths.h>
 #include <applications/external/hid_app/hid_path.h>
+#include <applications/external/totp/workers/bt_type_code/bt_type_code.h>
 
 void bt_settings_scene_forget_dev_confirm_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
@@ -39,7 +40,7 @@ bool bt_settings_scene_forget_dev_confirm_on_event(void* context, SceneManagerEv
             storage_simply_remove(storage, BAD_KB_KEYS_PATH);
             storage_simply_remove(
                 storage, EXT_PATH("apps_data/hid_ble/") HID_BT_KEYS_STORAGE_NAME);
-            storage_simply_remove(storage, EXT_PATH("authenticator/.bt_hid.keys"));
+            storage_simply_remove(storage, TOTP_BT_KEYS_STORAGE_PATH);
             furi_record_close(RECORD_STORAGE);
 
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevSuccess);
