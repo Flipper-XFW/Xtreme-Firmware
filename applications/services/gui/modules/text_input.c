@@ -257,6 +257,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     uint8_t start_pos = 4;
 
     model->cursor_pos = model->cursor_pos > text_length ? text_length : model->cursor_pos;
+    size_t cursor_pos = model->cursor_pos;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -264,43 +265,44 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, 2, 8, model->header);
     elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
 
-    FuriString* str = furi_string_alloc();
+    char buf[model->text_buffer_size + 1];
     if(model->text_buffer) {
-        furi_string_set_str(str, model->text_buffer);
+        strlcpy(buf, model->text_buffer, sizeof(buf));
     }
-    const char* cstr = furi_string_get_cstr(str);
+    char* str = buf;
 
     if(model->clear_default_text) {
         elements_slightly_rounded_box(
-            canvas, start_pos - 1, 14, canvas_string_width(canvas, cstr) + 2, 10);
+            canvas, start_pos - 1, 14, canvas_string_width(canvas, str) + 2, 10);
         canvas_set_color(canvas, ColorWhite);
     } else {
-        furi_string_replace_at(str, model->cursor_pos, 0, "|");
+        char* move = str + cursor_pos;
+        memmove(move + 1, move, strlen(move) + 1);
+        str[cursor_pos] = '|';
     }
 
-    if(model->cursor_pos > 0 && canvas_string_width(canvas, cstr) > needed_string_width) {
+    if(cursor_pos > 0 && canvas_string_width(canvas, str) > needed_string_width) {
         canvas_draw_str(canvas, start_pos, 22, "...");
         start_pos += 6;
         needed_string_width -= 8;
         for(uint32_t off = 0;
-            !furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width &&
-            off < model->cursor_pos;
+            strlen(str) && canvas_string_width(canvas, str) > needed_string_width &&
+            off < cursor_pos;
             off++) {
-            furi_string_right(str, 1);
+            str++;
         }
     }
 
-    if(canvas_string_width(canvas, cstr) > needed_string_width) {
+    if(canvas_string_width(canvas, str) > needed_string_width) {
         needed_string_width -= 4;
-        while(!furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width) {
-            furi_string_left(str, furi_string_size(str) - 1);
+        size_t len = strlen(str);
+        while(len && canvas_string_width(canvas, str) > needed_string_width) {
+            str[len--] = '\0';
         }
-        furi_string_cat_str(str, "...");
+        strcat(str, "...");
     }
 
-    canvas_draw_str(canvas, start_pos, 22, cstr);
-
-    furi_string_free(str);
+    canvas_draw_str(canvas, start_pos, 22, str);
 
     canvas_set_font(canvas, FontKeyboard);
 
