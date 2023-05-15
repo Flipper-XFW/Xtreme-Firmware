@@ -95,7 +95,8 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
             if(error != FSE_OK) {
                 FuriString* dialog_msg;
                 dialog_msg = furi_string_alloc();
-                furi_string_cat_printf(dialog_msg, "Cannot rename\nCode: %d", error);
+                furi_string_cat_printf(
+                    dialog_msg, "Cannot rename:\n%s", storage_error_get_desc(error));
                 dialog_message_show_storage_error(
                     archive->dialogs, furi_string_get_cstr(dialog_msg));
                 furi_string_free(dialog_msg);
