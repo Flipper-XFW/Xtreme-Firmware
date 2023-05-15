@@ -689,6 +689,13 @@ static FS_Error storage_int_common_remove(void* ctx, const char* path) {
     return storage_int_parse_error(result);
 }
 
+static FS_Error storage_int_common_rename(void* ctx, const char* old, const char* new) { // FIXME
+    StorageData* storage = ctx;
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    int result = lfs_rename(lfs, old, new);
+    return storage_int_parse_error(result);
+}
+
 static FS_Error storage_int_common_mkdir(void* ctx, const char* path) {
     StorageData* storage = ctx;
     lfs_t* lfs = lfs_get_from_storage(storage);
@@ -746,6 +753,7 @@ static const FS_Api fs_api = {
             .stat = storage_int_common_stat,
             .mkdir = storage_int_common_mkdir,
             .remove = storage_int_common_remove,
+            .rename = storage_int_common_rename,
             .fs_info = storage_int_common_fs_info,
         },
 };

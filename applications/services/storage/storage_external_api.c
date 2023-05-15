@@ -422,14 +422,17 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
 }
 
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
-    FS_Error error = storage_common_copy(storage, old_path, new_path);
-    if(error == FSE_OK) {
-        if(!storage_simply_remove_recursive(storage, old_path)) {
-            error = FSE_INTERNAL;
-        }
-    }
+    S_API_PROLOGUE;
+    SAData data = {
+        .rename = {
+            .old = old_path,
+            .new = new_path,
+            .thread_id = furi_thread_get_current_id(),
+        }};
 
-    return error;
+    S_API_MESSAGE(StorageCommandCommonRename);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
 }
 
 static FS_Error
