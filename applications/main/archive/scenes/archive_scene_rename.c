@@ -92,9 +92,7 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
 
             furi_string_free(path_dst);
 
-            if(error == FSE_OK || error == FSE_EXIST) {
-                scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneBrowser);
-            } else {
+            if(error != FSE_OK) {
                 FuriString* dialog_msg;
                 dialog_msg = furi_string_alloc();
                 furi_string_cat_printf(dialog_msg, "Cannot rename\nCode: %d", error);
@@ -102,6 +100,7 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
                     archive->dialogs, furi_string_get_cstr(dialog_msg));
                 furi_string_free(dialog_msg);
             }
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneBrowser);
             consumed = true;
         }
     }

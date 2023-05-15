@@ -139,7 +139,7 @@ FS_Error archive_rename_file_or_dir(void* context, const char* src_path, const c
         archive_favorites_rename(src_path, dst_path);
     }
 
-    if(error == FSE_OK || error == FSE_EXIST) {
+    if(error == FSE_OK) {
         FURI_LOG_I(TAG, "Rename from %s to %s is DONE", src_path, dst_path);
         archive_refresh_dir(browser);
     } else {

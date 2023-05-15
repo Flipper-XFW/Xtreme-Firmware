@@ -311,7 +311,7 @@ bool infrared_rename_current_remote(Infrared* infrared, const char* name) {
     furi_string_free(new_path);
 
     furi_record_close(RECORD_STORAGE);
-    return (status == FSE_OK || status == FSE_EXIST);
+    return status == FSE_OK;
 }
 
 void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
