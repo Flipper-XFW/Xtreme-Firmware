@@ -702,10 +702,14 @@ FS_Error storage_common_migrate(Storage* storage, const char* source, const char
         return FSE_OK;
     }
 
-    FS_Error error = storage_common_merge(storage, source, dest);
+    FS_Error error = storage_common_rename(storage, source, dest);
 
-    if(error == FSE_OK) {
-        storage_simply_remove_recursive(storage, source);
+    if(error != FSE_OK) {
+        error = storage_common_merge(storage, source, dest);
+
+        if(error == FSE_OK) {
+            storage_simply_remove_recursive(storage, source);
+        }
     }
 
     return error;
