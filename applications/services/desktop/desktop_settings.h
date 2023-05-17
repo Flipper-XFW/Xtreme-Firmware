@@ -9,8 +9,8 @@
 
 #define DESKTOP_SETTINGS_VER (8)
 
-#define DESKTOP_SETTINGS_OLD_PATH INT_PATH(".desktop.settings")
-#define DESKTOP_SETTINGS_PATH CFG_PATH("desktop.settings")
+#define DESKTOP_SETTINGS_OLD_PATH CFG_PATH("desktop.settings")
+#define DESKTOP_SETTINGS_PATH INT_PATH(".desktop.settings")
 #define DESKTOP_SETTINGS_MAGIC (0x17)
 #define PIN_MAX_LENGTH 12
 
