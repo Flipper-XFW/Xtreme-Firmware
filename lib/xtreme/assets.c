@@ -8,138 +8,104 @@
 
 #define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 
-XtremeAssets xtreme_assets = {
-    .A_Levelup_128x64 = &A_Levelup_128x64,
-    .I_BLE_Pairing_128x64 = &I_BLE_Pairing_128x64,
-    .I_DolphinCommon_56x48 = &I_DolphinCommon_56x48,
-    .I_DolphinMafia_115x62 = &I_DolphinMafia_115x62,
-    .I_DolphinNice_96x59 = &I_DolphinNice_96x59,
-    .I_DolphinWait_61x59 = &I_DolphinWait_61x59,
-    .I_iButtonDolphinVerySuccess_108x52 = &I_iButtonDolphinVerySuccess_108x52,
-    .I_DolphinReadingSuccess_59x63 = &I_DolphinReadingSuccess_59x63,
-    .I_Lockscreen = &I_Lockscreen,
-    .I_WarningDolphin_45x42 = &I_WarningDolphin_45x42,
-    .I_NFC_dolphin_emulation_47x61 = &I_NFC_dolphin_emulation_47x61,
-    .I_passport_bad_46x49 = &I_passport_bad_46x49,
-    .I_passport_DB = &I_passport_DB,
-    .I_passport_happy_46x49 = &I_passport_happy_46x49,
-    .I_passport_okay_46x49 = &I_passport_okay_46x49,
-    .I_RFIDDolphinReceive_97x61 = &I_RFIDDolphinReceive_97x61,
-    .I_RFIDDolphinSend_97x61 = &I_RFIDDolphinSend_97x61,
-    .I_RFIDDolphinSuccess_108x57 = &I_RFIDDolphinSuccess_108x57,
-    .I_Cry_dolph_55x52 = &I_Cry_dolph_55x52,
-    .I_Background_128x11 = &I_Background_128x11,
-    .I_Fishing_123x52 = &I_Fishing_123x52,
-    .I_Scanning_123x52 = &I_Scanning_123x52,
-    .I_Auth_62x31 = &I_Auth_62x31,
-    .I_Connect_me_62x31 = &I_Connect_me_62x31,
-    .I_Connected_62x31 = &I_Connected_62x31,
-    .I_Error_62x31 = &I_Error_62x31,
-};
+XtremeAssets xtreme_assets = {};
 
-void anim(const Icon** replace, const char* name, FuriString* path, File* file) {
-    do {
-        furi_string_printf(path, ICONS_FMT "/meta", XTREME_SETTINGS()->asset_pack, name);
-        if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
-            break;
-        int32_t width, height, frame_rate, frame_count;
-        storage_file_read(file, &width, 4);
-        storage_file_read(file, &height, 4);
-        storage_file_read(file, &frame_rate, 4);
-        storage_file_read(file, &frame_count, 4);
+void anim(const Icon* replace, const char* name, FuriString* path, File* file) {
+    const char* pack = XTREME_SETTINGS()->asset_pack;
+    furi_string_printf(path, ICONS_FMT "/meta", pack, name);
+    if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        int32_t icon_width, icon_height, frame_rate, frame_count;
+        bool ok =
+            (storage_file_read(file, &icon_width, 4) == 4 &&
+             storage_file_read(file, &icon_height, 4) == 4 &&
+             storage_file_read(file, &frame_rate, 4) == 4 &&
+             storage_file_read(file, &frame_count, 4) == 4);
         storage_file_close(file);
 
-        Icon* icon = malloc(sizeof(Icon));
-        FURI_CONST_ASSIGN(icon->width, width);
-        FURI_CONST_ASSIGN(icon->height, height);
-        FURI_CONST_ASSIGN(icon->frame_rate, frame_rate);
-        FURI_CONST_ASSIGN(icon->frame_count, frame_count);
-        icon->frames = malloc(sizeof(const uint8_t*) * icon->frame_count);
-        const char* pack = XTREME_SETTINGS()->asset_pack;
-
-        bool ok = true;
-        for(int i = 0; i < icon->frame_count; ++i) {
-            FURI_CONST_ASSIGN_PTR(icon->frames[i], 0);
-            if(ok) {
-                ok = false;
+        if(ok) {
+            uint8_t** frames = malloc(sizeof(const uint8_t*) * frame_count);
+            int i = 0;
+            for(; i < frame_count; i++) {
                 furi_string_printf(path, ICONS_FMT "/frame_%02d.bm", pack, name, i);
-                do {
-                    if(!storage_file_open(
-                           file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
-                        break;
-
+                if(storage_file_open(
+                       file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
                     uint64_t size = storage_file_size(file);
-                    FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(size));
-                    if(storage_file_read(file, (void*)icon->frames[i], size) == size) ok = true;
+                    frames[i] = malloc(size);
+                    ok = storage_file_read(file, frames[i], size) == size;
                     storage_file_close(file);
-                } while(0);
-            }
-        }
-        if(!ok) {
-            for(int i = 0; i < icon->frame_count; ++i) {
-                if(icon->frames[i]) {
-                    free((void*)icon->frames[i]);
+                    if(ok) continue;
+                } else {
+                    i--;
                 }
+                break;
             }
-            free((void*)icon->frames);
-            free(icon);
 
-            break;
+            if(i == frame_count) {
+                FURI_CONST_ASSIGN(replace->frame_count, frame_count);
+                FURI_CONST_ASSIGN(replace->frame_rate, frame_rate);
+                FURI_CONST_ASSIGN(replace->width, icon_width);
+                FURI_CONST_ASSIGN(replace->height, icon_height);
+                FURI_CONST_ASSIGN_PTR(replace->frames, frames);
+            } else {
+                for(; i >= 0; i--) {
+                    free(frames[i]);
+                }
+                free(frames);
+            }
         }
-
-        *replace = icon;
-    } while(false);
+    }
 }
 
-void icon(const Icon** replace, const char* name, FuriString* path, File* file) {
+void icon(const Icon* replace, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, ICONS_FMT ".bmx", XTREME_SETTINGS()->asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
-        int32_t width, height;
-        storage_file_read(file, &width, 4);
-        storage_file_read(file, &height, 4);
-
-        Icon* icon = malloc(sizeof(Icon));
-        FURI_CONST_ASSIGN(icon->frame_count, 1);
-        FURI_CONST_ASSIGN(icon->frame_rate, 0);
-        FURI_CONST_ASSIGN(icon->width, width);
-        FURI_CONST_ASSIGN(icon->height, height);
-        icon->frames = malloc(sizeof(const uint8_t*));
-        FURI_CONST_ASSIGN_PTR(icon->frames[0], malloc(size));
-        storage_file_read(file, (void*)icon->frames[0], size);
-        *replace = icon;
+        uint8_t* frame = malloc(size);
+        int32_t icon_width, icon_height;
+        if(storage_file_read(file, &icon_width, 4) == 4 &&
+           storage_file_read(file, &icon_height, 4) == 4 &&
+           storage_file_read(file, frame, size) == size) {
+            FURI_CONST_ASSIGN(replace->frame_count, 1);
+            FURI_CONST_ASSIGN(replace->frame_rate, 0);
+            FURI_CONST_ASSIGN(replace->width, icon_width);
+            FURI_CONST_ASSIGN(replace->height, icon_height);
+            FURI_CONST_ASSIGN_PTR(replace->frames, malloc(sizeof(const uint8_t*)));
+            FURI_CONST_ASSIGN_PTR(replace->frames[0], frame);
+        } else {
+            free(frame);
+        }
 
         storage_file_close(file);
     }
 }
 
-void swap(XtremeAssets* x, FuriString* p, File* f) {
-    anim(&x->A_Levelup_128x64, "Animations/Levelup_128x64", p, f);
-    icon(&x->I_BLE_Pairing_128x64, "BLE/BLE_Pairing_128x64", p, f);
-    icon(&x->I_DolphinCommon_56x48, "Dolphin/DolphinCommon_56x48", p, f);
-    icon(&x->I_DolphinMafia_115x62, "iButton/DolphinMafia_115x62", p, f);
-    icon(&x->I_DolphinNice_96x59, "iButton/DolphinNice_96x59", p, f);
-    icon(&x->I_DolphinWait_61x59, "iButton/DolphinWait_61x59", p, f);
-    icon(&x->I_iButtonDolphinVerySuccess_108x52, "iButton/iButtonDolphinVerySuccess_108x52", p, f);
-    icon(&x->I_DolphinReadingSuccess_59x63, "Infrared/DolphinReadingSuccess_59x63", p, f);
-    icon(&x->I_Lockscreen, "Interface/Lockscreen", p, f);
-    icon(&x->I_WarningDolphin_45x42, "Interface/WarningDolphin_45x42", p, f);
-    icon(&x->I_NFC_dolphin_emulation_47x61, "NFC/NFC_dolphin_emulation_47x61", p, f);
-    icon(&x->I_passport_bad_46x49, "Passport/passport_bad_46x49", p, f);
-    icon(&x->I_passport_DB, "Passport/passport_DB", p, f);
-    icon(&x->I_passport_happy_46x49, "Passport/passport_happy_46x49", p, f);
-    icon(&x->I_passport_okay_46x49, "Passport/passport_okay_46x49", p, f);
-    icon(&x->I_RFIDDolphinReceive_97x61, "RFID/RFIDDolphinReceive_97x61", p, f);
-    icon(&x->I_RFIDDolphinSend_97x61, "RFID/RFIDDolphinSend_97x61", p, f);
-    icon(&x->I_RFIDDolphinSuccess_108x57, "RFID/RFIDDolphinSuccess_108x57", p, f);
-    icon(&x->I_Cry_dolph_55x52, "Settings/Cry_dolph_55x52", p, f);
-    icon(&x->I_Background_128x11, "StatusBar/Background_128x11", p, f);
-    icon(&x->I_Fishing_123x52, "SubGhz/Fishing_123x52", p, f);
-    icon(&x->I_Scanning_123x52, "SubGhz/Scanning_123x52", p, f);
-    icon(&x->I_Auth_62x31, "U2F/Auth_62x31", p, f);
-    icon(&x->I_Connect_me_62x31, "U2F/Connect_me_62x31", p, f);
-    icon(&x->I_Connected_62x31, "U2F/Connected_62x31", p, f);
-    icon(&x->I_Error_62x31, "U2F/Error_62x31", p, f);
+void swap(FuriString* p, File* f) {
+    anim(&A_Levelup_128x64, "Animations/Levelup_128x64", p, f);
+    icon(&I_BLE_Pairing_128x64, "BLE/BLE_Pairing_128x64", p, f);
+    icon(&I_DolphinCommon_56x48, "Dolphin/DolphinCommon_56x48", p, f);
+    icon(&I_DolphinMafia_115x62, "iButton/DolphinMafia_115x62", p, f);
+    icon(&I_DolphinNice_96x59, "iButton/DolphinNice_96x59", p, f);
+    icon(&I_DolphinWait_61x59, "iButton/DolphinWait_61x59", p, f);
+    icon(&I_iButtonDolphinVerySuccess_108x52, "iButton/iButtonDolphinVerySuccess_108x52", p, f);
+    icon(&I_DolphinReadingSuccess_59x63, "Infrared/DolphinReadingSuccess_59x63", p, f);
+    icon(&I_Lockscreen, "Interface/Lockscreen", p, f);
+    icon(&I_WarningDolphin_45x42, "Interface/WarningDolphin_45x42", p, f);
+    icon(&I_NFC_dolphin_emulation_47x61, "NFC/NFC_dolphin_emulation_47x61", p, f);
+    icon(&I_passport_bad_46x49, "Passport/passport_bad_46x49", p, f);
+    icon(&I_passport_DB, "Passport/passport_DB", p, f);
+    icon(&I_passport_happy_46x49, "Passport/passport_happy_46x49", p, f);
+    icon(&I_passport_okay_46x49, "Passport/passport_okay_46x49", p, f);
+    icon(&I_RFIDDolphinReceive_97x61, "RFID/RFIDDolphinReceive_97x61", p, f);
+    icon(&I_RFIDDolphinSend_97x61, "RFID/RFIDDolphinSend_97x61", p, f);
+    icon(&I_RFIDDolphinSuccess_108x57, "RFID/RFIDDolphinSuccess_108x57", p, f);
+    icon(&I_Cry_dolph_55x52, "Settings/Cry_dolph_55x52", p, f);
+    icon(&I_Background_128x11, "StatusBar/Background_128x11", p, f);
+    icon(&I_Fishing_123x52, "SubGhz/Fishing_123x52", p, f);
+    icon(&I_Scanning_123x52, "SubGhz/Scanning_123x52", p, f);
+    icon(&I_Auth_62x31, "U2F/Auth_62x31", p, f);
+    icon(&I_Connect_me_62x31, "U2F/Connect_me_62x31", p, f);
+    icon(&I_Connected_62x31, "U2F/Connected_62x31", p, f);
+    icon(&I_Error_62x31, "U2F/Error_62x31", p, f);
 }
 
 void XTREME_ASSETS_LOAD() {
@@ -154,7 +120,7 @@ void XTREME_ASSETS_LOAD() {
     if(storage_common_stat(storage, furi_string_get_cstr(path), &info) == FSE_OK &&
        info.flags & FSF_DIRECTORY) {
         File* file = storage_file_alloc(storage);
-        swap(&xtreme_assets, path, file);
+        swap(path, file);
         storage_file_free(file);
     }
     furi_string_free(path);
