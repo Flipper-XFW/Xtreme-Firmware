@@ -14,6 +14,7 @@ extern "C" {
 
 typedef struct {
     char asset_pack[XTREME_ASSETS_PACK_NAME_LEN];
+    bool is_nsfw; // TODO: replace with packs text support
     uint32_t anim_speed;
     int32_t cycle_anims;
     bool unlock_anims;
@@ -40,12 +41,6 @@ typedef struct {
 
 void XTREME_SETTINGS_SAVE();
 XtremeSettings* XTREME_SETTINGS();
-
-typedef struct {
-    bool is_nsfw;
-} XtremeAssets;
-
-XtremeAssets* XTREME_ASSETS();
 
 #ifdef __cplusplus
 }

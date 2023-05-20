@@ -322,7 +322,6 @@ Function,-,SK6805_set_led_color,void,"uint8_t, uint8_t, uint8_t, uint8_t"
 Function,-,SK6805_update,void,
 Function,-,SystemCoreClockUpdate,void,
 Function,-,SystemInit,void,
-Function,+,XTREME_ASSETS,XtremeAssets*,
 Function,+,XTREME_SETTINGS,XtremeSettings*,
 Function,+,XTREME_SETTINGS_SAVE,void,
 Function,-,_Exit,void,int
