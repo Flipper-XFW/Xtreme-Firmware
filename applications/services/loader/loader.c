@@ -186,6 +186,15 @@ static FlipperApplication const* loader_find_application_by_name_in_list(
 }
 
 static const FlipperApplication* loader_find_application_by_name(const char* name) {
+    if(!strncmp(name, "Bad USB", strlen("Bad USB")))
+        name = "Bad KB";
+    else if(!strncmp(name, "Applications", strlen("Applications")))
+        name = "Apps";
+    else if(!strncmp(name, "125 kHz RFID", strlen("125 kHz RFID")))
+        name = "RFID";
+    else if(!strncmp(name, "Sub-GHz", strlen("Sub-GHz")))
+        name = "SubGHz";
+
     const FlipperApplication* application = NULL;
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
     if(!application) {
