@@ -1,5 +1,4 @@
 #include "../lfrfid_i.h"
-#include <xtreme.h>
 
 void lfrfid_scene_emulate_on_enter(void* context) {
     LfRfid* app = context;
@@ -17,7 +16,7 @@ void lfrfid_scene_emulate_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
+    popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
 
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_emulate_start(app->lfworker, (LFRFIDProtocol)app->protocol_id);

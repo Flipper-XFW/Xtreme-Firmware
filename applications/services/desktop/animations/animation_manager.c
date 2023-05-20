@@ -590,8 +590,7 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    one_shot_view_start_animation(
-        animation_manager->one_shot_view, XTREME_ASSETS()->A_Levelup_128x64);
+    one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup_128x64);
 }
 
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager) {

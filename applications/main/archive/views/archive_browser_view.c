@@ -324,7 +324,7 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
 
     const char* tab_name = ArchiveTabNames[model->tab_idx];
 
-    canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->I_Background_128x11);
+    canvas_draw_icon(canvas, 0, 0, &I_Background_128x11);
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 50, 13);

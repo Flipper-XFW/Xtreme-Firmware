@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include <xtreme.h>
 
 void subghz_scene_save_success_popup_callback(void* context) {
     SubGhz* subghz = context;
@@ -12,7 +11,7 @@ void subghz_scene_save_success_on_enter(void* context) {
 
     // Setup view
     Popup* popup = subghz->popup;
-    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->I_DolphinNice_96x59);
+    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, subghz);
