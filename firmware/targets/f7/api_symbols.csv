@@ -1455,7 +1455,6 @@ Function,+,furi_hal_subghz_enable_ext_power,_Bool,
 Function,+,furi_hal_subghz_flush_rx,void,
 Function,+,furi_hal_subghz_flush_tx,void,
 Function,+,furi_hal_subghz_get_external_power_disable,_Bool,
-Function,+,furi_hal_subghz_get_is_extended,_Bool,
 Function,+,furi_hal_subghz_get_lqi,uint8_t,
 Function,+,furi_hal_subghz_get_radio_type,SubGhzRadioType,
 Function,+,furi_hal_subghz_get_rolling_counter_mult,uint8_t,
@@ -1482,7 +1481,6 @@ Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
 Function,+,furi_hal_subghz_set_external_power_disable,void,_Bool
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
-Function,+,furi_hal_subghz_set_is_extended,void,_Bool
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
 Function,+,furi_hal_subghz_set_rolling_counter_mult,void,uint8_t
 Function,+,furi_hal_subghz_set_timestamp_file_names,void,_Bool
@@ -2822,6 +2820,7 @@ Function,+,subghz_protocol_blocks_parity_bytes,uint8_t,"const uint8_t[], size_t"
 Function,+,subghz_protocol_blocks_reverse_key,uint64_t,"uint64_t, uint8_t"
 Function,+,subghz_protocol_blocks_set_bit_array,void,"_Bool, uint8_t[], size_t, size_t"
 Function,+,subghz_protocol_blocks_xor_bytes,uint8_t,"const uint8_t[], size_t"
+Function,-,subghz_protocol_came_atomo_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint16_t, SubGhzRadioPreset*"
 Function,-,subghz_protocol_decoder_alutech_at_4n_alloc,void*,SubGhzEnvironment*
 Function,-,subghz_protocol_decoder_alutech_at_4n_deserialize,SubGhzProtocolStatus,"void*, FlipperFormat*"
 Function,-,subghz_protocol_decoder_alutech_at_4n_feed,void,"void*, _Bool, uint32_t"

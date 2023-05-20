@@ -41,6 +41,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .rolling_counter_mult = 1,
     .ext_module_power_disabled = false,
     .timestamp_file_names = false,
+    .extended_frequency_i = false,
 };
 
 void furi_hal_subghz_select_radio_type(SubGhzRadioType state) {
@@ -94,6 +95,10 @@ void furi_hal_subghz_set_timestamp_file_names(bool state) {
 
 bool furi_hal_subghz_get_timestamp_file_names(void) {
     return furi_hal_subghz.timestamp_file_names;
+}
+
+void furi_hal_subghz_set_extended_frequency(bool state_i) {
+    furi_hal_subghz.extended_frequency_i = state_i;
 }
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
@@ -448,49 +453,20 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     return value;
 }
 
-bool furi_hal_subghz_get_is_extended() {
-    bool is_extended = false;
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_file_alloc(storage);
-
-    if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(file, "use_ext_range_at_own_risk", &is_extended, 1);
-    }
-
-    flipper_format_free(file);
-    furi_record_close(RECORD_STORAGE);
-    return is_extended;
-}
-
-void furi_hal_subghz_set_is_extended(bool is_extended) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_file_alloc(storage);
-
-    do {
-        if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt")) break;
-        if(!flipper_format_write_header_cstr(file, "Flipper SubGhz Setting File", 1)) break;
-        if(!flipper_format_write_comment_cstr(
-               file, "Whether to allow extended ranges that can break your flipper"))
-            break;
-        if(!flipper_format_write_bool(file, "use_ext_range_at_own_risk", &is_extended, 1)) break;
-    } while(0);
-
-    flipper_format_free(file);
-    furi_record_close(RECORD_STORAGE);
-}
-
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
-    bool is_extended = furi_hal_subghz_get_is_extended();
+    bool allow_extended_for_int = furi_hal_subghz.extended_frequency_i;
 
-    if(!(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
+    if(!(allow_extended_for_int) &&
+       !(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
-       !(value >= 778999847 && value <= 928000000) && !(is_extended)) {
+       !(value >= 778999847 && value <= 928000000)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside default range");
         return false;
     } else if(
+        (allow_extended_for_int) && //
         !(value >= 281000000 && value <= 361000000) &&
         !(value >= 378000000 && value <= 481000000) &&
-        !(value >= 749000000 && value <= 962000000) && is_extended) {
+        !(value >= 749000000 && value <= 962000000)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
         return false;
     }

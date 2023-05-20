@@ -204,7 +204,6 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             furi_string_cat_printf(temp_str, "\e#ISO15693 (unknown)\n");
             break;
         }
-        // Set tag general data
     } else if(type == FuriHalNfcTypeF) {
         // Set NFC-F data
         furi_string_cat_printf(temp_str, "ISO 18092 (NFC-F)\n");
@@ -260,7 +259,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         for(size_t i = 0; i < sizeof(nfc_data->f_data.pmm); i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->f_data.pmm[i]);
         }
-    } else { // FuriHalNfcTypeA
+    } else {
+        // Set tag general data
         char iso_type = FURI_BIT(nfc_data->a_data.sak, 5) ? '4' : '3';
         furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
         furi_string_cat_printf(temp_str, "UID:");

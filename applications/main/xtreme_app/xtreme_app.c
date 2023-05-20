@@ -64,7 +64,19 @@ bool xtreme_app_apply(XtremeApp* app) {
     }
 
     if(app->save_subghz) {
-        furi_hal_subghz_set_is_extended(app->subghz_extend);
+        FlipperFormat* file = flipper_format_file_alloc(storage);
+        do {
+            if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt"))
+                break;
+            if(!flipper_format_write_header_cstr(file, "Flipper SubGhz Setting File", 1)) break;
+            if(!flipper_format_write_comment_cstr(
+                   file, "Whether to allow extended ranges that can break your flipper"))
+                break;
+            if(!flipper_format_write_bool(
+                   file, "use_ext_range_at_own_risk", &app->subghz_extend, 1))
+                break;
+        } while(0);
+        flipper_format_free(file);
     }
 
     if(app->save_name) {
@@ -249,10 +261,12 @@ XtremeApp* xtreme_app_alloc() {
             }
         }
     } while(false);
+
+    if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
+        flipper_format_read_bool(file, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+    }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
-
-    app->subghz_extend = furi_hal_subghz_get_is_extended();
 
     strlcpy(app->device_name, furi_hal_version_get_name_ptr(), FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
 
