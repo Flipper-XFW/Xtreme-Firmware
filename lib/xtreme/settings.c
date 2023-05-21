@@ -32,6 +32,8 @@ XtremeSettings xtreme_settings = {
 };
 
 void XTREME_SETTINGS_LOAD() {
+    if(!furi_hal_is_normal_boot()) return;
+
     XtremeSettings* x = &xtreme_settings;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);

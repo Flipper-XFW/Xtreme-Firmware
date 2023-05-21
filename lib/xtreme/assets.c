@@ -1,5 +1,6 @@
 #include "xtreme.h"
 #include "private.h"
+#include <furi_hal.h>
 #include <assets_icons.h>
 #include <storage/storage.h>
 #include <core/dangerous_defines.h>
@@ -79,6 +80,8 @@ void ico(const Icon* replace, const char* name, FuriString* path, File* file) {
 }
 
 void XTREME_ASSETS_LOAD() {
+    if(!furi_hal_is_normal_boot()) return;
+
     const char* pack = XTREME_SETTINGS()->asset_pack;
     if(pack[0] == '\0') return;
 
