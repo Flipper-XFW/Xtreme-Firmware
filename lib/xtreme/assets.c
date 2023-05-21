@@ -34,6 +34,7 @@ void ani(const Icon* replace, const char* name, FuriString* path, File* file) {
                     storage_file_close(file);
                     if(ok) continue;
                 } else {
+                    storage_file_close(file);
                     i--;
                 }
                 break;
@@ -53,6 +54,7 @@ void ani(const Icon* replace, const char* name, FuriString* path, File* file) {
             }
         }
     }
+    storage_file_close(file);
 }
 
 void ico(const Icon* replace, const char* name, FuriString* path, File* file) {
@@ -74,9 +76,8 @@ void ico(const Icon* replace, const char* name, FuriString* path, File* file) {
         } else {
             free(frame);
         }
-
-        storage_file_close(file);
     }
+    storage_file_close(file);
 }
 
 void XTREME_ASSETS_LOAD() {
