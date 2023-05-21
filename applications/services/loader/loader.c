@@ -145,12 +145,12 @@ static Loader* loader_alloc() {
     loader->app.name = NULL;
     loader->app.thread = NULL;
     loader->app.insomniac = false;
+    ExtMainAppList_init(loader->ext_main_apps);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* path = furi_string_alloc();
     FuriString* name = furi_string_alloc();
     Stream* stream = file_stream_alloc(storage);
-    ExtMainAppList_init(loader->ext_main_apps);
     if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(stream, path)) {
             furi_string_replace_all(path, "\r", "");
