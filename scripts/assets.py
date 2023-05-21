@@ -121,7 +121,7 @@ class Main(App):
             ICONS_TEMPLATE_C_HEADER.format(assets_filename=self.args.filename)
         )
         icons = []
-        icon_paths = []
+        paths = []
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
             self.logger.debug(f"Processing directory {dirpath}")
@@ -166,7 +166,8 @@ class Main(App):
                 )
                 icons_c.write("\n")
                 icons.append((icon_name, width, height, frame_rate, frame_count))
-                icon_paths.append((1, icon_name, dirpath.removeprefix(self.args.input_directory).replace("\\", "/")[1:]))
+                p = dirpath.removeprefix(self.args.input_directory)[1:]
+                paths.append((1, icon_name, p.replace("\\", "/")))
             else:
                 # process icons
                 for filename in filenames:
@@ -189,7 +190,8 @@ class Main(App):
                     )
                     icons_c.write("\n")
                     icons.append((icon_name, width, height, 0, 1))
-                    icon_paths.append((0, icon_name, fullfilename[:fullfilename.rfind(".")].removeprefix(self.args.input_directory).replace("\\", "/")[1:]))
+                    p = fullfilename.removeprefix(self.args.input_directory)[1:]
+                    paths.append((0, icon_name, p.replace("\\", "/").rsplit(".", 1)[0]))
         # Create array of images:
         self.logger.debug("Finalizing source file")
         for name, width, height, frame_rate, frame_count in icons:
@@ -203,16 +205,20 @@ class Main(App):
                 )
             )
         if self.args.filename == "assets_icons":
-            icons_c.write("""
+            icons_c.write(
+                """
 const IconPath ICON_PATHS[] = {
 #ifndef FURI_RAM_EXEC
-""")
-            for animated, name, path in icon_paths:
+"""
+            )
+            for animated, name, path in paths:
                 icons_c.write(f'    {{{animated}, &{name}, "{path}"}},\n')
-            icons_c.write("""#endif
+            icons_c.write(
+                """#endif
 };
 const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
-""")
+"""
+            )
         icons_c.close()
 
         # Create Public Header
@@ -226,7 +232,8 @@ const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
         if self.args.filename == "assets_icons":
-            icons_h.write("""
+            icons_h.write(
+                """
 typedef struct {
     bool animated;
     const Icon* icon;
@@ -235,7 +242,8 @@ typedef struct {
 
 extern const IconPath ICON_PATHS[];
 extern const size_t ICON_PATHS_COUNT;
-""")
+"""
+            )
         icons_h.close()
         self.logger.debug("Done")
         return 0
