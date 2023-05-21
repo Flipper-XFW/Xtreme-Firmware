@@ -9,7 +9,7 @@
 
 #define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 
-void ani(const Icon* replace, const char* name, FuriString* path, File* file) {
+void swap_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
     const char* pack = XTREME_SETTINGS()->asset_pack;
     furi_string_printf(path, ICONS_FMT "/meta", pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -57,7 +57,7 @@ void ani(const Icon* replace, const char* name, FuriString* path, File* file) {
     storage_file_close(file);
 }
 
-void ico(const Icon* replace, const char* name, FuriString* path, File* file) {
+void swap_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, ICONS_FMT ".bmx", XTREME_SETTINGS()->asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
@@ -94,32 +94,13 @@ void XTREME_ASSETS_LOAD() {
        info.flags & FSF_DIRECTORY) {
         File* f = storage_file_alloc(storage);
 
-        ani(&A_Levelup_128x64, "Animations/Levelup_128x64", p, f);
-        ico(&I_BLE_Pairing_128x64, "BLE/BLE_Pairing_128x64", p, f);
-        ico(&I_DolphinCommon_56x48, "Dolphin/DolphinCommon_56x48", p, f);
-        ico(&I_DolphinMafia_115x62, "iButton/DolphinMafia_115x62", p, f);
-        ico(&I_DolphinNice_96x59, "iButton/DolphinNice_96x59", p, f);
-        ico(&I_DolphinWait_61x59, "iButton/DolphinWait_61x59", p, f);
-        ico(&I_iButtonDolphinVerySuccess_108x52, "iButton/iButtonDolphinVerySuccess_108x52", p, f);
-        ico(&I_DolphinReadingSuccess_59x63, "Infrared/DolphinReadingSuccess_59x63", p, f);
-        ico(&I_Lockscreen, "Interface/Lockscreen", p, f);
-        ico(&I_WarningDolphin_45x42, "Interface/WarningDolphin_45x42", p, f);
-        ico(&I_NFC_dolphin_emulation_47x61, "NFC/NFC_dolphin_emulation_47x61", p, f);
-        ico(&I_passport_bad_46x49, "Passport/passport_bad_46x49", p, f);
-        ico(&I_passport_DB, "Passport/passport_DB", p, f);
-        ico(&I_passport_happy_46x49, "Passport/passport_happy_46x49", p, f);
-        ico(&I_passport_okay_46x49, "Passport/passport_okay_46x49", p, f);
-        ico(&I_RFIDDolphinReceive_97x61, "RFID/RFIDDolphinReceive_97x61", p, f);
-        ico(&I_RFIDDolphinSend_97x61, "RFID/RFIDDolphinSend_97x61", p, f);
-        ico(&I_RFIDDolphinSuccess_108x57, "RFID/RFIDDolphinSuccess_108x57", p, f);
-        ico(&I_Cry_dolph_55x52, "Settings/Cry_dolph_55x52", p, f);
-        ico(&I_Background_128x11, "StatusBar/Background_128x11", p, f);
-        ico(&I_Fishing_123x52, "SubGhz/Fishing_123x52", p, f);
-        ico(&I_Scanning_123x52, "SubGhz/Scanning_123x52", p, f);
-        ico(&I_Auth_62x31, "U2F/Auth_62x31", p, f);
-        ico(&I_Connect_me_62x31, "U2F/Connect_me_62x31", p, f);
-        ico(&I_Connected_62x31, "U2F/Connected_62x31", p, f);
-        ico(&I_Error_62x31, "U2F/Error_62x31", p, f);
+        for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
+            if(ICON_PATHS[i].animated) {
+                swap_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+            } else {
+                swap_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+            }
+        }
 
         storage_file_free(f);
     }

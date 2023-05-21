@@ -11,6 +11,7 @@ ICONS_SUPPORTED_FORMATS = ["png"]
 
 ICONS_TEMPLATE_H_HEADER = """#pragma once
 
+#include <furi.h>
 #include <gui/icon.h>
 
 """
@@ -120,6 +121,7 @@ class Main(App):
             ICONS_TEMPLATE_C_HEADER.format(assets_filename=self.args.filename)
         )
         icons = []
+        icon_paths = []
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
             self.logger.debug(f"Processing directory {dirpath}")
@@ -164,6 +166,7 @@ class Main(App):
                 )
                 icons_c.write("\n")
                 icons.append((icon_name, width, height, frame_rate, frame_count))
+                icon_paths.append((1, icon_name, dirpath.removeprefix(self.args.input_directory).replace("\\", "/")[1:]))
             else:
                 # process icons
                 for filename in filenames:
@@ -186,6 +189,7 @@ class Main(App):
                     )
                     icons_c.write("\n")
                     icons.append((icon_name, width, height, 0, 1))
+                    icon_paths.append((0, icon_name, fullfilename[:fullfilename.rfind(".")].removeprefix(self.args.input_directory).replace("\\", "/")[1:]))
         # Create array of images:
         self.logger.debug("Finalizing source file")
         for name, width, height, frame_rate, frame_count in icons:
@@ -198,7 +202,17 @@ class Main(App):
                     frame_count=frame_count,
                 )
             )
-        icons_c.write("\n")
+        if self.args.filename == "assets_icons":
+            icons_c.write("""
+const IconPath ICON_PATHS[] = {
+#ifndef FURI_RAM_EXEC
+""")
+            for animated, name, path in icon_paths:
+                icons_c.write(f'    {{{animated}, &{name}, "{path}"}},\n')
+            icons_c.write("""#endif
+};
+const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
+""")
         icons_c.close()
 
         # Create Public Header
@@ -211,6 +225,17 @@ class Main(App):
         icons_h.write(ICONS_TEMPLATE_H_HEADER)
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
+        if self.args.filename == "assets_icons":
+            icons_h.write("""
+typedef struct {
+    bool animated;
+    const Icon* icon;
+    const char* path;
+} IconPath;
+
+extern const IconPath ICON_PATHS[];
+extern const size_t ICON_PATHS_COUNT;
+""")
         icons_h.close()
         self.logger.debug("Done")
         return 0
