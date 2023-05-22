@@ -3,7 +3,7 @@
 #include "helpers/subrem_types.h"
 #include "helpers/subrem_presets.h"
 
-#include "../subghz/helpers/subghz_txrx.h"
+#include "applications/main/subghz/helpers/subghz_txrx.h"
 
 #include <assets_icons.h>
 

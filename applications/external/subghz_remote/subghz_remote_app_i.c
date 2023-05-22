@@ -4,7 +4,7 @@
 
 #include <lib/subghz/protocols/protocol_items.h>
 
-#include "../subghz/helpers/subghz_txrx_i.h"
+#include "applications/main/subghz/helpers/subghz_txrx_i.h"
 
 // #include <lib/subghz/protocols/keeloq.h>
 // #include <lib/subghz/protocols/star_line.h>

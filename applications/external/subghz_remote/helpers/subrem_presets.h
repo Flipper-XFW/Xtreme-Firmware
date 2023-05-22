@@ -3,7 +3,7 @@
 #include "subrem_types.h"
 #include <flipper_format/flipper_format_i.h>
 #include <lib/subghz/protocols/protocol_items.h>
-#include "../../subghz/helpers/subghz_txrx.h"
+#include "applications/main/subghz/helpers/subghz_txrx.h"
 
 typedef struct {
     FuriString* name;
