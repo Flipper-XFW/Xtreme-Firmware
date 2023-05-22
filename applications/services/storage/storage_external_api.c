@@ -421,7 +421,17 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
     return S_RETURN_ERROR;
 }
 
+bool storage_is_subdir(const char* a, const char* b) {
+    char test[strlen(b) + 2];
+    snprintf(test, sizeof(test), "%s/", b);
+    return strncmp(a, test, sizeof(test) - 1) == 0;
+}
+
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
+    if(storage_is_subdir(new_path, old_path)) {
+        return FSE_INVALID_NAME;
+    }
+
     S_API_PROLOGUE;
     SAData data = {
         .rename = {
@@ -437,6 +447,10 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
 
 static FS_Error
     storage_copy_recursive(Storage* storage, const char* old_path, const char* new_path) {
+    if(storage_is_subdir(new_path, old_path)) {
+        return FSE_INVALID_NAME;
+    }
+
     FS_Error error = storage_common_mkdir(storage, new_path);
     DirWalk* dir_walk = dir_walk_alloc(storage);
     FuriString* path;
