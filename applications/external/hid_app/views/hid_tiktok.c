@@ -117,8 +117,7 @@ static void hid_tiktok_reset_cursor(HidTikTok* hid_tiktok) {
         furi_delay_ms(50);
     }
     // Move cursor from the corner
-    hid_hal_mouse_move(hid_tiktok->hid, 40, 120);
-    hid_hal_mouse_move(hid_tiktok->hid, 0, 120);
+    hid_hal_mouse_move(hid_tiktok->hid, 20, 120);
     furi_delay_ms(50);
 }
 
@@ -190,11 +189,11 @@ static bool hid_tiktok_input_callback(InputEvent* event, void* context) {
                     hid_hal_mouse_release(hid_tiktok->hid, HID_MOUSE_BTN_LEFT);
                     consumed = true;
                 } else if(event->key == InputKeyDown) {
-                    // Swipe to previous video
+                    // Swipe to next video
                     hid_hal_mouse_scroll(hid_tiktok->hid, 19);
                     consumed = true;
                 } else if(event->key == InputKeyUp) {
-                    // Swipe to new video
+                    // Swipe to previous video
                     hid_hal_mouse_scroll(hid_tiktok->hid, -19);
                     consumed = true;
                 } else if(event->key == InputKeyBack) {

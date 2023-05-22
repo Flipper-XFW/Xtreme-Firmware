@@ -117,8 +117,7 @@ static void hid_ytshorts_reset_cursor(HidYTShorts* hid_ytshorts) {
         furi_delay_ms(50);
     }
     // Move cursor from the corner
-    hid_hal_mouse_move(hid_ytshorts->hid, 40, 120);
-    hid_hal_mouse_move(hid_ytshorts->hid, 0, 120);
+    hid_hal_mouse_move(hid_ytshorts->hid, 20, 120);
     furi_delay_ms(50);
 }
 
@@ -194,7 +193,7 @@ static bool hid_ytshorts_input_callback(InputEvent* event, void* context) {
                     hid_hal_mouse_release(hid_ytshorts->hid, HID_MOUSE_BTN_LEFT);
                     consumed = true;
                 } else if(event->key == InputKeyDown) {
-                    // Swipe to new video
+                    // Swipe to next video
                     hid_hal_mouse_scroll(hid_ytshorts->hid, 6);
                     hid_hal_mouse_scroll(hid_ytshorts->hid, 8);
                     hid_hal_mouse_scroll(hid_ytshorts->hid, 10);
