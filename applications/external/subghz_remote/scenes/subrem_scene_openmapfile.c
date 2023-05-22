@@ -4,7 +4,8 @@ void subrem_scene_openmapfile_on_enter(void* context) {
     SubGhzRemoteApp* app = context;
     SubRemLoadMapState load_state = subrem_load_from_file(app);
 
-    if(load_state == SubRemLoadMapStateError) {
+    if(load_state != SubRemLoadMapStateOK && load_state != SubRemLoadMapStateNotAllOK &&
+       load_state != SubRemLoadMapStateBack) {
 #ifdef SUBREM_LIGHT
         dialog_message_show_storage_error(app->dialogs, "Can't load\nMap file");
 #else
@@ -18,7 +19,7 @@ void subrem_scene_openmapfile_on_enter(void* context) {
         dialog_message_free(message);
 #endif
     }
-    if(load_state == SubRemLoadMapStateOK) {
+    if(load_state == SubRemLoadMapStateOK || load_state == SubRemLoadMapStateNotAllOK) {
         scene_manager_next_scene(app->scene_manager, SubRemSceneRemote);
     } else {
         // TODO: Map Preset Reset
