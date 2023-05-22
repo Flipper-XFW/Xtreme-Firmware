@@ -101,7 +101,7 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
                     archive->dialogs, furi_string_get_cstr(dialog_msg));
                 furi_string_free(dialog_msg);
             }
-            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneBrowser);
+            scene_manager_previous_scene(archive->scene_manager);
             consumed = true;
         }
     }
