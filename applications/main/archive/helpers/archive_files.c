@@ -115,13 +115,20 @@ void archive_delete_file(void* context, const char* format, ...) {
     furi_string_free(filename);
 }
 
-FS_Error archive_rename_file_or_dir(void* context, const char* src_path, const char* dst_path) {
+FS_Error archive_copy_move_file_or_dir(
+    void* context,
+    const char* src_path,
+    const char* dst_path,
+    bool copy,
+    bool find_name) {
     furi_assert(context);
 
-    FURI_LOG_I(TAG, "Rename from %s to %s", src_path, dst_path);
+    FURI_LOG_I(TAG, "%s from %s to %s", copy ? "Copy" : "Move", src_path, dst_path);
 
     ArchiveBrowserView* browser = context;
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
+    FuriString* dst_str = furi_string_alloc_set(dst_path);
+    dst_path = furi_string_get_cstr(dst_str);
 
     FileInfo fileinfo;
     storage_common_stat(fs_api, src_path, &fileinfo);
@@ -130,22 +137,57 @@ FS_Error archive_rename_file_or_dir(void* context, const char* src_path, const c
 
     if(!path_contains_only_ascii(dst_path)) {
         error = FSE_INVALID_NAME;
+    } else if(!copy && !strcmp(src_path, dst_path)) {
+        error = FSE_EXIST;
     } else {
-        error = storage_common_rename(fs_api, src_path, dst_path);
+        if(find_name && storage_common_exists(fs_api, dst_path)) {
+            FuriString* dir_path = furi_string_alloc();
+            FuriString* filename = furi_string_alloc();
+            char extension[MAX_EXT_LEN] = {0};
+
+            path_extract_filename(dst_str, filename, true);
+            path_extract_dirname(furi_string_get_cstr(dst_str), dir_path);
+            path_extract_extension(dst_str, extension, MAX_EXT_LEN);
+
+            storage_get_next_filename(
+                fs_api,
+                furi_string_get_cstr(dir_path),
+                furi_string_get_cstr(filename),
+                extension,
+                dst_str,
+                255);
+            furi_string_cat_printf(dir_path, "/%s%s", furi_string_get_cstr(dst_str), extension);
+            furi_string_set(dst_str, dir_path);
+
+            furi_string_free(dir_path);
+            furi_string_free(filename);
+        }
+
+        if(copy) {
+            error = storage_common_copy(fs_api, src_path, dst_path);
+        } else {
+            error = storage_common_rename(fs_api, src_path, dst_path);
+        }
     }
     furi_record_close(RECORD_STORAGE);
 
-    if(archive_is_favorite("%s", src_path)) {
+    if(!copy && archive_is_favorite("%s", src_path)) {
         archive_favorites_rename(src_path, dst_path);
     }
 
     if(error == FSE_OK) {
-        FURI_LOG_I(TAG, "Rename from %s to %s is DONE", src_path, dst_path);
+        FURI_LOG_I(TAG, "%s from %s to %s is DONE", copy ? "Copy" : "Move", src_path, dst_path);
         archive_refresh_dir(browser);
     } else {
         FURI_LOG_E(
-            TAG, "Rename failed: %s, Code: %d", filesystem_api_error_get_desc(error), error);
+            TAG,
+            "%s failed: %s, Code: %d",
+            copy ? "Copy" : "Move",
+            filesystem_api_error_get_desc(error),
+            error);
     }
+
+    furi_string_free(dst_str);
 
     return error;
 }
