@@ -185,11 +185,11 @@ static bool hid_ytshorts_input_callback(InputEvent* event, void* context) {
             } else if(event->type == InputTypeShort) {
                 if(event->key == InputKeyOk) {
                     hid_hal_mouse_press(hid_ytshorts->hid, HID_MOUSE_BTN_LEFT);
-                    furi_delay_ms(50);
+                    furi_delay_ms(25);
                     hid_hal_mouse_release(hid_ytshorts->hid, HID_MOUSE_BTN_LEFT);
-                    furi_delay_ms(50);
+                    furi_delay_ms(100);
                     hid_hal_mouse_press(hid_ytshorts->hid, HID_MOUSE_BTN_LEFT);
-                    furi_delay_ms(50);
+                    furi_delay_ms(25);
                     hid_hal_mouse_release(hid_ytshorts->hid, HID_MOUSE_BTN_LEFT);
                     consumed = true;
                 } else if(event->key == InputKeyDown) {
@@ -213,7 +213,6 @@ static bool hid_ytshorts_input_callback(InputEvent* event, void* context) {
                     hid_hal_mouse_press(hid_ytshorts->hid, HID_MOUSE_BTN_LEFT);
                     furi_delay_ms(50);
                     hid_hal_mouse_release(hid_ytshorts->hid, HID_MOUSE_BTN_LEFT);
-                    furi_delay_ms(50);
                     consumed = true;
                 }
             } else if(event->type == InputTypeLong) {
