@@ -94,19 +94,6 @@ This Firmware has 30 levels, not just the basic 3 the official one has.
 
 With this new system in place, it allows for some cool stuff like locking animations behind a certain level. This can be done fairly easy: The idle_animations are tied to the level system. Specifically, the `Min level` variable of your manifest file is used here. Each level you reach, unlocks a new animation. The higher your level, the more animations people can see.
 
-<details>
-<summary>Our example</summary>
-
-In our example case, this is used with the NSFW animation pack you can select in the Xtreme app. Dont worry, this is not used by default because I know not everyone likes to see my / anime tits and thats fine. Anyways.. each level gives a brand new background animation, they also become more and more lewd over time.
-
-| Level  | Animations |
-| ------------- | ------------- |
-| 1-10  | Try harder. Just sexy clothes |
-| 11-20 | Some tits, maybe an ass |
-| 21-30 | Fully NSFW, graphic scenes |
-
-</details>
-
 -----
 <br>
 <h2 align="center">List of changes:</h2>
@@ -122,7 +109,7 @@ Note: This repo is always updated with OFW & Unleashed. No need to mention all t
 - Bad-Keyboard App
 - A new battery display-type
 - Scrolling view for long file names in browser
-- NSFW Animations tied to the level system. Read more above
+- Advanced and optimized level system. Read more above
 - Folder handling for empty ones (Now indicate they are empty)
 
 - Custom subghz presets
