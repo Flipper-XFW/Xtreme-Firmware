@@ -449,6 +449,35 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
     return S_RETURN_ERROR;
 }
 
+FS_Error storage_common_move(Storage* storage, const char* old_path, const char* new_path) {
+    if(!storage_common_exists(storage, old_path)) {
+        return FSE_NOT_EXIST;
+    }
+
+    if(storage_is_subdir(new_path, old_path)) {
+        return FSE_INVALID_NAME;
+    }
+
+    if(storage_common_exists(storage, new_path)) {
+        FS_Error error = storage_common_remove(storage, new_path);
+        if(error != FSE_OK) {
+            return error;
+        }
+    }
+
+    S_API_PROLOGUE;
+    SAData data = {
+        .rename = {
+            .old = old_path,
+            .new = new_path,
+            .thread_id = furi_thread_get_current_id(),
+        }};
+
+    S_API_MESSAGE(StorageCommandCommonRename);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
 static FS_Error
     storage_copy_recursive(Storage* storage, const char* old_path, const char* new_path) {
     if(storage_is_subdir(new_path, old_path)) {
