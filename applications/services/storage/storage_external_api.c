@@ -428,6 +428,10 @@ bool storage_is_subdir(const char* a, const char* b) {
 }
 
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
+    if(!storage_common_exists(storage, old_path)) {
+        return FSE_NOT_EXIST;
+    }
+
     if(storage_is_subdir(new_path, old_path)) {
         return FSE_INVALID_NAME;
     }
