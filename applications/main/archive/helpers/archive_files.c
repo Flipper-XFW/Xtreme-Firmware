@@ -115,7 +115,7 @@ void archive_delete_file(void* context, const char* format, ...) {
     furi_string_free(filename);
 }
 
-FS_Error archive_copy_move_file_or_dir(
+FS_Error archive_copy_rename_file_or_dir(
     void* context,
     const char* src_path,
     const char* dst_path,

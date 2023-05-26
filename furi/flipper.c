@@ -66,8 +66,7 @@ void flipper_migrate_files() {
     FileInfo file_info;
     if(storage_common_stat(storage, U2F_CNT_OLD_FILE, &file_info) == FSE_OK &&
        file_info.size > 200) { // Is on Int and has content
-        storage_common_remove(storage, U2F_CNT_FILE); // Remove outdated on Ext
-        storage_common_rename(storage, U2F_CNT_OLD_FILE, U2F_CNT_FILE); // Int -> Ext
+        storage_common_move(storage, U2F_CNT_OLD_FILE, U2F_CNT_FILE); // Int -> Ext
     }
     storage_common_copy(storage, U2F_KEY_OLD_FILE, U2F_KEY_FILE); // Ext -> Int
 

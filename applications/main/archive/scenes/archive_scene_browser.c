@@ -220,7 +220,7 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
                 if(path_src && path_dst) {
                     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewStack);
                     archive_show_loading_popup(archive, true);
-                    FS_Error error = archive_copy_move_file_or_dir(
+                    FS_Error error = archive_copy_rename_file_or_dir(
                         archive->browser,
                         furi_string_get_cstr(path_src),
                         furi_string_get_cstr(path_dst),
