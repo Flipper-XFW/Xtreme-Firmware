@@ -7,7 +7,7 @@
 #include <storage/storage.h>
 #include <loader/loader.h>
 
-#define DESKTOP_SETTINGS_VER (8)
+#define DESKTOP_SETTINGS_VER (9)
 
 #define DESKTOP_SETTINGS_OLD_PATH CFG_PATH("desktop.settings")
 #define DESKTOP_SETTINGS_PATH INT_PATH(".desktop.settings")
@@ -36,6 +36,7 @@ typedef struct {
     PinCode pin_code;
     uint32_t auto_lock_delay_ms;
     bool auto_lock_with_pin;
+    uint8_t display_clock;
 } DesktopSettings;
 
 bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);

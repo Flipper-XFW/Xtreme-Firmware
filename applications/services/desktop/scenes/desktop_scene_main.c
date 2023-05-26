@@ -60,6 +60,21 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
 }
 #endif
 
+static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
+    LoaderStatus status = LoaderStatusErrorInternal;
+    if(application->is_external) {
+        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, application->name_or_path);
+    } else if(strlen(application->name_or_path) > 0) {
+        status = loader_start(desktop->loader, application->name_or_path, NULL);
+    } else {
+        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, NULL);
+    }
+
+    if(status != LoaderStatusOk) {
+        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+    }
+}
+
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
     if(desktop->in_transition) return;
@@ -128,40 +143,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenFavoritePrimary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_primary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_primary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_primary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_primary);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteSecondary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_secondary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_secondary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_secondary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_secondary);
             consumed = true;
             break;
         case DesktopAnimationEventCheckAnimation:

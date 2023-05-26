@@ -365,46 +365,6 @@ Power* power_alloc() {
     return power;
 }
 
-void power_free(Power* power) {
-    furi_assert(power);
-
-    // Gui
-    view_dispatcher_remove_view(power->view_dispatcher, PowerViewOff);
-    power_off_free(power->power_off);
-    view_dispatcher_remove_view(power->view_dispatcher, PowerViewUnplugUsb);
-    power_unplug_usb_free(power->power_unplug_usb);
-
-    view_port_free(power->battery_view_port);
-
-    // State
-    furi_mutex_free(power->api_mtx);
-
-    // FuriPubSub
-    furi_pubsub_unsubscribe(loader_get_pubsub(power->loader), power->app_start_stop_subscription);
-    furi_pubsub_unsubscribe(power->settings_events, power->settings_events_subscription);
-
-    if(power->input_events_subscription) {
-        furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
-        power->input_events_subscription = NULL;
-    }
-
-    furi_pubsub_free(power->event_pubsub);
-    furi_pubsub_free(power->settings_events);
-    power->loader = NULL;
-    power->input_events_pubsub = NULL;
-
-    //Auto shutdown timer
-    furi_timer_free(power->auto_shutdown_timer);
-
-    // Records
-    furi_record_close(RECORD_NOTIFICATION);
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_LOADER);
-    furi_record_close(RECORD_INPUT_EVENTS);
-
-    free(power);
-}
-
 static void power_check_charging_state(Power* power) {
     if(furi_hal_power_is_charging()) {
         if((power->info.charge == 100) || (furi_hal_power_is_charging_done())) {
@@ -558,8 +518,8 @@ int32_t power_srv(void* p) {
 
         furi_delay_ms(1000);
     }
-    power_auto_shutdown_inhibit(power);
-    power_free(power);
+
+    furi_crash("That was unexpected");
 
     return 0;
 }

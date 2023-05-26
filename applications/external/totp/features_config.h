@@ -5,10 +5,10 @@
 #define TOTP_AUTOMATION_ICONS_ENABLED
 
 // List of compatible firmwares
-#define TOTP_FIRMWARE_OFFICIAL_STABLE (1)
-#define TOTP_FIRMWARE_OFFICIAL_DEV (2)
-#define TOTP_FIRMWARE_XTREME (3)
+#define TOTP_FIRMWARE_OFFICIAL_STABLE 1
+#define TOTP_FIRMWARE_OFFICIAL_DEV 2
+#define TOTP_FIRMWARE_UL_XFW 3 // XFW and UL now has same bluetooth mac/advname changing API
 // End of list
 
 // Target firmware to build for
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_UL_XFW
