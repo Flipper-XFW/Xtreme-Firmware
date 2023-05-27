@@ -395,7 +395,7 @@ class ApplicationsCGenerator:
                 map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype))
             )
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
-            contents.append(f"const {entry_type} {entry_block}[] = {{")
+            contents.append(f"{entry_type} {entry_block}[] = {{")
             apps = self.buildset.get_apps_of_type(apptype)
             if apptype is FlipperAppType.APP:
                 apps += self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
