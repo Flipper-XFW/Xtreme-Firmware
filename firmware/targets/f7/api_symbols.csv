@@ -1,5 +1,6 @@
 entry,status,name,type,params
 Version,+,27.0,,
+Header,+,applications/main/archive/helpers/favorite_timeout.h,,
 Header,+,applications/main/fap_loader/fap_loader_app.h,,
 Header,+,applications/main/subghz/helpers/subghz_txrx.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
@@ -873,6 +874,8 @@ Function,-,fabs,double,double
 Function,-,fabsf,float,float
 Function,-,fabsl,long double,long double
 Function,+,fap_loader_load_name_and_icon,_Bool,"FuriString*, Storage*, uint8_t**, FuriString*"
+Function,+,favorite_timeout_callback,void,void*
+Function,+,favorite_timeout_run,void,"ViewDispatcher*, SceneManager*"
 Function,-,fclose,int,FILE*
 Function,-,fcloseall,int,
 Function,-,fdim,double,"double, double"
@@ -2271,6 +2274,7 @@ Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
 Function,-,prng_successor,uint32_t,"uint32_t, uint32_t"
+Function,+,process_favorite_launch,_Bool,char**
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."
 Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase**, size_t"
 Function,+,protocol_dict_decoders_feed,ProtocolId,"ProtocolDict*, _Bool, uint32_t"
