@@ -652,7 +652,9 @@ void elf_file_free(ELFFile* elf) {
         free(elf->debug_link_info.debug_link);
     }
 
-    storage_file_free(elf->fd);
+    if(elf->fd != NULL) {
+        storage_file_free(elf->fd);
+    }
     free(elf);
 }
 
@@ -782,6 +784,9 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
         }
         FURI_LOG_I(TAG, "Total size of loaded sections: %u", total_size); //-V576
     }
+
+    storage_file_free(elf->fd);
+    elf->fd = NULL;
 
     return status;
 }
