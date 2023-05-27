@@ -261,7 +261,9 @@ XtremeApp* xtreme_app_alloc() {
             }
         }
     } while(false);
+    flipper_format_free(file);
 
+    file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
         flipper_format_read_bool(file, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
     }
