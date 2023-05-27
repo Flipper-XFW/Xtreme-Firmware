@@ -124,8 +124,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventXtreme:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start(
-                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/.Main/xtreme_app.fap"));
+            loader_start(desktop->loader, "Xtreme", NULL);
             consumed = true;
             break;
         case DesktopLockMenuEventStealthModeOn:
