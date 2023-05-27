@@ -9,6 +9,7 @@
 #include <cli/cli.h>
 #include <cli/cli_vcp.h>
 #include <locale/locale.h>
+#include <xtreme.h>
 
 #include "animations/animation_manager.h"
 #include "desktop/scenes/desktop_scene.h"
@@ -463,7 +464,7 @@ int32_t desktop_srv(void* p) {
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+    if(XTREME_SETTINGS()->lock_on_boot || furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         desktop_lock(desktop, true);
     } else {
         if(!loader_is_locked(desktop->loader)) {

@@ -20,6 +20,7 @@ typedef struct {
     bool unlock_anims;
     bool fallback_anim;
     bool wii_menu;
+    bool lock_on_boot;
     bool bad_pins_format;
     bool lockscreen_time;
     bool lockscreen_seconds;
