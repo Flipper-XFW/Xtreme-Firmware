@@ -29,8 +29,8 @@ XtremeSettings xtreme_settings = {
     .bad_bt = false, // USB
     .bad_bt_remember = false, // OFF
     .butthurt_timer = 21600, // 6 H
-    .rgb_backlight = false, // OFF
     .charge_cap = 100, // 100%
+    .rgb_backlight = false, // OFF
 };
 
 void XTREME_SETTINGS_LOAD() {
@@ -91,9 +91,9 @@ void XTREME_SETTINGS_LOAD() {
         flipper_format_rewind(file);
         flipper_format_read_int32(file, "butthurt_timer", &x->butthurt_timer, 1);
         flipper_format_rewind(file);
-        flipper_format_read_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
-        flipper_format_rewind(file);
         flipper_format_read_uint32(file, "charge_cap", &x->charge_cap, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
@@ -129,8 +129,8 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "bad_bt", &x->bad_bt, 1);
         flipper_format_write_bool(file, "bad_bt_remember", &x->bad_bt_remember, 1);
         flipper_format_write_int32(file, "butthurt_timer", &x->butthurt_timer, 1);
-        flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
         flipper_format_write_uint32(file, "charge_cap", &x->charge_cap, 1);
+        flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
