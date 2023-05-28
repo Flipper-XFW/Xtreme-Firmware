@@ -681,7 +681,8 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     FuriString* folder_path = furi_string_alloc();
     FuriHalNfcDevData data = {};
     nested_get_data(&data);
-    MfClassicType type = mifare_nested_worker_get_tag_type(data.atqa[0], data.atqa[1], data.sak);
+    MfClassicType type = mifare_nested_worker_get_tag_type(
+        data.a_data.atqa[0], data.a_data.atqa[1], data.a_data.sak);
     uint64_t key = 0; // Found key for attack
     uint32_t found_key_type = 0;
     uint32_t key_block = 0;
@@ -836,7 +837,8 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     FuriString* folder_path = furi_string_alloc();
     FuriHalNfcDevData data = {};
     nested_get_data(&data);
-    MfClassicType type = mifare_nested_worker_get_tag_type(data.atqa[0], data.atqa[1], data.sak);
+    MfClassicType type = mifare_nested_worker_get_tag_type(
+        data.a_data.atqa[0], data.a_data.atqa[1], data.a_data.sak);
     uint64_t key = 0; // Found key for attack
     uint32_t found_key_type = 0;
     uint32_t key_block = 0;
@@ -1077,7 +1079,8 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     FuriString* folder_path = furi_string_alloc();
     FuriHalNfcDevData data = {};
     nested_get_data(&data);
-    MfClassicType type = mifare_nested_worker_get_tag_type(data.atqa[0], data.atqa[1], data.sak);
+    MfClassicType type = mifare_nested_worker_get_tag_type(
+        data.a_data.atqa[0], data.a_data.atqa[1], data.a_data.sak);
     uint64_t key = 0; // Found key for attack
     uint32_t found_key_type = 0;
     uint32_t key_block = 0;
@@ -1211,7 +1214,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
                         MifareNestedWorkerEventNoTagDetected, mifare_nested_worker->context);
 
                     while(mifare_nested_worker->state == MifareNestedWorkerStateCollecting &&
-                          lost_tag_data.cuid != data.cuid) {
+                          lost_tag_data.a_data.cuid != data.a_data.cuid) {
                         furi_delay_ms(250);
                         nested_get_data(&lost_tag_data);
                     }
@@ -1444,7 +1447,8 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
     FuriString* path = furi_string_alloc();
     FuriHalNfcDevData data = {};
     nested_get_data(&data);
-    MfClassicType type = mifare_nested_worker_get_tag_type(data.atqa[0], data.atqa[1], data.sak);
+    MfClassicType type = mifare_nested_worker_get_tag_type(
+        data.a_data.atqa[0], data.a_data.atqa[1], data.a_data.sak);
     NestedCheckKeyResult result = NestedCheckKeyNoTag;
     FuriHalNfcTxRxContext tx_rx = {};
     uint32_t key_count = 0;
