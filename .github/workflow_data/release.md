@@ -1,5 +1,5 @@
 ## ⬇️ Download
->### [🖥️ Web Updater (chrome)](https://lab.flipper.net/?url={ARTIFACT_WEB}&channel=XFW-Updater&version={VERSION_TAG}) [recommended]
+>### [🖥️ Web Updater (chrome)](https://update.flipper-xtre.me) [recommended]
 
 >### [🐬 qFlipper Package (.tgz)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{VERSION_TAG}/{ARTIFACT_TGZ})
 
