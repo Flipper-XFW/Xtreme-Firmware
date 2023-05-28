@@ -45,6 +45,17 @@ static void xtreme_app_scene_misc_butthurt_timer_changed(VariableItem* item) {
     app->require_reboot = true;
 }
 
+#define CHARGE_CAP_INTV 5
+static void xtreme_app_scene_misc_charge_cap_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    char cap_str[6];
+    uint32_t value = (variable_item_get_current_value_index(item) + 1) * CHARGE_CAP_INTV;
+    snprintf(cap_str, 6, "%lu%%", value);
+    variable_item_set_current_value_text(item, cap_str);
+    XTREME_SETTINGS()->charge_cap = value;
+    app->save_settings = true;
+}
+
 static void xtreme_app_scene_misc_lcd_color_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -95,6 +106,18 @@ void xtreme_app_scene_misc_on_enter(void* context) {
         xtreme_settings->butthurt_timer, butthurt_timer_values, COUNT_OF(butthurt_timer_names));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, butthurt_timer_names[value_index]);
+
+    char cap_str[6];
+    value_index = xtreme_settings->charge_cap / CHARGE_CAP_INTV;
+    snprintf(cap_str, 6, "%lu%%", (uint32_t)value_index * CHARGE_CAP_INTV);
+    item = variable_item_list_add(
+        var_item_list,
+        "Charge Cap",
+        100 / CHARGE_CAP_INTV,
+        xtreme_app_scene_misc_charge_cap_changed,
+        app);
+    variable_item_set_current_value_index(item, value_index - 1);
+    variable_item_set_current_value_text(item, cap_str);
 
     item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
     variable_item_set_current_value_text(item, xtreme_settings->rgb_backlight ? "ON" : "OFF");
