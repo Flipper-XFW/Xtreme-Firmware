@@ -54,6 +54,18 @@ static void xtreme_app_scene_misc_lcd_color_changed(VariableItem* item) {
     notification_message(app->notification, &sequence_display_backlight_on);
 }
 
+const char* const charge_cap_names[] =
+    {"50%", "60%", "70%", "80%", "90%", "100%"};
+const int32_t charge_cap_values[COUNT_OF(charge_cap_names)] =
+    {50, 60, 70, 80, 90, 100};
+static void xtreme_app_scene_misc_charge_cap_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, charge_cap_names[index]);
+    XTREME_SETTINGS()->charge_cap = charge_cap_values[index];
+    app->save_settings = true;
+}
+
 void xtreme_app_scene_misc_on_enter(void* context) {
     XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
@@ -109,6 +121,18 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rgb_backlight_get_color_text(value_index));
     variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Charge Cap %",
+        COUNT_OF(charge_cap_names),
+        xtreme_app_scene_misc_charge_cap_changed,
+        app);
+    value_index = value_index_uint32(
+        xtreme_settings->anim_speed, charge_cap_values, COUNT_OF(charge_cap_names));
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, charge_cap_names[value_index]);
+
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_misc_var_item_list_callback, app);

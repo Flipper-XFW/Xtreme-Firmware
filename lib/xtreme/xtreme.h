@@ -38,6 +38,7 @@ typedef struct {
     bool bad_bt_remember;
     int32_t butthurt_timer;
     bool rgb_backlight;
+    uint32_t charge_cap;
 } XtremeSettings;
 
 void XTREME_SETTINGS_SAVE();
