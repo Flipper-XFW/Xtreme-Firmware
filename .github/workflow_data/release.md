@@ -1,5 +1,5 @@
 ## ⬇️ Download
->### [🖥️ Web Updater (chrome)](https://update.flipper-xtre.me) [recommended]
+>### [🖥️ Web Updater (chrome)](https://flipper-xtre.me/upate) [recommended]
 
 >### [🐬 qFlipper Package (.tgz)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{VERSION_TAG}/{ARTIFACT_TGZ})
 
