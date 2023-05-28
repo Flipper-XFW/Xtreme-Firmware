@@ -151,7 +151,7 @@ static Loader* loader_alloc() {
     if(furi_hal_is_normal_boot()) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
         for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-            if(FLIPPER_APPS[i].app != NULL) continue;
+            if(FLIPPER_APPS[i].app != NULL || FLIPPER_APPS[i].stack_size != 1) continue;
             if(storage_common_exists(storage, FLIPPER_APPS[i].appid)) {
                 void* preload = loader_preload(storage, FLIPPER_APPS[i].appid);
                 FLIPPER_APPS[i].preload = preload;
