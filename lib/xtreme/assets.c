@@ -9,7 +9,7 @@
 
 #define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 
-void swap_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
+void load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
     const char* pack = XTREME_SETTINGS()->asset_pack;
     furi_string_printf(path, ICONS_FMT "/meta", pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -41,10 +41,13 @@ void swap_icon_animated(const Icon* replace, const char* name, FuriString* path,
             }
 
             if(i == frame_count) {
-                FURI_CONST_ASSIGN(replace->frame_count, frame_count);
-                FURI_CONST_ASSIGN(replace->frame_rate, frame_rate);
+                Icon* original = malloc(sizeof(Icon));
+                memcpy(original, replace, sizeof(Icon));
+                FURI_CONST_ASSIGN_PTR(replace->original, original);
                 FURI_CONST_ASSIGN(replace->width, icon_width);
                 FURI_CONST_ASSIGN(replace->height, icon_height);
+                FURI_CONST_ASSIGN(replace->frame_rate, frame_rate);
+                FURI_CONST_ASSIGN(replace->frame_count, frame_count);
                 FURI_CONST_ASSIGN_PTR(replace->frames, frames);
             } else {
                 for(; i >= 0; i--) {
@@ -57,7 +60,7 @@ void swap_icon_animated(const Icon* replace, const char* name, FuriString* path,
     storage_file_close(file);
 }
 
-void swap_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
+void load_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, ICONS_FMT ".bmx", XTREME_SETTINGS()->asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
@@ -67,17 +70,35 @@ void swap_icon_static(const Icon* replace, const char* name, FuriString* path, F
         if(storage_file_read(file, &icon_width, 4) == 4 &&
            storage_file_read(file, &icon_height, 4) == 4 &&
            storage_file_read(file, frame, size) == size) {
-            FURI_CONST_ASSIGN(replace->frame_count, 1);
+            Icon* original = malloc(sizeof(Icon));
+            memcpy(original, replace, sizeof(Icon));
+            FURI_CONST_ASSIGN_PTR(replace->original, original);
+            uint8_t** frames = malloc(sizeof(const uint8_t*));
+            frames[0] = frame;
             FURI_CONST_ASSIGN(replace->frame_rate, 0);
+            FURI_CONST_ASSIGN(replace->frame_count, 1);
             FURI_CONST_ASSIGN(replace->width, icon_width);
             FURI_CONST_ASSIGN(replace->height, icon_height);
-            FURI_CONST_ASSIGN_PTR(replace->frames, malloc(sizeof(const uint8_t*)));
-            FURI_CONST_ASSIGN_PTR(replace->frames[0], frame);
+            FURI_CONST_ASSIGN_PTR(replace->frames, frames);
         } else {
             free(frame);
         }
     }
     storage_file_close(file);
+}
+
+void free_icon(const Icon* icon) {
+    uint8_t** frames = (void*)icon->frames;
+    int32_t frame_count = icon->frame_count;
+
+    Icon* original = icon->original;
+    memcpy((void*)icon, original, sizeof(Icon));
+
+    free(original);
+    for(int32_t i = 0; i < frame_count; i++) {
+        free(frames[i]);
+    }
+    free(frames);
 }
 
 void XTREME_ASSETS_LOAD() {
@@ -95,10 +116,12 @@ void XTREME_ASSETS_LOAD() {
         File* f = storage_file_alloc(storage);
 
         for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
-            if(ICON_PATHS[i].animated) {
-                swap_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
-            } else {
-                swap_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+            if(ICON_PATHS[i].icon->original == NULL) {
+                if(ICON_PATHS[i].animated) {
+                    load_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+                } else {
+                    load_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+                }
             }
         }
 
@@ -106,4 +129,14 @@ void XTREME_ASSETS_LOAD() {
     }
     furi_string_free(p);
     furi_record_close(RECORD_STORAGE);
+}
+
+void XTREME_ASSETS_FREE() {
+    if(!furi_hal_is_normal_boot()) return;
+
+    for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
+        if(ICON_PATHS[i].icon->original != NULL) {
+            free_icon(ICON_PATHS[i].icon);
+        }
+    }
 }
