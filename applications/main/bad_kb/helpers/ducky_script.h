@@ -40,6 +40,7 @@ typedef enum {
     BadKbStateDelay,
     BadKbStateStringDelay,
     BadKbStateWaitForBtn,
+    BadKbStatePaused,
     BadKbStateDone,
     BadKbStateScriptError,
     BadKbStateFileError,
@@ -101,7 +102,9 @@ void bad_kb_script_start(BadKbScript* bad_kb);
 
 void bad_kb_script_stop(BadKbScript* bad_kb);
 
-void bad_kb_script_toggle(BadKbScript* bad_kb);
+void bad_kb_script_start_stop(BadKbScript* bad_kb);
+
+void bad_kb_script_pause_resume(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 
