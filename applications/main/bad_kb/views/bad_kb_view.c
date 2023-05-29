@@ -12,6 +12,7 @@ typedef struct {
     char file_name[MAX_NAME_LEN];
     char layout[MAX_NAME_LEN];
     BadKbState state;
+    bool pause_wait;
     uint8_t anim_frame;
 } BadKbModel;
 
@@ -28,11 +29,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     if(strlen(model->layout) == 0) {
         furi_string_set(disp_str, "(default)");
     } else {
-        furi_string_reset(disp_str);
-        furi_string_push_back(disp_str, '(');
-        for(size_t i = 0; i < strlen(model->layout); i++)
-            furi_string_push_back(disp_str, model->layout[i]);
-        furi_string_push_back(disp_str, ')');
+        furi_string_printf(disp_str, "(%s)", model->layout);
     }
     if(model->state.pin) {
         furi_string_cat_printf(disp_str, "  PIN: %ld", model->state.pin);
@@ -45,23 +42,30 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_draw_icon(canvas, 22, 24, &I_UsbTree_48x22);
 
-    if((model->state.state == BadKbStateIdle) || (model->state.state == BadKbStateDone) ||
-       (model->state.state == BadKbStateNotConnected)) {
+    BadKbWorkerState state = model->state.state;
+    if((state == BadKbStateIdle) || (state == BadKbStateDone) ||
+       (state == BadKbStateNotConnected)) {
         if(XTREME_SETTINGS()->is_nsfw) {
             elements_button_center(canvas, "Cum");
         } else {
             elements_button_center(canvas, "Run");
         }
         elements_button_left(canvas, "Config");
-    } else if((model->state.state == BadKbStateRunning) || (model->state.state == BadKbStateDelay)) {
+    } else if((state == BadKbStateRunning) || (state == BadKbStateDelay)) {
         elements_button_center(canvas, "Stop");
-    } else if(model->state.state == BadKbStateWaitForBtn) {
+        if(!model->pause_wait) {
+            elements_button_right(canvas, "Pause");
+        }
+    } else if(state == BadKbStatePaused) {
+        elements_button_center(canvas, "End");
+        elements_button_right(canvas, "Resume");
+    } else if(state == BadKbStateWaitForBtn) {
         elements_button_center(canvas, "Press to continue");
-    } else if(model->state.state == BadKbStateWillRun) {
+    } else if(state == BadKbStateWillRun) {
         elements_button_center(canvas, "Cancel");
     }
 
-    if(model->state.state == BadKbStateNotConnected) {
+    if(state == BadKbStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         if(XTREME_SETTINGS()->is_nsfw) {
@@ -71,7 +75,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
             canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
         }
-    } else if(model->state.state == BadKbStateWillRun) {
+    } else if(state == BadKbStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         if(XTREME_SETTINGS()->is_nsfw) {
@@ -80,12 +84,12 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
         }
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "on connect");
-    } else if(model->state.state == BadKbStateFileError) {
+    } else if(state == BadKbStateFileError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "File");
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "ERROR");
-    } else if(model->state.state == BadKbStateScriptError) {
+    } else if(state == BadKbStateScriptError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 33, AlignRight, AlignBottom, "ERROR:");
@@ -99,12 +103,12 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 56, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
-    } else if(model->state.state == BadKbStateIdle) {
+    } else if(state == BadKbStateIdle) {
         canvas_draw_icon(canvas, 4, 26, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "0");
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(model->state.state == BadKbStateRunning) {
+    } else if(state == BadKbStateRunning) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
         } else {
@@ -117,13 +121,13 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(model->state.state == BadKbStateDone) {
+    } else if(state == BadKbStateDone) {
         canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "100");
         furi_string_reset(disp_str);
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(model->state.state == BadKbStateDelay) {
+    } else if(state == BadKbStateDelay) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviWaiting1_18x21);
         } else {
@@ -141,6 +145,22 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 50, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
+    } else if((state == BadKbStatePaused) || (state == BadKbStateWaitForBtn)) {
+        if(model->anim_frame == 0) {
+            canvas_draw_icon(canvas, 4, 23, &I_EviWaiting1_18x21);
+        } else {
+            canvas_draw_icon(canvas, 4, 23, &I_EviWaiting2_18x21);
+        }
+        canvas_set_font(canvas, FontBigNumbers);
+        furi_string_printf(
+            disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
+        canvas_draw_str_aligned(
+            canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
+        furi_string_reset(disp_str);
+        canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 127, 50, AlignRight, AlignBottom, "Paused");
+        furi_string_reset(disp_str);
     } else {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
     }
@@ -154,7 +174,27 @@ static bool bad_kb_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     if(event->type == InputTypeShort) {
-        if((event->key == InputKeyLeft) || (event->key == InputKeyOk)) {
+        if(event->key == InputKeyLeft) {
+            consumed = true;
+            furi_assert(bad_kb->callback);
+            bad_kb->callback(event->key, bad_kb->context);
+        } else if(event->key == InputKeyOk) {
+            with_view_model(
+                bad_kb->view, BadKbModel * model, { model->pause_wait = false; }, true);
+            consumed = true;
+            furi_assert(bad_kb->callback);
+            bad_kb->callback(event->key, bad_kb->context);
+        } else if(event->key == InputKeyRight) {
+            with_view_model(
+                bad_kb->view,
+                BadKbModel * model,
+                {
+                    if((model->state.state == BadKbStateRunning) ||
+                       (model->state.state == BadKbStateDelay)) {
+                        model->pause_wait = true;
+                    }
+                },
+                true);
             consumed = true;
             furi_assert(bad_kb->callback);
             bad_kb->callback(event->key, bad_kb->context);
@@ -229,6 +269,9 @@ void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {
         {
             memcpy(&(model->state), st, sizeof(BadKbState));
             model->anim_frame ^= 1;
+            if(model->state.state == BadKbStatePaused) {
+                model->pause_wait = false;
+            }
         },
         true);
 }
