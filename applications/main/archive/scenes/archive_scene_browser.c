@@ -107,22 +107,27 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case ArchiveBrowserEventFileMenuOpen:
-            archive_show_file_menu(browser, true);
+            archive_show_file_menu(browser, true, false);
+            consumed = true;
+            break;
+        case ArchiveBrowserEventManageMenuOpen:
+            if(!favorites) {
+                archive_show_file_menu(browser, true, true);
+            }
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuClose:
-            archive_show_file_menu(browser, false);
+            archive_show_file_menu(browser, false, false);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
             if(selected->type == ArchiveFileTypeFolder) {
                 archive_switch_tab(browser, TAB_LEFT);
-                archive_show_file_menu(browser, false);
                 archive_enter_dir(browser, selected->path);
             } else if(archive_is_known_app(selected->type)) {
                 archive_run_in_app(browser, selected, favorites);
-                archive_show_file_menu(browser, false);
             }
+            archive_show_file_menu(browser, false, false);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuPin: {
@@ -130,47 +135,142 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             if(favorites) {
                 archive_favorites_delete("%s", name);
                 archive_file_array_rm_selected(browser);
-                archive_show_file_menu(browser, false);
             } else if(archive_is_known_app(selected->type)) {
                 if(archive_is_favorite("%s", name)) {
                     archive_favorites_delete("%s", name);
                 } else {
                     archive_file_append(ARCHIVE_FAV_PATH, "%s\n", name);
                 }
-                archive_show_file_menu(browser, false);
             }
+            archive_show_file_menu(browser, false, false);
             consumed = true;
         } break;
-
+        case ArchiveBrowserEventFileMenuInfo:
+            archive_show_file_menu(browser, false, false);
+            scene_manager_set_scene_state(
+                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneInfo);
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuShow:
+            archive_show_file_menu(browser, false, false);
+            scene_manager_set_scene_state(
+                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneShow);
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuCut:
+            archive_show_file_menu(browser, false, false);
+            if(!favorites) {
+                with_view_model(
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    {
+                        if(model->clipboard == NULL) {
+                            model->clipboard = strdup(furi_string_get_cstr(selected->path));
+                            model->clipboard_copy = false;
+                        }
+                    },
+                    false);
+            }
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuCopy:
+            archive_show_file_menu(browser, false, false);
+            if(!favorites) {
+                with_view_model(
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    {
+                        if(model->clipboard == NULL) {
+                            model->clipboard = strdup(furi_string_get_cstr(selected->path));
+                            model->clipboard_copy = true;
+                        }
+                    },
+                    false);
+            }
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuPaste:
+            archive_show_file_menu(browser, false, false);
+            if(!favorites) {
+                FuriString* path_src = NULL;
+                FuriString* path_dst = NULL;
+                bool copy;
+                with_view_model(
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    {
+                        if(model->clipboard != NULL) {
+                            path_src = furi_string_alloc_set(model->clipboard);
+                            path_dst = furi_string_alloc();
+                            FuriString* base = furi_string_alloc();
+                            path_extract_basename(model->clipboard, base);
+                            path_concat(
+                                furi_string_get_cstr(browser->path),
+                                furi_string_get_cstr(base),
+                                path_dst);
+                            furi_string_free(base);
+                            copy = model->clipboard_copy;
+                            free(model->clipboard);
+                            model->clipboard = NULL;
+                        }
+                    },
+                    false);
+                if(path_src && path_dst) {
+                    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewStack);
+                    archive_show_loading_popup(archive, true);
+                    FS_Error error = archive_copy_rename_file_or_dir(
+                        archive->browser,
+                        furi_string_get_cstr(path_src),
+                        furi_string_get_cstr(path_dst),
+                        copy,
+                        true);
+                    archive_show_loading_popup(archive, false);
+                    furi_string_free(path_src);
+                    furi_string_free(path_dst);
+                    if(error != FSE_OK) {
+                        FuriString* dialog_msg;
+                        dialog_msg = furi_string_alloc();
+                        furi_string_cat_printf(
+                            dialog_msg,
+                            "Cannot %s:\n%s",
+                            copy ? "copy" : "move",
+                            storage_error_get_desc(error));
+                        dialog_message_show_storage_error(
+                            archive->dialogs, furi_string_get_cstr(dialog_msg));
+                        furi_string_free(dialog_msg);
+                    }
+                    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
+                }
+            }
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuNewDir:
+            archive_show_file_menu(browser, false, false);
+            if(!favorites) {
+                scene_manager_set_scene_state(
+                    archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
+                scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneNewDir);
+            }
+            consumed = true;
+            break;
         case ArchiveBrowserEventFileMenuRename:
+            archive_show_file_menu(browser, false, false);
             if(favorites) {
                 browser->callback(ArchiveBrowserEventEnterFavMove, browser->context);
                 //} else if((archive_is_known_app(selected->type)) && (selected->is_app == false)) {
             } else {
                 // Added ability to rename files and folders
-                archive_show_file_menu(browser, false);
                 scene_manager_set_scene_state(
                     archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
                 scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
             }
             consumed = true;
             break;
-        case ArchiveBrowserEventFileMenuInfo:
-            archive_show_file_menu(browser, false);
-            scene_manager_set_scene_state(
-                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_DEFAULT);
-            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneInfo);
-            consumed = true;
-            break;
-        case ArchiveBrowserEventFileMenuShow:
-            archive_show_file_menu(browser, false);
-            scene_manager_set_scene_state(
-                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_DEFAULT);
-            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneShow);
-            consumed = true;
-            break;
         case ArchiveBrowserEventFileMenuDelete:
-            if(archive_get_tab(browser) != ArchiveTabFavorites) {
+            archive_show_file_menu(browser, false, false);
+            if(!favorites) {
                 scene_manager_set_scene_state(
                     archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
                 scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneDelete);
@@ -191,7 +291,6 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             break;
         case ArchiveBrowserEventEnterFavMove:
             furi_string_set(archive->fav_move_str, selected->path);
-            archive_show_file_menu(browser, false);
             archive_favorites_move_mode(archive->browser, true);
             consumed = true;
             break;

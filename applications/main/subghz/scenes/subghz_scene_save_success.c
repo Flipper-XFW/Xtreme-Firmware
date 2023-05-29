@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include <xtreme.h>
 
 void subghz_scene_save_success_popup_callback(void* context) {
     SubGhz* subghz = context;
@@ -12,7 +11,7 @@ void subghz_scene_save_success_on_enter(void* context) {
 
     // Setup view
     Popup* popup = subghz->popup;
-    popup_set_icon(popup, 32, 5, XTREME_ASSETS()->I_DolphinNice_96x59);
+    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, subghz);
@@ -25,13 +24,13 @@ bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) 
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventSceneSaveSuccess) {
-            if(!subghz->in_decoder_scene) {
+            if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
                 if(!scene_manager_search_and_switch_to_previous_scene(
                        subghz->scene_manager, SubGhzSceneReceiver)) {
-                    subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWSave;
+                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWSave);
                     if(!scene_manager_search_and_switch_to_previous_scene(
                            subghz->scene_manager, SubGhzSceneReadRAW)) {
-                        subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+                        subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
                         if(!scene_manager_search_and_switch_to_previous_scene(
                                subghz->scene_manager, SubGhzSceneSaved)) {
                             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
@@ -39,9 +38,11 @@ bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) 
                     }
                 }
             } else {
-                subghz->decode_raw_state = SubGhzDecodeRawStateStart;
-                subghz->txrx->idx_menu_chosen = 0;
-                subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
+                scene_manager_set_scene_state(
+                    subghz->scene_manager, SubGhzSceneDecodeRAW, SubGhzDecodeRawStateStart);
+
+                subghz->idx_menu_chosen = 0;
+                subghz_txrx_set_rx_calback(subghz->txrx, NULL, subghz);
 
                 if(subghz_file_encoder_worker_is_running(subghz->decode_raw_file_worker_encoder)) {
                     subghz_file_encoder_worker_stop(subghz->decode_raw_file_worker_encoder);
@@ -64,11 +65,6 @@ bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) 
 
 void subghz_scene_save_success_on_exit(void* context) {
     SubGhz* subghz = context;
-
-    if(subghz->in_decoder_scene) {
-        subghz->in_decoder_scene = false;
-        subghz->in_decoder_scene_skip = false;
-    }
 
     // Clear view
     Popup* popup = subghz->popup;

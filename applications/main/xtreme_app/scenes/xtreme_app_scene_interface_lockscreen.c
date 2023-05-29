@@ -10,6 +10,14 @@ void xtreme_app_scene_interface_lockscreen_var_item_list_callback(void* context,
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
+static void xtreme_app_scene_interface_lockscreen_lock_on_boot_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->lock_on_boot = value;
+    app->save_settings = true;
+}
+
 static void xtreme_app_scene_interface_lockscreen_bad_pins_format_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
@@ -63,6 +71,15 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Lock on Boot",
+        2,
+        xtreme_app_scene_interface_lockscreen_lock_on_boot_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings->lock_on_boot);
+    variable_item_set_current_value_text(item, xtreme_settings->lock_on_boot ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,

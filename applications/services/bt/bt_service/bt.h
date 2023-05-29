@@ -41,28 +41,6 @@ typedef void (*BtStatusChangedCallback)(BtStatus status, void* context);
  */
 bool bt_set_profile(Bt* bt, BtProfile profile);
 
-void bt_set_profile_adv_name(Bt* bt, const char* fmt, ...);
-const char* bt_get_profile_adv_name(Bt* bt);
-
-void bt_set_profile_mac_address(Bt* bt, const uint8_t mac[6]);
-const uint8_t* bt_get_profile_mac_address(Bt* bt);
-
-bool bt_remote_rssi(Bt* bt, uint8_t* rssi);
-
-void bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method);
-GapPairing bt_get_profile_pairing_method(Bt* bt);
-
-/** Stop saving new peer key to flash (in .bt.keys file)
- * 
-*/
-void bt_disable_peer_key_update(Bt* bt);
-
-/** Enable saving peer key to internal flash (enable by default)
- * 
- * @note This function should be called if bt_disable_peer_key_update was called before
-*/
-void bt_enable_peer_key_update(Bt* bt);
-
 /** Disconnect from Central
  *
  * @param bt        Bt instance
@@ -96,6 +74,30 @@ void bt_keys_storage_set_storage_path(Bt* bt, const char* keys_storage_path);
  * @param bt                    Bt instance
  */
 void bt_keys_storage_set_default_path(Bt* bt);
+
+void bt_set_profile_adv_name(Bt* bt, const char* fmt, ...);
+
+const char* bt_get_profile_adv_name(Bt* bt);
+
+void bt_set_profile_mac_address(Bt* bt, const uint8_t mac[6]);
+
+const uint8_t* bt_get_profile_mac_address(Bt* bt);
+
+bool bt_remote_rssi(Bt* bt, uint8_t* rssi);
+
+void bt_set_profile_pairing_method(Bt* bt, GapPairing pairing_method);
+GapPairing bt_get_profile_pairing_method(Bt* bt);
+
+/** Stop saving new peer key to flash (in .bt.keys file)
+ * 
+*/
+void bt_disable_peer_key_update(Bt* bt);
+
+/** Enable saving peer key to internal flash (enable by default)
+ * 
+ * @note This function should be called if bt_disable_peer_key_update was called before
+*/
+void bt_enable_peer_key_update(Bt* bt);
 
 #ifdef __cplusplus
 }

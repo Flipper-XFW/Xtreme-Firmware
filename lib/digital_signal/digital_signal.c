@@ -51,6 +51,16 @@ struct DigitalSignalInternals {
 #define T_TIM 1562 /* 15.625 ns *100 */
 #define T_TIM_DIV2 781 /* 15.625 ns / 2 *100 */
 
+/* maximum entry count of the sequence dma ring buffer */
+#define SEQUENCE_DMA_RINGBUFFER_SIZE 32
+/* maximum number of DigitalSignals in a sequence */
+#define SEQUENCE_SIGNALS_SIZE 32
+/*
+ * if sequence size runs out from the initial value passed to digital_sequence_alloc
+ * the size will be increased by this amount and reallocated
+ */
+#define SEQUENCE_SIZE_REALLOCATE_INCREMENT 256
+
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     DigitalSignal* signal = malloc(sizeof(DigitalSignal));
     signal->start_level = true;
@@ -89,10 +99,6 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
 
 void digital_signal_free(DigitalSignal* signal) {
     furi_assert(signal);
-
-    if(!signal) {
-        return;
-    }
 
     free(signal->edge_timings);
     free(signal->reload_reg_buff);
@@ -209,12 +215,12 @@ void digital_signal_prepare_arr(DigitalSignal* signal) {
         uint32_t edge_scaled = (internals->factor * signal->edge_timings[pos]) / (1024 * 1024);
         uint32_t pulse_duration = edge_scaled + internals->reload_reg_remainder;
         if(pulse_duration < 10 || pulse_duration > 10000000) {
-            FURI_LOG_D(
+            /*FURI_LOG_D(
                 TAG,
                 "[prepare] pulse_duration out of range: %lu = %lu * %llu",
                 pulse_duration,
                 signal->edge_timings[pos],
-                internals->factor);
+                internals->factor);*/
             pulse_duration = 100;
         }
         uint32_t pulse_ticks = (pulse_duration + T_TIM_DIV2) / T_TIM;
@@ -293,8 +299,6 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     furi_hal_gpio_init(
         signal->internals->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
-    /* single signal, add a temporary, terminating edge at the end */
-    signal->edge_timings[signal->edge_cnt++] = 10;
     digital_signal_prepare_arr(signal);
 
     digital_signal_setup_dma(signal);
@@ -306,8 +310,6 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
 
     digital_signal_stop_timer();
     digital_signal_stop_dma();
-
-    signal->edge_cnt--;
 }
 
 static void digital_sequence_alloc_signals(DigitalSequence* sequence, uint32_t size) {
@@ -332,7 +334,7 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     sequence->bake = false;
 
     sequence->dma_buffer = malloc(sizeof(struct ReloadBuffer));
-    sequence->dma_buffer->size = 32;
+    sequence->dma_buffer->size = SEQUENCE_DMA_RINGBUFFER_SIZE;
     sequence->dma_buffer->buffer = malloc(sequence->dma_buffer->size * sizeof(uint32_t));
 
     sequence->dma_config_gpio.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
@@ -357,7 +359,7 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     sequence->dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     sequence->dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
 
-    digital_sequence_alloc_signals(sequence, 32);
+    digital_sequence_alloc_signals(sequence, SEQUENCE_SIGNALS_SIZE);
     digital_sequence_alloc_sequence(sequence, size);
 
     return sequence;
@@ -365,10 +367,6 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
 
 void digital_sequence_free(DigitalSequence* sequence) {
     furi_assert(sequence);
-
-    if(!sequence) {
-        return;
-    }
 
     free(sequence->signals);
     free(sequence->sequence);
@@ -404,8 +402,9 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
     furi_assert(signal_index < sequence->signals_size);
 
     if(sequence->sequence_used >= sequence->sequence_size) {
-        sequence->sequence_size += 256;
-        sequence->sequence = realloc(sequence->sequence, sequence->sequence_size);
+        sequence->sequence_size += SEQUENCE_SIZE_REALLOCATE_INCREMENT;
+        sequence->sequence = realloc(sequence->sequence, sequence->sequence_size); //-V701
+        furi_assert(sequence->sequence);
     }
 
     sequence->sequence[sequence->sequence_used++] = signal_index;
@@ -479,17 +478,17 @@ static void digital_sequence_finish(DigitalSequence* sequence) {
                 break;
             }
 
-            if(last_pos != dma_buffer->read_pos) {
+            if(last_pos != dma_buffer->read_pos) { //-V547
                 prev_timer = DWT->CYCCNT;
             }
             if(DWT->CYCCNT - prev_timer > wait_ticks) {
-                FURI_LOG_D(
+                /*FURI_LOG_D(
                     TAG,
                     "[SEQ] hung %lu ms in finish (ARR 0x%08lx, read %lu, write %lu)",
                     wait_ms,
                     TIM2->ARR,
                     dma_buffer->read_pos,
-                    dma_buffer->write_pos);
+                    dma_buffer->write_pos);*/
                 break;
             }
         } while(1);
@@ -513,17 +512,17 @@ static void digital_sequence_queue_pulse(DigitalSequence* sequence, uint32_t len
                 break;
             }
 
-            if(last_pos != dma_buffer->read_pos) {
+            if(last_pos != dma_buffer->read_pos) { //-V547
                 prev_timer = DWT->CYCCNT;
             }
             if(DWT->CYCCNT - prev_timer > wait_ticks) {
-                FURI_LOG_D(
+                /*FURI_LOG_D(
                     TAG,
                     "[SEQ] hung %lu ms in queue (ARR 0x%08lx, read %lu, write %lu)",
                     wait_ms,
                     TIM2->ARR,
                     dma_buffer->read_pos,
-                    dma_buffer->write_pos);
+                    dma_buffer->write_pos);*/
                 break;
             }
         } while(1);

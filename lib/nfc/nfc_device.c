@@ -991,11 +991,17 @@ bool nfc_device_load_bank_card_data(FlipperFormat* file, NfcDevice* dev) {
         if(!flipper_format_get_value_count(file, "AID", &data_cnt)) break;
         data->aid_len = data_cnt;
         if(!flipper_format_read_hex(file, "AID", data->aid, data->aid_len)) break;
-        if(!flipper_format_read_string(file, "Name", temp_str)) break;
+        if(!flipper_format_read_string(file, "Name", temp_str)) {
+            furi_string_set_str(temp_str, "Unknown");
+        }
         strlcpy(data->name, furi_string_get_cstr(temp_str), sizeof(data->name));
-        if(!flipper_format_get_value_count(file, "Number", &data_cnt)) break;
+        if(!flipper_format_get_value_count(file, "Number", &data_cnt)) {
+            data_cnt = 0;
+        }
         data->number_len = data_cnt;
-        if(!flipper_format_read_hex(file, "Number", data->number, data->number_len)) break;
+        if(!flipper_format_read_hex(file, "Number", data->number, data->number_len)) {
+            memset(data->number, 0, sizeof(data->number));
+        };
         parsed = true;
         // Load optional data
         uint8_t exp_data[2] = {};
@@ -1401,9 +1407,8 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             break;
         nfc_device_prepare_format_string(dev, temp_str);
         if(!flipper_format_write_string(file, "Device type", temp_str)) break;
-        // Write UID, ATQA, SAK
-        if(!flipper_format_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
-            break;
+        // Write UID
+        if(!flipper_format_write_comment_cstr(file, "UID is common for all formats")) break;
         if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
 
         if(dev->format != NfcDeviceSaveFormatNfcV) {

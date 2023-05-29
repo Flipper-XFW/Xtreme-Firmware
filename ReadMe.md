@@ -1,12 +1,12 @@
 <h1 align="center">XFW - <code>Xtreme Firmware</code> for the Flipper Zero</h1>
-<h3 align="center">Feature-rich, stable, customizable</h3>
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/55334727/215170306-051eeb8f-8f72-437f-8c2d-0e4be009bdad.png">
+  <img src="https://github.com/ClaraCrazy/Flipper-Xtreme/assets/55334727/767a3e1b-a96c-43c8-b58f-a49a533b3bb4">
 </p>
 
-[Intro](https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special) | [Animations](https://github.com/ClaraCrazy/Flipper-Xtreme#Animations--Asset-Packs) | [Wiki](https://github.com/ClaraCrazy/Flipper-Xtreme/wiki) | [Changelog](https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes) | [Known bugs](https://github.com/ClaraCrazy/Flipper-Xtreme/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-pending) | [Install](https://github.com/ClaraCrazy/Flipper-Xtreme#Install) | [Build](https://github.com/ClaraCrazy/Flipper-Xtreme#build-it-yourself) | [Discord](https://discord.gg/flipper-xtreme) | [Donate](https://github.com/ClaraCrazy/Flipper-Xtreme#%EF%B8%8F-support)
------
+<h2 align="center">
+  <a href="https://flipper-xtre.me">Website</a> | <a href="https://github.com/ClaraCrazy/Flipper-Xtreme#What-makes-it-special">Intro</a> | <a href="https://github.com/ClaraCrazy/Flipper-Xtreme#Install">Install</a> | <a href="https://github.com/ClaraCrazy/Flipper-Xtreme#list-of-changes">Changelog</a> | <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/wiki">Wiki</a> | <a href="https://discord.gg/flipper-xtreme">Discord</a> | <a href="https://github.com/ClaraCrazy/Flipper-Xtreme#%EF%B8%8F-support">Donate</a>
+</h2>
 
 This firmware is a complete overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and also features lots of awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
 
@@ -52,7 +52,10 @@ Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it f
 
 -----
 <br>
-<h2 align="center">Animations / Asset Packs:</h2>
+<h2 align="center">Animations / Asset Packs:
+  <h3 align="center">Want to try some asset packs? Check <a href="https://flipper-xtre.me/asset-packs">here</a>
+  </h3>
+</h2>
 
 We created our own, new & improved Animation / Asset system, that we can finally reveal. It lets you to create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations and Icons like never before.
 
@@ -160,7 +163,7 @@ There are 3 methods to install Xtreme, we recommend you use the **Web Updater**,
 >   <li>Open the <a href="https://github.com/ClaraCrazy/Flipper-Xtreme/releases/latest">latest release page</a> and click on the <code>Web Updater</code> link</li>
 >   <li>Make sure qFlipper is closed</li>
 >   <li>Click <code>Connect</code> and select your Flipper from the list</li>
->   <li>Click <code>Install</code> and wait for the update to complete</li>
+>   <li>Click <code>Flash</code> and wait for the update to complete</li>
 > </ul></details>
 
 > <details><summary><code>qFlipper Package (.tgz)</code></summary><ul>

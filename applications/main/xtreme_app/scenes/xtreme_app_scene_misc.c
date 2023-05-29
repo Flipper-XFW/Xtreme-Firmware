@@ -2,7 +2,8 @@
 
 enum VarItemListIndex {
     VarItemListIndexChangeDeviceName,
-    VarItemListIndexXpLevel,
+    VarItemListIndexDolphinLevel,
+    VarItemListIndexDolphinAngry,
     VarItemListIndexButthurtTimer,
     VarItemListIndexRgbBacklight,
     VarItemListIndexLcdColor,
@@ -13,13 +14,22 @@ void xtreme_app_scene_misc_var_item_list_callback(void* context, uint32_t index)
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void xtreme_app_scene_misc_xp_level_changed(VariableItem* item) {
+static void xtreme_app_scene_misc_dolphin_level_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    app->xp_level = variable_item_get_current_value_index(item) + 1;
+    app->dolphin_level = variable_item_get_current_value_index(item) + 1;
     char level_str[4];
-    snprintf(level_str, 4, "%li", app->xp_level);
+    snprintf(level_str, 4, "%li", app->dolphin_level);
     variable_item_set_current_value_text(item, level_str);
     app->save_level = true;
+}
+
+static void xtreme_app_scene_misc_dolphin_angry_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    app->dolphin_angry = variable_item_get_current_value_index(item);
+    char angry_str[4];
+    snprintf(angry_str, 4, "%li", app->dolphin_angry);
+    variable_item_set_current_value_text(item, angry_str);
+    app->save_angry = true;
 }
 
 const char* const butthurt_timer_names[] =
@@ -33,6 +43,17 @@ static void xtreme_app_scene_misc_butthurt_timer_changed(VariableItem* item) {
     XTREME_SETTINGS()->butthurt_timer = butthurt_timer_values[index];
     app->save_settings = true;
     app->require_reboot = true;
+}
+
+#define CHARGE_CAP_INTV 5
+static void xtreme_app_scene_misc_charge_cap_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    char cap_str[6];
+    uint32_t value = (variable_item_get_current_value_index(item) + 1) * CHARGE_CAP_INTV;
+    snprintf(cap_str, 6, "%lu%%", value);
+    variable_item_set_current_value_text(item, cap_str);
+    XTREME_SETTINGS()->charge_cap = value;
+    app->save_settings = true;
 }
 
 static void xtreme_app_scene_misc_lcd_color_changed(VariableItem* item) {
@@ -54,15 +75,26 @@ void xtreme_app_scene_misc_on_enter(void* context) {
     variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
 
     char level_str[4];
-    snprintf(level_str, 4, "%li", app->xp_level);
+    snprintf(level_str, 4, "%li", app->dolphin_level);
     item = variable_item_list_add(
         var_item_list,
-        "XP Level",
+        "Dolphin Level",
         DOLPHIN_LEVEL_COUNT + 1,
-        xtreme_app_scene_misc_xp_level_changed,
+        xtreme_app_scene_misc_dolphin_level_changed,
         app);
-    variable_item_set_current_value_index(item, app->xp_level - 1);
+    variable_item_set_current_value_index(item, app->dolphin_level - 1);
     variable_item_set_current_value_text(item, level_str);
+
+    char angry_str[4];
+    snprintf(angry_str, 4, "%li", app->dolphin_angry);
+    item = variable_item_list_add(
+        var_item_list,
+        "Dolphin Angry",
+        BUTTHURT_MAX + 1,
+        xtreme_app_scene_misc_dolphin_angry_changed,
+        app);
+    variable_item_set_current_value_index(item, app->dolphin_angry);
+    variable_item_set_current_value_text(item, angry_str);
 
     item = variable_item_list_add(
         var_item_list,
@@ -74,6 +106,18 @@ void xtreme_app_scene_misc_on_enter(void* context) {
         xtreme_settings->butthurt_timer, butthurt_timer_values, COUNT_OF(butthurt_timer_names));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, butthurt_timer_names[value_index]);
+
+    char cap_str[6];
+    value_index = xtreme_settings->charge_cap / CHARGE_CAP_INTV;
+    snprintf(cap_str, 6, "%lu%%", (uint32_t)value_index * CHARGE_CAP_INTV);
+    item = variable_item_list_add(
+        var_item_list,
+        "Charge Cap",
+        100 / CHARGE_CAP_INTV,
+        xtreme_app_scene_misc_charge_cap_changed,
+        app);
+    variable_item_set_current_value_index(item, value_index - 1);
+    variable_item_set_current_value_text(item, cap_str);
 
     item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
     variable_item_set_current_value_text(item, xtreme_settings->rgb_backlight ? "ON" : "OFF");

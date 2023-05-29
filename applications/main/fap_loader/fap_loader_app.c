@@ -13,6 +13,7 @@
 #include <loader/firmware_api/firmware_api.h>
 #include <storage/storage_processing.h>
 #include <applications/main/archive/helpers/favorite_timeout.h>
+#include <xtreme/private.h>
 
 #define TAG "FapLoader"
 
@@ -243,6 +244,9 @@ static void fap_loader_free(FapLoader* loader) {
 }
 
 int32_t fap_loader_app(char* p) {
+    size_t start = furi_get_tick();
+    XTREME_ASSETS_FREE();
+    FURI_LOG_I("Assets", "Freed in %ums", (size_t)(furi_get_tick() - start));
     FapLoader* loader;
     process_favorite_launch(&p);
     if(p) {
@@ -262,5 +266,9 @@ int32_t fap_loader_app(char* p) {
     }
 
     fap_loader_free(loader);
+
+    start = furi_get_tick();
+    XTREME_ASSETS_LOAD();
+    FURI_LOG_I("Assets", "Loaded in %ums", (size_t)(furi_get_tick() - start));
     return 0;
 }

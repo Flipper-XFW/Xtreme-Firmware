@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Union
 
 
 class FlipperManifestException(Exception):
@@ -42,6 +42,7 @@ class FlipperApplication:
 
     appid: str
     apptype: FlipperAppType
+    preload: Optional[bool] = False
     name: Optional[str] = ""
     entry_point: Optional[str] = None
     flags: List[str] = field(default_factory=lambda: ["Default"])
@@ -57,7 +58,7 @@ class FlipperApplication:
 
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
-    fap_version: Tuple[int] = field(default_factory=lambda: (0, 1))
+    fap_version: Union[str, Tuple[int]] = "0.1"
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
     fap_category: str = ""
@@ -85,6 +86,13 @@ class FlipperApplication:
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
+        if isinstance(self.fap_version, str):
+            try:
+                self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
+            except ValueError:
+                raise FlipperManifestException(
+                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
+                )
 
 
 class AppManager:
@@ -366,7 +374,7 @@ class ApplicationsCGenerator:
     {{.app = NULL,
      .name = "{app.name}",
      .appid = "/ext/apps/.Main/{app.appid}.fap",
-     .stack_size = 0,
+     .stack_size = {1 if app.preload else 0},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
         return f"""
@@ -388,7 +396,7 @@ class ApplicationsCGenerator:
                 map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype))
             )
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
-            contents.append(f"const {entry_type} {entry_block}[] = {{")
+            contents.append(f"{entry_type} {entry_block}[] = {{")
             apps = self.buildset.get_apps_of_type(apptype)
             if apptype is FlipperAppType.APP:
                 apps += self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)

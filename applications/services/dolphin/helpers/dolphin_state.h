@@ -9,7 +9,13 @@
 extern "C" {
 #endif
 
+#define DOLPHIN_STATE_OLD_PATH INT_PATH(".dolphin.state")
+#define DOLPHIN_STATE_PATH CFG_PATH("dolphin.state")
+
 #define DOLPHIN_LEVEL_COUNT 29
+
+#define BUTTHURT_MAX 14
+#define BUTTHURT_MIN 0
 
 typedef struct DolphinState DolphinState;
 typedef struct {

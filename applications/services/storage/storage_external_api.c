@@ -421,19 +421,69 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
     return S_RETURN_ERROR;
 }
 
+bool storage_is_subdir(const char* a, const char* b) {
+    char test[strlen(b) + 2];
+    snprintf(test, sizeof(test), "%s/", b);
+    return strncmp(a, test, sizeof(test) - 1) == 0;
+}
+
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
-    FS_Error error = storage_common_copy(storage, old_path, new_path);
-    if(error == FSE_OK) {
-        if(!storage_simply_remove_recursive(storage, old_path)) {
-            error = FSE_INTERNAL;
+    if(!storage_common_exists(storage, old_path)) {
+        return FSE_NOT_EXIST;
+    }
+
+    if(storage_is_subdir(new_path, old_path)) {
+        return FSE_INVALID_NAME;
+    }
+
+    S_API_PROLOGUE;
+    SAData data = {
+        .rename = {
+            .old = old_path,
+            .new = new_path,
+            .thread_id = furi_thread_get_current_id(),
+        }};
+
+    S_API_MESSAGE(StorageCommandCommonRename);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error storage_common_move(Storage* storage, const char* old_path, const char* new_path) {
+    if(!storage_common_exists(storage, old_path)) {
+        return FSE_NOT_EXIST;
+    }
+
+    if(storage_is_subdir(new_path, old_path)) {
+        return FSE_INVALID_NAME;
+    }
+
+    if(storage_common_exists(storage, new_path)) {
+        FS_Error error = storage_common_remove(storage, new_path);
+        if(error != FSE_OK) {
+            return error;
         }
     }
 
-    return error;
+    S_API_PROLOGUE;
+    SAData data = {
+        .rename = {
+            .old = old_path,
+            .new = new_path,
+            .thread_id = furi_thread_get_current_id(),
+        }};
+
+    S_API_MESSAGE(StorageCommandCommonRename);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
 }
 
 static FS_Error
     storage_copy_recursive(Storage* storage, const char* old_path, const char* new_path) {
+    if(storage_is_subdir(new_path, old_path)) {
+        return FSE_INVALID_NAME;
+    }
+
     FS_Error error = storage_common_mkdir(storage, new_path);
     DirWalk* dir_walk = dir_walk_alloc(storage);
     FuriString* path;
@@ -699,10 +749,14 @@ FS_Error storage_common_migrate(Storage* storage, const char* source, const char
         return FSE_OK;
     }
 
-    FS_Error error = storage_common_merge(storage, source, dest);
+    FS_Error error = storage_common_rename(storage, source, dest);
 
-    if(error == FSE_OK) {
-        storage_simply_remove_recursive(storage, source);
+    if(error != FSE_OK) {
+        error = storage_common_merge(storage, source, dest);
+
+        if(error == FSE_OK) {
+            storage_simply_remove_recursive(storage, source);
+        }
     }
 
     return error;

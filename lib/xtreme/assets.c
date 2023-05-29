@@ -1,5 +1,6 @@
 #include "xtreme.h"
 #include "private.h"
+#include <furi_hal.h>
 #include <assets_icons.h>
 #include <storage/storage.h>
 #include <core/dangerous_defines.h>
@@ -8,166 +9,134 @@
 
 #define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 
-XtremeAssets xtreme_assets = {
-    .A_Levelup_128x64 = &A_Levelup_128x64,
-    .I_BLE_Pairing_128x64 = &I_BLE_Pairing_128x64,
-    .I_DolphinCommon_56x48 = &I_DolphinCommon_56x48,
-    .I_DolphinMafia_115x62 = &I_DolphinMafia_115x62,
-    .I_DolphinNice_96x59 = &I_DolphinNice_96x59,
-    .I_DolphinWait_61x59 = &I_DolphinWait_61x59,
-    .I_iButtonDolphinVerySuccess_108x52 = &I_iButtonDolphinVerySuccess_108x52,
-    .I_DolphinReadingSuccess_59x63 = &I_DolphinReadingSuccess_59x63,
-    .I_Lockscreen = &I_Lockscreen,
-    .I_WarningDolphin_45x42 = &I_WarningDolphin_45x42,
-    .I_NFC_dolphin_emulation_47x61 = &I_NFC_dolphin_emulation_47x61,
-    .I_passport_bad_46x49 = &I_passport_bad_46x49,
-    .I_passport_DB = &I_passport_DB,
-    .I_passport_happy_46x49 = &I_passport_happy_46x49,
-    .I_passport_okay_46x49 = &I_passport_okay_46x49,
-    .I_RFIDDolphinReceive_97x61 = &I_RFIDDolphinReceive_97x61,
-    .I_RFIDDolphinSend_97x61 = &I_RFIDDolphinSend_97x61,
-    .I_RFIDDolphinSuccess_108x57 = &I_RFIDDolphinSuccess_108x57,
-    .I_Cry_dolph_55x52 = &I_Cry_dolph_55x52,
-    .I_Background_128x11 = &I_Background_128x11,
-    .I_Fishing_123x52 = &I_Fishing_123x52,
-    .I_Scanning_123x52 = &I_Scanning_123x52,
-    .I_Auth_62x31 = &I_Auth_62x31,
-    .I_Connect_me_62x31 = &I_Connect_me_62x31,
-    .I_Connected_62x31 = &I_Connected_62x31,
-    .I_Error_62x31 = &I_Error_62x31,
-};
-
-void anim(const Icon** replace, const char* name, FuriString* path, File* file) {
-    do {
-        furi_string_printf(path, ICONS_FMT "/meta", XTREME_SETTINGS()->asset_pack, name);
-        if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
-            break;
-        int32_t width, height, frame_rate, frame_count;
-        storage_file_read(file, &width, 4);
-        storage_file_read(file, &height, 4);
-        storage_file_read(file, &frame_rate, 4);
-        storage_file_read(file, &frame_count, 4);
+void load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
+    const char* pack = XTREME_SETTINGS()->asset_pack;
+    furi_string_printf(path, ICONS_FMT "/meta", pack, name);
+    if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        int32_t icon_width, icon_height, frame_rate, frame_count;
+        bool ok =
+            (storage_file_read(file, &icon_width, 4) == 4 &&
+             storage_file_read(file, &icon_height, 4) == 4 &&
+             storage_file_read(file, &frame_rate, 4) == 4 &&
+             storage_file_read(file, &frame_count, 4) == 4);
         storage_file_close(file);
 
-        Icon* icon = malloc(sizeof(Icon));
-        FURI_CONST_ASSIGN(icon->width, width);
-        FURI_CONST_ASSIGN(icon->height, height);
-        FURI_CONST_ASSIGN(icon->frame_rate, frame_rate);
-        FURI_CONST_ASSIGN(icon->frame_count, frame_count);
-        icon->frames = malloc(sizeof(const uint8_t*) * icon->frame_count);
-        const char* pack = XTREME_SETTINGS()->asset_pack;
-
-        bool ok = true;
-        for(int i = 0; i < icon->frame_count; ++i) {
-            FURI_CONST_ASSIGN_PTR(icon->frames[i], 0);
-            if(ok) {
-                ok = false;
+        if(ok) {
+            uint8_t** frames = malloc(sizeof(const uint8_t*) * frame_count);
+            int i = 0;
+            for(; i < frame_count; i++) {
                 furi_string_printf(path, ICONS_FMT "/frame_%02d.bm", pack, name, i);
-                do {
-                    if(!storage_file_open(
-                           file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING))
-                        break;
-
+                if(storage_file_open(
+                       file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
                     uint64_t size = storage_file_size(file);
-                    FURI_CONST_ASSIGN_PTR(icon->frames[i], malloc(size));
-                    if(storage_file_read(file, (void*)icon->frames[i], size) == size) ok = true;
+                    frames[i] = malloc(size);
+                    ok = storage_file_read(file, frames[i], size) == size;
                     storage_file_close(file);
-                } while(0);
-            }
-        }
-        if(!ok) {
-            for(int i = 0; i < icon->frame_count; ++i) {
-                if(icon->frames[i]) {
-                    free((void*)icon->frames[i]);
+                    if(ok) continue;
+                } else {
+                    storage_file_close(file);
+                    i--;
                 }
+                break;
             }
-            free((void*)icon->frames);
-            free(icon);
 
-            break;
+            if(i == frame_count) {
+                Icon* original = malloc(sizeof(Icon));
+                memcpy(original, replace, sizeof(Icon));
+                FURI_CONST_ASSIGN_PTR(replace->original, original);
+                FURI_CONST_ASSIGN(replace->width, icon_width);
+                FURI_CONST_ASSIGN(replace->height, icon_height);
+                FURI_CONST_ASSIGN(replace->frame_rate, frame_rate);
+                FURI_CONST_ASSIGN(replace->frame_count, frame_count);
+                FURI_CONST_ASSIGN_PTR(replace->frames, frames);
+            } else {
+                for(; i >= 0; i--) {
+                    free(frames[i]);
+                }
+                free(frames);
+            }
         }
-
-        *replace = icon;
-    } while(false);
+    }
+    storage_file_close(file);
 }
 
-void icon(const Icon** replace, const char* name, FuriString* path, File* file) {
+void load_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, ICONS_FMT ".bmx", XTREME_SETTINGS()->asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
-        int32_t width, height;
-        storage_file_read(file, &width, 4);
-        storage_file_read(file, &height, 4);
+        uint8_t* frame = malloc(size);
+        int32_t icon_width, icon_height;
 
-        Icon* icon = malloc(sizeof(Icon));
-        FURI_CONST_ASSIGN(icon->frame_count, 1);
-        FURI_CONST_ASSIGN(icon->frame_rate, 0);
-        FURI_CONST_ASSIGN(icon->width, width);
-        FURI_CONST_ASSIGN(icon->height, height);
-        icon->frames = malloc(sizeof(const uint8_t*));
-        FURI_CONST_ASSIGN_PTR(icon->frames[0], malloc(size));
-        storage_file_read(file, (void*)icon->frames[0], size);
-        *replace = icon;
-
-        storage_file_close(file);
+        if(storage_file_read(file, &icon_width, 4) == 4 &&
+           storage_file_read(file, &icon_height, 4) == 4 &&
+           storage_file_read(file, frame, size) == size) {
+            Icon* original = malloc(sizeof(Icon));
+            memcpy(original, replace, sizeof(Icon));
+            FURI_CONST_ASSIGN_PTR(replace->original, original);
+            uint8_t** frames = malloc(sizeof(const uint8_t*));
+            frames[0] = frame;
+            FURI_CONST_ASSIGN(replace->frame_rate, 0);
+            FURI_CONST_ASSIGN(replace->frame_count, 1);
+            FURI_CONST_ASSIGN(replace->width, icon_width);
+            FURI_CONST_ASSIGN(replace->height, icon_height);
+            FURI_CONST_ASSIGN_PTR(replace->frames, frames);
+        } else {
+            free(frame);
+        }
     }
+    storage_file_close(file);
 }
 
-void swap(XtremeAssets* x, FuriString* p, File* f) {
-    anim(&x->A_Levelup_128x64, "Animations/Levelup_128x64", p, f);
-    icon(&x->I_BLE_Pairing_128x64, "BLE/BLE_Pairing_128x64", p, f);
-    icon(&x->I_DolphinCommon_56x48, "Dolphin/DolphinCommon_56x48", p, f);
-    icon(&x->I_DolphinMafia_115x62, "iButton/DolphinMafia_115x62", p, f);
-    icon(&x->I_DolphinNice_96x59, "iButton/DolphinNice_96x59", p, f);
-    icon(&x->I_DolphinWait_61x59, "iButton/DolphinWait_61x59", p, f);
-    icon(&x->I_iButtonDolphinVerySuccess_108x52, "iButton/iButtonDolphinVerySuccess_108x52", p, f);
-    icon(&x->I_DolphinReadingSuccess_59x63, "Infrared/DolphinReadingSuccess_59x63", p, f);
-    icon(&x->I_Lockscreen, "Interface/Lockscreen", p, f);
-    icon(&x->I_WarningDolphin_45x42, "Interface/WarningDolphin_45x42", p, f);
-    icon(&x->I_NFC_dolphin_emulation_47x61, "NFC/NFC_dolphin_emulation_47x61", p, f);
-    icon(&x->I_passport_bad_46x49, "Passport/passport_bad_46x49", p, f);
-    icon(&x->I_passport_DB, "Passport/passport_DB", p, f);
-    icon(&x->I_passport_happy_46x49, "Passport/passport_happy_46x49", p, f);
-    icon(&x->I_passport_okay_46x49, "Passport/passport_okay_46x49", p, f);
-    icon(&x->I_RFIDDolphinReceive_97x61, "RFID/RFIDDolphinReceive_97x61", p, f);
-    icon(&x->I_RFIDDolphinSend_97x61, "RFID/RFIDDolphinSend_97x61", p, f);
-    icon(&x->I_RFIDDolphinSuccess_108x57, "RFID/RFIDDolphinSuccess_108x57", p, f);
-    icon(&x->I_Cry_dolph_55x52, "Settings/Cry_dolph_55x52", p, f);
-    icon(&x->I_Background_128x11, "StatusBar/Background_128x11", p, f);
-    icon(&x->I_Fishing_123x52, "SubGhz/Fishing_123x52", p, f);
-    icon(&x->I_Scanning_123x52, "SubGhz/Scanning_123x52", p, f);
-    icon(&x->I_Auth_62x31, "U2F/Auth_62x31", p, f);
-    icon(&x->I_Connect_me_62x31, "U2F/Connect_me_62x31", p, f);
-    icon(&x->I_Connected_62x31, "U2F/Connected_62x31", p, f);
-    icon(&x->I_Error_62x31, "U2F/Error_62x31", p, f);
+void free_icon(const Icon* icon) {
+    uint8_t** frames = (void*)icon->frames;
+    int32_t frame_count = icon->frame_count;
+
+    Icon* original = icon->original;
+    memcpy((void*)icon, original, sizeof(Icon));
+
+    free(original);
+    for(int32_t i = 0; i < frame_count; i++) {
+        free(frames[i]);
+    }
+    free(frames);
 }
 
 void XTREME_ASSETS_LOAD() {
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-    if(xtreme_settings->asset_pack[0] == '\0') return;
-    xtreme_assets.is_nsfw = strncmp(xtreme_settings->asset_pack, "NSFW", strlen("NSFW")) == 0;
+    if(!furi_hal_is_normal_boot()) return;
+
+    const char* pack = XTREME_SETTINGS()->asset_pack;
+    if(pack[0] == '\0') return;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    int32_t timeout = 5000;
-    while(timeout > 0) {
-        if(storage_sd_status(storage) == FSE_OK) break;
-        furi_delay_ms(250);
-        timeout -= 250;
-    }
-
+    FuriString* p = furi_string_alloc();
     FileInfo info;
-    FuriString* path = furi_string_alloc();
-    furi_string_printf(path, XTREME_ASSETS_PATH "/%s", xtreme_settings->asset_pack);
-    if(storage_common_stat(storage, furi_string_get_cstr(path), &info) == FSE_OK &&
+    furi_string_printf(p, XTREME_ASSETS_PATH "/%s", pack);
+    if(storage_common_stat(storage, furi_string_get_cstr(p), &info) == FSE_OK &&
        info.flags & FSF_DIRECTORY) {
-        File* file = storage_file_alloc(storage);
-        swap(&xtreme_assets, path, file);
-        storage_file_free(file);
+        File* f = storage_file_alloc(storage);
+
+        for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
+            if(ICON_PATHS[i].icon->original == NULL) {
+                if(ICON_PATHS[i].animated) {
+                    load_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+                } else {
+                    load_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+                }
+            }
+        }
+
+        storage_file_free(f);
     }
-    furi_string_free(path);
+    furi_string_free(p);
     furi_record_close(RECORD_STORAGE);
 }
 
-XtremeAssets* XTREME_ASSETS() {
-    return &xtreme_assets;
+void XTREME_ASSETS_FREE() {
+    if(!furi_hal_is_normal_boot()) return;
+
+    for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
+        if(ICON_PATHS[i].icon->original != NULL) {
+            free_icon(ICON_PATHS[i].icon);
+        }
+    }
 }

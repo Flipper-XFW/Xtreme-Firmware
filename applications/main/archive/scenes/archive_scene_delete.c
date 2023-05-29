@@ -58,7 +58,6 @@ bool archive_scene_delete_on_event(void* context, SceneManagerEvent event) {
                 archive_delete_file(browser, "%s", name);
             }
             archive_show_loading_popup(app, false);
-            archive_show_file_menu(browser, false);
             return scene_manager_previous_scene(app->scene_manager);
         } else if(event.event == GuiButtonTypeLeft) {
             return scene_manager_previous_scene(app->scene_manager);

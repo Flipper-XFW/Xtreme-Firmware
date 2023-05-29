@@ -12,7 +12,7 @@
 #include "../views/desktop_view_lock_menu.h"
 #include "desktop_scene_i.h"
 #include "desktop_scene.h"
-#include "../helpers/pin_lock.h"
+#include "../helpers/pin.h"
 #include <power/power_service/power.h>
 #define TAG "DesktopSceneLock"
 
@@ -66,8 +66,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             if(desktop->settings.pin_code.length > 0) {
                 desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
-                desktop_pin_lock(&desktop->settings);
-                desktop_lock(desktop);
+                desktop_lock(desktop, true);
                 if(check_pin_changed == 2) {
                     Power* power = furi_record_open(RECORD_POWER);
                     furi_delay_ms(500);
@@ -86,15 +85,13 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventLock:
             desktop_scene_lock_menu_save_settings(desktop);
-            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
-            desktop_lock(desktop);
+            desktop_lock(desktop, false);
             consumed = true;
             break;
         case DesktopLockMenuEventLockPin:
             desktop_scene_lock_menu_save_settings(desktop);
             if(desktop->settings.pin_code.length > 0) {
-                desktop_pin_lock(&desktop->settings);
-                desktop_lock(desktop);
+                desktop_lock(desktop, true);
             } else {
                 LoaderStatus status =
                     loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
@@ -109,8 +106,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         case DesktopLockMenuEventLockPinOff:
             desktop_scene_lock_menu_save_settings(desktop);
             if(desktop->settings.pin_code.length > 0) {
-                desktop_pin_lock(&desktop->settings);
-                desktop_lock(desktop);
+                desktop_lock(desktop, true);
                 Power* power = furi_record_open(RECORD_POWER);
                 furi_delay_ms(500);
                 power_off(power);
@@ -128,8 +124,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventXtreme:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start(
-                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/.Main/xtreme_app.fap"));
+            loader_start(desktop->loader, "Xtreme", NULL);
             consumed = true;
             break;
         case DesktopLockMenuEventStealthModeOn:

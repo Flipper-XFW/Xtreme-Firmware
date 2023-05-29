@@ -25,7 +25,6 @@ typedef struct {
     size_t text_buffer_size;
     size_t minimum_length;
     bool clear_default_text;
-    FuriString* temp_str;
 
     bool cursor_select;
     size_t cursor_pos;
@@ -245,10 +244,9 @@ static void text_input_backspace_cb(TextInputModel* model) {
         model->text_buffer[0] = 0;
         model->cursor_pos = 0;
     } else if(model->cursor_pos > 0) {
-        furi_string_set_str(model->temp_str, model->text_buffer);
-        furi_string_replace_at(model->temp_str, model->cursor_pos - 1, 1, "");
+        char* move = model->text_buffer + model->cursor_pos;
+        memmove(move - 1, move, strlen(move) + 1);
         model->cursor_pos--;
-        strcpy(model->text_buffer, furi_string_get_cstr(model->temp_str));
     }
 }
 
@@ -259,6 +257,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     uint8_t start_pos = 4;
 
     model->cursor_pos = model->cursor_pos > text_length ? text_length : model->cursor_pos;
+    size_t cursor_pos = model->cursor_pos;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -266,43 +265,44 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, 2, 8, model->header);
     elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
 
-    FuriString* str = model->temp_str;
+    char buf[model->text_buffer_size + 1];
     if(model->text_buffer) {
-        furi_string_set_str(str, model->text_buffer);
-    } else {
-        furi_string_reset(str);
+        strlcpy(buf, model->text_buffer, sizeof(buf));
     }
-    const char* cstr = furi_string_get_cstr(str);
+    char* str = buf;
 
     if(model->clear_default_text) {
         elements_slightly_rounded_box(
-            canvas, start_pos - 1, 14, canvas_string_width(canvas, cstr) + 2, 10);
+            canvas, start_pos - 1, 14, canvas_string_width(canvas, str) + 2, 10);
         canvas_set_color(canvas, ColorWhite);
     } else {
-        furi_string_replace_at(str, model->cursor_pos, 0, "|");
+        char* move = str + cursor_pos;
+        memmove(move + 1, move, strlen(move) + 1);
+        str[cursor_pos] = '|';
     }
 
-    if(model->cursor_pos > 0 && canvas_string_width(canvas, cstr) > needed_string_width) {
+    if(cursor_pos > 0 && canvas_string_width(canvas, str) > needed_string_width) {
         canvas_draw_str(canvas, start_pos, 22, "...");
         start_pos += 6;
         needed_string_width -= 8;
         for(uint32_t off = 0;
-            !furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width &&
-            off < model->cursor_pos;
+            strlen(str) && canvas_string_width(canvas, str) > needed_string_width &&
+            off < cursor_pos;
             off++) {
-            furi_string_right(str, 1);
+            str++;
         }
     }
 
-    if(canvas_string_width(canvas, cstr) > needed_string_width) {
+    if(canvas_string_width(canvas, str) > needed_string_width) {
         needed_string_width -= 4;
-        while(!furi_string_empty(str) && canvas_string_width(canvas, cstr) > needed_string_width) {
-            furi_string_left(str, furi_string_size(str) - 1);
+        size_t len = strlen(str);
+        while(len && canvas_string_width(canvas, str) > needed_string_width) {
+            str[len--] = '\0';
         }
-        furi_string_cat_str(str, "...");
+        strcat(str, "...");
     }
 
-    canvas_draw_str(canvas, start_pos, 22, cstr);
+    canvas_draw_str(canvas, start_pos, 22, str);
 
     canvas_set_font(canvas, FontKeyboard);
 
@@ -468,14 +468,15 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
                     selected = char_to_uppercase(selected);
                 }
                 if(model->clear_default_text) {
-                    furi_string_set_str(model->temp_str, &selected);
+                    model->text_buffer[0] = selected;
+                    model->text_buffer[1] = '\0';
                     model->cursor_pos = 1;
                 } else {
-                    furi_string_set_str(model->temp_str, model->text_buffer);
-                    furi_string_replace_at(model->temp_str, model->cursor_pos, 0, &selected);
+                    char* move = model->text_buffer + model->cursor_pos;
+                    memmove(move + 1, move, strlen(move) + 1);
+                    model->text_buffer[model->cursor_pos] = selected;
                     model->cursor_pos++;
                 }
-                strcpy(model->text_buffer, furi_string_get_cstr(model->temp_str));
             }
         }
         model->clear_default_text = false;
@@ -601,7 +602,9 @@ TextInput* text_input_alloc() {
         TextInputModel * model,
         {
             model->validator_text = furi_string_alloc();
-            model->temp_str = furi_string_alloc();
+            model->minimum_length = 1;
+            model->cursor_pos = 0;
+            model->cursor_select = false;
         },
         false);
 
@@ -615,10 +618,7 @@ void text_input_free(TextInput* text_input) {
     with_view_model(
         text_input->view,
         TextInputModel * model,
-        {
-            furi_string_free(model->validator_text);
-            furi_string_free(model->temp_str);
-        },
+        { furi_string_free(model->validator_text); },
         false);
 
     // Send stop command

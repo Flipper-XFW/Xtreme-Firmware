@@ -10,7 +10,13 @@ App(
         "cli",
         "dialogs",
     ],
-    provides=["subghz_start"],
+    provides=[
+        "subghz_start",
+        "subghz_load_extended_settings",
+    ],
+    sdk_headers=[
+        "helpers/subghz_txrx.h",
+    ],
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
     order=10,
@@ -22,4 +28,12 @@ App(
     entry_point="subghz_on_system_start",
     requires=["subghz"],
     order=40,
+)
+
+App(
+    appid="subghz_load_extended_settings",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="subghz_extended_freq",
+    requires=["storage", "subghz"],
+    order=650,
 )

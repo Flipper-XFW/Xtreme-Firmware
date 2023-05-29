@@ -10,7 +10,6 @@ if __name__ == "__main__":
         template = f.read()
     notes = template.format(
         ARTIFACT_TGZ=os.environ['ARTIFACT_TGZ'],
-        ARTIFACT_WEB=os.environ['ARTIFACT_WEB'],
         ARTIFACT_ZIP=os.environ['ARTIFACT_ZIP'],
         VERSION_TAG=os.environ['VERSION_TAG'],
         CHANGELOG=changelog

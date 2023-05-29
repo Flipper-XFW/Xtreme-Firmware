@@ -64,43 +64,47 @@ bool xtreme_app_apply(XtremeApp* app) {
     }
 
     if(app->save_subghz) {
-        furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
+        FlipperFormat* file = flipper_format_file_alloc(storage);
+        do {
+            if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt"))
+                break;
+            if(!flipper_format_write_header_cstr(file, "Flipper SubGhz Setting File", 1)) break;
+            if(!flipper_format_write_comment_cstr(
+                   file, "Whether to allow extended ranges that can break your flipper"))
+                break;
+            if(!flipper_format_write_bool(
+                   file, "use_ext_range_at_own_risk", &app->subghz_extend, 1))
+                break;
+        } while(0);
+        flipper_format_free(file);
     }
 
     if(app->save_name) {
         if(strcmp(app->device_name, "") == 0) {
-            storage_simply_remove(storage, NAMECHANGER_PATH);
+            storage_simply_remove(storage, NAMESPOOF_PATH);
         } else {
             FlipperFormat* file = flipper_format_file_alloc(storage);
 
             do {
-                if(!flipper_format_file_open_always(file, NAMECHANGER_PATH)) break;
-
-                if(!flipper_format_write_header_cstr(file, NAMECHANGER_HEADER, 1)) break;
-
-                if(!flipper_format_write_comment_cstr(
-                       file, "Changing the value below will change your FlipperZero device name."))
+                if(!flipper_format_file_open_always(file, NAMESPOOF_PATH)) break;
+                if(!flipper_format_write_header_cstr(file, NAMESPOOF_HEADER, NAMESPOOF_VERSION))
                     break;
-                if(!flipper_format_write_comment_cstr(
-                       file,
-                       "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _"))
-                    break;
-                if(!flipper_format_write_comment_cstr(
-                       file, "It cannot contain any other characters."))
-                    break;
-
                 if(!flipper_format_write_string_cstr(file, "Name", app->device_name)) break;
-
             } while(0);
 
             flipper_format_free(file);
         }
     }
 
-    if(app->save_level) {
+    if(app->save_level || app->save_angry) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-        int32_t xp = app->xp_level > 1 ? dolphin_get_levels()[app->xp_level - 2] : 0;
-        dolphin->state->data.icounter = xp + 1;
+        if(app->save_level) {
+            int32_t xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+            dolphin->state->data.icounter = xp + 1;
+        }
+        if(app->save_angry) {
+            dolphin->state->data.butthurt = app->dolphin_angry;
+        }
         dolphin->state->dirty = true;
         dolphin_state_save(dolphin->state);
         furi_record_close(RECORD_DOLPHIN);
@@ -258,15 +262,20 @@ XtremeApp* xtreme_app_alloc() {
         }
     } while(false);
     flipper_format_free(file);
+
+    file = flipper_format_file_alloc(storage);
+    if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
+        flipper_format_read_bool(file, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+    }
+    flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 
-    furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
-
-    strlcpy(app->device_name, furi_hal_version_get_name_ptr(), NAMECHANGER_TEXT_STORE_SIZE);
+    strlcpy(app->device_name, furi_hal_version_get_name_ptr(), FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
-    app->xp_level = stats.level;
+    app->dolphin_level = stats.level;
+    app->dolphin_angry = stats.butthurt;
     furi_record_close(RECORD_DOLPHIN);
 
     app->version_tag =

@@ -1,6 +1,5 @@
 #include "../ibutton_i.h"
 #include <dolphin/dolphin.h>
-#include <xtreme.h>
 
 static void ibutton_scene_read_callback(void* context) {
     iButton* ibutton = context;
@@ -15,7 +14,7 @@ void ibutton_scene_read_on_enter(void* context) {
 
     popup_set_header(popup, "iButton", 95, 26, AlignCenter, AlignBottom);
     popup_set_text(popup, "Apply key to\nFlipper's back", 95, 30, AlignCenter, AlignTop);
-    popup_set_icon(popup, 0, 5, XTREME_ASSETS()->I_DolphinWait_61x59);
+    popup_set_icon(popup, 0, 5, &I_DolphinWait_61x59);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewPopup);
 

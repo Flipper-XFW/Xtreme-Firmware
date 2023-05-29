@@ -1,6 +1,7 @@
 #include "loader.h"
 #include "loader_i.h"
 #include "loader_menu.h"
+#include "loader_preload.h"
 #include <applications.h>
 #include <furi_hal.h>
 #include <core/dangerous_defines.h>
@@ -145,31 +146,40 @@ static Loader* loader_alloc() {
     loader->app.name = NULL;
     loader->app.thread = NULL;
     loader->app.insomniac = false;
-
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriString* path = furi_string_alloc();
-    FuriString* name = furi_string_alloc();
-    Stream* stream = file_stream_alloc(storage);
     ExtMainAppList_init(loader->ext_main_apps);
-    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        while(stream_read_line(stream, path)) {
-            furi_string_replace_all(path, "\r", "");
-            furi_string_replace_all(path, "\n", "");
-            const Icon* icon;
-            if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
-            ExtMainAppList_push_back(
-                loader->ext_main_apps,
-                (ExtMainApp){
-                    .name = strdup(furi_string_get_cstr(name)),
-                    .path = strdup(furi_string_get_cstr(path)),
-                    .icon = icon});
+
+    if(furi_hal_is_normal_boot()) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+            if(FLIPPER_APPS[i].app != NULL || FLIPPER_APPS[i].stack_size != 1) continue;
+            if(storage_common_exists(storage, FLIPPER_APPS[i].appid)) {
+                void* preload = loader_preload(storage, FLIPPER_APPS[i].appid);
+                FLIPPER_APPS[i].preload = preload;
+            }
         }
+        FuriString* path = furi_string_alloc();
+        FuriString* name = furi_string_alloc();
+        Stream* stream = file_stream_alloc(storage);
+        if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            while(stream_read_line(stream, path)) {
+                furi_string_replace_all(path, "\r", "");
+                furi_string_replace_all(path, "\n", "");
+                const Icon* icon;
+                if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
+                ExtMainAppList_push_back(
+                    loader->ext_main_apps,
+                    (ExtMainApp){
+                        .name = strdup(furi_string_get_cstr(name)),
+                        .path = strdup(furi_string_get_cstr(path)),
+                        .icon = icon});
+            }
+        }
+        file_stream_close(stream);
+        stream_free(stream);
+        furi_string_free(name);
+        furi_string_free(path);
+        furi_record_close(RECORD_STORAGE);
     }
-    file_stream_close(stream);
-    stream_free(stream);
-    furi_string_free(name);
-    furi_string_free(path);
-    furi_record_close(RECORD_STORAGE);
     return loader;
 }
 
@@ -186,6 +196,15 @@ static FlipperApplication const* loader_find_application_by_name_in_list(
 }
 
 static const FlipperApplication* loader_find_application_by_name(const char* name) {
+    if(!strncmp(name, "Bad USB", strlen("Bad USB")))
+        name = "Bad KB";
+    else if(!strncmp(name, "Applications", strlen("Applications")))
+        name = "Apps";
+    else if(!strncmp(name, "125 kHz RFID", strlen("125 kHz RFID")))
+        name = "RFID";
+    else if(!strncmp(name, "Sub-GHz", strlen("Sub-GHz")))
+        name = "SubGHz";
+
     const FlipperApplication* application = NULL;
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
     if(!application) {
@@ -205,6 +224,10 @@ static void
     FURI_LOG_I(TAG, "Starting %s", app->name);
 
     if(app->app == NULL) {
+        if(app->preload != NULL) {
+            loader_preload_start(app->preload, app->appid);
+            return;
+        }
         args = app->appid;
         app = loader_find_application_by_name_in_list(
             FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);

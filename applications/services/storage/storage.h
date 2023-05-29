@@ -236,6 +236,14 @@ FS_Error storage_common_remove(Storage* storage, const char* path);
  */
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path);
 
+/** Moves file/directory, file/directory must not be open, will overwrite existing destination
+ * @param app pointer to the api
+ * @param old_path old path
+ * @param new_path new path
+ * @return FS_Error operation result
+ */
+FS_Error storage_common_move(Storage* storage, const char* old_path, const char* new_path);
+
 /** Copy file, file must not be open
  * @param app pointer to the api
  * @param old_path old path

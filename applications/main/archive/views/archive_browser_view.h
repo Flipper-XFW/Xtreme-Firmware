@@ -39,8 +39,13 @@ typedef enum {
 typedef enum {
     ArchiveBrowserEventFileMenuNone,
     ArchiveBrowserEventFileMenuOpen,
+    ArchiveBrowserEventManageMenuOpen,
     ArchiveBrowserEventFileMenuRun,
     ArchiveBrowserEventFileMenuPin,
+    ArchiveBrowserEventFileMenuCut,
+    ArchiveBrowserEventFileMenuCopy,
+    ArchiveBrowserEventFileMenuPaste,
+    ArchiveBrowserEventFileMenuNewDir,
     ArchiveBrowserEventFileMenuRename,
     ArchiveBrowserEventFileMenuDelete,
     ArchiveBrowserEventFileMenuInfo,
@@ -91,6 +96,9 @@ typedef struct {
 
     uint8_t menu_idx;
     bool menu;
+    bool menu_manage;
+    char* clipboard;
+    bool clipboard_copy;
     menu_array_t context_menu;
 
     bool move_fav;

@@ -23,8 +23,6 @@ const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
 #define BADKB_ASCII_TO_KEY(script, x) \
     (((uint8_t)x < 128) ? (script->layout[(uint8_t)x]) : HID_KEYBOARD_NONE)
 
-#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Tools/.bt_hid.keys")
-
 /**
  * Delays for waiting between HID key press and key release
 */
@@ -388,9 +386,11 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
         bad_kb->app->switch_mode_thread = NULL;
     }
     // Looking for ID or BT_ID command at first line
-    bool usb_id = false;
-    bool bt_id = false;
-    if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
+    bad_kb->set_usb_id = false;
+    bad_kb->set_bt_id = false;
+    bad_kb->has_usb_id = strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0;
+    bad_kb->has_bt_id = strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0;
+    if(bad_kb->has_usb_id) {
         if(bad_kb->bt) {
             bad_kb->app->is_bt = false;
             bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
@@ -401,8 +401,8 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             furi_thread_start(bad_kb->app->switch_mode_thread);
             return false;
         }
-        usb_id = ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1]);
-    } else if(strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0) {
+        bad_kb->set_usb_id = ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1]);
+    } else if(bad_kb->has_bt_id) {
         if(!bad_kb->bt) {
             bad_kb->app->is_bt = true;
             bad_kb->app->switch_mode_thread = furi_thread_alloc_ex(
@@ -414,12 +414,13 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             return false;
         }
         if(!bad_kb->app->bt_remember) {
-            bt_id = ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
+            bad_kb->set_bt_id = ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
         }
     }
+    bad_kb_config_refresh_menu(bad_kb->app);
 
     if(bad_kb->bt) {
-        if(!bt_id) {
+        if(!bad_kb->set_bt_id) {
             const char* bt_name = bad_kb->app->config.bt_name;
             const uint8_t* bt_mac = bad_kb->app->bt_remember ?
                                         (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS :
@@ -442,7 +443,7 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             }
         }
     } else {
-        if(usb_id) {
+        if(bad_kb->set_usb_id) {
             furi_check(furi_hal_usb_set_config(&usb_hid, &bad_kb->hid_cfg));
         } else {
             furi_check(furi_hal_usb_set_config(&usb_hid, NULL));

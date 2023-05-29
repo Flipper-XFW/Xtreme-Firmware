@@ -1,4 +1,6 @@
 #pragma once
 
-void XTREME_ASSETS_LOAD();
+void NAMESPOOF_INIT();
 void XTREME_SETTINGS_LOAD();
+void XTREME_ASSETS_LOAD();
+void XTREME_ASSETS_FREE();
