@@ -11,8 +11,7 @@ cd ${ARTIFACT_DIR}
 cd ../../..
 
 python -m pip install pyncclient
-export ARTIFACT_WEB="$(NC_FILE=${ARTIFACT_TGZ} NC_PATH=XFW-Updater python .github/workflow_data/webupdater.py)"
+NC_FILE=${ARTIFACT_TGZ} NC_PATH=XFW-Updater python .github/workflow_data/webupdater.py
 
 echo "ARTIFACT_TGZ=${ARTIFACT_TGZ}" >> $GITHUB_ENV
-echo "ARTIFACT_WEB=${ARTIFACT_WEB}" >> $GITHUB_ENV
 echo "ARTIFACT_ZIP=${ARTIFACT_ZIP}" >> $GITHUB_ENV
