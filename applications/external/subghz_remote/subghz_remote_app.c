@@ -94,11 +94,11 @@ SubGhzRemoteApp* subghz_remote_app_alloc() {
 
     app->tx_running = false;
 
-#ifdef SUBREM_LIGHT
+    // #ifdef SUBREM_LIGHT
     scene_manager_next_scene(app->scene_manager, SubRemSceneOpenMapFile);
-#else
-    scene_manager_next_scene(app->scene_manager, SubRemSceneStart);
-#endif
+    // #else
+    //     scene_manager_next_scene(app->scene_manager, SubRemSceneStart);
+    // #endif
 
     return app;
 }
