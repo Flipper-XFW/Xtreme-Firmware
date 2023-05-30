@@ -153,9 +153,7 @@ void archive_update_focus(ArchiveBrowserView* browser, const char* target) {
 
     archive_get_items(browser, furi_string_get_cstr(browser->path));
 
-    if(!archive_file_get_array_size(browser) && archive_is_home(browser)) {
-        archive_switch_tab(browser, TAB_LEFT);
-    } else {
+    if(archive_file_get_array_size(browser) || !archive_is_home(browser)) {
         with_view_model(
             browser->view,
             ArchiveBrowserViewModel * model,
@@ -355,7 +353,13 @@ void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
     furi_assert(browser);
 
     with_view_model(
-        browser->view, ArchiveBrowserViewModel * model, { model->tab_idx = tab; }, false);
+        browser->view,
+        ArchiveBrowserViewModel * model,
+        {
+            model->tab_idx = tab;
+            model->clipboard = NULL;
+        },
+        false);
 }
 
 void archive_add_app_item(ArchiveBrowserView* browser, const char* name) {
@@ -412,17 +416,18 @@ void archive_add_file_item(ArchiveBrowserView* browser, bool is_folder, const ch
     ArchiveFile_t_clear(&item);
 }
 
-void archive_show_file_menu(ArchiveBrowserView* browser, bool show) {
+void archive_show_file_menu(ArchiveBrowserView* browser, bool show, bool manage) {
     furi_assert(browser);
     with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
             if(show) {
+                model->menu = true;
+                model->menu_manage = manage;
+                model->menu_idx = 0;
+                menu_array_reset(model->context_menu);
                 if(archive_is_item_in_array(model, model->item_idx)) {
-                    model->menu = true;
-                    model->menu_idx = 0;
-                    menu_array_reset(model->context_menu);
                     ArchiveFile_t* selected =
                         files_array_get(model->files, model->item_idx - model->array_offset);
                     selected->fav =

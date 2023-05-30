@@ -5,6 +5,10 @@
 #include <m-bptree.h>
 #include <m-array.h>
 #include <cli/cli.h>
+#include <gui/gui.h>
+#include <gui/view_dispatcher.h>
+#include <gui/modules/menu.h>
+#include <gui/modules/submenu.h>
 
 typedef struct {
     FuriThreadStdoutWriteCallback write_callback;
@@ -68,24 +72,32 @@ typedef struct {
 } ViewPort_internal;
 
 typedef struct {
-    FuriThreadId loader_thread;
+    Gui* gui;
+    ViewDispatcher* view_dispatcher;
+    Menu* primary_menu;
+    Submenu* settings_menu;
 
-    const void* application;
-    FuriThread* application_thread;
-    char* application_arguments;
+    void (*closed_callback)(void*);
+    void* closed_callback_context;
 
-    void* cli;
-    void* gui;
+    void (*click_callback)(const char*, void*);
+    void* click_callback_context;
 
-    void* view_dispatcher;
-    void* primary_menu;
-    // void* plugins_menu;
-    // void* debug_menu;
-    void* settings_menu;
+    FuriThread* thread;
+} LoaderMenu_internal;
 
-    volatile uint8_t lock_count;
+typedef struct {
+    char* args;
+    char* name;
+    FuriThread* thread;
+    bool insomniac;
+} LoaderAppData_internal;
 
-    void* pubsub;
+typedef struct {
+    FuriPubSub* pubsub;
+    FuriMessageQueue* queue;
+    LoaderMenu_internal* loader_menu;
+    LoaderAppData_internal app;
 } Loader_internal;
 
 typedef struct {

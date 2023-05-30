@@ -30,11 +30,11 @@ static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
-void animation_handler_select_manifest(bool force_stock) {
+void animation_handler_select_manifest() {
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     FuriString* anim_dir = furi_string_alloc();
     FuriString* manifest = furi_string_alloc();
-    bool use_asset_pack = !force_stock && xtreme_settings->asset_pack[0] != '\0';
+    bool use_asset_pack = xtreme_settings->asset_pack[0] != '\0';
     if(use_asset_pack) {
         furi_string_printf(
             anim_dir, "%s/%s/Anims", XTREME_ASSETS_PATH, xtreme_settings->asset_pack);
@@ -61,10 +61,9 @@ void animation_handler_select_manifest(bool force_stock) {
 
 static bool animation_storage_load_single_manifest_info(
     StorageAnimationManifestInfo* manifest_info,
-    const char* name,
-    bool force_stock) {
+    const char* name) {
     furi_assert(manifest_info);
-    animation_handler_select_manifest(force_stock);
+    animation_handler_select_manifest();
     bool result = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -120,7 +119,7 @@ static bool animation_storage_load_single_manifest_info(
 void animation_storage_fill_animation_list(StorageAnimationList_t* animation_list) {
     furi_assert(sizeof(StorageAnimationList_t) == sizeof(void*));
     furi_assert(!StorageAnimationList_size(*animation_list));
-    animation_handler_select_manifest(false);
+    animation_handler_select_manifest();
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -176,7 +175,7 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
     furi_record_close(RECORD_STORAGE);
 }
 
-StorageAnimation* animation_storage_find_animation(const char* name, bool force_stock) {
+StorageAnimation* animation_storage_find_animation(const char* name) {
     furi_assert(name);
     furi_assert(strlen(name));
     StorageAnimation* storage_animation = NULL;
@@ -203,8 +202,8 @@ StorageAnimation* animation_storage_find_animation(const char* name, bool force_
         storage_animation->external = true;
 
         bool result = false;
-        result = animation_storage_load_single_manifest_info(
-            &storage_animation->manifest_info, name, force_stock);
+        result =
+            animation_storage_load_single_manifest_info(&storage_animation->manifest_info, name);
         if(result) {
             storage_animation->animation = animation_storage_load_animation(name);
             result = !!storage_animation->animation;

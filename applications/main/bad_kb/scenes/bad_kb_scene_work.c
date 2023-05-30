@@ -21,7 +21,10 @@ bool bad_kb_scene_work_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
         } else if(event.event == InputKeyOk) {
-            bad_kb_script_toggle(app->bad_kb_script);
+            bad_kb_script_start_stop(app->bad_kb_script);
+            consumed = true;
+        } else if(event.event == InputKeyRight) {
+            bad_kb_script_pause_resume(app->bad_kb_script);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

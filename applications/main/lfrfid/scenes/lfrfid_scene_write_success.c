@@ -1,12 +1,11 @@
 #include "../lfrfid_i.h"
-#include <xtreme.h>
 
 void lfrfid_scene_write_success_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
 
     popup_set_header(popup, "Successfully\nwritten!", 94, 3, AlignCenter, AlignTop);
-    popup_set_icon(popup, 0, 6, XTREME_ASSETS()->I_RFIDDolphinSuccess_108x57);
+    popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57);
     popup_set_context(popup, app);
     popup_set_callback(popup, lfrfid_popup_timeout_callback);
     popup_set_timeout(popup, 1500);

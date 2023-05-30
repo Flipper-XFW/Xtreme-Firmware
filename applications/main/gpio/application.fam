@@ -1,7 +1,8 @@
 App(
     appid="gpio",
     name="GPIO",
-    apptype=FlipperAppType.APP,
+    apptype=FlipperAppType.EXTMAINAPP,
+    preload=True,
     entry_point="gpio_app",
     cdefines=["APP_GPIO"],
     requires=["gui"],

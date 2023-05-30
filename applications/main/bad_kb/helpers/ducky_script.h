@@ -40,6 +40,7 @@ typedef enum {
     BadKbStateDelay,
     BadKbStateStringDelay,
     BadKbStateWaitForBtn,
+    BadKbStatePaused,
     BadKbStateDone,
     BadKbStateScriptError,
     BadKbStateFileError,
@@ -82,6 +83,11 @@ typedef struct {
     FuriString* string_print;
     size_t string_print_pos;
 
+    bool set_usb_id;
+    bool set_bt_id;
+    bool has_usb_id;
+    bool has_bt_id;
+
     Bt* bt;
     BadKbApp* app;
 } BadKbScript;
@@ -96,7 +102,9 @@ void bad_kb_script_start(BadKbScript* bad_kb);
 
 void bad_kb_script_stop(BadKbScript* bad_kb);
 
-void bad_kb_script_toggle(BadKbScript* bad_kb);
+void bad_kb_script_start_stop(BadKbScript* bad_kb);
+
+void bad_kb_script_pause_resume(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 
@@ -146,6 +154,8 @@ struct BadKbApp {
 };
 
 int32_t bad_kb_config_switch_mode(BadKbApp* app);
+
+void bad_kb_config_refresh_menu(BadKbApp* app);
 
 #ifdef __cplusplus
 }

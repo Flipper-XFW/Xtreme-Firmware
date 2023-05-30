@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bad_kb_app.h"
+#include "bad_kb_paths.h"
 #include "scenes/bad_kb_scene.h"
 #include "helpers/ducky_script.h"
 
@@ -10,8 +11,6 @@
 #include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
 
-#define BAD_KB_APP_BASE_FOLDER EXT_PATH("badkb")
-#define BAD_KB_APP_PATH_LAYOUT_FOLDER BAD_KB_APP_BASE_FOLDER "/assets/layouts"
 #define BAD_KB_APP_SCRIPT_EXTENSION ".txt"
 #define BAD_KB_APP_LAYOUT_EXTENSION ".kl"
 

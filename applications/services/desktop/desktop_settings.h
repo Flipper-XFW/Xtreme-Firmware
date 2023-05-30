@@ -7,10 +7,10 @@
 #include <storage/storage.h>
 #include <loader/loader.h>
 
-#define DESKTOP_SETTINGS_VER (7)
+#define DESKTOP_SETTINGS_VER (9)
 
-#define DESKTOP_SETTINGS_OLD_PATH INT_PATH(".desktop.settings")
-#define DESKTOP_SETTINGS_PATH CFG_PATH("desktop.settings")
+#define DESKTOP_SETTINGS_OLD_PATH CFG_PATH("desktop.settings")
+#define DESKTOP_SETTINGS_PATH INT_PATH(".desktop.settings")
 #define DESKTOP_SETTINGS_MAGIC (0x17)
 #define PIN_MAX_LENGTH 12
 
@@ -34,9 +34,9 @@ typedef struct {
     FavoriteApp favorite_primary;
     FavoriteApp favorite_secondary;
     PinCode pin_code;
-    uint8_t is_locked;
     uint32_t auto_lock_delay_ms;
     bool auto_lock_with_pin;
+    uint8_t display_clock;
 } DesktopSettings;
 
 bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);

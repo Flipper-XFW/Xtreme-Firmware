@@ -535,6 +535,18 @@ static FS_Error storage_ext_common_remove(void* ctx, const char* path) {
 #endif
 }
 
+static FS_Error storage_ext_common_rename(void* ctx, const char* old, const char* new) {
+    UNUSED(ctx);
+#ifdef FURI_RAM_EXEC
+    UNUSED(old);
+    UNUSED(new);
+    return FSE_NOT_READY;
+#else
+    SDError result = f_rename(old, new);
+    return storage_ext_parse_error(result);
+#endif
+}
+
 static FS_Error storage_ext_common_mkdir(void* ctx, const char* path) {
     UNUSED(ctx);
 #ifdef FURI_RAM_EXEC
@@ -614,6 +626,7 @@ static const FS_Api fs_api = {
             .stat = storage_ext_common_stat,
             .mkdir = storage_ext_common_mkdir,
             .remove = storage_ext_common_remove,
+            .rename = storage_ext_common_rename,
             .fs_info = storage_ext_common_fs_info,
         },
 };

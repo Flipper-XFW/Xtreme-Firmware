@@ -6,13 +6,14 @@
 #include <portmacro.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <xtreme.h>
 
 #include "../desktop.h"
 #include "../desktop_i.h"
 #include "../animations/animation_manager.h"
 #include "../views/desktop_events.h"
 #include "../views/desktop_view_pin_input.h"
-#include "../helpers/pin_lock.h"
+#include "../helpers/pin.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
 
@@ -54,9 +55,18 @@ static void desktop_scene_pin_input_back_callback(void* context) {
 
 static void desktop_scene_pin_input_done_callback(const PinCode* pin_code, void* context) {
     Desktop* desktop = (Desktop*)context;
-    if(desktop_pin_lock_verify(&desktop->settings.pin_code, pin_code)) {
+    if(desktop_pin_compare(&desktop->settings.pin_code, pin_code)) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopPinInputEventUnlocked);
     } else {
+        uint32_t pin_fails = furi_hal_rtc_get_pin_fails() + 1;
+        if(pin_fails >= 10 && XTREME_SETTINGS()->bad_pins_format) {
+            furi_hal_rtc_set_pin_fails(0);
+            furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
+            storage_sd_format(furi_record_open(RECORD_STORAGE));
+            furi_record_close(RECORD_STORAGE);
+            power_reboot(PowerBootModeNormal);
+        }
+        furi_hal_rtc_set_pin_fails(pin_fails);
         view_dispatcher_send_custom_event(
             desktop->view_dispatcher, DesktopPinInputEventUnlockFailed);
     }
@@ -126,7 +136,6 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopPinInputEventUnlocked:
-            desktop_pin_unlock(&desktop->settings);
             desktop_unlock(desktop);
             consumed = true;
             break;

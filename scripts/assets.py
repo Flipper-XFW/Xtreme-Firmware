@@ -11,10 +11,11 @@ ICONS_SUPPORTED_FORMATS = ["png"]
 
 ICONS_TEMPLATE_H_HEADER = """#pragma once
 
+#include <furi.h>
 #include <gui/icon.h>
 
 """
-ICONS_TEMPLATE_H_ICON_NAME = "extern const Icon {name};\n"
+ICONS_TEMPLATE_H_ICON_NAME = "extern Icon {name};\n"
 
 ICONS_TEMPLATE_C_HEADER = """#include "{assets_filename}.h"
 
@@ -23,7 +24,7 @@ ICONS_TEMPLATE_C_HEADER = """#include "{assets_filename}.h"
 """
 ICONS_TEMPLATE_C_FRAME = "const uint8_t {name}[] = {data};\n"
 ICONS_TEMPLATE_C_DATA = "const uint8_t* const {name}[] = {data};\n"
-ICONS_TEMPLATE_C_ICONS = "const Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
+ICONS_TEMPLATE_C_ICONS = "Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
 
 
 class Main(App):
@@ -62,7 +63,6 @@ class Main(App):
         )
         self.parser_copro.add_argument("cube_dir", help="Path to Cube folder")
         self.parser_copro.add_argument("output_dir", help="Path to output folder")
-        self.parser_copro.add_argument("mcu", help="MCU series as in copro folder")
         self.parser_copro.add_argument(
             "--cube_ver", dest="cube_ver", help="Cube version", required=True
         )
@@ -121,6 +121,7 @@ class Main(App):
             ICONS_TEMPLATE_C_HEADER.format(assets_filename=self.args.filename)
         )
         icons = []
+        paths = []
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
             self.logger.debug(f"Processing directory {dirpath}")
@@ -165,6 +166,8 @@ class Main(App):
                 )
                 icons_c.write("\n")
                 icons.append((icon_name, width, height, frame_rate, frame_count))
+                p = dirpath.removeprefix(self.args.input_directory)[1:]
+                paths.append((1, icon_name, p.replace("\\", "/")))
             else:
                 # process icons
                 for filename in filenames:
@@ -187,6 +190,8 @@ class Main(App):
                     )
                     icons_c.write("\n")
                     icons.append((icon_name, width, height, 0, 1))
+                    p = fullfilename.removeprefix(self.args.input_directory)[1:]
+                    paths.append((0, icon_name, p.replace("\\", "/").rsplit(".", 1)[0]))
         # Create array of images:
         self.logger.debug("Finalizing source file")
         for name, width, height, frame_rate, frame_count in icons:
@@ -199,7 +204,21 @@ class Main(App):
                     frame_count=frame_count,
                 )
             )
-        icons_c.write("\n")
+        if self.args.filename == "assets_icons":
+            icons_c.write(
+                """
+const IconPath ICON_PATHS[] = {
+#ifndef FURI_RAM_EXEC
+"""
+            )
+            for animated, name, path in paths:
+                icons_c.write(f'    {{{animated}, &{name}, "{path}"}},\n')
+            icons_c.write(
+                """#endif
+};
+const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
+"""
+            )
         icons_c.close()
 
         # Create Public Header
@@ -212,6 +231,19 @@ class Main(App):
         icons_h.write(ICONS_TEMPLATE_H_HEADER)
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
+        if self.args.filename == "assets_icons":
+            icons_h.write(
+                """
+typedef struct {
+    bool animated;
+    const Icon* icon;
+    const char* path;
+} IconPath;
+
+extern const IconPath ICON_PATHS[];
+extern const size_t ICON_PATHS_COUNT;
+"""
+            )
         icons_h.close()
         self.logger.debug("Done")
         return 0
@@ -264,16 +296,20 @@ class Main(App):
         from flipper.assets.copro import Copro
 
         self.logger.info("Bundling coprocessor binaries")
-        copro = Copro(self.args.mcu)
-        self.logger.info("Loading CUBE info")
-        copro.loadCubeInfo(self.args.cube_dir, self.args.cube_ver)
-        self.logger.info("Bundling")
-        copro.bundle(
-            self.args.output_dir,
-            self.args.stack_file,
-            self.args.stack_type,
-            self.args.stack_addr,
-        )
+        copro = Copro()
+        try:
+            self.logger.info("Loading CUBE info")
+            copro.loadCubeInfo(self.args.cube_dir, self.args.cube_ver)
+            self.logger.info("Bundling")
+            copro.bundle(
+                self.args.output_dir,
+                self.args.stack_file,
+                self.args.stack_type,
+                self.args.stack_addr,
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to bundle: {e}")
+            return 1
         self.logger.info("Complete")
 
         return 0

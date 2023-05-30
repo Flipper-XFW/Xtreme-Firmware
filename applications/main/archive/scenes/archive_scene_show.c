@@ -133,7 +133,7 @@ bool archive_scene_show_on_event(void* context, SceneManagerEvent event) {
     ArchiveApp* app = (ArchiveApp*)context;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_next_scene(app->scene_manager, ArchiveAppSceneBrowser);
+        scene_manager_previous_scene(app->scene_manager);
         return true;
     }
     return false;

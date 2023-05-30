@@ -6,13 +6,12 @@ App(
     requires=[
         "gui",
         "storage",
-        "rgb_backlight",
         "archive",
     ],
     conflicts=["desktop"],
     entry_point="updater_srv",
     stack_size=2 * 1024,
-    order=130,
+    order=120,
 )
 
 App(

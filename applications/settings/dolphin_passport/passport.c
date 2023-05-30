@@ -33,33 +33,31 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     PassportContext* ctx = _ctx;
     DolphinStats* stats = ctx->stats;
 
-    XtremeAssets* xtreme_assets = XTREME_ASSETS();
-
     char level_str[20];
     char xp_str[12];
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
 
-    if(XTREME_ASSETS()->is_nsfw) {
+    if(XTREME_SETTINGS()->is_nsfw) {
         if(stats->butthurt <= 4) {
-            portrait = xtreme_assets->I_passport_happy_46x49;
+            portrait = &I_passport_happy_46x49;
             mood_str = "Status: Wet";
         } else if(stats->butthurt <= 9) {
-            portrait = xtreme_assets->I_passport_okay_46x49;
+            portrait = &I_passport_okay_46x49;
             mood_str = "Status: Horny";
         } else {
-            portrait = xtreme_assets->I_passport_bad_46x49;
+            portrait = &I_passport_bad_46x49;
             mood_str = "Status: Desperate";
         }
     } else {
         if(stats->butthurt <= 4) {
-            portrait = xtreme_assets->I_passport_happy_46x49;
+            portrait = &I_passport_happy_46x49;
             mood_str = "Mood: Happy";
         } else if(stats->butthurt <= 9) {
-            portrait = xtreme_assets->I_passport_okay_46x49;
+            portrait = &I_passport_okay_46x49;
             mood_str = "Mood: Okay";
         } else {
-            portrait = xtreme_assets->I_passport_bad_46x49;
+            portrait = &I_passport_bad_46x49;
             mood_str = "Mood: Angry";
         }
     }
@@ -81,7 +79,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     }
 
     // multipass
-    canvas_draw_icon(canvas, 0, 0, xtreme_assets->I_passport_DB);
+    canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
 
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= DOLPHIN_LEVEL_COUNT + 1));

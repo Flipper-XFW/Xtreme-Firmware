@@ -94,7 +94,7 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         snprintf(date_str, 14, "%.2d-%.2d-%.4d", datetime.day, datetime.month, datetime.year);
     }
 
-    canvas_draw_icon(canvas, 0, 0 + y, XTREME_ASSETS()->I_Lockscreen);
+    canvas_draw_icon(canvas, 0, 0 + y, &I_Lockscreen);
     if(xtreme_settings->lockscreen_time) {
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str(canvas, 0, 64 + y, time_str);

@@ -44,7 +44,6 @@ env.Append(
                 "variant",
             )
         ),
-        File("u8g2/u8g2.h"),
         File("xtreme/xtreme.h"),
     ],
     CPPDEFINES=[
@@ -80,7 +79,7 @@ env.Append(
 
 libs = env.BuildModules(
     [
-        "STM32CubeWB",
+        "stm32wb",
         "freertos",
         "print",
         "microtar",

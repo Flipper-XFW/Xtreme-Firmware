@@ -59,11 +59,6 @@ if __name__ == "__main__":
 
     body = release["body"]
     body = re.sub(
-        r"(https://lab\.flipper\.net/\?url=).*?(&channel=XFW-Updater&version=)[A-Za-z0-9_-]+",
-        r"\1" + os.environ['ARTIFACT_WEB'] + r"\2" + os.environ['VERSION_TAG'],
-        body
-    )
-    body = re.sub(
         r"(https://github\.com/ClaraCrazy/Flipper-Xtreme/releases/download/[A-Za-z0-9_-]+?/)[A-Za-z0-9_-]+",
         r"\1" + os.environ['VERSION_TAG'],
         body

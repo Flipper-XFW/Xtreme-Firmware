@@ -2,6 +2,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
+#include <toolbox/saved_struct.h>
 #include <input/input.h>
 #include "notification.h"
 #include "notification_messages.h"
@@ -410,78 +411,22 @@ void notification_process_internal_message(NotificationApp* app, NotificationApp
     }
 }
 
-static bool notification_load_settings(NotificationApp* app) {
-    NotificationSettings settings;
-    File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
-    const size_t settings_size = sizeof(NotificationSettings);
-
-    FURI_LOG_I(TAG, "loading settings from \"%s\"", NOTIFICATION_SETTINGS_PATH);
-    bool fs_result =
-        storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
-
-    if(fs_result) {
-        uint16_t bytes_count = storage_file_read(file, &settings, settings_size);
-
-        if(bytes_count != settings_size) {
-            fs_result = false;
-        }
-    }
-
-    if(fs_result) {
-        FURI_LOG_I(TAG, "load success");
-
-        if(settings.version != NOTIFICATION_SETTINGS_VERSION) {
-            FURI_LOG_E(
-                TAG, "version(%d != %d) mismatch", settings.version, NOTIFICATION_SETTINGS_VERSION);
-        } else {
-            furi_kernel_lock();
-            memcpy(&app->settings, &settings, settings_size);
-            furi_kernel_unlock();
-        }
-    } else {
-        FURI_LOG_E(TAG, "load failed, %s", storage_file_get_error_desc(file));
-    }
-
-    storage_file_close(file);
-    storage_file_free(file);
-    furi_record_close(RECORD_STORAGE);
-
-    return fs_result;
+static bool notification_save_settings(NotificationApp* app) {
+    return saved_struct_save(
+        NOTIFICATION_SETTINGS_PATH,
+        &app->settings,
+        sizeof(NotificationSettings),
+        NOTIFICATION_SETTINGS_MAGIC,
+        NOTIFICATION_SETTINGS_VERSION);
 }
 
-static bool notification_save_settings(NotificationApp* app) {
-    NotificationSettings settings;
-    File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
-    const size_t settings_size = sizeof(NotificationSettings);
-
-    FURI_LOG_I(TAG, "saving settings to \"%s\"", NOTIFICATION_SETTINGS_PATH);
-
-    furi_kernel_lock();
-    memcpy(&settings, &app->settings, settings_size);
-    furi_kernel_unlock();
-
-    bool fs_result =
-        storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS);
-
-    if(fs_result) {
-        uint16_t bytes_count = storage_file_write(file, &settings, settings_size);
-
-        if(bytes_count != settings_size) {
-            fs_result = false;
-        }
-    }
-
-    if(fs_result) {
-        FURI_LOG_I(TAG, "save success");
-    } else {
-        FURI_LOG_E(TAG, "save failed, %s", storage_file_get_error_desc(file));
-    }
-
-    storage_file_close(file);
-    storage_file_free(file);
-    furi_record_close(RECORD_STORAGE);
-
-    return fs_result;
+static bool notification_load_settings(NotificationApp* app) {
+    return saved_struct_load(
+        NOTIFICATION_SETTINGS_PATH,
+        &app->settings,
+        sizeof(NotificationSettings),
+        NOTIFICATION_SETTINGS_MAGIC,
+        NOTIFICATION_SETTINGS_VERSION);
 }
 
 static void input_event_callback(const void* value, void* context) {

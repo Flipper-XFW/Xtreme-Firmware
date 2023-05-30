@@ -195,30 +195,19 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
     if(need_format) {
         // Backup U2F keys
         // lfs_file_t file;
-        // uint8_t* cnt = NULL;
-        // uint32_t cnt_size;
         // uint8_t* key = NULL;
         // uint32_t key_size;
         // if(lfs_mount(lfs, &lfs_data->config) == 0) {
         //     FURI_LOG_I(TAG, "Factory reset: Mounted for backup");
 
-        //     if(lfs_file_open(lfs, &file, ".cnt.u2f", LFS_O_RDONLY) == 0) {
-        //         cnt_size = file.ctz.size;
-        //         cnt = malloc(cnt_size);
-        //         if(lfs_file_read(lfs, &file, cnt, cnt_size) != (int32_t)cnt_size) {
-        //             free(cnt);
-        //             cnt = NULL;
+        //     if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_RDONLY) == 0) {
+        //         key_size = file.ctz.size;
+        //         key = malloc(key_size);
+        //         if(lfs_file_read(lfs, &file, key, key_size) != (int32_t)key_size) {
+        //             free(key);
+        //             key = NULL;
         //         }
         //         lfs_file_close(lfs, &file);
-        //         if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_RDONLY) == 0) {
-        //             key_size = file.ctz.size;
-        //             key = malloc(key_size);
-        //             if(lfs_file_read(lfs, &file, key, key_size) != (int32_t)key_size) {
-        //                 free(key);
-        //                 key = NULL;
-        //             }
-        //             lfs_file_close(lfs, &file);
-        //         }
         //     }
 
         //     if(lfs_unmount(lfs) == 0) {
@@ -239,19 +228,12 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
                 storage->status = StorageStatusOK;
 
                 // Restore U2F keys
-                // if(cnt != NULL && key != NULL) {
-                //     if(lfs_file_open(lfs, &file, ".cnt.u2f", LFS_O_WRONLY | LFS_O_CREAT) == 0) {
-                //         lfs_file_write(lfs, &file, cnt, cnt_size);
+                // if(key != NULL) {
+                //     if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_WRONLY | LFS_O_CREAT) == 0) {
+                //         lfs_file_write(lfs, &file, key, key_size);
                 //         lfs_file_close(lfs, &file);
-                //         if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_WRONLY | LFS_O_CREAT) ==
-                //            0) {
-                //             lfs_file_write(lfs, &file, key, key_size);
-                //             lfs_file_close(lfs, &file);
-                //         }
                 //     }
                 // }
-                // if(cnt != NULL) free(cnt);
-                // if(key != NULL) free(key);
             } else {
                 FURI_LOG_E(TAG, "Factory reset: Mount after format failed");
                 storage->status = StorageStatusNotMounted;
@@ -260,6 +242,7 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
             FURI_LOG_E(TAG, "Factory reset: Format failed");
             storage->status = StorageStatusNoFS;
         }
+        // if(key != NULL) free(key);
     } else {
         // Normal
         err = lfs_mount(lfs, &lfs_data->config);
@@ -706,6 +689,13 @@ static FS_Error storage_int_common_remove(void* ctx, const char* path) {
     return storage_int_parse_error(result);
 }
 
+static FS_Error storage_int_common_rename(void* ctx, const char* old, const char* new) { // FIXME
+    StorageData* storage = ctx;
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    int result = lfs_rename(lfs, old, new);
+    return storage_int_parse_error(result);
+}
+
 static FS_Error storage_int_common_mkdir(void* ctx, const char* path) {
     StorageData* storage = ctx;
     lfs_t* lfs = lfs_get_from_storage(storage);
@@ -763,6 +753,7 @@ static const FS_Api fs_api = {
             .stat = storage_int_common_stat,
             .mkdir = storage_int_common_mkdir,
             .remove = storage_int_common_remove,
+            .rename = storage_int_common_rename,
             .fs_info = storage_int_common_fs_info,
         },
 };

@@ -1,6 +1,8 @@
 #include <xtreme.h>
 #include "gui_i.h"
 #include <assets_icons.h>
+#include <storage/storage.h>
+#include <storage/storage_i.h>
 
 #define TAG "GuiSrv"
 
@@ -16,6 +18,23 @@ ViewPort* gui_view_port_find_enabled(ViewPortArray_t array) {
         ViewPortArray_previous(it);
     }
     return NULL;
+}
+
+uint8_t gui_get_count_of_enabled_view_port_in_layer(Gui* gui, GuiLayer layer) {
+    furi_assert(gui);
+    furi_check(layer < GuiLayerMAX);
+    uint8_t ret = 0;
+
+    ViewPortArray_it_t it;
+    ViewPortArray_it_last(it, gui->layers[layer]);
+    while(!ViewPortArray_end_p(it)) {
+        ViewPort* view_port = *ViewPortArray_ref(it);
+        if(view_port_is_enabled(view_port)) {
+            ret++;
+        }
+        ViewPortArray_previous(it);
+    }
+    return ret;
 }
 
 void gui_update(Gui* gui) {
@@ -75,7 +94,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
         canvas_draw_box(gui->canvas, 89, 3, 38, 6);
         canvas_set_color(gui->canvas, ColorBlack);
         canvas_set_bitmap_mode(gui->canvas, 1);
-        canvas_draw_icon(gui->canvas, 0, 0, XTREME_ASSETS()->I_Background_128x11);
+        canvas_draw_icon(gui->canvas, 0, 0, &I_Background_128x11);
     } else {
         canvas_set_color(gui->canvas, ColorBlack);
     }
@@ -588,6 +607,10 @@ Gui* gui_alloc() {
 
     furi_check(gui->input_events);
     furi_pubsub_subscribe(gui->input_events, gui_input_events_callback, gui);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    gui_add_view_port(gui, storage->sd_gui.view_port, GuiLayerStatusBarLeft);
+    furi_record_close(RECORD_STORAGE);
 
     return gui;
 }

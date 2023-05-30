@@ -6,13 +6,13 @@
 #define TAG "XtremeSettings"
 
 XtremeSettings xtreme_settings = {
-    .loaded = false,
     .asset_pack = "",
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
     .fallback_anim = true, // ON
     .wii_menu = true, // ON
+    .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
     .lockscreen_time = true, // ON
     .lockscreen_seconds = false, // OFF
@@ -33,6 +33,8 @@ XtremeSettings xtreme_settings = {
 };
 
 void XTREME_SETTINGS_LOAD() {
+    if(!furi_hal_is_normal_boot()) return;
+
     XtremeSettings* x = &xtreme_settings;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -40,6 +42,7 @@ void XTREME_SETTINGS_LOAD() {
         FuriString* string = furi_string_alloc();
         if(flipper_format_read_string(file, "asset_pack", string)) {
             strlcpy(x->asset_pack, furi_string_get_cstr(string), XTREME_ASSETS_PACK_NAME_LEN);
+            x->is_nsfw = strncmp(x->asset_pack, "NSFW", strlen("NSFW")) == 0;
         }
         furi_string_free(string);
         flipper_format_rewind(file);
@@ -54,6 +57,8 @@ void XTREME_SETTINGS_LOAD() {
         flipper_format_read_bool(file, "wii_menu", &x->wii_menu, 1);
         flipper_format_rewind(file);
         flipper_format_read_bool(file, "bad_pins_format", &x->bad_pins_format, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_bool(file, "lock_on_boot", &x->lock_on_boot, 1);
         flipper_format_rewind(file);
         flipper_format_read_bool(file, "lockscreen_time", &x->lockscreen_time, 1);
         flipper_format_rewind(file);
@@ -89,8 +94,6 @@ void XTREME_SETTINGS_LOAD() {
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
-
-    xtreme_settings.loaded = true;
 }
 
 void XTREME_SETTINGS_SAVE() {
@@ -107,6 +110,7 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "fallback_anim", &x->fallback_anim, 1);
         flipper_format_write_bool(file, "wii_menu", &x->wii_menu, 1);
         flipper_format_write_bool(file, "bad_pins_format", &x->bad_pins_format, 1);
+        flipper_format_write_bool(file, "lock_on_boot", &x->lock_on_boot, 1);
         flipper_format_write_bool(file, "lockscreen_time", &x->lockscreen_time, 1);
         flipper_format_write_bool(file, "lockscreen_seconds", &x->lockscreen_seconds, 1);
         flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
@@ -129,14 +133,5 @@ void XTREME_SETTINGS_SAVE() {
 }
 
 XtremeSettings* XTREME_SETTINGS() {
-    return &xtreme_settings;
-}
-
-XtremeSettings* XTREME_SETTINGS_WAIT() {
-    if(furi_hal_is_normal_boot()) {
-        while(!xtreme_settings.loaded) {
-            furi_delay_ms(50);
-        }
-    }
     return &xtreme_settings;
 }

@@ -1,5 +1,4 @@
 #include "../lfrfid_i.h"
-#include <xtreme.h>
 
 static void lfrfid_write_callback(LFRFIDWorkerWriteResult result, void* context) {
     LfRfid* app = context;
@@ -34,7 +33,7 @@ void lfrfid_scene_write_on_enter(void* context) {
             AlignCenter,
             AlignTop);
     }
-    popup_set_icon(popup, 0, 3, XTREME_ASSETS()->I_RFIDDolphinSend_97x61);
+    popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
 

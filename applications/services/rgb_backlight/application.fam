@@ -1,9 +1,0 @@
-App(
-    appid="rgb_backlight",
-    name="RGB Backlight",
-    apptype=FlipperAppType.SERVICE,
-    entry_point="rgb_backlight_srv",
-    sdk_headers=[
-        "rgb_backlight.h",
-    ],
-)

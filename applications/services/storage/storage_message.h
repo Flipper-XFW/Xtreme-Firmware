@@ -79,6 +79,12 @@ typedef struct {
 } SADataPath;
 
 typedef struct {
+    const char* old;
+    const char* new;
+    FuriThreadId thread_id;
+} SADataRename;
+
+typedef struct {
     File* file;
 } SADataFile;
 
@@ -104,6 +110,7 @@ typedef union {
 
     SADataFile file;
     SADataPath path;
+    SADataRename rename;
 
     SAInfo sdinfo;
 } SAData;
@@ -134,6 +141,7 @@ typedef enum {
     StorageCommandCommonTimestamp,
     StorageCommandCommonStat,
     StorageCommandCommonRemove,
+    StorageCommandCommonRename,
     StorageCommandCommonMkDir,
     StorageCommandCommonFSInfo,
     StorageCommandSDFormat,

@@ -229,7 +229,7 @@ void hid_svc_start() {
         }
     }
 #endif
-    // add led state output report
+    // Add led state output report
     char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
     status = aci_gatt_add_char(
         hid_svc->svc_handle,
@@ -246,7 +246,7 @@ void hid_svc_start() {
         FURI_LOG_E(TAG, "Failed to add led state characteristic: %d", status);
     }
 
-    // add led state char descriptor specifying it is an output report
+    // Add led state char descriptor specifying it is an output report
     uint8_t buf[2] = {HID_SVC_REPORT_COUNT + 1, 2};
     desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
     status = aci_gatt_add_char_desc(
@@ -266,7 +266,6 @@ void hid_svc_start() {
     if(status) {
         FURI_LOG_E(TAG, "Failed to add led state descriptor: %d", status);
     }
-
     // Add Report Map characteristic
     char_uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID;
     status = aci_gatt_add_char(

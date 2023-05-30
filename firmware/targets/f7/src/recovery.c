@@ -56,7 +56,7 @@ void flipper_boot_recovery_exec() {
     }
 
     if(!counter) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagResetPin);
+        furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
         furi_hal_rtc_set_pin_fails(0);
         furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
     }

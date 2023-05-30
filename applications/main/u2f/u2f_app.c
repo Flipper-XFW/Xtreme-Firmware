@@ -28,11 +28,6 @@ U2fApp* u2f_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_copy(storage, U2F_CNT_OLD_FILE, U2F_CNT_FILE);
-    storage_common_copy(storage, U2F_KEY_OLD_FILE, U2F_KEY_FILE);
-    furi_record_close(RECORD_STORAGE);
-
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&u2f_scene_handlers, app);
     view_dispatcher_enable_queue(app->view_dispatcher);

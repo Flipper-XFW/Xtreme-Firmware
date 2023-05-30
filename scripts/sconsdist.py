@@ -170,7 +170,6 @@ class Main(App):
             "update.dir",
             "sdk_headers.dir",
             "lib.dir",
-            "debug.dir",
             "scripts.dir",
         )
 
@@ -251,17 +250,6 @@ class Main(App):
             )
         bundle_args.extend(self.other_args)
 
-        log_custom_fz_name = environ.get("CUSTOM_FLIPPER_NAME", None) or ""
-        if (
-            (log_custom_fz_name != "")
-            and (len(log_custom_fz_name) <= 8)
-            and (log_custom_fz_name.isalnum())
-            and (log_custom_fz_name.isascii())
-        ):
-            self.logger.info(
-                f"Flipper Custom Name is set:\n\tName: {log_custom_fz_name} : length - {len(log_custom_fz_name)} chars"
-            )
-
         if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
             self.note_dist_component("update", "dir", bundle_dir)
             self.logger.info(
@@ -283,7 +271,15 @@ class Main(App):
                 self.note_dist_component(
                     "update", "tgz", self.get_dist_path(bundle_tgz)
                 )
-                tar.add(bundle_dir, arcname=bundle_dir_name)
+
+                # Strip uid and gid in case of overflow
+                def tar_filter(tarinfo):
+                    tarinfo.uid = tarinfo.gid = 0
+                    tarinfo.mtime = 0
+                    tarinfo.uname = tarinfo.gname = "furippa"
+                    return tarinfo
+
+                tar.add(bundle_dir, arcname=bundle_dir_name, filter=tar_filter)
         return bundle_result
 
 

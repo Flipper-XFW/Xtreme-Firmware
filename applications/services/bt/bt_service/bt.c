@@ -5,7 +5,6 @@
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <xtreme.h>
 
 #define TAG "BtSrv"
 
@@ -36,7 +35,7 @@ static void bt_pin_code_view_port_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Bt* bt = context;
     char pin_code_info[24];
-    canvas_draw_icon(canvas, 0, 0, XTREME_ASSETS()->I_BLE_Pairing_128x64);
+    canvas_draw_icon(canvas, 0, 0, &I_BLE_Pairing_128x64);
     snprintf(pin_code_info, sizeof(pin_code_info), "Pairing code\n%06lu", bt->pin_code);
     elements_multiline_text_aligned(canvas, 64, 4, AlignCenter, AlignTop, pin_code_info);
     elements_button_left(canvas, "Quit");
@@ -84,7 +83,7 @@ static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     if(bt->suppress_pin_screen) return true;
 
     FuriString* pin_str;
-    dialog_message_set_icon(bt->dialog_message, XTREME_ASSETS()->I_BLE_Pairing_128x64, 0, 0);
+    dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
     pin_str = furi_string_alloc_printf("Verify code\n%06lu", pin);
     dialog_message_set_text(
         bt->dialog_message, furi_string_get_cstr(pin_str), 64, 4, AlignCenter, AlignTop);
@@ -126,10 +125,6 @@ Bt* bt_alloc() {
         bt_settings_save(&bt->bt_settings);
     }
     // Keys storage
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_copy(storage, BT_KEYS_STORAGE_OLD_PATH, BT_KEYS_STORAGE_PATH);
-    storage_common_remove(storage, BT_KEYS_STORAGE_OLD_PATH);
-    furi_record_close(RECORD_STORAGE);
     bt->keys_storage = bt_keys_storage_alloc(BT_KEYS_STORAGE_PATH);
     // Alloc queue
     bt->message_queue = furi_message_queue_alloc(8, sizeof(BtMessage));
@@ -393,7 +388,7 @@ static inline FuriHalBtProfile get_hal_bt_profile(BtProfile profile) {
     }
 }
 
-static void bt_restart(Bt* bt) {
+void bt_restart(Bt* bt) {
     furi_hal_bt_change_app(get_hal_bt_profile(bt->profile), bt_on_gap_event_callback, bt);
     furi_hal_bt_start_advertising();
 }
