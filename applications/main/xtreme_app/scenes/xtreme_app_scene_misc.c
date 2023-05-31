@@ -5,6 +5,7 @@ enum VarItemListIndex {
     VarItemListIndexDolphinLevel,
     VarItemListIndexDolphinAngry,
     VarItemListIndexButthurtTimer,
+    VarItemListIndexChargeCap,
     VarItemListIndexRgbBacklight,
     VarItemListIndexLcdColor,
 };
