@@ -356,47 +356,32 @@ static FS_Error storage_process_common_remove(Storage* app, FuriString* path) {
     StorageData* storage;
     FS_Error ret = storage_get_data(app, path, &storage);
 
-    do {
+    if(ret == FSE_OK) {
         if(storage_path_already_open(path, storage)) {
-            ret = FSE_ALREADY_OPEN;
-            break;
+            return FSE_ALREADY_OPEN;
         }
 
         storage_data_timestamp(storage);
         FS_CALL(storage, common.remove(storage, cstr_path_without_vfs_prefix(path)));
-    } while(false);
+    }
 
     return ret;
 }
 
 static FS_Error storage_process_common_rename(Storage* app, FuriString* old, FuriString* new) {
-    FS_Error ret;
-    // Paths are already resolved, no aliases
-    if(strncmp(furi_string_get_cstr(old), furi_string_get_cstr(new), STORAGE_PATH_PREFIX_LEN)) {
-        // Different filesystems, use copy + remove
-        ret = storage_common_copy(app, furi_string_get_cstr(old), furi_string_get_cstr(new));
-        if(ret == FSE_OK) {
-            if(!storage_simply_remove_recursive(app, furi_string_get_cstr(old))) {
-                ret = FSE_INTERNAL;
-            }
+    StorageData* storage;
+    FS_Error ret = storage_get_data(app, old, &storage);
+
+    if(ret == FSE_OK) {
+        if(storage_path_already_open(old, storage)) {
+            return FSE_ALREADY_OPEN;
         }
-    } else {
-        // Same filesystem, use rename
-        StorageData* storage;
-        ret = storage_get_data(app, old, &storage);
 
-        do {
-            if(storage_path_already_open(old, storage)) {
-                ret = FSE_ALREADY_OPEN;
-                break;
-            }
-
-            storage_data_timestamp(storage);
-            FS_CALL(
-                storage,
-                common.rename(
-                    storage, cstr_path_without_vfs_prefix(old), cstr_path_without_vfs_prefix(new)));
-        } while(false);
+        storage_data_timestamp(storage);
+        FS_CALL(
+            storage,
+            common.rename(
+                storage, cstr_path_without_vfs_prefix(old), cstr_path_without_vfs_prefix(new)));
     }
 
     return ret;
@@ -653,6 +638,14 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         storage_process_alias(app, opath, message->data->rename.thread_id, false);
         path = furi_string_alloc_set(message->data->rename.new);
         storage_process_alias(app, path, message->data->rename.thread_id, false);
+        // Paths are resolved, no aliases
+        if(strncmp(
+               furi_string_get_cstr(opath), furi_string_get_cstr(path), STORAGE_PATH_PREFIX_LEN)) {
+            // Different filesystems, return to caller
+            message->return_data->error_value = FSE_NOT_IMPLEMENTED;
+            break;
+        }
+        // Same filesystem, use rename
         message->return_data->error_value = storage_process_common_rename(app, opath, path);
         break;
     case StorageCommandCommonMkDir:
