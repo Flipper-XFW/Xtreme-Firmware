@@ -473,7 +473,8 @@ static void power_check_battery_level_change(Power* power) {
 }
 
 static void power_check_charge_cap(Power* power) {
-    if(power->info.charge >= XTREME_SETTINGS()->charge_cap) {
+    uint32_t cap = XTREME_SETTINGS()->charge_cap;
+    if(power->info.charge >= cap && cap < 100) {
         if(!power->info.is_charge_capped) { // Suppress charging if charge reaches custom cap
             power->info.is_charge_capped = true;
             furi_hal_power_suppress_charge_enter();

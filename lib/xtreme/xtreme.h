@@ -36,7 +36,7 @@ typedef struct {
     uint32_t favorite_timeout;
     bool bad_bt;
     bool bad_bt_remember;
-    int32_t butthurt_timer;
+    uint32_t butthurt_timer;
     uint32_t charge_cap;
     bool rgb_backlight;
 } XtremeSettings;
