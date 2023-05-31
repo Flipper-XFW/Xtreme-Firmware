@@ -472,6 +472,20 @@ static void power_check_battery_level_change(Power* power) {
     }
 }
 
+static void power_check_charge_cap(Power* power) {
+    if(power->info.charge >= XTREME_SETTINGS()->charge_cap) {
+        if(!power->info.is_charge_capped) { // Suppress charging if charge reaches custom cap
+            power->info.is_charge_capped = true;
+            furi_hal_power_suppress_charge_enter();
+        }
+    } else {
+        if(power->info.is_charge_capped) { // Start charging again if charge below custom cap
+            power->info.is_charge_capped = false;
+            furi_hal_power_suppress_charge_exit();
+        }
+    }
+}
+
 void power_trigger_ui_update(Power* power) {
     view_port_update(power->battery_view_port);
 }
@@ -491,6 +505,7 @@ int32_t power_srv(void* p) {
     }
     power_auto_shutdown_arm(power);
     power_update_info(power);
+    power->info.is_charge_capped = false; // default false
     furi_record_create(RECORD_POWER, power);
 
     while(1) {
@@ -505,6 +520,9 @@ int32_t power_srv(void* p) {
 
         // Check and notify about battery level change
         power_check_battery_level_change(power);
+
+        // Check charge cap, compare with user setting and suppress/unsuppress charging
+        power_check_charge_cap(power);
 
         // Update battery view port
         if(need_refresh) {
