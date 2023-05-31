@@ -185,6 +185,7 @@ Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_wwdg.h,,
 Header,+,lib/subghz/blocks/const.h,,
+Header,+,lib/subghz/blocks/custom_btn.h,,
 Header,+,lib/subghz/blocks/decoder.h,,
 Header,+,lib/subghz/blocks/encoder.h,,
 Header,+,lib/subghz/blocks/generic.h,,
@@ -2766,6 +2767,11 @@ Function,+,subghz_block_generic_deserialize,SubGhzProtocolStatus,"SubGhzBlockGen
 Function,+,subghz_block_generic_deserialize_check_count_bit,SubGhzProtocolStatus,"SubGhzBlockGeneric*, FlipperFormat*, uint16_t"
 Function,+,subghz_block_generic_get_preset_name,void,"const char*, FuriString*"
 Function,+,subghz_block_generic_serialize,SubGhzProtocolStatus,"SubGhzBlockGeneric*, FlipperFormat*, SubGhzRadioPreset*"
+Function,-,subghz_custom_btn_get,uint8_t,
+Function,-,subghz_custom_btn_get_original,uint8_t,
+Function,-,subghz_custom_btn_is_allowed,_Bool,
+Function,-,subghz_custom_btn_set,_Bool,uint8_t
+Function,+,subghz_custom_btns_reset,void,
 Function,+,subghz_environment_alloc,SubGhzEnvironment*,
 Function,+,subghz_environment_free,void,SubGhzEnvironment*
 Function,+,subghz_environment_get_alutech_at_4n_rainbow_table_file_name,const char*,SubGhzEnvironment*
@@ -3425,6 +3431,7 @@ Function,+,subghz_txrx_load_decoder_by_name_protocol,_Bool,"SubGhzTxRx*, const c
 Function,-,subghz_txrx_protocol_is_serializable,_Bool,SubGhzTxRx*
 Function,-,subghz_txrx_protocol_is_transmittable,_Bool,"SubGhzTxRx*, _Bool"
 Function,-,subghz_txrx_receiver_set_filter,void,"SubGhzTxRx*, SubGhzProtocolFlag"
+Function,+,subghz_txrx_reset_dynamic_and_custom_btns,void,SubGhzTxRx*
 Function,-,subghz_txrx_rx_start,void,SubGhzTxRx*
 Function,-,subghz_txrx_set_debug_pin_state,void,"SubGhzTxRx*, _Bool"
 Function,+,subghz_txrx_set_need_save_callback,void,"SubGhzTxRx*, SubGhzTxRxNeedSaveCallback, void*"
