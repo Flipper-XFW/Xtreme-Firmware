@@ -45,9 +45,10 @@ void flipper_migrate_files() {
     storage_common_remove(storage, INT_PATH(".passport.settings"));
     storage_common_remove(storage, INT_PATH(".region_data"));
 
-    // Migrate files, Int -> Ext
+    // Migrate files
     storage_common_copy(storage, ARCHIVE_FAV_OLD_PATH, ARCHIVE_FAV_PATH);
     storage_common_remove(storage, ARCHIVE_FAV_OLD_PATH);
+    // Int -> Ext
     storage_common_copy(storage, BT_SETTINGS_OLD_PATH, BT_SETTINGS_PATH);
     storage_common_remove(storage, BT_SETTINGS_OLD_PATH);
     storage_common_copy(storage, DOLPHIN_STATE_OLD_PATH, DOLPHIN_STATE_PATH);
