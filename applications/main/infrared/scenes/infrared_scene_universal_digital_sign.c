@@ -83,4 +83,4 @@ bool infrared_scene_universal_digital_sign_on_event(void* context, SceneManagerE
 
 void infrared_scene_universal_digital_sign_on_exit(void* context) {
     infrared_scene_universal_common_on_exit(context);
-}   
+}
