@@ -520,16 +520,6 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     gap->advertise_timer = furi_timer_alloc(gap_advetise_timer_callback, FuriTimerTypeOnce, NULL);
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
-    FURI_LOG_D(TAG, "Advertising name: %s", &(gap->service.adv_name[1]));
-    FURI_LOG_D(
-        TAG,
-        "MAC @ : %02X:%02X:%02X:%02X:%02X:%02X",
-        config->mac_address[5],
-        config->mac_address[4],
-        config->mac_address[3],
-        config->mac_address[2],
-        config->mac_address[1],
-        config->mac_address[0]);
     gap_init_svc(gap);
     // Initialization of the BLE Services
     SVCCTL_Init();
