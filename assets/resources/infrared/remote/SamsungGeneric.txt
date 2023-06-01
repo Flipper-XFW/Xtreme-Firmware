@@ -1,0 +1,12 @@
+REMOTE: /ext/infrared/Samsung.ir
+UP: Up
+DOWN: Down
+LEFT: Left
+RIGHT: Right
+OK: Select
+BACK: Return
+UPHOLD: VOL+
+DOWNHOLD: VOL-
+LEFTHOLD: Source
+RIGHTHOLD: Exit
+OKHOLD: POWER
