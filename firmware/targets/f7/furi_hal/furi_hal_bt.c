@@ -7,6 +7,7 @@
 #include <furi_hal_version.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_bt_serial.h>
+#include <furi_hal_bus.c>
 #include "battery_service.h"
 
 #include <furi.h>
@@ -80,6 +81,11 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
 FuriHalBtProfileConfig* current_profile = NULL;
 
 void furi_hal_bt_init() {
+    furi_hal_bus_enable(FuriHalBusHSEM);
+    furi_hal_bus_enable(FuriHalBusIPCC);
+    furi_hal_bus_enable(FuriHalBusAES2);
+    furi_hal_bus_enable(FuriHalBusPKA);
+
     if(!furi_hal_bt_core2_mtx) {
         furi_hal_bt_core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
         furi_assert(furi_hal_bt_core2_mtx);
@@ -269,6 +275,11 @@ void furi_hal_bt_reinit() {
     furi_delay_ms(100);
     ble_glue_thread_stop();
 
+    furi_hal_bus_disable(FuriHalBusHSEM);
+    furi_hal_bus_disable(FuriHalBusIPCC);
+    furi_hal_bus_disable(FuriHalBusAES2);
+    furi_hal_bus_disable(FuriHalBusPKA);
+
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bt_init();
 
@@ -450,40 +461,6 @@ uint32_t furi_hal_bt_get_conn_rssi(uint8_t* rssi) {
     return since;
 }
 
-uint32_t furi_hal_bt_get_transmitted_packets() {
-    uint32_t packets = 0;
-    aci_hal_le_tx_test_packet_number(&packets);
-    return packets;
-}
-
-void furi_hal_bt_stop_rx() {
-    aci_hal_rx_stop();
-}
-
-bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
-    BleGlueCommandResult fw_start_res = ble_glue_force_c2_mode(mode);
-    if(fw_start_res == BleGlueCommandResultOK) {
-        return true;
-    } else if(fw_start_res == BleGlueCommandResultRestartPending) {
-        // Do nothing and wait for system reset
-        furi_delay_ms(C2_MODE_SWITCH_TIMEOUT);
-        furi_crash("Waiting for FUS->radio stack transition");
-        return true;
-    }
-
-    FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
-    return false;
-}
-
-const FuriHalBtHardfaultInfo* furi_hal_bt_get_hardfault_info() {
-    /* AN5289, 4.8.2 */
-    const FuriHalBtHardfaultInfo* info = (FuriHalBtHardfaultInfo*)(SRAM2A_BASE);
-    if(info->magic != FURI_HAL_BT_HARDFAULT_INFO_MAGIC) {
-        return NULL;
-    }
-    return info;
-}
-
 void furi_hal_bt_set_profile_adv_name(
     FuriHalBtProfile profile,
     const char name[FURI_HAL_BT_ADV_NAME_LENGTH]) {
@@ -528,4 +505,38 @@ void furi_hal_bt_set_profile_pairing_method(FuriHalBtProfile profile, GapPairing
 GapPairing furi_hal_bt_get_profile_pairing_method(FuriHalBtProfile profile) {
     furi_assert(profile < FuriHalBtProfileNumber);
     return profile_config[profile].config.pairing_method;
+}
+
+uint32_t furi_hal_bt_get_transmitted_packets() {
+    uint32_t packets = 0;
+    aci_hal_le_tx_test_packet_number(&packets);
+    return packets;
+}
+
+void furi_hal_bt_stop_rx() {
+    aci_hal_rx_stop();
+}
+
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
+    BleGlueCommandResult fw_start_res = ble_glue_force_c2_mode(mode);
+    if(fw_start_res == BleGlueCommandResultOK) {
+        return true;
+    } else if(fw_start_res == BleGlueCommandResultRestartPending) {
+        // Do nothing and wait for system reset
+        furi_delay_ms(C2_MODE_SWITCH_TIMEOUT);
+        furi_crash("Waiting for FUS->radio stack transition");
+        return true;
+    }
+
+    FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
+    return false;
+}
+
+const FuriHalBtHardfaultInfo* furi_hal_bt_get_hardfault_info() {
+    /* AN5289, 4.8.2 */
+    const FuriHalBtHardfaultInfo* info = (FuriHalBtHardfaultInfo*)(SRAM2A_BASE);
+    if(info->magic != FURI_HAL_BT_HARDFAULT_INFO_MAGIC) {
+        return NULL;
+    }
+    return info;
 }

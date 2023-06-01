@@ -446,7 +446,18 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
 
     S_API_MESSAGE(StorageCommandCommonRename);
     S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    FS_Error ret = S_RETURN_ERROR;
+
+    if(ret == FSE_NOT_IMPLEMENTED) {
+        // Different filesystems, use copy + remove
+        ret = storage_common_copy(storage, old_path, new_path);
+        if(ret == FSE_OK) {
+            if(!storage_simply_remove_recursive(storage, old_path)) {
+                ret = FSE_INTERNAL;
+            }
+        }
+    }
+    return ret;
 }
 
 FS_Error storage_common_move(Storage* storage, const char* old_path, const char* new_path) {
@@ -458,7 +469,7 @@ FS_Error storage_common_move(Storage* storage, const char* old_path, const char*
         return FSE_INVALID_NAME;
     }
 
-    if(storage_common_exists(storage, new_path)) {
+    if(storage_file_exists(storage, new_path)) {
         FS_Error error = storage_common_remove(storage, new_path);
         if(error != FSE_OK) {
             return error;
@@ -475,7 +486,16 @@ FS_Error storage_common_move(Storage* storage, const char* old_path, const char*
 
     S_API_MESSAGE(StorageCommandCommonRename);
     S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    FS_Error ret = S_RETURN_ERROR;
+
+    if(ret == FSE_NOT_IMPLEMENTED) {
+        // Different filesystems, use copy + remove
+        ret = storage_common_copy(storage, old_path, new_path);
+        if(ret == FSE_OK) {
+            ret = storage_simply_remove_recursive(storage, old_path);
+        }
+    }
+    return ret;
 }
 
 static FS_Error
