@@ -23,7 +23,6 @@ static void xtreme_app_scene_interface_graphics_asset_pack_changed(VariableItem*
         XTREME_ASSETS_PACK_NAME_LEN);
     app->asset_pack_index = index;
     app->save_settings = true;
-    app->require_reboot = true;
 }
 
 const char* const anim_speed_names[] =
