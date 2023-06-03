@@ -118,9 +118,7 @@ void XTREME_SETTINGS_LOAD() {
         }
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "dark_mode", &b, 1)) {
-            {
-                x->dark_mode = b;
-            }
+            x->dark_mode = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "favorite_timeout", &u, 1)) {
