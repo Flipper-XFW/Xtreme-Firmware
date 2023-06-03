@@ -6,11 +6,6 @@
 #include <string.h>
 
 void nrf24_init(FuriHalSpiBusHandle* handle) {
-    FURI_LOG_I("aa", "nrf24_init");
-
-    furi_hal_gpio_init(&gpio_ext_pa4, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
-    furi_hal_gpio_write(&gpio_ext_pa4, true);
-
     furi_hal_power_enable_otg();
 
     furi_hal_spi_bus_handle_init(handle);
@@ -20,14 +15,10 @@ void nrf24_init(FuriHalSpiBusHandle* handle) {
 }
 
 void nrf24_deinit(FuriHalSpiBusHandle* handle) {
-    FURI_LOG_I("aa", "nrf24_deinit");
     furi_hal_spi_release(handle);
     furi_hal_spi_bus_handle_deinit(handle);
     furi_hal_gpio_write(nrf24_CE_PIN, false);
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-
-    furi_hal_gpio_init(&gpio_ext_pa4, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_write(&gpio_ext_pa4, false);
 
     furi_hal_power_disable_otg();
 }
