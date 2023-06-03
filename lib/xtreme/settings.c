@@ -43,7 +43,6 @@ void XTREME_SETTINGS_LOAD() {
         FuriString* string = furi_string_alloc();
         if(flipper_format_read_string(file, "asset_pack", string)) {
             strlcpy(x->asset_pack, furi_string_get_cstr(string), XTREME_ASSETS_PACK_NAME_LEN);
-            x->is_nsfw = strncmp(x->asset_pack, "NSFW", strlen("NSFW")) == 0;
         }
         furi_string_free(string);
         uint32_t u;
