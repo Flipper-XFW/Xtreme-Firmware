@@ -2,8 +2,6 @@
 
 #include "base.h"
 
-#include "../blocks/custom_btn.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,12 +14,6 @@ typedef struct SubGhzProtocolEncoderKeeloq SubGhzProtocolEncoderKeeloq;
 extern const SubGhzProtocolDecoder subghz_protocol_keeloq_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_keeloq_encoder;
 extern const SubGhzProtocol subghz_protocol_keeloq;
-
-void keeloq_reset_mfname();
-
-void keeloq_reset_kl_type();
-
-void keeloq_reset_original_btn();
 
 /**
  * Allocate SubGhzProtocolEncoderKeeloq.

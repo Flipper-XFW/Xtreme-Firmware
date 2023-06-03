@@ -80,10 +80,10 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     dolphin->event_queue = furi_message_queue_alloc(8, sizeof(DolphinEvent));
     dolphin->pubsub = furi_pubsub_alloc();
-    int32_t butthurt = XTREME_SETTINGS()->butthurt_timer;
+    uint32_t butthurt_timer = XTREME_SETTINGS()->butthurt_timer;
     dolphin->butthurt_timer = xTimerCreate(
         NULL,
-        (butthurt > 0) ? (butthurt * 1000) : -1,
+        butthurt_timer ? ((int32_t)butthurt_timer * 1000) : -1,
         pdTRUE,
         dolphin,
         dolphin_butthurt_timer_callback);

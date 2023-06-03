@@ -1,7 +1,9 @@
+from pathlib import Path
 import posixpath
 
 # For more details on these options, run 'fbt -h'
 
+FIRMWARE_ORIGIN = "Xtreme"
 
 # Default hardware target
 TARGET_HW = 7
@@ -14,7 +16,7 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "XFW-0047_29052023"
+DIST_SUFFIX = "XFW-0048_03062023"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
@@ -91,3 +93,8 @@ FIRMWARE_APPS = {
 }
 
 FIRMWARE_APP_SET = "default"
+
+custom_options_fn = "fbt_options_local.py"
+
+if Path(custom_options_fn).exists():
+    exec(compile(Path(custom_options_fn).read_text(), custom_options_fn, "exec"))

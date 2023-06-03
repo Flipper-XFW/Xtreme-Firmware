@@ -7,6 +7,7 @@
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_power.h>
+#include <furi_hal_bus.h>
 
 #include <stm32wbxx_ll_dma.h>
 
@@ -597,6 +598,8 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     furi_hal_subghz_capture_callback = callback;
     furi_hal_subghz_capture_callback_context = context;
 
+    furi_hal_bus_enable(FuriHalBusTIM2);
+
     // Timer: base
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     TIM_InitStruct.Prescaler = 64 - 1;
@@ -681,7 +684,7 @@ void furi_hal_subghz_stop_async_rx() {
     furi_hal_subghz_idle();
 
     FURI_CRITICAL_ENTER();
-    LL_TIM_DeInit(TIM2);
+    furi_hal_bus_disable(FuriHalBusTIM2);
 
     // Stop debug
     furi_hal_subghz_stop_debug();
@@ -860,6 +863,8 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     LL_DMA_EnableIT_HT(SUBGHZ_DMA_CH1_DEF);
     LL_DMA_EnableChannel(SUBGHZ_DMA_CH1_DEF);
 
+    furi_hal_bus_enable(FuriHalBusTIM2);
+
     // Configure TIM2
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     TIM_InitStruct.Prescaler = 64 - 1;
@@ -959,7 +964,7 @@ void furi_hal_subghz_stop_async_tx() {
 
     // Deinitialize Timer
     FURI_CRITICAL_ENTER();
-    LL_TIM_DeInit(TIM2);
+    furi_hal_bus_disable(FuriHalBusTIM2);
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
 
     // Deinitialize DMA
