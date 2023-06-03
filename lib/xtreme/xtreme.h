@@ -28,7 +28,7 @@ typedef struct {
     bool lockscreen_date;
     bool lockscreen_statusbar;
     bool lockscreen_prompt;
-    BatteryIcon battery_icon;
+    uint32_t battery_icon;
     bool status_icons;
     bool bar_borders;
     bool bar_background;
