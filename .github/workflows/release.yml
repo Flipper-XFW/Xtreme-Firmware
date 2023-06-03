@@ -46,15 +46,20 @@ jobs:
       - name: "Read version tag"
         run: bash .github/workflow_data/version.sh
 
-      - name: "Make tgz, zip and webupdater"
+      - name: "Make tgz and zip"
         run: bash .github/workflow_data/package.sh
+
+      - name: "Update release notes"
+        run: python .github/workflow_data/release.py
+
+      - name: "Upload to webupdater"
         env:
           NC_HOST: "https://cloud.cynthialabs.net/"
           NC_USER: "${{ secrets.NC_USER }}"
           NC_PASS: "${{ secrets.NC_PASS }}"
-
-      - name: "Update release notes"
-        run: python .github/workflow_data/release.py
+        run: |
+          python -m pip install pyncclient
+          python .github/workflow_data/webupdater.py
 
       - name: "Merge pull request"
         uses: "pascalgn/automerge-action@v0.15.6"

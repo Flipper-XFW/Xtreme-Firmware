@@ -10,8 +10,5 @@ cd ${ARTIFACT_DIR}
 7z a ../../../${ARTIFACT_ZIP} .
 cd ../../..
 
-python -m pip install pyncclient
-NC_FILE=${ARTIFACT_TGZ} NC_PATH=XFW-Updater python .github/workflow_data/webupdater.py
-
 echo "ARTIFACT_TGZ=${ARTIFACT_TGZ}" >> $GITHUB_ENV
 echo "ARTIFACT_ZIP=${ARTIFACT_ZIP}" >> $GITHUB_ENV

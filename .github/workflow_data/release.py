@@ -16,3 +16,5 @@ if __name__ == "__main__":
     )
     with open(notes_path, "w") as f:
         f.write(notes)
+    with open(os.environ["ARTIFACT_TGZ"].removesuffix(".tgz") + ".md", "w") as f:
+        f.write(changelog.strip() + "\n\n")

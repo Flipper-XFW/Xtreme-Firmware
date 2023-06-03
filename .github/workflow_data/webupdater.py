@@ -6,8 +6,8 @@ if __name__ == "__main__":
     client = nextcloud_client.Client(os.environ["NC_HOST"])
     client.login(os.environ["NC_USER"], os.environ["NC_PASS"])
 
-    file = os.environ["NC_FILE"]
-    path = os.environ["NC_PATH"] + "/" + file
+    file = os.environ["ARTIFACT_TGZ"]
+    path = f"XFW-Updater/{file}"
     try:
         client.delete(path)
     except Exception:
@@ -16,12 +16,20 @@ if __name__ == "__main__":
 
     file = file.removesuffix(".tgz") + ".md"
     path = path.removesuffix(".tgz") + ".md"
-    with open(os.environ['GITHUB_EVENT_PATH'], "r") as f:
-        changelog = json.load(f)['pull_request']['body']
-    with open(file, "w") as f:
-        f.write(changelog)
     try:
         client.delete(path)
     except Exception:
         pass
     client.put_file(path, file)
+
+    version = os.environ['VERSION_TAG'].split("_")[0]
+    files = (
+        os.environ['ARTIFACT_TGZ'],
+        os.environ['ARTIFACT_TGZ'].removesuffix(".tgz") + ".md"
+    )
+    for file in client.list("XFW-Updater"):
+        if file.name.startswith(version) and file.name not in files:
+            try:
+                client.delete(file.path)
+            except Exception:
+                pass
