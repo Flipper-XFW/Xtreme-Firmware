@@ -5,7 +5,7 @@ enum TextInputResult {
     TextInputResultError,
 };
 
-static void xtreme_app_scene_protocols_frequencies_add_text_input_callback(void* context) {
+static void xtreme_app_scene_protocols_freqs_add_text_input_callback(void* context) {
     XtremeApp* app = context;
 
     char* end;
@@ -15,17 +15,17 @@ static void xtreme_app_scene_protocols_frequencies_add_text_input_callback(void*
         return;
     }
     bool is_hopper =
-        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocolsFrequenciesAdd);
+        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneProtocolsFreqsAdd);
     if(is_hopper) {
         FrequencyList_push_back(app->subghz_hopper_freqs, value);
     } else {
         FrequencyList_push_back(app->subghz_static_freqs, value);
     }
-    app->save_subghz_frequencies = true;
+    app->save_subghz_freqs = true;
     view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultOk);
 }
 
-void xtreme_app_scene_protocols_frequencies_add_on_enter(void* context) {
+void xtreme_app_scene_protocols_freqs_add_on_enter(void* context) {
     XtremeApp* app = context;
     TextInput* text_input = app->text_input;
 
@@ -35,7 +35,7 @@ void xtreme_app_scene_protocols_frequencies_add_on_enter(void* context) {
 
     text_input_set_result_callback(
         text_input,
-        xtreme_app_scene_protocols_frequencies_add_text_input_callback,
+        xtreme_app_scene_protocols_freqs_add_text_input_callback,
         app,
         app->subghz_freq_buffer,
         XTREME_SUBGHZ_FREQ_BUFFER_SIZE,
@@ -49,7 +49,7 @@ void callback_return(void* context) {
     scene_manager_previous_scene(app->scene_manager);
 }
 
-bool xtreme_app_scene_protocols_frequencies_add_on_event(void* context, SceneManagerEvent event) {
+bool xtreme_app_scene_protocols_freqs_add_on_event(void* context, SceneManagerEvent event) {
     XtremeApp* app = context;
     bool consumed = false;
 
@@ -77,7 +77,7 @@ bool xtreme_app_scene_protocols_frequencies_add_on_event(void* context, SceneMan
     return consumed;
 }
 
-void xtreme_app_scene_protocols_frequencies_add_on_exit(void* context) {
+void xtreme_app_scene_protocols_freqs_add_on_exit(void* context) {
     XtremeApp* app = context;
     text_input_reset(app->text_input);
 }

@@ -57,7 +57,7 @@ typedef struct {
     FuriString* version_tag;
 
     bool save_mainmenu_apps;
-    bool save_subghz_frequencies;
+    bool save_subghz_freqs;
     bool save_subghz;
     bool save_name;
     bool save_level;

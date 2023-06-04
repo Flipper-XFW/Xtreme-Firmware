@@ -27,7 +27,7 @@ bool xtreme_app_apply(XtremeApp* app) {
         stream_free(stream);
     }
 
-    if(app->save_subghz_frequencies) {
+    if(app->save_subghz_freqs) {
         FlipperFormat* file = flipper_format_file_alloc(storage);
         do {
             FrequencyList_it_t it;
