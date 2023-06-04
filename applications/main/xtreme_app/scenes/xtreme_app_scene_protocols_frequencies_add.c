@@ -9,7 +9,7 @@ static void xtreme_app_scene_protocols_frequencies_add_text_input_callback(void*
     XtremeApp* app = context;
 
     char* end;
-    uint32_t value = strtol(app->subghz_freq_buffer, &end, 0) * 10000;
+    uint32_t value = strtol(app->subghz_freq_buffer, &end, 0) * 1000;
     if(*end || !furi_hal_subghz_is_frequency_valid(value)) {
         view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultError);
         return;
@@ -29,7 +29,7 @@ void xtreme_app_scene_protocols_frequencies_add_on_enter(void* context) {
     XtremeApp* app = context;
     TextInput* text_input = app->text_input;
 
-    text_input_set_header_text(text_input, "Format: 12356");
+    text_input_set_header_text(text_input, "Ex: 123456 for 123.456 MHz");
 
     strlcpy(app->subghz_freq_buffer, "", XTREME_SUBGHZ_FREQ_BUFFER_SIZE);
 

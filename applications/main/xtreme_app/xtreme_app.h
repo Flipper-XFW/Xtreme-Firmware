@@ -25,7 +25,7 @@
 #include <namespoof.h>
 #include <xtreme.h>
 
-#define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 6
+#define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 7
 
 ARRAY_DEF(CharList, char*)
 
