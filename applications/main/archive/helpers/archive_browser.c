@@ -471,10 +471,14 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
 
     browser->last_tab_switch_dir = key;
 
-    if(key == InputKeyLeft) {
-        tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
-    } else {
-        tab = (tab + 1) % ArchiveTabTotal;
+    for(int i = 0; i < 2; i++) {
+        if(key == InputKeyLeft) {
+            tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
+        } else {
+            tab = (tab + 1) % ArchiveTabTotal;
+        }
+        if(tab == ArchiveTabInternal && !XTREME_SETTINGS()->show_internal_tab) continue;
+        break;
     }
 
     browser->is_root = true;
@@ -503,14 +507,14 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
             bool hide_dot_files = !is_browser ? true :
                                   tab == ArchiveTabInternal ?
                                                 false :
-                                                !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
+                                                !XTREME_SETTINGS()->show_hidden_files;
             archive_file_browser_set_path(
                 browser, browser->path, archive_get_tab_ext(tab), skip_assets, hide_dot_files);
             tab_empty = false; // Empty check will be performed later
         }
     }
 
-    if((tab_empty) && (tab != ArchiveTabBrowser) && (tab != ArchiveTabInternal)) {
+    if(tab_empty && tab != ArchiveTabBrowser && tab != ArchiveTabInternal) {
         archive_switch_tab(browser, key);
     } else {
         with_view_model(

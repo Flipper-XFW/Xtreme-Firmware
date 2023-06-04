@@ -6,7 +6,7 @@
 #define TAG "XtremeSettings"
 
 XtremeSettings xtreme_settings = {
-    .asset_pack = "",
+    .asset_pack = "", // SFW
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
@@ -24,6 +24,8 @@ XtremeSettings xtreme_settings = {
     .bar_borders = true, // ON
     .bar_background = false, // OFF
     .sort_dirs_first = true, // ON
+    .show_hidden_files = false, // OFF
+    .show_internal_tab = false, // OFF
     .favorite_timeout = 0, // OFF
     .bad_bt = false, // USB
     .bad_bt_remember = false, // OFF
@@ -117,6 +119,14 @@ void XTREME_SETTINGS_LOAD() {
             x->sort_dirs_first = b;
         }
         flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "show_hidden_files", &b, 1)) {
+            x->show_hidden_files = b;
+        }
+        flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "show_internal_tab", &b, 1)) {
+            x->show_internal_tab = b;
+        }
+        flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "favorite_timeout", &u, 1)) {
             x->favorite_timeout = CLAMP(u, 60U, 0U);
         }
@@ -174,6 +184,8 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);
         flipper_format_write_bool(file, "bar_background", &x->bar_background, 1);
         flipper_format_write_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
+        flipper_format_write_bool(file, "show_hidden_files", &x->show_hidden_files, 1);
+        flipper_format_write_bool(file, "show_internal_tab", &x->show_internal_tab, 1);
         flipper_format_write_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
         flipper_format_write_bool(file, "bad_bt", &x->bad_bt, 1);
         flipper_format_write_bool(file, "bad_bt_remember", &x->bad_bt_remember, 1);

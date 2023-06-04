@@ -33,6 +33,8 @@ typedef struct {
     bool bar_borders;
     bool bar_background;
     bool sort_dirs_first;
+    bool show_hidden_files;
+    bool show_internal_tab;
     uint32_t favorite_timeout;
     bool bad_bt;
     bool bad_bt_remember;
