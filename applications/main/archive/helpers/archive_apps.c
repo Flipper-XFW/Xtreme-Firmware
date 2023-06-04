@@ -1,6 +1,7 @@
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
+#include <applications/main/u2f/u2f_data.h>
 
 static const char* known_apps[] = {
     [ArchiveAppTypeU2f] = "u2f",
@@ -28,13 +29,9 @@ bool archive_app_is_available(void* context, const char* path) {
     ArchiveAppTypeEnum app = archive_get_app_type(path);
 
     if(app == ArchiveAppTypeU2f) {
-        bool file_exists = false;
         Storage* storage = furi_record_open(RECORD_STORAGE);
-
-        if(storage_file_exists(storage, ANY_PATH("u2f/key.u2f"))) {
-            file_exists = storage_file_exists(storage, ANY_PATH("u2f/cnt.u2f"));
-        }
-
+        bool file_exists = storage_file_exists(storage, U2F_KEY_FILE) &&
+                           storage_file_exists(storage, U2F_CNT_FILE);
         furi_record_close(RECORD_STORAGE);
         return file_exists;
     } else {
@@ -69,8 +66,8 @@ void archive_app_delete_file(void* context, const char* path) {
 
     if(app == ArchiveAppTypeU2f) {
         Storage* fs_api = furi_record_open(RECORD_STORAGE);
-        res = (storage_common_remove(fs_api, ANY_PATH("u2f/key.u2f")) == FSE_OK);
-        res |= (storage_common_remove(fs_api, ANY_PATH("u2f/cnt.u2f")) == FSE_OK);
+        res = (storage_common_remove(fs_api, U2F_KEY_FILE) == FSE_OK);
+        res |= (storage_common_remove(fs_api, U2F_CNT_FILE) == FSE_OK);
         furi_record_close(RECORD_STORAGE);
 
         if(archive_is_favorite("/app:u2f/U2F Token")) {

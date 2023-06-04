@@ -64,25 +64,27 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
             FuriString* item_new_dir = furi_string_alloc_set("New Dir");
             FuriString* item_rename = furi_string_alloc_set("Rename");
             FuriString* item_delete = furi_string_alloc_set("Delete");
-            if(model->clipboard != NULL) {
+            if(!model->is_app_tab) {
+                if(model->clipboard != NULL) {
+                    archive_menu_add_item(
+                        menu_array_push_raw(model->context_menu),
+                        item_paste,
+                        ArchiveBrowserEventFileMenuPaste);
+                } else if(selected) {
+                    archive_menu_add_item(
+                        menu_array_push_raw(model->context_menu),
+                        item_cut,
+                        ArchiveBrowserEventFileMenuCut);
+                    archive_menu_add_item(
+                        menu_array_push_raw(model->context_menu),
+                        item_copy,
+                        ArchiveBrowserEventFileMenuCopy);
+                }
                 archive_menu_add_item(
                     menu_array_push_raw(model->context_menu),
-                    item_paste,
-                    ArchiveBrowserEventFileMenuPaste);
-            } else if(selected) {
-                archive_menu_add_item(
-                    menu_array_push_raw(model->context_menu),
-                    item_cut,
-                    ArchiveBrowserEventFileMenuCut);
-                archive_menu_add_item(
-                    menu_array_push_raw(model->context_menu),
-                    item_copy,
-                    ArchiveBrowserEventFileMenuCopy);
+                    item_new_dir,
+                    ArchiveBrowserEventFileMenuNewDir);
             }
-            archive_menu_add_item(
-                menu_array_push_raw(model->context_menu),
-                item_new_dir,
-                ArchiveBrowserEventFileMenuNewDir);
             if(selected) {
                 if(!selected->is_app) {
                     archive_menu_add_item(

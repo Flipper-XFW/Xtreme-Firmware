@@ -101,6 +101,7 @@ typedef struct {
     bool clipboard_copy;
     menu_array_t context_menu;
 
+    bool is_app_tab;
     bool move_fav;
     bool list_loading;
     bool folder_loading;
