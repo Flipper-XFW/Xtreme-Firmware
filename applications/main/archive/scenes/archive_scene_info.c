@@ -41,7 +41,8 @@ void archive_scene_info_on_enter(void* context) {
 
     // File size
     FileInfo fileinfo;
-    if(storage_common_stat(fs_api, furi_string_get_cstr(current->path), &fileinfo) != FSE_OK) {
+    if(storage_common_stat(fs_api, furi_string_get_cstr(current->path), &fileinfo) != FSE_OK ||
+       file_info_is_dir(&fileinfo)) {
         snprintf(
             file_info_message,
             sizeof(file_info_message),
