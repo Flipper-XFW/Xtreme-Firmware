@@ -33,9 +33,11 @@ void xtreme_app_scene_protocols_frequencies_on_enter(void* context) {
     variable_item_set_current_value_index(item, app->subghz_use_defaults);
     variable_item_set_current_value_text(item, app->subghz_use_defaults ? "ON" : "OFF");
 
-    variable_item_list_add(var_item_list, "Static Frequencies", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "Static Frequencies", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
 
-    variable_item_list_add(var_item_list, "Hopper Frequencies", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "Hopper Frequencies", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_protocols_frequencies_var_item_list_callback, app);

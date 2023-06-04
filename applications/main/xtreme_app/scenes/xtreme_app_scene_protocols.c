@@ -55,7 +55,8 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt_remember);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt_remember ? "ON" : "OFF");
 
-    variable_item_list_add(var_item_list, "SubGHz Frequencies", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "SubGHz Frequencies", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
 
     item = variable_item_list_add(
         var_item_list, "SubGHz Extend", 2, xtreme_app_scene_protocols_subghz_extend_changed, app);
