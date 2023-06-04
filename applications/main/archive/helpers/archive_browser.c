@@ -449,7 +449,8 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
 }
 
 static bool archive_is_dir_exists(FuriString* path) {
-    if(furi_string_equal(path, STORAGE_ANY_PATH_PREFIX)) {
+    if(furi_string_equal(path, STORAGE_INT_PATH_PREFIX) ||
+       furi_string_equal(path, STORAGE_EXT_PATH_PREFIX)) {
         return true;
     }
     bool state = false;
@@ -475,13 +476,6 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     } else {
         tab = (tab + 1) % ArchiveTabTotal;
     }
-    if(tab == ArchiveTabInternal && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        if(key == InputKeyLeft) {
-            tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
-        } else {
-            tab = (tab + 1) % ArchiveTabTotal;
-        }
-    }
 
     browser->is_root = true;
     archive_set_tab(browser, tab);
@@ -502,18 +496,20 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     } else {
         tab = archive_get_tab(browser);
         if(archive_is_dir_exists(browser->path)) {
-            bool skip_assets = (strcmp(archive_get_tab_ext(tab), "*") == 0) ? false : true;
+            bool is_browser = !strcmp(archive_get_tab_ext(tab), "*");
+            bool skip_assets = is_browser;
             // Hide dot files everywhere except Browser if in debug mode
-            bool hide_dot_files = (strcmp(archive_get_tab_ext(tab), "*") == 0) ?
-                                      !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) :
-                                      true;
+            bool hide_dot_files = !is_browser ? true :
+                                  tab == ArchiveTabInternal ?
+                                                false :
+                                                !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
             archive_file_browser_set_path(
                 browser, browser->path, archive_get_tab_ext(tab), skip_assets, hide_dot_files);
             tab_empty = false; // Empty check will be performed later
         }
     }
 
-    if((tab_empty) && (tab != ArchiveTabBrowser)) {
+    if((tab_empty) && (tab != ArchiveTabBrowser) && (tab != ArchiveTabInternal)) {
         archive_switch_tab(browser, key);
     } else {
         with_view_model(

@@ -9,16 +9,16 @@
 
 static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/app:favorites",
-    [ArchiveTabIButton] = ANY_PATH("ibutton"),
-    [ArchiveTabNFC] = ANY_PATH("nfc"),
-    [ArchiveTabSubGhz] = ANY_PATH("subghz"),
-    [ArchiveTabLFRFID] = ANY_PATH("lfrfid"),
-    [ArchiveTabInfrared] = ANY_PATH("infrared"),
-    [ArchiveTabBadKb] = ANY_PATH("badkb"),
+    [ArchiveTabIButton] = EXT_PATH("ibutton"),
+    [ArchiveTabNFC] = EXT_PATH("nfc"),
+    [ArchiveTabSubGhz] = EXT_PATH("subghz"),
+    [ArchiveTabLFRFID] = EXT_PATH("lfrfid"),
+    [ArchiveTabInfrared] = EXT_PATH("infrared"),
+    [ArchiveTabBadKb] = EXT_PATH("badkb"),
     [ArchiveTabU2f] = "/app:u2f",
-    [ArchiveTabApplications] = ANY_PATH("apps"),
+    [ArchiveTabApplications] = EXT_PATH("apps"),
     [ArchiveTabInternal] = STORAGE_INT_PATH_PREFIX,
-    [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
+    [ArchiveTabBrowser] = STORAGE_EXT_PATH_PREFIX,
 };
 
 static const char* known_ext[] = {
