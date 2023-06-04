@@ -498,7 +498,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
         tab = archive_get_tab(browser);
         if(archive_is_dir_exists(browser->path)) {
             bool is_browser = !strcmp(archive_get_tab_ext(tab), "*");
-            bool skip_assets = is_browser;
+            bool skip_assets = !is_browser;
             // Hide dot files everywhere except Browser if in debug mode
             bool hide_dot_files = !is_browser ? true :
                                   tab == ArchiveTabInternal ?
