@@ -24,13 +24,13 @@ XtremeSettings xtreme_settings = {
     .bar_borders = true, // ON
     .bar_background = false, // OFF
     .sort_dirs_first = true, // ON
-    .dark_mode = false, // OFF
     .favorite_timeout = 0, // OFF
     .bad_bt = false, // USB
     .bad_bt_remember = false, // OFF
+    .dark_mode = false, // OFF
+    .rgb_backlight = false, // OFF
     .butthurt_timer = 21600, // 6 H
     .charge_cap = 100, // 100%
-    .rgb_backlight = false, // OFF
 };
 
 void XTREME_SETTINGS_LOAD() {
@@ -117,10 +117,6 @@ void XTREME_SETTINGS_LOAD() {
             x->sort_dirs_first = b;
         }
         flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "dark_mode", &b, 1)) {
-            x->dark_mode = b;
-        }
-        flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "favorite_timeout", &u, 1)) {
             x->favorite_timeout = CLAMP(u, 60U, 0U);
         }
@@ -133,16 +129,20 @@ void XTREME_SETTINGS_LOAD() {
             x->bad_bt_remember = b;
         }
         flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "dark_mode", &b, 1)) {
+            x->dark_mode = b;
+        }
+        flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "rgb_backlight", &b, 1)) {
+            x->rgb_backlight = b;
+        }
+        flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "butthurt_timer", &u, 1)) {
             x->butthurt_timer = CLAMP(u, 172800U, 0U);
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "charge_cap", &u, 1)) {
             x->charge_cap = CLAMP(u, 100U, 5U);
-        }
-        flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "rgb_backlight", &b, 1)) {
-            x->rgb_backlight = b;
         }
     }
     flipper_format_free(file);
@@ -174,13 +174,13 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);
         flipper_format_write_bool(file, "bar_background", &x->bar_background, 1);
         flipper_format_write_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
-        flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);
         flipper_format_write_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
         flipper_format_write_bool(file, "bad_bt", &x->bad_bt, 1);
         flipper_format_write_bool(file, "bad_bt_remember", &x->bad_bt_remember, 1);
+        flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);
+        flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
         flipper_format_write_uint32(file, "butthurt_timer", &x->butthurt_timer, 1);
         flipper_format_write_uint32(file, "charge_cap", &x->charge_cap, 1);
-        flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);

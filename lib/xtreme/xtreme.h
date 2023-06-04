@@ -33,13 +33,13 @@ typedef struct {
     bool bar_borders;
     bool bar_background;
     bool sort_dirs_first;
-    bool dark_mode;
     uint32_t favorite_timeout;
     bool bad_bt;
     bool bad_bt_remember;
+    bool dark_mode;
+    bool rgb_backlight;
     uint32_t butthurt_timer;
     uint32_t charge_cap;
-    bool rgb_backlight;
 } XtremeSettings;
 
 void XTREME_SETTINGS_SAVE();
