@@ -401,10 +401,19 @@ int32_t nrfsniff_app(void* p) {
                                 start_sniffing();
                                 start = furi_get_tick();
                             } else {
-                                sniffing_state = false;
-                                furi_hal_speaker_start(100, 100);
-                                furi_delay_ms(100);
-                                furi_hal_speaker_stop();
+                                nrf24_flush_rx(nrf24_HANDLE);
+
+                                // check again
+                                if(nrf24_checkconnected(nrf24_HANDLE)) {
+                                    clear_cache();
+                                    start_sniffing();
+                                    start = furi_get_tick();
+                                } else {
+                                    sniffing_state = false;
+                                    furi_hal_speaker_start(100, 100);
+                                    furi_delay_ms(100);
+                                    furi_hal_speaker_stop();
+                                }
                             }
                         } else
                             wrap_up(storage, notification);
