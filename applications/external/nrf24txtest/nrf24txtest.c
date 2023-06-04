@@ -88,73 +88,6 @@ void spectrum_sweep(FuriHalSpiBusHandle* handle) {
         nrf24_stop_testtx(handle);
     }
 
-    // for(uint8_t i = 128; i > 0; i--) {
-    //     nrf24_start_testtx(i);
-    //     furi_delay_ms(15);
-    //     nrf24_stop_testtx();
-    // }
-
-    furi_hal_light_set(LightRed, 0);
-}
-
-void testpoepie(FuriHalSpiBusHandle* handle) {
-    furi_hal_light_set(LightRed, 255);
-
-    // nrf24_start_testtx(20, handle);
-    // furi_delay_ms(1000);
-    // // nrf24_stop_testtx(handle);
-
-    // nrf24_start_testtx(30, handle);
-    // furi_delay_ms(1000);
-
-    // nrf24_stop_testtx(handle);
-
-    uint8_t data = 0;
-
-    nrf24_set_rx_mode(handle);
-
-    furi_delay_ms(50);
-
-    // for(uint8_t j = 0; j < 10; j++) {
-    for(uint8_t i = 0; i < 100; i++) {
-        // skip wifi channels 50 - 70
-        if(i == 50) i = 71;
-
-        nrf24_set_chan(handle, i);
-
-        furi_delay_ms(10);
-
-        nrf24_read_reg(handle, 0x09, &data, 1);
-        FURI_LOG_I(appname, "channel: %d, data: %02x", i, data);
-
-        if(data == 0x01) {
-            uint8_t dataAgain = 0;
-            nrf24_read_reg(handle, 0x09, &dataAgain, 1);
-            if(dataAgain == 0x01) {
-                FURI_LOG_I(appname, "bingoooo");
-                furi_hal_light_set(LightGreen, 255);
-
-                nrf24_set_tx_mode(handle);
-                nrf24_start_testtx(i, handle);
-
-                furi_delay_ms(100);
-
-                nrf24_stop_testtx(handle);
-
-                nrf24_set_rx_mode(handle);
-
-                furi_hal_light_set(LightGreen, 0);
-
-                continue;
-            }
-        }
-
-        // furi_delay_ms(500);
-    }
-    // }
-
-    nrf24_set_tx_mode(handle);
-
     furi_hal_light_set(LightRed, 0);
 }
 
@@ -285,8 +218,6 @@ int32_t nrf24txtest_app(void* p) {
                         if(ctx->isNRF24active) {
                             nrf24_stop_testtx(ctx->nrf24handle);
                         }
-
-                        // testpoepie(ctx->nrf24handle);
 
                         if(!ctx->isSpectrumSweeping) {
                             ctx->isSpectrumSweeping = true;
