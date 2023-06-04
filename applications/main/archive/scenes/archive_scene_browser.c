@@ -77,6 +77,9 @@ void archive_scene_browser_on_enter(void* context) {
     browser->is_root = true;
 
     archive_browser_set_callback(browser, archive_scene_browser_callback, archive);
+    if(archive_get_tab(browser) == ArchiveTabFavorites && archive_favorites_count() < 1) {
+        archive_switch_tab(browser, TAB_LEFT);
+    }
     archive_update_focus(browser, archive->text_store);
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
 

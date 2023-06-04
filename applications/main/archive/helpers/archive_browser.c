@@ -484,7 +484,9 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     bool tab_empty = true;
     bool is_app_tab = furi_string_start_with_str(browser->path, "/app:");
     if(tab == ArchiveTabFavorites) {
-        tab_empty = false;
+        if(archive_favorites_count() > 0) {
+            tab_empty = false;
+        }
     } else if(is_app_tab) {
         char* app_name = strchr(furi_string_get_cstr(browser->path), ':');
         if(app_name != NULL) {

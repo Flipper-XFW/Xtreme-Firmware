@@ -46,9 +46,7 @@ static bool archive_favorites_read_line(File* file, FuriString* str_result) {
     return result;
 }
 
-uint16_t archive_favorites_count(void* context) {
-    furi_assert(context);
-
+uint16_t archive_favorites_count() {
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
 
