@@ -41,8 +41,13 @@ void archive_scene_info_on_enter(void* context) {
 
     // File size
     FileInfo fileinfo;
-    storage_common_stat(fs_api, furi_string_get_cstr(current->path), &fileinfo);
-    if(fileinfo.size <= 1024) {
+    if(storage_common_stat(fs_api, furi_string_get_cstr(current->path), &fileinfo) != FSE_OK) {
+        snprintf(
+            file_info_message,
+            sizeof(file_info_message),
+            "Size: \e#N/A\e#\n%s",
+            furi_string_get_cstr(dirname));
+    } else if(fileinfo.size <= 1024) {
         furi_string_printf(str_size, "%lld", fileinfo.size);
         snprintf(
             file_info_message,
