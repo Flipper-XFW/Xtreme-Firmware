@@ -2,8 +2,6 @@
 
 enum VarItemListIndex {
     VarItemListIndexSortDirsFirst,
-    VarItemListIndexDarkMode,
-    VarItemListIndexLeftHanded,
     VarItemListIndexFavoriteTimeout,
 };
 
@@ -18,24 +16,6 @@ static void xtreme_app_scene_interface_common_sort_dirs_first_changed(VariableIt
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->sort_dirs_first = value;
     app->save_settings = true;
-}
-
-static void xtreme_app_scene_interface_common_dark_mode_changed(VariableItem* item) {
-    XtremeApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->dark_mode = value;
-    app->save_settings = true;
-}
-
-static void xtreme_app_scene_interface_common_hand_orient_changed(VariableItem* item) {
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    if(value) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagHandOrient);
-    } else {
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagHandOrient);
-    }
 }
 
 static void xtreme_app_scene_interface_common_favorite_timeout_changed(VariableItem* item) {
@@ -62,21 +42,6 @@ void xtreme_app_scene_interface_common_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, xtreme_settings->sort_dirs_first);
     variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
-
-    item = variable_item_list_add(
-        var_item_list, "Dark Mode", 2, xtreme_app_scene_interface_common_dark_mode_changed, app);
-    variable_item_set_current_value_index(item, xtreme_settings->dark_mode);
-    variable_item_set_current_value_text(item, xtreme_settings->dark_mode ? "ON" : "OFF");
-
-    item = variable_item_list_add(
-        var_item_list,
-        "Left Handed",
-        2,
-        xtreme_app_scene_interface_common_hand_orient_changed,
-        app);
-    bool value = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
-    variable_item_set_current_value_index(item, value);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
