@@ -5,12 +5,12 @@ enum VarItemListIndex {
     VarItemListIndexFavoriteTimeout,
 };
 
-void xtreme_app_scene_interface_common_var_item_list_callback(void* context, uint32_t index) {
+void xtreme_app_scene_interface_filebrowser_var_item_list_callback(void* context, uint32_t index) {
     XtremeApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void xtreme_app_scene_interface_common_sort_dirs_first_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_filebrowser_sort_dirs_first_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -18,7 +18,7 @@ static void xtreme_app_scene_interface_common_sort_dirs_first_changed(VariableIt
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_common_favorite_timeout_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_filebrowser_favorite_timeout_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint32_t value = variable_item_get_current_value_index(item);
     char text[6];
@@ -28,7 +28,7 @@ static void xtreme_app_scene_interface_common_favorite_timeout_changed(VariableI
     app->save_settings = true;
 }
 
-void xtreme_app_scene_interface_common_on_enter(void* context) {
+void xtreme_app_scene_interface_filebrowser_on_enter(void* context) {
     XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
@@ -38,7 +38,7 @@ void xtreme_app_scene_interface_common_on_enter(void* context) {
         var_item_list,
         "Sort Dirs First",
         2,
-        xtreme_app_scene_interface_common_sort_dirs_first_changed,
+        xtreme_app_scene_interface_filebrowser_sort_dirs_first_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->sort_dirs_first);
     variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
@@ -47,7 +47,7 @@ void xtreme_app_scene_interface_common_on_enter(void* context) {
         var_item_list,
         "Favorite Timeout",
         61,
-        xtreme_app_scene_interface_common_favorite_timeout_changed,
+        xtreme_app_scene_interface_filebrowser_favorite_timeout_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->favorite_timeout);
     char text[4];
@@ -55,22 +55,22 @@ void xtreme_app_scene_interface_common_on_enter(void* context) {
     variable_item_set_current_value_text(item, xtreme_settings->favorite_timeout ? text : "OFF");
 
     variable_item_list_set_enter_callback(
-        var_item_list, xtreme_app_scene_interface_common_var_item_list_callback, app);
+        var_item_list, xtreme_app_scene_interface_filebrowser_var_item_list_callback, app);
 
     variable_item_list_set_selected_item(
         var_item_list,
-        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneInterfaceCommon));
+        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneInterfaceFilebrowser));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewVarItemList);
 }
 
-bool xtreme_app_scene_interface_common_on_event(void* context, SceneManagerEvent event) {
+bool xtreme_app_scene_interface_filebrowser_on_event(void* context, SceneManagerEvent event) {
     XtremeApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(
-            app->scene_manager, XtremeAppSceneInterfaceCommon, event.event);
+            app->scene_manager, XtremeAppSceneInterfaceFilebrowser, event.event);
         consumed = true;
         switch(event.event) {
         default:
@@ -81,7 +81,7 @@ bool xtreme_app_scene_interface_common_on_event(void* context, SceneManagerEvent
     return consumed;
 }
 
-void xtreme_app_scene_interface_common_on_exit(void* context) {
+void xtreme_app_scene_interface_filebrowser_on_exit(void* context) {
     XtremeApp* app = context;
     variable_item_list_reset(app->var_item_list);
 }
