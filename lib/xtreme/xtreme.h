@@ -13,8 +13,9 @@ extern "C" {
 #define XTREME_ASSETS_PACK_NAME_LEN 32
 
 typedef struct {
-    char asset_pack[XTREME_ASSETS_PACK_NAME_LEN];
     bool is_nsfw; // TODO: replace with packs text support
+
+    char asset_pack[XTREME_ASSETS_PACK_NAME_LEN];
     uint32_t anim_speed;
     int32_t cycle_anims;
     bool unlock_anims;
@@ -27,7 +28,7 @@ typedef struct {
     bool lockscreen_date;
     bool lockscreen_statusbar;
     bool lockscreen_prompt;
-    BatteryIcon battery_icon;
+    uint32_t battery_icon;
     bool status_icons;
     bool bar_borders;
     bool bar_background;

@@ -43,7 +43,6 @@ void XTREME_SETTINGS_LOAD() {
         FuriString* string = furi_string_alloc();
         if(flipper_format_read_string(file, "asset_pack", string)) {
             strlcpy(x->asset_pack, furi_string_get_cstr(string), XTREME_ASSETS_PACK_NAME_LEN);
-            x->is_nsfw = strncmp(x->asset_pack, "NSFW", strlen("NSFW")) == 0;
         }
         furi_string_free(string);
         uint32_t u;
@@ -119,9 +118,7 @@ void XTREME_SETTINGS_LOAD() {
         }
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "dark_mode", &b, 1)) {
-            {
-                x->dark_mode = b;
-            }
+            x->dark_mode = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "favorite_timeout", &u, 1)) {
@@ -172,7 +169,7 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
         flipper_format_write_bool(file, "lockscreen_statusbar", &x->lockscreen_statusbar, 1);
         flipper_format_write_bool(file, "lockscreen_prompt", &x->lockscreen_prompt, 1);
-        flipper_format_write_uint32(file, "battery_icon", (uint32_t*)&x->battery_icon, 1);
+        flipper_format_write_uint32(file, "battery_icon", &x->battery_icon, 1);
         flipper_format_write_bool(file, "status_icons", &x->status_icons, 1);
         flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);
         flipper_format_write_bool(file, "bar_background", &x->bar_background, 1);
