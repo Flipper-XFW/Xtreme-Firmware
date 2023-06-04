@@ -5,6 +5,7 @@ enum VarItemListIndex {
     VarItemListIndexAnimSpeed,
     VarItemListIndexCycleAnims,
     VarItemListIndexUnlockAnims,
+    VarItemListIndexFallbackAnim,
 };
 
 void xtreme_app_scene_interface_graphics_var_item_list_callback(void* context, uint32_t index) {

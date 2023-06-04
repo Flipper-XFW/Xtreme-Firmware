@@ -1,8 +1,13 @@
 #include "../xtreme_app.h"
 
 enum VarItemListIndex {
-    VarItemListIndexShowClock,
+    VarItemListIndexLockOnBoot,
+    VarItemListIndexFormatOn10BadPins,
+    VarItemListIndexShowTime,
+    VarItemListIndexShowSeconds,
     VarItemListIndexShowDate,
+    VarItemListIndexShowStatusbar,
+    VarItemListIndexUnlockPrompt,
 };
 
 void xtreme_app_scene_interface_lockscreen_var_item_list_callback(void* context, uint32_t index) {
@@ -26,7 +31,7 @@ static void xtreme_app_scene_interface_lockscreen_bad_pins_format_changed(Variab
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_lockscreen_show_time_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_lockscreen_lockscreen_time_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -34,7 +39,7 @@ static void xtreme_app_scene_interface_lockscreen_show_time_changed(VariableItem
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_lockscreen_show_seconds_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_lockscreen_lockscreen_seconds_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -42,7 +47,7 @@ static void xtreme_app_scene_interface_lockscreen_show_seconds_changed(VariableI
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_lockscreen_show_date_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_lockscreen_lockscreen_date_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -50,7 +55,8 @@ static void xtreme_app_scene_interface_lockscreen_show_date_changed(VariableItem
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_lockscreen_show_statusbar_changed(VariableItem* item) {
+static void
+    xtreme_app_scene_interface_lockscreen_lockscreen_statusbar_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -58,7 +64,7 @@ static void xtreme_app_scene_interface_lockscreen_show_statusbar_changed(Variabl
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_lockscreen_unlock_prompt_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_lockscreen_lockscreen_prompt_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -94,7 +100,7 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
         var_item_list,
         "Show Time",
         2,
-        xtreme_app_scene_interface_lockscreen_show_time_changed,
+        xtreme_app_scene_interface_lockscreen_lockscreen_time_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_time);
     variable_item_set_current_value_text(item, xtreme_settings->lockscreen_time ? "ON" : "OFF");
@@ -103,7 +109,7 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
         var_item_list,
         "Show Seconds",
         2,
-        xtreme_app_scene_interface_lockscreen_show_seconds_changed,
+        xtreme_app_scene_interface_lockscreen_lockscreen_seconds_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_seconds);
     variable_item_set_current_value_text(item, xtreme_settings->lockscreen_seconds ? "ON" : "OFF");
@@ -112,7 +118,7 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
         var_item_list,
         "Show Date",
         2,
-        xtreme_app_scene_interface_lockscreen_show_date_changed,
+        xtreme_app_scene_interface_lockscreen_lockscreen_date_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_date);
     variable_item_set_current_value_text(item, xtreme_settings->lockscreen_date ? "ON" : "OFF");
@@ -121,7 +127,7 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
         var_item_list,
         "Show Statusbar",
         2,
-        xtreme_app_scene_interface_lockscreen_show_statusbar_changed,
+        xtreme_app_scene_interface_lockscreen_lockscreen_statusbar_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_statusbar);
     variable_item_set_current_value_text(
@@ -131,7 +137,7 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
         var_item_list,
         "Unlock Prompt",
         2,
-        xtreme_app_scene_interface_lockscreen_unlock_prompt_changed,
+        xtreme_app_scene_interface_lockscreen_lockscreen_prompt_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_prompt);
     variable_item_set_current_value_text(item, xtreme_settings->lockscreen_prompt ? "ON" : "OFF");

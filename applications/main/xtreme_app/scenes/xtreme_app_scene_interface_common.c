@@ -4,6 +4,7 @@ enum VarItemListIndex {
     VarItemListIndexSortDirsFirst,
     VarItemListIndexDarkMode,
     VarItemListIndexLeftHanded,
+    VarItemListIndexFavoriteTimeout,
 };
 
 void xtreme_app_scene_interface_common_var_item_list_callback(void* context, uint32_t index) {
@@ -27,7 +28,7 @@ static void xtreme_app_scene_interface_common_dark_mode_changed(VariableItem* it
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_common_left_handed_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_common_hand_orient_changed(VariableItem* item) {
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     if(value) {
@@ -71,7 +72,7 @@ void xtreme_app_scene_interface_common_on_enter(void* context) {
         var_item_list,
         "Left Handed",
         2,
-        xtreme_app_scene_interface_common_left_handed_changed,
+        xtreme_app_scene_interface_common_hand_orient_changed,
         app);
     bool value = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
     variable_item_set_current_value_index(item, value);

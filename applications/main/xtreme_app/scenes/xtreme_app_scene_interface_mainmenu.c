@@ -1,7 +1,7 @@
 #include "../xtreme_app.h"
 
 enum VarItemListIndex {
-    VarItemListIndexWiiMenu,
+    VarItemListIndexMenuStyle,
     VarItemListIndexApp,
     VarItemListIndexRemoveApp,
     VarItemListIndexAddApp,
