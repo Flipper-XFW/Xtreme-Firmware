@@ -20,6 +20,8 @@ static void xtreme_app_scene_interface_statusbar_battery_icon_changed(VariableIt
     variable_item_set_current_value_text(item, battery_icon_names[index]);
     XTREME_SETTINGS()->battery_icon = index;
     app->save_settings = true;
+    power_set_battery_icon_enabled(furi_record_open(RECORD_POWER), index != BatteryIconOff);
+    furi_record_close(RECORD_POWER);
 }
 
 static void xtreme_app_scene_interface_statusbar_status_icons_changed(VariableItem* item) {

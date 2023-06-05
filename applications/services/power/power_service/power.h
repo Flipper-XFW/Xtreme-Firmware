@@ -120,6 +120,13 @@ void power_enable_low_battery_level_notification(Power* power, bool enable);
  */
 void power_trigger_ui_update(Power* power);
 
+/** Enable or disable battery icon
+ *
+ * @param power         Power instance
+ * @param is_enabled    Show battery or not
+ */
+void power_set_battery_icon_enabled(Power* power, bool is_enabled);
+
 #ifdef __cplusplus
 }
 #endif

@@ -7,6 +7,12 @@
 #define POWER_OFF_TIMEOUT 90
 #define TAG "Power"
 
+void power_set_battery_icon_enabled(Power* power, bool is_enabled) {
+    furi_assert(power);
+
+    view_port_enabled_set(power->battery_view_port, is_enabled);
+}
+
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
@@ -356,6 +362,7 @@ Power* power_alloc() {
 
     // Battery view port
     power->battery_view_port = power_battery_view_port_alloc(power);
+    power_set_battery_icon_enabled(power, XTREME_SETTINGS()->battery_icon != BatteryIconOff);
     power->show_low_bat_level_message = true;
 
     //Auto shutdown timer
