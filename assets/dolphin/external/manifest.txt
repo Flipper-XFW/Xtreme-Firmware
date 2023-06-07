@@ -102,7 +102,7 @@ Weight: 4
 Name: L2_Wake_up_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 11
+Min level: 12
 Max level: 30
 Weight: 3
 
