@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-/** Get the index of a int32_t array element which is equal to the given value.
+/** Get the index of a int32_t array element which is closest to the given value.
  *
  * Returned index corresponds to the first element found.
  * If no suitable elements were found, the function returns 0.
