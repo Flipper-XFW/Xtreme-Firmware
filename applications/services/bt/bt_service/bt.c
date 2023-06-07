@@ -121,9 +121,7 @@ Bt* bt_alloc() {
     bt->max_packet_size = FURI_HAL_BT_SERIAL_PACKET_SIZE_MAX;
     bt->profile = BtProfileSerial;
     // Load settings
-    if(!bt_settings_load(&bt->bt_settings)) {
-        bt_settings_save(&bt->bt_settings);
-    }
+    bt_settings_load(&bt->bt_settings);
     // Keys storage
     bt->keys_storage = bt_keys_storage_alloc(BT_KEYS_STORAGE_PATH);
     // Alloc queue

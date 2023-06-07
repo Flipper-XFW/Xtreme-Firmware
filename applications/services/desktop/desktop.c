@@ -457,10 +457,8 @@ int32_t desktop_srv(void* p) {
 
     Desktop* desktop = desktop_alloc();
 
-    bool loaded = DESKTOP_SETTINGS_LOAD(&desktop->settings);
-    if(!loaded) {
+    if(!DESKTOP_SETTINGS_LOAD(&desktop->settings)) {
         memset(&desktop->settings, 0, sizeof(desktop->settings));
-        DESKTOP_SETTINGS_SAVE(&desktop->settings);
     }
 
     desktop_clock_toggle_view(desktop, desktop->settings.display_clock);

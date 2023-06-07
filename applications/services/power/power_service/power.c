@@ -509,7 +509,6 @@ int32_t power_srv(void* p) {
     Power* power = power_alloc();
     if(!LOAD_POWER_SETTINGS(&power->shutdown_idle_delay_ms)) {
         power->shutdown_idle_delay_ms = 0;
-        SAVE_POWER_SETTINGS(&power->shutdown_idle_delay_ms);
     }
     power_auto_shutdown_arm(power);
     power_update_info(power);
