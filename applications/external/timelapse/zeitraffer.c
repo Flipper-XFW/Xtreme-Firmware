@@ -5,7 +5,7 @@
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
 #include "gpio_item.h"
-#include "GPIO_Timelapse_icons.h"
+#include "gpio_timelapse_icons.h"
 
 #define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/timelapse"
 #define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/timelapse.conf"

@@ -1,5 +1,5 @@
 App(
-    appid="Air_Mouse",
+    appid="air_mouse",
     name="[BMI160] Air Mouse",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="air_mouse_app",

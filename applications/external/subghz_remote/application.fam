@@ -1,5 +1,5 @@
 App(
-    appid="SubGHz_Remote",
+    appid="subghz_remote",
     name="Sub-GHz Remote",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="subghz_remote_app",
