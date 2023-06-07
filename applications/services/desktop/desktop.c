@@ -459,6 +459,7 @@ int32_t desktop_srv(void* p) {
 
     if(!DESKTOP_SETTINGS_LOAD(&desktop->settings)) {
         memset(&desktop->settings, 0, sizeof(desktop->settings));
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
     }
 
     desktop_clock_toggle_view(desktop, desktop->settings.display_clock);
