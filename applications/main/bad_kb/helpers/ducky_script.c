@@ -566,6 +566,93 @@ static uint32_t bad_kb_flags_get(uint32_t flags_mask, uint32_t timeout) {
     return flags;
 }
 
+int32_t bad_kb_conn_refresh(BadKbApp* app) {
+    bool bt = app->is_bt;
+
+    if(app->conn_mode != BadKbConnModeNone) bad_kb_conn_reset(app);
+
+    if(bt) {
+        strcpy(
+            app->prev_config.bt_name,
+            furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
+        memcpy(
+            app->prev_config.bt_mac,
+            furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
+            BAD_KB_MAC_ADDRESS_LEN);
+        app->prev_config.bt_mode =
+            furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
+        bt_timeout = bt_hid_delays[LevelRssi39_0];
+        bt_disconnect(app->bt);
+        bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
+        if(strcmp(app->config.bt_name, "") != 0) {
+            furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->config.bt_name);
+        }
+        if(app->bt_remember) {
+            furi_hal_bt_set_profile_mac_addr(
+                FuriHalBtProfileHidKeyboard, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
+            furi_hal_bt_set_profile_pairing_method(
+                FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
+        } else {
+            if(memcmp(
+                   app->config.bt_mac,
+                   (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS,
+                   BAD_KB_MAC_ADDRESS_LEN) != 0) {
+                furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->config.bt_mac);
+            }
+            furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
+        }
+        furi_check(bt_set_profile(app->bt, BtProfileHidKeyboard));
+        if(strcmp(app->config.bt_name, "") == 0) {
+            strcpy(
+                app->config.bt_name,
+                furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
+        }
+        if(memcmp(
+               app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) ==
+           0) {
+            memcpy(
+                app->config.bt_mac,
+                furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
+                BAD_KB_MAC_ADDRESS_LEN);
+        }
+        if(app->bt_remember) {
+            bt_enable_peer_key_update(app->bt);
+        } else {
+            bt_disable_peer_key_update(app->bt);
+        }
+        furi_hal_bt_start_advertising();
+
+        app->conn_mode = BadKbConnModeBt;
+
+    } else {
+        app->prev_config.usb_mode = furi_hal_usb_get_config();
+        furi_hal_usb_unlock();
+        furi_check(furi_hal_usb_set_config(NULL, NULL));
+
+        app->conn_mode = BadKbConnModeUsb;
+    }
+
+    return 0;
+}
+
+void bad_kb_conn_reset(BadKbApp* app) {
+    if(app->conn_mode == BadKbConnModeBt) {
+        bt_disconnect(app->bt);
+        bt_keys_storage_set_default_path(app->bt);
+        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->prev_config.bt_name);
+        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->prev_config.bt_mac);
+        furi_hal_bt_set_profile_pairing_method(
+            FuriHalBtProfileHidKeyboard, app->prev_config.bt_mode);
+        furi_check(bt_set_profile(app->bt, BtProfileSerial));
+        bt_enable_peer_key_update(app->bt);
+
+    } else if(app->conn_mode == BadKbConnModeUsb) {
+        furi_check(furi_hal_usb_set_config(app->prev_config.usb_mode, NULL));
+    }
+
+    app->conn_mode = BadKbConnModeNone;
+}
+
 static int32_t bad_kb_worker(void* context) {
     BadKbScript* bad_kb = context;
 
@@ -579,9 +666,17 @@ static int32_t bad_kb_worker(void* context) {
     bad_kb->line_prev = furi_string_alloc();
     bad_kb->string_print = furi_string_alloc();
 
+    if(bad_kb->app->conn_init_thread) {
+        furi_thread_join(bad_kb->app->conn_init_thread);
+        furi_thread_free(bad_kb->app->conn_init_thread);
+        bad_kb->app->conn_init_thread = NULL;
+    }
+
     if(bad_kb->bt) {
+        if(bad_kb->app->conn_mode != BadKbConnModeBt) bad_kb_conn_refresh(bad_kb->app);
         bt_set_status_changed_callback(bad_kb->bt, bad_kb_bt_hid_state_callback, bad_kb);
     } else {
+        if(bad_kb->app->conn_mode != BadKbConnModeUsb) bad_kb_conn_refresh(bad_kb->app);
         furi_hal_hid_set_state_callback(bad_kb_usb_hid_state_callback, bad_kb);
     }
 

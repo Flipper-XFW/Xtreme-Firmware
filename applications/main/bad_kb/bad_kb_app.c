@@ -125,74 +125,6 @@ void bad_kb_config_switch_remember_mode(BadKbApp* app) {
     bad_kb_reload_worker(app);
 }
 
-int32_t bad_kb_connection_init(BadKbApp* app) {
-    app->prev_config.usb_mode = furi_hal_usb_get_config();
-    furi_hal_usb_set_config(NULL, NULL);
-
-    strcpy(
-        app->prev_config.bt_name, furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
-    memcpy(
-        app->prev_config.bt_mac,
-        furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-        BAD_KB_MAC_ADDRESS_LEN);
-    app->prev_config.bt_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
-
-    bt_timeout = bt_hid_delays[LevelRssi39_0];
-    bt_disconnect(app->bt);
-    bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
-    if(strcmp(app->config.bt_name, "") != 0) {
-        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->config.bt_name);
-    }
-    if(app->bt_remember) {
-        furi_hal_bt_set_profile_mac_addr(
-            FuriHalBtProfileHidKeyboard, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
-        furi_hal_bt_set_profile_pairing_method(
-            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
-    } else {
-        if(memcmp(
-               app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) !=
-           0) {
-            furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->config.bt_mac);
-        }
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
-    }
-    bt_set_profile(app->bt, BtProfileHidKeyboard);
-    if(strcmp(app->config.bt_name, "") == 0) {
-        strcpy(app->config.bt_name, furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
-    }
-    if(memcmp(app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) ==
-       0) {
-        memcpy(
-            app->config.bt_mac,
-            furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-            BAD_KB_MAC_ADDRESS_LEN);
-    }
-    if(app->is_bt) {
-        furi_hal_bt_start_advertising();
-        if(app->bt_remember) {
-            bt_enable_peer_key_update(app->bt);
-        } else {
-            bt_disable_peer_key_update(app->bt);
-        }
-    } else {
-        furi_hal_bt_stop_advertising();
-    }
-
-    return 0;
-}
-
-void bad_kb_connection_deinit(BadKbApp* app) {
-    furi_hal_usb_set_config(app->prev_config.usb_mode, NULL);
-
-    bt_disconnect(app->bt);
-    bt_keys_storage_set_default_path(app->bt);
-    furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->prev_config.bt_name);
-    furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->prev_config.bt_mac);
-    furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, app->prev_config.bt_mode);
-    bt_set_profile(app->bt, BtProfileSerial);
-    bt_enable_peer_key_update(app->bt);
-}
-
 BadKbApp* bad_kb_app_alloc(char* arg) {
     BadKbApp* app = malloc(sizeof(BadKbApp));
 
@@ -258,23 +190,17 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    if(furi_hal_usb_is_locked()) {
-        app->error = BadKbAppErrorCloseRpc;
-        app->conn_init_thread = NULL;
-        scene_manager_next_scene(app->scene_manager, BadKbSceneError);
+    app->conn_mode = BadKbConnModeNone;
+    app->conn_init_thread =
+        furi_thread_alloc_ex("BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_conn_refresh, app);
+    furi_thread_start(app->conn_init_thread);
+    if(!furi_string_empty(app->file_path)) {
+        app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
+        bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
+        scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
     } else {
-        app->conn_init_thread = furi_thread_alloc_ex(
-            "BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_connection_init, app);
-        furi_thread_start(app->conn_init_thread);
-        if(!furi_string_empty(app->file_path)) {
-            app->bad_kb_script =
-                bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
-            bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
-            scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
-        } else {
-            furi_string_set(app->file_path, BAD_KB_APP_BASE_FOLDER);
-            scene_manager_next_scene(app->scene_manager, BadKbSceneFileSelect);
-        }
+        furi_string_set(app->file_path, BAD_KB_APP_BASE_FOLDER);
+        scene_manager_next_scene(app->scene_manager, BadKbSceneFileSelect);
     }
 
     return app;
@@ -317,8 +243,8 @@ void bad_kb_app_free(BadKbApp* app) {
     if(app->conn_init_thread) {
         furi_thread_join(app->conn_init_thread);
         furi_thread_free(app->conn_init_thread);
-        bad_kb_connection_deinit(app);
     }
+    bad_kb_conn_reset(app);
 
     // Close records
     furi_record_close(RECORD_GUI);
