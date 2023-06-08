@@ -1,0 +1,9 @@
+diff a/applications/main/nfc/scenes/nfc_scene_nfcv_emulate.c b/applications/main/nfc/scenes/nfc_scene_nfcv_emulate.c	(rejected hunks)
+@@ -50,7 +50,6 @@
+     widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61);
+     widget_add_string_multiline_element(
+         widget, 87, 13, AlignCenter, AlignTop, FontPrimary, "Emulating\nNFC V");
+-    if(strcmp(nfc->dev->dev_name, "")) {
+     if(strcmp(nfc->dev->dev_name, "") != 0) {
+         furi_string_printf(info_str, "%s", nfc->dev->dev_name);
+     } else {
