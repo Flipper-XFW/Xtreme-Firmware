@@ -118,7 +118,6 @@ extern const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN];
 
 typedef enum {
     BadKbAppErrorNoFiles,
-    BadKbAppErrorCloseRpc,
 } BadKbAppError;
 
 typedef struct {
