@@ -27,7 +27,8 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     DESKTOP_SETTINGS_LOAD(&desktop->settings);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
-    desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop->settings.pin_code.length > 0);
+    desktop_lock_menu_set_pin_state(
+        desktop->lock_menu, desktop_pin_is_valid(&desktop->settings.pin_code));
     desktop_lock_menu_set_stealth_mode_state(
         desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
     desktop_lock_menu_set_idx(desktop->lock_menu, 3);
@@ -63,7 +64,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
         if(check_pin_changed) {
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.pin_code.length > 0) {
+            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
                 desktop_lock(desktop, true);
@@ -90,7 +91,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventLockPin:
             desktop_scene_lock_menu_save_settings(desktop);
-            if(desktop->settings.pin_code.length > 0) {
+            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock(desktop, true);
             } else {
                 LoaderStatus status =
@@ -105,7 +106,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventLockPinOff:
             desktop_scene_lock_menu_save_settings(desktop);
-            if(desktop->settings.pin_code.length > 0) {
+            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock(desktop, true);
                 Power* power = furi_record_open(RECORD_POWER);
                 furi_delay_ms(500);

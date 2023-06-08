@@ -53,3 +53,12 @@ bool desktop_pin_compare(const PinCode* pin_code1, const PinCode* pin_code2) {
 
     return result;
 }
+
+bool desktop_pin_is_valid(const PinCode* pin_code) {
+    bool ok = pin_code->length >= MIN_PIN_SIZE && pin_code->length <= MAX_PIN_SIZE;
+    for(size_t i = 0; ok && i < pin_code->length; i++) {
+        ok = ok && (pin_code->data[i] == InputKeyUp || pin_code->data[i] == InputKeyDown ||
+                    pin_code->data[i] == InputKeyRight || pin_code->data[i] == InputKeyLeft);
+    }
+    return ok;
+}

@@ -34,7 +34,7 @@ void desktop_settings_scene_pin_auth_on_enter(void* context) {
     DesktopSettingsApp* app = context;
 
     DESKTOP_SETTINGS_LOAD(&app->settings);
-    furi_assert(app->settings.pin_code.length > 0);
+    furi_assert(desktop_pin_is_valid(&app->settings.pin_code));
 
     desktop_view_pin_input_set_context(app->pin_input_view, app);
     desktop_view_pin_input_set_back_callback(app->pin_input_view, pin_auth_back_callback);
