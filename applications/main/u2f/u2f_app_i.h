@@ -18,7 +18,6 @@
 
 typedef enum {
     U2fAppErrorNoFiles,
-    U2fAppErrorCloseRpc,
 } U2fAppError;
 
 typedef enum {
