@@ -237,6 +237,9 @@ static bool game_won(Minesweeper* minesweeper_state) {
         message, furi_string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
     dialog_message_set_buttons(message, NULL, "Play again", NULL);
 
+    // Call dolphin deed when we win the game
+    // dolphin_deed(DolphinDeedPluginGameWin);
+
     DialogMessageButton choice = dialog_message_show(minesweeper_state->dialogs, message);
     dialog_message_free(message);
     furi_string_free(tempStr);
@@ -390,6 +393,9 @@ int32_t minesweeper_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+    // Call dolphin deed on game start
+    // dolphin_deed(DolphinDeedPluginGameStart);
 
     PluginEvent event;
     for(bool processing = true; processing;) {

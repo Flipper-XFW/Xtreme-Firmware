@@ -171,6 +171,9 @@ int32_t totp_app() {
         return 253;
     }
 
+    // Affecting dolphin level
+    // dolphin_deed(DolphinDeedPluginStart);
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, plugin_state);

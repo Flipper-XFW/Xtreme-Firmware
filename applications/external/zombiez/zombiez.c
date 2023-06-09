@@ -313,6 +313,9 @@ int32_t zombiez_game_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+    // Call dolphin deed on game start
+    // dolphin_deed(DolphinDeedPluginGameStart);
+
     PluginEvent event;
     bool isRunning = true;
     while(isRunning) {

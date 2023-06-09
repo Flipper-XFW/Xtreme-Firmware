@@ -399,6 +399,9 @@ int32_t game_2048_app() {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+    // Call dolphin deed on game start
+    // dolphin_deed(DolphinDeedPluginGameStart);
+
     bool is_finished = false;
     while(!is_finished) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &input, FuriWaitForever);

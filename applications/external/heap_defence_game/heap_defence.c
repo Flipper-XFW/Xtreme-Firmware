@@ -533,6 +533,9 @@ int32_t heap_defence_app(void* p) {
     game->game_status = 0;
     game->animation = AnimationPause;
 
+    // Call dolphin deed on game start
+    // dolphin_deed(DolphinDeedPluginGameStart);
+
     GameEvent event = {0};
     while(event.input.key != InputKeyBack) {
         if(furi_message_queue_get(event_queue, &event, 100) != FuriStatusOk) {
