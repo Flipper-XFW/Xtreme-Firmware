@@ -869,7 +869,11 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateRunning;
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
-                    furi_hal_hid_kb_release_all();
+                    if(bad_kb->bt) {
+                        furi_hal_bt_hid_kb_release_all();
+                    } else {
+                        furi_hal_hid_kb_release_all();
+                    }
                 }
                 bad_kb->st.state = worker_state;
                 continue;
@@ -884,11 +888,19 @@ static int32_t bad_kb_worker(void* context) {
                 } else if(flags & WorkerEvtStartStop) {
                     worker_state = BadKbStateIdle; // Stop executing script
                     bad_kb->st.state = worker_state;
-                    furi_hal_hid_kb_release_all();
+                    if(bad_kb->bt) {
+                        furi_hal_bt_hid_kb_release_all();
+                    } else {
+                        furi_hal_hid_kb_release_all();
+                    }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     bad_kb->st.state = worker_state;
-                    furi_hal_hid_kb_release_all();
+                    if(bad_kb->bt) {
+                        furi_hal_bt_hid_kb_release_all();
+                    } else {
+                        furi_hal_hid_kb_release_all();
+                    }
                 } else if(flags & WorkerEvtPauseResume) {
                     if(pause_state == BadKbStateRunning) {
                         if(delay_val > 0) {
