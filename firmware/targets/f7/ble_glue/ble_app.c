@@ -70,12 +70,6 @@ static const SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
         .min_tx_power = 0,
         .max_tx_power = 0,
         .rx_model_config = 1,
-        /* New stack (13.3->15.0) */
-        .max_adv_set_nbr = 1, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
-        .max_adv_data_len = 31, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
-        .tx_path_compens = 0, // RF TX Path Compensation, * 0.1 dB
-        .rx_path_compens = 0, // RF RX Path Compensation, * 0.1 dB
-        .ble_core_version = 11, // BLE Core Version: 11(5.2), 12(5.3)
     }};
 
 bool ble_app_init() {
