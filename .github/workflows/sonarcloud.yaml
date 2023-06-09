@@ -53,8 +53,8 @@ jobs:
           mkdir ${{ env.BUILD_WRAPPER_OUT_DIR }}
           set -e
           for TARGET in ${TARGETS}; do
-            TARGET="$(echo "${TARGET}" | sed 's/f//')"; \
-            build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} ./sonar-build "./fbt TARGET_HW=$TARGET updater_package"
+            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
+            build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} ./sonar-build "./fbt TARGET_HW=$TARGET_HW updater_package"
           done
 
       - name: Run sonar-scanner
