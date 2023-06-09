@@ -3,6 +3,7 @@
 enum VarItemListIndex {
     VarItemListIndexLockOnBoot,
     VarItemListIndexFormatOn10BadPins,
+    VarItemListIndexPinUnlockFromApp,
     VarItemListIndexShowTime,
     VarItemListIndexShowSeconds,
     VarItemListIndexShowDate,
@@ -28,6 +29,14 @@ static void xtreme_app_scene_interface_lockscreen_bad_pins_format_changed(Variab
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     XTREME_SETTINGS()->bad_pins_format = value;
+    app->save_settings = true;
+}
+
+static void xtreme_app_scene_interface_lockscreen_pin_unlock_from_app_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->pin_unlock_from_app = value;
     app->save_settings = true;
 }
 
@@ -89,12 +98,22 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Format on 10 bad PINs",
+        "Format on 10 Bad PINs",
         2,
         xtreme_app_scene_interface_lockscreen_bad_pins_format_changed,
         app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_pins_format);
     variable_item_set_current_value_text(item, xtreme_settings->bad_pins_format ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "PIN Unlock From App",
+        2,
+        xtreme_app_scene_interface_lockscreen_pin_unlock_from_app_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings->pin_unlock_from_app);
+    variable_item_set_current_value_text(
+        item, xtreme_settings->pin_unlock_from_app ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,

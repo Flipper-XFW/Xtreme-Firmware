@@ -23,6 +23,7 @@ typedef struct {
     bool wii_menu;
     bool lock_on_boot;
     bool bad_pins_format;
+    bool pin_unlock_from_app;
     bool lockscreen_time;
     bool lockscreen_seconds;
     bool lockscreen_date;

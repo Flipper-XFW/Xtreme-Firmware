@@ -439,7 +439,9 @@ bool desktop_api_is_locked(Desktop* instance) {
 
 void desktop_api_unlock(Desktop* instance) {
     furi_assert(instance);
-    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) || XTREME_SETTINGS()->pin_unlock_from_app) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
+    }
 }
 
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
@@ -464,6 +466,7 @@ int32_t desktop_srv(void* p) {
     if(!ok) {
         memset(&desktop->settings, 0, sizeof(desktop->settings));
         furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+        furi_hal_rtc_set_pin_fails(0);
     }
 
     desktop_clock_toggle_view(desktop, desktop->settings.display_clock);
