@@ -1332,7 +1332,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 int32_t nrf24scan_app(void* p) {
     UNUSED(p);
     APP = malloc(sizeof(Nrf24Scan));
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     APP->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     PluginState* plugin_state = malloc(sizeof(PluginState));
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);

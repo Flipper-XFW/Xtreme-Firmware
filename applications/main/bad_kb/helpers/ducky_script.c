@@ -730,7 +730,7 @@ static int32_t bad_kb_worker(void* context) {
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtStartStop) { // Start executing script
-                DOLPHIN_DEED(DolphinDeedBadKbPlayScript);
+                dolphin_deed(DolphinDeedBadKbPlayScript);
                 delay_val = 0;
                 bad_kb->buf_len = 0;
                 bad_kb->st.line_cur = 0;
@@ -754,7 +754,7 @@ static int32_t bad_kb_worker(void* context) {
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtConnect) { // Start executing script
-                DOLPHIN_DEED(DolphinDeedBadKbPlayScript);
+                dolphin_deed(DolphinDeedBadKbPlayScript);
                 delay_val = 0;
                 bad_kb->buf_len = 0;
                 bad_kb->st.line_cur = 0;

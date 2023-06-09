@@ -147,7 +147,7 @@ void subghz_remote_app_free(SubGhzRemoteApp* app) {
 
 int32_t subghz_remote_app(void* p) {
     UNUSED(p);
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     SubGhzRemoteApp* subghz_remote_app = subghz_remote_app_alloc();
 
     furi_string_set(subghz_remote_app->file_path, SUBREM_APP_FOLDER);

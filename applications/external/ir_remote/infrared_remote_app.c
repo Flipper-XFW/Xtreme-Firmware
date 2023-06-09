@@ -161,7 +161,7 @@ static void app_input_callback(InputEvent* input_event, void* ctx) {
 int32_t infrared_remote_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     // App button string
     IRApp* app = malloc(sizeof(IRApp));

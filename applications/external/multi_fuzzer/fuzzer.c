@@ -21,7 +21,7 @@ static void fuzzer_app_tick_event_callback(void* context) {
 }
 
 PacsFuzzerApp* fuzzer_app_alloc() {
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     PacsFuzzerApp* app = malloc(sizeof(PacsFuzzerApp));
 

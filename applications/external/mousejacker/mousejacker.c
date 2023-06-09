@@ -287,7 +287,7 @@ void start_mjthread(PluginState* plugin_state) {
 int32_t mousejacker_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     mousejacker_state_init(plugin_state);
