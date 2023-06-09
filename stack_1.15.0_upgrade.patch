@@ -1,0 +1,329 @@
+diff --git a/fbt_options.py b/fbt_options.py
+index 7c5857e09f..acc6b8a982 100644
+--- a/fbt_options.py
++++ b/fbt_options.py
+@@ -22,7 +22,7 @@ DIST_SUFFIX = "XFW-0048_03062023"
+ COPRO_OB_DATA = "scripts/ob.data"
+ 
+ # Must match lib/stm32wb_copro version
+-COPRO_CUBE_VERSION = "1.13.3"
++COPRO_CUBE_VERSION = "1.15.0"
+ 
+ COPRO_CUBE_DIR = "lib/stm32wb_copro"
+ 
+diff --git a/firmware/targets/f7/ble_glue/app_common.h b/firmware/targets/f7/ble_glue/app_common.h
+index 214c85acd2..8eaf230859 100644
+--- a/firmware/targets/f7/ble_glue/app_common.h
++++ b/firmware/targets/f7/ble_glue/app_common.h
+@@ -33,6 +33,7 @@ extern "C" {
+ #include <stdarg.h>
+ 
+ #include <core/common_defines.h>
++#include <tl.h>
+ 
+ #include "app_conf.h"
+ 
+diff --git a/firmware/targets/f7/ble_glue/app_conf.h b/firmware/targets/f7/ble_glue/app_conf.h
+index aaa755a362..ee5115cfed 100644
+--- a/firmware/targets/f7/ble_glue/app_conf.h
++++ b/firmware/targets/f7/ble_glue/app_conf.h
+@@ -8,6 +8,8 @@
+ 
+ #define CFG_TX_POWER (0x19) /* +0dBm */
+ 
++#define CFG_IDENTITY_ADDRESS GAP_PUBLIC_ADDR
++
+ /**
+  * Define Advertising parameters
+  */
+diff --git a/firmware/targets/f7/ble_glue/app_debug.c b/firmware/targets/f7/ble_glue/app_debug.c
+index 35f53ae22c..d288528223 100644
+--- a/firmware/targets/f7/ble_glue/app_debug.c
++++ b/firmware/targets/f7/ble_glue/app_debug.c
+@@ -33,7 +33,8 @@ PLACE_IN_SECTION("MB_MEM2")
+ ALIGN(4) static SHCI_C2_DEBUG_TracesConfig_t APPD_TracesConfig = {0, 0, 0, 0};
+ PLACE_IN_SECTION("MB_MEM2")
+ ALIGN(4)
+-static SHCI_C2_DEBUG_GeneralConfig_t APPD_GeneralConfig = {BLE_DTB_CFG, SYS_DBG_CFG1, {0, 0}};
++static SHCI_C2_DEBUG_GeneralConfig_t APPD_GeneralConfig =
++    {BLE_DTB_CFG, SYS_DBG_CFG1, {0, 0}, 0, 0, 0, 0, 0};
+ 
+ /**
+  * THE DEBUG ON GPIO FOR CPU2 IS INTENDED TO BE USED ONLY ON REQUEST FROM ST SUPPORT
+diff --git a/firmware/targets/f7/ble_glue/ble_app.c b/firmware/targets/f7/ble_glue/ble_app.c
+index 7a2148b6b8..c0418d9fe8 100644
+--- a/firmware/targets/f7/ble_glue/ble_app.c
++++ b/firmware/targets/f7/ble_glue/ble_app.c
+@@ -18,8 +18,8 @@ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
+ PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SIZE];
+ 
+ _Static_assert(
+-    sizeof(SHCI_C2_Ble_Init_Cmd_Packet_t) == 49,
+-    "Ble stack config structure size mismatch");
++    sizeof(SHCI_C2_Ble_Init_Cmd_Packet_t) == 57,
++    "Ble stack config structure size mismatch (check new config options - last updated for v.1.15.0)");
+ 
+ typedef struct {
+     FuriMutex* hci_mtx;
+@@ -70,6 +70,12 @@ static const SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
+         .min_tx_power = 0,
+         .max_tx_power = 0,
+         .rx_model_config = 1,
++        /* New stack (13.3->15.0) */
++        .max_adv_set_nbr = 1, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
++        .max_adv_data_len = 31, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
++        .tx_path_compens = 0, // RF TX Path Compensation, * 0.1 dB
++        .rx_path_compens = 0, // RF RX Path Compensation, * 0.1 dB
++        .ble_core_version = 11, // BLE Core Version: 11(5.2), 12(5.3)
+     }};
+ 
+ bool ble_app_init() {
+diff --git a/firmware/targets/f7/ble_glue/ble_const.h b/firmware/targets/f7/ble_glue/ble_const.h
+index 0e4c8b398d..85f734b62c 100644
+--- a/firmware/targets/f7/ble_glue/ble_const.h
++++ b/firmware/targets/f7/ble_glue/ble_const.h
+@@ -23,6 +23,7 @@
+ #include <ble/core/ble_std.h>
+ #include <ble/core/ble_defs.h>
+ #include "osal.h"
++#include "compiler.h"
+ 
+ /* Default BLE variant */
+ #ifndef BASIC_FEATURES
+@@ -34,6 +35,9 @@
+ #ifndef LL_ONLY
+ #define LL_ONLY 0
+ #endif
++#ifndef LL_ONLY_BASIC
++#define LL_ONLY_BASIC 0
++#endif
+ #ifndef BEACON_ONLY
+ #define BEACON_ONLY 0
+ #endif
+diff --git a/firmware/targets/f7/ble_glue/compiler.h b/firmware/targets/f7/ble_glue/compiler.h
+index 1c39628197..98a93d7126 100644
+--- a/firmware/targets/f7/ble_glue/compiler.h
++++ b/firmware/targets/f7/ble_glue/compiler.h
+@@ -5,7 +5,7 @@
+  *****************************************************************************
+  * @attention
+  *
+- * Copyright (c) 2018-2022 STMicroelectronics.
++ * Copyright (c) 2018-2023 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+@@ -18,6 +18,14 @@
+ #ifndef COMPILER_H__
+ #define COMPILER_H__
+ 
++#ifndef __PACKED_STRUCT
++#define __PACKED_STRUCT PACKED(struct)
++#endif
++
++#ifndef __PACKED_UNION
++#define __PACKED_UNION PACKED(union)
++#endif
++
+ /**
+   * @brief  This is the section dedicated to IAR toolchain
+   */
+diff --git a/firmware/targets/f7/ble_glue/gap.c b/firmware/targets/f7/ble_glue/gap.c
+index 9dfb5af89c..641eccc4ea 100644
+--- a/firmware/targets/f7/ble_glue/gap.c
++++ b/firmware/targets/f7/ble_glue/gap.c
+@@ -1,5 +1,6 @@
+ #include "gap.h"
+ 
++#include "app_common.h"
+ #include <ble/ble.h>
+ 
+ #include <furi_hal.h>
+@@ -100,7 +101,7 @@ static void gap_verify_connection_parameters(Gap* gap) {
+ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+     hci_event_pckt* event_pckt;
+     evt_le_meta_event* meta_evt;
+-    evt_blue_aci* blue_evt;
++    evt_blecore_aci* blue_evt;
+     hci_le_phy_update_complete_event_rp0* evt_le_phy_update_complete;
+     uint8_t tx_phy;
+     uint8_t rx_phy;
+@@ -112,7 +113,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+         furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
+     }
+     switch(event_pckt->evt) {
+-    case EVT_DISCONN_COMPLETE: {
++    case HCI_DISCONNECTION_COMPLETE_EVT_CODE: {
+         hci_disconnection_complete_event_rp0* disconnection_complete_event =
+             (hci_disconnection_complete_event_rp0*)event_pckt->data;
+         if(disconnection_complete_event->Connection_Handle == gap->service.connection_handle) {
+@@ -131,10 +132,10 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+         gap->on_event_cb(event, gap->context);
+     } break;
+ 
+-    case EVT_LE_META_EVENT:
++    case HCI_LE_META_EVT_CODE:
+         meta_evt = (evt_le_meta_event*)event_pckt->data;
+         switch(meta_evt->subevent) {
+-        case EVT_LE_CONN_UPDATE_COMPLETE: {
++        case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE: {
+             hci_le_connection_update_complete_event_rp0* event =
+                 (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
+             gap->connection_params.conn_interval = event->Conn_Interval;
+@@ -148,7 +149,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+             break;
+         }
+ 
+-        case EVT_LE_PHY_UPDATE_COMPLETE:
++        case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
+             evt_le_phy_update_complete = (hci_le_phy_update_complete_event_rp0*)meta_evt->data;
+             if(evt_le_phy_update_complete->Status) {
+                 FURI_LOG_E(
+@@ -164,7 +165,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+             }
+             break;
+ 
+-        case EVT_LE_CONN_COMPLETE: {
++        case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE: {
+             hci_le_connection_complete_event_rp0* event =
+                 (hci_le_connection_complete_event_rp0*)meta_evt->data;
+             gap->connection_params.conn_interval = event->Conn_Interval;
+@@ -191,16 +192,16 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+         }
+         break;
+ 
+-    case EVT_VENDOR:
+-        blue_evt = (evt_blue_aci*)event_pckt->data;
++    case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
++        blue_evt = (evt_blecore_aci*)event_pckt->data;
+         switch(blue_evt->ecode) {
+             aci_gap_pairing_complete_event_rp0* pairing_complete;
+ 
+-        case EVT_BLUE_GAP_LIMITED_DISCOVERABLE:
++        case ACI_GAP_LIMITED_DISCOVERABLE_VSEVT_CODE:
+             FURI_LOG_I(TAG, "Limited discoverable event");
+             break;
+ 
+-        case EVT_BLUE_GAP_PASS_KEY_REQUEST: {
++        case ACI_GAP_PASS_KEY_REQ_VSEVT_CODE: {
+             // Generate random PIN code
+             uint32_t pin = rand() % 999999; //-V1064
+             aci_gap_pass_key_resp(gap->service.connection_handle, pin);
+@@ -213,7 +214,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+             gap->on_event_cb(event, gap->context);
+         } break;
+ 
+-        case EVT_BLUE_ATT_EXCHANGE_MTU_RESP: {
++        case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE: {
+             aci_att_exchange_mtu_resp_event_rp0* pr = (void*)blue_evt->data;
+             FURI_LOG_I(TAG, "Rx MTU size: %d", pr->Server_RX_MTU);
+             // Set maximum packet size given header size is 3 bytes
+@@ -222,32 +223,28 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+             gap->on_event_cb(event, gap->context);
+         } break;
+ 
+-        case EVT_BLUE_GAP_AUTHORIZATION_REQUEST:
++        case ACI_GAP_AUTHORIZATION_REQ_VSEVT_CODE:
+             FURI_LOG_D(TAG, "Authorization request event");
+             break;
+ 
+-        case EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED:
++        case ACI_GAP_SLAVE_SECURITY_INITIATED_VSEVT_CODE:
+             FURI_LOG_D(TAG, "Slave security initiated");
+             break;
+ 
+-        case EVT_BLUE_GAP_BOND_LOST:
++        case ACI_GAP_BOND_LOST_VSEVT_CODE:
+             FURI_LOG_D(TAG, "Bond lost event. Start rebonding");
+             aci_gap_allow_rebond(gap->service.connection_handle);
+             break;
+ 
+-        case EVT_BLUE_GAP_DEVICE_FOUND:
+-            FURI_LOG_D(TAG, "Device found event");
+-            break;
+-
+-        case EVT_BLUE_GAP_ADDR_NOT_RESOLVED:
++        case ACI_GAP_ADDR_NOT_RESOLVED_VSEVT_CODE:
+             FURI_LOG_D(TAG, "Address not resolved event");
+             break;
+ 
+-        case EVT_BLUE_GAP_KEYPRESS_NOTIFICATION:
++        case ACI_GAP_KEYPRESS_NOTIFICATION_VSEVT_CODE:
+             FURI_LOG_D(TAG, "Key press notification event");
+             break;
+ 
+-        case EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE: {
++        case ACI_GAP_NUMERIC_COMPARISON_VALUE_VSEVT_CODE: {
+             uint32_t pin =
+                 ((aci_gap_numeric_comparison_value_event_rp0*)(blue_evt->data))->Numeric_Value;
+             FURI_LOG_I(TAG, "Verify numeric comparison: %06lu", pin);
+@@ -257,7 +254,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+             break;
+         }
+ 
+-        case EVT_BLUE_GAP_PAIRING_CMPLT:
++        case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
+             pairing_complete = (aci_gap_pairing_complete_event_rp0*)blue_evt->data;
+             if(pairing_complete->Status) {
+                 FURI_LOG_E(
+@@ -275,11 +272,11 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+             }
+             break;
+ 
+-        case EVT_BLUE_GAP_PROCEDURE_COMPLETE:
++        case ACI_L2CAP_CONNECTION_UPDATE_RESP_VSEVT_CODE:
+             FURI_LOG_D(TAG, "Procedure complete event");
+             break;
+ 
+-        case EVT_BLUE_L2CAP_CONNECTION_UPDATE_RESP: {
++        case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE: {
+             uint16_t result =
+                 ((aci_l2cap_connection_update_resp_event_rp0*)(blue_evt->data))->Result;
+             if(result == 0) {
+@@ -402,7 +399,7 @@ static void gap_init_svc(Gap* gap) {
+         CFG_ENCRYPTION_KEY_SIZE_MAX,
+         conf_used_fixed_pin, // 0x0 for no pin
+         0,
+-        PUBLIC_ADDR);
++        CFG_IDENTITY_ADDRESS);
+     // Configure whitelist
+     aci_gap_configure_whitelist();
+ }
+@@ -437,7 +434,7 @@ static void gap_advertise_start(GapState new_state) {
+         ADV_IND,
+         min_interval,
+         max_interval,
+-        PUBLIC_ADDR,
++        CFG_IDENTITY_ADDRESS,
+         0,
+         strlen(gap->service.adv_name),
+         (uint8_t*)gap->service.adv_name,
+diff --git a/lib/stm32wb_copro b/lib/stm32wb_copro
+index d685979c28..6c9c54f056 160000
+--- a/lib/stm32wb_copro
++++ b/lib/stm32wb_copro
+@@ -1 +1 @@
+-Subproject commit d685979c282c9f38d561dd1ea8e6fdbd735d7362
++Subproject commit 6c9c54f05669b2c4d436df58bb691d3b0d7c86df
+diff --git a/scripts/ob.data b/scripts/ob.data
+index 5276a5103b..605faccbfc 100644
+--- a/scripts/ob.data
++++ b/scripts/ob.data
+@@ -14,7 +14,7 @@ IWDGSTOP:0x1:rw
+ IWDGSW:0x1:rw
+ IPCCDBA:0x0:rw
+ ESE:0x1:r
+-SFSA:0xD7:r
++SFSA:0xD5:r
+ FSD:0x0:r
+ DDS:0x1:r
+ C2OPT:0x1:r
+@@ -22,7 +22,7 @@ NBRSD:0x0:r
+ SNBRSA:0xD:r
+ BRSD:0x0:r
+ SBRSA:0x12:r
+-SBRV:0x35C00:r
++SBRV:0x35400:r
+ PCROP1A_STRT:0x1FF:r
+ PCROP1A_END:0x0:r
+ PCROP_RDP:0x1:rw
