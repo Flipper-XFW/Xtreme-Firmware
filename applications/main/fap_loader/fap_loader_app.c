@@ -32,45 +32,46 @@ bool fap_loader_load_name_and_icon(
     Storage* storage,
     uint8_t** icon_ptr,
     FuriString* item_name) {
+    bool load_success = true;
+
     StorageData* storage_data;
     if(storage_get_data(storage, path, &storage_data) == FSE_OK &&
        storage_path_already_open(path, storage_data)) {
-        size_t offset = furi_string_search_rchar(path, '/');
-        if(offset != FURI_STRING_FAILURE) {
-            furi_string_set_n(item_name, path, offset + 1, furi_string_size(path) - offset - 1);
-        } else {
-            furi_string_set(item_name, path);
-        }
-        return false;
-    }
-
-    FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
-
-    FlipperApplicationPreloadStatus preload_res =
-        flipper_application_preload_manifest(app, furi_string_get_cstr(path));
-
-    bool load_success = false;
-
-    if(preload_res == FlipperApplicationPreloadStatusSuccess ||
-       preload_res == FlipperApplicationPreloadStatusApiMismatch) {
-        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-        if(manifest->has_icon && icon_ptr != NULL && *icon_ptr != NULL) {
-            memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
-        }
-        furi_string_set(item_name, manifest->name);
-        load_success = true;
-    } else {
-        FURI_LOG_E(TAG, "FAP Loader failed to preload %s", furi_string_get_cstr(path));
-        size_t offset = furi_string_search_rchar(path, '/');
-        if(offset != FURI_STRING_FAILURE) {
-            furi_string_set_n(item_name, path, offset + 1, furi_string_size(path) - offset - 1);
-        } else {
-            furi_string_set(item_name, path);
-        }
         load_success = false;
     }
 
-    flipper_application_free(app);
+    if(load_success) {
+        load_success = false;
+
+        FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
+
+        FlipperApplicationPreloadStatus preload_res =
+            flipper_application_preload_manifest(app, furi_string_get_cstr(path));
+
+        if(preload_res == FlipperApplicationPreloadStatusSuccess ||
+           preload_res == FlipperApplicationPreloadStatusApiMismatch) {
+            const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
+            if(manifest->has_icon && icon_ptr != NULL && *icon_ptr != NULL) {
+                memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
+            }
+            furi_string_set(item_name, manifest->name);
+            load_success = true;
+        } else {
+            FURI_LOG_E(TAG, "FAP Loader failed to preload %s", furi_string_get_cstr(path));
+        }
+
+        flipper_application_free(app);
+    }
+
+    if(!load_success) {
+        size_t offset = furi_string_search_rchar(path, '/');
+        if(offset != FURI_STRING_FAILURE) {
+            furi_string_set_n(item_name, path, offset + 1, furi_string_size(path) - offset - 1);
+        } else {
+            furi_string_set(item_name, path);
+        }
+    }
+
     return load_success;
 }
 
@@ -84,46 +85,23 @@ static bool fap_loader_item_callback(
     return fap_loader_load_name_and_icon(path, fap_loader->storage, icon_ptr, item_name);
 }
 
-static bool fap_loader_run_selected_app(FapLoader* loader, bool ignore_mismatch) {
+static void fap_loader_run_selected_app(FapLoader* loader) {
     furi_assert(loader);
 
-    FuriString* error_message;
+    FuriString* error_message = furi_string_alloc_set("unknown error");
+    loader->app = flipper_application_alloc(loader->storage, firmware_api_interface);
 
-    error_message = furi_string_alloc_set("unknown error");
-
-    bool file_selected = false;
     bool show_error = true;
-    bool retry = false;
     do {
-        file_selected = true;
-        loader->app = flipper_application_alloc(loader->storage, firmware_api_interface);
         size_t start = furi_get_tick();
-
         FURI_LOG_I(TAG, "FAP Loader is loading %s", furi_string_get_cstr(loader->fap_path));
 
         FlipperApplicationPreloadStatus preload_res =
             flipper_application_preload(loader->app, furi_string_get_cstr(loader->fap_path));
+        bool api_mismatch = false;
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             if(preload_res == FlipperApplicationPreloadStatusApiMismatch) {
-                if(!ignore_mismatch) {
-                    DialogMessage* message = dialog_message_alloc();
-                    dialog_message_set_header(
-                        message, "API Mismatch", 64, 0, AlignCenter, AlignTop);
-                    dialog_message_set_buttons(message, "Cancel", NULL, "Continue");
-                    dialog_message_set_text(
-                        message,
-                        "This app might not\nwork correctly\nContinue anyways?",
-                        64,
-                        32,
-                        AlignCenter,
-                        AlignCenter);
-                    if(dialog_message_show(loader->dialogs, message) == DialogMessageButtonRight) {
-                        retry = true;
-                    }
-                    dialog_message_free(message);
-                    show_error = false;
-                    break;
-                }
+                api_mismatch = true;
             } else {
                 const char* err_msg = flipper_application_preload_status_to_string(preload_res);
                 furi_string_printf(error_message, "Preload failed: %s", err_msg);
@@ -147,6 +125,24 @@ static bool fap_loader_run_selected_app(FapLoader* loader, bool ignore_mismatch)
                 furi_string_get_cstr(loader->fap_path),
                 err_msg);
             break;
+        } else if(api_mismatch) {
+            // Successful map, but found api mismatch -> warn user
+            DialogMessage* message = dialog_message_alloc();
+            dialog_message_set_header(message, "API Mismatch", 64, 0, AlignCenter, AlignTop);
+            dialog_message_set_buttons(message, "Cancel", NULL, "Continue");
+            dialog_message_set_text(
+                message,
+                "This app might not\nwork correctly\nContinue anyways?",
+                64,
+                32,
+                AlignCenter,
+                AlignCenter);
+            DialogMessageButton res = dialog_message_show(loader->dialogs, message);
+            dialog_message_free(message);
+            if(res != DialogMessageButtonRight) {
+                show_error = false;
+                break;
+            }
         }
 
         FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
@@ -194,12 +190,9 @@ static bool fap_loader_run_selected_app(FapLoader* loader, bool ignore_mismatch)
     }
 
     furi_string_free(error_message);
+    flipper_application_free(loader->app);
 
-    if(file_selected) {
-        flipper_application_free(loader->app);
-    }
-
-    return retry;
+    return;
 }
 
 static bool fap_loader_select_app(FapLoader* loader) {
@@ -244,31 +237,23 @@ static void fap_loader_free(FapLoader* loader) {
 }
 
 int32_t fap_loader_app(char* p) {
-    size_t start = furi_get_tick();
     XTREME_ASSETS_FREE();
-    FURI_LOG_I("Assets", "Freed in %ums", (size_t)(furi_get_tick() - start));
     FapLoader* loader;
     process_favorite_launch(&p);
     if(p) {
         loader = fap_loader_alloc((const char*)p);
         view_dispatcher_switch_to_view(loader->view_dispatcher, 0);
-        if(fap_loader_run_selected_app(loader, false)) {
-            fap_loader_run_selected_app(loader, true);
-        }
+        fap_loader_run_selected_app(loader);
     } else {
         loader = fap_loader_alloc(EXT_PATH("apps"));
         while(fap_loader_select_app(loader)) {
             view_dispatcher_switch_to_view(loader->view_dispatcher, 0);
-            if(fap_loader_run_selected_app(loader, false)) {
-                fap_loader_run_selected_app(loader, true);
-            }
+            fap_loader_run_selected_app(loader);
         }
     }
 
     fap_loader_free(loader);
 
-    start = furi_get_tick();
     XTREME_ASSETS_LOAD();
-    FURI_LOG_I("Assets", "Loaded in %ums", (size_t)(furi_get_tick() - start));
     return 0;
 }
