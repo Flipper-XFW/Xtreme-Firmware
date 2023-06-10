@@ -121,7 +121,7 @@ typedef enum {
 } BadKbAppError;
 
 typedef struct {
-    char bt_name[BAD_KB_ADV_NAME_MAX_LEN + 1];
+    char bt_name[BAD_KB_ADV_NAME_MAX_LEN];
     uint8_t bt_mac[BAD_KB_MAC_ADDRESS_LEN];
     FuriHalUsbInterface* usb_mode;
     GapPairing bt_mode;

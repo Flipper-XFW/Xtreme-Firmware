@@ -1,6 +1,5 @@
 #pragma once
 
-#include "bad_kb_app.h"
 #include "scenes/bad_kb_scene.h"
 #include "helpers/ducky_script.h"
 
