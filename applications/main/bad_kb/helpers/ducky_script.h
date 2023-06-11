@@ -143,6 +143,8 @@ struct BadKbApp {
     VariableItemList* var_item_list;
     TextInput* text_input;
     ByteInput* byte_input;
+    char bt_name_buf[BAD_KB_NAME_LEN];
+    uint8_t bt_mac_buf[BAD_KB_MAC_LEN];
 
     BadKbAppError error;
     FuriString* file_path;
