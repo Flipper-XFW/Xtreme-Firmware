@@ -12,7 +12,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
     BadKbApp* bad_kb = context;
     ByteInput* byte_input = bad_kb->byte_input;
 
-    memmove(bad_kb->bt_mac_buf, bad_kb->config.bt_mac, GAP_MAC_ADDR_SIZE);
+    memmove(bad_kb->bt_mac_buf, bad_kb->config.bt_mac, BAD_KB_MAC_LEN);
 
     byte_input_set_header_text(byte_input, "Set BT MAC address");
 
@@ -22,7 +22,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
         NULL,
         bad_kb,
         bad_kb->bt_mac_buf,
-        GAP_MAC_ADDR_SIZE);
+        BAD_KB_MAC_LEN);
 
     view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewByteInput);
 }
@@ -34,7 +34,7 @@ bool bad_kb_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == BadKbAppCustomEventByteInputDone) {
-            memmove(bad_kb->config.bt_mac, bad_kb->bt_mac_buf, GAP_MAC_ADDR_SIZE);
+            memmove(bad_kb->config.bt_mac, bad_kb->bt_mac_buf, BAD_KB_MAC_LEN);
             bt_set_profile_mac_address(bad_kb->bt, bad_kb->config.bt_mac);
         }
         scene_manager_previous_scene(bad_kb->scene_manager);

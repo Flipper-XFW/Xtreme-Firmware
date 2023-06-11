@@ -109,20 +109,20 @@ void bad_kb_script_pause_resume(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 
-#define BAD_KB_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
-#define BAD_KB_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
+#define BAD_KB_NAME_LEN FURI_HAL_BT_ADV_NAME_LENGTH
+#define BAD_KB_MAC_LEN GAP_MAC_ADDR_SIZE
 
 // this is the MAC address used when we do not forget paired device (BOUND STATE)
-extern const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN];
-extern const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN];
+extern const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_LEN];
+extern const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_LEN];
 
 typedef enum {
     BadKbAppErrorNoFiles,
 } BadKbAppError;
 
 typedef struct {
-    char bt_name[BAD_KB_ADV_NAME_MAX_LEN];
-    uint8_t bt_mac[BAD_KB_MAC_ADDRESS_LEN];
+    char bt_name[BAD_KB_NAME_LEN];
+    uint8_t bt_mac[BAD_KB_MAC_LEN];
     FuriHalUsbInterface* usb_mode;
     GapPairing bt_mode;
 } BadKbConfig;

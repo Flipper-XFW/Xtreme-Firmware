@@ -12,10 +12,8 @@
 #include <dolphin/dolphin.h>
 #include <toolbox/hex.h>
 
-const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
-    {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
-const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
-    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_LEN] = {0x41, 0x4a, 0xef, 0xb6, 0xa9, 0xd4};
+const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_LEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 #define TAG "BadKB"
 #define WORKER_TAG TAG "Worker"
@@ -333,11 +331,11 @@ static bool ducky_set_usb_id(BadKbScript* bad_kb, const char* line) {
 
 static bool ducky_set_bt_id(BadKbScript* bad_kb, const char* line) {
     size_t line_len = strlen(line);
-    size_t mac_len = BAD_KB_MAC_ADDRESS_LEN * 3;
+    size_t mac_len = BAD_KB_MAC_LEN * 3;
     if(line_len < mac_len + 1) return false; // MAC + at least 1 char for name
 
-    uint8_t mac[BAD_KB_MAC_ADDRESS_LEN];
-    for(size_t i = 0; i < BAD_KB_MAC_ADDRESS_LEN; i++) {
+    uint8_t mac[BAD_KB_MAC_LEN];
+    for(size_t i = 0; i < BAD_KB_MAC_LEN; i++) {
         char a = line[i * 3];
         char b = line[i * 3 + 1];
         if((a < 'A' && a > 'F') || (a < '0' && a > '9') || (b < 'A' && b > 'F') ||
@@ -427,11 +425,11 @@ static bool ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
             bool reset_name = strncmp(
                 bt_name,
                 furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard),
-                BAD_KB_ADV_NAME_MAX_LEN);
+                BAD_KB_NAME_LEN);
             bool reset_mac = memcmp(
                 bt_mac,
                 furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-                BAD_KB_MAC_ADDRESS_LEN);
+                BAD_KB_MAC_LEN);
             if(reset_name && reset_mac) {
                 furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, bt_name);
             } else if(reset_name) {
@@ -576,7 +574,7 @@ int32_t bad_kb_conn_refresh(BadKbApp* app) {
         memcpy(
             app->prev_config.bt_mac,
             furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-            BAD_KB_MAC_ADDRESS_LEN);
+            BAD_KB_MAC_LEN);
         app->prev_config.bt_mode =
             furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
         bt_timeout = bt_hid_delays[LevelRssi39_0];
@@ -591,10 +589,8 @@ int32_t bad_kb_conn_refresh(BadKbApp* app) {
             furi_hal_bt_set_profile_pairing_method(
                 FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
         } else {
-            if(memcmp(
-                   app->config.bt_mac,
-                   (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS,
-                   BAD_KB_MAC_ADDRESS_LEN) != 0) {
+            if(memcmp(app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_LEN) !=
+               0) {
                 furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->config.bt_mac);
             }
             furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
@@ -605,13 +601,11 @@ int32_t bad_kb_conn_refresh(BadKbApp* app) {
                 app->config.bt_name,
                 furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
         }
-        if(memcmp(
-               app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) ==
-           0) {
+        if(memcmp(app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_LEN) == 0) {
             memcpy(
                 app->config.bt_mac,
                 furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-                BAD_KB_MAC_ADDRESS_LEN);
+                BAD_KB_MAC_LEN);
         }
         if(app->bt_remember) {
             bt_enable_peer_key_update(app->bt);

@@ -112,7 +112,7 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigMac);
             break;
         case VarItemListIndexRandomizeBtMac:
-            furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN);
+            furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_LEN);
             bt_set_profile_mac_address(bad_kb->bt, bad_kb->config.bt_mac);
             break;
         default:
