@@ -23,15 +23,13 @@ const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN] =
 #define BADKB_ASCII_TO_KEY(script, x) \
     (((uint8_t)x < 128) ? (script->layout[(uint8_t)x]) : HID_KEYBOARD_NONE)
 
-/**
- * Delays for waiting between HID key press and key release
-*/
+// Delays for waiting between HID key press and key release
 const uint8_t bt_hid_delays[LevelRssiNum] = {
-    30, // LevelRssi122_100
-    25, // LevelRssi99_80
-    20, // LevelRssi79_60
-    17, // LevelRssi59_40
-    14, // LevelRssi39_0
+    45, // LevelRssi122_100
+    38, // LevelRssi99_80
+    30, // LevelRssi79_60
+    26, // LevelRssi59_40
+    21, // LevelRssi39_0
 };
 
 uint8_t bt_timeout = 0;
@@ -767,7 +765,7 @@ static int32_t bad_kb_worker(void* context) {
                 flags = furi_thread_flags_wait(
                     WorkerEvtEnd | WorkerEvtDisconnect | WorkerEvtStartStop,
                     FuriFlagWaitAny | FuriFlagNoClear,
-                    1500);
+                    bad_kb->bt ? 3000 : 1500);
                 if(flags == (unsigned)FuriFlagErrorTimeout) {
                     // If nothing happened - start script execution
                     worker_state = BadKbStateRunning;
