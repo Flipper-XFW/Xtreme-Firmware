@@ -23,8 +23,6 @@ void bad_kb_scene_config_connection_callback(VariableItem* item) {
 void bad_kb_scene_config_bt_remember_callback(VariableItem* item) {
     BadKbApp* bad_kb = variable_item_get_context(item);
     bad_kb->bt_remember = variable_item_get_current_value_index(item);
-    XTREME_SETTINGS()->bad_bt_remember = bad_kb->bt_remember;
-    XTREME_SETTINGS_SAVE();
     variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
     view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexBtRemember);
 }
@@ -45,9 +43,9 @@ void bad_kb_scene_config_on_enter(void* context) {
         var_item_list, "Connection", 2, bad_kb_scene_config_connection_callback, bad_kb);
     variable_item_set_current_value_index(item, bad_kb->is_bt);
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
-    if(bad_kb->bad_kb_script->has_usb_id) {
+    if(bad_kb->has_usb_id) {
         variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nUSB Mode!");
-    } else if(bad_kb->bad_kb_script->has_bt_id) {
+    } else if(bad_kb->has_bt_id) {
         variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nBT Mode!");
     }
 
@@ -58,21 +56,21 @@ void bad_kb_scene_config_on_enter(void* context) {
         variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
 
         item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
-        if(bad_kb->bad_kb_script->set_bt_id) {
+        if(bad_kb->set_bt_id) {
             variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset Name!");
         }
 
         item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
         if(bad_kb->bt_remember) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
-        } else if(bad_kb->bad_kb_script->set_bt_id) {
+        } else if(bad_kb->set_bt_id) {
             variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
         }
 
         item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
         if(bad_kb->bt_remember) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
-        } else if(bad_kb->bad_kb_script->set_bt_id) {
+        } else if(bad_kb->set_bt_id) {
             variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
         }
     }
@@ -97,14 +95,6 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
         case VarItemListIndexKeyboardLayout:
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
             break;
-        case VarItemListIndexConnection:
-            bad_kb_config_switch_mode(bad_kb);
-            break;
-        case VarItemListIndexBtRemember:
-            bad_kb_config_switch_remember_mode(bad_kb);
-            scene_manager_previous_scene(bad_kb->scene_manager);
-            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfig);
-            break;
         case VarItemListIndexBtDeviceName:
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigName);
             break;
@@ -113,7 +103,11 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
             break;
         case VarItemListIndexRandomizeBtMac:
             furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_LEN);
-            bt_set_profile_mac_address(bad_kb->bt, bad_kb->config.bt_mac);
+            /* fall through */
+        case VarItemListIndexBtRemember:
+            /* fall through */
+        case VarItemListIndexConnection:
+            bad_kb_config_refresh(bad_kb);
             break;
         default:
             break;

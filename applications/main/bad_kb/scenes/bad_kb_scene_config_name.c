@@ -33,7 +33,7 @@ bool bad_kb_scene_config_name_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         if(event.event == BadKbAppCustomEventTextInputDone) {
             strlcpy(bad_kb->config.bt_name, bad_kb->bt_name_buf, BAD_KB_NAME_LEN);
-            bt_set_profile_adv_name(bad_kb->bt, bad_kb->config.bt_name);
+            bad_kb_config_refresh(bad_kb);
         }
         scene_manager_previous_scene(bad_kb->scene_manager);
     }

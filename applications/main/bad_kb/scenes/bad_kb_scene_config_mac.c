@@ -35,7 +35,7 @@ bool bad_kb_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         if(event.event == BadKbAppCustomEventByteInputDone) {
             memmove(bad_kb->config.bt_mac, bad_kb->bt_mac_buf, BAD_KB_MAC_LEN);
-            bt_set_profile_mac_address(bad_kb->bt, bad_kb->config.bt_mac);
+            bad_kb_config_refresh(bad_kb);
         }
         scene_manager_previous_scene(bad_kb->scene_manager);
     }

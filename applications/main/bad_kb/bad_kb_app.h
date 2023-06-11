@@ -25,5 +25,3 @@ typedef enum {
     BadKbAppViewByteInput,
     BadKbAppViewTextInput
 } BadKbAppView;
-
-void bad_kb_config_switch_remember_mode(BadKbApp* app);

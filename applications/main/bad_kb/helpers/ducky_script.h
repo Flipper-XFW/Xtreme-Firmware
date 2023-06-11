@@ -61,7 +61,6 @@ struct BadKbState {
 typedef struct BadKbApp BadKbApp;
 
 typedef struct {
-    FuriHalUsbHidConfig hid_cfg;
     FuriThread* thread;
     BadKbState st;
 
@@ -83,11 +82,6 @@ typedef struct {
 
     FuriString* string_print;
     size_t string_print_pos;
-
-    bool set_usb_id;
-    bool set_bt_id;
-    bool has_usb_id;
-    bool has_bt_id;
 
     Bt* bt;
     BadKbApp* app;
@@ -112,19 +106,19 @@ BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 #define BAD_KB_NAME_LEN FURI_HAL_BT_ADV_NAME_LENGTH
 #define BAD_KB_MAC_LEN GAP_MAC_ADDR_SIZE
 
-// this is the MAC address used when we do not forget paired device (BOUND STATE)
-extern const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_LEN];
-extern const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_LEN];
+extern const uint8_t BAD_KB_EMPTY_MAC[BAD_KB_MAC_LEN];
+extern uint8_t BAD_KB_BOUND_MAC[BAD_KB_MAC_LEN]; // For remember mode
 
 typedef enum {
     BadKbAppErrorNoFiles,
 } BadKbAppError;
 
 typedef struct {
+    GapPairing bt_mode;
     char bt_name[BAD_KB_NAME_LEN];
     uint8_t bt_mac[BAD_KB_MAC_LEN];
     FuriHalUsbInterface* usb_mode;
-    GapPairing bt_mode;
+    FuriHalUsbHidConfig usb_cfg;
 } BadKbConfig;
 
 typedef enum {
@@ -155,21 +149,25 @@ struct BadKbApp {
     Bt* bt;
     bool is_bt;
     bool bt_remember;
-    BadKbConfig config;
-    BadKbConfig prev_config;
+    BadKbConfig config; // User options (TODO: allow users to change usb cfg)
+    BadKbConfig id_config; // ID and BT_ID values
+    BadKbConfig prev_config; // State to restore at exit
 
+    bool set_usb_id;
+    bool set_bt_id;
+    bool has_usb_id;
+    bool has_bt_id;
+
+    FuriHalUsbHidConfig* hid_cfg;
     BadKbConnMode conn_mode;
     FuriThread* conn_init_thread;
-    FuriThread* switch_mode_thread;
 };
 
-int32_t bad_kb_config_switch_mode(BadKbApp* app);
-
-void bad_kb_config_refresh_menu(BadKbApp* app);
-
-int32_t bad_kb_conn_refresh(BadKbApp* app);
+int32_t bad_kb_conn_apply(BadKbApp* app);
 
 void bad_kb_conn_reset(BadKbApp* app);
+
+void bad_kb_config_refresh(BadKbApp* app);
 
 #ifdef __cplusplus
 }

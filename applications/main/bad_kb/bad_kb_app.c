@@ -89,41 +89,6 @@ static void bad_kb_save_settings(BadKbApp* app) {
     furi_record_close(RECORD_STORAGE);
 }
 
-void bad_kb_reload_worker(BadKbApp* app) {
-    bad_kb_script_close(app->bad_kb_script);
-    app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
-    bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
-}
-
-int32_t bad_kb_config_switch_mode(BadKbApp* app) {
-    if(!app->is_bt) furi_hal_bt_stop_advertising();
-    XTREME_SETTINGS()->bad_bt = app->is_bt;
-    XTREME_SETTINGS_SAVE();
-    bad_kb_reload_worker(app);
-    if(app->is_bt) furi_hal_bt_start_advertising();
-    bad_kb_config_refresh_menu(app);
-    return 0;
-}
-
-void bad_kb_config_refresh_menu(BadKbApp* app) {
-    scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
-    scene_manager_previous_scene(app->scene_manager);
-}
-
-void bad_kb_config_switch_remember_mode(BadKbApp* app) {
-    if(app->bt_remember) {
-        furi_hal_bt_set_profile_pairing_method(
-            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
-        bt_set_profile_mac_address(app->bt, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
-        bt_enable_peer_key_update(app->bt);
-    } else {
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
-        bt_set_profile_mac_address(app->bt, app->config.bt_mac);
-        bt_disable_peer_key_update(app->bt);
-    }
-    bad_kb_reload_worker(app);
-}
-
 BadKbApp* bad_kb_app_alloc(char* arg) {
     BadKbApp* app = malloc(sizeof(BadKbApp));
 
@@ -165,6 +130,8 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     app->bt->suppress_pin_screen = true;
     app->is_bt = XTREME_SETTINGS()->bad_bt;
     app->bt_remember = XTREME_SETTINGS()->bad_bt_remember;
+    memcpy(BAD_KB_BOUND_MAC, furi_hal_version_get_ble_mac(), BAD_KB_MAC_LEN);
+    BAD_KB_BOUND_MAC[2] += 2;
 
     // Custom Widget
     app->widget = widget_alloc();
@@ -193,7 +160,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->conn_mode = BadKbConnModeNone;
     app->conn_init_thread =
-        furi_thread_alloc_ex("BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_conn_refresh, app);
+        furi_thread_alloc_ex("BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_conn_apply, app);
     furi_thread_start(app->conn_init_thread);
     if(!furi_string_empty(app->file_path)) {
         app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
@@ -247,6 +214,7 @@ void bad_kb_app_free(BadKbApp* app) {
         app->conn_init_thread = NULL;
     }
     bad_kb_conn_reset(app);
+    if(app->hid_cfg) free(app->hid_cfg);
 
     // Close records
     furi_record_close(RECORD_GUI);
