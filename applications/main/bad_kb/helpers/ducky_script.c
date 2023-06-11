@@ -588,6 +588,23 @@ void bad_kb_conn_reset(BadKbApp* app) {
     app->conn_mode = BadKbConnModeNone;
 }
 
+void bad_kb_config_adjust(BadKbConfig* cfg) {
+    // MAC is adjusted by furi_hal_bt, adjust here too so it matches after applying
+    const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
+    uint8_t empty_mac[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
+    uint8_t default_mac[BAD_KB_MAC_LEN] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
+    if(memcmp(cfg->bt_mac, empty_mac, BAD_KB_MAC_LEN) == 0 ||
+       memcmp(cfg->bt_mac, normal_mac, BAD_KB_MAC_LEN) == 0 ||
+       memcmp(cfg->bt_mac, default_mac, BAD_KB_MAC_LEN) == 0) {
+        memcpy(cfg->bt_mac, normal_mac, BAD_KB_MAC_LEN);
+        cfg->bt_mac[2]++;
+    }
+
+    // Use defaults if vid or pid are unset
+    if(cfg->usb_cfg.vid == 0) cfg->usb_cfg.vid = HID_VID_DEFAULT;
+    if(cfg->usb_cfg.pid == 0) cfg->usb_cfg.pid = HID_PID_DEFAULT;
+}
+
 void bad_kb_config_refresh(BadKbApp* app) {
     bt_set_status_changed_callback(app->bt, NULL, NULL);
     furi_hal_hid_set_state_callback(NULL, NULL);
@@ -601,17 +618,7 @@ void bad_kb_config_refresh(BadKbApp* app) {
     bool apply = false;
     if(app->is_bt) {
         BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
-
-        // MAC is adjusted by furi_hal_bt, adjust here too so it matches after applying
-        const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
-        uint8_t empty_mac[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
-        uint8_t default_mac[BAD_KB_MAC_LEN] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
-        if(memcmp(cfg->bt_mac, empty_mac, BAD_KB_MAC_LEN) == 0 ||
-           memcmp(cfg->bt_mac, normal_mac, BAD_KB_MAC_LEN) == 0 ||
-           memcmp(cfg->bt_mac, default_mac, BAD_KB_MAC_LEN) == 0) {
-            memcpy(cfg->bt_mac, normal_mac, BAD_KB_MAC_LEN);
-            cfg->bt_mac[2]++;
-        }
+        bad_kb_config_adjust(cfg);
 
         if(app->conn_mode != BadKbConnModeBt) {
             apply = true;
@@ -627,8 +634,8 @@ void bad_kb_config_refresh(BadKbApp* app) {
                                  BAD_KB_MAC_LEN);
         }
     } else {
-        FuriHalUsbHidConfig* cfg = app->set_usb_id ? &app->id_config.usb_cfg :
-                                                     &app->config.usb_cfg;
+        BadKbConfig* cfg = app->set_usb_id ? &app->id_config : &app->config;
+        bad_kb_config_adjust(cfg);
 
         if(app->conn_mode != BadKbConnModeUsb) {
             apply = true;
@@ -638,10 +645,10 @@ void bad_kb_config_refresh(BadKbApp* app) {
             if(furi_hal_usb_get_config() == &usb_hid &&
                (ctx = furi_hal_usb_get_config_context()) != NULL) {
                 FuriHalUsbHidConfig* cur = ctx;
-                apply = apply || cfg->vid != cur->vid;
-                apply = apply || cfg->pid != cur->pid;
-                apply = apply || strncmp(cfg->manuf, cur->manuf, sizeof(cur->manuf));
-                apply = apply || strncmp(cfg->product, cur->product, sizeof(cur->product));
+                apply = apply || cfg->usb_cfg.vid != cur->vid;
+                apply = apply || cfg->usb_cfg.pid != cur->pid;
+                apply = apply || strncmp(cfg->usb_cfg.manuf, cur->manuf, sizeof(cur->manuf));
+                apply = apply || strncmp(cfg->usb_cfg.product, cur->product, sizeof(cur->product));
             } else {
                 apply = true;
             }

@@ -9,6 +9,9 @@
 extern "C" {
 #endif
 
+#define HID_VID_DEFAULT 0x046D
+#define HID_PID_DEFAULT 0xC529
+
 /** Max number of simultaneously pressed keys (keyboard) */
 #define HID_KB_MAX_KEYS 6
 /** Max number of simultaneously pressed keys (consumer control) */

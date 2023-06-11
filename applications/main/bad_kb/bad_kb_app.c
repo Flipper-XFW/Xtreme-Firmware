@@ -130,6 +130,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     app->bt->suppress_pin_screen = true;
     app->is_bt = XTREME_SETTINGS()->bad_bt;
     app->bt_remember = XTREME_SETTINGS()->bad_bt_remember;
+    bad_kb_config_adjust(&app->config);
 
     // Save prev config
     BadKbConfig* prev = &app->prev_config;

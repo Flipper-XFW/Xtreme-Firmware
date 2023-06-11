@@ -169,6 +169,8 @@ void bad_kb_conn_reset(BadKbApp* app);
 
 void bad_kb_config_refresh(BadKbApp* app);
 
+void bad_kb_config_adjust(BadKbConfig* cfg);
+
 #ifdef __cplusplus
 }
 #endif
