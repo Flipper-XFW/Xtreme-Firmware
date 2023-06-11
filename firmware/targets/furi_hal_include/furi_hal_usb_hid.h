@@ -164,6 +164,7 @@ static const uint16_t hid_asciimap[] = {
 };
 
 typedef struct {
+    // Good job knobheads, these should be uint16_t
     uint32_t vid;
     uint32_t pid;
     char manuf[32];
