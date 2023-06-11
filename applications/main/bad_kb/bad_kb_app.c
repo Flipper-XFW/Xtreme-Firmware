@@ -170,11 +170,13 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     // Custom Widget
     app->widget = widget_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewError, widget_get_view(app->widget));
+        app->view_dispatcher, BadKbAppViewWidget, widget_get_view(app->widget));
 
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfig, variable_item_list_get_view(app->var_item_list));
+        app->view_dispatcher,
+        BadKbAppViewVarItemList,
+        variable_item_list_get_view(app->var_item_list));
 
     app->bad_kb_view = bad_kb_alloc();
     view_dispatcher_add_view(
@@ -182,11 +184,11 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfigName, text_input_get_view(app->text_input));
+        app->view_dispatcher, BadKbAppViewTextInput, text_input_get_view(app->text_input));
 
     app->byte_input = byte_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfigMac, byte_input_get_view(app->byte_input));
+        app->view_dispatcher, BadKbAppViewByteInput, byte_input_get_view(app->byte_input));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -219,30 +221,31 @@ void bad_kb_app_free(BadKbApp* app) {
     bad_kb_free(app->bad_kb_view);
 
     // Custom Widget
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewError);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewWidget);
     widget_free(app->widget);
 
     // Variable item list
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfig);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
 
     // Text Input
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigName);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewTextInput);
     text_input_free(app->text_input);
 
     // Byte Input
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigMac);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewByteInput);
     byte_input_free(app->byte_input);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
-    // Restore bt config
+    // Restore connection config
     app->bt->suppress_pin_screen = false;
     if(app->conn_init_thread) {
         furi_thread_join(app->conn_init_thread);
         furi_thread_free(app->conn_init_thread);
+        app->conn_init_thread = NULL;
     }
     bad_kb_conn_reset(app);
 

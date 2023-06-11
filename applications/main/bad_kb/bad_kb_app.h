@@ -13,17 +13,17 @@
 #define BAD_KB_APP_LAYOUT_EXTENSION ".kl"
 
 typedef enum BadKbCustomEvent {
-    BadKbAppCustomEventTextEditResult,
+    BadKbAppCustomEventTextInputDone,
     BadKbAppCustomEventByteInputDone,
     BadKbCustomEventErrorBack
 } BadKbCustomEvent;
 
 typedef enum {
-    BadKbAppViewError,
+    BadKbAppViewWidget,
     BadKbAppViewWork,
-    BadKbAppViewConfig,
-    BadKbAppViewConfigMac,
-    BadKbAppViewConfigName
+    BadKbAppViewVarItemList,
+    BadKbAppViewByteInput,
+    BadKbAppViewTextInput
 } BadKbAppView;
 
 void bad_kb_config_switch_remember_mode(BadKbApp* app);

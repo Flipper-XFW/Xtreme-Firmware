@@ -21,7 +21,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
         bad_kb,
         bad_kb->config.bt_mac,
         GAP_MAC_ADDR_SIZE);
-    view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewConfigMac);
+    view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewByteInput);
 }
 
 bool bad_kb_scene_config_mac_on_event(void* context, SceneManagerEvent event) {

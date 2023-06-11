@@ -27,7 +27,7 @@ void bad_kb_scene_error_on_enter(void* context) {
             app->widget, GuiButtonTypeLeft, "Back", bad_kb_scene_error_event_callback, app);
     }
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, BadKbAppViewError);
+    view_dispatcher_switch_to_view(app->view_dispatcher, BadKbAppViewWidget);
 }
 
 bool bad_kb_scene_error_on_event(void* context, SceneManagerEvent event) {

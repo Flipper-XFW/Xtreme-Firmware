@@ -83,7 +83,7 @@ void bad_kb_scene_config_on_enter(void* context) {
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(bad_kb->scene_manager, BadKbSceneConfig));
 
-    view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewConfig);
+    view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewVarItemList);
 }
 
 bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
