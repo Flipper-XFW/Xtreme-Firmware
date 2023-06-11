@@ -680,6 +680,7 @@ static int32_t bad_kb_worker(void* context) {
 
     while(1) {
         if(worker_state == BadKbStateInit) { // State: initialization
+            FURI_LOG_D(WORKER_TAG, "init start");
             if(storage_file_open(
                    script_file,
                    furi_string_get_cstr(bad_kb->file_path),
@@ -707,10 +708,13 @@ static int32_t bad_kb_worker(void* context) {
                 worker_state = BadKbStateFileError; // File open error
             }
             bad_kb->st.state = worker_state;
+            FURI_LOG_D(WORKER_TAG, "init done");
 
         } else if(worker_state == BadKbStateNotConnected) { // State: Not connected
+            FURI_LOG_D(WORKER_TAG, "not connected wait");
             uint32_t flags = bad_kb_flags_get(
                 WorkerEvtEnd | WorkerEvtConnect | WorkerEvtStartStop, FuriWaitForever);
+            FURI_LOG_D(WORKER_TAG, "not connected flags: %lu", flags);
 
             if(flags & WorkerEvtEnd) {
                 break;
@@ -722,8 +726,10 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateIdle) { // State: ready to start
+            FURI_LOG_D(WORKER_TAG, "idle wait");
             uint32_t flags = bad_kb_flags_get(
                 WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtDisconnect, FuriWaitForever);
+            FURI_LOG_D(WORKER_TAG, "idle flags: %lu", flags);
 
             if(flags & WorkerEvtEnd) {
                 break;
@@ -746,8 +752,10 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateWillRun) { // State: start on connection
+            FURI_LOG_D(WORKER_TAG, "will run wait");
             uint32_t flags = bad_kb_flags_get(
                 WorkerEvtEnd | WorkerEvtConnect | WorkerEvtStartStop, FuriWaitForever);
+            FURI_LOG_D(WORKER_TAG, "will run flags: %lu", flags);
 
             if(flags & WorkerEvtEnd) {
                 break;
@@ -783,11 +791,13 @@ static int32_t bad_kb_worker(void* context) {
             bad_kb->st.state = worker_state;
 
         } else if(worker_state == BadKbStateRunning) { // State: running
+            FURI_LOG_D(WORKER_TAG, "running");
             uint16_t delay_cur = (delay_val > 1000) ? (1000) : (delay_val);
             uint32_t flags = furi_thread_flags_wait(
                 WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
                 FuriFlagWaitAny,
                 delay_cur);
+            FURI_LOG_D(WORKER_TAG, "running flags: %lu", flags);
 
             delay_val -= delay_cur;
             if(!(flags & FuriFlagError)) {
@@ -856,9 +866,11 @@ static int32_t bad_kb_worker(void* context) {
                 furi_check((flags & FuriFlagError) == 0);
             }
         } else if(worker_state == BadKbStateWaitForBtn) { // State: Wait for button Press
+            FURI_LOG_D(WORKER_TAG, "button wait");
             uint32_t flags = bad_kb_flags_get(
                 WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
                 FuriWaitForever);
+            FURI_LOG_D(WORKER_TAG, "button flags: %lu", flags);
             if(!(flags & FuriFlagError)) {
                 if(flags & WorkerEvtEnd) {
                     break;
@@ -877,9 +889,11 @@ static int32_t bad_kb_worker(void* context) {
                 continue;
             }
         } else if(worker_state == BadKbStatePaused) { // State: Paused
+            FURI_LOG_D(WORKER_TAG, "paused wait");
             uint32_t flags = bad_kb_flags_get(
                 WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
                 FuriWaitForever);
+            FURI_LOG_D(WORKER_TAG, "paused flags: %lu", flags);
             if(!(flags & FuriFlagError)) {
                 if(flags & WorkerEvtEnd) {
                     break;
@@ -917,9 +931,11 @@ static int32_t bad_kb_worker(void* context) {
                 continue;
             }
         } else if(worker_state == BadKbStateStringDelay) { // State: print string with delays
+            FURI_LOG_D(WORKER_TAG, "delay wait");
             uint32_t flags = bad_kb_flags_get(
                 WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
                 bad_kb->stringdelay);
+            FURI_LOG_D(WORKER_TAG, "delay flags: %lu", flags);
 
             if(!(flags & FuriFlagError)) {
                 if(flags & WorkerEvtEnd) {
@@ -958,8 +974,10 @@ static int32_t bad_kb_worker(void* context) {
         } else if(
             (worker_state == BadKbStateFileError) ||
             (worker_state == BadKbStateScriptError)) { // State: error
+            FURI_LOG_D(WORKER_TAG, "error wait");
             uint32_t flags =
                 bad_kb_flags_get(WorkerEvtEnd, FuriWaitForever); // Waiting for exit command
+            FURI_LOG_D(WORKER_TAG, "error flags: %lu", flags);
 
             if(flags & WorkerEvtEnd) {
                 break;
