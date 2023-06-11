@@ -707,7 +707,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(worker_state == BadKbStateNotConnected) { // State: Not connected
             FURI_LOG_D(WORKER_TAG, "not connected wait");
             uint32_t flags = bad_kb_flags_get(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtStartStop, FuriWaitForever);
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtDisconnect | WorkerEvtStartStop,
+                FuriWaitForever);
             FURI_LOG_D(WORKER_TAG, "not connected flags: %lu", flags);
 
             if(flags & WorkerEvtEnd) {
@@ -722,7 +723,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(worker_state == BadKbStateIdle) { // State: ready to start
             FURI_LOG_D(WORKER_TAG, "idle wait");
             uint32_t flags = bad_kb_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtDisconnect, FuriWaitForever);
+                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtConnect | WorkerEvtDisconnect,
+                FuriWaitForever);
             FURI_LOG_D(WORKER_TAG, "idle flags: %lu", flags);
 
             if(flags & WorkerEvtEnd) {
@@ -748,7 +750,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(worker_state == BadKbStateWillRun) { // State: start on connection
             FURI_LOG_D(WORKER_TAG, "will run wait");
             uint32_t flags = bad_kb_flags_get(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtStartStop, FuriWaitForever);
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtDisconnect | WorkerEvtStartStop,
+                FuriWaitForever);
             FURI_LOG_D(WORKER_TAG, "will run flags: %lu", flags);
 
             if(flags & WorkerEvtEnd) {
@@ -788,7 +791,8 @@ static int32_t bad_kb_worker(void* context) {
             FURI_LOG_D(WORKER_TAG, "running");
             uint16_t delay_cur = (delay_val > 1000) ? (1000) : (delay_val);
             uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtConnect |
+                    WorkerEvtDisconnect,
                 FuriFlagWaitAny,
                 delay_cur);
             FURI_LOG_D(WORKER_TAG, "running flags: %lu", flags);
@@ -862,7 +866,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(worker_state == BadKbStateWaitForBtn) { // State: Wait for button Press
             FURI_LOG_D(WORKER_TAG, "button wait");
             uint32_t flags = bad_kb_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtConnect |
+                    WorkerEvtDisconnect,
                 FuriWaitForever);
             FURI_LOG_D(WORKER_TAG, "button flags: %lu", flags);
             if(!(flags & FuriFlagError)) {
@@ -885,7 +890,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(worker_state == BadKbStatePaused) { // State: Paused
             FURI_LOG_D(WORKER_TAG, "paused wait");
             uint32_t flags = bad_kb_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtConnect |
+                    WorkerEvtDisconnect,
                 FuriWaitForever);
             FURI_LOG_D(WORKER_TAG, "paused flags: %lu", flags);
             if(!(flags & FuriFlagError)) {
@@ -927,7 +933,8 @@ static int32_t bad_kb_worker(void* context) {
         } else if(worker_state == BadKbStateStringDelay) { // State: print string with delays
             FURI_LOG_D(WORKER_TAG, "delay wait");
             uint32_t flags = bad_kb_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtConnect |
+                    WorkerEvtDisconnect,
                 bad_kb->stringdelay);
             FURI_LOG_D(WORKER_TAG, "delay flags: %lu", flags);
 
