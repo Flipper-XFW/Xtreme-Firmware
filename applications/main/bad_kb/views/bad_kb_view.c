@@ -18,9 +18,12 @@ typedef struct {
 
 static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     BadKbModel* model = _model;
+    BadKbWorkerState state = model->state.state;
 
-    FuriString* disp_str;
-    disp_str = furi_string_alloc_set(model->state.is_bt ? "(BT) " : "(USB) ");
+    FuriString* disp_str = furi_string_alloc_set(
+        state == BadKbStateInit ? "( . . . )" :
+        model->state.is_bt      ? "(BT) " :
+                                  "(USB) ");
     furi_string_cat_str(disp_str, model->file_name);
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_set_font(canvas, FontSecondary);
@@ -42,7 +45,6 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_draw_icon(canvas, 22, 24, &I_UsbTree_48x22);
 
-    BadKbWorkerState state = model->state.state;
     if((state == BadKbStateIdle) || (state == BadKbStateDone) ||
        (state == BadKbStateNotConnected)) {
         if(XTREME_SETTINGS()->is_nsfw) {
