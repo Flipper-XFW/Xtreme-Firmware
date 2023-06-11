@@ -511,14 +511,8 @@ static uint32_t bad_kb_flags_get(uint32_t flags_mask, uint32_t timeout) {
 int32_t bad_kb_conn_apply(BadKbApp* app) {
     if(app->is_bt) {
         // Shorthands so this bs is readable
-        BadKbConfig* prev = &app->prev_config;
         BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
         FuriHalBtProfile kbd = FuriHalBtProfileHidKeyboard;
-
-        // Save prev config
-        strcpy(prev->bt_name, furi_hal_bt_get_profile_adv_name(kbd));
-        memcpy(prev->bt_mac, furi_hal_bt_get_profile_mac_addr(kbd), BAD_KB_MAC_LEN);
-        prev->bt_mode = furi_hal_bt_get_profile_pairing_method(kbd);
 
         // Setup new config
         bt_timeout = bt_hid_delays[LevelRssi39_0];
@@ -555,9 +549,6 @@ int32_t bad_kb_conn_apply(BadKbApp* app) {
         app->conn_mode = BadKbConnModeBt;
 
     } else {
-        // Save prev config (TODO: maybe also restore config context?)
-        app->prev_config.usb_mode = furi_hal_usb_get_config();
-
         // Unlock RPC connections
         furi_hal_usb_unlock();
 
@@ -590,6 +581,7 @@ void bad_kb_conn_reset(BadKbApp* app) {
         bt_enable_peer_key_update(app->bt);
 
     } else if(app->conn_mode == BadKbConnModeUsb) {
+        // TODO: maybe also restore USB config context?
         furi_check(furi_hal_usb_set_config(app->prev_config.usb_mode, NULL));
     }
 
