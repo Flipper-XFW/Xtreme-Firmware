@@ -138,24 +138,26 @@ FS_Error archive_copy_rename_file_or_dir(
         if(find_name && storage_common_exists(fs_api, dst_path)) {
             FuriString* dir_path = furi_string_alloc();
             FuriString* filename = furi_string_alloc();
-            char extension[MAX_EXT_LEN] = {0};
+            FuriString* file_ext = furi_string_alloc();
 
-            path_extract_filename(dst_str, filename, true);
             path_extract_dirname(furi_string_get_cstr(dst_str), dir_path);
-            path_extract_extension(dst_str, extension, MAX_EXT_LEN);
+            path_extract_filename(dst_str, filename, true);
+            path_extract_ext_str(dst_str, file_ext);
 
             storage_get_next_filename(
                 fs_api,
                 furi_string_get_cstr(dir_path),
                 furi_string_get_cstr(filename),
-                extension,
+                furi_string_get_cstr(file_ext),
                 dst_str,
                 255);
-            furi_string_cat_printf(dir_path, "/%s%s", furi_string_get_cstr(dst_str), extension);
+            furi_string_cat_printf(
+                dir_path, "/%s%s", furi_string_get_cstr(dst_str), furi_string_get_cstr(file_ext));
             furi_string_set(dst_str, dir_path);
 
             furi_string_free(dir_path);
             furi_string_free(filename);
+            furi_string_free(file_ext);
         }
 
         if(copy) {

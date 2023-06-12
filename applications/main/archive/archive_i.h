@@ -38,7 +38,7 @@ struct ArchiveApp {
 
     FuriString* fav_move_str;
     char text_store[MAX_NAME_LEN];
-    char file_extension[MAX_EXT_LEN + 1];
+    FuriString* file_extension;
 };
 
 void archive_show_loading_popup(ArchiveApp* context, bool show);

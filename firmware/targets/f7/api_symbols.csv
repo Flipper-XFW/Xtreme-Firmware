@@ -2233,6 +2233,7 @@ Function,+,path_concat,void,"const char*, const char*, FuriString*"
 Function,+,path_contains_only_ascii,_Bool,const char*
 Function,+,path_extract_basename,void,"const char*, FuriString*"
 Function,+,path_extract_dirname,void,"const char*, FuriString*"
+Function,+,path_extract_ext_str,void,"FuriString*, FuriString*"
 Function,+,path_extract_extension,void,"FuriString*, char*, size_t"
 Function,+,path_extract_filename,void,"FuriString*, FuriString*, _Bool"
 Function,+,path_extract_filename_no_ext,void,"const char*, FuriString*"
