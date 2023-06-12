@@ -7,10 +7,20 @@
 enum VarItemListIndex {
     VarItemListIndexKeyboardLayout,
     VarItemListIndexConnection,
-    VarItemListIndexBtRemember,
+};
+
+enum VarItemListIndexBt {
+    VarItemListIndexBtRemember = VarItemListIndexConnection + 1,
     VarItemListIndexBtDeviceName,
     VarItemListIndexBtMacAddress,
-    VarItemListIndexRandomizeBtMac,
+    VarItemListIndexBtRandomizeMac,
+};
+
+enum VarItemListIndexUsb {
+    VarItemListIndexUsbManufacturerName = VarItemListIndexConnection + 1,
+    VarItemListIndexUsbProductName,
+    VarItemListIndexUsbVidPid,
+    VarItemListIndexUsbRandomizeVidPid,
 };
 
 void bad_kb_scene_config_connection_callback(VariableItem* item) {
@@ -73,6 +83,26 @@ void bad_kb_scene_config_on_enter(void* context) {
         } else if(bad_kb->set_bt_id) {
             variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
         }
+    } else {
+        item = variable_item_list_add(var_item_list, "USB Manufacturer Name", 0, NULL, bad_kb);
+        if(bad_kb->set_usb_id) {
+            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset Mname!");
+        }
+
+        item = variable_item_list_add(var_item_list, "USB Product Name", 0, NULL, bad_kb);
+        if(bad_kb->set_usb_id) {
+            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset Pname!");
+        }
+
+        item = variable_item_list_add(var_item_list, "USB VID and PID", 0, NULL, bad_kb);
+        if(bad_kb->set_usb_id) {
+            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset IDs!");
+        }
+
+        item = variable_item_list_add(var_item_list, "Randomize USB VID:PID", 0, NULL, bad_kb);
+        if(bad_kb->set_usb_id) {
+            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset IDs!");
+        }
     }
 
     variable_item_list_set_enter_callback(
@@ -95,22 +125,55 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
         case VarItemListIndexKeyboardLayout:
             scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigLayout);
             break;
-        case VarItemListIndexBtDeviceName:
-            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigName);
-            break;
-        case VarItemListIndexBtMacAddress:
-            scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigMac);
-            break;
-        case VarItemListIndexRandomizeBtMac:
-            furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_LEN);
-            /* fall through */
-        case VarItemListIndexBtRemember:
-            /* fall through */
         case VarItemListIndexConnection:
             bad_kb_config_refresh(bad_kb);
             break;
         default:
             break;
+        }
+        if(bad_kb->is_bt) {
+            switch(event.event) {
+            case VarItemListIndexBtRemember:
+                bad_kb_config_refresh(bad_kb);
+                break;
+            case VarItemListIndexBtDeviceName:
+                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBtName);
+                break;
+            case VarItemListIndexBtMacAddress:
+                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBtMac);
+                break;
+            case VarItemListIndexBtRandomizeMac:
+                furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_LEN);
+                bad_kb_config_refresh(bad_kb);
+                break;
+            default:
+                break;
+            }
+        } else {
+            switch(event.event) {
+            case VarItemListIndexUsbManufacturerName:
+                scene_manager_set_scene_state(
+                    bad_kb->scene_manager, BadKbSceneConfigUsbName, true);
+                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigUsbName);
+                break;
+            case VarItemListIndexUsbProductName:
+                scene_manager_set_scene_state(
+                    bad_kb->scene_manager, BadKbSceneConfigUsbName, false);
+                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigUsbName);
+                break;
+            case VarItemListIndexUsbVidPid:
+                scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigUsbVidPid);
+                break;
+            case VarItemListIndexUsbRandomizeVidPid:
+                furi_hal_random_fill_buf(
+                    (void*)bad_kb->usb_vidpid_buf, sizeof(bad_kb->usb_vidpid_buf));
+                bad_kb->config.usb_cfg.vid = bad_kb->usb_vidpid_buf[0];
+                bad_kb->config.usb_cfg.pid = bad_kb->usb_vidpid_buf[1];
+                bad_kb_config_refresh(bad_kb);
+                break;
+            default:
+                break;
+            }
         }
     }
 

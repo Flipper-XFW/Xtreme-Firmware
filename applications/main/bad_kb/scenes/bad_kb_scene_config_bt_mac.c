@@ -1,24 +1,21 @@
 #include "../bad_kb_app.h"
 
-#define TAG "BadKbConfigMac"
-
-void bad_kb_scene_config_mac_byte_input_callback(void* context) {
+void bad_kb_scene_config_bt_mac_byte_input_callback(void* context) {
     BadKbApp* bad_kb = context;
 
     view_dispatcher_send_custom_event(bad_kb->view_dispatcher, BadKbAppCustomEventByteInputDone);
 }
 
-void bad_kb_scene_config_mac_on_enter(void* context) {
+void bad_kb_scene_config_bt_mac_on_enter(void* context) {
     BadKbApp* bad_kb = context;
     ByteInput* byte_input = bad_kb->byte_input;
 
     memmove(bad_kb->bt_mac_buf, bad_kb->config.bt_mac, BAD_KB_MAC_LEN);
-
     byte_input_set_header_text(byte_input, "Set BT MAC address");
 
     byte_input_set_result_callback(
         byte_input,
-        bad_kb_scene_config_mac_byte_input_callback,
+        bad_kb_scene_config_bt_mac_byte_input_callback,
         NULL,
         bad_kb,
         bad_kb->bt_mac_buf,
@@ -27,7 +24,7 @@ void bad_kb_scene_config_mac_on_enter(void* context) {
     view_dispatcher_switch_to_view(bad_kb->view_dispatcher, BadKbAppViewByteInput);
 }
 
-bool bad_kb_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
+bool bad_kb_scene_config_bt_mac_on_event(void* context, SceneManagerEvent event) {
     BadKbApp* bad_kb = context;
     bool consumed = false;
 
@@ -42,7 +39,7 @@ bool bad_kb_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void bad_kb_scene_config_mac_on_exit(void* context) {
+void bad_kb_scene_config_bt_mac_on_exit(void* context) {
     BadKbApp* bad_kb = context;
     ByteInput* byte_input = bad_kb->byte_input;
 

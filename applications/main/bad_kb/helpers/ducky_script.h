@@ -137,6 +137,8 @@ struct BadKbApp {
     VariableItemList* var_item_list;
     TextInput* text_input;
     ByteInput* byte_input;
+    char usb_name_buf[32];
+    uint16_t usb_vidpid_buf[2];
     char bt_name_buf[BAD_KB_NAME_LEN];
     uint8_t bt_mac_buf[BAD_KB_MAC_LEN];
 
@@ -149,7 +151,7 @@ struct BadKbApp {
     Bt* bt;
     bool is_bt;
     bool bt_remember;
-    BadKbConfig config; // User options (TODO: allow users to change usb cfg)
+    BadKbConfig config; // User options
     BadKbConfig id_config; // ID and BT_ID values
     BadKbConfig prev_config; // State to restore at exit
 
