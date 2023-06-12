@@ -6,8 +6,6 @@
 #include <gui/modules/validators.h>
 #include <dolphin/dolphin.h>
 
-#define MAX_TEXT_INPUT_LEN 23
-
 void subghz_scene_save_name_text_input_callback(void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -108,7 +106,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         subghz_scene_save_name_text_input_callback,
         subghz,
         subghz->file_name_tmp,
-        MAX_TEXT_INPUT_LEN,
+        SUBGHZ_MAX_LEN_NAME,
         dev_name_empty);
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(

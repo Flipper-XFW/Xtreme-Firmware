@@ -9,7 +9,6 @@
 #define TAG "Archive"
 
 #define SCENE_NEW_DIR_CUSTOM_EVENT (0UL)
-#define MAX_TEXT_INPUT_LEN 22
 
 void archive_scene_new_dir_text_input_callback(void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
@@ -29,7 +28,7 @@ void archive_scene_new_dir_on_enter(void* context) {
         archive_scene_new_dir_text_input_callback,
         context,
         archive->text_store,
-        MAX_TEXT_INPUT_LEN,
+        MAX_NAME_LEN,
         false);
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewTextInput);

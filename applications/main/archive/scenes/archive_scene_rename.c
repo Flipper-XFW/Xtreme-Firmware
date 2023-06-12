@@ -9,7 +9,6 @@
 #define TAG "Archive"
 
 #define SCENE_RENAME_CUSTOM_EVENT (0UL)
-#define MAX_TEXT_INPUT_LEN 22
 
 void archive_scene_rename_text_input_callback(void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
@@ -47,7 +46,7 @@ void archive_scene_rename_on_enter(void* context) {
         archive_scene_rename_text_input_callback,
         context,
         archive->text_store,
-        MAX_TEXT_INPUT_LEN,
+        MAX_NAME_LEN,
         false);
 
     // Init validator to show message to user that name already exist
