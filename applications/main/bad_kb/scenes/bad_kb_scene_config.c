@@ -17,7 +17,7 @@ enum VarItemListIndexBt {
 };
 
 enum VarItemListIndexUsb {
-    VarItemListIndexUsbManufacturerName = VarItemListIndexConnection + 1,
+    VarItemListIndexUsbManufacturer = VarItemListIndexConnection + 1,
     VarItemListIndexUsbProductName,
     VarItemListIndexUsbVidPid,
     VarItemListIndexUsbRandomizeVidPid,
@@ -84,7 +84,7 @@ void bad_kb_scene_config_on_enter(void* context) {
             variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
         }
     } else {
-        item = variable_item_list_add(var_item_list, "USB Manufacturer Name", 0, NULL, bad_kb);
+        item = variable_item_list_add(var_item_list, "USB Manufacturer", 0, NULL, bad_kb);
         if(bad_kb->set_usb_id) {
             variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset Mname!");
         }
@@ -151,7 +151,7 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
             }
         } else {
             switch(event.event) {
-            case VarItemListIndexUsbManufacturerName:
+            case VarItemListIndexUsbManufacturer:
                 scene_manager_set_scene_state(
                     bad_kb->scene_manager, BadKbSceneConfigUsbName, true);
                 scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigUsbName);
