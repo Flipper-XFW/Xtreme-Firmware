@@ -115,10 +115,8 @@ typedef enum {
 } BadKbAppError;
 
 typedef struct {
-    GapPairing bt_mode;
     char bt_name[BAD_KB_NAME_LEN];
     uint8_t bt_mac[BAD_KB_MAC_LEN];
-    FuriHalUsbInterface* usb_mode;
     FuriHalUsbHidConfig usb_cfg;
 } BadKbConfig;
 
@@ -154,12 +152,16 @@ struct BadKbApp {
     bool bt_remember;
     BadKbConfig config; // User options
     BadKbConfig id_config; // ID and BT_ID values
-    BadKbConfig prev_config; // State to restore at exit
 
     bool set_usb_id;
     bool set_bt_id;
     bool has_usb_id;
     bool has_bt_id;
+
+    GapPairing prev_bt_mode;
+    char prev_bt_name[BAD_KB_NAME_LEN];
+    uint8_t prev_bt_mac[BAD_KB_MAC_LEN];
+    FuriHalUsbInterface* prev_usb_mode;
 
     FuriHalUsbHidConfig* hid_cfg;
     BadKbConnMode conn_mode;

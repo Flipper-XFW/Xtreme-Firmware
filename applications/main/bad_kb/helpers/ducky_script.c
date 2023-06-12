@@ -565,19 +565,20 @@ int32_t bad_kb_conn_apply(BadKbApp* app) {
 
 void bad_kb_conn_reset(BadKbApp* app) {
     if(app->conn_mode == BadKbConnModeBt) {
+        // TODO: maybe also restore BT profile?
         bt_disconnect(app->bt);
         furi_delay_ms(200);
         bt_keys_storage_set_default_path(app->bt);
-        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->prev_config.bt_name);
-        furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->prev_config.bt_mac);
-        furi_hal_bt_set_profile_pairing_method(
-            FuriHalBtProfileHidKeyboard, app->prev_config.bt_mode);
+        FuriHalBtProfile kbd = FuriHalBtProfileHidKeyboard;
+        furi_hal_bt_set_profile_mac_addr(kbd, app->prev_bt_mac);
+        furi_hal_bt_set_profile_adv_name(kbd, app->prev_bt_name);
+        furi_hal_bt_set_profile_pairing_method(kbd, app->prev_bt_mode);
         furi_check(bt_set_profile(app->bt, BtProfileSerial));
         bt_enable_peer_key_update(app->bt);
 
     } else if(app->conn_mode == BadKbConnModeUsb) {
-        // TODO: maybe also restore USB config context?
-        furi_check(furi_hal_usb_set_config(app->prev_config.usb_mode, NULL));
+        // TODO: maybe also restore USB context?
+        furi_check(furi_hal_usb_set_config(app->prev_usb_mode, NULL));
     }
 
     app->conn_mode = BadKbConnModeNone;

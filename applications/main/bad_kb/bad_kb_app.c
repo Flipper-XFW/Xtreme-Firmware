@@ -153,12 +153,11 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     bad_kb_config_adjust(&app->config);
 
     // Save prev config
-    BadKbConfig* prev = &app->prev_config;
-    prev->usb_mode = furi_hal_usb_get_config();
+    app->prev_usb_mode = furi_hal_usb_get_config();
     FuriHalBtProfile kbd = FuriHalBtProfileHidKeyboard;
-    prev->bt_mode = furi_hal_bt_get_profile_pairing_method(kbd);
-    strcpy(prev->bt_name, furi_hal_bt_get_profile_adv_name(kbd));
-    memcpy(prev->bt_mac, furi_hal_bt_get_profile_mac_addr(kbd), BAD_KB_MAC_LEN);
+    app->prev_bt_mode = furi_hal_bt_get_profile_pairing_method(kbd);
+    memcpy(app->prev_bt_mac, furi_hal_bt_get_profile_mac_addr(kbd), BAD_KB_MAC_LEN);
+    strlcpy(app->prev_bt_name, furi_hal_bt_get_profile_adv_name(kbd), BAD_KB_NAME_LEN);
 
     // Adjust BT remember MAC to be serial MAC +2
     memcpy(BAD_KB_BOUND_MAC, furi_hal_version_get_ble_mac(), BAD_KB_MAC_LEN);
