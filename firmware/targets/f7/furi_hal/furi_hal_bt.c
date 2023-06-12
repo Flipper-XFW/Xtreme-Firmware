@@ -233,8 +233,8 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
                     config->adv_name,
                     FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
                     "%cControl %s",
-                    *furi_hal_version_get_ble_local_device_name_ptr(),
-                    furi_hal_version_get_ble_local_device_name_ptr() + 1);
+                    AD_TYPE_COMPLETE_LOCAL_NAME,
+                    furi_hal_version_get_name_ptr());
             }
         }
         if(!gap_init(config, event_cb, context)) {
