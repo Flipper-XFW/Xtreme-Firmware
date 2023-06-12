@@ -228,16 +228,17 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             file_type = file->type;
+            bool ext = model->tab_idx == ArchiveTabBrowser || model->tab_idx == ArchiveTabInternal;
             if(file_type == ArchiveFileTypeApplication) {
                 if(file->custom_icon_data) {
                     custom_icon_data = file->custom_icon_data;
                     furi_string_set(str_buf, file->custom_name);
                 } else {
                     file_type = ArchiveFileTypeUnknown;
-                    path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
+                    path_extract_filename(file->path, str_buf, !ext);
                 }
             } else {
-                path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
+                path_extract_filename(file->path, str_buf, !ext);
             }
         } else {
             furi_string_set(str_buf, "---");
