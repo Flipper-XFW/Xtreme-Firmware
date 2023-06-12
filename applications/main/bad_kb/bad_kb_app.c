@@ -30,11 +30,9 @@ static void bad_kb_app_tick_event_callback(void* context) {
 
 static void bad_kb_load_settings(BadKbApp* app) {
     furi_string_reset(app->keyboard_layout);
-    strcpy(app->config.bt_name, "");
-    memcpy(
-        app->config.bt_mac,
-        furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-        BAD_KB_MAC_LEN);
+    BadKbConfig* cfg = &app->config;
+    strcpy(cfg->bt_name, "");
+    memcpy(cfg->bt_mac, BAD_KB_EMPTY_MAC, BAD_KB_MAC_LEN);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -44,16 +42,12 @@ static void bad_kb_load_settings(BadKbApp* app) {
             furi_string_reset(app->keyboard_layout);
         }
         if(flipper_format_read_string(file, "Bt_Name", tmp_str) && !furi_string_empty(tmp_str)) {
-            strcpy(app->config.bt_name, furi_string_get_cstr(tmp_str));
+            strcpy(cfg->bt_name, furi_string_get_cstr(tmp_str));
         } else {
-            strcpy(app->config.bt_name, "");
+            strcpy(cfg->bt_name, "");
         }
-        if(!flipper_format_read_hex(
-               file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_LEN)) {
-            memcpy(
-                app->config.bt_mac,
-                furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-                BAD_KB_MAC_LEN);
+        if(!flipper_format_read_hex(file, "Bt_Mac", (uint8_t*)&cfg->bt_mac, BAD_KB_MAC_LEN)) {
+            memcpy(cfg->bt_mac, BAD_KB_EMPTY_MAC, BAD_KB_MAC_LEN);
         }
         furi_string_free(tmp_str);
         flipper_format_file_close(file);
@@ -77,12 +71,13 @@ static void bad_kb_load_settings(BadKbApp* app) {
 }
 
 static void bad_kb_save_settings(BadKbApp* app) {
+    BadKbConfig* cfg = &app->config;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_always(file, BAD_KB_SETTINGS_PATH)) {
         flipper_format_write_string(file, "Keyboard_Layout", app->keyboard_layout);
-        flipper_format_write_string_cstr(file, "Bt_Name", app->config.bt_name);
-        flipper_format_write_hex(file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_LEN);
+        flipper_format_write_string_cstr(file, "Bt_Name", cfg->bt_name);
+        flipper_format_write_hex(file, "Bt_Mac", (uint8_t*)&cfg->bt_mac, BAD_KB_MAC_LEN);
         flipper_format_file_close(file);
     }
     flipper_format_free(file);

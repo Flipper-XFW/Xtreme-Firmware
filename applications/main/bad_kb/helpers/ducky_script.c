@@ -531,11 +531,6 @@ int32_t bad_kb_conn_apply(BadKbApp* app) {
         // Set profile, restart BT, adjust defaults
         furi_check(bt_set_profile(app->bt, BtProfileHidKeyboard));
 
-        // What was empty is now adjusted by furi_hal_bt so save the new defaults
-        if(strcmp(app->config.bt_name, "") == 0) {
-            strcpy(app->config.bt_name, furi_hal_bt_get_profile_adv_name(kbd));
-        }
-
         // Advertise even if BT is off in settings
         furi_hal_bt_start_advertising();
 
@@ -589,6 +584,11 @@ void bad_kb_conn_reset(BadKbApp* app) {
 }
 
 void bad_kb_config_adjust(BadKbConfig* cfg) {
+    // Avoid empty name
+    if(strcmp(cfg->bt_name, "") == 0) {
+        snprintf(cfg->bt_name, BAD_KB_NAME_LEN, "Control %s", furi_hal_version_get_name_ptr());
+    }
+
     // MAC is adjusted by furi_hal_bt, adjust here too so it matches after applying
     const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
     uint8_t empty_mac[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
