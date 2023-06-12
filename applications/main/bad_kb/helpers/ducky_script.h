@@ -105,6 +105,7 @@ BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 
 #define BAD_KB_NAME_LEN FURI_HAL_BT_ADV_NAME_LENGTH
 #define BAD_KB_MAC_LEN GAP_MAC_ADDR_SIZE
+#define BAD_KB_USB_LEN HID_MANUF_PRODUCT_NAME_LEN
 
 extern const uint8_t BAD_KB_EMPTY_MAC[BAD_KB_MAC_LEN];
 extern uint8_t BAD_KB_BOUND_MAC[BAD_KB_MAC_LEN]; // For remember mode
@@ -137,7 +138,7 @@ struct BadKbApp {
     VariableItemList* var_item_list;
     TextInput* text_input;
     ByteInput* byte_input;
-    char usb_name_buf[32];
+    char usb_name_buf[BAD_KB_USB_LEN];
     uint16_t usb_vidpid_buf[2];
     char bt_name_buf[BAD_KB_NAME_LEN];
     uint8_t bt_mac_buf[BAD_KB_MAC_LEN];

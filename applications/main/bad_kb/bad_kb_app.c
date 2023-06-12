@@ -46,7 +46,7 @@ static void bad_kb_load_settings(BadKbApp* app) {
             furi_string_reset(app->keyboard_layout);
         }
         if(flipper_format_read_string(file, "Bt_Name", tmp_str) && !furi_string_empty(tmp_str)) {
-            strcpy(cfg->bt_name, furi_string_get_cstr(tmp_str));
+            strlcpy(cfg->bt_name, furi_string_get_cstr(tmp_str), BAD_KB_NAME_LEN);
         } else {
             strcpy(cfg->bt_name, "");
         }
@@ -54,13 +54,13 @@ static void bad_kb_load_settings(BadKbApp* app) {
             memcpy(cfg->bt_mac, BAD_KB_EMPTY_MAC, BAD_KB_MAC_LEN);
         }
         if(flipper_format_read_string(file, "Usb_Manuf", tmp_str) && !furi_string_empty(tmp_str)) {
-            strcpy(cfg->usb_cfg.manuf, furi_string_get_cstr(tmp_str));
+            strlcpy(cfg->usb_cfg.manuf, furi_string_get_cstr(tmp_str), BAD_KB_USB_LEN);
         } else {
             strcpy(cfg->usb_cfg.manuf, "");
         }
         if(flipper_format_read_string(file, "Usb_Product", tmp_str) &&
            !furi_string_empty(tmp_str)) {
-            strcpy(cfg->usb_cfg.product, furi_string_get_cstr(tmp_str));
+            strlcpy(cfg->usb_cfg.product, furi_string_get_cstr(tmp_str), BAD_KB_USB_LEN);
         } else {
             strcpy(cfg->usb_cfg.product, "");
         }

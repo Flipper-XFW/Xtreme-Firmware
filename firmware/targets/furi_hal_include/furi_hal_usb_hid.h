@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+#define HID_MANUF_PRODUCT_NAME_LEN 32
+
 #define HID_VID_DEFAULT 0x046D
 #define HID_PID_DEFAULT 0xC529
 
@@ -167,8 +169,8 @@ typedef struct {
     // Good job knobheads, these should be uint16_t
     uint32_t vid;
     uint32_t pid;
-    char manuf[32];
-    char product[32];
+    char manuf[HID_MANUF_PRODUCT_NAME_LEN];
+    char product[HID_MANUF_PRODUCT_NAME_LEN];
 } FuriHalUsbHidConfig;
 
 typedef void (*HidStateCallback)(bool state, void* context);
