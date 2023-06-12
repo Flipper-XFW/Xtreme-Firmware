@@ -86,8 +86,7 @@ static int32_t ducky_fnc_sysrq(BadKbScript* bad_kb, const char* line, int32_t pa
         furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
         furi_hal_bt_hid_kb_press(key);
         furi_delay_ms(bt_timeout);
-        furi_hal_bt_hid_kb_release(key);
-        furi_hal_bt_hid_kb_release(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
+        furi_hal_bt_hid_kb_release_all();
     } else {
         furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
         furi_hal_hid_kb_press(key);
