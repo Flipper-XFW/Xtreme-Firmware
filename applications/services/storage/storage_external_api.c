@@ -7,7 +7,7 @@
 #include <toolbox/dir_walk.h>
 #include "toolbox/path.h"
 
-#define MAX_NAME_LENGTH 256
+#define MAX_NAME_LENGTH 254
 #define FILE_BUFFER_SIZE 512
 
 #define TAG "StorageAPI"
@@ -893,7 +893,7 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
         return true;
     }
 
-    char* name = malloc(MAX_NAME_LENGTH + 1); //-V799
+    char* name = malloc(MAX_NAME_LENGTH); //-V799
     File* dir = storage_file_alloc(storage);
     cur_dir = furi_string_alloc_set(path);
     bool go_deeper = false;

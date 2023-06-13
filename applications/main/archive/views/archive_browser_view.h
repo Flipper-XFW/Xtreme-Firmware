@@ -15,7 +15,7 @@
 #include "gui/modules/file_browser_worker.h"
 
 #define MAX_LEN_PX 110
-#define MAX_NAME_LEN 255
+#define MAX_NAME_LEN 254
 #define FRAME_HEIGHT 12
 #define MENU_ITEMS 5u
 #define MOVE_OFFSET 5u
