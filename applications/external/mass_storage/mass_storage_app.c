@@ -40,19 +40,20 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
     memset(app, 0, sizeof(MassStorageApp));
 
     if(arg != NULL) {
-        string_t filename;
-        string_init_set(filename, arg);
-        if(string_start_with_str_p(filename, MASS_STORAGE_APP_PATH_FOLDER)) {
-            string_right(filename, strlen(MASS_STORAGE_APP_PATH_FOLDER) + 1);
+        FuriString* filename = furi_string_alloc_set(arg);
+        if(furi_string_start_with_str(filename, MASS_STORAGE_APP_PATH_FOLDER)) {
+            furi_string_right(filename, strlen(MASS_STORAGE_APP_PATH_FOLDER) + 1);
         }
-        strncpy(app->file_name, string_get_cstr(filename), MASS_STORAGE_FILE_NAME_LEN);
-        string_clear(filename);
+        strlcpy(app->file_name, furi_string_get_cstr(filename), MASS_STORAGE_FILE_NAME_LEN);
+        furi_string_free(filename);
     }
 
-    app->gui = furi_record_open("gui");
-    app->fs_api = furi_record_open("storage");
-    app->notifications = furi_record_open("notification");
-    app->dialogs = furi_record_open("dialogs");
+    app->gui = furi_record_open(RECORD_GUI);
+    app->fs_api = furi_record_open(RECORD_STORAGE);
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
+
+    storage_simply_mkdir(app->fs_api, MASS_STORAGE_APP_PATH_FOLDER);
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
@@ -95,7 +96,6 @@ void mass_storage_app_free(MassStorageApp* app) {
     furi_assert(app);
 
     // Views
-    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewFileSelect);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewWork);
     mass_storage_free(app->mass_storage_view);
 
@@ -108,10 +108,10 @@ void mass_storage_app_free(MassStorageApp* app) {
     scene_manager_free(app->scene_manager);
 
     // Close records
-    furi_record_close("gui");
-    furi_record_close("storage");
-    furi_record_close("notification");
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_DIALOGS);
 
     free(app);
 }

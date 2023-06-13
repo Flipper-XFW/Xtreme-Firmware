@@ -1,5 +1,6 @@
 #include "mass_storage_view.h"
 #include <gui/elements.h>
+#include <assets_icons.h>
 
 struct MassStorage {
     View* view;
@@ -12,16 +13,15 @@ typedef struct {
 static void mass_storage_draw_callback(Canvas* canvas, void* _model) {
     MassStorageModel* model = _model;
 
-    string_t disp_str;
-    string_init_set_str(disp_str, model->file_name);
+    FuriString* disp_str = furi_string_alloc_set(model->file_name);
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 8, string_get_cstr(disp_str));
-    string_reset(disp_str);
+    canvas_draw_str(canvas, 2, 8, furi_string_get_cstr(disp_str));
+    furi_string_reset(disp_str);
 
     canvas_draw_icon(canvas, 40, 20, &I_UsbTree_48x22);
 
-    string_clear(disp_str);
+    furi_string_free(disp_str);
 }
 
 MassStorage* mass_storage_alloc() {
@@ -49,8 +49,5 @@ View* mass_storage_get_view(MassStorage* mass_storage) {
 void mass_storage_set_file_name(MassStorage* mass_storage, char* name) {
     furi_assert(name);
     with_view_model(
-        mass_storage->view, (MassStorageModel * model) {
-            model->file_name = name;
-            return true;
-        });
+        mass_storage->view, MassStorageModel * model, { model->file_name = name; }, true);
 }

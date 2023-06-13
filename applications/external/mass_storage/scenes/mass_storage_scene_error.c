@@ -1,4 +1,5 @@
 #include "../mass_storage_app_i.h"
+#include <assets_icons.h>
 
 typedef enum {
     SubghzCustomEventErrorBack,

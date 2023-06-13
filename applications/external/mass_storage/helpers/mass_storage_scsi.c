@@ -1,7 +1,5 @@
 #include "mass_storage_scsi.h"
 
-#include <furi/log.h>
-
 #define TAG "MassStorageSCSI"
 
 #define SCSI_TEST_UNIT_READY (0x00)

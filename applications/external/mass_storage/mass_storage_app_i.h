@@ -29,11 +29,11 @@ struct MassStorageApp {
     DialogsApp* dialogs;
     Widget* widget;
 
-    char file_name[MASS_STORAGE_FILE_NAME_LEN + 1];
+    char file_name[MASS_STORAGE_FILE_NAME_LEN];
     File* file;
     MassStorage* mass_storage_view;
 
-    osMutexId_t usb_mutex;
+    FuriMutex* usb_mutex;
     MassStorageUsb* usb;
 };
 

@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-#define SCSI_BLOCK_SIZE (0x200)
+#define SCSI_BLOCK_SIZE (0x200u)
 
 #define SCSI_SK_ILLEGAL_REQUEST (5)
 
