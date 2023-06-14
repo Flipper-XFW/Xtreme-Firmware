@@ -60,23 +60,18 @@ class GitVersion:
             "GIT_BRANCH": branch,
             "VERSION": version,
             "BUILD_DIRTY": dirty and 1 or 0,
-            "GIT_ORIGIN": ",".join(self._get_git_origins()),
+            "GIT_ORIGIN": self._get_git_origin(),
             "GIT_COMMIT_DATE": commit_date,
         }
 
-    def _get_git_origins(self):
+    def _get_git_origin(self):
         try:
-            remotes = self._exec_git("remote -v")
+            branch = self._exec_git("branch --show-current")
+            remote = self._exec_git(f"config branch.{branch}.remote")
+            origin = self._exec_git(f"remote get-url {remote}")
+            return origin
         except subprocess.CalledProcessError:
-            return set()
-        origins = set()
-        for line in remotes.split("\n"):
-            if not line:
-                continue
-            _, destination = line.split("\t")
-            url, _ = destination.split(" ")
-            origins.add(url)
-        return origins
+            return ""
 
     def _exec_git(self, args):
         cmd = ["git"]
