@@ -1,8 +1,8 @@
 diff --git a/fbt_options.py b/fbt_options.py
-index 7c5857e09f..acc6b8a982 100644
+index bb4ee592c0..a1b6032b29 100644
 --- a/fbt_options.py
 +++ b/fbt_options.py
-@@ -22,7 +22,7 @@ DIST_SUFFIX = "XFW-0048_03062023"
+@@ -25,7 +25,7 @@ DIST_SUFFIX = f"XFW-0048_{datetime.datetime.today().strftime('%d%m%Y')}"
  COPRO_OB_DATA = "scripts/ob.data"
  
  # Must match lib/stm32wb_copro version
@@ -37,7 +37,7 @@ index aaa755a362..ee5115cfed 100644
   * Define Advertising parameters
   */
 diff --git a/firmware/targets/f7/ble_glue/app_debug.c b/firmware/targets/f7/ble_glue/app_debug.c
-index 35f53ae22c..d288528223 100644
+index 78e789ac30..b443bee21f 100644
 --- a/firmware/targets/f7/ble_glue/app_debug.c
 +++ b/firmware/targets/f7/ble_glue/app_debug.c
 @@ -33,7 +33,8 @@ PLACE_IN_SECTION("MB_MEM2")
@@ -51,7 +51,7 @@ index 35f53ae22c..d288528223 100644
  /**
   * THE DEBUG ON GPIO FOR CPU2 IS INTENDED TO BE USED ONLY ON REQUEST FROM ST SUPPORT
 diff --git a/firmware/targets/f7/ble_glue/ble_app.c b/firmware/targets/f7/ble_glue/ble_app.c
-index 7a2148b6b8..c0418d9fe8 100644
+index 4fc4d521be..37d8f7cd04 100644
 --- a/firmware/targets/f7/ble_glue/ble_app.c
 +++ b/firmware/targets/f7/ble_glue/ble_app.c
 @@ -18,8 +18,8 @@ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
@@ -65,19 +65,19 @@ index 7a2148b6b8..c0418d9fe8 100644
  
  typedef struct {
      FuriMutex* hci_mtx;
-@@ -70,6 +70,12 @@ static const SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
-         .min_tx_power = 0,
-         .max_tx_power = 0,
-         .rx_model_config = 1,
-+        /* New stack (13.3->15.0) */
-+        .max_adv_set_nbr = 1, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
-+        .max_adv_data_len = 31, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
-+        .tx_path_compens = 0, // RF TX Path Compensation, * 0.1 dB
-+        .rx_path_compens = 0, // RF RX Path Compensation, * 0.1 dB
-+        .ble_core_version = 11, // BLE Core Version: 11(5.2), 12(5.3)
-     }};
- 
- bool ble_app_init() {
+@@ -88,6 +88,12 @@ bool ble_app_init() {
+             .min_tx_power = 0,
+             .max_tx_power = 0,
+             .rx_model_config = 1,
++            /* New stack (13.3->15.0) */
++            .max_adv_set_nbr = 1, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
++            .max_adv_data_len = 31, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
++            .tx_path_compens = 0, // RF TX Path Compensation, * 0.1 dB
++            .rx_path_compens = 0, // RF RX Path Compensation, * 0.1 dB
++            .ble_core_version = 11, // BLE Core Version: 11(5.2), 12(5.3)
+         }};
+     status = SHCI_C2_BLE_Init(&ble_init_cmd_packet);
+     if(status) {
 diff --git a/firmware/targets/f7/ble_glue/ble_const.h b/firmware/targets/f7/ble_glue/ble_const.h
 index 0e4c8b398d..85f734b62c 100644
 --- a/firmware/targets/f7/ble_glue/ble_const.h
