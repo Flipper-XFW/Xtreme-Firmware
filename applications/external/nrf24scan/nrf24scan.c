@@ -1439,7 +1439,7 @@ int32_t nrf24scan_app(void* p) {
                             if(log_arr_idx == 0)
                                 view_log_arr_idx = 0;
                             else {
-                            view_log_arr_idx += event.input.type == InputTypeRepeat ? 10 : 1;
+                                view_log_arr_idx += event.input.type == InputTypeRepeat ? 10 : 1;
                                 if(view_log_arr_idx >= log_arr_idx)
                                     view_log_arr_idx = log_arr_idx - 1;
                             }
