@@ -13,7 +13,7 @@ App(
         "gui",
         "dialogs",
     ],
-    fap_category="Tools",
+    fap_category="Misc",
     fap_icon="icons/qrcode_10px.png",
     fap_icon_assets="icons",
 )
