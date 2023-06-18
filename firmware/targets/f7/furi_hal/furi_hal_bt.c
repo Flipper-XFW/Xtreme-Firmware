@@ -461,6 +461,15 @@ uint32_t furi_hal_bt_get_conn_rssi(uint8_t* rssi) {
     return since;
 }
 
+void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {
+    uint8_t tmp;
+    for(size_t i = 0; i < GAP_MAC_ADDR_SIZE / 2; i++) {
+        tmp = mac_addr[i];
+        mac_addr[i] = mac_addr[GAP_MAC_ADDR_SIZE - 1 - i];
+        mac_addr[GAP_MAC_ADDR_SIZE - 1 - i] = tmp;
+    }
+}
+
 void furi_hal_bt_set_profile_adv_name(
     FuriHalBtProfile profile,
     const char name[FURI_HAL_BT_ADV_NAME_LENGTH]) {

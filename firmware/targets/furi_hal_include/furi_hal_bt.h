@@ -218,6 +218,11 @@ float furi_hal_bt_get_rssi();
  */
 uint32_t furi_hal_bt_get_transmitted_packets();
 
+/** Reverse a MAC address byte order in-place
+ * @param[in] mac       mac address to reverse
+*/
+void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);
+
 /** Modify profile advertisement name and restart bluetooth
  * @param[in] profile   profile type
  * @param[in] name      new adv name
