@@ -114,9 +114,7 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventManageMenuOpen:
-            if(!favorites) {
-                archive_show_file_menu(browser, true, true);
-            }
+            archive_show_file_menu(browser, true, true);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuClose:
@@ -133,7 +131,7 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             archive_show_file_menu(browser, false, false);
             consumed = true;
             break;
-        case ArchiveBrowserEventFileMenuPin: {
+        case ArchiveBrowserEventFileMenuFavorite: {
             const char* name = archive_get_name(browser);
             if(favorites) {
                 archive_favorites_delete("%s", name);
@@ -160,38 +158,6 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
             scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneShow);
-            consumed = true;
-            break;
-        case ArchiveBrowserEventFileMenuCut:
-            archive_show_file_menu(browser, false, false);
-            if(!favorites) {
-                with_view_model(
-                    browser->view,
-                    ArchiveBrowserViewModel * model,
-                    {
-                        if(model->clipboard == NULL) {
-                            model->clipboard = strdup(furi_string_get_cstr(selected->path));
-                            model->clipboard_copy = false;
-                        }
-                    },
-                    false);
-            }
-            consumed = true;
-            break;
-        case ArchiveBrowserEventFileMenuCopy:
-            archive_show_file_menu(browser, false, false);
-            if(!favorites) {
-                with_view_model(
-                    browser->view,
-                    ArchiveBrowserViewModel * model,
-                    {
-                        if(model->clipboard == NULL) {
-                            model->clipboard = strdup(furi_string_get_cstr(selected->path));
-                            model->clipboard_copy = true;
-                        }
-                    },
-                    false);
-            }
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuPaste:
@@ -249,6 +215,38 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
             break;
+        case ArchiveBrowserEventFileMenuCut:
+            archive_show_file_menu(browser, false, false);
+            if(!favorites) {
+                with_view_model(
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    {
+                        if(model->clipboard == NULL) {
+                            model->clipboard = strdup(furi_string_get_cstr(selected->path));
+                            model->clipboard_copy = false;
+                        }
+                    },
+                    false);
+            }
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuCopy:
+            archive_show_file_menu(browser, false, false);
+            if(!favorites) {
+                with_view_model(
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    {
+                        if(model->clipboard == NULL) {
+                            model->clipboard = strdup(furi_string_get_cstr(selected->path));
+                            model->clipboard_copy = true;
+                        }
+                    },
+                    false);
+            }
+            consumed = true;
+            break;
         case ArchiveBrowserEventFileMenuNewDir:
             archive_show_file_menu(browser, false, false);
             if(!favorites) {
@@ -273,11 +271,9 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             break;
         case ArchiveBrowserEventFileMenuDelete:
             archive_show_file_menu(browser, false, false);
-            if(!favorites) {
-                scene_manager_set_scene_state(
-                    archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
-                scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneDelete);
-            }
+            scene_manager_set_scene_state(
+                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneDelete);
             consumed = true;
             break;
         case ArchiveBrowserEventEnterDir:
