@@ -8,9 +8,11 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/widget_elements/widget_element_i.h>
 #include <gui/view_stack.h>
 #include <dialogs/dialogs.h>
 #include <gui/modules/loading.h>
+#include <toolbox/dir_walk.h>
 #include <loader/loader.h>
 
 #include "views/archive_browser_view.h"
@@ -39,6 +41,9 @@ struct ArchiveApp {
     FuriString* fav_move_str;
     char text_store[MAX_NAME_LEN];
     FuriString* file_extension;
+
+    WidgetElement* element;
+    FuriThread* thread;
 };
 
 void archive_show_loading_popup(ArchiveApp* context, bool show);
