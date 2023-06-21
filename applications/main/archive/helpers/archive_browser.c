@@ -75,11 +75,27 @@ static void archive_list_item_cb(
             ArchiveBrowserViewModel * model,
             {
                 if(model->item_cnt <= BROWSER_SORT_THRESHOLD) {
+                    FuriString* selected = NULL;
+                    if(model->item_idx > 0) {
+                        selected = furi_string_alloc_set(
+                            files_array_get(model->files, model->item_idx)->path);
+                    }
+
                     files_array_sort(model->files);
+
+                    if(selected != NULL) {
+                        for(uint32_t i = 0; i < model->item_cnt; i++) {
+                            if(!furi_string_cmp(files_array_get(model->files, i)->path, selected)) {
+                                model->item_idx = i;
+                                break;
+                            }
+                        }
+                    }
                 }
                 model->list_loading = false;
             },
             true);
+        archive_update_offset(browser);
     }
 }
 
