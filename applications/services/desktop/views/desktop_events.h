@@ -23,6 +23,7 @@ typedef enum {
     DesktopMainEventOpenSubRemote,
     DesktopMainEventOpenClock,
 
+    DesktopLockedEventOpenPowerOff,
     DesktopLockedEventUnlocked,
     DesktopLockedEventUpdate,
     DesktopLockedEventShowPinInput,

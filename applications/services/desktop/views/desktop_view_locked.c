@@ -231,6 +231,12 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
 
         desktop_view_locked_update_hint_icon_timeout(locked_view);
 
+        if(event->key == InputKeyBack) {
+            if(event->type == InputTypeLong) {
+                locked_view->callback(DesktopLockedEventOpenPowerOff, locked_view->context);
+            }
+        }
+
         if(pin_locked) {
             if(event->key == InputKeyUp) {
                 locked_view->callback(DesktopLockedEventShowPinInput, locked_view->context);
