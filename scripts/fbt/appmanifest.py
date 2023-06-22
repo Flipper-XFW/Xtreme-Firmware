@@ -45,7 +45,6 @@ class FlipperApplication:
 
     appid: str
     apptype: FlipperAppType
-    preload: Optional[bool] = False
     name: Optional[str] = ""
     entry_point: Optional[str] = None
     flags: List[str] = field(default_factory=lambda: ["Default"])
@@ -381,7 +380,7 @@ class ApplicationsCGenerator:
     {{.app = NULL,
      .name = "{app.name}",
      .appid = "/ext/apps/.Main/{app.appid}.fap",
-     .stack_size = {1 if app.preload else 0},
+     .stack_size = 0,
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
         return f"""
