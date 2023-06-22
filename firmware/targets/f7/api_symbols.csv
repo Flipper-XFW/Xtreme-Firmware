@@ -953,7 +953,6 @@ Function,-,finitel,int,long double
 Function,-,fiprintf,int,"FILE*, const char*, ..."
 Function,-,fiscanf,int,"FILE*, const char*, ..."
 Function,+,flipper_application_alloc,FlipperApplication*,"Storage*, const ElfApiInterface*"
-Function,+,flipper_application_despawn,void,FlipperApplication*
 Function,+,flipper_application_free,void,FlipperApplication*
 Function,+,flipper_application_get_manifest,const FlipperApplicationManifest*,FlipperApplication*
 Function,+,flipper_application_is_plugin,_Bool,FlipperApplication*

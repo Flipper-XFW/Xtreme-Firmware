@@ -107,18 +107,13 @@ FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplicatio
 
 /**
  * @brief Create application thread at entry point address, using app name and
- * stack size from metadata. Returned thread isn't started yet.
+ * stack size from metadata. Returned thread isn't started yet. 
+ * Can be only called once for application instance.
  * @param app Applicaiton pointer
  * @param args Object to pass to app's entry point
  * @return Created thread
  */
 FuriThread* flipper_application_spawn(FlipperApplication* app, void* args);
-
-/**
- * @brief Cleanup application in order to re-spawn later.
- * @param app Applicaiton pointer
- */
-void flipper_application_despawn(FlipperApplication* app);
 
 /**
  * @brief Check if application is a plugin (not a runnable standalone app)

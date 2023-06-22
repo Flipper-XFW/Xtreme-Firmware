@@ -236,15 +236,6 @@ FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     return app->thread;
 }
 
-void flipper_application_despawn(FlipperApplication* app) {
-    furi_check(app->thread != NULL);
-    furi_check(!flipper_application_is_plugin(app));
-
-    furi_thread_join(app->thread);
-    furi_thread_free(app->thread);
-    app->thread = NULL;
-}
-
 static const char* preload_status_strings[] = {
     [FlipperApplicationPreloadStatusSuccess] = "Success",
     [FlipperApplicationPreloadStatusUnspecifiedError] = "Unknown error",

@@ -1,7 +1,6 @@
 #include "loader.h"
 #include "loader_i.h"
 #include "loader_menu.h"
-#include "loader_preload.h"
 #include <applications.h>
 #include <furi_hal.h>
 #include <core/dangerous_defines.h>
@@ -150,13 +149,6 @@ static Loader* loader_alloc() {
 
     if(furi_hal_is_normal_boot()) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
-        for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-            if(FLIPPER_APPS[i].app != NULL || FLIPPER_APPS[i].stack_size != 1) continue;
-            if(storage_common_exists(storage, FLIPPER_APPS[i].appid)) {
-                void* preload = loader_preload(storage, FLIPPER_APPS[i].appid);
-                FLIPPER_APPS[i].preload = preload;
-            }
-        }
         FuriString* path = furi_string_alloc();
         FuriString* name = furi_string_alloc();
         Stream* stream = file_stream_alloc(storage);
@@ -224,10 +216,6 @@ static void
     FURI_LOG_I(TAG, "Starting %s", app->name);
 
     if(app->app == NULL) {
-        if(app->preload != NULL) {
-            loader_preload_start(app->preload, app->appid);
-            return;
-        }
         args = app->appid;
         app = loader_find_application_by_name_in_list(
             FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
