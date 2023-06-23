@@ -1089,7 +1089,7 @@ Function,-,furi_hal_bt_get_hardfault_info,const FuriHalBtHardfaultInfo*,
 Function,+,furi_hal_bt_get_key_storage_buff,void,"uint8_t**, uint16_t*"
 Function,+,furi_hal_bt_get_profile_adv_name,const char*,FuriHalBtProfile
 Function,+,furi_hal_bt_get_profile_mac_addr,const uint8_t*,FuriHalBtProfile
-Function,-,furi_hal_bt_get_profile_pairing_method,GapPairing,FuriHalBtProfile
+Function,+,furi_hal_bt_get_profile_pairing_method,GapPairing,FuriHalBtProfile
 Function,+,furi_hal_bt_get_radio_stack,FuriHalBtStack,
 Function,+,furi_hal_bt_get_rssi,float,
 Function,+,furi_hal_bt_get_transmitted_packets,uint32_t,
@@ -2940,7 +2940,7 @@ Function,+,submenu_set_header,void,"Submenu*, const char*"
 Function,+,submenu_set_selected_item,void,"Submenu*, uint32_t"
 Function,-,system,int,const char*
 Function,+,t5577_write,void,LFRFIDT5577*
-Function,-,t5577_write_with_pass,void,"LFRFIDT5577*, uint32_t"
+Function,+,t5577_write_with_pass,void,"LFRFIDT5577*, uint32_t"
 Function,-,tan,double,double
 Function,-,tanf,float,float
 Function,-,tanh,double,double
