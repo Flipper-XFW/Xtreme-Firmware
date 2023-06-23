@@ -25,7 +25,7 @@ DIST_SUFFIX = f"XFW-0048_{datetime.datetime.today().strftime('%d%m%Y')}"
 COPRO_OB_DATA = "scripts/ob.data"
 
 # Must match lib/stm32wb_copro version
-COPRO_CUBE_VERSION = "1.13.3"
+COPRO_CUBE_VERSION = "1.15.0"
 
 COPRO_CUBE_DIR = "lib/stm32wb_copro"
 
