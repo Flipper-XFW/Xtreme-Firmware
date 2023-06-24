@@ -1,0 +1,198 @@
+Filetype: IR signals file
+Version: 1
+# 
+# LG TV REMOTE
+#
+# by SFJUOCEKR
+#
+name: POWER
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 08 00 00 00
+# 
+name: MUTE
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 09 00 00 00
+# 
+name: OK
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 44 00 00 00
+# 
+name: EXIT
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 5B 00 00 00
+# 
+name: UP
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 40 00 00 00
+# 
+name: DOWN
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 41 00 00 00
+# 
+name: LEFT
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 07 00 00 00
+# 
+name: RIGHT
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 06 00 00 00
+# 
+name: 1
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 11 00 00 00
+# 
+name: 2
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 12 00 00 00
+# 
+name: 3
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 13 00 00 00
+# 
+name: 4
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 14 00 00 00
+# 
+name: 5
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 15 00 00 00
+# 
+name: 6
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 16 00 00 00
+# 
+name: 7
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 17 00 00 00
+# 
+name: 8
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 18 00 00 00
+# 
+name: 9
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 19 00 00 00
+# 
+name: 0
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 10 00 00 00
+# 
+name: Back
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 28 00 00 00
+# 
+name: TXT
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 20 00 00 00
+# 
+name: RED
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 40 00 00 00
+# 
+name: YELOW
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 07 00 00 00
+# 
+name: GREEN
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 41 00 00 00
+# 
+name: BLUE
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 06 00 00 00
+# 
+name: VOL+
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 02 00 00 00
+# 
+name: VOL-
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 03 00 00 00
+# 
+name: CH+
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 00 00 00 00
+# 
+name: CH-
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 01 00 00 00
+# 
+name: I
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: AA 00 00 00
+# 
+name: TV
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 174 119830 169
+# 
+name: AV
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 0B 00 00 00
+# 
+name: DTT
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 174 39827 177 19824 178 19823 168 19830 172 39829 175
