@@ -190,6 +190,9 @@ There are 3 methods to install Xtreme, we recommend you use the **Web Updater**,
 <br>
 <h2 align="center">Build it yourself:</h2>
 
+> **Warning**
+> We will not give basic support for compiling in our server. This is intended for people that already *know* what they are doing!
+
 ```bash
 To download the needed tools:
 $ git clone --recursive https://github.com/ClaraCrazy/Flipper-Xtreme.git
