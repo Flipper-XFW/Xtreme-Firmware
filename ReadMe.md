@@ -183,9 +183,6 @@ There are 3 methods to install Xtreme, we recommend you use the **Web Updater**,
 
 <br>
 
-**If you have issues or crashes with the install process, you can try to use `Settings > Storage > Factory Reset` then retry the install.**
-**Doing that will NOT remove your saved files, it will only forget some settings and paired devices.**
-
 ----
 <br>
 <h2 align="center">Build it yourself:</h2>
