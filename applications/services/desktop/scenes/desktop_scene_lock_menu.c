@@ -80,8 +80,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopLockMenuEventSettings:
             desktop_scene_lock_menu_save_settings(desktop);
-            // loader_show_settings(furi_record_open(RECORD_LOADER));
-            // furi_record_close(RECORD_LOADER);
+            loader_show_settings(furi_record_open(RECORD_LOADER));
+            furi_record_close(RECORD_LOADER);
             consumed = true;
             break;
         case DesktopLockMenuEventLock:

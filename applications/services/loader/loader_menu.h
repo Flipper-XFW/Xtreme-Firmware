@@ -7,7 +7,7 @@ extern "C" {
 
 typedef struct LoaderMenu LoaderMenu;
 
-LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context);
+LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool settings);
 
 void loader_menu_free(LoaderMenu* loader_menu);
 

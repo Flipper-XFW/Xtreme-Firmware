@@ -73,6 +73,12 @@ bool loader_is_locked(Loader* instance);
 void loader_show_menu(Loader* instance);
 
 /**
+ * @brief Show settings menu
+ * @param[in] instance loader instance
+ */
+void loader_show_settings(Loader* instance);
+
+/**
  * @brief Get loader pubsub
  * @param[in] instance loader instance
  * @return FuriPubSub* 
