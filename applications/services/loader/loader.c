@@ -3,11 +3,14 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
+#include <xtreme.h>
 
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
+#include <toolbox/stream/file_stream.h>
+#include <core/dangerous_defines.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
@@ -102,6 +105,11 @@ FuriPubSub* loader_get_pubsub(Loader* loader) {
     return loader->pubsub;
 }
 
+ExtMainAppList_t* loader_get_ext_main_apps(Loader* loader) {
+    furi_assert(loader);
+    return &loader->ext_main_apps;
+}
+
 // callbacks
 
 static void loader_menu_closed_callback(void* context) {
@@ -136,6 +144,28 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
 
 // implementation
 
+bool loader_menu_load_fap_meta(
+    Storage* storage,
+    FuriString* path,
+    FuriString* name,
+    const Icon** icon) {
+    *icon = NULL;
+    uint8_t* icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
+    if(!flipper_application_load_name_and_icon(path, storage, &icon_buf, name)) {
+        free(icon_buf);
+        icon_buf = NULL;
+        return false;
+    }
+    *icon = malloc(sizeof(Icon));
+    FURI_CONST_ASSIGN((*icon)->frame_count, 1);
+    FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
+    FURI_CONST_ASSIGN((*icon)->width, 10);
+    FURI_CONST_ASSIGN((*icon)->height, 10);
+    FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
+    FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
+    return true;
+}
+
 static Loader* loader_alloc() {
     Loader* loader = malloc(sizeof(Loader));
     loader->pubsub = furi_pubsub_alloc();
@@ -146,6 +176,33 @@ static Loader* loader_alloc() {
     loader->app.thread = NULL;
     loader->app.insomniac = false;
     loader->app.fap = NULL;
+    ExtMainAppList_init(loader->ext_main_apps);
+
+    if(furi_hal_is_normal_boot()) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        FuriString* path = furi_string_alloc();
+        FuriString* name = furi_string_alloc();
+        Stream* stream = file_stream_alloc(storage);
+        if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            while(stream_read_line(stream, path)) {
+                furi_string_replace_all(path, "\r", "");
+                furi_string_replace_all(path, "\n", "");
+                const Icon* icon;
+                if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
+                ExtMainAppList_push_back(
+                    loader->ext_main_apps,
+                    (ExtMainApp){
+                        .name = strdup(furi_string_get_cstr(name)),
+                        .path = strdup(furi_string_get_cstr(path)),
+                        .icon = icon});
+            }
+        }
+        file_stream_close(stream);
+        stream_free(stream);
+        furi_string_free(name);
+        furi_string_free(path);
+        furi_record_close(RECORD_STORAGE);
+    }
     return loader;
 }
 
