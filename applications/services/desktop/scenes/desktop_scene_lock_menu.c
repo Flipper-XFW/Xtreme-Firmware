@@ -94,8 +94,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock(desktop, true);
             } else {
-                LoaderStatus status =
-                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
+                LoaderStatus status = loader_start(
+                    desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
                 if(status == LoaderStatusOk) {
                     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
                 } else {
@@ -113,8 +113,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 power_off(power);
                 furi_record_close(RECORD_POWER);
             } else {
-                LoaderStatus status =
-                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
+                LoaderStatus status = loader_start(
+                    desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
                 if(status == LoaderStatusOk) {
                     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 2);
                 } else {
