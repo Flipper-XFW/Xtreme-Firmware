@@ -179,7 +179,7 @@ class AppBuilder:
                         deployable = False
                 app_artifacts.dist_entries.append((deployable, fal_path))
         else:
-            fap_path = f"apps/{'.Main' if self.app.apptype == FlipperAppType.FAPP else self.app.fap_category}/{app_artifacts.compact.name}"
+            fap_path = f"apps/{'assets' if self.app.apptype == FlipperAppType.FAPP else self.app.fap_category}/{app_artifacts.compact.name}"
             app_artifacts.dist_entries.append(
                 (self.app.is_default_deployable, fap_path)
             )

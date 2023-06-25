@@ -380,7 +380,7 @@ class ApplicationsCGenerator:
             return f"""
     {{.app = NULL,
      .name = "{app.name}",
-     .appid = "/ext/apps/.Main/{app.appid}.fap",
+     .appid = "/ext/apps/assets/{app.appid}.fap",
      .stack_size = 0,
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
