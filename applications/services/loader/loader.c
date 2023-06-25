@@ -366,8 +366,15 @@ static LoaderStatus loader_do_start_by_name(
         {
             const FlipperInternalApplication* app = loader_find_application_by_name(name);
             if(app) {
-                loader_start_internal_app(loader, app, args);
-                status = loader_make_success_status(error_message);
+                if(app->app == NULL) {
+                    // FAPP support
+                    status = loader_start_external_app(
+                        loader, furi_record_open(RECORD_STORAGE), app->appid, args, error_message);
+                    furi_record_close(RECORD_STORAGE);
+                } else {
+                    loader_start_internal_app(loader, app, args);
+                    status = loader_make_success_status(error_message);
+                }
                 break;
             }
         }
