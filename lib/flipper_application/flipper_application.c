@@ -3,6 +3,7 @@
 #include <notification/notification_messages.h>
 #include "application_assets.h"
 #include <loader/firmware_api/firmware_api.h>
+#include <storage/storage_processing.h>
 
 #include <m-list.h>
 
@@ -312,25 +313,45 @@ bool flipper_application_load_name_and_icon(
     Storage* storage,
     uint8_t** icon_ptr,
     FuriString* item_name) {
-    FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
+    bool load_success = true;
 
-    FlipperApplicationPreloadStatus preload_res =
-        flipper_application_preload_manifest(app, furi_string_get_cstr(path));
-
-    bool load_success = false;
-
-    if(preload_res == FlipperApplicationPreloadStatusSuccess) {
-        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-        if(manifest->has_icon) {
-            memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
-        }
-        furi_string_set(item_name, manifest->name);
-        load_success = true;
-    } else {
-        FURI_LOG_E(TAG, "Failed to preload %s", furi_string_get_cstr(path));
+    StorageData* storage_data;
+    if(storage_get_data(storage, path, &storage_data) == FSE_OK &&
+       storage_path_already_open(path, storage_data)) {
         load_success = false;
     }
 
-    flipper_application_free(app);
+    if(load_success) {
+        load_success = false;
+
+        FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
+
+        FlipperApplicationPreloadStatus preload_res =
+            flipper_application_preload_manifest(app, furi_string_get_cstr(path));
+
+        if(preload_res == FlipperApplicationPreloadStatusSuccess ||
+           preload_res == FlipperApplicationPreloadStatusApiMismatch) {
+            const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
+            if(manifest->has_icon && icon_ptr != NULL && *icon_ptr != NULL) {
+                memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
+            }
+            furi_string_set(item_name, manifest->name);
+            load_success = true;
+        } else {
+            FURI_LOG_E(TAG, "Failed to preload %s", furi_string_get_cstr(path));
+        }
+
+        flipper_application_free(app);
+    }
+
+    if(!load_success) {
+        size_t offset = furi_string_search_rchar(path, '/');
+        if(offset != FURI_STRING_FAILURE) {
+            furi_string_set_n(item_name, path, offset + 1, furi_string_size(path) - offset - 1);
+        } else {
+            furi_string_set(item_name, path);
+        }
+    }
+
     return load_success;
 }
