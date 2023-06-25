@@ -425,6 +425,16 @@ static LoaderStatus loader_do_start_by_name(
             break;
         }
 
+        // Translate app names (mainly for RPC, thanks OFW for not using a smart system like appid's :/)
+        if(!strncmp(name, "Bad USB", strlen("Bad USB")))
+            name = "Bad KB";
+        else if(!strncmp(name, "Applications", strlen("Applications")))
+            name = "Apps";
+        else if(!strncmp(name, "125 kHz RFID", strlen("125 kHz RFID")))
+            name = "RFID";
+        else if(!strncmp(name, "Sub-GHz", strlen("Sub-GHz")))
+            name = "SubGHz";
+
         // check internal apps
         {
             const FlipperInternalApplication* app = loader_find_application_by_name(name);
