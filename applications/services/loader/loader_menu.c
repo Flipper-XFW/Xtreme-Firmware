@@ -88,8 +88,14 @@ static uint32_t loader_menu_exit(void* context) {
 }
 
 static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
-    size_t i;
-    for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
+    menu_add_item(
+        app->primary_menu,
+        LOADER_APPLICATIONS_NAME,
+        &A_Plugins_14,
+        0,
+        loader_menu_applications_callback,
+        (void*)menu);
+    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
             app->primary_menu,
             FLIPPER_APPS[i].name,
@@ -99,14 +105,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
             (void*)menu);
     }
     menu_add_item(
-        app->primary_menu, "Settings", &A_Settings_14, i++, loader_menu_switch_to_settings, app);
-    menu_add_item(
-        app->primary_menu,
-        LOADER_APPLICATIONS_NAME,
-        &A_Plugins_14,
-        i++,
-        loader_menu_applications_callback,
-        (void*)menu);
+        app->primary_menu, "Settings", &A_Settings_14, 0, loader_menu_switch_to_settings, app);
 };
 
 static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
