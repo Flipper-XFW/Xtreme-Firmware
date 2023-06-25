@@ -80,8 +80,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopLockMenuEventSettings:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_show_settings(furi_record_open(RECORD_LOADER));
-            furi_record_close(RECORD_LOADER);
+            // loader_show_settings(furi_record_open(RECORD_LOADER));
+            // furi_record_close(RECORD_LOADER);
             consumed = true;
             break;
         case DesktopLockMenuEventLock:
@@ -95,7 +95,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 desktop_lock(desktop, true);
             } else {
                 LoaderStatus status =
-                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
                 if(status == LoaderStatusOk) {
                     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
                 } else {
@@ -114,7 +114,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 furi_record_close(RECORD_POWER);
             } else {
                 LoaderStatus status =
-                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
                 if(status == LoaderStatusOk) {
                     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 2);
                 } else {
@@ -125,7 +125,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventXtreme:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start(desktop->loader, "Xtreme", NULL);
+            loader_start_with_gui_error(desktop->loader, "Xtreme", NULL);
             consumed = true;
             break;
         case DesktopLockMenuEventStealthModeOn:

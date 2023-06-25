@@ -64,14 +64,6 @@ static void
 static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
     if(strlen(application->name_or_path) > 0) {
         loader_start_with_gui_error(desktop->loader, application->name_or_path, NULL);
-    } else {
-        // No favourite app is set! So we skipping this part
-        return;
-        //status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, NULL);
-    }
-
-    if(status != LoaderStatusOk) {
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
     }
 }
 
@@ -167,11 +159,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenClock: {
-            LoaderStatus status = loader_start(
-                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/Misc/Nightstand.fap"));
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start_with_gui_error(
+                desktop->loader, EXT_PATH("apps/Misc/Nightstand.fap"), NULL);
             break;
         }
         case DesktopLockedEventUpdate:

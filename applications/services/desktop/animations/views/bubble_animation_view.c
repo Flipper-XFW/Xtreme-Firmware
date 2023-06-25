@@ -136,7 +136,7 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
             }
         } else if(event->type == InputTypeLong) {
             Loader* loader = furi_record_open(RECORD_LOADER);
-            loader_start(loader, "Power", "about_battery");
+            loader_start(loader, "Power", "about_battery", NULL);
             furi_record_close(RECORD_LOADER);
         }
     }

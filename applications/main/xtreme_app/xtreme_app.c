@@ -229,7 +229,7 @@ XtremeApp* xtreme_app_alloc() {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
             CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
-            fap_loader_load_name_and_icon(line, storage, NULL, line);
+            flipper_application_load_name_and_icon(line, storage, NULL, line);
             CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(line)));
         }
     }

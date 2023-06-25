@@ -23,7 +23,7 @@ const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
         return "RFID";
     case ArchiveFileTypeInfrared:
         return "Infrared";
-    case ArchiveFileTypeBadUsb:
+    case ArchiveFileTypeBadKb:
         return "Bad KB";
     case ArchiveFileTypeU2f:
         return "U2F";
@@ -65,6 +65,7 @@ static void
         }
     } else {
         loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
+        UNUSED(favorites);
         // const char* str = furi_string_get_cstr(selected->path);
         // if(favorites) {
         //     char arg[strlen(str) + 4];
@@ -73,10 +74,6 @@ static void
         // } else {
         //     status = loader_start(loader, flipper_app_name[selected->type], str);
         // }
-    }
-
-    if(status != LoaderStatusOk) {
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
     }
 
     furi_record_close(RECORD_LOADER);

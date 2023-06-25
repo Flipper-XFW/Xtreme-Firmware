@@ -1,7 +1,6 @@
 entry,status,name,type,params
 Version,+,31.0,,
 Header,+,applications/main/archive/helpers/favorite_timeout.h,,
-Header,+,applications/main/fap_loader/fap_loader_app.h,,
 Header,+,applications/main/subghz/helpers/subghz_txrx.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -878,7 +877,6 @@ Function,-,expm1l,long double,long double
 Function,-,fabs,double,double
 Function,-,fabsf,float,float
 Function,-,fabsl,long double,long double
-Function,+,fap_loader_load_name_and_icon,_Bool,"FuriString*, Storage*, uint8_t**, FuriString*"
 Function,+,favorite_timeout_callback,void,void*
 Function,+,favorite_timeout_run,void,"ViewDispatcher*, SceneManager*"
 Function,-,fclose,int,FILE*
@@ -1920,7 +1918,6 @@ Function,+,loader_get_pubsub,FuriPubSub*,Loader*
 Function,+,loader_is_locked,_Bool,Loader*
 Function,+,loader_lock,_Bool,Loader*
 Function,+,loader_show_menu,void,Loader*
-Function,+,loader_show_settings,void,Loader*
 Function,+,loader_start,LoaderStatus,"Loader*, const char*, const char*, FuriString*"
 Function,+,loader_start_with_gui_error,LoaderStatus,"Loader*, const char*, const char*"
 Function,+,loader_unlock,void,Loader*

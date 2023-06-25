@@ -18,7 +18,7 @@
 #include "dolphin/dolphin_i.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/subghz/subghz_setting.h>
-#include <applications/main/fap_loader/fap_loader_app.h>
+#include <flipper_application/flipper_application.h>
 #include <notification/notification_app.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
