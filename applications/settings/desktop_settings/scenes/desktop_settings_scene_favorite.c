@@ -3,7 +3,6 @@
 #include "desktop_settings_scene.h"
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
-#include <fap_loader/fap_loader_app.h>
 
 static bool favorite_fap_selector_item_callback(
     FuriString* file_path,

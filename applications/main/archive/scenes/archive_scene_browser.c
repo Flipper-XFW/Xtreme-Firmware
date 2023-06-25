@@ -11,18 +11,28 @@
 #define SCENE_STATE_DEFAULT (0)
 #define SCENE_STATE_NEED_REFRESH (1)
 
-static const char* flipper_app_name[] = {
-    [ArchiveFileTypeIButton] = "iButton",
-    [ArchiveFileTypeNFC] = "NFC",
-    [ArchiveFileTypeSubGhz] = "SubGHz",
-    [ArchiveFileTypeLFRFID] = "RFID",
-    [ArchiveFileTypeInfrared] = "Infrared",
-    [ArchiveFileTypeBadKb] = "Bad KB",
-    [ArchiveFileTypeU2f] = "U2F",
-    [ArchiveFileTypeApplication] = "Apps",
-    [ArchiveFileTypeUpdateManifest] = "UpdaterApp",
-    [ArchiveFileTypeFolder] = "Archive",
-};
+const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
+    switch(file_type) {
+    case ArchiveFileTypeIButton:
+        return "iButton";
+    case ArchiveFileTypeNFC:
+        return "NFC";
+    case ArchiveFileTypeSubGhz:
+        return "SubGHz";
+    case ArchiveFileTypeLFRFID:
+        return "RFID";
+    case ArchiveFileTypeInfrared:
+        return "Infrared";
+    case ArchiveFileTypeBadUsb:
+        return "Bad KB";
+    case ArchiveFileTypeU2f:
+        return "U2F";
+    case ArchiveFileTypeUpdateManifest:
+        return "UpdaterApp";
+    default:
+        return NULL;
+    }
+}
 
 static void archive_loader_callback(const void* message, void* context) {
     furi_assert(message);
@@ -41,22 +51,28 @@ static void
     UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
 
-    LoaderStatus status;
-    if(selected->is_app) {
-        char* param = strrchr(furi_string_get_cstr(selected->path), '/');
-        if(param != NULL) {
-            param++;
-        }
-        status = loader_start(loader, flipper_app_name[selected->type], param);
-    } else {
-        const char* str = furi_string_get_cstr(selected->path);
-        if(favorites) {
-            char arg[strlen(str) + 4];
-            snprintf(arg, sizeof(arg), "fav%s", str);
-            status = loader_start(loader, flipper_app_name[selected->type], arg);
+    const char* app_name = archive_get_flipper_app_name(selected->type);
+
+    if(app_name) {
+        if(selected->is_app) {
+            char* param = strrchr(furi_string_get_cstr(selected->path), '/');
+            if(param != NULL) {
+                param++;
+            }
+            loader_start_with_gui_error(loader, app_name, param);
         } else {
-            status = loader_start(loader, flipper_app_name[selected->type], str);
+            loader_start_with_gui_error(loader, app_name, furi_string_get_cstr(selected->path));
         }
+    } else {
+        loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
+        // const char* str = furi_string_get_cstr(selected->path);
+        // if(favorites) {
+        //     char arg[strlen(str) + 4];
+        //     snprintf(arg, sizeof(arg), "fav%s", str);
+        //     status = loader_start(loader, flipper_app_name[selected->type], arg);
+        // } else {
+        //     status = loader_start(loader, flipper_app_name[selected->type], str);
+        // }
     }
 
     if(status != LoaderStatusOk) {
