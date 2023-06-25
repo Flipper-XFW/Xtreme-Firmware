@@ -215,12 +215,6 @@ static void
     loader_start_internal_app(Loader* loader, const FlipperApplication* app, const char* args) {
     FURI_LOG_I(TAG, "Starting %s", app->name);
 
-    if(app->app == NULL) {
-        args = app->appid;
-        app = loader_find_application_by_name_in_list(
-            FAP_LOADER_APP_NAME, FLIPPER_APPS, FLIPPER_APPS_COUNT);
-    }
-
     // store args
     furi_assert(loader->app.args == NULL);
     if(args && strlen(args) > 0) {
