@@ -116,6 +116,6 @@ void archive_delete_file(void* context, const char* format, ...)
 FS_Error archive_copy_rename_file_or_dir(
     void* context,
     const char* src_path,
-    const char* dst_path,
+    FuriString* dst_path,
     bool copy,
     bool find_name);

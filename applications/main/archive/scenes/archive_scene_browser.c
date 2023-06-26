@@ -201,14 +201,8 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
                     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewStack);
                     archive_show_loading_popup(archive, true);
                     FS_Error error = archive_copy_rename_file_or_dir(
-                        archive->browser,
-                        furi_string_get_cstr(path_src),
-                        furi_string_get_cstr(path_dst),
-                        copy,
-                        true);
+                        archive->browser, furi_string_get_cstr(path_src), path_dst, copy, true);
                     archive_show_loading_popup(archive, false);
-                    furi_string_free(path_src);
-                    furi_string_free(path_dst);
                     if(error != FSE_OK) {
                         FuriString* dialog_msg;
                         dialog_msg = furi_string_alloc();
@@ -220,7 +214,14 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
                         dialog_message_show_storage_error(
                             archive->dialogs, furi_string_get_cstr(dialog_msg));
                         furi_string_free(dialog_msg);
+                    } else {
+                        ArchiveFile_t* current = archive_get_current_file(archive->browser);
+                        if(current != NULL) furi_string_set(current->path, path_dst);
+                        view_dispatcher_send_custom_event(
+                            archive->view_dispatcher, ArchiveBrowserEventListRefresh);
                     }
+                    furi_string_free(path_src);
+                    furi_string_free(path_dst);
                     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
                 }
             }

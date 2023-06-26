@@ -573,9 +573,11 @@ void archive_leave_dir(ArchiveBrowserView* browser) {
 void archive_refresh_dir(ArchiveBrowserView* browser) {
     furi_assert(browser);
 
-    int32_t idx_temp = 0;
-
-    with_view_model(
-        browser->view, ArchiveBrowserViewModel * model, { idx_temp = model->item_idx; }, false);
-    file_browser_worker_folder_refresh(browser->worker, idx_temp);
+    ArchiveFile_t* current = archive_get_current_file(browser);
+    FuriString* str = furi_string_alloc();
+    if(current != NULL) {
+        path_extract_basename(furi_string_get_cstr(current->path), str);
+    }
+    file_browser_worker_folder_refresh(browser->worker, furi_string_get_cstr(str));
+    furi_string_free(str);
 }

@@ -55,10 +55,7 @@ bool archive_scene_new_dir_on_event(void* context, SceneManagerEvent event) {
                 error = storage_common_mkdir(fs_api, furi_string_get_cstr(path_dst));
                 furi_record_close(RECORD_STORAGE);
             }
-            archive_refresh_dir(archive->browser);
             archive_show_loading_popup(archive, false);
-
-            furi_string_free(path_dst);
 
             if(error != FSE_OK) {
                 FuriString* dialog_msg;
@@ -68,7 +65,12 @@ bool archive_scene_new_dir_on_event(void* context, SceneManagerEvent event) {
                 dialog_message_show_storage_error(
                     archive->dialogs, furi_string_get_cstr(dialog_msg));
                 furi_string_free(dialog_msg);
+            } else {
+                ArchiveFile_t* current = archive_get_current_file(archive->browser);
+                if(current != NULL) furi_string_set(current->path, path_dst);
             }
+
+            furi_string_free(path_dst);
             scene_manager_previous_scene(archive->scene_manager);
             consumed = true;
         }
