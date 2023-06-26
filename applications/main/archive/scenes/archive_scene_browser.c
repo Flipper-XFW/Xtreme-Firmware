@@ -61,19 +61,17 @@ static void
             }
             loader_start_with_gui_error(loader, app_name, param);
         } else {
-            loader_start_with_gui_error(loader, app_name, furi_string_get_cstr(selected->path));
+            const char* str = furi_string_get_cstr(selected->path);
+            if(favorites) {
+                char arg[strlen(str) + 4];
+                snprintf(arg, sizeof(arg), "fav%s", str);
+                loader_start_with_gui_error(loader, app_name, arg);
+            } else {
+                loader_start_with_gui_error(loader, app_name, str);
+            }
         }
     } else {
         loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
-        UNUSED(favorites);
-        // const char* str = furi_string_get_cstr(selected->path);
-        // if(favorites) {
-        //     char arg[strlen(str) + 4];
-        //     snprintf(arg, sizeof(arg), "fav%s", str);
-        //     status = loader_start(loader, flipper_app_name[selected->type], arg);
-        // } else {
-        //     status = loader_start(loader, flipper_app_name[selected->type], str);
-        // }
     }
 
     furi_record_close(RECORD_LOADER);
