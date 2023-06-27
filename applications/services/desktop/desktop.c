@@ -157,7 +157,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         // locking and unlocking
         DESKTOP_SETTINGS_LOAD(&desktop->settings);
 
-        desktop_clock_toggle_view(desktop, desktop->settings.display_clock);
+        desktop_clock_toggle_view(desktop, XTREME_SETTINGS()->statusbar_clock);
 
         desktop_auto_lock_arm(desktop);
         return true;
@@ -470,7 +470,7 @@ int32_t desktop_srv(void* p) {
         furi_hal_rtc_set_pin_fails(0);
     }
 
-    desktop_clock_toggle_view(desktop, desktop->settings.display_clock);
+    desktop_clock_toggle_view(desktop, XTREME_SETTINGS()->statusbar_clock);
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 

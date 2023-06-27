@@ -36,7 +36,6 @@ typedef struct {
     PinCode pin_code;
     uint32_t auto_lock_delay_ms;
     bool auto_lock_with_pin;
-    uint8_t display_clock;
 } DesktopSettings;
 
 bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);

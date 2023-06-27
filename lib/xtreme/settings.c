@@ -21,6 +21,7 @@ XtremeSettings xtreme_settings = {
     .lockscreen_statusbar = true, // ON
     .lockscreen_prompt = true, // ON
     .battery_icon = BatteryIconBarPercent, // Bar %
+    .statusbar_clock = false, // OFF
     .status_icons = true, // ON
     .bar_borders = true, // ON
     .bar_background = false, // OFF
@@ -108,6 +109,10 @@ void XTREME_SETTINGS_LOAD() {
             x->battery_icon = CLAMP(u, BatteryIconCount - 1U, 0U);
         }
         flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "statusbar_clock", &b, 1)) {
+            x->statusbar_clock = b;
+        }
+        flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "status_icons", &b, 1)) {
             x->status_icons = b;
         }
@@ -186,6 +191,7 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "lockscreen_statusbar", &x->lockscreen_statusbar, 1);
         flipper_format_write_bool(file, "lockscreen_prompt", &x->lockscreen_prompt, 1);
         flipper_format_write_uint32(file, "battery_icon", &x->battery_icon, 1);
+        flipper_format_write_bool(file, "statusbar_clock", &x->statusbar_clock, 1);
         flipper_format_write_bool(file, "status_icons", &x->status_icons, 1);
         flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);
         flipper_format_write_bool(file, "bar_background", &x->bar_background, 1);
