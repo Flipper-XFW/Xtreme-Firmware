@@ -43,6 +43,10 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
         } else if(event->key == InputKeyDown) {
             main_view->callback(DesktopMainEventOpenArchive, main_view->context);
+        } else if(event->key == InputKeyRight) {
+            Loader* loader = furi_record_open(RECORD_LOADER);
+            loader_start(loader, "Passport", NULL, NULL);
+            furi_record_close(RECORD_LOADER);
         } else if(event->key == InputKeyLeft) {
             main_view->callback(DesktopMainEventOpenClock, main_view->context);
         }
@@ -54,6 +58,10 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
         } else if(event->key == InputKeyDown) {
             main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
+        } else if(event->key == InputKeyRight) {
+            Loader* loader = furi_record_open(RECORD_LOADER);
+            loader_start(loader, "Power", "about_battery", NULL);
+            furi_record_close(RECORD_LOADER);
         } else if(event->key == InputKeyLeft) {
             main_view->callback(DesktopMainEventLock, main_view->context);
         }

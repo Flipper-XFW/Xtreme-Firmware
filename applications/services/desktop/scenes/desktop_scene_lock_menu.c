@@ -4,7 +4,6 @@
 #include <toolbox/saved_struct.h>
 #include <stdbool.h>
 #include <loader/loader.h>
-// #include <loader/loader_i.h>
 #include <xtreme.h>
 
 #include "../desktop_i.h"

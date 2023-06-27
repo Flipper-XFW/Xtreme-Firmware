@@ -154,10 +154,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
             break;
-        case DesktopMainEventOpenPassport: {
-            loader_start(desktop->loader, "Passport", NULL, NULL);
-            break;
-        }
         case DesktopMainEventOpenClock: {
             loader_start_with_gui_error(
                 desktop->loader, EXT_PATH("apps/Misc/Nightstand.fap"), NULL);

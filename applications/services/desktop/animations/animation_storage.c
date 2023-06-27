@@ -15,15 +15,8 @@
 #define ANIMATION_META_FILE "meta.txt"
 #define BASE_ANIMATION_DIR EXT_PATH("dolphin")
 #define TAG "AnimationStorage"
-/* Unused old code, for safe-keeping
-
-#define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
-
-*/
-// 59 Max length = strlen("/ext/dolphin_custom//Anims") + XTREME_ASSETS_PACK_NAME_LEN + 1 (Null terminator)
-char ANIMATION_DIR[59];
-// 72 Max length = ANIMATION_DIR + strlen("/manifest.txt")
-char ANIMATION_MANIFEST_FILE[72];
+char ANIMATION_DIR[26 /*"/ext/dolphin_custom//Anims"*/ + XTREME_ASSETS_PACK_NAME_LEN + 1];
+char ANIMATION_MANIFEST_FILE[sizeof(ANIMATION_DIR) + 13 /*"/manifest.txt"*/];
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);
 static void animation_storage_free_frames(BubbleAnimation* animation);
@@ -43,6 +36,7 @@ void animation_handler_select_manifest() {
         if(storage_common_stat(storage, furi_string_get_cstr(manifest), NULL) == FSE_OK) {
             FURI_LOG_I(TAG, "Custom manifest selected");
         } else {
+            FURI_LOG_E(TAG, "Custom manifest does not exist!");
             use_asset_pack = false;
         }
         furi_record_close(RECORD_STORAGE);
