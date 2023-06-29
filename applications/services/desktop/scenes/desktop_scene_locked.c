@@ -54,7 +54,6 @@ void desktop_scene_locked_on_enter(void* context) {
         furi_record_close(RECORD_GUI);
 
         if(pin_locked) {
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
             desktop_view_locked_lock(desktop->locked_view, true);
             uint32_t pin_timeout = desktop_pin_lock_get_fail_timeout();
             if(pin_timeout > 0) {

@@ -18,7 +18,7 @@ static void pin_auth_done_callback(const PinCode* pin_code, void* context) {
     DesktopSettingsApp* app = context;
 
     app->pincode_buffer = *pin_code;
-    if(desktop_pin_compare(&app->settings.pin_code, pin_code)) {
+    if(desktop_pin_compare(&app->desktop->settings.pin_code, pin_code)) {
         view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EVENT_PINS_EQUAL);
     } else {
         view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EVENT_PINS_DIFFERENT);
@@ -33,8 +33,7 @@ static void pin_auth_back_callback(void* context) {
 void desktop_settings_scene_pin_auth_on_enter(void* context) {
     DesktopSettingsApp* app = context;
 
-    DESKTOP_SETTINGS_LOAD(&app->settings);
-    furi_assert(desktop_pin_is_valid(&app->settings.pin_code));
+    furi_assert(desktop_pin_is_valid(&app->desktop->settings.pin_code));
 
     desktop_view_pin_input_set_context(app->pin_input_view, app);
     desktop_view_pin_input_set_back_callback(app->pin_input_view, pin_auth_back_callback);

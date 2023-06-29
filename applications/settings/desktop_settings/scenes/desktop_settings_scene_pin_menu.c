@@ -20,7 +20,7 @@ void desktop_settings_scene_pin_menu_on_enter(void* context) {
     Submenu* submenu = app->submenu;
     submenu_reset(submenu);
 
-    if(!desktop_pin_is_valid(&app->settings.pin_code)) {
+    if(!desktop_pin_is_valid(&app->desktop->settings.pin_code)) {
         submenu_add_item(
             submenu,
             "Set Pin",

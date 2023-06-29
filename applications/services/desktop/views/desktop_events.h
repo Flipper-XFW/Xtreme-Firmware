@@ -3,14 +3,11 @@
 typedef enum {
     DesktopMainEventOpenLockMenu,
     DesktopMainEventOpenArchive,
-    DesktopMainEventOpenFavoritePrimary,
-    DesktopMainEventOpenFavoriteSecondary,
     DesktopMainEventOpenMenu,
     DesktopMainEventOpenDebug,
     DesktopMainEventOpenPowerOff,
-    DesktopMainEventLock,
-
-    DesktopMainEventOpenClock,
+    DesktopMainEventLockKeypad,
+    DesktopMainEventLockWithPin,
 
     DesktopLockedEventOpenPowerOff,
     DesktopLockedEventUnlocked,

@@ -61,12 +61,6 @@ static void
 }
 #endif
 
-static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
-    if(strlen(application->name_or_path) > 0) {
-        loader_start_with_gui_error(desktop->loader, application->name_or_path, NULL);
-    }
-}
-
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
     if(desktop->in_transition) return;
@@ -113,7 +107,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        case DesktopMainEventLock:
+        case DesktopMainEventLockKeypad:
+            desktop_lock(desktop, false);
+            consumed = true;
+            break;
+
+        case DesktopMainEventLockWithPin:
             desktop_lock(desktop, true);
             consumed = true;
             break;
@@ -130,16 +129,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         }
-        case DesktopMainEventOpenFavoritePrimary:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_primary);
-            consumed = true;
-            break;
-        case DesktopMainEventOpenFavoriteSecondary:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_secondary);
-            consumed = true;
-            break;
         case DesktopAnimationEventCheckAnimation:
             animation_manager_check_blocking_process(desktop->animation_manager);
             consumed = true;
@@ -150,15 +139,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                loader_start(desktop->loader, "Passport", NULL, NULL);
+                desktop_run_keybind(desktop, InputTypeShort, InputKeyRight);
             }
             consumed = true;
             break;
-        case DesktopMainEventOpenClock: {
-            loader_start_with_gui_error(
-                desktop->loader, EXT_PATH("apps/Misc/Nightstand.fap"), NULL);
-            break;
-        }
         case DesktopLockedEventUpdate:
             desktop_view_locked_update(desktop->locked_view);
             consumed = true;

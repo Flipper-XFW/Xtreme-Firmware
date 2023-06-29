@@ -9,7 +9,7 @@
 #include <dialogs/dialogs.h>
 #include <assets_icons.h>
 
-#include <desktop/desktop_settings.h>
+#include <desktop/desktop_i.h>
 #include <desktop/views/desktop_view_pin_input.h>
 #include "views/desktop_settings_view_pin_setup_howto.h"
 #include "views/desktop_settings_view_pin_setup_howto2.h"
@@ -24,9 +24,8 @@ typedef enum {
 } DesktopSettingsAppView;
 
 typedef struct {
-    DesktopSettings settings;
-
     Gui* gui;
+    Desktop* desktop;
     DialogsApp* dialogs;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;

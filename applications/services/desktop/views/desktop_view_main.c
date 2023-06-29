@@ -36,34 +36,15 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
 
     DesktopMainView* main_view = context;
 
-    if(event->type == InputTypeShort) {
+    // DesktopMainEventOpenDebug
+    if(event->type == InputTypeShort || event->type == InputTypeLong) {
         if(event->key == InputKeyOk) {
-            main_view->callback(DesktopMainEventOpenMenu, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
-        } else if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenArchive, main_view->context);
-        } else if(event->key == InputKeyRight) {
-            Loader* loader = furi_record_open(RECORD_LOADER);
-            loader_start(loader, "Passport", NULL, NULL);
-            furi_record_close(RECORD_LOADER);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventOpenClock, main_view->context);
-        }
-        // Right key is handled by animation manager
-    } else if(event->type == InputTypeLong) {
-        if(event->key == InputKeyOk) {
-            main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
-        } else if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
-        } else if(event->key == InputKeyRight) {
-            Loader* loader = furi_record_open(RECORD_LOADER);
-            loader_start(loader, "Power", "about_battery", NULL);
-            furi_record_close(RECORD_LOADER);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventLock, main_view->context);
+            main_view->callback(
+                event->type == InputTypeShort ? DesktopMainEventOpenMenu :
+                                                DesktopAnimationEventNewIdleAnimation,
+                main_view->context);
+        } else {
+            desktop_run_keybind((Desktop*)main_view->context, event->type, event->key);
         }
     }
 

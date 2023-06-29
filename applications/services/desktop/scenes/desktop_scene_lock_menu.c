@@ -23,7 +23,6 @@ void desktop_scene_lock_menu_callback(DesktopEvent event, void* context) {
 void desktop_scene_lock_menu_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
 
-    DESKTOP_SETTINGS_LOAD(&desktop->settings);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
     desktop_lock_menu_set_pin_state(
@@ -62,7 +61,6 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         int check_pin_changed =
             scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
         if(check_pin_changed) {
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
             if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);

@@ -3,13 +3,13 @@
 
 #include "../desktop_settings_app.h"
 #include "desktop_settings_scene.h"
-#include <power/power_service/power.h>
 
-#define SCENE_EVENT_SELECT_FAVORITE_PRIMARY 0
-#define SCENE_EVENT_SELECT_FAVORITE_SECONDARY 1
-#define SCENE_EVENT_SELECT_PIN_SETUP 2
-#define SCENE_EVENT_SELECT_AUTO_LOCK_DELAY 3
-#define SCENE_EVENT_SELECT_AUTO_LOCK_PIN 4
+enum VarItemListIndex {
+    VarItemListIndexKeybinds,
+    VarItemListIndexPinSetup,
+    VarItemListIndexAutoLockTime,
+    VarItemListIndexAutoLockPin,
+};
 
 #define AUTO_LOCK_DELAY_COUNT 9
 const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
@@ -36,7 +36,7 @@ static void desktop_settings_scene_start_auto_lock_delay_changed(VariableItem* i
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, auto_lock_delay_text[index]);
-    app->settings.auto_lock_delay_ms = auto_lock_delay_value[index];
+    app->desktop->settings.auto_lock_delay_ms = auto_lock_delay_value[index];
 }
 
 static void desktop_settings_scene_start_auto_lock_pin_changed(VariableItem* item) {
@@ -44,7 +44,7 @@ static void desktop_settings_scene_start_auto_lock_pin_changed(VariableItem* ite
     uint8_t value = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    app->settings.auto_lock_with_pin = value;
+    app->desktop->settings.auto_lock_with_pin = value;
 }
 
 void desktop_settings_scene_start_on_enter(void* context) {
@@ -54,9 +54,7 @@ void desktop_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(variable_item_list, "Primary Fav App (Up)", 1, NULL, NULL);
-
-    variable_item_list_add(variable_item_list, "Secondary Fav App (Down)", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Keybinds Setup", 1, NULL, NULL);
 
     variable_item_list_add(variable_item_list, "PIN Setup", 1, NULL, NULL);
 
@@ -68,7 +66,7 @@ void desktop_settings_scene_start_on_enter(void* context) {
         app);
 
     value_index = value_index_uint32(
-        app->settings.auto_lock_delay_ms, auto_lock_delay_value, AUTO_LOCK_DELAY_COUNT);
+        app->desktop->settings.auto_lock_delay_ms, auto_lock_delay_value, AUTO_LOCK_DELAY_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, auto_lock_delay_text[value_index]);
 
@@ -79,8 +77,9 @@ void desktop_settings_scene_start_on_enter(void* context) {
         desktop_settings_scene_start_auto_lock_pin_changed,
         app);
 
-    variable_item_set_current_value_index(item, app->settings.auto_lock_with_pin);
-    variable_item_set_current_value_text(item, app->settings.auto_lock_with_pin ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, app->desktop->settings.auto_lock_with_pin);
+    variable_item_set_current_value_text(
+        item, app->desktop->settings.auto_lock_with_pin ? "ON" : "OFF");
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
@@ -94,21 +93,14 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent even
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case SCENE_EVENT_SELECT_FAVORITE_PRIMARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 1);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+        case VarItemListIndexKeybinds:
+            scene_manager_set_scene_state(
+                app->scene_manager, DesktopSettingsAppSceneKeybindsType, 0);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneKeybindsType);
             consumed = true;
             break;
-        case SCENE_EVENT_SELECT_FAVORITE_SECONDARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 0);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
-            consumed = true;
-            break;
-        case SCENE_EVENT_SELECT_PIN_SETUP:
+        case VarItemListIndexPinSetup:
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
-            consumed = true;
-            break;
-        case SCENE_EVENT_SELECT_AUTO_LOCK_DELAY:
             consumed = true;
             break;
         }
@@ -119,5 +111,4 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent even
 void desktop_settings_scene_start_on_exit(void* context) {
     DesktopSettingsApp* app = context;
     variable_item_list_reset(app->variable_item_list);
-    DESKTOP_SETTINGS_SAVE(&app->settings);
 }

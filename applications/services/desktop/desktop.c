@@ -153,12 +153,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         return true;
     case DesktopGlobalAfterAppFinished:
         animation_manager_load_and_continue_animation(desktop->animation_manager);
-        // TODO: Implement a message mechanism for loading settings and (optionally)
-        // locking and unlocking
-        DESKTOP_SETTINGS_LOAD(&desktop->settings);
-
         desktop_clock_toggle_view(desktop, XTREME_SETTINGS()->statusbar_clock);
-
         desktop_auto_lock_arm(desktop);
         return true;
     case DesktopGlobalAutoLock:
@@ -450,6 +445,43 @@ FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
     return instance->status_pubsub;
 }
 
+static const KeybindType keybind_types[] = {
+    [InputTypeShort] = KeybindTypePress,
+    [InputTypeLong] = KeybindTypeHold,
+};
+
+static const KeybindKey keybind_keys[] = {
+    [InputKeyUp] = KeybindKeyUp,
+    [InputKeyDown] = KeybindKeyDown,
+    [InputKeyRight] = KeybindKeyRight,
+    [InputKeyLeft] = KeybindKeyLeft,
+};
+
+void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
+    if(_type != InputTypeShort && _type != InputTypeLong) return;
+    if(_key != InputKeyUp && _key != InputKeyDown && _key != InputKeyRight && _key != InputKeyLeft)
+        return;
+
+    KeybindType type = keybind_types[_type];
+    KeybindKey key = keybind_keys[_key];
+    const char* keybind = instance->settings.keybinds[type][key].data;
+    if(!strnlen(keybind, MAX_KEYBIND_LENGTH)) return;
+
+    if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenArchive);
+    } else if(!strncmp(keybind, "Device Info", MAX_KEYBIND_LENGTH)) {
+        loader_start_with_gui_error(instance->loader, "Power", "about_battery");
+    } else if(!strncmp(keybind, "Lock Menu", MAX_KEYBIND_LENGTH)) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenLockMenu);
+    } else if(!strncmp(keybind, "Lock Keypad", MAX_KEYBIND_LENGTH)) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockKeypad);
+    } else if(!strncmp(keybind, "Lock with PIN", MAX_KEYBIND_LENGTH)) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockWithPin);
+    } else {
+        loader_start_with_gui_error(instance->loader, keybind, NULL);
+    }
+}
+
 int32_t desktop_srv(void* p) {
     UNUSED(p);
 
@@ -466,6 +498,14 @@ int32_t desktop_srv(void* p) {
     }
     if(!ok) {
         memset(&desktop->settings, 0, sizeof(desktop->settings));
+        strcpy(desktop->settings.keybinds[KeybindTypePress][KeybindKeyUp].data, "Lock Menu");
+        strcpy(desktop->settings.keybinds[KeybindTypePress][KeybindKeyDown].data, "Archive");
+        strcpy(desktop->settings.keybinds[KeybindTypePress][KeybindKeyRight].data, "Passport");
+        strcpy(
+            desktop->settings.keybinds[KeybindTypePress][KeybindKeyLeft].data,
+            EXT_PATH("apps/Misc/nightstand.fap"));
+        strcpy(desktop->settings.keybinds[KeybindTypeHold][KeybindKeyRight].data, "Device Info");
+        strcpy(desktop->settings.keybinds[KeybindTypeHold][KeybindKeyLeft].data, "Lock with PIN");
         furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
         furi_hal_rtc_set_pin_fails(0);
     }
