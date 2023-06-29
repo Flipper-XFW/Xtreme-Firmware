@@ -21,6 +21,7 @@ void desktop_settings_scene_pin_disable_on_enter(void* context) {
     app->desktop->settings.pin_code.length = 0;
     memset(
         app->desktop->settings.pin_code.data, '0', sizeof(app->desktop->settings.pin_code.data));
+    app->save_settings = true;
 
     popup_set_context(app->popup, app);
     popup_set_callback(app->popup, pin_disable_back_callback);

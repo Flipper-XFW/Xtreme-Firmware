@@ -23,6 +23,16 @@ typedef enum {
     DesktopSettingsAppViewIdPinSetupHowto2,
 } DesktopSettingsAppView;
 
+typedef enum {
+    DesktopSettingsAppKeybindActionTypeMainApp,
+    DesktopSettingsAppKeybindActionTypeExternalApp,
+    DesktopSettingsAppKeybindActionTypeMoreActions,
+    DesktopSettingsAppKeybindActionTypeRemoveKeybind,
+} DesktopSettingsAppKeybindActionType;
+
+extern const char* EXTRA_KEYBINDS[];
+extern const size_t EXTRA_KEYBINDS_COUNT;
+
 typedef struct {
     Gui* gui;
     Desktop* desktop;
@@ -40,4 +50,8 @@ typedef struct {
     bool pincode_buffer_filled;
 
     uint8_t menu_idx;
+
+    bool save_settings;
 } DesktopSettingsApp;
+
+char* desktop_settings_app_get_keybind(DesktopSettingsApp* app);

@@ -467,7 +467,9 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
     const char* keybind = instance->keybinds[type][key].data;
     if(!strnlen(keybind, MAX_KEYBIND_LENGTH)) return;
 
-    if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
+    if(!strncmp(keybind, "Apps Menu", MAX_KEYBIND_LENGTH)) {
+        loader_start_with_gui_error(instance->loader, LOADER_APPLICATIONS_NAME, NULL);
+    } else if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenArchive);
     } else if(!strncmp(keybind, "Device Info", MAX_KEYBIND_LENGTH)) {
         loader_start_with_gui_error(instance->loader, "Power", "about_battery");

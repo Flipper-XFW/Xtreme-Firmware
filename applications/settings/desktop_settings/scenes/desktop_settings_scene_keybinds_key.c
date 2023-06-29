@@ -46,7 +46,11 @@ bool desktop_settings_scene_keybinds_key_on_event(void* context, SceneManagerEve
         consumed = true;
         scene_manager_set_scene_state(
             app->scene_manager, DesktopSettingsAppSceneKeybindsKey, event.event);
-        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneKeybindsChoose);
+        scene_manager_set_scene_state(
+            app->scene_manager,
+            DesktopSettingsAppSceneKeybindsActionType,
+            DesktopSettingsAppKeybindActionTypeRemoveKeybind);
+        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneKeybindsActionType);
     }
     return consumed;
 }

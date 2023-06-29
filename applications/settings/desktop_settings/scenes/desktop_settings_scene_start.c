@@ -37,6 +37,7 @@ static void desktop_settings_scene_start_auto_lock_delay_changed(VariableItem* i
 
     variable_item_set_current_value_text(item, auto_lock_delay_text[index]);
     app->desktop->settings.auto_lock_delay_ms = auto_lock_delay_value[index];
+    app->save_settings = true;
 }
 
 static void desktop_settings_scene_start_auto_lock_pin_changed(VariableItem* item) {
@@ -45,6 +46,7 @@ static void desktop_settings_scene_start_auto_lock_pin_changed(VariableItem* ite
 
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     app->desktop->settings.auto_lock_with_pin = value;
+    app->save_settings = true;
 }
 
 void desktop_settings_scene_start_on_enter(void* context) {
