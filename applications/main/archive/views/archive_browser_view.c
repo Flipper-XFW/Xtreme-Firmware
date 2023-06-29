@@ -425,11 +425,20 @@ static bool archive_view_input(InputEvent* event, void* context) {
                         } else {
                             scroll_speed = model->button_held_for_ticks > 9 ? 4 : 2;
                         }
+                    } else if(model->button_held_for_ticks < 0) {
+                        scroll_speed = 0;
                     }
 
                     if(event->key == InputKeyUp) {
                         if(model->item_idx < scroll_speed) {
                             scroll_speed = model->item_idx;
+                            if(scroll_speed == 0) {
+                                if(model->button_held_for_ticks > 0) {
+                                    model->button_held_for_ticks = -1;
+                                } else {
+                                    scroll_speed = 1;
+                                }
+                            }
                         }
 
                         model->item_idx =
@@ -442,11 +451,22 @@ static bool archive_view_input(InputEvent* event, void* context) {
                             browser->callback(ArchiveBrowserEventFavMoveUp, browser->context);
                         }
                         model->scroll_counter = 0;
+
+                        if(model->button_held_for_ticks < -1) {
+                            model->button_held_for_ticks = 0;
+                        }
                         model->button_held_for_ticks += 1;
                     } else if(event->key == InputKeyDown) {
                         int32_t count = model->item_cnt;
                         if(model->item_idx >= (count - scroll_speed)) {
                             scroll_speed = model->item_cnt - model->item_idx - 1;
+                            if(scroll_speed == 0) {
+                                if(model->button_held_for_ticks > 0) {
+                                    model->button_held_for_ticks = -1;
+                                } else {
+                                    scroll_speed = 1;
+                                }
+                            }
                         }
 
                         model->item_idx = (model->item_idx + scroll_speed) % model->item_cnt;
@@ -458,6 +478,10 @@ static bool archive_view_input(InputEvent* event, void* context) {
                             browser->callback(ArchiveBrowserEventFavMoveDown, browser->context);
                         }
                         model->scroll_counter = 0;
+
+                        if(model->button_held_for_ticks < -1) {
+                            model->button_held_for_ticks = 0;
+                        }
                         model->button_held_for_ticks += 1;
                     }
                 },
