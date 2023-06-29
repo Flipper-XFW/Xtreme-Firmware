@@ -394,7 +394,7 @@ def generate_embed_app_metadata_actions(source, target, env, for_signature):
                 "$APPMETAEMBED_COMSTR",
             ),
             Action(
-                "${FBT_SCRIPT_DIR}/fastfap.py ${TARGET} ${OBJCOPY}",
+                "${PYTHON3} ${FBT_SCRIPT_DIR}/fastfap.py ${TARGET} ${OBJCOPY}",
                 "$FASTFAP_COMSTR",
             ),
         )
