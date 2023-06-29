@@ -7,5 +7,4 @@ App(
     order=46,
     fap_icon="wav_10px.png",
     fap_category="Media",
-    fap_icon_assets="images",
 )

@@ -2,6 +2,7 @@
 
 #include "swd_probe_app.h"
 #include "swd_probe_icons.h"
+#include <assets_icons.h>
 #include "jep106.h"
 #include "adi.h"
 

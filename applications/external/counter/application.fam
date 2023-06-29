@@ -7,6 +7,5 @@ App(
         "gui",
     ],
     fap_category="Misc",
-    fap_icon="icons/counter_icon.png",
-    fap_icon_assets="icons",
+    fap_icon="counter_icon.png",
 )

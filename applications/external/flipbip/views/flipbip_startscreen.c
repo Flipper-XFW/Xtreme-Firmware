@@ -4,6 +4,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include "flipbip_icons.h"
+#include "assets_icons.h"
 
 struct FlipBipStartscreen {
     View* view;

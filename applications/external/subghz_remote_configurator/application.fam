@@ -11,6 +11,5 @@ App(
     order=50,
     fap_description="File Editor for the SubGhz Remote app",
     fap_category="Sub-Ghz",
-    fap_icon_assets="icons",
-    fap_icon="icons/subrem_10px.png",
+    fap_icon="subrem_10px.png",
 )

@@ -25,6 +25,9 @@
 #include "views/hid_tikshorts.h"
 #include "views/hid_mouse_clicker.h"
 
+#include "hid_icons.h"
+#include <assets_icons.h>
+
 #include "hid_path.h"
 
 typedef enum {

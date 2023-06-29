@@ -2,8 +2,6 @@
 #include "../hid.h"
 #include <gui/elements.h>
 
-#include "hid_icons.h"
-
 #define TAG "HidTikShorts"
 
 struct HidTikShorts {

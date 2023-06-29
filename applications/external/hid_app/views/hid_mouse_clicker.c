@@ -2,8 +2,6 @@
 #include <gui/elements.h>
 #include "../hid.h"
 
-#include "hid_icons.h"
-
 #define TAG "HidMouseClicker"
 #define DEFAULT_CLICK_RATE 1
 #define MAXIMUM_CLICK_RATE 60

@@ -5,7 +5,7 @@
 #include "scenes/subrem_scene.h"
 
 #include "helpers/txrx/subghz_txrx.h"
-#include <subrem_configurator_icons.h>
+#include <assets_icons.h>
 
 #include "views/remote.h"
 #include "views/edit_menu.h"

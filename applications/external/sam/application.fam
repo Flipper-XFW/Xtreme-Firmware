@@ -11,7 +11,6 @@ App(
     order=20,
     fap_icon="music_10px.png",
     fap_category="Media",
-    fap_icon_assets="icons",
 )
 App(
     appid="sam_yes",
@@ -26,7 +25,6 @@ App(
     order=20,
     fap_icon="music_10px.png",
     fap_category="Media",
-    fap_icon_assets="icons",
 )
 App(
     appid="sam_no",
@@ -41,7 +39,6 @@ App(
     order=20,
     fap_icon="music_10px.png",
     fap_category="Media",
-    fap_icon_assets="icons",
 )
 App(
     appid="sam_wtf",
@@ -56,5 +53,4 @@ App(
     order=20,
     fap_icon="music_10px.png",
     fap_category="Media",
-    fap_icon_assets="icons",
 )

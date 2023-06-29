@@ -8,5 +8,4 @@ App(
     order=90,
     fap_icon="uart_terminal.png",
     fap_category="GPIO",
-    fap_icon_assets="assets",
 )

@@ -9,5 +9,4 @@ App(
     order=2,
     # fap_icon="",
     fap_category="Misc",
-    fap_libs=["assets"],
 )

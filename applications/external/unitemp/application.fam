@@ -14,5 +14,4 @@ App(
     fap_category="GPIO",
     fap_icon="icon.png",
     fap_icon_assets="assets",
-    fap_libs=["assets"],
 )

@@ -1,6 +1,7 @@
 #include "pocsag_pager_receiver.h"
 #include "../pocsag_pager_app_i.h"
 #include <pocsag_pager_icons.h>
+#include <assets_icons.h>
 #include <math.h>
 
 #include <input/input.h>

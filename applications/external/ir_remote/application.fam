@@ -10,5 +10,4 @@ App(
     ],
     fap_category="Tools",
     fap_icon="ir_10px.png",
-    fap_icon_assets="images",
 )

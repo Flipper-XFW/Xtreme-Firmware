@@ -5,6 +5,7 @@
 #include <notification/notification_messages.h>
 #include <stdlib.h>
 #include <passgen_icons.h>
+#include <assets_icons.h>
 
 #define PASSGEN_MAX_LENGTH 16
 #define PASSGEN_CHARACTERS_LENGTH (26 * 4)

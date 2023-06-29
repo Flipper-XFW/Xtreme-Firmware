@@ -26,6 +26,7 @@ env.Append(
         "#/lib/mlib",
         # Ugly hack
         Dir("../assets/compiled"),
+        Dir("../../icons"),
     ],
     SDK_HEADERS=[
         *(
@@ -43,6 +44,7 @@ env.Append(
                 "variant",
             )
         ),
+        File("../../icons/assets_icons.h"),
         File("xtreme/xtreme.h"),
     ],
     CPPDEFINES=[

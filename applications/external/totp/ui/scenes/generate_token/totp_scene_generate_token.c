@@ -2,6 +2,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <totp_icons.h>
+#include <assets_icons.h>
 #include <roll_value.h>
 #include "totp_scene_generate_token.h"
 #include "../../../types/token_info.h"

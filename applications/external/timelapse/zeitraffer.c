@@ -6,6 +6,7 @@
 #include <flipper_format/flipper_format.h>
 #include "gpio_item.h"
 #include "gpio_timelapse_icons.h"
+#include <assets_icons.h>
 
 #define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/timelapse"
 #define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/timelapse.conf"

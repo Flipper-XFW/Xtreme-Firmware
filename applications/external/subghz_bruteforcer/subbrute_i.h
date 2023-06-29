@@ -16,7 +16,7 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/loading.h>
 
-#include "subghz_bruteforcer_icons.h"
+#include <assets_icons.h>
 
 #include <dialogs/dialogs.h>
 
