@@ -493,7 +493,7 @@ int32_t desktop_srv(void* p) {
     Desktop* desktop = desktop_alloc();
 
     bool ok = DESKTOP_SETTINGS_LOAD(&desktop->settings);
-    if(ok) {
+    if(ok && desktop->settings.pin_code.length) {
         ok = desktop_pin_is_valid(&desktop->settings.pin_code);
     }
     if(!ok) {
