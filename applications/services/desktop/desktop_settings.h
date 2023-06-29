@@ -6,12 +6,14 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define DESKTOP_SETTINGS_VER (11)
-
 #define DESKTOP_SETTINGS_OLD_PATH CFG_PATH("desktop.settings")
 #define DESKTOP_SETTINGS_PATH INT_PATH(".desktop.settings")
 #define DESKTOP_SETTINGS_MAGIC (0x17)
-#define PIN_MAX_LENGTH 12
+#define DESKTOP_SETTINGS_VER (11)
+
+#define DESKTOP_KEYBINDS_PATH CFG_PATH(".desktop.keybinds")
+#define DESKTOP_KEYBINDS_MAGIC (0x14)
+#define DESKTOP_KEYBINDS_VER (1)
 
 #define DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG "run_pin_setup"
 
@@ -46,9 +48,12 @@ typedef struct {
     PinCode pin_code;
     uint32_t auto_lock_delay_ms;
     bool auto_lock_with_pin;
-    Keybind keybinds[KeybindTypeCount][KeybindKeyCount];
 } DesktopSettings;
 
 bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);
 
 bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x);
+
+bool DESKTOP_KEYBINDS_SAVE(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size);
+
+bool DESKTOP_KEYBINDS_LOAD(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size);

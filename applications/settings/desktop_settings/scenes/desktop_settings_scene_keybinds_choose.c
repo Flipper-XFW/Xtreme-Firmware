@@ -34,9 +34,10 @@ static void desktop_settings_scene_keybinds_choose_main_callback(void* context, 
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsType);
     KeybindKey key =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsKey);
-    char* keybind = app->desktop->settings.keybinds[type][key].data;
+    char* keybind = app->desktop->keybinds[type][key].data;
 
     strncpy(keybind, FLIPPER_APPS[index].name, MAX_KEYBIND_LENGTH);
+    DESKTOP_KEYBINDS_SAVE(&app->desktop->keybinds, sizeof(app->desktop->keybinds));
     scene_manager_previous_scene(app->scene_manager);
     scene_manager_previous_scene(app->scene_manager);
     scene_manager_previous_scene(app->scene_manager);
@@ -49,7 +50,7 @@ static void desktop_settings_scene_keybinds_choose_ext_callback(void* context, u
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsType);
     KeybindKey key =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsKey);
-    char* keybind = app->desktop->settings.keybinds[type][key].data;
+    char* keybind = app->desktop->keybinds[type][key].data;
 
     const DialogsFileBrowserOptions browser_options = {
         .extension = ".fap",
@@ -71,6 +72,7 @@ static void desktop_settings_scene_keybinds_choose_ext_callback(void* context, u
     if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
         submenu_reset(app->submenu); // Prevent menu from being shown when we exiting scene
         strncpy(keybind, furi_string_get_cstr(temp_path), MAX_KEYBIND_LENGTH);
+        DESKTOP_KEYBINDS_SAVE(&app->desktop->keybinds, sizeof(app->desktop->keybinds));
         scene_manager_previous_scene(app->scene_manager);
         scene_manager_previous_scene(app->scene_manager);
         scene_manager_previous_scene(app->scene_manager);
@@ -84,9 +86,10 @@ static void desktop_settings_scene_keybinds_choose_extra_callback(void* context,
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsType);
     KeybindKey key =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsKey);
-    char* keybind = app->desktop->settings.keybinds[type][key].data;
+    char* keybind = app->desktop->keybinds[type][key].data;
 
     strncpy(keybind, EXTRA_OPTIONS[index - FLIPPER_APPS_COUNT], MAX_KEYBIND_LENGTH);
+    DESKTOP_KEYBINDS_SAVE(&app->desktop->keybinds, sizeof(app->desktop->keybinds));
     scene_manager_previous_scene(app->scene_manager);
     scene_manager_previous_scene(app->scene_manager);
     scene_manager_previous_scene(app->scene_manager);
@@ -102,7 +105,7 @@ void desktop_settings_scene_keybinds_choose_on_enter(void* context) {
     KeybindKey key =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsKey);
     uint32_t pre_select_item = 0;
-    char* keybind = app->desktop->settings.keybinds[type][key].data;
+    char* keybind = app->desktop->keybinds[type][key].data;
     size_t submenu_i = -1;
 
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {

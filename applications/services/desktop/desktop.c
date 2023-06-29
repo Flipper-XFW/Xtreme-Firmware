@@ -464,7 +464,7 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
 
     KeybindType type = keybind_types[_type];
     KeybindKey key = keybind_keys[_key];
-    const char* keybind = instance->settings.keybinds[type][key].data;
+    const char* keybind = instance->keybinds[type][key].data;
     if(!strnlen(keybind, MAX_KEYBIND_LENGTH)) return;
 
     if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
@@ -498,16 +498,20 @@ int32_t desktop_srv(void* p) {
     }
     if(!ok) {
         memset(&desktop->settings, 0, sizeof(desktop->settings));
-        strcpy(desktop->settings.keybinds[KeybindTypePress][KeybindKeyUp].data, "Lock Menu");
-        strcpy(desktop->settings.keybinds[KeybindTypePress][KeybindKeyDown].data, "Archive");
-        strcpy(desktop->settings.keybinds[KeybindTypePress][KeybindKeyRight].data, "Passport");
-        strcpy(
-            desktop->settings.keybinds[KeybindTypePress][KeybindKeyLeft].data,
-            EXT_PATH("apps/Misc/nightstand.fap"));
-        strcpy(desktop->settings.keybinds[KeybindTypeHold][KeybindKeyRight].data, "Device Info");
-        strcpy(desktop->settings.keybinds[KeybindTypeHold][KeybindKeyLeft].data, "Lock with PIN");
         furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
         furi_hal_rtc_set_pin_fails(0);
+    }
+
+    if(!DESKTOP_KEYBINDS_LOAD(&desktop->keybinds, sizeof(desktop->keybinds))) {
+        memset(&desktop->keybinds, 0, sizeof(desktop->keybinds));
+        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyUp].data, "Lock Menu");
+        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyDown].data, "Archive");
+        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyRight].data, "Passport");
+        strcpy(
+            desktop->keybinds[KeybindTypePress][KeybindKeyLeft].data,
+            EXT_PATH("apps/Misc/nightstand.fap"));
+        strcpy(desktop->keybinds[KeybindTypeHold][KeybindKeyRight].data, "Device Info");
+        strcpy(desktop->keybinds[KeybindTypeHold][KeybindKeyLeft].data, "Lock with PIN");
     }
 
     desktop_clock_toggle_view(desktop, XTREME_SETTINGS()->statusbar_clock);
