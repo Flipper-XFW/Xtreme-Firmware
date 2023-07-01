@@ -57,6 +57,15 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
     return status;
 }
 
+void loader_start_detached_with_gui_error(Loader* loader, const char* name, const char* args) {
+    LoaderMessage message;
+
+    message.type = LoaderMessageTypeStartByNameDetachedWithGuiError;
+    message.start.name = name;
+    message.start.args = args;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+}
+
 bool loader_lock(Loader* loader) {
     LoaderMessage message;
     LoaderMessageBoolResult result;
@@ -569,6 +578,32 @@ int32_t loader_srv(void* p) {
                     loader, message.start.name, message.start.args, message.start.error_message);
                 api_lock_unlock(message.api_lock);
                 break;
+            case LoaderMessageTypeStartByNameDetachedWithGuiError: {
+                FuriString* error_message = furi_string_alloc();
+                LoaderStatus status = loader_do_start_by_name(
+                    loader, message.start.name, message.start.args, error_message);
+                if(status == LoaderStatusErrorUnknownApp || status == LoaderStatusErrorInternal) {
+                    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+                    DialogMessage* message = dialog_message_alloc();
+                    dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
+                    dialog_message_set_buttons(message, NULL, NULL, NULL);
+
+                    furi_string_replace(error_message, ":", "\n");
+                    dialog_message_set_text(
+                        message,
+                        furi_string_get_cstr(error_message),
+                        64,
+                        32,
+                        AlignCenter,
+                        AlignCenter);
+
+                    dialog_message_show(dialogs, message);
+                    dialog_message_free(message);
+                    furi_record_close(RECORD_DIALOGS);
+                }
+                furi_string_free(error_message);
+                break;
+            }
             case LoaderMessageTypeShowMenu:
                 loader_do_menu_show(loader, false);
                 break;

@@ -122,7 +122,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventXtreme:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start_with_gui_error(desktop->loader, "Xtreme", NULL);
+            loader_start_detached_with_gui_error(desktop->loader, "Xtreme", NULL);
             consumed = true;
             break;
         case DesktopLockMenuEventStealthModeOn:

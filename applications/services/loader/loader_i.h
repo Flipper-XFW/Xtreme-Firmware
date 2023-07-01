@@ -25,6 +25,7 @@ struct Loader {
 
 typedef enum {
     LoaderMessageTypeStartByName,
+    LoaderMessageTypeStartByNameDetachedWithGuiError,
     LoaderMessageTypeAppClosed,
     LoaderMessageTypeShowMenu,
     LoaderMessageTypeShowSettings,

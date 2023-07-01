@@ -46,6 +46,14 @@ LoaderStatus
  */
 LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args);
 
+/**
+ * @brief Start application detached with GUI error message
+ * @param[in] instance loader instance
+ * @param[in] name application name
+ * @param[in] args application arguments
+ */
+void loader_start_detached_with_gui_error(Loader* loader, const char* name, const char* args);
+
 /** 
  * @brief Lock application start
  * @param[in] instance loader instance

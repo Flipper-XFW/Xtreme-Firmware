@@ -468,11 +468,11 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
     if(!strnlen(keybind, MAX_KEYBIND_LENGTH)) return;
 
     if(!strncmp(keybind, "Apps Menu", MAX_KEYBIND_LENGTH)) {
-        loader_start_with_gui_error(instance->loader, LOADER_APPLICATIONS_NAME, NULL);
+        loader_start_detached_with_gui_error(instance->loader, LOADER_APPLICATIONS_NAME, NULL);
     } else if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenArchive);
     } else if(!strncmp(keybind, "Device Info", MAX_KEYBIND_LENGTH)) {
-        loader_start_with_gui_error(instance->loader, "Power", "about_battery");
+        loader_start_detached_with_gui_error(instance->loader, "Power", "about_battery");
     } else if(!strncmp(keybind, "Lock Menu", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenLockMenu);
     } else if(!strncmp(keybind, "Lock Keypad", MAX_KEYBIND_LENGTH)) {
@@ -480,7 +480,7 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
     } else if(!strncmp(keybind, "Lock with PIN", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockWithPin);
     } else {
-        loader_start_with_gui_error(instance->loader, keybind, NULL);
+        loader_start_detached_with_gui_error(instance->loader, keybind, NULL);
     }
 }
 
