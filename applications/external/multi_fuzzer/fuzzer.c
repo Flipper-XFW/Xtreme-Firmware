@@ -148,7 +148,7 @@ int32_t fuzzer_start_rfid(void* p) {
     PacsFuzzerApp* fuzzer_app = fuzzer_app_alloc();
 
     FuzzerConsts app_const = {
-        .custom_dict_folder = EXT_PATH("rfid_fuzzer"),
+        .custom_dict_folder = EXT_PATH("lfrfid_fuzzer"),
         .custom_dict_extension = ".txt",
         .key_extension = ".rfid",
         .path_key_folder = EXT_PATH("lfrfid"),
