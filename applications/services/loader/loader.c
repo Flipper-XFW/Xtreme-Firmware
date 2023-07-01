@@ -32,10 +32,7 @@ LoaderStatus
     return result.value;
 }
 
-LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
-    FuriString* error_message = furi_string_alloc();
-    LoaderStatus status = loader_start(loader, name, args, error_message);
-
+static void loader_show_gui_error(LoaderStatus status, FuriString* error_message) {
     // TODO: we have many places where we can emit a double start, ex: desktop, menu
     // so i prefer to not show LoaderStatusErrorAppStarted error message for now
     if(status == LoaderStatusErrorUnknownApp || status == LoaderStatusErrorInternal) {
@@ -52,7 +49,12 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
     }
+}
 
+LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
+    FuriString* error_message = furi_string_alloc();
+    LoaderStatus status = loader_start(loader, name, args, error_message);
+    loader_show_gui_error(status, error_message);
     furi_string_free(error_message);
     return status;
 }
@@ -582,25 +584,7 @@ int32_t loader_srv(void* p) {
                 FuriString* error_message = furi_string_alloc();
                 LoaderStatus status = loader_do_start_by_name(
                     loader, message.start.name, message.start.args, error_message);
-                if(status == LoaderStatusErrorUnknownApp || status == LoaderStatusErrorInternal) {
-                    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
-                    DialogMessage* message = dialog_message_alloc();
-                    dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
-                    dialog_message_set_buttons(message, NULL, NULL, NULL);
-
-                    furi_string_replace(error_message, ":", "\n");
-                    dialog_message_set_text(
-                        message,
-                        furi_string_get_cstr(error_message),
-                        64,
-                        32,
-                        AlignCenter,
-                        AlignCenter);
-
-                    dialog_message_show(dialogs, message);
-                    dialog_message_free(message);
-                    furi_record_close(RECORD_DIALOGS);
-                }
+                loader_show_gui_error(status, error_message);
                 furi_string_free(error_message);
                 break;
             }
