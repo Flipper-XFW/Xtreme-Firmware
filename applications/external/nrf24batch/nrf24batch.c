@@ -16,7 +16,7 @@
 #define TAG "nrf24batch"
 #define VERSION "1.9"
 
-#define SCAN_APP_PATH_FOLDER "/ext/nrf24batch"
+#define SCAN_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define LOG_FILEEXT ".txt"
 #define NRF_READ_TIMEOUT 300UL // ms
 #define WORK_PERIOD 2 // ms, Timer period
@@ -1510,6 +1510,7 @@ int32_t nrf24batch_app(void* p) {
     gui_add_view_port(APP->gui, view_port, GuiLayerFullscreen);
     APP->notification = furi_record_open(RECORD_NOTIFICATION);
     APP->storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(APP->storage, EXT_PATH("nrf24batch"), SCAN_APP_PATH_FOLDER);
     storage_common_mkdir(APP->storage, SCAN_APP_PATH_FOLDER);
     file_stream = file_stream_alloc(APP->storage);
     FuriTimer* work_timer =

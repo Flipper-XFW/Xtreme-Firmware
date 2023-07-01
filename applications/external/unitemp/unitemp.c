@@ -74,8 +74,6 @@ bool unitemp_saveSettings(void) {
     FuriString* filepath = furi_string_alloc();
     //Составление пути к файлу
     furi_string_printf(filepath, "%s/%s", APP_PATH_FOLDER, APP_FILENAME_SETTINGS);
-    //Создание папки плагина
-    storage_common_mkdir(app->storage, APP_PATH_FOLDER);
     //Открытие потока
     if(!file_stream_open(
            app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
@@ -224,6 +222,7 @@ static bool unitemp_alloc(void) {
 
     //Открытие хранилища (?)
     app->storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(app->storage, EXT_PATH("unitemp"), APP_PATH_FOLDER);
 
     //Уведомления
     app->notifications = furi_record_open(RECORD_NOTIFICATION);

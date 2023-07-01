@@ -397,8 +397,6 @@ bool unitemp_sensors_save(void) {
     FuriString* filepath = furi_string_alloc();
     //Составление пути к файлу
     furi_string_printf(filepath, "%s/%s", APP_PATH_FOLDER, APP_FILENAME_SENSORS);
-    //Создание папки плагина
-    storage_common_mkdir(app->storage, APP_PATH_FOLDER);
     //Открытие потока
     if(!file_stream_open(
            app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {

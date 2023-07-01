@@ -1,4 +1,5 @@
 #include "air_mouse.h"
+#include <storage/storage.h>
 
 #include <furi.h>
 
@@ -51,6 +52,11 @@ uint32_t air_mouse_exit(void* context) {
 
 AirMouse* air_mouse_app_alloc() {
     AirMouse* app = malloc(sizeof(AirMouse));
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(
+        storage, EXT_PATH(".calibration.data"), APP_DATA_PATH("calibration.data"));
+    furi_record_close(RECORD_STORAGE);
 
     // Gui
     app->gui = furi_record_open(RECORD_GUI);

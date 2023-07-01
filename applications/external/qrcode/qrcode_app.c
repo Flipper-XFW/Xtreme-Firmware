@@ -11,7 +11,7 @@
 #include "qrcode.h"
 
 #define TAG "qrcode"
-#define QRCODE_FOLDER ANY_PATH("qrcodes")
+#define QRCODE_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define QRCODE_EXTENSION ".qrcode"
 #define QRCODE_FILETYPE "QRCode"
 #define QRCODE_FILE_VERSION 0
@@ -518,6 +518,9 @@ static void qrcode_app_free(QRCodeApp* instance) {
 int32_t qrcode_app(void* p) {
     QRCodeApp* instance = qrcode_app_alloc();
     FuriString* file_path = furi_string_alloc();
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("qrcodes"), QRCODE_FOLDER);
+    furi_record_close(RECORD_STORAGE);
 
     do {
         if(p && strlen(p)) {

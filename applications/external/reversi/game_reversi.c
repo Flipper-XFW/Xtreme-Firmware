@@ -12,8 +12,7 @@
 #define FRAME_TOP 3
 #define FRAME_CELL_SIZE 7
 
-#define SAVING_DIRECTORY "/ext/apps/Games"
-#define SAVING_FILENAME SAVING_DIRECTORY "/game_reversi.save"
+#define SAVING_FILENAME APP_DATA_PATH("game_reversi.save")
 
 typedef enum { AppScreenGame, AppScreenMenu } AppScreen;
 
@@ -171,6 +170,7 @@ static void gray_canvas(Canvas* const canvas) {
 
 bool load_game(GameState* game_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("apps/Games/game_reversi.save"), SAVING_FILENAME);
 
     File* file = storage_file_alloc(storage);
     uint16_t bytes_readed = 0;
@@ -187,12 +187,6 @@ bool load_game(GameState* game_state) {
 
 void save_game(const GameState* game_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-
-    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
-        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
-            return;
-        }
-    }
 
     File* file = storage_file_alloc(storage);
     if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {

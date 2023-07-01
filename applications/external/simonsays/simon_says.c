@@ -22,8 +22,7 @@
 #define BOARD_X 72 // Used for board placement
 #define BOARD_Y 8
 #define GAME_START_LIVES 3
-#define SAVING_DIRECTORY "/ext/apps/Games"
-#define SAVING_FILENAME SAVING_DIRECTORY "/game_simon_says.save"
+#define SAVING_FILENAME APP_DATA_PATH("game_simon_says.save")
 
 // Define Notes
 // Shamelessly stolen from Ocarina application
@@ -372,6 +371,7 @@ void simon_input_callback(InputEvent* input_event, void* ctx) {
 
 bool load_game(SimonData* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("apps/Games/game_simon_says.save"), SAVING_FILENAME);
 
     File* file = storage_file_alloc(storage);
 
@@ -394,12 +394,6 @@ bool load_game(SimonData* app) {
 
 void save_game(SimonData* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-
-    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
-        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
-            return;
-        }
-    }
 
     File* file = storage_file_alloc(storage);
     if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {

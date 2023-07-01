@@ -15,7 +15,7 @@
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
-#define NRFSNIFF_APP_PATH_FOLDER "/ext/nrfsniff"
+#define NRFSNIFF_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
 #define TAG "nrfsniff"
 
@@ -343,6 +343,7 @@ int32_t nrfsniff_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("nrfsniff"), NRFSNIFF_APP_PATH_FOLDER);
     storage_common_mkdir(storage, NRFSNIFF_APP_PATH_FOLDER);
 
     PluginEvent event;

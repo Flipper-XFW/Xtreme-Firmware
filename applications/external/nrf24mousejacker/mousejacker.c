@@ -15,10 +15,10 @@
 
 #define TAG "mousejacker"
 #define LOGITECH_MAX_CHANNEL 85
-#define NRFSNIFF_APP_PATH_FOLDER "/ext/nrfsniff"
+#define NRFSNIFF_APP_PATH_FOLDER EXT_PATH("apps_data/nrf24sniff")
 #define NRFSNIFF_APP_PATH_EXTENSION ".txt"
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
-#define MOUSEJACKER_APP_PATH_FOLDER "/ext/mousejacker"
+#define MOUSEJACKER_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define MOUSEJACKER_APP_PATH_EXTENSION ".txt"
 #define MAX_ADDRS 100
 
@@ -309,6 +309,8 @@ int32_t mousejacker_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     plugin_state->storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(
+        plugin_state->storage, EXT_PATH("mousejacker"), MOUSEJACKER_APP_PATH_FOLDER);
     storage_common_mkdir(plugin_state->storage, MOUSEJACKER_APP_PATH_FOLDER);
     plugin_state->file_stream = file_stream_alloc(plugin_state->storage);
 

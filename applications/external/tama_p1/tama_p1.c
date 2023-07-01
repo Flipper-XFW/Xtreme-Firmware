@@ -720,6 +720,7 @@ static void tama_p1_init(TamaApp* const ctx) {
 
     // Load ROM
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("tama_p1"), STORAGE_APP_DATA_PATH_PREFIX);
     FileInfo fi;
     if(storage_common_stat(storage, TAMA_ROM_PATH, &fi) == FSE_OK) {
         File* rom_file = storage_file_alloc(storage);
