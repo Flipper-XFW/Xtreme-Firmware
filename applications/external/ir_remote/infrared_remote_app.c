@@ -147,11 +147,11 @@ int32_t infrared_remote_app(void* p) {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, ".txt", &I_sub1_10px);
-    browser_options.base_path = EXT_PATH("infrared/remote");
+    browser_options.base_path = IR_REMOTE_PATH;
     FuriString* map_file = furi_string_alloc();
-    furi_string_set(map_file, EXT_PATH("infrared/remote"));
-    if(!storage_file_exists(storage, EXT_PATH("infrared/remote"))) {
-        storage_common_mkdir(storage, EXT_PATH("infrared/remote")); //Make Folder If dir not exist
+    furi_string_set(map_file, IR_REMOTE_PATH);
+    if(!storage_file_exists(storage, IR_REMOTE_PATH)) {
+        storage_common_mkdir(storage, IR_REMOTE_PATH); //Make Folder If dir not exist
     }
 
     bool res = dialog_file_browser_show(dialogs, map_file, map_file, &browser_options);
