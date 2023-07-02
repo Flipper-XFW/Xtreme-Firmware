@@ -62,7 +62,10 @@ static void
             loader_start_with_gui_error(loader, app_name, param);
         } else {
             const char* str = furi_string_get_cstr(selected->path);
-            if(favorites) {
+            if(favorites &&
+               (selected->type == ArchiveFileTypeIButton ||
+                selected->type == ArchiveFileTypeLFRFID || selected->type == ArchiveFileTypeNFC ||
+                selected->type == ArchiveFileTypeSubGhz)) {
                 char arg[strlen(str) + 4];
                 snprintf(arg, sizeof(arg), "fav%s", str);
                 loader_start_with_gui_error(loader, app_name, arg);
