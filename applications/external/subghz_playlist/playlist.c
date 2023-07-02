@@ -693,7 +693,7 @@ void playlist_free(Playlist* app) {
     free(app);
 }
 
-int32_t playlist_app(void* p) {
+int32_t playlist_app(char* p) {
     UNUSED(p);
     dolphin_deed(DolphinDeedPluginStart);
 
@@ -723,7 +723,9 @@ int32_t playlist_app(void* p) {
     furi_hal_power_suppress_charge_enter();
 
     // select playlist file
-    {
+    if(p && strlen(p)) {
+        furi_string_set(app->file_path, p);
+    } else {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogsFileBrowserOptions browser_options;
         dialog_file_browser_set_basic_options(&browser_options, PLAYLIST_EXT, &I_sub1_10px);
