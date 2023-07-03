@@ -46,6 +46,7 @@ uint32_t archive_scene_search_dirwalk(void* context) {
     };
     dir_walk_set_recurse_filter(dir_walk, ignore, COUNT_OF(ignore));
     FuriString* path = furi_string_alloc();
+    FuriString* name = furi_string_alloc();
     FileInfo fileinfo;
 
     if(dir_walk_open(dir_walk, STORAGE_EXT_PATH_PREFIX)) {
@@ -64,8 +65,9 @@ uint32_t archive_scene_search_dirwalk(void* context) {
                 break;
             }
             if(!file_info_is_dir(&fileinfo)) {
-                furi_string_right(path, furi_string_search_rchar(path, '/') + 1);
-                if(furi_string_search_str(path, archive->text_store) != FURI_STRING_FAILURE) {
+                furi_string_set(
+                    name, furi_string_get_cstr(path) + furi_string_search_rchar(path, '/') + 1);
+                if(furi_string_search_str(name, archive->text_store) != FURI_STRING_FAILURE) {
                     archive_add_file_item(archive->browser, false, furi_string_get_cstr(path));
                     archive_set_item_count(archive->browser, ++count);
                 }
@@ -79,6 +81,7 @@ uint32_t archive_scene_search_dirwalk(void* context) {
         archive_get_file_at(archive->browser, 0)->path, "/app:search/Search for files");
     scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneSearch, false);
 
+    furi_string_free(name);
     furi_string_free(path);
     dir_walk_free(dir_walk);
     return 0;
