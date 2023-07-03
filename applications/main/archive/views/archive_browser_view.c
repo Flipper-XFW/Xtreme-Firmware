@@ -503,13 +503,19 @@ static bool archive_view_input(InputEvent* event, void* context) {
         }
 
         ArchiveFile_t* selected = archive_get_current_file(browser);
+        bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
         if(selected && selected->type == ArchiveFileTypeSearch) {
-            if(event->key == InputKeyOk && event->type == InputTypeShort && cur_item_idx == 0) {
-                browser->callback(ArchiveBrowserEventSearch, browser->context);
+            if((cur_item_idx == 0 || favorites) && event->key == InputKeyOk) {
+                if(event->type == InputTypeShort) {
+                    browser->callback(
+                        favorites ? ArchiveBrowserEventFileMenuRun : ArchiveBrowserEventSearch,
+                        browser->context);
+                } else if(event->type == InputTypeLong) {
+                    browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
+                }
             }
         } else if(event->key == InputKeyOk) {
             if(selected) {
-                bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
                 bool folder = selected->type == ArchiveFileTypeFolder;
 
                 if(event->type == InputTypeShort) {

@@ -59,7 +59,15 @@ static void
 
     const char* app_name = archive_get_flipper_app_name(selected->type);
 
-    if(app_name) {
+    if(selected->type == ArchiveFileTypeSearch) {
+        while(archive_get_tab(browser) != ArchiveTabSearch) {
+            archive_switch_tab(browser, TAB_LEFT);
+        }
+        ArchiveApp* archive;
+        with_view_model(
+            browser->view, ArchiveBrowserViewModel * model, { archive = model->archive; }, false);
+        view_dispatcher_send_custom_event(archive->view_dispatcher, ArchiveBrowserEventSearch);
+    } else if(app_name) {
         if(selected->is_app) {
             char* param = strrchr(furi_string_get_cstr(selected->path), '/');
             if(param != NULL) {
