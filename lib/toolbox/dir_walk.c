@@ -99,7 +99,7 @@ static DirWalkResult
 
                 bool filter = false;
                 for(size_t i = 0; i < dir_walk->recurse_filter_count; i++) {
-                    if(furi_string_start_with_str(dir_walk->path, dir_walk->recurse_filter[i])) {
+                    if(furi_string_equal_str(dir_walk->path, dir_walk->recurse_filter[i])) {
                         filter = true;
                         break;
                     }
