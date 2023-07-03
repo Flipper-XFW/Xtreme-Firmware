@@ -555,14 +555,32 @@ void archive_enter_dir(ArchiveBrowserView* browser, FuriString* path) {
     furi_assert(browser);
     furi_assert(path);
 
-    int32_t idx_temp = 0;
-
-    with_view_model(
-        browser->view, ArchiveBrowserViewModel * model, { idx_temp = model->item_idx; }, false);
-
     furi_string_set(browser->path, path);
 
-    file_browser_worker_folder_enter(browser->worker, path, idx_temp);
+    const char* switch_ext = NULL;
+    switch(archive_get_tab(browser)) {
+    case ArchiveTabSubGhz:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("subghz/playlist")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeSubghzPlaylist];
+        } else if(furi_string_cmp_str(browser->path, EXT_PATH("subghz/remote")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeSubghzRemote];
+        }
+        break;
+    case ArchiveTabInfrared:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("infrared/remote")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeInfraredRemote];
+        }
+        break;
+    default:
+        break;
+    }
+
+    if(switch_ext != NULL &&
+       strcmp(switch_ext, file_browser_worker_get_filter_ext(browser->worker)) != 0) {
+        file_browser_worker_set_filter_ext(browser->worker, browser->path, switch_ext);
+    } else {
+        file_browser_worker_folder_enter(browser->worker, path, 0);
+    }
 }
 
 void archive_leave_dir(ArchiveBrowserView* browser) {
@@ -571,7 +589,28 @@ void archive_leave_dir(ArchiveBrowserView* browser) {
     size_t dirname_start = furi_string_search_rchar(browser->path, '/');
     furi_string_left(browser->path, dirname_start);
 
-    file_browser_worker_folder_exit(browser->worker);
+    const char* switch_ext = NULL;
+    switch(archive_get_tab(browser)) {
+    case ArchiveTabSubGhz:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("subghz")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeSubGhz];
+        }
+        break;
+    case ArchiveTabInfrared:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("infrared")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeInfrared];
+        }
+        break;
+    default:
+        break;
+    }
+
+    if(switch_ext != NULL &&
+       strcmp(switch_ext, file_browser_worker_get_filter_ext(browser->worker)) != 0) {
+        file_browser_worker_set_filter_ext(browser->worker, browser->path, switch_ext);
+    } else {
+        file_browser_worker_folder_exit(browser->worker);
+    }
 }
 
 void archive_refresh_dir(ArchiveBrowserView* browser) {
