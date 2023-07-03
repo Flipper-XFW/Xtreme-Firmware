@@ -514,6 +514,21 @@ void file_browser_worker_set_config(
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
 }
 
+const char* file_browser_worker_get_filter_ext(BrowserWorker* browser) {
+    furi_assert(browser);
+    return furi_string_get_cstr(browser->filter_extension);
+}
+
+void file_browser_worker_set_filter_ext(
+    BrowserWorker* browser,
+    FuriString* path,
+    const char* filter_ext) {
+    furi_assert(browser);
+    furi_string_set(browser->path_next, path);
+    furi_string_set(browser->filter_extension, filter_ext);
+    furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
+}
+
 void file_browser_worker_folder_enter(BrowserWorker* browser, FuriString* path, int32_t item_idx) {
     furi_assert(browser);
     furi_string_set(browser->path_next, path);

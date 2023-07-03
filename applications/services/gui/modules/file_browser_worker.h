@@ -58,6 +58,13 @@ void file_browser_worker_set_config(
     bool skip_assets,
     bool hide_dot_files);
 
+const char* file_browser_worker_get_filter_ext(BrowserWorker* browser);
+
+void file_browser_worker_set_filter_ext(
+    BrowserWorker* browser,
+    FuriString* path,
+    const char* filter_ext);
+
 void file_browser_worker_folder_enter(BrowserWorker* browser, FuriString* path, int32_t item_idx);
 
 bool file_browser_worker_is_in_start_folder(BrowserWorker* browser);
