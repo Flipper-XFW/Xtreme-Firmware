@@ -1,6 +1,9 @@
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
+#include <applications/external/subghz_playlist/playlist_file.h>
+#include <applications/external/subghz_remote/subghz_remote_app_i.h>
+#include <applications/external/ir_remote/infrared_remote.h>
 
 #define TAG "Archive"
 
@@ -16,11 +19,26 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
         for(size_t i = 0; i < COUNT_OF(known_ext); i++) {
             if((known_ext[i][0] == '?') || (known_ext[i][0] == '*')) continue;
             if(furi_string_search(file->path, known_ext[i], 0) != FURI_STRING_FAILURE) {
-                if(i == ArchiveFileTypeBadKb) {
-                    if(furi_string_search(file->path, archive_get_default_path(ArchiveTabBadKb)) ==
-                       0) {
+                // Check for .txt containing folder
+                if(strcmp(known_ext[i], ".txt") == 0) {
+                    const char* path = NULL;
+                    switch(i) {
+                    case ArchiveFileTypeSubghzPlaylist:
+                        path = PLAYLIST_FOLDER;
+                        break;
+                    case ArchiveFileTypeSubghzRemote:
+                        path = SUBREM_APP_FOLDER;
+                        break;
+                    case ArchiveFileTypeInfraredRemote:
+                        path = IR_REMOTE_PATH;
+                        break;
+                    case ArchiveFileTypeBadKb:
+                        path = archive_get_default_path(ArchiveTabBadKb);
+                        break;
+                    }
+                    if(path != NULL && furi_string_search(file->path, path) == 0) {
                         file->type = i;
-                        return; // *.txt file is a BadKB script only if it is in BadKB folder
+                        return;
                     }
                 } else {
                     file->type = i;
