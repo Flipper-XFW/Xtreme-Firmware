@@ -84,6 +84,7 @@ uint32_t archive_scene_search_dirwalk(void* context) {
     furi_string_free(name);
     furi_string_free(path);
     dir_walk_free(dir_walk);
+    furi_record_close(RECORD_STORAGE);
     return 0;
 }
 
