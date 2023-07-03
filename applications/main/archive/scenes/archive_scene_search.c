@@ -5,6 +5,7 @@
 #include "archive/views/archive_browser_view.h"
 #include "toolbox/path.h"
 #include <dialogs/dialogs.h>
+#include <desktop/animations/animation_storage.h>
 
 #define TAG "Archive"
 
@@ -39,6 +40,11 @@ uint32_t archive_scene_search_dirwalk(void* context) {
 
     uint32_t count = 1;
     DirWalk* dir_walk = dir_walk_alloc(furi_record_open(RECORD_STORAGE));
+    const char* ignore[] = {
+        XTREME_ASSETS_PATH,
+        BASE_ANIMATION_DIR,
+    };
+    dir_walk_set_recurse_filter(dir_walk, ignore, COUNT_OF(ignore));
     FuriString* path = furi_string_alloc();
     FileInfo fileinfo;
 
