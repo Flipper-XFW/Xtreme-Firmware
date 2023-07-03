@@ -85,12 +85,7 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                     ArchiveBrowserEventFileMenuNewDir);
             }
             if(selected) {
-                if(favorites) {
-                    archive_menu_add_item(
-                        menu_array_push_raw(model->context_menu),
-                        "Move",
-                        ArchiveBrowserEventFileMenuRename);
-                } else if(!selected->is_app) {
+                if(!selected->is_app) {
                     archive_menu_add_item(
                         menu_array_push_raw(model->context_menu),
                         "Rename",
@@ -125,6 +120,12 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                         "Show",
                         ArchiveBrowserEventFileMenuShow);
                 }
+            }
+            if(favorites) {
+                archive_menu_add_item(
+                    menu_array_push_raw(model->context_menu),
+                    "Move",
+                    ArchiveBrowserEventFileMenuRename);
             }
         }
     }
