@@ -28,7 +28,7 @@ static void
             {
                 files_array_reset(model->files);
                 model->item_cnt = item_cnt;
-                model->item_idx = (file_idx > 0) ? file_idx : 0;
+                model->item_idx = file_idx;
                 load_offset =
                     CLAMP(model->item_idx - FILE_LIST_BUF_LEN / 2, (int32_t)model->item_cnt, 0);
                 model->array_offset = 0;
@@ -76,7 +76,7 @@ static void archive_list_item_cb(
             {
                 if(model->item_cnt <= BROWSER_SORT_THRESHOLD) {
                     FuriString* selected = NULL;
-                    if(model->item_idx > 0) {
+                    if(model->item_idx >= 0) {
                         selected = furi_string_alloc_set(
                             files_array_get(model->files, model->item_idx)->path);
                     }
@@ -90,6 +90,10 @@ static void archive_list_item_cb(
                                 break;
                             }
                         }
+                    }
+
+                    if(model->item_idx < 0) {
+                        model->item_idx = 0;
                     }
                 }
                 model->list_loading = false;
