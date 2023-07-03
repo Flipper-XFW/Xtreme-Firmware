@@ -336,12 +336,41 @@ static int32_t browser_worker(void* context) {
         furi_assert((flags & FuriFlagError) == 0);
 
         if(flags & WorkerEvtConfigChange) {
-            // If start path is a path to the file - try finding index of this file in a folder
-            if(browser_path_is_file(browser->path_next)) {
-                path_extract_filename(browser->path_next, filename, false);
-            }
+            if(furi_string_start_with(path, browser->path_next)) {
+                // New path is parent of current, keep prev selected in new view
+                furi_string_set(filename, path);
+                furi_string_right(filename, furi_string_size(browser->path_next));
+                furi_string_trim(filename, "/");
+                size_t pos = furi_string_search_char(filename, '/');
+                if(pos != FURI_STRING_FAILURE) {
+                    furi_string_left(filename, pos);
+                }
 
-            furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderEnter);
+                furi_string_set(path, browser->path_next);
+                bool is_root = browser_folder_check_and_switch(path);
+
+                int32_t file_idx = 0;
+                browser_folder_init(browser, path, filename, &items_cnt, &file_idx);
+                furi_string_set(browser->path_current, path);
+                FURI_LOG_D(
+                    TAG,
+                    "Config to: %s items: %lu idx: %ld",
+                    furi_string_get_cstr(path),
+                    items_cnt,
+                    file_idx);
+                if(browser->folder_cb) {
+                    browser->folder_cb(browser->cb_ctx, items_cnt, file_idx, is_root);
+                }
+                furi_string_reset(filename);
+
+            } else {
+                // If start path is a path to the file - try finding index of this file in a folder
+                if(browser_path_is_file(browser->path_next)) {
+                    path_extract_filename(browser->path_next, filename, false);
+                }
+
+                furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderEnter);
+            }
         }
 
         if(flags & WorkerEvtFolderEnter) {
