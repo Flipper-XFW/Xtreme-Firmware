@@ -39,6 +39,7 @@ struct BrowserWorker {
     FuriString* path_start;
     FuriString* path_current;
     FuriString* path_next;
+    bool keep_selection;
     uint32_t load_offset;
     uint32_t load_count;
     bool skip_assets;
@@ -336,7 +337,7 @@ static int32_t browser_worker(void* context) {
         furi_assert((flags & FuriFlagError) == 0);
 
         if(flags & WorkerEvtConfigChange) {
-            if(furi_string_start_with(path, browser->path_next)) {
+            if(browser->keep_selection && furi_string_start_with(path, browser->path_next)) {
                 // New path is parent of current, keep prev selected in new view
                 furi_string_set(filename, path);
                 furi_string_right(filename, furi_string_size(browser->path_next));
@@ -537,6 +538,7 @@ void file_browser_worker_set_config(
     bool hide_dot_files) {
     furi_assert(browser);
     furi_string_set(browser->path_next, path);
+    browser->keep_selection = false;
     furi_string_set(browser->filter_extension, filter_ext);
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
@@ -554,6 +556,7 @@ void file_browser_worker_set_filter_ext(
     const char* filter_ext) {
     furi_assert(browser);
     furi_string_set(browser->path_next, path);
+    browser->keep_selection = true;
     furi_string_set(browser->filter_extension, filter_ext);
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
 }
