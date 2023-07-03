@@ -3,6 +3,8 @@
 #include <m-list.h>
 #include "views/bubble_animation_view.h"
 
+#define BASE_ANIMATION_DIR EXT_PATH("dolphin")
+
 /** Main structure to handle animation data.
  * Contains all, including animation playing data (BubbleAnimation),
  * data for random animation selection (StorageAnimationMeta) and

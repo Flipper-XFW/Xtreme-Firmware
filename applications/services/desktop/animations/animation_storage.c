@@ -13,7 +13,6 @@
 #include <assets_dolphin_blocking.h>
 #include <xtreme.h>
 #define ANIMATION_META_FILE "meta.txt"
-#define BASE_ANIMATION_DIR EXT_PATH("dolphin")
 #define TAG "AnimationStorage"
 char ANIMATION_DIR[26 /*"/ext/dolphin_custom//Anims"*/ + XTREME_ASSETS_PACK_NAME_LEN + 1];
 char ANIMATION_MANIFEST_FILE[sizeof(ANIMATION_DIR) + 13 /*"/manifest.txt"*/];
