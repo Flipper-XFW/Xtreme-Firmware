@@ -301,6 +301,19 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             archive_enter_dir(browser, selected->path);
             consumed = true;
             break;
+        case ArchiveBrowserEventSearch: {
+            bool open =
+                !scene_manager_get_scene_state(archive->scene_manager, ArchiveAppSceneSearch);
+            scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneSearch, false);
+            if(archive->thread) {
+                furi_thread_join(archive->thread);
+                furi_thread_free(archive->thread);
+                archive->thread = NULL;
+            }
+            if(open) scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneSearch);
+            consumed = true;
+            break;
+        }
         case ArchiveBrowserEventFavMoveUp:
             archive_file_array_swap(browser, 1);
             consumed = true;

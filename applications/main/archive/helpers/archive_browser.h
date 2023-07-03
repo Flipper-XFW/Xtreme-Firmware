@@ -17,6 +17,7 @@ static const char* tab_default_paths[] = {
     [ArchiveTabBadKb] = EXT_PATH("badkb"),
     [ArchiveTabU2f] = "/app:u2f",
     [ArchiveTabApplications] = EXT_PATH("apps"),
+    [ArchiveTabSearch] = "/app:search",
     [ArchiveTabInternal] = STORAGE_INT_PATH_PREFIX,
     [ArchiveTabBrowser] = STORAGE_EXT_PATH_PREFIX,
 };
@@ -33,6 +34,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeBadKb] = ".txt",
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
+    [ArchiveFileTypeSearch] = "*",
     [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
@@ -48,6 +50,7 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabBadKb] = ArchiveFileTypeBadKb,
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
     [ArchiveTabApplications] = ArchiveFileTypeApplication,
+    [ArchiveTabSearch] = ArchiveFileTypeSearch,
     [ArchiveTabInternal] = ArchiveFileTypeUnknown,
     [ArchiveTabBrowser] = ArchiveFileTypeUnknown,
 };

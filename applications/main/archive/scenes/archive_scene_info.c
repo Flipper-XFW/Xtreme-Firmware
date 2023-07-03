@@ -134,7 +134,7 @@ void archive_scene_info_on_enter(void* context) {
     if(is_dir) {
         scene_manager_set_scene_state(instance->scene_manager, ArchiveAppSceneInfo, true);
         instance->thread = furi_thread_alloc_ex(
-            "ArchiveDirWalk", 1024, (FuriThreadCallback)archive_scene_info_dirwalk, instance);
+            "ArchiveInfoDirWalk", 1024, (FuriThreadCallback)archive_scene_info_dirwalk, instance);
         furi_thread_start(instance->thread);
     }
 }

@@ -19,6 +19,7 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabBadKb] = "Bad KB",
     [ArchiveTabU2f] = "U2F",
     [ArchiveTabApplications] = "Apps",
+    [ArchiveTabSearch] = "Search",
     [ArchiveTabInternal] = "Internal",
     [ArchiveTabBrowser] = "Browser",
 };
@@ -35,6 +36,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeBadKb] = &I_badkb_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
     [ArchiveFileTypeApplication] = &I_Apps_10px,
+    [ArchiveFileTypeSearch] = &I_search_10px,
     [ArchiveFileTypeUpdateManifest] = &I_update_10px,
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
@@ -197,7 +199,8 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             file_type = file->type;
-            bool ext = model->tab_idx == ArchiveTabBrowser || model->tab_idx == ArchiveTabInternal;
+            bool ext = strncmp(archive_get_default_path(model->tab_idx), "/app:", 5) == 0 ||
+                       model->tab_idx == ArchiveTabBrowser || model->tab_idx == ArchiveTabInternal;
             if(file_type == ArchiveFileTypeApplication) {
                 if(file->custom_icon_data) {
                     custom_icon_data = file->custom_icon_data;
@@ -261,6 +264,10 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
     furi_assert(model);
 
     const char* tab_name = ArchiveTabNames[model->tab_idx];
+    if(model->tab_idx == ArchiveTabSearch &&
+       scene_manager_get_scene_state(model->archive->scene_manager, ArchiveAppSceneSearch)) {
+        tab_name = "Searching";
+    }
     bool clip = model->clipboard != NULL;
 
     canvas_draw_icon(canvas, 0, 0, &I_Background_128x11);
@@ -354,6 +361,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
     ArchiveBrowserView* browser = context;
 
     bool in_menu;
+    int32_t cur_item_idx;
     bool move_fav_mode;
     bool is_loading;
     with_view_model(
@@ -361,6 +369,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
         ArchiveBrowserViewModel * model,
         {
             in_menu = model->menu;
+            cur_item_idx = model->item_idx;
             move_fav_mode = model->move_fav;
             is_loading = model->folder_loading || model->list_loading;
         },
@@ -492,9 +501,12 @@ static bool archive_view_input(InputEvent* event, void* context) {
             archive_update_offset(browser);
         }
 
-        if(event->key == InputKeyOk) {
-            ArchiveFile_t* selected = archive_get_current_file(browser);
-
+        ArchiveFile_t* selected = archive_get_current_file(browser);
+        if(selected && selected->type == ArchiveFileTypeSearch) {
+            if(event->key == InputKeyOk && event->type == InputTypeShort && cur_item_idx == 0) {
+                browser->callback(ArchiveBrowserEventSearch, browser->context);
+            }
+        } else if(event->key == InputKeyOk) {
             if(selected) {
                 bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
                 bool folder = selected->type == ArchiveFileTypeFolder;

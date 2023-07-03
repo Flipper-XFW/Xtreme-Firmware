@@ -30,6 +30,7 @@ typedef enum {
     ArchiveTabBadKb,
     ArchiveTabU2f,
     ArchiveTabApplications,
+    ArchiveTabSearch,
     ArchiveTabInternal,
     ArchiveTabBrowser,
     ArchiveTabTotal,
@@ -52,6 +53,8 @@ typedef enum {
     ArchiveBrowserEventFileMenuClose,
 
     ArchiveBrowserEventEnterDir,
+
+    ArchiveBrowserEventSearch,
 
     ArchiveBrowserEventFavMoveUp,
     ArchiveBrowserEventFavMoveDown,
@@ -90,6 +93,7 @@ struct ArchiveBrowserView {
 };
 
 typedef struct {
+    ArchiveApp* archive;
     ArchiveTabEnum tab_idx;
     files_array_t files;
 

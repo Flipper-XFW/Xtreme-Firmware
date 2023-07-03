@@ -5,6 +5,7 @@
 
 static const char* known_apps[] = {
     [ArchiveAppTypeU2f] = "u2f",
+    [ArchiveAppTypeSearch] = "search",
 };
 
 ArchiveAppTypeEnum archive_get_app_type(const char* path) {
@@ -35,6 +36,9 @@ bool archive_app_is_available(void* context, const char* path) {
         res = storage_file_exists(storage, U2F_KEY_FILE) &&
               storage_file_exists(storage, U2F_CNT_FILE);
         break;
+    case ArchiveAppTypeSearch:
+        res = true;
+        break;
     default:
         break;
     }
@@ -48,15 +52,17 @@ bool archive_app_read_dir(void* context, const char* path) {
     furi_assert(path);
     ArchiveBrowserView* browser = context;
 
-    archive_file_array_rm_all(browser);
-
     ArchiveAppTypeEnum app = archive_get_app_type(path);
 
     switch(app) {
     case ArchiveAppTypeU2f:
         archive_add_app_item(browser, "/app:u2f/U2F Token");
+        archive_file_array_rm_all(browser);
+        return true;
+    case ArchiveAppTypeSearch:
         return true;
     default:
+        archive_file_array_rm_all(browser);
         return false;
     }
 }
@@ -77,6 +83,8 @@ void archive_app_delete_file(void* context, const char* path) {
         if(archive_is_favorite("/app:u2f/U2F Token")) {
             archive_favorites_delete("/app:u2f/U2F Token");
         }
+        break;
+    case ArchiveAppTypeSearch:
         break;
     default:
         break;

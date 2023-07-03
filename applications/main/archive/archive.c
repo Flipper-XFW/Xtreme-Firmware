@@ -51,6 +51,11 @@ static ArchiveApp* archive_alloc() {
         view_dispatcher, ArchiveViewStack, view_stack_get_view(archive->view_stack));
 
     archive->browser = browser_alloc();
+    with_view_model(
+        archive->browser->view,
+        ArchiveBrowserViewModel * model,
+        { model->archive = archive; },
+        true);
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewBrowser, archive_browser_get_view(archive->browser));
 
@@ -63,6 +68,14 @@ static ArchiveApp* archive_alloc() {
 void archive_free(ArchiveApp* archive) {
     furi_assert(archive);
     ViewDispatcher* view_dispatcher = archive->view_dispatcher;
+
+    scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneInfo, false);
+    scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneSearch, false);
+    if(archive->thread) {
+        furi_thread_join(archive->thread);
+        furi_thread_free(archive->thread);
+        archive->thread = NULL;
+    }
 
     // Loading
     loading_free(archive->loading);

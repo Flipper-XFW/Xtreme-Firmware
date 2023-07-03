@@ -489,6 +489,18 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     furi_assert(browser);
     ArchiveTabEnum tab = archive_get_tab(browser);
 
+    if(tab == ArchiveTabSearch) {
+        ArchiveApp* archive;
+        with_view_model(
+            browser->view, ArchiveBrowserViewModel * model, { archive = model->archive; }, false);
+        scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneSearch, false);
+        if(archive->thread) {
+            furi_thread_join(archive->thread);
+            furi_thread_free(archive->thread);
+            archive->thread = NULL;
+        }
+    }
+
     browser->last_tab_switch_dir = key;
 
     for(int i = 0; i < 2; i++) {
@@ -516,6 +528,11 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
         if(app_name != NULL) {
             if(archive_app_is_available(browser, furi_string_get_cstr(browser->path))) {
                 tab_empty = false;
+                if(tab == ArchiveTabSearch) {
+                    archive_file_array_rm_all(browser);
+                    archive_add_app_item(browser, "/app:search/Search for files");
+                    archive_set_item_count(browser, 1);
+                }
             }
         }
     } else {
