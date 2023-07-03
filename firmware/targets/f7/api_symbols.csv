@@ -799,6 +799,7 @@ Function,+,dir_walk_get_error,FS_Error,DirWalk*
 Function,+,dir_walk_open,_Bool,"DirWalk*, const char*"
 Function,+,dir_walk_read,DirWalkResult,"DirWalk*, FuriString*, FileInfo*"
 Function,+,dir_walk_set_filter_cb,void,"DirWalk*, DirWalkFilterCb, void*"
+Function,+,dir_walk_set_recurse_filter,void,"DirWalk*, const char**, size_t"
 Function,+,dir_walk_set_recursive,void,"DirWalk*, _Bool"
 Function,-,div,div_t,"int, int"
 Function,+,dolphin_deed,void,DolphinDeed

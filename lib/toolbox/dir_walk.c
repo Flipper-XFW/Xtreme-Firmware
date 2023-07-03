@@ -13,6 +13,8 @@ struct DirWalk {
     bool recursive;
     DirWalkFilterCb filter_cb;
     void* filter_context;
+    const char** recurse_filter;
+    size_t recurse_filter_count;
 };
 
 DirWalk* dir_walk_alloc(Storage* storage) {
@@ -22,6 +24,8 @@ DirWalk* dir_walk_alloc(Storage* storage) {
     DirIndexList_init(dir_walk->index_list);
     dir_walk->recursive = true;
     dir_walk->filter_cb = NULL;
+    dir_walk->recurse_filter = NULL;
+    dir_walk->recurse_filter_count = 0;
     return dir_walk;
 }
 
@@ -39,6 +43,11 @@ void dir_walk_set_recursive(DirWalk* dir_walk, bool recursive) {
 void dir_walk_set_filter_cb(DirWalk* dir_walk, DirWalkFilterCb cb, void* context) {
     dir_walk->filter_cb = cb;
     dir_walk->filter_context = context;
+}
+
+void dir_walk_set_recurse_filter(DirWalk* dir_walk, const char** array, size_t count) {
+    dir_walk->recurse_filter = array;
+    dir_walk->recurse_filter_count = count;
 }
 
 bool dir_walk_open(DirWalk* dir_walk, const char* path) {
@@ -86,13 +95,30 @@ static DirWalkResult
             }
 
             if(file_info_is_dir(&info) && dir_walk->recursive) {
-                // step into
-                DirIndexList_push_back(dir_walk->index_list, dir_walk->current_index);
-                dir_walk->current_index = 0;
-                storage_dir_close(dir_walk->file);
-
                 furi_string_cat_printf(dir_walk->path, "/%s", name);
-                storage_dir_open(dir_walk->file, furi_string_get_cstr(dir_walk->path));
+
+                bool filter = false;
+                for(size_t i = 0; i < dir_walk->recurse_filter_count; i++) {
+                    if(furi_string_start_with_str(dir_walk->path, dir_walk->recurse_filter[i])) {
+                        filter = true;
+                        break;
+                    }
+                }
+
+                if(filter) {
+                    // reset path
+                    size_t last_char = furi_string_search_rchar(dir_walk->path, '/');
+                    if(last_char != FURI_STRING_FAILURE) {
+                        furi_string_left(dir_walk->path, last_char);
+                    }
+
+                } else {
+                    // step into
+                    DirIndexList_push_back(dir_walk->index_list, dir_walk->current_index);
+                    dir_walk->current_index = 0;
+                    storage_dir_close(dir_walk->file);
+                    storage_dir_open(dir_walk->file, furi_string_get_cstr(dir_walk->path));
+                }
             }
         } else if(storage_file_get_error(dir_walk->file) == FSE_NOT_EXIST) {
             if(DirIndexList_size(dir_walk->index_list) == 0) {
