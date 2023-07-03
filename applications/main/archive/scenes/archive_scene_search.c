@@ -63,10 +63,12 @@ uint32_t archive_scene_search_dirwalk(void* context) {
                 }
                 break;
             }
-            if(!file_info_is_dir(&fileinfo) &&
-               furi_string_search_str(path, archive->text_store) != FURI_STRING_FAILURE) {
-                archive_add_file_item(archive->browser, false, furi_string_get_cstr(path));
-                archive_set_item_count(archive->browser, ++count);
+            if(!file_info_is_dir(&fileinfo)) {
+                furi_string_right(path, furi_string_search_rchar(path, '/') + 1);
+                if(furi_string_search_str(path, archive->text_store) != FURI_STRING_FAILURE) {
+                    archive_add_file_item(archive->browser, false, furi_string_get_cstr(path));
+                    archive_set_item_count(archive->browser, ++count);
+                }
             }
         }
     } else {
