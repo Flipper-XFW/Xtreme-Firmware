@@ -56,8 +56,8 @@ bool archive_app_read_dir(void* context, const char* path) {
 
     switch(app) {
     case ArchiveAppTypeU2f:
-        archive_add_app_item(browser, "/app:u2f/U2F Token");
         archive_file_array_rm_all(browser);
+        archive_add_app_item(browser, "/app:u2f/U2F Token");
         return true;
     case ArchiveAppTypeSearch:
         return true;
