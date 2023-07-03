@@ -57,6 +57,10 @@ uint32_t archive_scene_search_dirwalk(void* context) {
                 break;
             }
             if(result == DirWalkLast) {
+                if(count == 1) {
+                    archive_add_app_item(archive->browser, "/app:search/No results found!");
+                    archive_set_item_count(archive->browser, ++count);
+                }
                 break;
             }
             if(!file_info_is_dir(&fileinfo) &&
