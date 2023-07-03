@@ -18,25 +18,25 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
     } else {
         for(size_t i = 0; i < COUNT_OF(known_ext); i++) {
             if((known_ext[i][0] == '?') || (known_ext[i][0] == '*')) continue;
-            if(furi_string_search(file->path, known_ext[i], 0) != FURI_STRING_FAILURE) {
+            if(furi_string_end_with_str(file->path, known_ext[i])) {
                 // Check for .txt containing folder
                 if(strcmp(known_ext[i], ".txt") == 0) {
-                    const char* path = NULL;
+                    const char* txt_path = NULL;
                     switch(i) {
                     case ArchiveFileTypeSubghzPlaylist:
-                        path = PLAYLIST_FOLDER;
+                        txt_path = PLAYLIST_FOLDER;
                         break;
                     case ArchiveFileTypeSubghzRemote:
-                        path = SUBREM_APP_FOLDER;
+                        txt_path = SUBREM_APP_FOLDER;
                         break;
                     case ArchiveFileTypeInfraredRemote:
-                        path = IR_REMOTE_PATH;
+                        txt_path = IR_REMOTE_PATH;
                         break;
                     case ArchiveFileTypeBadKb:
-                        path = archive_get_default_path(ArchiveTabBadKb);
+                        txt_path = archive_get_default_path(ArchiveTabBadKb);
                         break;
                     }
-                    if(path != NULL && furi_string_search(file->path, path) == 0) {
+                    if(txt_path != NULL && furi_string_start_with_str(file->path, txt_path)) {
                         file->type = i;
                         return;
                     }
