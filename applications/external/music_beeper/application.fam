@@ -14,11 +14,3 @@ App(
     fap_icon="music_10px.png",
     fap_category="Media",
 )
-
-App(
-    appid="music_beeper_start",
-    apptype=FlipperAppType.STARTUP,
-    entry_point="music_beeper_on_system_start",
-    requires=["music_beeper"],
-    order=30,
-)
