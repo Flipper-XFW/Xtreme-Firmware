@@ -200,8 +200,8 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             file_type = file->type;
-            bool ext = strncmp(archive_get_default_path(model->tab_idx), "/app:", 5) == 0 ||
-                       model->tab_idx == ArchiveTabBrowser || model->tab_idx == ArchiveTabInternal;
+            bool ext = model->tab_idx == ArchiveTabBrowser ||
+                       model->tab_idx == ArchiveTabInternal || model->tab_idx == ArchiveTabSearch;
             if(file_type == ArchiveFileTypeApplication) {
                 if(file->custom_icon_data) {
                     custom_icon_data = file->custom_icon_data;
