@@ -18,14 +18,14 @@
 #include "dolphin/dolphin_i.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/subghz/subghz_setting.h>
-#include <applications/main/fap_loader/fap_loader_app.h>
+#include <flipper_application/flipper_application.h>
 #include <notification/notification_app.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
 #include <namespoof.h>
 #include <xtreme.h>
 
-#define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 6
+#define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 7
 
 ARRAY_DEF(CharList, char*)
 
@@ -57,7 +57,7 @@ typedef struct {
     FuriString* version_tag;
 
     bool save_mainmenu_apps;
-    bool save_subghz_frequencies;
+    bool save_subghz_freqs;
     bool save_subghz;
     bool save_name;
     bool save_level;

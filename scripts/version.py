@@ -1,5 +1,5 @@
 #!/usb/bin/env python3
-VERSION = "XFW-0048"
+VERSION = "XFW-0049"
 
 import json
 import os
@@ -45,27 +45,33 @@ class GitVersion:
         if force_no_dirty != "":
             dirty = False
 
+        if "SOURCE_DATE_EPOCH" in os.environ:
+            commit_date = datetime.utcfromtimestamp(
+                int(os.environ["SOURCE_DATE_EPOCH"])
+            )
+        else:
+            commit_date = datetime.strptime(
+                self._exec_git("log -1 --format=%cd").strip(),
+                "%a %b %d %H:%M:%S %Y %z",
+            )
+
         return {
             "GIT_COMMIT": commit,
             "GIT_BRANCH": branch,
             "VERSION": version,
             "BUILD_DIRTY": dirty and 1 or 0,
-            "GIT_ORIGIN": ",".join(self._get_git_origins()),
+            "GIT_ORIGIN": self._get_git_origin(),
+            "GIT_COMMIT_DATE": commit_date,
         }
 
-    def _get_git_origins(self):
+    def _get_git_origin(self):
         try:
-            remotes = self._exec_git("remote -v")
+            branch = self._exec_git("branch --show-current")
+            remote = self._exec_git(f"config branch.{branch}.remote")
+            origin = self._exec_git(f"remote get-url {remote}")
+            return origin
         except subprocess.CalledProcessError:
-            return set()
-        origins = set()
-        for line in remotes.split("\n"):
-            if not line:
-                continue
-            _, destination = line.split("\t")
-            url, _ = destination.split(" ")
-            origins.add(url)
-        return origins
+            return ""
 
     def _exec_git(self, args):
         cmd = ["git"]
@@ -107,10 +113,11 @@ class Main(App):
     def generate(self):
         current_info = GitVersion(self.args.sourcedir).get_version_info()
 
-        if "SOURCE_DATE_EPOCH" in os.environ:
-            build_date = datetime.utcfromtimestamp(int(os.environ["SOURCE_DATE_EPOCH"]))
-        else:
-            build_date = date.today()
+        build_date = (
+            date.today()
+            if current_info["BUILD_DIRTY"]
+            else current_info["GIT_COMMIT_DATE"]
+        )
 
         current_info.update(
             {
@@ -119,6 +126,8 @@ class Main(App):
                 "FIRMWARE_ORIGIN": self.args.firmware_origin,
             }
         )
+
+        del current_info["GIT_COMMIT_DATE"]
 
         version_values = []
         for key in current_info:

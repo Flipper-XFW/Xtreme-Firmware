@@ -1,7 +1,5 @@
 #pragma once
 
-#include "bad_kb_app.h"
-#include "bad_kb_paths.h"
 #include "scenes/bad_kb_scene.h"
 #include "helpers/ducky_script.h"
 
@@ -15,21 +13,15 @@
 #define BAD_KB_APP_LAYOUT_EXTENSION ".kl"
 
 typedef enum BadKbCustomEvent {
-    BadKbAppCustomEventTextEditResult,
+    BadKbAppCustomEventTextInputDone,
     BadKbAppCustomEventByteInputDone,
     BadKbCustomEventErrorBack
 } BadKbCustomEvent;
 
 typedef enum {
-    BadKbAppViewError,
+    BadKbAppViewWidget,
     BadKbAppViewWork,
-    BadKbAppViewConfig,
-    BadKbAppViewConfigMac,
-    BadKbAppViewConfigName
+    BadKbAppViewVarItemList,
+    BadKbAppViewByteInput,
+    BadKbAppViewTextInput
 } BadKbAppView;
-
-void bad_kb_config_switch_remember_mode(BadKbApp* app);
-
-int32_t bad_kb_connection_init(BadKbApp* app);
-
-void bad_kb_connection_deinit(BadKbApp* app);

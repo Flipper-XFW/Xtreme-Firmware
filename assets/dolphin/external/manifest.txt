@@ -44,23 +44,23 @@ Max level: 30
 Weight: 3
 
 Name: L1_Cry_128x64
-Min butthurt: 0
+Min butthurt: 6
 Max butthurt: 14
-Min level: 12
+Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_Boxing_128x64
-Min butthurt: 0
+Min butthurt: 12
 Max butthurt: 14
-Min level: 3
+Min level: 16
 Max level: 30
 Weight: 3
 
 Name: L1_Mad_fist_128x64
-Min butthurt: 0
+Min butthurt: 10
 Max butthurt: 14
-Min level: 4
+Min level: 9
 Max level: 30
 Weight: 3
 
@@ -79,16 +79,30 @@ Max level: 30
 Weight: 3
 
 Name: L1_Leaving_sad_128x64
-Min butthurt: 0
+Min butthurt: 8
 Max butthurt: 14
-Min level: 21
+Min level: 23
 Max level: 30
 Weight: 3
+
+Name: L1_Senpai_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 3
+Max level: 30
+Weight: 3
+
+Name: L1_Kaiju_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 13
+Max level: 30
+Weight: 4
 
 Name: L2_Wake_up_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 22
+Min level: 12
 Max level: 30
 Weight: 3
 
@@ -112,6 +126,13 @@ Max butthurt: 14
 Min level: 25
 Max level: 30
 Weight: 3
+
+Name: L2_Dj_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 21
+Max level: 30
+Weight: 4
 
 Name: L3_Furippa3_128x64
 Min butthurt: 0

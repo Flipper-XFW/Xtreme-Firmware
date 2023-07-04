@@ -17,4 +17,8 @@ App(
     stack_size=1 * 1024,
     fap_category="Misc",
     fap_icon="cube.png",
+    fap_author="@RaZeSloth",
+    fap_weburl="https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler",
+    fap_version="1.0",
+    fap_description="App generates random moves to scramble a Rubik's cube.",
 )

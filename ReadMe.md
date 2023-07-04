@@ -183,12 +183,12 @@ There are 3 methods to install Xtreme, we recommend you use the **Web Updater**,
 
 <br>
 
-**If you have issues or crashes with the install process, you can try to use `Settings > Storage > Factory Reset` then retry the install.**
-**Doing that will NOT remove your saved files, it will only forget some settings and paired devices.**
-
 ----
 <br>
 <h2 align="center">Build it yourself:</h2>
+
+> **Warning**
+> We will not give basic support for compiling in our server. This is intended for people that already *know* what they are doing!
 
 ```bash
 To download the needed tools:
@@ -222,9 +222,10 @@ $ ./fbt resources icons dolphin_ext
 ## ❤️ Support
 If you like what you're seeing, **please consider donating to us**. We won't ever put this behind a paywall, but we'd still appreciate a few bucks!
 
-- **[Direct Wire-transfer](https://bunq.me/ClaraK)**: No account needed, just specify amount and hit send
-- **[Patreon](https://patreon.com/CynthiaLabs)**
-- **[Paypal](https://paypal.me/RdX2020)**
+- **[Patreon](https://patreon.com/CynthiaLabs)**: ❤️ Account needed, subscription with perks across my entire org.
+- **[Wire-transfer](https://bunq.me/ClaraK)**: No account needed, one-time
+- **[Paypal](https://paypal.me/RdX2020)**: Account needed, one-time
+- **[ko-fi](https://ko-fi.com/cynthialabs)**: No account needed, one-time
 - **Monero**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`
 
 **Thanks for all your support <3**

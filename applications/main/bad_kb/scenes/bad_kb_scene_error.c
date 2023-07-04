@@ -1,5 +1,4 @@
 #include "../bad_kb_app.h"
-#include <xtreme.h>
 
 static void
     bad_kb_scene_error_event_callback(GuiButtonType result, InputType type, void* context) {
@@ -26,34 +25,9 @@ void bad_kb_scene_error_on_enter(void* context) {
             "No SD card or\napp data found.\nThis app will not\nwork without\nrequired files.");
         widget_add_button_element(
             app->widget, GuiButtonTypeLeft, "Back", bad_kb_scene_error_event_callback, app);
-    } else if(app->error == BadKbAppErrorCloseRpc) {
-        widget_add_icon_element(app->widget, 78, 0, &I_ActiveConnection_50x64);
-        if(XTREME_SETTINGS()->is_nsfw) {
-            widget_add_string_multiline_element(
-                app->widget, 3, 2, AlignLeft, AlignTop, FontPrimary, "I am not\na whore!");
-            widget_add_string_multiline_element(
-                app->widget,
-                3,
-                30,
-                AlignLeft,
-                AlignTop,
-                FontSecondary,
-                "Pull out from\nPC or phone to\nuse me like this.");
-        } else {
-            widget_add_string_multiline_element(
-                app->widget, 3, 2, AlignLeft, AlignTop, FontPrimary, "Connection\nis active!");
-            widget_add_string_multiline_element(
-                app->widget,
-                3,
-                30,
-                AlignLeft,
-                AlignTop,
-                FontSecondary,
-                "Disconnect from\nPC or phone to\nuse this function.");
-        }
     }
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, BadKbAppViewError);
+    view_dispatcher_switch_to_view(app->view_dispatcher, BadKbAppViewWidget);
 }
 
 bool bad_kb_scene_error_on_event(void* context, SceneManagerEvent event) {

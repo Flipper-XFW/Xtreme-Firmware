@@ -19,10 +19,11 @@ static void subghz_remote_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-SubGhzRemoteApp* subghz_remote_app_alloc() {
+SubGhzRemoteApp* subghz_remote_app_alloc(char* p) {
     SubGhzRemoteApp* app = malloc(sizeof(SubGhzRemoteApp));
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("unirf"), SUBREM_APP_FOLDER);
     storage_common_migrate(storage, EXT_PATH("subghz/unirf"), SUBREM_APP_FOLDER);
 
     if(!storage_simply_mkdir(storage, SUBREM_APP_FOLDER)) {
@@ -90,13 +91,19 @@ SubGhzRemoteApp* subghz_remote_app_alloc() {
 
     subghz_txrx_set_need_save_callback(app->txrx, subrem_save_active_sub, app);
 
+    if(p && strlen(p)) {
+        furi_string_set(app->file_path, p);
+        subrem_map_file_load(app, furi_string_get_cstr(app->file_path));
+        scene_manager_next_scene(app->scene_manager, SubRemSceneRemote);
+    } else {
 #ifdef SUBREM_LIGHT
-    scene_manager_next_scene(app->scene_manager, SubRemSceneOpenMapFile);
+        scene_manager_next_scene(app->scene_manager, SubRemSceneOpenMapFile);
 #else
-    scene_manager_next_scene(app->scene_manager, SubRemSceneStart);
-    scene_manager_set_scene_state(
-        app->scene_manager, SubRemSceneStart, SubmenuIndexSubRemOpenMapFile);
+        scene_manager_next_scene(app->scene_manager, SubRemSceneStart);
+        scene_manager_set_scene_state(
+            app->scene_manager, SubRemSceneStart, SubmenuIndexSubRemOpenMapFile);
 #endif
+    }
 
     return app;
 }
@@ -145,12 +152,10 @@ void subghz_remote_app_free(SubGhzRemoteApp* app) {
     free(app);
 }
 
-int32_t subghz_remote_app(void* p) {
+int32_t subghz_remote_app(char* p) {
     UNUSED(p);
-    DOLPHIN_DEED(DolphinDeedPluginStart);
-    SubGhzRemoteApp* subghz_remote_app = subghz_remote_app_alloc();
-
-    furi_string_set(subghz_remote_app->file_path, SUBREM_APP_FOLDER);
+    dolphin_deed(DolphinDeedPluginStart);
+    SubGhzRemoteApp* subghz_remote_app = subghz_remote_app_alloc(p);
 
     view_dispatcher_run(subghz_remote_app->view_dispatcher);
 

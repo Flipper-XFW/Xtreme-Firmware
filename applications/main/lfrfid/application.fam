@@ -1,7 +1,7 @@
 App(
     appid="lfrfid",
     name="RFID",
-    apptype=FlipperAppType.APP,
+    apptype=FlipperAppType.FAPP,
     targets=["f7"],
     entry_point="lfrfid_app",
     cdefines=["APP_LF_RFID"],
@@ -15,7 +15,6 @@ App(
     icon="A_125khz_14",
     stack_size=2 * 1024,
     order=20,
-    fap_libs=["assets"],
 )
 
 App(

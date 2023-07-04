@@ -3,7 +3,7 @@
 enum VarItemListIndex {
     VarItemListIndexBadkbMode,
     VarItemListIndexBadbtRemember,
-    VarItemListIndexSubghzFrequencies,
+    VarItemListIndexSubghzFreqs,
     VarItemListIndexSubghzExtend,
 };
 
@@ -12,7 +12,7 @@ void xtreme_app_scene_protocols_var_item_list_callback(void* context, uint32_t i
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void xtreme_app_scene_protocols_badkb_mode_changed(VariableItem* item) {
+static void xtreme_app_scene_protocols_bad_bt_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "BT" : "USB");
@@ -20,7 +20,7 @@ static void xtreme_app_scene_protocols_badkb_mode_changed(VariableItem* item) {
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_protocols_badbt_remember_changed(VariableItem* item) {
+static void xtreme_app_scene_protocols_bad_bt_remember_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -42,16 +42,21 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list, "BadKB Mode", 2, xtreme_app_scene_protocols_badkb_mode_changed, app);
+        var_item_list, "BadKB Mode", 2, xtreme_app_scene_protocols_bad_bt_changed, app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt ? "BT" : "USB");
 
     item = variable_item_list_add(
-        var_item_list, "BadBT Remember", 2, xtreme_app_scene_protocols_badbt_remember_changed, app);
+        var_item_list,
+        "BadBT Remember",
+        2,
+        xtreme_app_scene_protocols_bad_bt_remember_changed,
+        app);
     variable_item_set_current_value_index(item, xtreme_settings->bad_bt_remember);
     variable_item_set_current_value_text(item, xtreme_settings->bad_bt_remember ? "ON" : "OFF");
 
-    variable_item_list_add(var_item_list, "SubGHz Frequencies", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "SubGHz Freqs", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
 
     item = variable_item_list_add(
         var_item_list, "SubGHz Extend", 2, xtreme_app_scene_protocols_subghz_extend_changed, app);
@@ -75,8 +80,8 @@ bool xtreme_app_scene_protocols_on_event(void* context, SceneManagerEvent event)
         scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocols, event.event);
         consumed = true;
         switch(event.event) {
-        case VarItemListIndexSubghzFrequencies:
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFrequencies);
+        case VarItemListIndexSubghzFreqs:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFreqs);
             break;
         default:
             break;

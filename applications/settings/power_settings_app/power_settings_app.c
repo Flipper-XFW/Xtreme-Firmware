@@ -19,7 +19,7 @@ static void power_settings_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
+PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene, ViewDispatcherType type) {
     PowerSettingsApp* app = malloc(sizeof(PowerSettingsApp));
 
     app->about_battery = first_scene == PowerSettingsAppSceneBatteryInfo;
@@ -42,7 +42,10 @@ PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
         app->view_dispatcher, power_settings_back_event_callback);
     view_dispatcher_set_tick_event_callback(
         app->view_dispatcher, power_settings_tick_event_callback, 2000);
-    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, type);
+    if(type == ViewDispatcherTypeDesktop) {
+        gui_set_hide_statusbar(app->gui, true);
+    }
 
     // Views
     app->battery_info = battery_info_alloc();
@@ -95,14 +98,16 @@ void power_settings_app_free(PowerSettingsApp* app) {
 
 int32_t power_settings_app(void* p) {
     uint32_t first_scene = PowerSettingsAppSceneStart;
+    ViewDispatcherType type = ViewDispatcherTypeFullscreen;
     if(p && strlen(p)) {
         if(!strcmp(p, "off")) {
             first_scene = PowerSettingsAppScenePowerOff;
+            type = ViewDispatcherTypeDesktop;
         } else if(!strcmp(p, "about_battery")) {
             first_scene = PowerSettingsAppSceneBatteryInfo;
         }
     }
-    PowerSettingsApp* app = power_settings_app_alloc(first_scene);
+    PowerSettingsApp* app = power_settings_app_alloc(first_scene, type);
     while(true) {
         view_dispatcher_run(app->view_dispatcher);
         if(app->battery_info->exit_to_about) {
@@ -113,6 +118,9 @@ int32_t power_settings_app(void* p) {
             }
         }
         break;
+    }
+    if(type == ViewDispatcherTypeDesktop) {
+        gui_set_hide_statusbar(app->gui, false);
     }
     power_settings_app_free(app);
     return 0;

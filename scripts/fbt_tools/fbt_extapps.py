@@ -179,7 +179,7 @@ class AppBuilder:
                         deployable = False
                 app_artifacts.dist_entries.append((deployable, fal_path))
         else:
-            fap_path = f"apps/{'.Main' if self.app.apptype == FlipperAppType.EXTMAINAPP else self.app.fap_category}/{app_artifacts.compact.name}"
+            fap_path = f"apps/{'assets' if self.app.apptype == FlipperAppType.FAPP else self.app.fap_category}/{app_artifacts.compact.name}"
             app_artifacts.dist_entries.append(
                 (self.app.is_default_deployable, fap_path)
             )
@@ -387,10 +387,16 @@ def generate_embed_app_metadata_actions(source, target, env, for_signature):
         "${SOURCES} ${TARGET}"
     )
 
-    actions.append(
-        Action(
-            objcopy_str,
-            "$APPMETAEMBED_COMSTR",
+    actions.extend(
+        (
+            Action(
+                objcopy_str,
+                "$APPMETAEMBED_COMSTR",
+            ),
+            Action(
+                "${PYTHON3} ${FBT_SCRIPT_DIR}/fastfap.py ${TARGET} ${OBJCOPY}",
+                "$FASTFAP_COMSTR",
+            ),
         )
     )
 
@@ -434,7 +440,7 @@ def AddAppLaunchTarget(env, appname, launch_target_name):
     # print(deploy_sources, flipp_dist_paths)
     env.PhonyTarget(
         launch_target_name,
-        '${PYTHON3} "${APP_RUN_SCRIPT}" ${EXTRA_ARGS} -s ${SOURCES} -t ${FLIPPER_FILE_TARGETS}',
+        '${PYTHON3} "${APP_RUN_SCRIPT}" -p ${FLIP_PORT} ${EXTRA_ARGS} -s ${SOURCES} -t ${FLIPPER_FILE_TARGETS}',
         source=deploy_sources,
         FLIPPER_FILE_TARGETS=flipp_dist_paths,
         EXTRA_ARGS=run_script_extra_ars,
@@ -446,7 +452,6 @@ def generate(env, **kw):
     env.SetDefault(
         EXT_APPS_WORK_DIR="${FBT_FAP_DEBUG_ELF_ROOT}",
         APP_RUN_SCRIPT="${FBT_SCRIPT_DIR}/runfap.py",
-        STORAGE_SCRIPT="${FBT_SCRIPT_DIR}/storage.py",
     )
     if not env["VERBOSE"]:
         env.SetDefault(
@@ -454,6 +459,7 @@ def generate(env, **kw):
             APPMETA_COMSTR="\tAPPMETA\t${TARGET}",
             APPFILE_COMSTR="\tAPPFILE\t${TARGET}",
             APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
+            FASTFAP_COMSTR="\tFASTFAP\t${TARGET}",
             APPCHECK_COMSTR="\tAPPCHK\t${SOURCE}",
         )
 

@@ -15,7 +15,7 @@
 
 #define TAG "RpcStorage"
 
-#define MAX_NAME_LENGTH 255
+#define MAX_NAME_LENGTH 254
 
 static const size_t MAX_DATA_SIZE = 512;
 
@@ -282,7 +282,7 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
 
     while(!finish) {
         FileInfo fileinfo;
-        char* name = malloc(MAX_NAME_LENGTH + 1);
+        char* name = malloc(MAX_NAME_LENGTH);
         if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
             if(path_contains_only_ascii(name)) {
                 if(i == COUNT_OF(list->file)) {

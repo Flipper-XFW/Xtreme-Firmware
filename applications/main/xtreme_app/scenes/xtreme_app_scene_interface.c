@@ -5,7 +5,7 @@ enum VarItemListIndex {
     VarItemListIndexMainmenu,
     VarItemListIndexLockscreen,
     VarItemListIndexStatusbar,
-    VarItemListIndexCommon,
+    VarItemListIndexFileBrowser,
 };
 
 void xtreme_app_scene_interface_var_item_list_callback(void* context, uint32_t index) {
@@ -16,12 +16,22 @@ void xtreme_app_scene_interface_var_item_list_callback(void* context, uint32_t i
 void xtreme_app_scene_interface_on_enter(void* context) {
     XtremeApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
+    VariableItem* item;
 
-    variable_item_list_add(var_item_list, "Graphics", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Mainmenu", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Lockscreen", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Statusbar", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Common", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "Graphics", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Mainmenu", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Lockscreen", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Statusbar", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "File Browser", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_interface_var_item_list_callback, app);
@@ -52,8 +62,8 @@ bool xtreme_app_scene_interface_on_event(void* context, SceneManagerEvent event)
         case VarItemListIndexStatusbar:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceStatusbar);
             break;
-        case VarItemListIndexCommon:
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceCommon);
+        case VarItemListIndexFileBrowser:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceFilebrowser);
             break;
         default:
             break;

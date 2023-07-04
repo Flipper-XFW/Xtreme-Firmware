@@ -10,3 +10,5 @@ typedef struct {
 } ExtMainApp;
 
 LIST_DEF(ExtMainAppList, ExtMainApp, M_POD_OPLIST)
+
+ExtMainAppList_t* loader_get_ext_main_apps(Loader* loader);

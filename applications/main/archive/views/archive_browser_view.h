@@ -15,8 +15,7 @@
 #include "gui/modules/file_browser_worker.h"
 
 #define MAX_LEN_PX 110
-#define MAX_NAME_LEN 255
-#define MAX_EXT_LEN 6
+#define MAX_NAME_LEN 254
 #define FRAME_HEIGHT 12
 #define MENU_ITEMS 5u
 #define MOVE_OFFSET 5u
@@ -31,6 +30,7 @@ typedef enum {
     ArchiveTabBadKb,
     ArchiveTabU2f,
     ArchiveTabApplications,
+    ArchiveTabSearch,
     ArchiveTabInternal,
     ArchiveTabBrowser,
     ArchiveTabTotal,
@@ -41,18 +41,20 @@ typedef enum {
     ArchiveBrowserEventFileMenuOpen,
     ArchiveBrowserEventManageMenuOpen,
     ArchiveBrowserEventFileMenuRun,
-    ArchiveBrowserEventFileMenuPin,
+    ArchiveBrowserEventFileMenuFavorite,
+    ArchiveBrowserEventFileMenuInfo,
+    ArchiveBrowserEventFileMenuShow,
+    ArchiveBrowserEventFileMenuPaste,
     ArchiveBrowserEventFileMenuCut,
     ArchiveBrowserEventFileMenuCopy,
-    ArchiveBrowserEventFileMenuPaste,
     ArchiveBrowserEventFileMenuNewDir,
     ArchiveBrowserEventFileMenuRename,
     ArchiveBrowserEventFileMenuDelete,
-    ArchiveBrowserEventFileMenuInfo,
-    ArchiveBrowserEventFileMenuShow,
     ArchiveBrowserEventFileMenuClose,
 
     ArchiveBrowserEventEnterDir,
+
+    ArchiveBrowserEventSearch,
 
     ArchiveBrowserEventFavMoveUp,
     ArchiveBrowserEventFavMoveDown,
@@ -91,6 +93,7 @@ struct ArchiveBrowserView {
 };
 
 typedef struct {
+    ArchiveApp* archive;
     ArchiveTabEnum tab_idx;
     files_array_t files;
 
@@ -101,6 +104,7 @@ typedef struct {
     bool clipboard_copy;
     menu_array_t context_menu;
 
+    bool is_app_tab;
     bool move_fav;
     bool list_loading;
     bool folder_loading;
@@ -110,6 +114,8 @@ typedef struct {
     int32_t array_offset;
     int32_t list_offset;
     size_t scroll_counter;
+
+    int32_t button_held_for_ticks;
 } ArchiveBrowserViewModel;
 
 void archive_browser_set_callback(

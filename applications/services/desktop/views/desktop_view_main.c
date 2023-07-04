@@ -13,15 +13,7 @@ struct DesktopMainView {
     View* view;
     DesktopMainViewCallback callback;
     void* context;
-    TimerHandle_t poweroff_timer;
 };
-
-#define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 1300
-
-static void desktop_main_poweroff_timer_callback(TimerHandle_t timer) {
-    DesktopMainView* main_view = pvTimerGetTimerID(timer);
-    main_view->callback(DesktopMainEventOpenPowerOff, main_view->context);
-}
 
 void desktop_main_set_callback(
     DesktopMainView* main_view,
@@ -44,37 +36,21 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
 
     DesktopMainView* main_view = context;
 
-    if(event->type == InputTypeShort) {
+    // DesktopMainEventOpenDebug
+    if(event->type == InputTypeShort || event->type == InputTypeLong) {
         if(event->key == InputKeyOk) {
-            main_view->callback(DesktopMainEventOpenMenu, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
-        } else if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenArchive, main_view->context);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventOpenClock, main_view->context);
-        }
-        // Right key is handled by animation manager
-    } else if(event->type == InputTypeLong) {
-        if(event->key == InputKeyOk) {
-            main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
-        } else if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventLock, main_view->context);
+            main_view->callback(
+                event->type == InputTypeShort ? DesktopMainEventOpenMenu :
+                                                DesktopAnimationEventNewIdleAnimation,
+                main_view->context);
+        } else {
+            desktop_run_keybind((Desktop*)main_view->context, event->type, event->key);
         }
     }
 
     if(event->key == InputKeyBack) {
-        if(event->type == InputTypePress) {
-            xTimerChangePeriod(
-                main_view->poweroff_timer,
-                pdMS_TO_TICKS(DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT),
-                portMAX_DELAY);
-        } else if(event->type == InputTypeRelease) {
-            xTimerStop(main_view->poweroff_timer, portMAX_DELAY);
+        if(event->type == InputTypeLong) {
+            main_view->callback(DesktopMainEventOpenPowerOff, main_view->context);
         }
     }
 
@@ -88,19 +64,11 @@ DesktopMainView* desktop_main_alloc() {
     view_set_context(main_view->view, main_view);
     view_set_input_callback(main_view->view, desktop_main_input_callback);
 
-    main_view->poweroff_timer = xTimerCreate(
-        NULL,
-        pdMS_TO_TICKS(DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT),
-        pdFALSE,
-        main_view,
-        desktop_main_poweroff_timer_callback);
-
     return main_view;
 }
 
 void desktop_main_free(DesktopMainView* main_view) {
     furi_assert(main_view);
     view_free(main_view->view);
-    furi_timer_free(main_view->poweroff_timer);
     free(main_view);
 }

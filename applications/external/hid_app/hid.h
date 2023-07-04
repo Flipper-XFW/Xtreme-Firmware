@@ -17,7 +17,6 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include "views/hid_keynote.h"
-#include "views/hid_keynote_vertical.h"
 #include "views/hid_keyboard.h"
 #include "views/hid_numpad.h"
 #include "views/hid_media.h"
@@ -25,6 +24,9 @@
 #include "views/hid_mouse_jiggler.h"
 #include "views/hid_tikshorts.h"
 #include "views/hid_mouse_clicker.h"
+
+#include "hid_icons.h"
+#include <assets_icons.h>
 
 #include "hid_path.h"
 
@@ -43,7 +45,6 @@ struct Hid {
     Submenu* device_type_submenu;
     DialogEx* dialog;
     HidKeynote* hid_keynote;
-    HidKeynoteVertical* hid_keynote_vertical;
     HidKeyboard* hid_keyboard;
     HidNumpad* hid_numpad;
     HidMedia* hid_media;

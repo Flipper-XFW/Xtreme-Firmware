@@ -9,9 +9,12 @@ assetsenv = env.Clone(
 )
 assetsenv.ApplyLibFlags()
 
-icons = assetsenv.CompileIcons(
-    assetsenv.Dir("compiled"), assetsenv.Dir("#/assets/icons")
+icons_path = (
+    assetsenv.Dir("#/build/icons")
+    if assetsenv["IS_BASE_FIRMWARE"]
+    else assetsenv.Dir("compiled")
 )
+icons = assetsenv.CompileIcons(icons_path, assetsenv.Dir("#/assets/icons"))
 assetsenv.Alias("icons", icons)
 
 

@@ -14,6 +14,7 @@ extern "C" {
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include "../views/bad_kb_view.h"
+#include "../bad_kb_paths.h"
 
 #define FILE_BUFFER_LEN 16
 
@@ -60,7 +61,6 @@ struct BadKbState {
 typedef struct BadKbApp BadKbApp;
 
 typedef struct {
-    FuriHalUsbHidConfig hid_cfg;
     FuriThread* thread;
     BadKbState st;
 
@@ -83,11 +83,6 @@ typedef struct {
     FuriString* string_print;
     size_t string_print_pos;
 
-    bool set_usb_id;
-    bool set_bt_id;
-    bool has_usb_id;
-    bool has_bt_id;
-
     Bt* bt;
     BadKbApp* app;
 } BadKbScript;
@@ -108,24 +103,28 @@ void bad_kb_script_pause_resume(BadKbScript* bad_kb);
 
 BadKbState* bad_kb_script_get_state(BadKbScript* bad_kb);
 
-#define BAD_KB_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
-#define BAD_KB_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
+#define BAD_KB_NAME_LEN FURI_HAL_BT_ADV_NAME_LENGTH
+#define BAD_KB_MAC_LEN GAP_MAC_ADDR_SIZE
+#define BAD_KB_USB_LEN HID_MANUF_PRODUCT_NAME_LEN
 
-// this is the MAC address used when we do not forget paired device (BOUND STATE)
-extern const uint8_t BAD_KB_BOUND_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN];
-extern const uint8_t BAD_KB_EMPTY_MAC_ADDRESS[BAD_KB_MAC_ADDRESS_LEN];
+extern const uint8_t BAD_KB_EMPTY_MAC[BAD_KB_MAC_LEN];
+extern uint8_t BAD_KB_BOUND_MAC[BAD_KB_MAC_LEN]; // For remember mode
 
 typedef enum {
     BadKbAppErrorNoFiles,
-    BadKbAppErrorCloseRpc,
 } BadKbAppError;
 
 typedef struct {
-    char bt_name[BAD_KB_ADV_NAME_MAX_LEN + 1];
-    uint8_t bt_mac[BAD_KB_MAC_ADDRESS_LEN];
-    FuriHalUsbInterface* usb_mode;
-    GapPairing bt_mode;
+    char bt_name[BAD_KB_NAME_LEN];
+    uint8_t bt_mac[BAD_KB_MAC_LEN];
+    FuriHalUsbHidConfig usb_cfg;
 } BadKbConfig;
+
+typedef enum {
+    BadKbConnModeNone,
+    BadKbConnModeUsb,
+    BadKbConnModeBt,
+} BadKbConnMode;
 
 struct BadKbApp {
     Gui* gui;
@@ -137,6 +136,10 @@ struct BadKbApp {
     VariableItemList* var_item_list;
     TextInput* text_input;
     ByteInput* byte_input;
+    char usb_name_buf[BAD_KB_USB_LEN];
+    uint16_t usb_vidpid_buf[2];
+    char bt_name_buf[BAD_KB_NAME_LEN];
+    uint8_t bt_mac_buf[BAD_KB_MAC_LEN];
 
     BadKbAppError error;
     FuriString* file_path;
@@ -147,15 +150,31 @@ struct BadKbApp {
     Bt* bt;
     bool is_bt;
     bool bt_remember;
-    BadKbConfig config;
-    BadKbConfig prev_config;
+    BadKbConfig config; // User options
+    BadKbConfig id_config; // ID and BT_ID values
+
+    bool set_usb_id;
+    bool set_bt_id;
+    bool has_usb_id;
+    bool has_bt_id;
+
+    GapPairing prev_bt_mode;
+    char prev_bt_name[BAD_KB_NAME_LEN];
+    uint8_t prev_bt_mac[BAD_KB_MAC_LEN];
+    FuriHalUsbInterface* prev_usb_mode;
+
+    FuriHalUsbHidConfig* hid_cfg;
+    BadKbConnMode conn_mode;
     FuriThread* conn_init_thread;
-    FuriThread* switch_mode_thread;
 };
 
-int32_t bad_kb_config_switch_mode(BadKbApp* app);
+int32_t bad_kb_conn_apply(BadKbApp* app);
 
-void bad_kb_config_refresh_menu(BadKbApp* app);
+void bad_kb_conn_reset(BadKbApp* app);
+
+void bad_kb_config_refresh(BadKbApp* app);
+
+void bad_kb_config_adjust(BadKbConfig* cfg);
 
 #ifdef __cplusplus
 }

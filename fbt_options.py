@@ -1,5 +1,6 @@
 from pathlib import Path
 import posixpath
+import datetime
 
 # For more details on these options, run 'fbt -h'
 
@@ -16,13 +17,15 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "XFW-0048_03062023"
+
+# How about we add the timestamp automatically. Solves some problems
+DIST_SUFFIX = f"XFW-0049_{datetime.datetime.today().strftime('%d%m%Y')}"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
 
 # Must match lib/stm32wb_copro version
-COPRO_CUBE_VERSION = "1.13.3"
+COPRO_CUBE_VERSION = "1.15.0"
 
 COPRO_CUBE_DIR = "lib/stm32wb_copro"
 

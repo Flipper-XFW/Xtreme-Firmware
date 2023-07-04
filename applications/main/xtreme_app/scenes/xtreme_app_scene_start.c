@@ -15,10 +15,17 @@ void xtreme_app_scene_start_var_item_list_callback(void* context, uint32_t index
 void xtreme_app_scene_start_on_enter(void* context) {
     XtremeApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
+    VariableItem* item;
 
-    variable_item_list_add(var_item_list, "Interface", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Protocols", 0, NULL, app);
-    variable_item_list_add(var_item_list, "Misc", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "Interface", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Protocols", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Misc", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
     variable_item_list_add(var_item_list, furi_string_get_cstr(app->version_tag), 0, NULL, app);
 
     variable_item_list_set_enter_callback(
@@ -48,12 +55,15 @@ bool xtreme_app_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMisc);
             break;
         case VarItemListIndexVersion: {
-            if(storage_common_copy(
-                   furi_record_open(RECORD_STORAGE),
-                   EXT_PATH("dolphin/xfwfirstboot.bin"),
-                   EXT_PATH(".slideshow"))) {
-                app->show_slideshow = true;
-                xtreme_app_apply(app);
+            for(int i = 0; i < 10; i++) {
+                if(storage_common_copy(
+                       furi_record_open(RECORD_STORAGE),
+                       EXT_PATH("dolphin/xfwfirstboot.bin"),
+                       EXT_PATH(".slideshow"))) {
+                    app->show_slideshow = true;
+                    xtreme_app_apply(app);
+                    break;
+                }
             }
             break;
         }

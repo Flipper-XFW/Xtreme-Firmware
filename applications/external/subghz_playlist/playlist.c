@@ -6,7 +6,7 @@
 #include <storage/storage.h>
 
 #include <lib/toolbox/path.h>
-#include <subghz_playlist_icons.h>
+#include <assets_icons.h>
 
 #include <lib/subghz/protocols/protocol_items.h>
 #include <flipper_format/flipper_format_i.h>
@@ -22,8 +22,6 @@
 #include "playlist_file.h"
 #include "canvas_helper.h"
 
-#define PLAYLIST_FOLDER "/ext/subghz/playlist"
-#define PLAYLIST_EXT ".txt"
 #define TAG "Playlist"
 
 #define STATE_NONE 0
@@ -695,9 +693,9 @@ void playlist_free(Playlist* app) {
     free(app);
 }
 
-int32_t playlist_app(void* p) {
+int32_t playlist_app(char* p) {
     UNUSED(p);
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     // create playlist folder
     {
@@ -725,7 +723,9 @@ int32_t playlist_app(void* p) {
     furi_hal_power_suppress_charge_enter();
 
     // select playlist file
-    {
+    if(p && strlen(p)) {
+        furi_string_set(app->file_path, p);
+    } else {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogsFileBrowserOptions browser_options;
         dialog_file_browser_set_basic_options(&browser_options, PLAYLIST_EXT, &I_sub1_10px);

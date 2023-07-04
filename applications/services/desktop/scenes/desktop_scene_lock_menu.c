@@ -4,7 +4,6 @@
 #include <toolbox/saved_struct.h>
 #include <stdbool.h>
 #include <loader/loader.h>
-// #include <loader/loader_i.h>
 #include <xtreme.h>
 
 #include "../desktop_i.h"
@@ -24,10 +23,10 @@ void desktop_scene_lock_menu_callback(DesktopEvent event, void* context) {
 void desktop_scene_lock_menu_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
 
-    DESKTOP_SETTINGS_LOAD(&desktop->settings);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
-    desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop->settings.pin_code.length > 0);
+    desktop_lock_menu_set_pin_state(
+        desktop->lock_menu, desktop_pin_is_valid(&desktop->settings.pin_code));
     desktop_lock_menu_set_stealth_mode_state(
         desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
     desktop_lock_menu_set_idx(desktop->lock_menu, 3);
@@ -62,8 +61,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         int check_pin_changed =
             scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
         if(check_pin_changed) {
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.pin_code.length > 0) {
+            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
                 desktop_lock(desktop, true);
@@ -90,11 +88,11 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventLockPin:
             desktop_scene_lock_menu_save_settings(desktop);
-            if(desktop->settings.pin_code.length > 0) {
+            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock(desktop, true);
             } else {
-                LoaderStatus status =
-                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                LoaderStatus status = loader_start(
+                    desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
                 if(status == LoaderStatusOk) {
                     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
                 } else {
@@ -105,15 +103,15 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventLockPinOff:
             desktop_scene_lock_menu_save_settings(desktop);
-            if(desktop->settings.pin_code.length > 0) {
+            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock(desktop, true);
                 Power* power = furi_record_open(RECORD_POWER);
                 furi_delay_ms(500);
                 power_off(power);
                 furi_record_close(RECORD_POWER);
             } else {
-                LoaderStatus status =
-                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                LoaderStatus status = loader_start(
+                    desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG, NULL);
                 if(status == LoaderStatusOk) {
                     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 2);
                 } else {
@@ -124,7 +122,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventXtreme:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start(desktop->loader, "Xtreme", NULL);
+            loader_start_detached_with_gui_error(desktop->loader, "Xtreme", NULL);
             consumed = true;
             break;
         case DesktopLockMenuEventStealthModeOn:

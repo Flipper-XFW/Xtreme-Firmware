@@ -43,7 +43,7 @@ static RpcSessionContext rpc_session[TEST_RPC_SESSIONS];
 
 #define TAG "UnitTestsRpc"
 #define MAX_RECEIVE_OUTPUT_TIMEOUT 3000
-#define MAX_NAME_LENGTH 255
+#define MAX_NAME_LENGTH 254
 #define MAX_DATA_SIZE 512u // have to be exact as in rpc_storage.c
 #define TEST_DIR TEST_DIR_NAME "/"
 #define TEST_DIR_NAME EXT_PATH("unit_tests_tmp")
@@ -186,7 +186,7 @@ static void clean_directory(Storage* fs_api, const char* clean_dir) {
     File* dir = storage_file_alloc(fs_api);
     if(storage_dir_open(dir, clean_dir)) {
         FileInfo fileinfo;
-        char* name = malloc(MAX_NAME_LENGTH + 1);
+        char* name = malloc(MAX_NAME_LENGTH);
         while(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
             size_t size = strlen(clean_dir) + strlen(name) + 1 + 1;
             char* fullname = malloc(size);
@@ -598,7 +598,7 @@ static void test_rpc_storage_list_create_expected_list(
 
     while(!finish) {
         FileInfo fileinfo;
-        char* name = malloc(MAX_NAME_LENGTH + 1);
+        char* name = malloc(MAX_NAME_LENGTH);
         if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
             if(i == COUNT_OF(list->file)) {
                 list->file_count = i;

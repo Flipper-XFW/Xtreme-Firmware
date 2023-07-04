@@ -74,7 +74,7 @@ void flipper_migrate_files() {
     furi_record_close(RECORD_STORAGE);
 }
 
-void flipper_start_service(const FlipperApplication* service) {
+void flipper_start_service(const FlipperInternalApplication* service) {
     FURI_LOG_D(TAG, "Starting service %s", service->name);
 
     FuriThread* thread =

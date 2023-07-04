@@ -7,7 +7,6 @@
 #include <furi_hal.h>
 #include <portmacro.h>
 #include <stdint.h>
-#include <applications/main/archive/helpers/favorite_timeout.h>
 
 static bool updater_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -35,7 +34,6 @@ static void
 
 Updater* updater_alloc(char* arg) {
     Updater* updater = malloc(sizeof(Updater));
-    process_favorite_launch(&arg);
     if(arg && strlen(arg)) {
         updater->startup_arg = furi_string_alloc_set(arg);
         furi_string_replace(updater->startup_arg, ANY_PATH(""), EXT_PATH(""));

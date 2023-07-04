@@ -2,6 +2,8 @@
 #include "elf/elf_file.h"
 #include <notification/notification_messages.h>
 #include "application_assets.h"
+#include <loader/firmware_api/firmware_api.h>
+#include <storage/storage_processing.h>
 
 #include <m-list.h>
 
@@ -81,6 +83,12 @@ void flipper_application_free(FlipperApplication* app) {
     }
 
     elf_file_free(app->elf);
+
+    if(app->ep_thread_args) {
+        free(app->ep_thread_args);
+        app->ep_thread_args = NULL;
+    }
+
     free(app);
 }
 
@@ -224,25 +232,25 @@ static int32_t flipper_application_thread(void* context) {
     return ret_code;
 }
 
-FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
+FuriThread* flipper_application_alloc_thread(FlipperApplication* app, const char* args) {
     furi_check(app->thread == NULL);
     furi_check(!flipper_application_is_plugin(app));
-    app->ep_thread_args = args;
+
+    if(app->ep_thread_args) {
+        free(app->ep_thread_args);
+    }
+
+    if(args) {
+        app->ep_thread_args = strdup(args);
+    } else {
+        app->ep_thread_args = NULL;
+    }
 
     const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
     app->thread = furi_thread_alloc_ex(
         manifest->name, manifest->stack_size, flipper_application_thread, app);
 
     return app->thread;
-}
-
-void flipper_application_despawn(FlipperApplication* app) {
-    furi_check(app->thread != NULL);
-    furi_check(!flipper_application_is_plugin(app));
-
-    furi_thread_join(app->thread);
-    furi_thread_free(app->thread);
-    app->thread = NULL;
 }
 
 static const char* preload_status_strings[] = {
@@ -298,4 +306,52 @@ const FlipperAppPluginDescriptor*
         lib_descriptor->ep_api_version);
 
     return lib_descriptor;
+}
+
+bool flipper_application_load_name_and_icon(
+    FuriString* path,
+    Storage* storage,
+    uint8_t** icon_ptr,
+    FuriString* item_name) {
+    bool load_success = true;
+
+    StorageData* storage_data;
+    if(storage_get_data(storage, path, &storage_data) == FSE_OK &&
+       storage_path_already_open(path, storage_data)) {
+        load_success = false;
+    }
+
+    if(load_success) {
+        load_success = false;
+
+        FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
+
+        FlipperApplicationPreloadStatus preload_res =
+            flipper_application_preload_manifest(app, furi_string_get_cstr(path));
+
+        if(preload_res == FlipperApplicationPreloadStatusSuccess ||
+           preload_res == FlipperApplicationPreloadStatusApiMismatch) {
+            const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
+            if(manifest->has_icon && icon_ptr != NULL && *icon_ptr != NULL) {
+                memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
+            }
+            furi_string_set(item_name, manifest->name);
+            load_success = true;
+        } else {
+            FURI_LOG_E(TAG, "Failed to preload %s", furi_string_get_cstr(path));
+        }
+
+        flipper_application_free(app);
+    }
+
+    if(!load_success) {
+        size_t offset = furi_string_search_rchar(path, '/');
+        if(offset != FURI_STRING_FAILURE) {
+            furi_string_set_n(item_name, path, offset + 1, furi_string_size(path) - offset - 1);
+        } else {
+            furi_string_set(item_name, path);
+        }
+    }
+
+    return load_success;
 }

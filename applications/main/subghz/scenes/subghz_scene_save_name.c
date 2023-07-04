@@ -6,8 +6,6 @@
 #include <gui/modules/validators.h>
 #include <dolphin/dolphin.h>
 
-#define MAX_TEXT_INPUT_LEN 23
-
 void subghz_scene_save_name_text_input_callback(void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -56,7 +54,7 @@ void subghz_scene_save_name_on_enter(void* context) {
 
     if(!subghz_path_is_file(subghz->file_path)) {
         char file_name_buf[SUBGHZ_MAX_LEN_NAME] = {0};
-        if(furi_hal_subghz_get_timestamp_file_names()) {
+        if(subghz->last_settings->timestamp_file_names) {
             SubGhzProtocolDecoderBase* decoder_result = subghz_txrx_get_decoder(subghz->txrx);
             if(decoder_result != 0x0) {
                 if(decoder_result != NULL) {
@@ -108,7 +106,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         subghz_scene_save_name_text_input_callback,
         subghz,
         subghz->file_name_tmp,
-        MAX_TEXT_INPUT_LEN,
+        SUBGHZ_MAX_LEN_NAME,
         dev_name_empty);
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
@@ -180,9 +178,9 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                     // Ditto, for RAW signals
                 } else if(scene_manager_has_previous_scene(
                               subghz->scene_manager, SubGhzSceneSetType)) {
-                    DOLPHIN_DEED(DolphinDeedSubGhzAddManually);
+                    dolphin_deed(DolphinDeedSubGhzAddManually);
                 } else {
-                    DOLPHIN_DEED(DolphinDeedSubGhzSave);
+                    dolphin_deed(DolphinDeedSubGhzSave);
                 }
                 return true;
             } else {

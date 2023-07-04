@@ -11,7 +11,7 @@ static bool xtreme_app_scene_interface_mainmenu_add_file_browser_callback(
     FuriString* item_name) {
     UNUSED(context);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    bool success = fap_loader_load_name_and_icon(file_path, storage, icon_ptr, item_name);
+    bool success = flipper_application_load_name_and_icon(file_path, storage, icon_ptr, item_name);
     furi_record_close(RECORD_STORAGE);
     return success;
 }
@@ -32,7 +32,7 @@ void xtreme_app_scene_interface_mainmenu_add_on_enter(void* context) {
     if(dialog_file_browser_show(app->dialogs, string, string, &browser_options)) {
         CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(string)));
         Storage* storage = furi_record_open(RECORD_STORAGE);
-        fap_loader_load_name_and_icon(string, storage, NULL, string);
+        flipper_application_load_name_and_icon(string, storage, NULL, string);
         furi_record_close(RECORD_STORAGE);
         CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(string)));
         app->save_mainmenu_apps = true;

@@ -138,7 +138,7 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
         furi_hal_info_get_api_version(&api_major, &api_minor);
         furi_string_cat_printf(
             buffer,
-            "%s  %s\n%s  F%d  %d.%d  %s\nhttps://flipper-xtre.me/",
+            "%s   %s\n%s   F%d:%d.%d   %s\nhttps://flipper-xtre.me/",
             version_get_version(ver),
             version_get_builddate(ver),
             version_get_githash(ver),

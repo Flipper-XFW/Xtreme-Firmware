@@ -1,8 +1,6 @@
 #include "../avr_isp_app_i.h"
 #include <gui/modules/validators.h>
 
-#define MAX_TEXT_INPUT_LEN 22
-
 void avr_isp_scene_input_name_text_callback(void* context) {
     furi_assert(context);
 
@@ -46,7 +44,7 @@ void avr_isp_scene_input_name_on_enter(void* context) {
         avr_isp_scene_input_name_text_callback,
         app,
         app->file_name_tmp,
-        MAX_TEXT_INPUT_LEN, // buffer size
+        AVR_ISP_MAX_LEN_NAME, // buffer size
         dev_name_empty);
 
     ValidatorIsFile* validator_is_file =

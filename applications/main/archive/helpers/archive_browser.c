@@ -6,7 +6,7 @@
 #include <core/common_defines.h>
 #include <core/log.h>
 #include <gui/modules/file_browser_worker.h>
-#include <fap_loader/fap_loader_app.h>
+#include <flipper_application/flipper_application.h>
 #include <math.h>
 #include <furi_hal.h>
 
@@ -28,7 +28,7 @@ static void
             {
                 files_array_reset(model->files);
                 model->item_cnt = item_cnt;
-                model->item_idx = (file_idx > 0) ? file_idx : 0;
+                model->item_idx = file_idx;
                 load_offset =
                     CLAMP(model->item_idx - FILE_LIST_BUF_LEN / 2, (int32_t)model->item_cnt, 0);
                 model->array_offset = 0;
@@ -75,11 +75,31 @@ static void archive_list_item_cb(
             ArchiveBrowserViewModel * model,
             {
                 if(model->item_cnt <= BROWSER_SORT_THRESHOLD) {
+                    FuriString* selected = NULL;
+                    if(model->item_idx >= 0) {
+                        selected = furi_string_alloc_set(
+                            files_array_get(model->files, model->item_idx)->path);
+                    }
+
                     files_array_sort(model->files);
+
+                    if(selected != NULL) {
+                        for(uint32_t i = 0; i < model->item_cnt; i++) {
+                            if(!furi_string_cmp(files_array_get(model->files, i)->path, selected)) {
+                                model->item_idx = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(model->item_idx < 0) {
+                        model->item_idx = 0;
+                    }
                 }
                 model->list_loading = false;
             },
             true);
+        archive_update_offset(browser);
     }
 }
 
@@ -385,7 +405,7 @@ void archive_add_app_item(ArchiveBrowserView* browser, const char* name) {
 static bool archive_get_fap_meta(FuriString* file_path, FuriString* fap_name, uint8_t** icon_ptr) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
-    if(fap_loader_load_name_and_icon(file_path, storage, icon_ptr, fap_name)) {
+    if(flipper_application_load_name_and_icon(file_path, storage, icon_ptr, fap_name)) {
         success = true;
     }
     furi_record_close(RECORD_STORAGE);
@@ -449,7 +469,8 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
 }
 
 static bool archive_is_dir_exists(FuriString* path) {
-    if(furi_string_equal(path, STORAGE_ANY_PATH_PREFIX)) {
+    if(furi_string_equal(path, STORAGE_INT_PATH_PREFIX) ||
+       furi_string_equal(path, STORAGE_EXT_PATH_PREFIX)) {
         return true;
     }
     bool state = false;
@@ -468,19 +489,28 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     furi_assert(browser);
     ArchiveTabEnum tab = archive_get_tab(browser);
 
+    if(tab == ArchiveTabSearch) {
+        ArchiveApp* archive;
+        with_view_model(
+            browser->view, ArchiveBrowserViewModel * model, { archive = model->archive; }, false);
+        scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneSearch, false);
+        if(archive->thread) {
+            furi_thread_join(archive->thread);
+            furi_thread_free(archive->thread);
+            archive->thread = NULL;
+        }
+    }
+
     browser->last_tab_switch_dir = key;
 
-    if(key == InputKeyLeft) {
-        tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
-    } else {
-        tab = (tab + 1) % ArchiveTabTotal;
-    }
-    if(tab == ArchiveTabInternal && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    for(int i = 0; i < 2; i++) {
         if(key == InputKeyLeft) {
             tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
         } else {
             tab = (tab + 1) % ArchiveTabTotal;
         }
+        if(tab == ArchiveTabInternal && !XTREME_SETTINGS()->show_internal_tab) continue;
+        break;
     }
 
     browser->is_root = true;
@@ -488,32 +518,40 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
 
     furi_string_set(browser->path, archive_get_default_path(tab));
     bool tab_empty = true;
+    bool is_app_tab = furi_string_start_with_str(browser->path, "/app:");
     if(tab == ArchiveTabFavorites) {
-        if(archive_favorites_count(browser) > 0) {
+        if(archive_favorites_count() > 0) {
             tab_empty = false;
         }
-    } else if(furi_string_start_with_str(browser->path, "/app:")) {
+    } else if(is_app_tab) {
         char* app_name = strchr(furi_string_get_cstr(browser->path), ':');
         if(app_name != NULL) {
             if(archive_app_is_available(browser, furi_string_get_cstr(browser->path))) {
                 tab_empty = false;
+                if(tab == ArchiveTabSearch) {
+                    archive_file_array_rm_all(browser);
+                    archive_add_app_item(browser, "/app:search/Search for files");
+                    archive_set_item_count(browser, 1);
+                }
             }
         }
     } else {
         tab = archive_get_tab(browser);
         if(archive_is_dir_exists(browser->path)) {
-            bool skip_assets = (strcmp(archive_get_tab_ext(tab), "*") == 0) ? false : true;
+            bool is_browser = !strcmp(archive_get_tab_ext(tab), "*");
+            bool skip_assets = !is_browser;
             // Hide dot files everywhere except Browser if in debug mode
-            bool hide_dot_files = (strcmp(archive_get_tab_ext(tab), "*") == 0) ?
-                                      !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) :
-                                      true;
+            bool hide_dot_files = !is_browser ? true :
+                                  tab == ArchiveTabInternal ?
+                                                false :
+                                                !XTREME_SETTINGS()->show_hidden_files;
             archive_file_browser_set_path(
                 browser, browser->path, archive_get_tab_ext(tab), skip_assets, hide_dot_files);
             tab_empty = false; // Empty check will be performed later
         }
     }
 
-    if((tab_empty) && (tab != ArchiveTabBrowser)) {
+    if(tab_empty && tab != ArchiveTabBrowser && tab != ArchiveTabInternal) {
         archive_switch_tab(browser, key);
     } else {
         with_view_model(
@@ -522,6 +560,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
             {
                 model->item_idx = 0;
                 model->array_offset = 0;
+                model->is_app_tab = is_app_tab;
             },
             false);
         archive_get_items(browser, furi_string_get_cstr(browser->path));
@@ -533,14 +572,32 @@ void archive_enter_dir(ArchiveBrowserView* browser, FuriString* path) {
     furi_assert(browser);
     furi_assert(path);
 
-    int32_t idx_temp = 0;
-
-    with_view_model(
-        browser->view, ArchiveBrowserViewModel * model, { idx_temp = model->item_idx; }, false);
-
     furi_string_set(browser->path, path);
 
-    file_browser_worker_folder_enter(browser->worker, path, idx_temp);
+    const char* switch_ext = NULL;
+    switch(archive_get_tab(browser)) {
+    case ArchiveTabSubGhz:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("subghz/playlist")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeSubghzPlaylist];
+        } else if(furi_string_cmp_str(browser->path, EXT_PATH("subghz/remote")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeSubghzRemote];
+        }
+        break;
+    case ArchiveTabInfrared:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("infrared/remote")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeInfraredRemote];
+        }
+        break;
+    default:
+        break;
+    }
+
+    if(switch_ext != NULL &&
+       strcmp(switch_ext, file_browser_worker_get_filter_ext(browser->worker)) != 0) {
+        file_browser_worker_set_filter_ext(browser->worker, browser->path, switch_ext);
+    } else {
+        file_browser_worker_folder_enter(browser->worker, path, 0);
+    }
 }
 
 void archive_leave_dir(ArchiveBrowserView* browser) {
@@ -549,15 +606,38 @@ void archive_leave_dir(ArchiveBrowserView* browser) {
     size_t dirname_start = furi_string_search_rchar(browser->path, '/');
     furi_string_left(browser->path, dirname_start);
 
-    file_browser_worker_folder_exit(browser->worker);
+    const char* switch_ext = NULL;
+    switch(archive_get_tab(browser)) {
+    case ArchiveTabSubGhz:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("subghz")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeSubGhz];
+        }
+        break;
+    case ArchiveTabInfrared:
+        if(furi_string_cmp_str(browser->path, EXT_PATH("infrared")) == 0) {
+            switch_ext = known_ext[ArchiveFileTypeInfrared];
+        }
+        break;
+    default:
+        break;
+    }
+
+    if(switch_ext != NULL &&
+       strcmp(switch_ext, file_browser_worker_get_filter_ext(browser->worker)) != 0) {
+        file_browser_worker_set_filter_ext(browser->worker, browser->path, switch_ext);
+    } else {
+        file_browser_worker_folder_exit(browser->worker);
+    }
 }
 
 void archive_refresh_dir(ArchiveBrowserView* browser) {
     furi_assert(browser);
 
-    int32_t idx_temp = 0;
-
-    with_view_model(
-        browser->view, ArchiveBrowserViewModel * model, { idx_temp = model->item_idx; }, false);
-    file_browser_worker_folder_refresh(browser->worker, idx_temp);
+    ArchiveFile_t* current = archive_get_current_file(browser);
+    FuriString* str = furi_string_alloc();
+    if(current != NULL) {
+        path_extract_basename(furi_string_get_cstr(current->path), str);
+    }
+    file_browser_worker_folder_refresh(browser->worker, furi_string_get_cstr(str));
+    furi_string_free(str);
 }

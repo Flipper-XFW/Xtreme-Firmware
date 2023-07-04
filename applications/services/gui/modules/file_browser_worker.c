@@ -16,7 +16,7 @@
 
 #define ASSETS_DIR "assets"
 #define BROWSER_ROOT STORAGE_ANY_PATH_PREFIX
-#define FILE_NAME_LEN_MAX 256
+#define FILE_NAME_LEN_MAX 254
 #define LONG_LOAD_THRESHOLD 100
 
 typedef enum {
@@ -32,8 +32,6 @@ typedef enum {
     (WorkerEvtStop | WorkerEvtLoad | WorkerEvtFolderEnter | WorkerEvtFolderExit | \
      WorkerEvtFolderRefresh | WorkerEvtConfigChange)
 
-ARRAY_DEF(idx_last_array, int32_t)
-
 struct BrowserWorker {
     FuriThread* thread;
 
@@ -41,12 +39,11 @@ struct BrowserWorker {
     FuriString* path_start;
     FuriString* path_current;
     FuriString* path_next;
-    int32_t item_sel_idx;
+    bool keep_selection;
     uint32_t load_offset;
     uint32_t load_count;
     bool skip_assets;
     bool hide_dot_files;
-    idx_last_array_t idx_last;
 
     void* cb_ctx;
     BrowserWorkerFolderOpenCallback folder_cb;
@@ -328,7 +325,6 @@ static int32_t browser_worker(void* context) {
     uint32_t items_cnt = 0;
     FuriString* path;
     path = furi_string_alloc_set(BROWSER_ROOT);
-    browser->item_sel_idx = -1;
 
     FuriString* filename;
     filename = furi_string_alloc();
@@ -341,21 +337,46 @@ static int32_t browser_worker(void* context) {
         furi_assert((flags & FuriFlagError) == 0);
 
         if(flags & WorkerEvtConfigChange) {
-            // If start path is a path to the file - try finding index of this file in a folder
-            if(browser_path_is_file(browser->path_next)) {
-                path_extract_filename(browser->path_next, filename, false);
-            }
-            idx_last_array_reset(browser->idx_last);
+            if(browser->keep_selection && furi_string_start_with(path, browser->path_next)) {
+                // New path is parent of current, keep prev selected in new view
+                furi_string_set(filename, path);
+                furi_string_right(filename, furi_string_size(browser->path_next));
+                furi_string_trim(filename, "/");
+                size_t pos = furi_string_search_char(filename, '/');
+                if(pos != FURI_STRING_FAILURE) {
+                    furi_string_left(filename, pos);
+                }
 
-            furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderEnter);
+                furi_string_set(path, browser->path_next);
+                bool is_root = browser_folder_check_and_switch(path);
+
+                int32_t file_idx = 0;
+                browser_folder_init(browser, path, filename, &items_cnt, &file_idx);
+                furi_string_set(browser->path_current, path);
+                FURI_LOG_D(
+                    TAG,
+                    "Config to: %s items: %lu idx: %ld",
+                    furi_string_get_cstr(path),
+                    items_cnt,
+                    file_idx);
+                if(browser->folder_cb) {
+                    browser->folder_cb(browser->cb_ctx, items_cnt, file_idx, is_root);
+                }
+                furi_string_reset(filename);
+
+            } else {
+                // If start path is a path to the file - try finding index of this file in a folder
+                if(browser_path_is_file(browser->path_next)) {
+                    path_extract_filename(browser->path_next, filename, false);
+                }
+
+                furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderEnter);
+            }
         }
 
         if(flags & WorkerEvtFolderEnter) {
             furi_string_set(path, browser->path_next);
             bool is_root = browser_folder_check_and_switch(path);
-
-            // Push previous selected item index to history array
-            idx_last_array_push_back(browser->idx_last, browser->item_sel_idx);
 
             int32_t file_idx = 0;
             browser_folder_init(browser, path, filename, &items_cnt, &file_idx);
@@ -373,15 +394,13 @@ static int32_t browser_worker(void* context) {
         }
 
         if(flags & WorkerEvtFolderExit) {
+            path_extract_basename(furi_string_get_cstr(path), filename);
+
             browser_path_trim(path);
             bool is_root = browser_folder_check_and_switch(path);
 
             int32_t file_idx = 0;
             browser_folder_init(browser, path, filename, &items_cnt, &file_idx);
-            if(idx_last_array_size(browser->idx_last) > 0) {
-                // Pop previous selected item index from history array
-                idx_last_array_pop_back(&file_idx, browser->idx_last);
-            }
             furi_string_set(browser->path_current, path);
             FURI_LOG_D(
                 TAG,
@@ -392,23 +411,26 @@ static int32_t browser_worker(void* context) {
             if(browser->folder_cb) {
                 browser->folder_cb(browser->cb_ctx, items_cnt, file_idx, is_root);
             }
+            furi_string_reset(filename);
         }
 
         if(flags & WorkerEvtFolderRefresh) {
+            furi_string_set(filename, browser->path_next);
+
             bool is_root = browser_folder_check_and_switch(path);
 
             int32_t file_idx = 0;
-            furi_string_reset(filename);
             browser_folder_init(browser, path, filename, &items_cnt, &file_idx);
             FURI_LOG_D(
                 TAG,
                 "Refresh folder: %s items: %lu idx: %ld",
                 furi_string_get_cstr(path),
                 items_cnt,
-                browser->item_sel_idx);
+                file_idx);
             if(browser->folder_cb) {
-                browser->folder_cb(browser->cb_ctx, items_cnt, browser->item_sel_idx, is_root);
+                browser->folder_cb(browser->cb_ctx, items_cnt, file_idx, is_root);
             }
+            furi_string_reset(filename);
         }
 
         if(flags & WorkerEvtLoad) {
@@ -442,8 +464,6 @@ BrowserWorker* file_browser_worker_alloc(
     bool hide_dot_files) {
     BrowserWorker* browser = malloc(sizeof(BrowserWorker));
 
-    idx_last_array_init(browser->idx_last);
-
     browser->filter_extension = furi_string_alloc_set(filter_ext);
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
@@ -473,8 +493,6 @@ void file_browser_worker_free(BrowserWorker* browser) {
     furi_string_free(browser->path_next);
     furi_string_free(browser->path_current);
     furi_string_free(browser->path_start);
-
-    idx_last_array_clear(browser->idx_last);
 
     free(browser);
 }
@@ -520,16 +538,33 @@ void file_browser_worker_set_config(
     bool hide_dot_files) {
     furi_assert(browser);
     furi_string_set(browser->path_next, path);
+    browser->keep_selection = false;
     furi_string_set(browser->filter_extension, filter_ext);
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
 }
 
+const char* file_browser_worker_get_filter_ext(BrowserWorker* browser) {
+    furi_assert(browser);
+    return furi_string_get_cstr(browser->filter_extension);
+}
+
+void file_browser_worker_set_filter_ext(
+    BrowserWorker* browser,
+    FuriString* path,
+    const char* filter_ext) {
+    furi_assert(browser);
+    furi_string_set(browser->path_next, path);
+    browser->keep_selection = true;
+    furi_string_set(browser->filter_extension, filter_ext);
+    furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
+}
+
 void file_browser_worker_folder_enter(BrowserWorker* browser, FuriString* path, int32_t item_idx) {
     furi_assert(browser);
     furi_string_set(browser->path_next, path);
-    browser->item_sel_idx = item_idx;
+    UNUSED(item_idx);
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderEnter);
 }
 
@@ -543,9 +578,13 @@ void file_browser_worker_folder_exit(BrowserWorker* browser) {
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderExit);
 }
 
-void file_browser_worker_folder_refresh(BrowserWorker* browser, int32_t item_idx) {
+void file_browser_worker_folder_refresh(BrowserWorker* browser, const char* item_name) {
     furi_assert(browser);
-    browser->item_sel_idx = item_idx;
+    if(item_name != NULL) {
+        furi_string_set(browser->path_next, item_name);
+    } else {
+        furi_string_reset(browser->path_next);
+    }
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderRefresh);
 }
 

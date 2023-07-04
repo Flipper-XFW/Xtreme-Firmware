@@ -1,5 +1,6 @@
 #include "ui_controls.h"
 #include <totp_icons.h>
+#include <assets_icons.h>
 #include "constants.h"
 
 #define TEXT_BOX_HEIGHT (13)

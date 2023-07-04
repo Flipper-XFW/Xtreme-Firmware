@@ -6,11 +6,7 @@
 
 #include "helpers/txrx/subghz_txrx.h"
 
-#ifdef APP_SUBGHZREMOTE
 #include <assets_icons.h>
-#else
-#include <subrem_remote_fap_icons.h>
-#endif
 
 #include "views/remote.h"
 
@@ -56,3 +52,5 @@ bool subrem_tx_start_sub(SubGhzRemoteApp* app, SubRemSubFilePreset* sub_preset);
 bool subrem_tx_stop_sub(SubGhzRemoteApp* app, bool forced);
 
 void subrem_save_active_sub(void* context);
+
+SubRemLoadMapState subrem_map_file_load(SubGhzRemoteApp* app, const char* file_path);

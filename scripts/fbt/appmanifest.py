@@ -1,7 +1,8 @@
 import os
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
 
 class FlipperManifestException(Exception):
@@ -12,6 +13,7 @@ class FlipperAppType(Enum):
     SERVICE = "Service"
     SYSTEM = "System"
     APP = "App"
+    FAPP = "Fapp"
     DEBUG = "Debug"
     ARCHIVE = "Archive"
     SETTINGS = "Settings"
@@ -19,11 +21,12 @@ class FlipperAppType(Enum):
     EXTERNAL = "External"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
-    EXTMAINAPP = "ExtMainApp"
 
 
 @dataclass
 class FlipperApplication:
+    APP_ID_REGEX: ClassVar[re.Pattern] = re.compile(r"^[a-z0-9_]+$")
+
     @dataclass
     class ExternallyBuiltFile:
         path: str
@@ -42,7 +45,6 @@ class FlipperApplication:
 
     appid: str
     apptype: FlipperAppType
-    preload: Optional[bool] = False
     name: Optional[str] = ""
     entry_point: Optional[str] = None
     flags: List[str] = field(default_factory=lambda: ["Default"])
@@ -86,6 +88,10 @@ class FlipperApplication:
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
+        if not self.APP_ID_REGEX.match(self.appid):
+            raise FlipperManifestException(
+                f"Invalid appid '{self.appid}'. Must match regex '{self.APP_ID_REGEX}'"
+            )
         if isinstance(self.fap_version, str):
             try:
                 self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
@@ -124,11 +130,6 @@ class AppManager:
                 raise FlipperManifestException(
                     f"Plugin {kw.get('appid')} must have 'requires' in manifest"
                 )
-        # Harmless - cdefines for external apps are meaningless
-        # if apptype == FlipperAppType.EXTERNAL and kw.get("cdefines"):
-        #     raise FlipperManifestException(
-        #         f"External app {kw.get('appid')} must not have 'cdefines' in manifest"
-        #     )
 
     def load_manifest(self, app_manifest_path: str, app_dir_node: object):
         if not os.path.exists(app_manifest_path):
@@ -349,12 +350,18 @@ class AppBuildset:
 
 class ApplicationsCGenerator:
     APP_TYPE_MAP = {
-        FlipperAppType.SERVICE: ("FlipperApplication", "FLIPPER_SERVICES"),
-        FlipperAppType.SYSTEM: ("FlipperApplication", "FLIPPER_SYSTEM_APPS"),
-        FlipperAppType.APP: ("FlipperApplication", "FLIPPER_APPS"),
-        FlipperAppType.DEBUG: ("FlipperApplication", "FLIPPER_DEBUG_APPS"),
-        FlipperAppType.SETTINGS: ("FlipperApplication", "FLIPPER_SETTINGS_APPS"),
-        FlipperAppType.STARTUP: ("FlipperOnStartHook", "FLIPPER_ON_SYSTEM_START"),
+        FlipperAppType.SERVICE: ("FlipperInternalApplication", "FLIPPER_SERVICES"),
+        FlipperAppType.SYSTEM: ("FlipperInternalApplication", "FLIPPER_SYSTEM_APPS"),
+        FlipperAppType.APP: ("FlipperInternalApplication", "FLIPPER_APPS"),
+        FlipperAppType.DEBUG: ("FlipperInternalApplication", "FLIPPER_DEBUG_APPS"),
+        FlipperAppType.SETTINGS: (
+            "FlipperInternalApplication",
+            "FLIPPER_SETTINGS_APPS",
+        ),
+        FlipperAppType.STARTUP: (
+            "FlipperInternalOnStartHook",
+            "FLIPPER_ON_SYSTEM_START",
+        ),
     }
 
     def __init__(self, buildset: AppBuildset, autorun_app: str = ""):
@@ -369,21 +376,21 @@ class ApplicationsCGenerator:
     def get_app_descr(self, app: FlipperApplication):
         if app.apptype == FlipperAppType.STARTUP:
             return app.entry_point
-        if app.apptype == FlipperAppType.EXTMAINAPP:
+        if app.apptype == FlipperAppType.FAPP:
             return f"""
     {{.app = NULL,
      .name = "{app.name}",
-     .appid = "/ext/apps/.Main/{app.appid}.fap",
-     .stack_size = {1 if app.preload else 0},
+     .appid = "/ext/apps/assets/{app.appid}.fap",
+     .stack_size = 0,
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
+     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
      .appid = "{app.appid}",
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
+     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
 
     def generate(self):
         contents = [
@@ -396,10 +403,10 @@ class ApplicationsCGenerator:
                 map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype))
             )
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
-            contents.append(f"{entry_type} {entry_block}[] = {{")
+            contents.append(f"const {entry_type} {entry_block}[] = {{")
             apps = self.buildset.get_apps_of_type(apptype)
             if apptype is FlipperAppType.APP:
-                apps += self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
+                apps += self.buildset.get_apps_of_type(FlipperAppType.FAPP)
             apps.sort(key=lambda app: app.order)
             contents.append(",\n".join(map(self.get_app_descr, apps)))
             contents.append("};")
@@ -412,7 +419,7 @@ class ApplicationsCGenerator:
             contents.extend(
                 [
                     self.get_app_ep_forward(archive_app[0]),
-                    f"const FlipperApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
+                    f"const FlipperInternalApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
                 ]
             )
 

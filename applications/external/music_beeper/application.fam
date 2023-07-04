@@ -1,5 +1,5 @@
 App(
-    appid="Music_Beeper",
+    appid="music_beeper",
     name="Music Beeper",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="music_beeper_app",
@@ -12,14 +12,5 @@ App(
     stack_size=2 * 1024,
     order=45,
     fap_icon="music_10px.png",
-    fap_icon_assets="icons",
-    fap_category="Music",
-)
-
-App(
-    appid="music_beeper_start",
-    apptype=FlipperAppType.STARTUP,
-    entry_point="music_beeper_on_system_start",
-    requires=["music_beeper"],
-    order=30,
+    fap_category="Media",
 )

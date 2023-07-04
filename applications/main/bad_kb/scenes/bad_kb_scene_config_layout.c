@@ -40,11 +40,9 @@ void bad_kb_scene_config_layout_on_enter(void* context) {
 bool bad_kb_scene_config_layout_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-    // BadKbApp* bad_kb = context;
     return false;
 }
 
 void bad_kb_scene_config_layout_on_exit(void* context) {
     UNUSED(context);
-    // BadKbApp* bad_kb = context;
 }

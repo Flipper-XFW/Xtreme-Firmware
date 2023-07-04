@@ -1,5 +1,6 @@
 #include "standby.h"
 #include <totp_icons.h>
+#include <assets_icons.h>
 #include "../../constants.h"
 
 void totp_scene_standby_render(Canvas* const canvas) {

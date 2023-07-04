@@ -11,4 +11,7 @@ App(
     order=90,
     fap_icon="game_2048.png",
     fap_category="Games",
+    fap_author="@eugene-kirzhanov",
+    fap_version="1.0",
+    fap_description="2048 Game",
 )

@@ -27,7 +27,7 @@ bool xtreme_app_apply(XtremeApp* app) {
         stream_free(stream);
     }
 
-    if(app->save_subghz_frequencies) {
+    if(app->save_subghz_freqs) {
         FlipperFormat* file = flipper_format_file_alloc(storage);
         do {
             FrequencyList_it_t it;
@@ -229,7 +229,7 @@ XtremeApp* xtreme_app_alloc() {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
             CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
-            fap_loader_load_name_and_icon(line, storage, NULL, line);
+            flipper_application_load_name_and_icon(line, storage, NULL, line);
             CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(line)));
         }
     }

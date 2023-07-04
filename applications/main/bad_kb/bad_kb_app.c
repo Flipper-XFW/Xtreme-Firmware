@@ -5,7 +5,6 @@
 #include <lib/toolbox/path.h>
 #include <xtreme.h>
 #include <lib/flipper_format/flipper_format.h>
-#include <applications/main/archive/helpers/favorite_timeout.h>
 
 #include <bt/bt_service/bt_i.h>
 #include <bt/bt_service/bt.h>
@@ -30,11 +29,13 @@ static void bad_kb_app_tick_event_callback(void* context) {
 
 static void bad_kb_load_settings(BadKbApp* app) {
     furi_string_reset(app->keyboard_layout);
-    strcpy(app->config.bt_name, "");
-    memcpy(
-        app->config.bt_mac,
-        furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-        BAD_KB_MAC_ADDRESS_LEN);
+    BadKbConfig* cfg = &app->config;
+    strcpy(cfg->bt_name, "");
+    memcpy(cfg->bt_mac, BAD_KB_EMPTY_MAC, BAD_KB_MAC_LEN);
+    strcpy(cfg->usb_cfg.manuf, "");
+    strcpy(cfg->usb_cfg.product, "");
+    cfg->usb_cfg.vid = 0;
+    cfg->usb_cfg.pid = 0;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -44,16 +45,29 @@ static void bad_kb_load_settings(BadKbApp* app) {
             furi_string_reset(app->keyboard_layout);
         }
         if(flipper_format_read_string(file, "Bt_Name", tmp_str) && !furi_string_empty(tmp_str)) {
-            strcpy(app->config.bt_name, furi_string_get_cstr(tmp_str));
+            strlcpy(cfg->bt_name, furi_string_get_cstr(tmp_str), BAD_KB_NAME_LEN);
         } else {
-            strcpy(app->config.bt_name, "");
+            strcpy(cfg->bt_name, "");
         }
-        if(!flipper_format_read_hex(
-               file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN)) {
-            memcpy(
-                app->config.bt_mac,
-                furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-                BAD_KB_MAC_ADDRESS_LEN);
+        if(!flipper_format_read_hex(file, "Bt_Mac", (uint8_t*)&cfg->bt_mac, BAD_KB_MAC_LEN)) {
+            memcpy(cfg->bt_mac, BAD_KB_EMPTY_MAC, BAD_KB_MAC_LEN);
+        }
+        if(flipper_format_read_string(file, "Usb_Manuf", tmp_str) && !furi_string_empty(tmp_str)) {
+            strlcpy(cfg->usb_cfg.manuf, furi_string_get_cstr(tmp_str), BAD_KB_USB_LEN);
+        } else {
+            strcpy(cfg->usb_cfg.manuf, "");
+        }
+        if(flipper_format_read_string(file, "Usb_Product", tmp_str) &&
+           !furi_string_empty(tmp_str)) {
+            strlcpy(cfg->usb_cfg.product, furi_string_get_cstr(tmp_str), BAD_KB_USB_LEN);
+        } else {
+            strcpy(cfg->usb_cfg.product, "");
+        }
+        if(!flipper_format_read_uint32(file, "Usb_Vid", &cfg->usb_cfg.vid, 1)) {
+            cfg->usb_cfg.vid = 0;
+        }
+        if(!flipper_format_read_uint32(file, "Usb_Pid", &cfg->usb_cfg.pid, 1)) {
+            cfg->usb_cfg.pid = 0;
         }
         furi_string_free(tmp_str);
         flipper_format_file_close(file);
@@ -77,120 +91,21 @@ static void bad_kb_load_settings(BadKbApp* app) {
 }
 
 static void bad_kb_save_settings(BadKbApp* app) {
+    BadKbConfig* cfg = &app->config;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_always(file, BAD_KB_SETTINGS_PATH)) {
         flipper_format_write_string(file, "Keyboard_Layout", app->keyboard_layout);
-        flipper_format_write_string_cstr(file, "Bt_Name", app->config.bt_name);
-        flipper_format_write_hex(
-            file, "Bt_Mac", (uint8_t*)&app->config.bt_mac, BAD_KB_MAC_ADDRESS_LEN);
+        flipper_format_write_string_cstr(file, "Bt_Name", cfg->bt_name);
+        flipper_format_write_hex(file, "Bt_Mac", (uint8_t*)&cfg->bt_mac, BAD_KB_MAC_LEN);
+        flipper_format_write_string_cstr(file, "Usb_Manuf", cfg->usb_cfg.manuf);
+        flipper_format_write_string_cstr(file, "Usb_Product", cfg->usb_cfg.product);
+        flipper_format_write_uint32(file, "Usb_Vid", &cfg->usb_cfg.vid, 1);
+        flipper_format_write_uint32(file, "Usb_Pid", &cfg->usb_cfg.pid, 1);
         flipper_format_file_close(file);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
-}
-
-void bad_kb_reload_worker(BadKbApp* app) {
-    bad_kb_script_close(app->bad_kb_script);
-    app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
-    bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
-}
-
-int32_t bad_kb_config_switch_mode(BadKbApp* app) {
-    if(!app->is_bt) furi_hal_bt_stop_advertising();
-    XTREME_SETTINGS()->bad_bt = app->is_bt;
-    XTREME_SETTINGS_SAVE();
-    bad_kb_reload_worker(app);
-    if(app->is_bt) furi_hal_bt_start_advertising();
-    bad_kb_config_refresh_menu(app);
-    return 0;
-}
-
-void bad_kb_config_refresh_menu(BadKbApp* app) {
-    scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
-    scene_manager_previous_scene(app->scene_manager);
-}
-
-void bad_kb_config_switch_remember_mode(BadKbApp* app) {
-    if(app->bt_remember) {
-        furi_hal_bt_set_profile_pairing_method(
-            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
-        bt_set_profile_mac_address(app->bt, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
-        bt_enable_peer_key_update(app->bt);
-    } else {
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
-        bt_set_profile_mac_address(app->bt, app->config.bt_mac);
-        bt_disable_peer_key_update(app->bt);
-    }
-    bad_kb_reload_worker(app);
-}
-
-int32_t bad_kb_connection_init(BadKbApp* app) {
-    app->prev_config.usb_mode = furi_hal_usb_get_config();
-    furi_hal_usb_set_config(NULL, NULL);
-
-    strcpy(
-        app->prev_config.bt_name, furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
-    memcpy(
-        app->prev_config.bt_mac,
-        furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-        BAD_KB_MAC_ADDRESS_LEN);
-    app->prev_config.bt_mode = furi_hal_bt_get_profile_pairing_method(FuriHalBtProfileHidKeyboard);
-
-    bt_timeout = bt_hid_delays[LevelRssi39_0];
-    bt_disconnect(app->bt);
-    bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
-    if(strcmp(app->config.bt_name, "") != 0) {
-        furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->config.bt_name);
-    }
-    if(app->bt_remember) {
-        furi_hal_bt_set_profile_mac_addr(
-            FuriHalBtProfileHidKeyboard, (uint8_t*)&BAD_KB_BOUND_MAC_ADDRESS);
-        furi_hal_bt_set_profile_pairing_method(
-            FuriHalBtProfileHidKeyboard, GapPairingPinCodeVerifyYesNo);
-    } else {
-        if(memcmp(
-               app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) !=
-           0) {
-            furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->config.bt_mac);
-        }
-        furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, GapPairingNone);
-    }
-    bt_set_profile(app->bt, BtProfileHidKeyboard);
-    if(strcmp(app->config.bt_name, "") == 0) {
-        strcpy(app->config.bt_name, furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard));
-    }
-    if(memcmp(app->config.bt_mac, (uint8_t*)&BAD_KB_EMPTY_MAC_ADDRESS, BAD_KB_MAC_ADDRESS_LEN) ==
-       0) {
-        memcpy(
-            app->config.bt_mac,
-            furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-            BAD_KB_MAC_ADDRESS_LEN);
-    }
-    if(app->is_bt) {
-        furi_hal_bt_start_advertising();
-        if(app->bt_remember) {
-            bt_enable_peer_key_update(app->bt);
-        } else {
-            bt_disable_peer_key_update(app->bt);
-        }
-    } else {
-        furi_hal_bt_stop_advertising();
-    }
-
-    return 0;
-}
-
-void bad_kb_connection_deinit(BadKbApp* app) {
-    furi_hal_usb_set_config(app->prev_config.usb_mode, NULL);
-
-    bt_disconnect(app->bt);
-    bt_keys_storage_set_default_path(app->bt);
-    furi_hal_bt_set_profile_adv_name(FuriHalBtProfileHidKeyboard, app->prev_config.bt_name);
-    furi_hal_bt_set_profile_mac_addr(FuriHalBtProfileHidKeyboard, app->prev_config.bt_mac);
-    furi_hal_bt_set_profile_pairing_method(FuriHalBtProfileHidKeyboard, app->prev_config.bt_mode);
-    bt_set_profile(app->bt, BtProfileSerial);
-    bt_enable_peer_key_update(app->bt);
 }
 
 BadKbApp* bad_kb_app_alloc(char* arg) {
@@ -200,7 +115,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->file_path = furi_string_alloc();
     app->keyboard_layout = furi_string_alloc();
-    process_favorite_launch(&arg);
     if(arg && strlen(arg)) {
         furi_string_set(app->file_path, arg);
     }
@@ -223,7 +137,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_tick_event_callback(
-        app->view_dispatcher, bad_kb_app_tick_event_callback, 500);
+        app->view_dispatcher, bad_kb_app_tick_event_callback, 250);
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, bad_kb_app_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
@@ -234,15 +148,29 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     app->bt->suppress_pin_screen = true;
     app->is_bt = XTREME_SETTINGS()->bad_bt;
     app->bt_remember = XTREME_SETTINGS()->bad_bt_remember;
+    bad_kb_config_adjust(&app->config);
+
+    // Save prev config
+    app->prev_usb_mode = furi_hal_usb_get_config();
+    FuriHalBtProfile kbd = FuriHalBtProfileHidKeyboard;
+    app->prev_bt_mode = furi_hal_bt_get_profile_pairing_method(kbd);
+    memcpy(app->prev_bt_mac, furi_hal_bt_get_profile_mac_addr(kbd), BAD_KB_MAC_LEN);
+    strlcpy(app->prev_bt_name, furi_hal_bt_get_profile_adv_name(kbd), BAD_KB_NAME_LEN);
+
+    // Adjust BT remember MAC to be serial MAC +2
+    memcpy(BAD_KB_BOUND_MAC, furi_hal_version_get_ble_mac(), BAD_KB_MAC_LEN);
+    BAD_KB_BOUND_MAC[2] += 2;
 
     // Custom Widget
     app->widget = widget_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewError, widget_get_view(app->widget));
+        app->view_dispatcher, BadKbAppViewWidget, widget_get_view(app->widget));
 
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfig, variable_item_list_get_view(app->var_item_list));
+        app->view_dispatcher,
+        BadKbAppViewVarItemList,
+        variable_item_list_get_view(app->var_item_list));
 
     app->bad_kb_view = bad_kb_alloc();
     view_dispatcher_add_view(
@@ -250,31 +178,25 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfigName, text_input_get_view(app->text_input));
+        app->view_dispatcher, BadKbAppViewTextInput, text_input_get_view(app->text_input));
 
     app->byte_input = byte_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewConfigMac, byte_input_get_view(app->byte_input));
+        app->view_dispatcher, BadKbAppViewByteInput, byte_input_get_view(app->byte_input));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    if(furi_hal_usb_is_locked()) {
-        app->error = BadKbAppErrorCloseRpc;
-        app->conn_init_thread = NULL;
-        scene_manager_next_scene(app->scene_manager, BadKbSceneError);
+    app->conn_mode = BadKbConnModeNone;
+    app->conn_init_thread =
+        furi_thread_alloc_ex("BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_conn_apply, app);
+    furi_thread_start(app->conn_init_thread);
+    if(!furi_string_empty(app->file_path)) {
+        app->bad_kb_script = bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
+        bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
+        scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
     } else {
-        app->conn_init_thread = furi_thread_alloc_ex(
-            "BadKbConnInit", 1024, (FuriThreadCallback)bad_kb_connection_init, app);
-        furi_thread_start(app->conn_init_thread);
-        if(!furi_string_empty(app->file_path)) {
-            app->bad_kb_script =
-                bad_kb_script_open(app->file_path, app->is_bt ? app->bt : NULL, app);
-            bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
-            scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
-        } else {
-            furi_string_set(app->file_path, BAD_KB_APP_BASE_FOLDER);
-            scene_manager_next_scene(app->scene_manager, BadKbSceneFileSelect);
-        }
+        furi_string_set(app->file_path, BAD_KB_APP_BASE_FOLDER);
+        scene_manager_next_scene(app->scene_manager, BadKbSceneFileSelect);
     }
 
     return app;
@@ -293,32 +215,34 @@ void bad_kb_app_free(BadKbApp* app) {
     bad_kb_free(app->bad_kb_view);
 
     // Custom Widget
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewError);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewWidget);
     widget_free(app->widget);
 
     // Variable item list
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfig);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
 
     // Text Input
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigName);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewTextInput);
     text_input_free(app->text_input);
 
     // Byte Input
-    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewConfigMac);
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewByteInput);
     byte_input_free(app->byte_input);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
-    // Restore bt config
+    // Restore connection config
     app->bt->suppress_pin_screen = false;
     if(app->conn_init_thread) {
         furi_thread_join(app->conn_init_thread);
         furi_thread_free(app->conn_init_thread);
-        bad_kb_connection_deinit(app);
+        app->conn_init_thread = NULL;
     }
+    bad_kb_conn_reset(app);
+    if(app->hid_cfg) free(app->hid_cfg);
 
     // Close records
     furi_record_close(RECORD_GUI);

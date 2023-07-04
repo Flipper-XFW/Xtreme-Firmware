@@ -3,14 +3,14 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <Music_Beeper_icons.h>
+#include <assets_icons.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 
 #define TAG "MusicBeeper"
 
-#define MUSIC_BEEPER_APP_PATH_FOLDER ANY_PATH("music_player")
+#define MUSIC_BEEPER_APP_PATH_FOLDER EXT_PATH("music_player")
 #define MUSIC_BEEPER_APP_EXTENSION "*"
 
 #define MUSIC_BEEPER_SEMITONE_HISTORY_SIZE 4

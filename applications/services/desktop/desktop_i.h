@@ -55,6 +55,7 @@ struct Desktop {
     ViewStack* locked_view_stack;
 
     DesktopSettings settings;
+    Keybind keybinds[KeybindTypeCount][KeybindKeyCount];
     DesktopViewPinInput* pin_input_view;
 
     ViewPort* lock_icon_viewport;

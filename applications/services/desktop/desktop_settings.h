@@ -5,20 +5,21 @@
 #include <stdbool.h>
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
-#include <loader/loader.h>
-
-#define DESKTOP_SETTINGS_VER (9)
 
 #define DESKTOP_SETTINGS_OLD_PATH CFG_PATH("desktop.settings")
 #define DESKTOP_SETTINGS_PATH INT_PATH(".desktop.settings")
 #define DESKTOP_SETTINGS_MAGIC (0x17)
-#define PIN_MAX_LENGTH 12
+#define DESKTOP_SETTINGS_VER (11)
+
+#define DESKTOP_KEYBINDS_PATH CFG_PATH(".desktop.keybinds")
+#define DESKTOP_KEYBINDS_MAGIC (0x14)
+#define DESKTOP_KEYBINDS_VER (1)
 
 #define DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG "run_pin_setup"
 
 #define MAX_PIN_SIZE 10
 #define MIN_PIN_SIZE 4
-#define MAX_APP_LENGTH 128
+#define MAX_KEYBIND_LENGTH 64
 
 typedef struct {
     InputKey data[MAX_PIN_SIZE];
@@ -26,19 +27,33 @@ typedef struct {
 } PinCode;
 
 typedef struct {
-    bool is_external;
-    char name_or_path[MAX_APP_LENGTH];
-} FavoriteApp;
+    char data[MAX_KEYBIND_LENGTH];
+} Keybind;
+
+typedef enum {
+    KeybindTypePress,
+    KeybindTypeHold,
+    KeybindTypeCount,
+} KeybindType;
+
+typedef enum {
+    KeybindKeyUp,
+    KeybindKeyDown,
+    KeybindKeyRight,
+    KeybindKeyLeft,
+    KeybindKeyCount,
+} KeybindKey;
 
 typedef struct {
-    FavoriteApp favorite_primary;
-    FavoriteApp favorite_secondary;
     PinCode pin_code;
     uint32_t auto_lock_delay_ms;
     bool auto_lock_with_pin;
-    uint8_t display_clock;
 } DesktopSettings;
 
 bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);
 
 bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x);
+
+bool DESKTOP_KEYBINDS_SAVE(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size);
+
+bool DESKTOP_KEYBINDS_LOAD(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size);

@@ -6,7 +6,7 @@
 #define TAG "XtremeSettings"
 
 XtremeSettings xtreme_settings = {
-    .asset_pack = "",
+    .asset_pack = "", // SFW
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
@@ -14,23 +14,27 @@ XtremeSettings xtreme_settings = {
     .wii_menu = true, // ON
     .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
+    .pin_unlock_from_app = false, // OFF
     .lockscreen_time = true, // ON
     .lockscreen_seconds = false, // OFF
     .lockscreen_date = true, // ON
     .lockscreen_statusbar = true, // ON
     .lockscreen_prompt = true, // ON
     .battery_icon = BatteryIconBarPercent, // Bar %
+    .statusbar_clock = false, // OFF
     .status_icons = true, // ON
     .bar_borders = true, // ON
     .bar_background = false, // OFF
     .sort_dirs_first = true, // ON
-    .dark_mode = false, // OFF
+    .show_hidden_files = false, // OFF
+    .show_internal_tab = false, // OFF
     .favorite_timeout = 0, // OFF
     .bad_bt = false, // USB
     .bad_bt_remember = false, // OFF
+    .dark_mode = false, // OFF
+    .rgb_backlight = false, // OFF
     .butthurt_timer = 21600, // 6 H
     .charge_cap = 100, // 100%
-    .rgb_backlight = false, // OFF
 };
 
 void XTREME_SETTINGS_LOAD() {
@@ -43,7 +47,6 @@ void XTREME_SETTINGS_LOAD() {
         FuriString* string = furi_string_alloc();
         if(flipper_format_read_string(file, "asset_pack", string)) {
             strlcpy(x->asset_pack, furi_string_get_cstr(string), XTREME_ASSETS_PACK_NAME_LEN);
-            x->is_nsfw = strncmp(x->asset_pack, "NSFW", strlen("NSFW")) == 0;
         }
         furi_string_free(string);
         uint32_t u;
@@ -74,6 +77,10 @@ void XTREME_SETTINGS_LOAD() {
             x->bad_pins_format = b;
         }
         flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "pin_unlock_from_app", &b, 1)) {
+            x->pin_unlock_from_app = b;
+        }
+        flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "lock_on_boot", &b, 1)) {
             x->lock_on_boot = b;
         }
@@ -102,6 +109,10 @@ void XTREME_SETTINGS_LOAD() {
             x->battery_icon = CLAMP(u, BatteryIconCount - 1U, 0U);
         }
         flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "statusbar_clock", &b, 1)) {
+            x->statusbar_clock = b;
+        }
+        flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "status_icons", &b, 1)) {
             x->status_icons = b;
         }
@@ -118,10 +129,12 @@ void XTREME_SETTINGS_LOAD() {
             x->sort_dirs_first = b;
         }
         flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "dark_mode", &b, 1)) {
-            {
-                x->dark_mode = b;
-            }
+        if(flipper_format_read_bool(file, "show_hidden_files", &b, 1)) {
+            x->show_hidden_files = b;
+        }
+        flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "show_internal_tab", &b, 1)) {
+            x->show_internal_tab = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "favorite_timeout", &u, 1)) {
@@ -136,16 +149,20 @@ void XTREME_SETTINGS_LOAD() {
             x->bad_bt_remember = b;
         }
         flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "dark_mode", &b, 1)) {
+            x->dark_mode = b;
+        }
+        flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "rgb_backlight", &b, 1)) {
+            x->rgb_backlight = b;
+        }
+        flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "butthurt_timer", &u, 1)) {
             x->butthurt_timer = CLAMP(u, 172800U, 0U);
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "charge_cap", &u, 1)) {
             x->charge_cap = CLAMP(u, 100U, 5U);
-        }
-        flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "rgb_backlight", &b, 1)) {
-            x->rgb_backlight = b;
         }
     }
     flipper_format_free(file);
@@ -166,24 +183,28 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "fallback_anim", &x->fallback_anim, 1);
         flipper_format_write_bool(file, "wii_menu", &x->wii_menu, 1);
         flipper_format_write_bool(file, "bad_pins_format", &x->bad_pins_format, 1);
+        flipper_format_write_bool(file, "pin_unlock_from_app", &x->pin_unlock_from_app, 1);
         flipper_format_write_bool(file, "lock_on_boot", &x->lock_on_boot, 1);
         flipper_format_write_bool(file, "lockscreen_time", &x->lockscreen_time, 1);
         flipper_format_write_bool(file, "lockscreen_seconds", &x->lockscreen_seconds, 1);
         flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
         flipper_format_write_bool(file, "lockscreen_statusbar", &x->lockscreen_statusbar, 1);
         flipper_format_write_bool(file, "lockscreen_prompt", &x->lockscreen_prompt, 1);
-        flipper_format_write_uint32(file, "battery_icon", (uint32_t*)&x->battery_icon, 1);
+        flipper_format_write_uint32(file, "battery_icon", &x->battery_icon, 1);
+        flipper_format_write_bool(file, "statusbar_clock", &x->statusbar_clock, 1);
         flipper_format_write_bool(file, "status_icons", &x->status_icons, 1);
         flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);
         flipper_format_write_bool(file, "bar_background", &x->bar_background, 1);
         flipper_format_write_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
-        flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);
+        flipper_format_write_bool(file, "show_hidden_files", &x->show_hidden_files, 1);
+        flipper_format_write_bool(file, "show_internal_tab", &x->show_internal_tab, 1);
         flipper_format_write_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
         flipper_format_write_bool(file, "bad_bt", &x->bad_bt, 1);
         flipper_format_write_bool(file, "bad_bt_remember", &x->bad_bt_remember, 1);
+        flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);
+        flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
         flipper_format_write_uint32(file, "butthurt_timer", &x->butthurt_timer, 1);
         flipper_format_write_uint32(file, "charge_cap", &x->charge_cap, 1);
-        flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);

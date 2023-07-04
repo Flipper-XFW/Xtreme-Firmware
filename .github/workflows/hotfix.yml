@@ -35,8 +35,8 @@ jobs:
         run: |
           set -e
           for TARGET in ${TARGETS}; do
-            TARGET="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET updater_package
+            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
+            ./fbt TARGET_HW=$TARGET_HW FORCE_NO_DIRTY=1 updater_package
           done
 
       - name: "Check for uncommitted changes"

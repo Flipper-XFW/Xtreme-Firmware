@@ -34,7 +34,8 @@ static void desktop_scene_main_interact_animation_callback(void* context) {
 }
 
 #ifdef APP_ARCHIVE
-static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {
+static void
+    desktop_switch_to_app(Desktop* desktop, const FlipperInternalApplication* flipper_app) {
     furi_assert(desktop);
     furi_assert(flipper_app);
     furi_assert(flipper_app->app);
@@ -59,23 +60,6 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
     furi_thread_start(desktop->scene_thread);
 }
 #endif
-
-static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
-    LoaderStatus status = LoaderStatusErrorInternal;
-    if(application->is_external) {
-        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, application->name_or_path);
-    } else if(strlen(application->name_or_path) > 0) {
-        status = loader_start(desktop->loader, application->name_or_path, NULL);
-    } else {
-        // No favourite app is set! So we skipping this part
-        return;
-        //status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, NULL);
-    }
-
-    if(status != LoaderStatusOk) {
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
-    }
-}
 
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -123,7 +107,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        case DesktopMainEventLock:
+        case DesktopMainEventLockKeypad:
+            desktop_lock(desktop, false);
+            consumed = true;
+            break;
+
+        case DesktopMainEventLockWithPin:
             desktop_lock(desktop, true);
             consumed = true;
             break;
@@ -136,23 +125,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenPowerOff: {
-            LoaderStatus status = loader_start(desktop->loader, "Power", "off");
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start(desktop->loader, "Power", "off", NULL);
             consumed = true;
             break;
         }
-        case DesktopMainEventOpenFavoritePrimary:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_primary);
-            consumed = true;
-            break;
-        case DesktopMainEventOpenFavoriteSecondary:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_secondary);
-            consumed = true;
-            break;
         case DesktopAnimationEventCheckAnimation:
             animation_manager_check_blocking_process(desktop->animation_manager);
             consumed = true;
@@ -163,28 +139,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
+                desktop_run_keybind(desktop, InputTypeShort, InputKeyRight);
             }
             consumed = true;
             break;
-        case DesktopMainEventOpenPassport: {
-            LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
-            break;
-        }
-        case DesktopMainEventOpenClock: {
-            LoaderStatus status = loader_start(
-                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("apps/Misc/Nightstand.fap"));
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
-            break;
-        }
         case DesktopLockedEventUpdate:
             desktop_view_locked_update(desktop->locked_view);
             consumed = true;

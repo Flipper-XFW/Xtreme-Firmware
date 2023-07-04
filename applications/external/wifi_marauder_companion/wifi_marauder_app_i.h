@@ -22,6 +22,7 @@
 #include "wifi_marauder_text_input.h"
 
 #include <esp32_wifi_marauder_icons.h>
+#include <assets_icons.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>

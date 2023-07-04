@@ -27,7 +27,7 @@ typedef struct {
 typedef enum {
     FuriHalRtcFlagDebug = (1 << 0),
     FuriHalRtcFlagFactoryReset = (1 << 1),
-    FuriHalRtcFlagLock = (1 << 2),
+    FuriHalRtcFlagLock = (1 << 2), // WITH PIN, on OFW also for keypad (removes option to do both)
     FuriHalRtcFlagC2Update = (1 << 3),
     FuriHalRtcFlagHandOrient = (1 << 4),
     FuriHalRtcFlagLegacySleep = (1 << 5),

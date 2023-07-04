@@ -7,8 +7,7 @@
 #include "util/vector.h"
 
 #define CALIBRATION_DATA_VER (1)
-#define CALIBRATION_DATA_FILE_NAME ".calibration.data"
-#define CALIBRATION_DATA_PATH EXT_PATH(CALIBRATION_DATA_FILE_NAME)
+#define CALIBRATION_DATA_PATH APP_DATA_PATH("calibration.data")
 #define CALIBRATION_DATA_MAGIC (0x23)
 
 #define CALIBRATION_DATA_SAVE(x)   \

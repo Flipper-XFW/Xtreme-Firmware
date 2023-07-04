@@ -1,7 +1,7 @@
 Filetype: IR library file
 Version: 1
-# Last Updated 17th May, 2023
-# Last Checked 17th May, 2023
+# Last Updated 1st Jul, 2023
+# Last Checked 1st Jul, 2023
 #
 name: Power
 type: parsed
@@ -62,12 +62,6 @@ type: parsed
 protocol: NEC
 address: 40 00 00 00
 command: 13 00 00 00
-# 
-name: Vol_dn
-type: parsed
-protocol: NEC
-address: 40 00 00 00
-command: 12 00 00 00
 # 
 name: Mute
 type: parsed
@@ -453,6 +447,12 @@ type: parsed
 protocol: Samsung32
 address: 0E 00 00 00
 command: 15 00 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 40 00 00 00
+command: 12 00 00 00
 #
 name: Ch_next
 type: parsed
@@ -1143,13 +1143,17 @@ type: parsed
 protocol: RC6
 address: 00 00 00 00
 command: 0D 00 00 00
+# 
 # Samsung Standby
+# 
 name: Power
 type: parsed
 protocol: Samsung32
 address: 07 00 00 00
 command: E0 00 00 00
+# 
 # Samsung Power Off
+# 
 name: Power
 type: parsed
 protocol: Samsung32
@@ -2047,3 +2051,227 @@ type: parsed
 protocol: Samsung32
 address: 3E 00 00 00
 command: 0D 00 00 00
+#
+# TCL LED49D2930 / Thomson Remote RC3000E02
+# 
+name: Power
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 54 00 00 00
+# 
+name: Mute
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: FC 00 00 00
+# 
+name: Ch_next
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: B4 00 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 34 00 00 00
+# 
+name: Vol_up
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: F4 00 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 74 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 18 00 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: NEC
+address: 08 00 00 00
+command: DD 00 00 00
+# 
+name: Power
+type: parsed
+protocol: NECext
+address: 04 F4 00 00
+command: 08 F7 00 00
+# 
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 04 F4 00 00
+command: 02 FD 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 04 F4 00 00
+command: 03 FC 00 00
+# 
+name: Mute
+type: parsed
+protocol: NECext
+address: 04 F4 00 00
+command: 09 F6 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: Samsung32
+address: 07 00 00 00
+command: 13 00 00 00
+# 
+name: Vol_up
+type: parsed
+protocol: SIRC
+address: 10 00 00 00
+command: 12 00 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: SIRC
+address: 10 00 00 00
+command: 13 00 00 00
+# 
+name: Mute
+type: parsed
+protocol: SIRC
+address: 10 00 00 00
+command: 14 00 00 00
+# 
+name: Ch_next
+type: parsed
+protocol: SIRC
+address: 0D 00 00 00
+command: 10 00 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: SIRC
+address: 0D 00 00 00
+command: 11 00 00 00
+# 
+name: Mute
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 11 00 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: RC5
+address: 01 00 00 00
+command: 22 00 00 00
+# 
+name: Power
+type: parsed
+protocol: NEC
+address: 40 00 00 00
+command: 12 00 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 10 00 00 00
+# 
+name: Power
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 1E E1 00 00
+# 
+name: Mute
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 5C A3 00 00
+# 
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 20 00 00 00
+command: 02 00 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 20 00 00 00
+command: 09 00 00 00
+# 
+name: Ch_next
+type: parsed
+protocol: NEC
+address: 20 00 00 00
+command: 03 00 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: NEC
+address: 20 00 00 00
+command: 41 00 00 00
+# 
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 02 7D 00 00
+command: 0F F0 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 02 7D 00 00
+command: 5A A5 00 00
+# 
+name: Ch_next
+type: parsed
+protocol: NECext
+address: 02 7D 00 00
+command: 0C F3 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: NECext
+address: 02 7D 00 00
+command: 19 E6 00 00
+# 
+name: Mute
+type: parsed
+protocol: NEC
+address: 40 00 00 00
+command: 10 00 00 00
+# 
+name: Ch_next
+type: parsed
+protocol: Samsung32
+address: 07 00 00 00
+command: 10 00 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: Samsung32
+address: 07 00 00 00
+command: 12 00 00 00
+# 
+name: Power
+type: parsed
+protocol: NEC
+address: A0 00 00 00
+command: 1C 00 00 00
+# 
+name: Mute
+type: parsed
+protocol: NEC
+address: A0 00 00 00
+command: 5F 00 00 00
