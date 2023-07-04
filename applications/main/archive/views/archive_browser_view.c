@@ -125,7 +125,7 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 archive_menu_add_item(
                     menu_array_push_raw(model->context_menu),
                     "Move",
-                    ArchiveBrowserEventFileMenuRename);
+                    ArchiveBrowserEventEnterFavMove);
             }
         }
     }

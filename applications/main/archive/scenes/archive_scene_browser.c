@@ -287,15 +287,9 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             break;
         case ArchiveBrowserEventFileMenuRename:
             archive_show_file_menu(browser, false, false);
-            if(favorites) {
-                browser->callback(ArchiveBrowserEventEnterFavMove, browser->context);
-                //} else if((archive_is_known_app(selected->type)) && (selected->is_app == false)) {
-            } else {
-                // Added ability to rename files and folders
-                scene_manager_set_scene_state(
-                    archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
-                scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
-            }
+            scene_manager_set_scene_state(
+                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuDelete:
@@ -331,6 +325,7 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventEnterFavMove:
+            archive_show_file_menu(browser, false, false);
             furi_string_set(archive->fav_move_str, selected->path);
             archive_favorites_move_mode(archive->browser, true);
             consumed = true;
