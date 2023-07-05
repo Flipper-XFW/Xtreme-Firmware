@@ -1,7 +1,7 @@
 #pragma once
 
-#include <gui/icon_i.h>
-#include <power/power_service/power.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,6 +11,17 @@ extern "C" {
 #define XTREME_ASSETS_PATH EXT_PATH("dolphin_custom")
 #define XTREME_APPS_PATH CFG_PATH("xtreme_apps.txt")
 #define XTREME_ASSETS_PACK_NAME_LEN 32
+
+typedef enum {
+    BatteryIconOff,
+    BatteryIconBar,
+    BatteryIconPercent,
+    BatteryIconInvertedPercent,
+    BatteryIconRetro3,
+    BatteryIconRetro5,
+    BatteryIconBarPercent,
+    BatteryIconCount,
+} BatteryIcon;
 
 typedef struct {
     bool is_nsfw; // TODO: replace with packs text support
@@ -46,8 +57,12 @@ typedef struct {
     uint32_t charge_cap;
 } XtremeSettings;
 
+void XTREME_SETTINGS_LOAD();
 void XTREME_SETTINGS_SAVE();
 XtremeSettings* XTREME_SETTINGS();
+
+void XTREME_ASSETS_LOAD();
+void XTREME_ASSETS_FREE();
 
 #ifdef __cplusplus
 }

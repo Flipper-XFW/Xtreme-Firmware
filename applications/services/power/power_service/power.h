@@ -25,17 +25,6 @@ typedef enum {
     PowerEventTypeBatteryLevelChanged,
 } PowerEventType;
 
-typedef enum {
-    BatteryIconOff,
-    BatteryIconBar,
-    BatteryIconPercent,
-    BatteryIconInvertedPercent,
-    BatteryIconRetro3,
-    BatteryIconRetro5,
-    BatteryIconBarPercent,
-    BatteryIconCount,
-} BatteryIcon;
-
 typedef union {
     uint8_t battery_level;
 } PowerEventData;

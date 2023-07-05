@@ -13,7 +13,8 @@
 #include <dolphin/helpers/dolphin_state.h>
 #include <applications/main/u2f/u2f_data.h>
 #include <applications/main/archive/helpers/archive_favorites.h>
-#include <xtreme/private.h>
+#include <namespoof.h>
+#include <xtreme.h>
 
 #define TAG "Flipper"
 

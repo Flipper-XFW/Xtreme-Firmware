@@ -1,5 +1,4 @@
 #include "xtreme.h"
-#include "private.h"
 #include <furi_hal.h>
 #include <flipper_format/flipper_format.h>
 

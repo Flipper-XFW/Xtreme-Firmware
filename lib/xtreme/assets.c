@@ -1,6 +1,6 @@
 #include "xtreme.h"
-#include "private.h"
 #include <furi_hal.h>
+#include <gui/icon_i.h>
 #include <assets_icons.h>
 #include <storage/storage.h>
 #include <core/dangerous_defines.h>

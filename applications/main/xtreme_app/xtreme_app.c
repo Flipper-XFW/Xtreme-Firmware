@@ -120,9 +120,7 @@ bool xtreme_app_apply(XtremeApp* app) {
 
     if(app->show_slideshow) {
         callback_reboot(NULL);
-    }
-
-    if(app->require_reboot) {
+    } else if(app->require_reboot) {
         popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
         popup_set_text(app->popup, "Applying changes...", 64, 40, AlignCenter, AlignCenter);
         popup_set_callback(app->popup, callback_reboot);

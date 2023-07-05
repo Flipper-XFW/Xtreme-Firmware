@@ -11,6 +11,7 @@
 #include <loader/firmware_api/firmware_api.h>
 #include <toolbox/stream/file_stream.h>
 #include <core/dangerous_defines.h>
+#include <gui/icon_i.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
