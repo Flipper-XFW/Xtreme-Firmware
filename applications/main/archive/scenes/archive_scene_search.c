@@ -67,7 +67,7 @@ uint32_t archive_scene_search_dirwalk(void* context) {
             if(!file_info_is_dir(&fileinfo)) {
                 furi_string_set(
                     name, furi_string_get_cstr(path) + furi_string_search_rchar(path, '/') + 1);
-                if(furi_string_search_str(name, archive->text_store) != FURI_STRING_FAILURE) {
+                if(strcasestr(furi_string_get_cstr(name), archive->text_store) != NULL) {
                     archive_add_file_item(archive->browser, false, furi_string_get_cstr(path));
                     archive_set_item_count(archive->browser, ++count);
                 }
