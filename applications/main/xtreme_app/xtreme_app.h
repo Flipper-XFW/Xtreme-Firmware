@@ -65,6 +65,7 @@ typedef struct {
     bool save_angry;
     bool save_backlight;
     bool save_settings;
+    bool apply_pack;
     bool show_slideshow;
     bool require_reboot;
 } XtremeApp;
