@@ -353,14 +353,12 @@ static void menu_process_up(Menu* menu) {
             }
 
             if(XTREME_SETTINGS()->wii_menu) {
-                if(!(model->position == count - 1 && count % 2)) {
-                    if(model->position % 2) {
-                        model->position--;
-                    } else {
-                        model->position++;
-                    }
-                    model->scroll_counter = 0;
+                if(model->position % 2 || (model->position == count - 1 && count % 2)) {
+                    model->position--;
+                } else {
+                    model->position++;
                 }
+                model->scroll_counter = 0;
             } else {
                 if(model->position > 0) {
                     model->position--;
@@ -389,14 +387,12 @@ static void menu_process_down(Menu* menu) {
             }
 
             if(XTREME_SETTINGS()->wii_menu) {
-                if(!(model->position == count - 1 && count % 2)) {
-                    if(model->position % 2) {
-                        model->position--;
-                    } else {
-                        model->position++;
-                    }
-                    model->scroll_counter = 0;
+                if(model->position % 2 || (model->position == count - 1 && count % 2)) {
+                    model->position--;
+                } else {
+                    model->position++;
                 }
+                model->scroll_counter = 0;
             } else {
                 if(model->position < count - 1) {
                     model->position++;
