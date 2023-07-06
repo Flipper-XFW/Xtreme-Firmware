@@ -1,6 +1,7 @@
 #pragma once
 
 #include "thread.h"
+#include "string.h"
 
 typedef struct {
     FuriThreadStdoutWriteCallback write_callback;
