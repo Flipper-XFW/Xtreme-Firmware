@@ -21,12 +21,12 @@ void nfc_maker_scene_result_on_enter(void* context) {
     do {
         if(!flipper_format_file_open_new(file, furi_string_get_cstr(path))) break;
 
-        uint32_t pages = 42;
+        uint32_t pages = 135;
         size_t size = pages * 4;
         uint8_t* buf = malloc(size);
 
         if(!flipper_format_write_header_cstr(file, "Flipper NFC device", 3)) break;
-        if(!flipper_format_write_string_cstr(file, "Device type", "NTAG203")) break;
+        if(!flipper_format_write_string_cstr(file, "Device type", "NTAG215")) break;
 
         // Serial number
         size_t i = 0;
@@ -46,7 +46,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
                "Signature",
                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"))
             break;
-        if(!flipper_format_write_string_cstr(file, "Mifare version", "00 00 00 00 00 00 00 00"))
+        if(!flipper_format_write_string_cstr(file, "Mifare version", "00 04 04 02 01 00 11 03"))
             break;
 
         if(!flipper_format_write_string_cstr(file, "Counter 0", "0")) break;
@@ -63,13 +63,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
         buf[i++] = 0x00; // ...
         buf[i++] = 0xE1; // Capability container
         buf[i++] = 0x10; // ...
-        buf[i++] = 0x12; // ...
+        buf[i++] = 0x3E; // ...
         buf[i++] = 0x00; // ...
-        buf[i++] = 0x01; // ...
-        buf[i++] = 0x03; // ...
-        buf[i++] = 0xA0; // ...
-        buf[i++] = 0x10; // ...
-        buf[i++] = 0x44; // ...
         buf[i++] = 0x03; // Message flags
         size_t start = i++;
 
@@ -292,11 +287,38 @@ void nfc_maker_scene_result_on_enter(void* context) {
         buf[start] = i - start - 1;
         buf[i++] = 0xFE;
 
-        // Padding
-        for(; i < size; i++) {
+        // Padding until last 5 pages
+        for(; i < size - 20; i++) {
             buf[i] = 0x00;
         }
 
+        // Last 5 static pages
+        buf[i++] = 0x00;
+        buf[i++] = 0x00;
+        buf[i++] = 0x00;
+        buf[i++] = 0xBD;
+
+        buf[i++] = 0x04;
+        buf[i++] = 0x00;
+        buf[i++] = 0x00;
+        buf[i++] = 0xFF;
+
+        buf[i++] = 0x00;
+        buf[i++] = 0x05;
+        buf[i++] = 0x00;
+        buf[i++] = 0x00;
+
+        buf[i++] = 0xFF;
+        buf[i++] = 0xFF;
+        buf[i++] = 0xFF;
+        buf[i++] = 0xFF;
+
+        buf[i++] = 0x00;
+        buf[i++] = 0x00;
+        buf[i++] = 0x00;
+        buf[i++] = 0x00;
+
+        // Write pages
         char str[16];
         bool ok = true;
         for(size_t page = 0; page < pages; page++) {
