@@ -18,12 +18,12 @@ void nfc_maker_scene_result_on_enter(void* context) {
     FlipperFormat* file = flipper_format_file_alloc(furi_record_open(RECORD_STORAGE));
     FuriString* path = furi_string_alloc();
     furi_string_printf(path, NFC_APP_FOLDER "/%s" NFC_APP_EXTENSION, app->name_buf);
+
+    uint32_t pages = 135;
+    size_t size = pages * 4;
+    uint8_t* buf = malloc(size);
     do {
         if(!flipper_format_file_open_new(file, furi_string_get_cstr(path))) break;
-
-        uint32_t pages = 135;
-        size_t size = pages * 4;
-        uint8_t* buf = malloc(size);
 
         if(!flipper_format_write_header_cstr(file, "Flipper NFC device", 3)) break;
         if(!flipper_format_write_string_cstr(file, "Device type", "NTAG215")) break;
@@ -330,10 +330,11 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         if(!ok) break;
 
-        free(buf);
         success = true;
 
     } while(false);
+    free(buf);
+
     furi_string_free(path);
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
