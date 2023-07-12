@@ -92,6 +92,37 @@ void nfc_maker_scene_result_on_enter(void* context) {
             j += data_len;
             break;
         }
+        case NfcMakerSceneContact: {
+            tnf = 0x02; // Media-type [RFC 2046]
+            type = "text/vcard";
+
+            FuriString* vcard = furi_string_alloc_set("BEGIN:VCARD\r\nVERSION:3.0\r\n");
+            furi_string_cat_printf(
+                vcard, "PRODID:-//Flipper Xtreme//%s//EN\r\n", version_get_version(NULL));
+            furi_string_cat_printf(vcard, "N:%s;%s;;;\r\n", app->small_buf2, app->small_buf1);
+            furi_string_cat_printf(
+                vcard,
+                "FN:%s%s%s\r\n",
+                app->small_buf1,
+                strnlen(app->small_buf2, SMALL_INPUT_LEN) ? " " : "",
+                app->small_buf2);
+            if(strnlen(app->mail_buf, MAIL_INPUT_LEN)) {
+                furi_string_cat_printf(vcard, "EMAIL:%s\r\n", app->mail_buf);
+            }
+            if(strnlen(app->phone_buf, PHONE_INPUT_LEN)) {
+                furi_string_cat_printf(vcard, "TEL:%s\r\n", app->phone_buf);
+            }
+            if(strnlen(app->big_buf, BIG_INPUT_LEN)) {
+                furi_string_cat_printf(vcard, "URL:%s\r\n", app->big_buf);
+            }
+            furi_string_cat_printf(vcard, "END:VCARD\r\n");
+
+            payload_len = furi_string_size(vcard);
+            payload = malloc(payload_len);
+            memcpy(payload, furi_string_get_cstr(vcard), payload_len);
+            furi_string_free(vcard);
+            break;
+        }
         case NfcMakerSceneHttps: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
