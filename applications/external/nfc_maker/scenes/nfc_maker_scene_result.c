@@ -17,7 +17,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
     FlipperFormat* file = flipper_format_file_alloc(furi_record_open(RECORD_STORAGE));
     FuriString* path = furi_string_alloc();
-    furi_string_printf(path, NFC_APP_FOLDER "/%s" NFC_APP_EXTENSION, app->name_buf);
+    furi_string_printf(path, NFC_APP_FOLDER "/%s" NFC_APP_EXTENSION, app->save_buf);
 
     uint32_t pages = 135;
     size_t size = pages * 4;
@@ -77,12 +77,12 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
         size_t data_len = 0;
         size_t j = 0;
-        switch(scene_manager_get_scene_state(app->scene_manager, NfcMakerSceneMenu)) {
+        switch(scene_manager_get_scene_state(app->scene_manager, NfcMakerSceneStart)) {
         case NfcMakerSceneBluetooth: {
             tnf = 0x02; // Media-type [RFC 2046]
             type = "application/vnd.bluetooth.ep.oob";
 
-            data_len = GAP_MAC_ADDR_SIZE;
+            data_len = MAC_INPUT_LEN;
             payload_len = data_len + 2;
             payload = malloc(payload_len);
 
@@ -96,12 +96,12 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
             payload[j++] = 0x04; // Prepend "https://"
-            memcpy(&payload[j], app->text_buf, data_len);
+            memcpy(&payload[j], app->big_buf, data_len);
             j += data_len;
             break;
         }
@@ -109,12 +109,12 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            data_len = strnlen(app->mail_buf, MAIL_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
             payload[j++] = 0x06; // Prepend "mailto:"
-            memcpy(&payload[j], app->text_buf, data_len);
+            memcpy(&payload[j], app->mail_buf, data_len);
             j += data_len;
             break;
         }
@@ -122,12 +122,12 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            data_len = strnlen(app->phone_buf, PHONE_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
             payload[j++] = 0x05; // Prepend "tel:"
-            memcpy(&payload[j], app->text_buf, data_len);
+            memcpy(&payload[j], app->phone_buf, data_len);
             j += data_len;
             break;
         }
@@ -135,14 +135,14 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x54";
 
-            data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 3;
             payload = malloc(payload_len);
 
             payload[j++] = 0x02;
             payload[j++] = 0x65; // e
             payload[j++] = 0x6E; // n
-            memcpy(&payload[j], app->text_buf, data_len);
+            memcpy(&payload[j], app->big_buf, data_len);
             j += data_len;
             break;
         }
@@ -150,12 +150,12 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
             payload[j++] = 0x00; // No prepend
-            memcpy(&payload[j], app->text_buf, data_len);
+            memcpy(&payload[j], app->big_buf, data_len);
             j += data_len;
             break;
         }
@@ -163,8 +163,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x02; // Media-type [RFC 2046]
             type = "application/vnd.wfa.wsc";
 
-            uint8_t ssid_len = strnlen(app->text_buf, WIFI_INPUT_LEN);
-            uint8_t pass_len = strnlen(app->pass_buf, WIFI_INPUT_LEN);
+            uint8_t ssid_len = strnlen(app->small_buf1, SMALL_INPUT_LEN);
+            uint8_t pass_len = strnlen(app->small_buf2, SMALL_INPUT_LEN);
             uint8_t data_len = ssid_len + pass_len;
             payload_len = data_len + 39;
             payload = malloc(payload_len);
@@ -185,7 +185,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
             payload[j++] = 0x00;
             payload[j++] = ssid_len;
-            memcpy(&payload[j], app->text_buf, ssid_len);
+            memcpy(&payload[j], app->small_buf1, ssid_len);
             j += ssid_len;
             payload[j++] = 0x10;
             payload[j++] = 0x03;
@@ -209,7 +209,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
             payload[j++] = 0x00;
             payload[j++] = pass_len;
-            memcpy(&payload[j], app->pass_buf, pass_len);
+            memcpy(&payload[j], app->small_buf2, pass_len);
             j += pass_len;
             payload[j++] = 0x10;
             payload[j++] = 0x20;
@@ -353,7 +353,7 @@ bool nfc_maker_scene_result_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case PopupEventExit:
             scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, NfcMakerSceneMenu);
+                app->scene_manager, NfcMakerSceneStart);
             break;
         default:
             break;
