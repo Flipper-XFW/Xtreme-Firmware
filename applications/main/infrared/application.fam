@@ -8,7 +8,6 @@ App(
     stack_size=3 * 1024,
     order=40,
     fap_icon="icon.png",
-    fap_category="Infrared",
 )
 
 App(

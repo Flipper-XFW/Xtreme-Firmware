@@ -6,6 +6,5 @@ App(
     stack_size=2 * 1024,
     icon="A_Xtreme_14",
     order=90,
-    # fap_icon="",
-    # fap_category="",
+    fap_icon="icon.png",
 )
