@@ -1,29 +1,21 @@
 #pragma once
 
 #include <gui/view.h>
+#include "../helpers/subghz_types.h"
 #include "../helpers/subghz_custom_event.h"
 
-typedef struct {
-    FuriString* frequency_str;
-    FuriString* preset_str;
-    FuriString* key_str;
-    bool show_button;
-    FuriString* temp_button_id;
-    bool draw_temp_button;
-} SubGhzViewTransmitterModel;
+typedef struct SubGhzViewTransmitter SubGhzViewTransmitter;
 
 typedef void (*SubGhzViewTransmitterCallback)(SubGhzCustomEvent event, void* context);
-
-typedef struct {
-    View* view;
-    SubGhzViewTransmitterCallback callback;
-    void* context;
-} SubGhzViewTransmitter;
 
 void subghz_view_transmitter_set_callback(
     SubGhzViewTransmitter* subghz_transmitter,
     SubGhzViewTransmitterCallback callback,
     void* context);
+
+void subghz_view_transmitter_set_radio_device_type(
+    SubGhzViewTransmitter* subghz_transmitter,
+    SubGhzRadioDeviceType device_type);
 
 SubGhzViewTransmitter* subghz_view_transmitter_alloc();
 

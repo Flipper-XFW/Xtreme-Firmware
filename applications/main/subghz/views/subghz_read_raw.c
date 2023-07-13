@@ -59,6 +59,14 @@ void subghz_read_raw_add_data_statusbar(
         true);
 }
 
+void subghz_read_raw_set_radio_device_type(
+    SubGhzReadRAW* instance,
+    SubGhzRadioDeviceType device_type) {
+    furi_assert(instance);
+    with_view_model(
+        instance->view, SubGhzReadRAWModel * model, { model->device_type = device_type; }, true);
+}
+
 void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi, bool trace) {
     furi_assert(instance);
     uint8_t u_rssi = 0;

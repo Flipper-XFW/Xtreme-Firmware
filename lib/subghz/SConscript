@@ -14,7 +14,6 @@ env.Append(
         File("transmitter.h"),
         File("protocols/raw.h"),
         File("blocks/const.h"),
-        File("blocks/custom_btn.h"),
         File("blocks/decoder.h"),
         File("blocks/encoder.h"),
         File("blocks/generic.h"),
@@ -22,6 +21,7 @@ env.Append(
         File("blocks/custom_btn.h"),
         File("subghz_setting.h"),
         File("subghz_protocol_registry.h"),
+        File("devices/cc1101_configs.h"),
     ],
 )
 

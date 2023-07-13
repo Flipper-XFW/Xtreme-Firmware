@@ -39,6 +39,8 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
         furi_string_free(modulation_str);
         furi_string_free(key_str);
     }
+    subghz_view_transmitter_set_radio_device_type(
+        subghz->subghz_transmitter, subghz_txrx_radio_device_get(subghz->txrx));
     return ret;
 }
 
@@ -66,19 +68,19 @@ void subghz_scene_transmitter_on_enter(void* context) {
 
     // Auto send and exit with favorites
     if(subghz->fav_timeout) {
-        subghz_custom_btn_set(0);
+        // subghz_custom_btn_set(0);
         scene_manager_handle_custom_event(
             subghz->scene_manager, SubGhzCustomEventViewTransmitterSendStart);
-        with_view_model(
-            subghz->subghz_transmitter->view,
-            SubGhzViewTransmitterModel * model,
-            { model->show_button = false; },
-            true);
+        // with_view_model(
+        //     subghz->subghz_transmitter->view,
+        //     SubGhzViewTransmitterModel * model,
+        //     { model->show_button = false; },
+        //     true);
         subghz->fav_timer = furi_timer_alloc(fav_timer_callback, FuriTimerTypeOnce, subghz);
         furi_timer_start(
             subghz->fav_timer,
             XTREME_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency());
-        subghz->state_notifications = SubGhzNotificationStateTx;
+        // subghz->state_notifications = SubGhzNotificationStateTx;
     }
 }
 

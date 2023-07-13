@@ -51,6 +51,17 @@ void subghz_view_transmitter_add_data_to_show(
         true);
 }
 
+void subghz_view_transmitter_set_radio_device_type(
+    SubGhzViewTransmitter* subghz_transmitter,
+    SubGhzRadioDeviceType device_type) {
+    furi_assert(subghz_transmitter);
+    with_view_model(
+        subghz_transmitter->view,
+        SubGhzViewTransmitterModel * model,
+        { model->device_type = device_type; },
+        true);
+}
+
 static void subghz_view_transmitter_button_right(Canvas* canvas, const char* str) {
     const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;

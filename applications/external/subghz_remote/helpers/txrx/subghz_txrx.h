@@ -1,7 +1,5 @@
 #pragma once
 
-#include "subghz_types.h"
-
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/receiver.h>
@@ -18,6 +16,37 @@ typedef enum {
     SubGhzTxRxStartTxStateErrorOnlyRx,
     SubGhzTxRxStartTxStateErrorParserOthers,
 } SubGhzTxRxStartTxState;
+
+// Type from subghz_types.h need for txrx working
+/** SubGhzTxRx state */
+typedef enum {
+    SubGhzTxRxStateIDLE,
+    SubGhzTxRxStateRx,
+    SubGhzTxRxStateTx,
+    SubGhzTxRxStateSleep,
+} SubGhzTxRxState;
+
+/** SubGhzHopperState state */
+typedef enum {
+    SubGhzHopperStateOFF,
+    SubGhzHopperStateRunning,
+    SubGhzHopperStatePause,
+    SubGhzHopperStateRSSITimeOut,
+} SubGhzHopperState;
+
+/** SubGhzSpeakerState state */
+typedef enum {
+    SubGhzSpeakerStateDisable,
+    SubGhzSpeakerStateShutdown,
+    SubGhzSpeakerStateEnable,
+} SubGhzSpeakerState;
+
+/** SubGhzRadioDeviceType */
+typedef enum {
+    SubGhzRadioDeviceTypeAuto,
+    SubGhzRadioDeviceTypeInternal,
+    SubGhzRadioDeviceTypeExternalCC1101,
+} SubGhzRadioDeviceType;
 
 /**
  * Allocate SubGhzTxRx

@@ -10,6 +10,6 @@ App(
     stack_size=2 * 1024,
     order=50,
     fap_description="File Editor for the SubGhz Remote app",
-    fap_category="Sub-Ghz",
+    fap_category="Sub-GHz",
     fap_icon="subrem_10px.png",
 )
