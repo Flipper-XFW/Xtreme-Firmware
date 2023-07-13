@@ -70,7 +70,7 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
         furi_delay_tick(1);
     }
     //waiting for reception to complete
-    while(furi_hal_gpio_read(furi_hal_subghz.cc1101_g0_pin)) {
+    while(furi_hal_gpio_read(instance->device_data_gpio)) {
         furi_delay_tick(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "RX cc1101_g0 timeout");
@@ -105,7 +105,7 @@ void subghz_tx_rx_worker_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t si
     furi_hal_subghz_tx(); //start send
     instance->status = SubGhzTxRxWorkerStatusTx;
     while(!furi_hal_gpio_read(
-        furi_hal_subghz.cc1101_g0_pin)) { // Wait for GDO0 to be set -> sync transmitted
+        instance->device_data_gpio)) { // Wait for GDO0 to be set -> sync transmitted
         furi_delay_tick(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "TX !cc1101_g0 timeout");
@@ -113,7 +113,7 @@ void subghz_tx_rx_worker_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t si
         }
     }
     while(furi_hal_gpio_read(
-        furi_hal_subghz.cc1101_g0_pin)) { // Wait for GDO0 to be cleared -> end of packet
+        instance->device_data_gpio)) { // Wait for GDO0 to be cleared -> end of packet
         furi_delay_tick(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "TX cc1101_g0 timeout");
@@ -132,11 +132,11 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
     SubGhzTxRxWorker* instance = context;
     FURI_LOG_I(TAG, "Worker start");
 
-    furi_hal_subghz_reset();
-    furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
-    //furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
-    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    subghz_devices_begin(instance->device);
+    instance->device_data_gpio = subghz_devices_get_data_gpio(instance->device);
+    subghz_devices_reset(instance->device);
+    subghz_devices_idle(instance->device);
+    subghz_devices_load_preset(instance->device, FuriHalSubGhzPresetGFSK9_99KbAsync, NULL);
 
     furi_hal_subghz_set_frequency_and_path(instance->frequency);
     furi_hal_subghz_flush_rx();

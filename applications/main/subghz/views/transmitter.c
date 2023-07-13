@@ -6,6 +6,22 @@
 
 #include <lib/subghz/blocks/custom_btn.h>
 
+struct SubGhzViewTransmitter {
+    View* view;
+    SubGhzViewTransmitterCallback callback;
+    void* context;
+};
+
+typedef struct {
+    FuriString* frequency_str;
+    FuriString* preset_str;
+    FuriString* key_str;
+    bool show_button;
+    SubGhzRadioDeviceType device_type;
+    FuriString* temp_button_id;
+    bool draw_temp_button;
+} SubGhzViewTransmitterModel;
+
 void subghz_view_transmitter_set_callback(
     SubGhzViewTransmitter* subghz_transmitter,
     SubGhzViewTransmitterCallback callback,
@@ -85,7 +101,12 @@ void subghz_view_transmitter_draw(Canvas* canvas, SubGhzViewTransmitterModel* mo
     }
 
     if(model->show_button) {
-        canvas_draw_str(canvas, 58, 62, furi_hal_subghz_get_radio_type() ? "R: Ext" : "R: Int");
+        // TODO
+        canvas_draw_str(
+            canvas,
+            58,
+            62,
+            (model->device_type == SubGhzRadioDeviceTypeInternal) ? "R: Int" : "R: Ext");
         subghz_view_transmitter_button_right(canvas, "Send");
     }
 }

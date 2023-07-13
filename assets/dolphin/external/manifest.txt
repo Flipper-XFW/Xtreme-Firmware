@@ -99,6 +99,13 @@ Min level: 13
 Max level: 30
 Weight: 4
 
+Name: L1_My_dude_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 17
+Max level: 30
+Weight: 4
+
 Name: L2_Wake_up_128x64
 Min butthurt: 0
 Max butthurt: 14

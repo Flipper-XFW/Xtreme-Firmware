@@ -19,6 +19,32 @@
 #define SUBGHZ_FREQUENCY_RANGE_STR \
     "299999755...348000000 or 386999938...464000000 or 778999847...928000000"
 
+// Tx/Rx Carrier | only internal module
+// Tx/Rx command | both
+// Rx RAW        | only internal module
+// Chat          | both
+
+#define TAG "SubGhz CLI"
+
+static void subghz_cli_radio_device_power_on() {
+    uint8_t attempts = 5;
+    while(--attempts > 0) {
+        if(furi_hal_power_enable_otg()) break;
+    }
+    if(attempts == 0) {
+        if(furi_hal_power_get_usb_voltage() < 4.5f) {
+            FURI_LOG_E(
+                "TAG",
+                "Error power otg enable. BQ2589 check otg fault = %d",
+                furi_hal_power_check_otg_fault() ? 1 : 0);
+        }
+    }
+}
+
+static void subghz_cli_radio_device_power_off() {
+    if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+}
+
 void subghz_cli_command_tx_carrier(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     uint32_t frequency = 433920000;
@@ -42,9 +68,8 @@ void subghz_cli_command_tx_carrier(Cli* cli, FuriString* args, void* context) {
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
 
-    furi_hal_gpio_init(
-        furi_hal_subghz.cc1101_g0_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_write(furi_hal_subghz.cc1101_g0_pin, true);
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_write(&gpio_cc1101_g0, true);
 
     furi_hal_power_suppress_charge_enter();
 
@@ -105,6 +130,27 @@ void subghz_cli_command_rx_carrier(Cli* cli, FuriString* args, void* context) {
     furi_hal_subghz_sleep();
 }
 
+static const SubGhzDevice* subghz_cli_command_get_device(uint32_t* device_ind) {
+    const SubGhzDevice* device = NULL;
+    switch(*device_ind) {
+    case 1:
+        subghz_cli_radio_device_power_on();
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
+        break;
+
+    default:
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+        break;
+    }
+    //check if the device is connected
+    if(!subghz_devices_is_connect(device)) {
+        subghz_cli_radio_device_power_off();
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+        *device_ind = 0;
+    }
+    return device;
+}
+
 void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     uint32_t frequency = 433920000;
@@ -129,14 +175,16 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
                 furi_string_get_cstr(args));
             return;
         }
-        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-            printf(
-                "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
-                frequency);
-            return;
-        }
     }
-
+    subghz_devices_init();
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        subghz_devices_deinit();
+        subghz_cli_radio_device_power_off();
+        return;
+    }
     printf(
         "Transmitting at %lu, key %lx, te %lu, repeat %lu. Press CTRL+C to stop\r\n",
         frequency,
@@ -181,7 +229,7 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
         furi_hal_subghz_stop_async_tx();
 
     } else {
-        printf("Transmission on this frequency is restricted in your region\r\n");
+        printf("Frequency is outside of default range. Check docs.\r\n");
     }
 
     furi_hal_subghz_sleep();
@@ -236,12 +284,15 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
             cli_print_usage("subghz rx", "<Frequency: in Hz>", furi_string_get_cstr(args));
             return;
         }
-        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-            printf(
-                "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
-                frequency);
-            return;
-        }
+    }
+    subghz_devices_init();
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        subghz_devices_deinit();
+        subghz_cli_radio_device_power_off();
+        return;
     }
 
     // Allocate context and buffers
@@ -266,10 +317,10 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
     subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
 
     // Configure radio
-    furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
-    frequency = furi_hal_subghz_set_frequency_and_path(frequency);
-    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    subghz_devices_begin(device);
+    subghz_devices_reset(device);
+    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async, NULL);
+    frequency = subghz_devices_set_frequency(device, frequency);
 
     furi_hal_power_suppress_charge_enter();
 
@@ -336,9 +387,9 @@ void subghz_cli_command_rx_raw(Cli* cli, FuriString* args, void* context) {
 
     // Configure radio
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok270Async);
+    furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_650khz_async_regs);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
-    furi_hal_gpio_init(furi_hal_subghz.cc1101_g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     furi_hal_power_suppress_charge_enter();
 
@@ -609,13 +660,18 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
             cli_print_usage("subghz chat", "<Frequency: in Hz>", furi_string_get_cstr(args));
             return;
         }
-        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-            printf(
-                "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
-                frequency);
-            return;
-        }
     }
+    subghz_devices_init();
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        subghz_devices_deinit();
+        subghz_cli_radio_device_power_off();
+        return;
+    }
+
+    // TODO
     if(!furi_hal_subghz_is_tx_allowed(frequency)) {
         printf(
             "In your settings, only reception on this frequency (%lu) is allowed,\r\n"
@@ -780,15 +836,6 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
 static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     FuriString* cmd = furi_string_alloc();
 
-    // Enable power for External CC1101 if it is connected
-    furi_hal_subghz_enable_ext_power();
-    // Auto switch to internal radio if external radio is not available
-    furi_delay_ms(15);
-    if(!furi_hal_subghz_check_radio()) {
-        furi_hal_subghz_select_radio_type(SubGhzRadioInternal);
-        furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
-    }
-
     do {
         if(!args_read_string_and_trim(args, cmd)) {
             subghz_cli_command_print_usage();
@@ -844,11 +891,6 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
 
         subghz_cli_command_print_usage();
     } while(false);
-
-    // Disable power for External CC1101 if it was enabled and module is connected
-    furi_hal_subghz_disable_ext_power();
-    // Reinit SPI handles for internal radio / nfc
-    furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
 
     furi_string_free(cmd);
 }

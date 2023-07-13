@@ -18,6 +18,12 @@
 #define FURI_HAL_BT_STACK_VERSION_MINOR (12)
 #define FURI_HAL_BT_C2_START_TIMEOUT 1000
 
+#define FURI_HAL_BT_EMPTY_MAC_ADDR \
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+
+#define FURI_HAL_BT_DEFAULT_MAC_ADDR \
+    { 0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72 }
+
 #ifdef __cplusplus
 extern "C" {
 #endif

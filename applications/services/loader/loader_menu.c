@@ -56,10 +56,16 @@ static void loader_menu_start(const char* name) {
     furi_record_close(RECORD_LOADER);
 }
 
-static void loader_menu_callback(void* context, uint32_t index) {
+static void loader_menu_apps_callback(void* context, uint32_t index) {
     UNUSED(context);
     const char* name_or_path = (const char*)index;
     loader_menu_start(name_or_path);
+}
+
+static void loader_menu_external_apps_callback(void* context, uint32_t index) {
+    UNUSED(context);
+    const char* path = FLIPPER_EXTERNAL_APPS[index].path;
+    loader_menu_start(path);
 }
 
 static void loader_menu_applications_callback(void* context, uint32_t index) {
@@ -92,20 +98,14 @@ static uint32_t loader_menu_exit(void* context) {
 }
 
 static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
-    menu_add_item(
-        app->primary_menu,
-        LOADER_APPLICATIONS_NAME,
-        &A_Plugins_14,
-        0,
-        loader_menu_applications_callback,
-        (void*)menu);
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+    size_t i;
+    for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
             app->primary_menu,
             FLIPPER_APPS[i].name,
             FLIPPER_APPS[i].icon,
-            (uint32_t)FLIPPER_APPS[i].name,
-            loader_menu_callback,
+            i,
+            loader_menu_apps_callback,
             (void*)menu);
     }
     menu_add_item(

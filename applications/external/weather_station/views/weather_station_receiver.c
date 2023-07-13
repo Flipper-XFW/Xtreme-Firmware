@@ -62,6 +62,7 @@ typedef struct {
     uint16_t history_item;
     WSReceiverBarShow bar_show;
     uint8_t u_rssi;
+    bool external_redio;
 } WSReceiverModel;
 
 void ws_view_receiver_set_rssi(WSReceiver* instance, float rssi) {
@@ -155,7 +156,8 @@ void ws_view_receiver_add_data_statusbar(
     WSReceiver* ws_receiver,
     const char* frequency_str,
     const char* preset_str,
-    const char* history_stat_str) {
+    const char* history_stat_str,
+    bool external) {
     furi_assert(ws_receiver);
     with_view_model(
         ws_receiver->view,
@@ -164,6 +166,7 @@ void ws_view_receiver_add_data_statusbar(
             furi_string_set_str(model->frequency_str, frequency_str);
             furi_string_set_str(model->preset_str, preset_str);
             furi_string_set_str(model->history_stat_str, history_stat_str);
+            model->external_redio = external;
         },
         true);
 }
@@ -203,7 +206,7 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    bool ext_module = furi_hal_subghz_get_radio_type();
+    // bool ext_module = furi_hal_subghz_get_radio_type();
 
     WSReceiverMenuItem* item_menu;
 
@@ -229,11 +232,12 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(model->history_item == 0) {
-        canvas_draw_icon(canvas, 0, 0, ext_module ? &I_Fishing_123x52 : &I_Scanning_123x52);
+        canvas_draw_icon(
+            canvas, 0, 0, model->external_redio ? &I_Fishing_123x52 : &I_Scanning_123x52);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 63, 46, "Scanning...");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 44, 10, ext_module ? "Ext" : "Int");
+        canvas_draw_str(canvas, 44, 10, model->external_redio ? "Ext" : "Int");
     }
 
     // Draw RSSI
@@ -409,6 +413,7 @@ WSReceiver* ws_view_receiver_alloc() {
             model->history_stat_str = furi_string_alloc();
             model->bar_show = WSReceiverBarShowDefault;
             model->history = malloc(sizeof(WSReceiverHistory));
+            model->external_redio = false;
             WSReceiverMenuItemArray_init(model->history->data);
         },
         true);

@@ -1,5 +1,5 @@
-
 #pragma once
+
 #include "subghz_txrx.h"
 
 struct SubGhzTxRx {

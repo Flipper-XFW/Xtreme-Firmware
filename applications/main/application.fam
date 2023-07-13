@@ -3,16 +3,33 @@ App(
     name="Basic applications for main menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "subghz",
+        "gpio",
+        "ibutton",
+        "infrared",
         "lfrfid",
         "nfc",
         "infrared",
         "gpio",
-        "onewire",
         "ibutton",
         "bad_kb",
         "u2f",
-        "xtreme_app",
         "archive",
+        "clock",
+        "subghz_remote",
+        "main_apps_on_start",
+    ],
+)
+
+App(
+    appid="main_apps_on_start",
+    name="On start hooks",
+    apptype=FlipperAppType.METAPACKAGE,
+    provides=[
+        "ibutton_start",
+        "onewire_start",
+        "subghz_start",
+        "infrared_start",
+        "lfrfid_start",
+        "nfc_start",
     ],
 )
