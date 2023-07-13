@@ -104,7 +104,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
             app->primary_menu,
             FLIPPER_EXTERNAL_APPS[i].name,
             FLIPPER_EXTERNAL_APPS[i].icon,
-            (uint32_t)FLIPPER_EXTERNAL_APPS[i].path,
+            (uint32_t)FLIPPER_EXTERNAL_APPS[i].name,
             loader_menu_apps_callback,
             (void*)menu);
     }
@@ -129,7 +129,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
             ext_main_app->name,
             ext_main_app->icon,
             (uint32_t)ext_main_app->path,
-            loader_menu_callback,
+            loader_menu_apps_callback,
             (void*)menu);
     }
     furi_record_close(RECORD_LOADER);
