@@ -11,7 +11,7 @@ App(
     ],
     provides=[
         "subghz_start",
-        "subghz_load_dangerous_settings",
+        "subghz_load_extended_settings",
     ],
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
@@ -29,9 +29,9 @@ App(
 )
 
 App(
-    appid="subghz_load_dangerous_settings",
+    appid="subghz_load_extended_settings",
     apptype=FlipperAppType.STARTUP,
-    entry_point="subghz_dangerous_freq",
+    entry_point="subghz_extended_freq",
     requires=["storage", "subghz"],
     order=650,
 )

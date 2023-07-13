@@ -54,16 +54,15 @@ typedef struct {
 
     uint8_t rolling_counter_mult;
     bool timestamp_file_names : 1;
-    bool dangerous_frequency_i : 1;
+    bool extended_frequency_i : 1;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
     .state = SubGhzStateInit,
     .regulation = SubGhzRegulationTxRx,
-    .preset = FuriHalSubGhzPresetIDLE,
     .async_mirror_pin = NULL,
     .rolling_counter_mult = 1,
-    .dangerous_frequency_i = false,
+    .extended_frequency_i = false,
 };
 
 uint8_t furi_hal_subghz_get_rolling_counter_mult(void) {
@@ -74,16 +73,8 @@ void furi_hal_subghz_set_rolling_counter_mult(uint8_t mult) {
     furi_hal_subghz.rolling_counter_mult = mult;
 }
 
-void furi_hal_subghz_set_external_power_disable(bool state) {
-    furi_hal_subghz.ext_module_power_disabled = state;
-}
-
-bool furi_hal_subghz_get_external_power_disable(void) {
-    return furi_hal_subghz.ext_module_power_disabled;
-}
-
-void furi_hal_subghz_set_dangerous_frequency(bool state_i) {
-    furi_hal_subghz.dangerous_frequency_i = state_i;
+void furi_hal_subghz_set_extended_frequency(bool state_i) {
+    furi_hal_subghz.extended_frequency_i = state_i;
 }
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
@@ -97,7 +88,6 @@ const GpioPin* furi_hal_subghz_get_data_gpio() {
 void furi_hal_subghz_init() {
     furi_assert(furi_hal_subghz.state == SubGhzStateInit);
     furi_hal_subghz.state = SubGhzStateIdle;
-    furi_hal_subghz.preset = FuriHalSubGhzPresetIDLE;
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
 
@@ -162,34 +152,7 @@ void furi_hal_subghz_dump_state() {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
-    if(preset == FuriHalSubGhzPresetOok650Async) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_ook_650khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
-    } else if(preset == FuriHalSubGhzPresetOok270Async) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_ook_270khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
-    } else if(preset == FuriHalSubGhzPreset2FSKDev238Async) {
-        furi_hal_subghz_load_registers(
-            (uint8_t*)furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
-    } else if(preset == FuriHalSubGhzPreset2FSKDev476Async) {
-        furi_hal_subghz_load_registers(
-            (uint8_t*)furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
-    } else if(preset == FuriHalSubGhzPresetMSK99_97KbAsync) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_msk_99_97kb_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_msk_async_patable);
-    } else if(preset == FuriHalSubGhzPresetGFSK9_99KbAsync) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
-    } else {
-        furi_crash("SubGhz: Missing config.");
-    }
-    furi_hal_subghz.preset = preset;
-}
-
-void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
+void furi_hal_subghz_load_custom_preset(const uint8_t* preset_data) {
     //load config
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_reset(&furi_hal_spi_bus_handle_subghz);
@@ -204,7 +167,6 @@ void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
     //load pa table
     memcpy(&pa[0], &preset_data[i + 2], 8);
     furi_hal_subghz_load_patable(pa);
-    furi_hal_subghz.preset = FuriHalSubGhzPresetCustom;
 
     //show debug
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -350,8 +312,7 @@ uint8_t furi_hal_subghz_get_lqi() {
 
 /* 
  Modified by @tkerby & MX to the full YARD Stick One extended range of 281-361 MHz, 378-481 MHz, and 749-962 MHz. 
- These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage
- Set flag use_ext_range_at_own_risk in extend_range.txt to use
+ These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage!
  */
 
 bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
@@ -391,7 +352,7 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     } else if(
         (allow_extended_for_int) && //
         !furi_hal_subghz_is_frequency_valid(value)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside dangerous range");
+        FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
         return false;
     }
 

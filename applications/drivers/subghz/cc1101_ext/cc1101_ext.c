@@ -18,7 +18,7 @@
 #define TAG "SubGhz_Device_CC1101_Ext"
 
 #define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO &gpio_ext_pb2
-#define SUBGHZ_DEVICE_CC1101_EXT_DANGEROUS_RANGE false
+#define SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE false
 
 /* DMA Channels definition */
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA DMA2
@@ -432,16 +432,16 @@ bool subghz_device_cc1101_ext_is_frequency_valid(uint32_t value) {
 }
 
 bool subghz_device_cc1101_ext_is_tx_allowed(uint32_t value) {
-    if(!(SUBGHZ_DEVICE_CC1101_EXT_DANGEROUS_RANGE) &&
+    if(!(SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE) &&
        !(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
        !(value >= 778999847 && value <= 928000000)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside default range");
         return false;
     } else if(
-        (SUBGHZ_DEVICE_CC1101_EXT_DANGEROUS_RANGE) &&
+        (SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE) &&
         !subghz_device_cc1101_ext_is_frequency_valid(value)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside dangerous range");
+        FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
         return false;
     }
 
