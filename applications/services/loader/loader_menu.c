@@ -62,12 +62,6 @@ static void loader_menu_apps_callback(void* context, uint32_t index) {
     loader_menu_start(name_or_path);
 }
 
-static void loader_menu_external_apps_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    const char* path = FLIPPER_EXTERNAL_APPS[index].path;
-    loader_menu_start(path);
-}
-
 static void loader_menu_applications_callback(void* context, uint32_t index) {
     UNUSED(index);
     UNUSED(context);
@@ -98,13 +92,29 @@ static uint32_t loader_menu_exit(void* context) {
 }
 
 static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
-    size_t i;
-    for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
+    menu_add_item(
+        app->primary_menu,
+        LOADER_APPLICATIONS_NAME,
+        &A_Plugins_14,
+        0,
+        loader_menu_applications_callback,
+        (void*)menu);
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        menu_add_item(
+            app->primary_menu,
+            FLIPPER_EXTERNAL_APPS[i].name,
+            FLIPPER_EXTERNAL_APPS[i].icon,
+            (uint32_t)FLIPPER_EXTERNAL_APPS[i].path,
+            loader_menu_apps_callback,
+            (void*)menu);
+    }
+
+    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
             app->primary_menu,
             FLIPPER_APPS[i].name,
             FLIPPER_APPS[i].icon,
-            i,
+            (uint32_t)FLIPPER_APPS[i].name,
             loader_menu_apps_callback,
             (void*)menu);
     }

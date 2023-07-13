@@ -13,7 +13,6 @@ class FlipperAppType(Enum):
     SERVICE = "Service"
     SYSTEM = "System"
     APP = "App"
-    FAPP = "Fapp"
     DEBUG = "Debug"
     ARCHIVE = "Archive"
     SETTINGS = "Settings"
@@ -382,14 +381,6 @@ class ApplicationsCGenerator:
     def get_app_descr(self, app: FlipperApplication):
         if app.apptype == FlipperAppType.STARTUP:
             return app.entry_point
-        if app.apptype == FlipperAppType.FAPP:
-            return f"""
-    {{.app = NULL,
-     .name = "{app.name}",
-     .appid = "/ext/apps/assets/{app.appid}.fap",
-     .stack_size = 0,
-     .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
@@ -421,11 +412,11 @@ class ApplicationsCGenerator:
             )
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
             contents.append(f"const {entry_type} {entry_block}[] = {{")
-            apps = self.buildset.get_apps_of_type(apptype)
-            if apptype is FlipperAppType.APP:
-                apps += self.buildset.get_apps_of_type(FlipperAppType.FAPP)
-            apps.sort(key=lambda app: app.order)
-            contents.append(",\n".join(map(self.get_app_descr, apps)))
+            contents.append(
+                ",\n".join(
+                    map(self.get_app_descr, self.buildset.get_apps_of_type(apptype))
+                )
+            )
             contents.append("};")
             contents.append(
                 f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});"
