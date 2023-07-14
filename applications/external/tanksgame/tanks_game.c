@@ -11,6 +11,7 @@
 #include <lib/subghz/protocols/princeton.h>
 #include <lib/subghz/subghz_tx_rx_worker.h>
 #include <tanks_icons.h>
+#include "helpers/radio_device_loader.h"
 
 #include "constants.h"
 
@@ -1215,7 +1216,15 @@ int32_t tanks_game_app(void* p) {
     size_t message_max_len = 180;
     uint8_t incomingMessage[180] = {0};
     SubGhzTxRxWorker* subghz_txrx = subghz_tx_rx_worker_alloc();
-    subghz_tx_rx_worker_start(subghz_txrx, frequency);
+
+    subghz_devices_init();
+    const SubGhzDevice* subghz_device =
+        radio_device_loader_set(NULL, SubGhzRadioDeviceTypeExternalCC1101);
+
+    subghz_devices_reset(subghz_device);
+    subghz_devices_load_preset(subghz_device, FuriHalSubGhzPresetOok650Async, NULL);
+
+    subghz_tx_rx_worker_start(subghz_txrx, subghz_device, frequency);
     furi_hal_power_suppress_charge_enter();
 
     for(bool processing = true; processing;) {
@@ -1437,6 +1446,8 @@ int32_t tanks_game_app(void* p) {
         subghz_tx_rx_worker_stop(subghz_txrx);
         subghz_tx_rx_worker_free(subghz_txrx);
     }
+
+    subghz_devices_deinit();
 
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
