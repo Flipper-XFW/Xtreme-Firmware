@@ -619,8 +619,7 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             (show_scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX),
             filename,
             scroll_counter,
-            (model->item_idx != idx),
-            false);
+            (model->item_idx != idx));
     }
 
     if(show_scrollbar) {

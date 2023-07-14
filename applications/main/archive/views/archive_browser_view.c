@@ -246,8 +246,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             ((scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX) - x_offset),
             str_buf,
             scroll_counter,
-            (model->item_idx != idx),
-            false);
+            (model->item_idx != idx));
 
         furi_string_free(str_buf);
     }

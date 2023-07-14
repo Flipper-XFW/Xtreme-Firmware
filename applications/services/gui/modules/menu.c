@@ -91,7 +91,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                         furi_string_right(name, trim + 2);
                     }
                 }
-                elements_scrollable_text_line(
+                elements_scrollable_text_line_centered(
                     canvas, 20 + x_off, 26 + y_off, 36, name, scroll_counter, false, true);
                 if(item_i == position) {
                     canvas_set_color(canvas, ColorBlack);

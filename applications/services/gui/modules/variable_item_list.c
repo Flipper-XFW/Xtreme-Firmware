@@ -101,8 +101,7 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                     37,
                     item->current_value_text,
                     scroll_counter,
-                    false,
-                    true);
+                    false);
 
                 if(item->current_value_index < (item->values_count - 1)) {
                     canvas_draw_str(canvas, 115, item_text_y, ">");
