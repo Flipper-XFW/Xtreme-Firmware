@@ -36,7 +36,6 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
 
     DesktopMainView* main_view = context;
 
-    // DesktopMainEventOpenDebug
     if(event->type == InputTypeShort || event->type == InputTypeLong) {
         if(event->key == InputKeyOk) {
             main_view->callback(
