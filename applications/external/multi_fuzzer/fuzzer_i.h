@@ -7,6 +7,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/popup.h>
+#include <gui/modules/text_input.h>
 
 #include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
@@ -24,6 +25,7 @@
 #include <assets_icons.h>
 
 #define FUZZ_TIME_DELAY_MAX (80)
+#define KEY_NAME_SIZE 22
 
 typedef struct {
     const char* custom_dict_extension;
@@ -42,11 +44,13 @@ typedef struct {
 
     Popup* popup;
     DialogsApp* dialogs;
+    TextInput* text_input;
     FuzzerViewMain* main_view;
     FuzzerViewAttack* attack_view;
     FuzzerViewFieldEditor* field_editor_view;
 
     FuriString* file_path;
+    char key_name[KEY_NAME_SIZE + 1];
 
     FuzzerState fuzzer_state;
     FuzzerConsts* fuzzer_const;
