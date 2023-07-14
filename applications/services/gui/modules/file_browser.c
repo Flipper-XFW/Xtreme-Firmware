@@ -692,7 +692,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 } else {
                                     // Wasn't holding / done waiting, roll over now
                                     model->item_idx = model->item_cnt - 1;
-                                    file_list_rollover(model);
+                                    browser_list_rollover(model);
                                 }
                             } else {
                                 // Not first item, jump to first
@@ -728,7 +728,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 } else {
                                     // Wasn't holding / done waiting, roll over now
                                     model->item_idx = 0;
-                                    file_list_rollover(model);
+                                    browser_list_rollover(model);
                                 }
                             } else {
                                 // Not last item, jump to last
