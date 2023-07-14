@@ -720,8 +720,7 @@ void playlist_free(Playlist* app) {
     free(app);
 }
 
-int32_t playlist_app(void* p) {
-    UNUSED(p);
+int32_t playlist_app(char* p) {
     dolphin_deed(DolphinDeedPluginStart);
 
     // create playlist folder

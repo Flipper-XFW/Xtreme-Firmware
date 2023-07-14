@@ -35,7 +35,7 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
 
             // Select keybind item in submenu
             if(!strncmp(FLIPPER_EXTERNAL_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
-                pre_select_item = FLIPPER_EXTERNAL_APPS[i].name;
+                pre_select_item = (uint32_t)FLIPPER_EXTERNAL_APPS[i].name;
             }
         }
         for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
@@ -48,7 +48,7 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
 
             // Select keybind item in submenu
             if(!strncmp(FLIPPER_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
-                pre_select_item = FLIPPER_APPS[i].name;
+                pre_select_item = (uint32_t)FLIPPER_APPS[i].name;
             }
         }
     } else if(action_type == DesktopSettingsAppKeybindActionTypeMoreActions) {
@@ -62,7 +62,7 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
 
             // Select keybind item in submenu
             if(!strncmp(EXTRA_KEYBINDS[i], keybind, MAX_KEYBIND_LENGTH)) {
-                pre_select_item = EXTRA_KEYBINDS[i];
+                pre_select_item = (uint32_t)EXTRA_KEYBINDS[i];
             }
         }
     }
