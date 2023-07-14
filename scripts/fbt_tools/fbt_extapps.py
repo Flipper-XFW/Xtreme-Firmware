@@ -52,9 +52,6 @@ class AppBuilder:
         self.app_env = self.fw_env.Clone(
             FAP_SRC_DIR=self.app._appdir, FAP_WORK_DIR=self.app_work_dir
         )
-        self.app_env.Append(
-            CPPDEFINES=self.app.cdefines,
-        )
         self.app_env.VariantDir(self.app_work_dir, self.app._appdir, duplicate=False)
 
     def _build_external_files(self):
