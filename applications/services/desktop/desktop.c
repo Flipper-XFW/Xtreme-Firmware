@@ -471,6 +471,9 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
         loader_start_detached_with_gui_error(instance->loader, LOADER_APPLICATIONS_NAME, NULL);
     } else if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenArchive);
+    } else if(!strncmp(keybind, "Clock", MAX_KEYBIND_LENGTH)) {
+        loader_start_detached_with_gui_error(
+            instance->loader, EXT_PATH("apps/Tools/nightstand.fap"), "");
     } else if(!strncmp(keybind, "Device Info", MAX_KEYBIND_LENGTH)) {
         loader_start_detached_with_gui_error(instance->loader, "Power", "about_battery");
     } else if(!strncmp(keybind, "Lock Menu", MAX_KEYBIND_LENGTH)) {
@@ -504,17 +507,7 @@ int32_t desktop_srv(void* p) {
         furi_hal_rtc_set_pin_fails(0);
     }
 
-    if(!DESKTOP_KEYBINDS_LOAD(&desktop->keybinds, sizeof(desktop->keybinds))) {
-        memset(&desktop->keybinds, 0, sizeof(desktop->keybinds));
-        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyUp].data, "Lock Menu");
-        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyDown].data, "Archive");
-        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyRight].data, "Passport");
-        strcpy(
-            desktop->keybinds[KeybindTypePress][KeybindKeyLeft].data,
-            EXT_PATH("apps/Misc/nightstand.fap"));
-        strcpy(desktop->keybinds[KeybindTypeHold][KeybindKeyRight].data, "Device Info");
-        strcpy(desktop->keybinds[KeybindTypeHold][KeybindKeyLeft].data, "Lock with PIN");
-    }
+    DESKTOP_KEYBINDS_LOAD(&desktop->keybinds, sizeof(desktop->keybinds));
 
     desktop_clock_toggle_view(desktop, XTREME_SETTINGS()->statusbar_clock);
 

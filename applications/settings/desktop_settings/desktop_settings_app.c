@@ -9,6 +9,7 @@
 const char* EXTRA_KEYBINDS[] = {
     "Apps Menu",
     "Archive",
+    "Clock",
     "Device Info",
     "Lock Menu",
     "Lock Keypad",
