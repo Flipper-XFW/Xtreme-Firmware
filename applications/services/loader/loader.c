@@ -15,7 +15,20 @@
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
-// api
+
+// helpers
+
+static const char* loader_find_external_application_by_name(const char* app_name) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
+            return FLIPPER_EXTERNAL_APPS[i].path;
+        }
+    }
+
+    return NULL;
+}
+
+// API
 
 LoaderStatus
     loader_start(Loader* loader, const char* name, const char* args, FuriString* error_message) {
@@ -43,8 +56,12 @@ static void loader_show_gui_error(LoaderStatus status, FuriString* error_message
         dialog_message_set_buttons(message, NULL, NULL, NULL);
 
         furi_string_replace(error_message, ":", "\n");
+        furi_string_replace(error_message, "/ext/apps/", "");
+        furi_string_replace(error_message, ", ", "\n");
+        furi_string_replace(error_message, ": ", "\n");
+
         dialog_message_set_text(
-            message, furi_string_get_cstr(error_message), 64, 32, AlignCenter, AlignCenter);
+            message, furi_string_get_cstr(error_message), 64, 35, AlignCenter, AlignCenter);
 
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
@@ -245,16 +262,6 @@ static const FlipperInternalApplication* loader_find_application_by_name(const c
     return application;
 }
 
-static const char* loader_find_external_application_by_name(const char* app_name) {
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
-            return FLIPPER_EXTERNAL_APPS[i].path;
-        }
-    }
-
-    return NULL;
-}
-
 static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFlag flags) {
     // setup heap trace
     FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
@@ -356,7 +363,7 @@ static LoaderStatus loader_start_external_app(
         } else if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
             status = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Preload failed %s: %s", path, err_msg);
+                LoaderStatusErrorInternal, error_message, "Preload failed, %s: %s", path, err_msg);
             break;
         }
 
@@ -504,7 +511,7 @@ static LoaderStatus loader_do_start_by_name(
             }
         }
 
-        // check external apps
+        // check Faps
         {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, name)) {
