@@ -218,7 +218,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
 
         size_t scroll_counter = model->scroll_counter;
 
-        if(model->item_idx == idx) {
+        if(!model->list_loading && model->item_idx == idx) {
             archive_draw_frame(canvas, i, scrollbar, model->move_fav);
             if(scroll_counter < SCROLL_DELAY) {
                 scroll_counter = 0;

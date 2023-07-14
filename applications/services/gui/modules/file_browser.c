@@ -582,7 +582,7 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
         }
 
         size_t scroll_counter = model->scroll_counter;
-        if(model->item_idx == idx) {
+        if(!model->list_loading && model->item_idx == idx) {
             browser_draw_frame(canvas, i, show_scrollbar);
             if(scroll_counter < SCROLL_DELAY) {
                 scroll_counter = 0;
