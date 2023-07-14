@@ -144,7 +144,7 @@ typedef struct {
     bool hide_ext;
     size_t scroll_counter;
 
-    uint32_t button_held_for_ticks;
+    int32_t button_held_for_ticks;
 } FileBrowserModel;
 
 static const Icon* BrowserItemIcons[] = {
@@ -677,13 +677,29 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                             scroll_speed = model->button_held_for_ticks > 9 ? 5 : 3;
                         }
                     }
+                    if(model->button_held_for_ticks < -1) {
+                        model->button_held_for_ticks = 0;
+                    }
 
                     if(event->key == InputKeyUp) {
                         if(model->item_idx < scroll_speed) {
-                            model->button_held_for_ticks = 0;
-                            model->item_idx = model->item_cnt - 1;
-                            browser_list_rollover(model);
+                            // Would wrap around
+                            if(model->item_idx == 0) {
+                                // Is first item
+                                if(model->button_held_for_ticks > 0) {
+                                    // Was holding, so wait a second to roll over
+                                    model->button_held_for_ticks = -1;
+                                } else {
+                                    // Wasn't holding / done waiting, roll over now
+                                    model->item_idx = model->item_cnt - 1;
+                                    file_list_rollover(model);
+                                }
+                            } else {
+                                // Not first item, jump to first
+                                model->item_idx = 0;
+                            }
                         } else {
+                            // No wrap around
                             model->item_idx =
                                 ((model->item_idx - scroll_speed) + model->item_cnt) %
                                 model->item_cnt;
@@ -703,10 +719,23 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                         model->button_held_for_ticks += 1;
                     } else if(event->key == InputKeyDown) {
                         if(model->item_idx + scroll_speed >= (int32_t)model->item_cnt) {
-                            model->button_held_for_ticks = 0;
-                            model->item_idx = 0;
-                            browser_list_rollover(model);
+                            // Would wrap around
+                            if(model->item_idx == (int32_t)model->item_cnt - 1) {
+                                // Is last item
+                                if(model->button_held_for_ticks > 0) {
+                                    // Was holding, so wait a second to roll over
+                                    model->button_held_for_ticks = -1;
+                                } else {
+                                    // Wasn't holding / done waiting, roll over now
+                                    model->item_idx = 0;
+                                    file_list_rollover(model);
+                                }
+                            } else {
+                                // Not last item, jump to last
+                                model->item_idx = model->item_cnt - 1;
+                            }
                         } else {
+                            // No wrap around
                             model->item_idx = (model->item_idx + scroll_speed) % model->item_cnt;
                         }
 
