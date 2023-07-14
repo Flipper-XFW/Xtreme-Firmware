@@ -504,7 +504,7 @@ static void
                     model->list_loading = false;
                 }
             },
-            false);
+            true);
         if(load_again) {
             file_browser_worker_load(browser->worker, load_offset, ITEM_LIST_LEN_MAX);
         } else {
@@ -753,7 +753,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                         model->button_held_for_ticks += 1;
                     }
                 },
-                false);
+                true);
             browser_update_offset(browser);
             consumed = true;
         } else if(event->type == InputTypeRelease) {
