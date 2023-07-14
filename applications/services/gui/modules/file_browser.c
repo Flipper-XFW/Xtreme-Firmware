@@ -33,7 +33,6 @@ typedef enum {
 } BrowserItemType;
 
 typedef struct {
-    uint32_t unsorted_idx;
     FuriString* path;
     BrowserItemType type;
     uint8_t* custom_icon_data;
@@ -41,7 +40,6 @@ typedef struct {
 } BrowserItem_t;
 
 static void BrowserItem_t_init(BrowserItem_t* obj) {
-    obj->unsorted_idx = 0;
     obj->type = BrowserItemTypeLoading;
     obj->path = furi_string_alloc();
     obj->display_name = furi_string_alloc();
@@ -49,7 +47,6 @@ static void BrowserItem_t_init(BrowserItem_t* obj) {
 }
 
 static void BrowserItem_t_init_set(BrowserItem_t* obj, const BrowserItem_t* src) {
-    obj->unsorted_idx = src->unsorted_idx;
     obj->type = src->type;
     obj->path = furi_string_alloc_set(src->path);
     obj->display_name = furi_string_alloc_set(src->display_name);
@@ -62,7 +59,6 @@ static void BrowserItem_t_init_set(BrowserItem_t* obj, const BrowserItem_t* src)
 }
 
 static void BrowserItem_t_set(BrowserItem_t* obj, const BrowserItem_t* src) {
-    obj->unsorted_idx = src->unsorted_idx;
     obj->type = src->type;
     furi_string_set(obj->path, src->path);
     furi_string_set(obj->display_name, src->display_name);
@@ -436,11 +432,11 @@ static void browser_list_item_cb(
     bool is_folder,
     bool is_last) {
     furi_assert(context);
+    UNUSED(idx);
     FileBrowser* browser = (FileBrowser*)context;
 
     BrowserItem_t item;
     item.custom_icon_data = NULL;
-    item.unsorted_idx = idx;
 
     if(!is_last) {
         item.path = furi_string_alloc_set(item_path);
@@ -745,7 +741,6 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
     } else if(event->key == InputKeyOk) {
         if(event->type == InputTypeShort) {
             BrowserItem_t* selected_item = NULL;
-            int32_t select_index = 0;
             with_view_model(
                 browser->view,
                 FileBrowserModel * model,
@@ -753,7 +748,6 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                     if(browser_is_item_in_array(model, model->item_idx)) {
                         selected_item =
                             items_array_get(model->items, model->item_idx - model->array_offset);
-                        select_index = selected_item->unsorted_idx;
                     }
                 },
                 false);
@@ -762,8 +756,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                 if(selected_item->type == BrowserItemTypeBack) {
                     file_browser_worker_folder_exit(browser->worker);
                 } else if(selected_item->type == BrowserItemTypeFolder) {
-                    file_browser_worker_folder_enter(
-                        browser->worker, selected_item->path, select_index);
+                    file_browser_worker_folder_enter(browser->worker, selected_item->path, 0);
                 } else if(selected_item->type == BrowserItemTypeFile) {
                     furi_string_set(browser->result_path, selected_item->path);
                     if(browser->callback) {
