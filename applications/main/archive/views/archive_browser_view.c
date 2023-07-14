@@ -195,7 +195,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
         ArchiveFileTypeEnum file_type = ArchiveFileTypeLoading;
         uint8_t* custom_icon_data = NULL;
 
-        if(archive_is_item_in_array(model, idx)) {
+        if(!model->list_loading && archive_is_item_in_array(model, idx)) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             file_type = file->type;
