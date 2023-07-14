@@ -17,11 +17,6 @@
 
 #define TAG "UpdWorkerBackup"
 
-#define CHECK_RESULT(x) \
-    if(!(x)) {          \
-        break;          \
-    }
-
 static bool update_task_pre_update(UpdateTask* update_task) {
     bool success = false;
     FuriString* backup_file_path;
