@@ -7,7 +7,7 @@
 #include "util/vector.h"
 
 #define CALIBRATION_DATA_VER (1)
-#define CALIBRATION_DATA_PATH APP_DATA_PATH("calibration.data")
+#define CALIBRATION_DATA_PATH EXT_PATH("apps_data/air_mouse/calibration.data")
 #define CALIBRATION_DATA_MAGIC (0x23)
 
 #define CALIBRATION_DATA_SAVE(x)   \

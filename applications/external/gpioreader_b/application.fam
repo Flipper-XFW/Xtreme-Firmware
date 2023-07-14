@@ -1,9 +1,8 @@
 App(
-    appid="gpio_reader_b",
+    appid="gpioreader2",
     name="[GPIO] Reader (biotinker)",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_app",
-    cdefines=["APP_GPIOREADER"],
     requires=["gui"],
     stack_size=1 * 1024,
     order=50,
