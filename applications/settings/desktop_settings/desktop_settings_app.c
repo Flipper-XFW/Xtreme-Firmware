@@ -58,6 +58,7 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
 
     app->popup = popup_alloc();
     app->submenu = submenu_alloc();
+    app->dialog_ex = dialog_ex_alloc();
     app->variable_item_list = variable_item_list_alloc();
     app->pin_input_view = desktop_view_pin_input_alloc();
     app->pin_setup_howto_view = desktop_settings_view_pin_setup_howto_alloc();
@@ -71,6 +72,8 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
         variable_item_list_get_view(app->variable_item_list));
     view_dispatcher_add_view(
         app->view_dispatcher, DesktopSettingsAppViewIdPopup, popup_get_view(app->popup));
+    view_dispatcher_add_view(
+        app->view_dispatcher, DesktopSettingsAppViewDialogEx, dialog_ex_get_view(app->dialog_ex));
     view_dispatcher_add_view(
         app->view_dispatcher,
         DesktopSettingsAppViewIdPinInput,
@@ -92,10 +95,12 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
     view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewVarItemList);
     view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewIdPopup);
+    view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewDialogEx);
     view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewIdPinInput);
     view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewIdPinSetupHowto);
     view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewIdPinSetupHowto2);
     variable_item_list_free(app->variable_item_list);
+    dialog_ex_free(app->dialog_ex);
     submenu_free(app->submenu);
     popup_free(app->popup);
     desktop_view_pin_input_free(app->pin_input_view);
