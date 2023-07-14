@@ -360,8 +360,8 @@ static bool archive_view_input(InputEvent* event, void* context) {
         },
         false);
 
-    if(is_loading) {
-        return false;
+    if(is_loading && event->key != InputKeyBack) {
+        return true; // Return without doing anything
     }
     if(in_menu) {
         if(event->type != InputTypeShort) {

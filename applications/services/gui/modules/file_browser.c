@@ -661,8 +661,8 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
         { is_loading = model->folder_loading || model->list_loading; },
         false);
 
-    if(is_loading) {
-        return false;
+    if(is_loading && event->key != InputKeyBack) {
+        return true; // Return without doing anything
     } else if(event->key == InputKeyUp || event->key == InputKeyDown) {
         if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
             with_view_model(
