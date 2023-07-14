@@ -421,9 +421,14 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
 }
 
 bool storage_is_subdir(const char* a, const char* b) {
-    char test[strlen(b) + 2];
-    snprintf(test, sizeof(test), "%s/", b);
-    return strncmp(a, test, sizeof(test) - 1) == 0;
+    size_t len = strlen(b) + 2;
+    char test[len];
+    strncpy(test, b, len);
+    if(test[len - 3] != '/') {
+        test[len - 2] = '/';
+        test[len - 1] = '\0';
+    }
+    return strncmp(a, test, len - 1) == 0;
 }
 
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
