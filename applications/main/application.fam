@@ -11,9 +11,9 @@ App(
         "subghz",
         "bad_kb",
         "u2f",
+        "xtreme_app",
         "archive",
         "nightstand",
-        "subghz_remote",
         "main_apps_on_start",
     ],
 )
