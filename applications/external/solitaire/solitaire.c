@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 #include <furi.h>
 #include <gui/canvas_i.h>
 #include "defines.h"

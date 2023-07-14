@@ -8,7 +8,7 @@ App(
         "gui",
         "dialogs",
     ],
-    fap_category="Tools",
+    fap_category="Infrared",
     fap_icon="ir_10px.png",
     fap_author="@Hong5489 & @friebel & @d4ve10",
     fap_weburl="https://github.com/Hong5489/ir_remote",

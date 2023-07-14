@@ -99,7 +99,10 @@ int32_t flizzer_tracker_app(void* p) {
     UNUSED(p);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_simply_mkdir(storage, FLIZZER_TRACKER_INSTRUMENTS_FOLDER);
+    bool st = storage_simply_mkdir(storage, APPSDATA_FOLDER);
+    st = storage_simply_mkdir(storage, FLIZZER_TRACKER_FOLDER);
+    st = storage_simply_mkdir(storage, FLIZZER_TRACKER_INSTRUMENTS_FOLDER);
+    UNUSED(st);
     furi_record_close(RECORD_STORAGE);
 
     FlizzerTrackerApp* tracker = init_tracker(44100, 50, true, 1024);
