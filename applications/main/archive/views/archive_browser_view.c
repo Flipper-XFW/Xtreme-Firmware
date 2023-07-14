@@ -335,24 +335,10 @@ View* archive_browser_get_view(ArchiveBrowserView* browser) {
     return browser->view;
 }
 
-static bool is_file_list_load_required(ArchiveBrowserViewModel* model) {
-    size_t array_size = files_array_size(model->files);
-
-    if((model->list_loading) || (array_size >= model->item_cnt)) {
-        return false;
+static void file_list_rollover(ArchiveBrowserViewModel* model) {
+    if(!model->list_loading && files_array_size(model->files) < model->item_cnt) {
+        files_array_reset(model->files);
     }
-
-    if((model->array_offset > 0) &&
-       (model->item_idx < (model->array_offset + FILE_LIST_BUF_LEN / 4))) {
-        return true;
-    }
-
-    if(((model->array_offset + array_size) < model->item_cnt) &&
-       (model->item_idx > (int32_t)(model->array_offset + array_size - FILE_LIST_BUF_LEN / 4))) {
-        return true;
-    }
-
-    return false;
 }
 
 static bool archive_view_input(InputEvent* event, void* context) {
@@ -438,25 +424,19 @@ static bool archive_view_input(InputEvent* event, void* context) {
                         } else {
                             scroll_speed = model->button_held_for_ticks > 9 ? 4 : 2;
                         }
-                    } else if(model->button_held_for_ticks < 0) {
-                        scroll_speed = 0;
                     }
 
                     if(event->key == InputKeyUp) {
                         if(model->item_idx < scroll_speed) {
-                            scroll_speed = model->item_idx;
-                            if(scroll_speed == 0) {
-                                if(model->button_held_for_ticks > 0) {
-                                    model->button_held_for_ticks = -1;
-                                } else {
-                                    scroll_speed = 1;
-                                }
-                            }
+                            model->button_held_for_ticks = 0;
+                            model->item_idx = model->item_cnt - 1;
+                            file_list_rollover(model);
+                        } else {
+                            model->item_idx =
+                                ((model->item_idx - scroll_speed) + model->item_cnt) %
+                                model->item_cnt;
                         }
-
-                        model->item_idx =
-                            ((model->item_idx - scroll_speed) + model->item_cnt) % model->item_cnt;
-                        if(is_file_list_load_required(model)) {
+                        if(archive_is_file_list_load_required(model)) {
                             model->list_loading = true;
                             browser->callback(ArchiveBrowserEventLoadPrevItems, browser->context);
                         }
@@ -464,26 +444,17 @@ static bool archive_view_input(InputEvent* event, void* context) {
                             browser->callback(ArchiveBrowserEventFavMoveUp, browser->context);
                         }
                         model->scroll_counter = 0;
-
-                        if(model->button_held_for_ticks < -1) {
-                            model->button_held_for_ticks = 0;
-                        }
                         model->button_held_for_ticks += 1;
                     } else if(event->key == InputKeyDown) {
                         int32_t count = model->item_cnt;
-                        if(model->item_idx >= (count - scroll_speed)) {
-                            scroll_speed = model->item_cnt - model->item_idx - 1;
-                            if(scroll_speed == 0) {
-                                if(model->button_held_for_ticks > 0) {
-                                    model->button_held_for_ticks = -1;
-                                } else {
-                                    scroll_speed = 1;
-                                }
-                            }
+                        if(model->item_idx + scroll_speed >= count) {
+                            model->button_held_for_ticks = 0;
+                            model->item_idx = 0;
+                            file_list_rollover(model);
+                        } else {
+                            model->item_idx = (model->item_idx + scroll_speed) % model->item_cnt;
                         }
-
-                        model->item_idx = (model->item_idx + scroll_speed) % model->item_cnt;
-                        if(is_file_list_load_required(model)) {
+                        if(archive_is_file_list_load_required(model)) {
                             model->list_loading = true;
                             browser->callback(ArchiveBrowserEventLoadNextItems, browser->context);
                         }
@@ -491,10 +462,6 @@ static bool archive_view_input(InputEvent* event, void* context) {
                             browser->callback(ArchiveBrowserEventFavMoveDown, browser->context);
                         }
                         model->scroll_counter = 0;
-
-                        if(model->button_held_for_ticks < -1) {
-                            model->button_held_for_ticks = 0;
-                        }
                         model->button_held_for_ticks += 1;
                     }
                 },
