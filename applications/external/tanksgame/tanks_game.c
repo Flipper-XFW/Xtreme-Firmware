@@ -1286,39 +1286,43 @@ int32_t tanks_game_app(void* p) {
                         }
                         break;
                     case InputKeyRight:
-                        if(tanks_state->state == GameStateCooperativeClient) {
-                            FuriString* goesRight = furi_string_alloc();
-                            char arr[2];
-                            arr[0] = GoesRight;
-                            arr[1] = 0;
-                            furi_string_set(goesRight, (char*)&arr);
+                        if(!(tanks_state->state == GameStateMenu)) {
+                            if(tanks_state->state == GameStateCooperativeClient) {
+                                FuriString* goesRight = furi_string_alloc();
+                                char arr[2];
+                                arr[0] = GoesRight;
+                                arr[1] = 0;
+                                furi_string_set(goesRight, (char*)&arr);
 
-                            subghz_tx_rx_worker_write(
-                                subghz_txrx,
-                                (uint8_t*)furi_string_get_cstr(goesRight),
-                                strlen(furi_string_get_cstr(goesRight)));
-                            furi_string_free(goesRight);
-                        } else {
-                            tanks_state->p1->moving = true;
-                            tanks_state->p1->direction = DirectionRight;
+                                subghz_tx_rx_worker_write(
+                                    subghz_txrx,
+                                    (uint8_t*)furi_string_get_cstr(goesRight),
+                                    strlen(furi_string_get_cstr(goesRight)));
+                                furi_string_free(goesRight);
+                            } else {
+                                tanks_state->p1->moving = true;
+                                tanks_state->p1->direction = DirectionRight;
+                            }
                         }
                         break;
                     case InputKeyLeft:
-                        if(tanks_state->state == GameStateCooperativeClient) {
-                            FuriString* goesLeft = furi_string_alloc();
-                            char arr[2];
-                            arr[0] = GoesLeft;
-                            arr[1] = 0;
-                            furi_string_set(goesLeft, (char*)&arr);
+                        if(!(tanks_state->state == GameStateMenu)) {
+                            if(tanks_state->state == GameStateCooperativeClient) {
+                                FuriString* goesLeft = furi_string_alloc();
+                                char arr[2];
+                                arr[0] = GoesLeft;
+                                arr[1] = 0;
+                                furi_string_set(goesLeft, (char*)&arr);
 
-                            subghz_tx_rx_worker_write(
-                                subghz_txrx,
-                                (uint8_t*)furi_string_get_cstr(goesLeft),
-                                strlen(furi_string_get_cstr(goesLeft)));
-                            furi_string_free(goesLeft);
-                        } else {
-                            tanks_state->p1->moving = true;
-                            tanks_state->p1->direction = DirectionLeft;
+                                subghz_tx_rx_worker_write(
+                                    subghz_txrx,
+                                    (uint8_t*)furi_string_get_cstr(goesLeft),
+                                    strlen(furi_string_get_cstr(goesLeft)));
+                                furi_string_free(goesLeft);
+                            } else {
+                                tanks_state->p1->moving = true;
+                                tanks_state->p1->direction = DirectionLeft;
+                            }
                         }
                         break;
                     case InputKeyOk:
