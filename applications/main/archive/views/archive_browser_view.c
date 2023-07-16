@@ -132,22 +132,28 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
     const uint8_t menu_height = 48;
     const uint8_t line_height = 10;
     const uint8_t calc_height = menu_height - ((MENU_ITEMS - size_menu - 1) * line_height);
-    const uint8_t off = (MENU_ITEMS - size_menu) * (line_height / 2);
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 72, off + 2, 56, calc_height + 4);
+    canvas_draw_box(canvas, 72, 2, 56, calc_height + 4);
     canvas_set_color(canvas, ColorBlack);
-    elements_slightly_rounded_frame(canvas, 71, off + 2, 57, calc_height + 4);
+    elements_slightly_rounded_frame(canvas, 71, 2, 57, calc_height + 4);
 
-    canvas_draw_str(canvas, 74, off + 11, model->menu_manage ? "Manage:" : "Actions:");
+    canvas_draw_str_aligned(
+        canvas, 100, 11, AlignCenter, AlignBottom, model->menu_manage ? "Manage:" : "Actions:");
+    if(model->menu_can_switch) {
+        if(model->menu_manage) {
+            canvas_draw_icon(canvas, 74, 4, &I_ButtonLeft_4x7);
+        } else {
+            canvas_draw_icon(canvas, 121, 4, &I_ButtonRight_4x7);
+        }
+    }
     for(size_t i = 0; i < size_menu; i++) {
         ArchiveContextMenuItem_t* current = menu_array_get(model->context_menu, i);
         canvas_draw_str(
-            canvas, 82, off + 11 + (i + 1) * line_height, furi_string_get_cstr(current->text));
+            canvas, 82, 11 + (i + 1) * line_height, furi_string_get_cstr(current->text));
     }
 
-    canvas_draw_icon(
-        canvas, 74, off + 4 + (model->menu_idx + 1) * line_height, &I_ButtonRight_4x7);
+    canvas_draw_icon(canvas, 74, 4 + (model->menu_idx + 1) * line_height, &I_ButtonRight_4x7);
 }
 
 static void archive_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar, bool moving) {
@@ -346,7 +352,6 @@ static bool archive_view_input(InputEvent* event, void* context) {
     ArchiveBrowserView* browser = context;
 
     bool in_menu;
-    int32_t cur_item_idx;
     bool move_fav_mode;
     bool is_loading;
     with_view_model(
@@ -354,7 +359,6 @@ static bool archive_view_input(InputEvent* event, void* context) {
         ArchiveBrowserViewModel * model,
         {
             in_menu = model->menu;
-            cur_item_idx = model->item_idx;
             move_fav_mode = model->move_fav;
             is_loading = model->folder_loading || model->list_loading;
         },
@@ -365,7 +369,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
     }
     if(in_menu) {
         if(event->type != InputTypeShort) {
-            return true; // RETURN
+            return true; // Return without doing anything
         }
         if(event->key == InputKeyUp || event->key == InputKeyDown) {
             with_view_model(
@@ -377,6 +381,20 @@ static bool archive_view_input(InputEvent* event, void* context) {
                         model->menu_idx = ((model->menu_idx - 1) + size_menu) % size_menu;
                     } else if(event->key == InputKeyDown) {
                         model->menu_idx = (model->menu_idx + 1) % size_menu;
+                    }
+                },
+                true);
+        } else if(event->key == InputKeyLeft || event->key == InputKeyRight) {
+            with_view_model(
+                browser->view,
+                ArchiveBrowserViewModel * model,
+                {
+                    if(model->menu_can_switch) {
+                        if((event->key == InputKeyLeft && model->menu_manage) ||
+                           (event->key == InputKeyRight && !model->menu_manage)) {
+                            model->menu_manage = !model->menu_manage;
+                            menu_array_reset(model->context_menu);
+                        }
                     }
                 },
                 true);
@@ -396,19 +414,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
             browser->callback(ArchiveBrowserEventFileMenuClose, browser->context);
         }
     } else {
-        if(event->type == InputTypeShort) {
-            if(event->key == InputKeyLeft || event->key == InputKeyRight) {
-                if(move_fav_mode) return false;
-                archive_switch_tab(browser, event->key);
-            } else if(event->key == InputKeyBack) {
-                if(move_fav_mode) {
-                    browser->callback(ArchiveBrowserEventExitFavMove, browser->context);
-                } else {
-                    browser->callback(ArchiveBrowserEventExit, browser->context);
-                }
-            }
-        }
-
+        ArchiveFile_t* selected = archive_get_current_file(browser);
         if((event->key == InputKeyUp || event->key == InputKeyDown) &&
            (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
             with_view_model(
@@ -493,46 +499,44 @@ static bool archive_view_input(InputEvent* event, void* context) {
                 },
                 false);
             archive_update_offset(browser);
-        }
-
-        ArchiveFile_t* selected = archive_get_current_file(browser);
-        bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
-        if(selected && selected->type == ArchiveFileTypeSearch) {
-            if((cur_item_idx == 0 || favorites) && event->key == InputKeyOk) {
-                if(event->type == InputTypeShort) {
-                    browser->callback(
-                        favorites ? ArchiveBrowserEventFileMenuRun : ArchiveBrowserEventSearch,
-                        browser->context);
-                } else if(event->type == InputTypeLong) {
+        } else if(event->type == InputTypeShort) {
+            if(event->key == InputKeyLeft || event->key == InputKeyRight) {
+                if(move_fav_mode) {
+                    return true; // Return without doing anything
+                } else {
+                    archive_switch_tab(browser, event->key);
+                }
+            } else if(event->key == InputKeyOk) {
+                if(move_fav_mode) {
+                    browser->callback(ArchiveBrowserEventSaveFavMove, browser->context);
+                } else if(selected && selected->type == ArchiveFileTypeFolder) {
+                    browser->callback(ArchiveBrowserEventEnterDir, browser->context);
+                } else if(selected && archive_is_known_app(selected->type)) {
+                    browser->callback(ArchiveBrowserEventFileMenuRun, browser->context);
+                } else {
                     browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                 }
-            }
-        } else if(event->key == InputKeyOk) {
-            if(selected) {
-                bool folder = selected->type == ArchiveFileTypeFolder;
-
-                if(event->type == InputTypeShort) {
-                    if(favorites) {
-                        if(move_fav_mode) {
-                            browser->callback(ArchiveBrowserEventSaveFavMove, browser->context);
-                        } else {
-                            browser->callback(ArchiveBrowserEventFileMenuRun, browser->context);
-                        }
-                    } else if(folder) {
-                        browser->callback(ArchiveBrowserEventEnterDir, browser->context);
-                    } else {
-                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
-                    }
-                } else if(event->type == InputTypeLong) {
-                    if(move_fav_mode) {
-                        browser->callback(ArchiveBrowserEventSaveFavMove, browser->context);
-                    } else if(folder || favorites) {
-                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
-                    }
+            } else if(event->key == InputKeyBack) {
+                if(move_fav_mode) {
+                    browser->callback(ArchiveBrowserEventExitFavMove, browser->context);
+                } else {
+                    browser->callback(ArchiveBrowserEventExit, browser->context);
                 }
             }
-        } else if(event->key == InputKeyBack && event->type == InputTypeLong) {
-            browser->callback(ArchiveBrowserEventManageMenuOpen, browser->context);
+        } else if(event->type == InputTypeLong) {
+            if(event->key == InputKeyOk) {
+                if(move_fav_mode) {
+                    browser->callback(ArchiveBrowserEventSaveFavMove, browser->context);
+                } else {
+                    browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
+                }
+            } else if(event->key == InputKeyBack) {
+                if(move_fav_mode) {
+                    browser->callback(ArchiveBrowserEventExitFavMove, browser->context);
+                } else {
+                    browser->callback(ArchiveBrowserEventManageMenuOpen, browser->context);
+                }
+            }
         }
     }
 

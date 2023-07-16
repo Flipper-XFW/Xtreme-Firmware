@@ -469,18 +469,31 @@ void archive_show_file_menu(ArchiveBrowserView* browser, bool show, bool manage)
         {
             if(show) {
                 model->menu = true;
-                model->menu_manage = manage;
                 model->menu_idx = 0;
                 menu_array_reset(model->context_menu);
+                model->menu_manage = manage;
+                model->menu_can_switch = true;
                 if(archive_is_item_in_array(model, model->item_idx)) {
                     ArchiveFile_t* selected =
                         files_array_get(model->files, model->item_idx - model->array_offset);
                     selected->fav =
                         archive_is_favorite("%s", furi_string_get_cstr(selected->path));
+                    if(selected->type == ArchiveFileTypeSearch) {
+                        if(!furi_string_cmp_str(selected->path, "/app:search/Search for files")) {
+                            model->menu_manage = false;
+                            model->menu_can_switch = false;
+                        } else {
+                            model->menu = false;
+                        }
+                    }
+                } else {
+                    model->menu_manage = true;
+                    model->menu_can_switch = false;
                 }
             } else {
                 model->menu = false;
                 model->menu_idx = 0;
+                menu_array_reset(model->context_menu);
             }
         },
         true);
