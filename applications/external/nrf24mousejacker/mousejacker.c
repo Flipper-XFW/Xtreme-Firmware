@@ -15,11 +15,8 @@
 
 #define TAG "mousejacker"
 #define LOGITECH_MAX_CHANNEL 85
-#define NRFSNIFF_APP_PATH_FOLDER EXT_PATH("apps_data/nrf24sniff")
 #define NRFSNIFF_APP_PATH_FOLDER_ADDRESSES EXT_PATH("apps_data/nrf24sniff/addresses.txt")
-#define NRFSNIFF_APP_PATH_EXTENSION ".txt"
-#define NRFSNIFF_APP_FILENAME "addresses.txt"
-#define MOUSEJACKER_APP_PATH_FOLDER EXT_PATH("apps_data/mousejacker")
+#define BADKB_FOLDER EXT_PATH("badkb")
 #define MOUSEJACKER_APP_PATH_EXTENSION ".txt"
 #define MAX_ADDRS 100
 
@@ -118,7 +115,7 @@ static bool open_ducky_script(Stream* stream, PluginState* plugin_state) {
     bool result = false;
     FuriString* path;
     path = furi_string_alloc();
-    furi_string_set(path, MOUSEJACKER_APP_PATH_FOLDER);
+    furi_string_set(path, BADKB_FOLDER);
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
@@ -303,9 +300,6 @@ int32_t mousejacker_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     plugin_state->storage = furi_record_open(RECORD_STORAGE);
-    storage_common_migrate(
-        plugin_state->storage, EXT_PATH("mousejacker"), MOUSEJACKER_APP_PATH_FOLDER);
-    storage_common_mkdir(plugin_state->storage, MOUSEJACKER_APP_PATH_FOLDER);
     plugin_state->file_stream = file_stream_alloc(plugin_state->storage);
 
     plugin_state->mjthread = furi_thread_alloc();
