@@ -59,10 +59,7 @@ static void
 
     const char* app_name = archive_get_flipper_app_name(selected->type);
 
-    if(selected->type == ArchiveFileTypeFolder) {
-        archive_switch_tab(browser, TAB_LEFT);
-        archive_enter_dir(browser, selected->path);
-    } else if(selected->type == ArchiveFileTypeSearch) {
+    if(selected->type == ArchiveFileTypeSearch) {
         while(archive_get_tab(browser) != ArchiveTabSearch) {
             archive_switch_tab(browser, TAB_LEFT);
         }
@@ -297,6 +294,9 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventEnterDir:
+            if(favorites) {
+                archive_switch_tab(browser, TAB_LEFT);
+            }
             archive_enter_dir(browser, selected->path);
             consumed = true;
             break;
