@@ -15,10 +15,8 @@
 
 #define TAG "mousejacker"
 #define LOGITECH_MAX_CHANNEL 85
-#define NRFSNIFF_APP_PATH_FOLDER EXT_PATH("apps_data/nrf24sniff")
-#define NRFSNIFF_APP_PATH_EXTENSION ".txt"
-#define NRFSNIFF_APP_FILENAME "addresses.txt"
-#define MOUSEJACKER_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
+#define NRFSNIFF_APP_PATH_FOLDER_ADDRESSES EXT_PATH("apps_data/nrf24sniff/addresses.txt")
+#define BADKB_FOLDER EXT_PATH("badkb")
 #define MOUSEJACKER_APP_PATH_EXTENSION ".txt"
 #define MAX_ADDRS 100
 
@@ -33,12 +31,13 @@ typedef struct {
 } PluginEvent;
 
 uint8_t addrs_count = 0;
-uint8_t addr_idx = 0;
+int8_t addr_idx = 0;
 uint8_t loaded_addrs[MAX_ADDRS][6]; // first byte is rate, the rest are the address
 
 char target_fmt_text[] = "Target addr: %s";
 char target_address_str[12] = "None";
 char target_text[30];
+char index_text[30];
 
 static void render_callback(Canvas* const canvas, void* ctx) {
     furi_assert(ctx);
@@ -54,8 +53,15 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         snprintf(target_text, sizeof(target_text), target_fmt_text, target_address_str);
         canvas_draw_str_aligned(canvas, 7, 10, AlignLeft, AlignBottom, target_text);
         canvas_draw_str_aligned(canvas, 22, 20, AlignLeft, AlignBottom, "<- select address ->");
-        canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, "Press Ok button to ");
-        canvas_draw_str_aligned(canvas, 10, 40, AlignLeft, AlignBottom, "browse for ducky script");
+        snprintf(
+            index_text, sizeof(index_text), "Address index: %d/%d", addr_idx + 1, addrs_count);
+        canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, index_text);
+        canvas_draw_str_aligned(canvas, 10, 40, AlignLeft, AlignBottom, "Press Ok button to ");
+        canvas_draw_str_aligned(canvas, 10, 50, AlignLeft, AlignBottom, "browse for ducky script");
+        if(!plugin_state->is_nrf24_connected) {
+            canvas_draw_str_aligned(
+                canvas, 10, 60, AlignLeft, AlignBottom, "Connect NRF24 to GPIO!");
+        }
     } else if(plugin_state->addr_err) {
         canvas_draw_str_aligned(
             canvas, 10, 10, AlignLeft, AlignBottom, "Error: No nrfsniff folder");
@@ -95,6 +101,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 
 static void mousejacker_state_init(PluginState* const plugin_state) {
     plugin_state->is_thread_running = false;
+    plugin_state->is_nrf24_connected = true;
 }
 
 static void hexlify(uint8_t* in, uint8_t size, char* out) {
@@ -108,7 +115,7 @@ static bool open_ducky_script(Stream* stream, PluginState* plugin_state) {
     bool result = false;
     FuriString* path;
     path = furi_string_alloc();
-    furi_string_set(path, MOUSEJACKER_APP_PATH_FOLDER);
+    furi_string_set(path, BADKB_FOLDER);
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
@@ -133,27 +140,17 @@ static bool open_ducky_script(Stream* stream, PluginState* plugin_state) {
 }
 
 static bool open_addrs_file(Stream* stream) {
-    DialogsApp* dialogs = furi_record_open("dialogs");
     bool result = false;
     FuriString* path;
     path = furi_string_alloc();
-    furi_string_set(path, NRFSNIFF_APP_PATH_FOLDER);
+    furi_string_set(path, NRFSNIFF_APP_PATH_FOLDER_ADDRESSES);
 
-    DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(
-        &browser_options, NRFSNIFF_APP_PATH_EXTENSION, &I_sub1_10px);
-    browser_options.hide_ext = false;
-
-    bool ret = dialog_file_browser_show(dialogs, path, path, &browser_options);
-
-    furi_record_close("dialogs");
-    if(ret) {
-        if(!file_stream_open(stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            FURI_LOG_D(TAG, "Cannot open file \"%s\"", furi_string_get_cstr(path));
-        } else {
-            result = true;
-        }
+    if(!file_stream_open(stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_D(TAG, "Cannot open file \"%s\"", furi_string_get_cstr(path));
+    } else {
+        result = true;
     }
+
     furi_string_free(path);
     return result;
 }
@@ -278,12 +275,6 @@ static int32_t mj_worker_thread(void* ctx) {
     return 0;
 }
 
-void start_mjthread(PluginState* plugin_state) {
-    if(!plugin_state->is_thread_running) {
-        furi_thread_start(plugin_state->mjthread);
-    }
-}
-
 int32_t mousejacker_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
@@ -309,9 +300,6 @@ int32_t mousejacker_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     plugin_state->storage = furi_record_open(RECORD_STORAGE);
-    storage_common_migrate(
-        plugin_state->storage, EXT_PATH("mousejacker"), MOUSEJACKER_APP_PATH_FOLDER);
-    storage_common_mkdir(plugin_state->storage, MOUSEJACKER_APP_PATH_FOLDER);
     plugin_state->file_stream = file_stream_alloc(plugin_state->storage);
 
     plugin_state->mjthread = furi_thread_alloc();
@@ -319,6 +307,10 @@ int32_t mousejacker_app(void* p) {
     furi_thread_set_stack_size(plugin_state->mjthread, 2048);
     furi_thread_set_context(plugin_state->mjthread, plugin_state);
     furi_thread_set_callback(plugin_state->mjthread, mj_worker_thread);
+
+    while(!furi_hal_speaker_acquire(100)) {
+        furi_delay_ms(100);
+    }
 
     // spawn load file dialog to choose sniffed addresses file
     if(load_addrs_file(plugin_state->file_stream)) {
@@ -348,21 +340,27 @@ int32_t mousejacker_app(void* p) {
                     case InputKeyRight:
                         if(!plugin_state->addr_err) {
                             addr_idx++;
-                            if(addr_idx > addrs_count) addr_idx = 0;
+                            if(addr_idx >= addrs_count) addr_idx = 0;
                             hexlify(loaded_addrs[addr_idx] + 1, 5, target_address_str);
                         }
                         break;
                     case InputKeyLeft:
                         if(!plugin_state->addr_err) {
                             addr_idx--;
-                            if(addr_idx == 0) addr_idx = addrs_count - 1;
+                            if(addr_idx < 0) addr_idx = addrs_count - 1;
                             hexlify(loaded_addrs[addr_idx] + 1, 5, target_address_str);
                         }
                         break;
                     case InputKeyOk:
                         if(!plugin_state->addr_err) {
-                            if(!plugin_state->is_thread_running) {
-                                start_mjthread(plugin_state);
+                            if(!nrf24_check_connected(nrf24_HANDLE)) {
+                                plugin_state->is_nrf24_connected = false;
+                                view_port_update(view_port);
+                                furi_hal_speaker_start(100, 100);
+                                furi_delay_ms(100);
+                                furi_hal_speaker_stop();
+                            } else if(!plugin_state->is_thread_running) {
+                                furi_thread_start(plugin_state->mjthread);
                                 view_port_update(view_port);
                             }
                         }
@@ -389,6 +387,7 @@ int32_t mousejacker_app(void* p) {
 
     furi_thread_free(plugin_state->mjthread);
     nrf24_deinit();
+    furi_hal_speaker_release();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
