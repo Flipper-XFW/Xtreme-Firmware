@@ -595,8 +595,11 @@ FS_Error storage_common_copy(Storage* storage, const char* old_path, const char*
 
 static FS_Error _storage_common_merge(Storage*, const char*, const char*, bool);
 
-static FS_Error
-    storage_merge_recursive(Storage* storage, const char* old_path, const char* new_path, bool copy) {
+static FS_Error storage_merge_recursive(
+    Storage* storage,
+    const char* old_path,
+    const char* new_path,
+    bool copy) {
     FS_Error error = FSE_OK;
     DirWalk* dir_walk = dir_walk_alloc(storage);
     FuriString *path, *file_basename, *tmp_new_path;
@@ -656,7 +659,8 @@ static FS_Error
     return error;
 }
 
-static FS_Error _storage_common_merge(Storage* storage, const char* old_path, const char* new_path, bool copy) {
+static FS_Error
+    _storage_common_merge(Storage* storage, const char* old_path, const char* new_path, bool copy) {
     FS_Error error;
     const char* new_path_tmp = NULL;
     FuriString* new_path_next = NULL;
@@ -711,8 +715,10 @@ static FS_Error _storage_common_merge(Storage* storage, const char* old_path, co
                 Stream* stream_to = file_stream_alloc(storage);
 
                 do {
-                    if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
-                    if(!file_stream_open(stream_to, new_path_tmp, FSAM_WRITE, FSOM_CREATE_NEW)) break;
+                    if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING))
+                        break;
+                    if(!file_stream_open(stream_to, new_path_tmp, FSAM_WRITE, FSOM_CREATE_NEW))
+                        break;
                     stream_copy_full(stream_from, stream_to);
                 } while(false);
 
