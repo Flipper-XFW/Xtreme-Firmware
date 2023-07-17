@@ -593,8 +593,10 @@ FS_Error storage_common_copy(Storage* storage, const char* old_path, const char*
     return error;
 }
 
+static FS_Error _storage_common_merge(Storage*, const char*, const char*, bool);
+
 static FS_Error
-    storage_merge_recursive(Storage* storage, const char* old_path, const char* new_path) {
+    storage_merge_recursive(Storage* storage, const char* old_path, const char* new_path, bool copy) {
     FS_Error error = FSE_OK;
     DirWalk* dir_walk = dir_walk_alloc(storage);
     FuriString *path, *file_basename, *tmp_new_path;
@@ -636,8 +638,8 @@ static FS_Error
                         }
                     }
                 }
-                error = storage_common_merge(
-                    storage, furi_string_get_cstr(path), furi_string_get_cstr(tmp_new_path));
+                error = _storage_common_merge(
+                    storage, furi_string_get_cstr(path), furi_string_get_cstr(tmp_new_path), copy);
 
                 if(error != FSE_OK) {
                     break;
@@ -654,7 +656,7 @@ static FS_Error
     return error;
 }
 
-FS_Error storage_common_merge(Storage* storage, const char* old_path, const char* new_path) {
+static FS_Error _storage_common_merge(Storage* storage, const char* old_path, const char* new_path, bool copy) {
     FS_Error error;
     const char* new_path_tmp = NULL;
     FuriString* new_path_next = NULL;
@@ -665,7 +667,12 @@ FS_Error storage_common_merge(Storage* storage, const char* old_path, const char
 
     if(error == FSE_OK) {
         if(file_info_is_dir(&fileinfo)) {
-            error = storage_merge_recursive(storage, old_path, new_path);
+            if(!copy) {
+                error = storage_common_rename(storage, old_path, new_path);
+            }
+            if(copy || error != FSE_OK) {
+                error = storage_merge_recursive(storage, old_path, new_path, copy);
+            }
         } else {
             error = storage_common_stat(storage, new_path, &fileinfo);
             if(error == FSE_OK) {
@@ -699,28 +706,36 @@ FS_Error storage_common_merge(Storage* storage, const char* old_path, const char
             } else {
                 new_path_tmp = new_path;
             }
-            Stream* stream_from = file_stream_alloc(storage);
-            Stream* stream_to = file_stream_alloc(storage);
+            if(copy) {
+                Stream* stream_from = file_stream_alloc(storage);
+                Stream* stream_to = file_stream_alloc(storage);
 
-            do {
-                if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
-                if(!file_stream_open(stream_to, new_path_tmp, FSAM_WRITE, FSOM_CREATE_NEW)) break;
-                stream_copy_full(stream_from, stream_to);
-            } while(false);
+                do {
+                    if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
+                    if(!file_stream_open(stream_to, new_path_tmp, FSAM_WRITE, FSOM_CREATE_NEW)) break;
+                    stream_copy_full(stream_from, stream_to);
+                } while(false);
 
-            error = file_stream_get_error(stream_from);
-            if(error == FSE_OK) {
-                error = file_stream_get_error(stream_to);
+                error = file_stream_get_error(stream_from);
+                if(error == FSE_OK) {
+                    error = file_stream_get_error(stream_to);
+                }
+
+                stream_free(stream_from);
+                stream_free(stream_to);
+            } else {
+                error = storage_common_rename(storage, old_path, new_path_tmp);
             }
-
-            stream_free(stream_from);
-            stream_free(stream_to);
         }
     }
 
     furi_string_free(new_path_next);
 
     return error;
+}
+
+FS_Error storage_common_merge(Storage* storage, const char* old_path, const char* new_path) {
+    return _storage_common_merge(storage, old_path, new_path, true);
 }
 
 FS_Error storage_common_mkdir(Storage* storage, const char* path) {
@@ -774,14 +789,10 @@ FS_Error storage_common_migrate(Storage* storage, const char* source, const char
         return FSE_OK;
     }
 
-    FS_Error error = storage_common_rename(storage, source, dest);
+    FS_Error error = _storage_common_merge(storage, source, dest, false);
 
-    if(error != FSE_OK) {
-        error = storage_common_merge(storage, source, dest);
-
-        if(error == FSE_OK) {
-            storage_simply_remove_recursive(storage, source);
-        }
+    if(error == FSE_OK) {
+        storage_simply_remove_recursive(storage, source);
     }
 
     return error;
