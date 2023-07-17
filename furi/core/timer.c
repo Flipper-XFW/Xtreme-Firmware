@@ -15,7 +15,7 @@ typedef struct {
 } TimerCallback_t;
 
 const char* furi_timer_get_current_name() {
-        return current_timer_name;
+    return current_timer_name;
 }
 
 static void TimerCallback(TimerHandle_t hTimer) {

@@ -513,7 +513,7 @@ const char* furi_thread_get_appid(FuriThreadId thread_id) {
         FuriThread* thread = (FuriThread*)pvTaskGetThreadLocalStoragePointer(hTask, 0);
         if(thread) {
             appid = thread->appid;
-        } else if (hTask == xTimerGetTimerDaemonTaskHandle()) {
+        } else if(hTask == xTimerGetTimerDaemonTaskHandle()) {
             const char* timer = furi_timer_get_current_name();
             if(timer) {
                 appid = timer;
