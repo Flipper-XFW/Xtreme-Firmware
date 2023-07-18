@@ -1,9 +1,9 @@
 #include "../esp_flasher_app_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexMarauder,
-    SubmenuIndexEvilPortal,
     SubmenuIndexBlackMagic,
+    SubmenuIndexEvilPortal,
+    SubmenuIndexMarauder,
 };
 
 void esp_flasher_scene_devboard_submenu_callback(void* context, uint32_t index) {
@@ -52,14 +52,19 @@ bool esp_flasher_scene_devboard_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         const char* path = NULL;
         consumed = true;
-        if(event.event == SubmenuIndexBlackMagic) {
+        switch(event.event) {
+        case SubmenuIndexBlackMagic:
             path = APP_DATA_PATH("Black_Magic.bin");
-        } else if(event.event == SubmenuIndexEvilPortal) {
+            break;
+        case SubmenuIndexEvilPortal:
             path = APP_DATA_PATH("Evil_Portal.bin");
-        } else if(event.event == SubmenuIndexMarauder) {
+            break;
+        case SubmenuIndexMarauder:
             path = APP_DATA_PATH("Marauder.bin");
-        } else {
+            break;
+        default:
             consumed = false;
+            break;
         }
 
         if(consumed) {

@@ -49,14 +49,14 @@ bool esp_flasher_scene_start_on_event(void* context, SceneManagerEvent event) {
     EspFlasherApp* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexEspFlasherAbout) {
-            scene_manager_next_scene(app->scene_manager, EspFlasherSceneAbout);
+        if(event.event == SubmenuIndexEspFlasherDevboardFlash) {
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneDevboard);
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherFlash) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneBrowse);
             consumed = true;
-        } else if(event.event == SubmenuIndexEspFlasherDevboardFlash) {
-            scene_manager_next_scene(app->scene_manager, EspFlasherSceneDevboard);
+        } else if(event.event == SubmenuIndexEspFlasherAbout) {
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneAbout);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneStart, event.event);
