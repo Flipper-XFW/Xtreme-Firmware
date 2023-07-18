@@ -8,6 +8,7 @@
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <notification/notification_messages.h>
 #include <nrf24.h>
 #include "mousejacker_ducky.h"
 #include <assets_icons.h>
@@ -290,6 +291,8 @@ int32_t mousejacker_app(void* p) {
         return 255;
     }
 
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, plugin_state);
@@ -307,10 +310,6 @@ int32_t mousejacker_app(void* p) {
     furi_thread_set_stack_size(plugin_state->mjthread, 2048);
     furi_thread_set_context(plugin_state->mjthread, plugin_state);
     furi_thread_set_callback(plugin_state->mjthread, mj_worker_thread);
-
-    while(!furi_hal_speaker_acquire(100)) {
-        furi_delay_ms(100);
-    }
 
     // spawn load file dialog to choose sniffed addresses file
     if(load_addrs_file(plugin_state->file_stream)) {
@@ -356,9 +355,7 @@ int32_t mousejacker_app(void* p) {
                             if(!nrf24_check_connected(nrf24_HANDLE)) {
                                 plugin_state->is_nrf24_connected = false;
                                 view_port_update(view_port);
-                                furi_hal_speaker_start(100, 100);
-                                furi_delay_ms(100);
-                                furi_hal_speaker_stop();
+                                notification_message(notification, &sequence_error);
                             } else if(!plugin_state->is_thread_running) {
                                 furi_thread_start(plugin_state->mjthread);
                                 view_port_update(view_port);
@@ -387,9 +384,9 @@ int32_t mousejacker_app(void* p) {
 
     furi_thread_free(plugin_state->mjthread);
     nrf24_deinit();
-    furi_hal_speaker_release();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
+    furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
     view_port_free(view_port);
