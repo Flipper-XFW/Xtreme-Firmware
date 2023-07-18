@@ -21,8 +21,8 @@ void esp_flasher_scene_devboard_on_enter(void* context) {
     submenu_set_header(submenu, "Select Firmware to flash");
     submenu_add_item(
         submenu,
-        "Marauder",
-        SubmenuIndexMarauder,
+        "Black Magic",
+        SubmenuIndexBlackMagic,
         esp_flasher_scene_devboard_submenu_callback,
         app);
     submenu_add_item(
@@ -33,8 +33,8 @@ void esp_flasher_scene_devboard_on_enter(void* context) {
         app);
     submenu_add_item(
         submenu,
-        "Black Magic",
-        SubmenuIndexBlackMagic,
+        "Marauder",
+        SubmenuIndexMarauder,
         esp_flasher_scene_devboard_submenu_callback,
         app);
 
