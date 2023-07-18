@@ -41,7 +41,7 @@ jobs:
         with:
           name: updater
           path: |
-            dist/${{ env.DEFAULT_TARGET }}-*/${{ env.DEFAULT_TARGET }}-update-*/
+            dist/${{ env.DEFAULT_TARGET }}-*/
 
       # - name: 'Find Previous Comment'
       #   if: ${{ github.event.pull_request }}
