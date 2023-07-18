@@ -142,7 +142,15 @@ bool subghz_devices_set_tx(const SubGhzDevice* device) {
     furi_assert(device);
     if(device->interconnect->set_tx) {
         ret = device->interconnect->set_tx();
-        furi_hal_gpio_write(&gpio_ext_pc3, 1);
+
+        SubGhzLastSettings* last_settings = subghz_last_settings_alloc();
+        subghz_last_settings_load(last_settings, 0);
+
+        if(last_settings->external_module_power_amp) {
+            furi_hal_gpio_write(&gpio_ext_pc3, 1);
+        }
+
+        subghz_last_settings_free(last_settings);
     }
     return ret;
 }
@@ -183,7 +191,14 @@ void subghz_devices_set_rx(const SubGhzDevice* device) {
     furi_assert(device);
     if(device->interconnect->set_rx) {
         device->interconnect->set_rx();
-        furi_hal_gpio_write(&gpio_ext_pc3, 0);
+        SubGhzLastSettings* last_settings = subghz_last_settings_alloc();
+        subghz_last_settings_load(last_settings, 0);
+
+        if(last_settings->external_module_power_amp) {
+            furi_hal_gpio_write(&gpio_ext_pc3, 0);
+        }
+
+        subghz_last_settings_free(last_settings);
     }
 }
 
