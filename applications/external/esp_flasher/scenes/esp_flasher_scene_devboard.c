@@ -18,6 +18,7 @@ void esp_flasher_scene_devboard_on_enter(void* context) {
 
     EspFlasherApp* app = context;
     Submenu* submenu = app->submenu;
+    submenu_set_header(submenu, "Select Firmware to flash");
     submenu_add_item(
         submenu,
         "Marauder",
