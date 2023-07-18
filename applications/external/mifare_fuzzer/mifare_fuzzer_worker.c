@@ -49,8 +49,7 @@ int32_t mifare_fuzzer_worker_task(void* context) {
 
         furi_hal_nfc_exit_sleep();
         while(mifare_fuzzer_worker->state == MifareFuzzerWorkerStateEmulate) {
-            furi_hal_nfc_listen(
-                params.uid, params.uid_len, params.atqa, params.sak, false, 500);
+            furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 500);
             furi_delay_ms(50);
         }
         furi_hal_nfc_sleep();
