@@ -186,9 +186,9 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     }
                     gen4_config[7] = 0x00;
                     memset(gen4_config + 8, 0, 16);
-                    gen4_config[24] = dev_data->nfc_data.a_data.atqa[0];
-                    gen4_config[25] = dev_data->nfc_data.a_data.atqa[1];
-                    gen4_config[26] = dev_data->nfc_data.a_data.sak;
+                    gen4_config[24] = dev_data->nfc_data.atqa[0];
+                    gen4_config[25] = dev_data->nfc_data.atqa[1];
+                    gen4_config[26] = dev_data->nfc_data.sak;
 
                     furi_hal_nfc_sleep();
                     furi_hal_nfc_activate_nfca(200, &cuid);
@@ -308,7 +308,7 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
             }
 
             if(furi_hal_nfc_detect(&nfc_data, 200)) {
-                magic_dev->cuid = nfc_data.a_data.cuid;
+                magic_dev->cuid = nfc_data.cuid;
                 magic_dev->uid_len = nfc_data.uid_len;
             } else {
                 // wrong BCC
@@ -320,7 +320,7 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
             magic_deactivate();
             magic_activate();
             if(furi_hal_nfc_detect(&nfc_data, 200)) {
-                magic_dev->cuid = nfc_data.a_data.cuid;
+                magic_dev->cuid = nfc_data.cuid;
                 magic_dev->uid_len = nfc_data.uid_len;
                 if(magic_gen4_get_cfg(magic_dev->password, gen4_config)) {
                     magic_dev->type = MagicTypeGen4;
