@@ -17,6 +17,14 @@ if __name__ == "__main__":
     match os.environ["GITHUB_EVENT_NAME"]:
         case "push":
             count = len(event["commits"])
+            if count == 20:
+                count = int(requests.get(
+                    event["compare"].replace("github.com", "api.github.com/repos"),
+                    headers={
+                        "Accept": "application/vnd.github.v3+json",
+                        "Authorization": f"token {os.environ['GITHUB_TOKEN']}"
+                    }
+                ).json()["total_commits"])
             branch = event["ref"].removeprefix("refs/heads/")
             change = (
                 "Force Push"

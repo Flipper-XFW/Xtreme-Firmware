@@ -40,4 +40,5 @@ jobs:
       - name: Send webhook
         env:
           DEV_WEBHOOK: "https://discord.com/api/webhooks/${{ secrets.DEV_WEBHOOK_ID }}/${{ secrets.DEV_WEBHOOK_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: python .github/workflow_data/webhook.py
