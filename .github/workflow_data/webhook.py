@@ -16,6 +16,7 @@ if __name__ == "__main__":
 
     match os.environ["GITHUB_EVENT_NAME"]:
         case "push":
+            webhook = "BUILD_WEBHOOK"
             count = len(event["commits"])
             if count == 20:
                 count = int(requests.get(
