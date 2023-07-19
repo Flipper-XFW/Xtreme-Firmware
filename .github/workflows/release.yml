@@ -46,7 +46,7 @@ jobs:
       - name: "Read version tag"
         run: bash .github/workflow_data/version.sh
 
-      - name: "Make tgz and zip"
+      - name: "Make tgz, zip and sdk"
         run: bash .github/workflow_data/package.sh
 
       - name: "Update release notes"
@@ -76,6 +76,7 @@ jobs:
           files: |
             ${{ env.ARTIFACT_TGZ }}
             ${{ env.ARTIFACT_ZIP }}
+            ${{ env.ARTIFACT_SDK }}
           name: "${{ env.VERSION_TAG }}"
           tag_name: "${{ env.VERSION_TAG }}"
           target_commitish: ${{ github.event.pull_request.base.ref }}

@@ -21,7 +21,8 @@ if __name__ == "__main__":
 
     artifacts = {
         os.environ['ARTIFACT_TGZ']: "application/gzip",
-        os.environ['ARTIFACT_ZIP']: "application/zip"
+        os.environ['ARTIFACT_ZIP']: "application/zip",
+        os.environ['ARTIFACT_SDK']: "application/zip",
     }
 
     for asset in release["assets"]:

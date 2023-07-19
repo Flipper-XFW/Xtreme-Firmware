@@ -46,7 +46,7 @@ jobs:
       - name: "Read version tag"
         run: bash .github/workflow_data/version.sh
 
-      - name: "Make tgz and zip"
+      - name: "Make tgz, zip and sdk"
         run: bash .github/workflow_data/package.sh
 
       - name: "Upload hotfix"
