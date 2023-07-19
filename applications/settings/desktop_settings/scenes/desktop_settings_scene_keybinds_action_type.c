@@ -107,6 +107,11 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
                 selected = DesktopSettingsAppKeybindActionTypeMainApp;
             }
         }
+        for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+            if(!strncmp(FLIPPER_EXTERNAL_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
+                selected = DesktopSettingsAppKeybindActionTypeMainApp;
+            }
+        }
 
         if(storage_file_exists(furi_record_open(RECORD_STORAGE), keybind)) {
             selected = DesktopSettingsAppKeybindActionTypeExternalApp;
