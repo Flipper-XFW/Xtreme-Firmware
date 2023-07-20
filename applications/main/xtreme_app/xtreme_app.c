@@ -185,6 +185,10 @@ XtremeApp* xtreme_app_alloc() {
         XtremeAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, XtremeAppViewSubmenu, submenu_get_view(app->submenu));
+
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, XtremeAppViewTextInput, text_input_get_view(app->text_input));
@@ -299,6 +303,8 @@ void xtreme_app_free(XtremeApp* app) {
     // Gui modules
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewSubmenu);
+    submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewTextInput);
     text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewPopup);

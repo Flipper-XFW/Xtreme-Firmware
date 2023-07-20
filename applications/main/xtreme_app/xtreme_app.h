@@ -7,7 +7,9 @@
 #include <gui/scene_manager.h>
 #include <dialogs/dialogs.h>
 #include <assets_icons.h>
+#include <applications.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
 #include <lib/toolbox/value_index.h>
@@ -37,6 +39,7 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
+    Submenu* submenu;
     TextInput* text_input;
     Popup* popup;
 
@@ -72,6 +75,7 @@ typedef struct {
 
 typedef enum {
     XtremeAppViewVarItemList,
+    XtremeAppViewSubmenu,
     XtremeAppViewTextInput,
     XtremeAppViewPopup,
 } XtremeAppView;
