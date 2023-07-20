@@ -19,7 +19,7 @@ bool xtreme_app_apply(XtremeApp* app) {
         if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
             CharList_it_t it;
             CharList_it(it, app->mainmenu_app_paths);
-            for(uint i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
+            for(size_t i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
                 stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_app_paths, i));
             }
         }
@@ -204,9 +204,8 @@ XtremeApp* xtreme_app_alloc() {
     if(storage_dir_open(folder, XTREME_ASSETS_PATH)) {
         while(storage_dir_read(folder, &info, name, XTREME_ASSETS_PACK_NAME_LEN)) {
             if(info.flags & FSF_DIRECTORY) {
-                char* copy = malloc(XTREME_ASSETS_PACK_NAME_LEN);
-                strlcpy(copy, name, XTREME_ASSETS_PACK_NAME_LEN);
-                uint idx = 0;
+                char* copy = strdup(name);
+                size_t idx = 0;
                 if(strcmp(copy, "NSFW") != 0) {
                     for(; idx < CharList_size(app->asset_pack_names); idx++) {
                         char* comp = *CharList_get(app->asset_pack_names, idx);
