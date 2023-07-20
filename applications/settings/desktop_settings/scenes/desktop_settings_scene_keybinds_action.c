@@ -67,7 +67,6 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
         }
     }
 
-    // submenu_set_header(submenu, "Keybind action:");
     submenu_set_selected_item(submenu, pre_select_item); // If set during loop, visual glitch.
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);

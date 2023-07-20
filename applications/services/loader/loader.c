@@ -238,7 +238,6 @@ static Loader* loader_alloc() {
     FuriString* line = furi_string_alloc();
     FuriString* name = furi_string_alloc();
     do {
-
         if(!file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
             file_stream_close(stream);
             loader_make_menu_file(storage);

@@ -45,7 +45,6 @@ static void
         }
         furi_record_close(RECORD_STORAGE);
         if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
-            submenu_reset(app->submenu); // Prevent menu from being shown when we exiting scene
             strncpy(keybind, furi_string_get_cstr(temp_path), MAX_KEYBIND_LENGTH);
             DESKTOP_KEYBINDS_SAVE(&app->desktop->keybinds, sizeof(app->desktop->keybinds));
             scene_manager_search_and_switch_to_previous_scene(
@@ -69,7 +68,6 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     Submenu* submenu = app->submenu;
     char* keybind = desktop_settings_app_get_keybind(app);
-    submenu_reset(submenu);
 
     submenu_add_item(
         submenu,
