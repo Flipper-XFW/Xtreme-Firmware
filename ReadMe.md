@@ -192,20 +192,17 @@ There are 3 methods to install Xtreme, we recommend you use the **Web Updater**,
 
 ```bash
 To download the needed tools:
-$ git clone --recursive https://github.com/Flipper-XFW/Xtreme-Firmware.git
-$ cd Flipper-Xtreme/
+$ git clone --recursive --jobs 8 https://github.com/Flipper-XFW/Xtreme-Firmware.git
+$ cd Xtreme-Firmware/
 
 To flash directly to the Flipper (Needs to be connected via USB, qFlipper closed)
-$ ./fbt flash_usb
+$ ./fbt flash_usb_full
 
-To just compile firmware
+To compile a TGZ package
 $ ./fbt updater_package
 
-If building FAPS:
-$ ./fbt fap_dist
-
-If building image assets:
-$ ./fbt resources icons dolphin_ext
+To build and launch a single app:
+$ ./fbt launch APPSRC=some_appid
 ```
 
 ----
