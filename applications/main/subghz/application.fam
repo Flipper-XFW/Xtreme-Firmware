@@ -1,7 +1,7 @@
 App(
     appid="subghz",
     name="SubGHz",
-    apptype=FlipperAppType.MENUEXTERNAL,
+    apptype=FlipperAppType.APP,
     targets=["f7"],
     entry_point="subghz_app",
     requires=[
