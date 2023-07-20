@@ -16,11 +16,12 @@ bool xtreme_app_apply(XtremeApp* app) {
 
     if(app->save_mainmenu_apps) {
         Stream* stream = file_stream_alloc(storage);
-        if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+        if(file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+            stream_write_format(stream, "MenuAppList Version %u\n", 0);
             CharList_it_t it;
-            CharList_it(it, app->mainmenu_app_paths);
-            for(size_t i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
-                stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_app_paths, i));
+            CharList_it(it, app->mainmenu_app_exes);
+            for(size_t i = 0; i < CharList_size(app->mainmenu_app_exes); i++) {
+                stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_app_exes, i));
             }
         }
         file_stream_close(stream);
@@ -227,17 +228,18 @@ XtremeApp* xtreme_app_alloc() {
     free(name);
     storage_file_free(folder);
 
-    CharList_init(app->mainmenu_app_names);
-    CharList_init(app->mainmenu_app_paths);
+    CharList_init(app->mainmenu_app_labels);
+    CharList_init(app->mainmenu_app_exes);
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
-    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        stream_read_line(stream, line);
         while(stream_read_line(stream, line)) {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
-            CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
+            CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
             flipper_application_load_name_and_icon(line, storage, NULL, line);
-            CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(line)));
+            CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(line)));
         }
     }
     furi_string_free(line);
@@ -314,14 +316,14 @@ void xtreme_app_free(XtremeApp* app) {
     }
     CharList_clear(app->asset_pack_names);
 
-    for(CharList_it(it, app->mainmenu_app_names); !CharList_end_p(it); CharList_next(it)) {
+    for(CharList_it(it, app->mainmenu_app_labels); !CharList_end_p(it); CharList_next(it)) {
         free(*CharList_cref(it));
     }
-    CharList_clear(app->mainmenu_app_names);
-    for(CharList_it(it, app->mainmenu_app_paths); !CharList_end_p(it); CharList_next(it)) {
+    CharList_clear(app->mainmenu_app_labels);
+    for(CharList_it(it, app->mainmenu_app_exes); !CharList_end_p(it); CharList_next(it)) {
         free(*CharList_cref(it));
     }
-    CharList_clear(app->mainmenu_app_paths);
+    CharList_clear(app->mainmenu_app_exes);
 
     FrequencyList_clear(app->subghz_static_freqs);
     FrequencyList_clear(app->subghz_hopper_freqs);

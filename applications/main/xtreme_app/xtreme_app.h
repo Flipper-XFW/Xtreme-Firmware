@@ -42,8 +42,8 @@ typedef struct {
 
     CharList_t asset_pack_names;
     uint8_t asset_pack_index;
-    CharList_t mainmenu_app_names;
-    CharList_t mainmenu_app_paths;
+    CharList_t mainmenu_app_labels;
+    CharList_t mainmenu_app_exes;
     uint8_t mainmenu_app_index;
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_freqs;

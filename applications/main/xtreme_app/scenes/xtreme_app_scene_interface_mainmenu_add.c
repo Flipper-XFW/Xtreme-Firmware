@@ -30,11 +30,11 @@ void xtreme_app_scene_interface_mainmenu_add_on_enter(void* context) {
     };
 
     if(dialog_file_browser_show(app->dialogs, string, string, &browser_options)) {
-        CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(string)));
+        CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(string)));
         Storage* storage = furi_record_open(RECORD_STORAGE);
         flipper_application_load_name_and_icon(string, storage, NULL, string);
         furi_record_close(RECORD_STORAGE);
-        CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(string)));
+        CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(string)));
         app->save_mainmenu_apps = true;
         app->require_reboot = true;
     }
