@@ -21,7 +21,7 @@ def generate(env):
                 action=Action(
                     '${PYTHON3} "${VERSION_SCRIPT}" generate '
                     "-t ${TARGET_HW} -fw-origin ${FIRMWARE_ORIGIN} "
-                    '-o ${TARGET.dir.posix} --dir "${ROOT_DIR}"',
+                    '-o ${TARGET.dir.posix} --dir "${ROOT_DIR}" --suffix "${DIST_SUFFIX}"',
                     "${VERSIONCOMSTR}",
                 ),
                 emitter=version_emitter,

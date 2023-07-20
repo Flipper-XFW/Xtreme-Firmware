@@ -10,8 +10,9 @@ from flipper.app import App
 class GitVersion:
     REVISION_SUFFIX_LENGTH = 8
 
-    def __init__(self, source_dir):
+    def __init__(self, source_dir, suffix):
         self.source_dir = source_dir
+        self.suffix = suffix
 
     def get_version_info(self):
         commit = (
@@ -34,7 +35,11 @@ class GitVersion:
             or "unknown"
         )
 
-        version = os.environ.get("DIST_SUFFIX", None).split("_")[0] or "unknown"
+        version = (
+            self.suffix.split("_")[0]
+            or os.environ.get("DIST_SUFFIX", None)
+            or "unknown"
+        )
 
         force_no_dirty = os.environ.get("FORCE_NO_DIRTY", None) or ""
         if force_no_dirty != "":
@@ -103,10 +108,13 @@ class Main(App):
             required=True,
         )
         self.parser_generate.add_argument("--dir", dest="sourcedir", required=True)
+        self.parser_generate.add_argument("--suffix", dest="suffix", required=True)
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
-        current_info = GitVersion(self.args.sourcedir).get_version_info()
+        current_info = GitVersion(
+            self.args.sourcedir, self.args.suffix
+        ).get_version_info()
 
         build_date = (
             date.today()
