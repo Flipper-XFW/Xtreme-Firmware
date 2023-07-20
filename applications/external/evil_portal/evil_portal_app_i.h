@@ -24,7 +24,7 @@
 #define RESET_CMD "reset"
 
 #define EVIL_PORTAL_INDEX_EXTENSION ".html"
-#define EVIL_PORTAL_BASE_FOLDER "/apps_data/evil_portal/"
+#define EVIL_PORTAL_BASE_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 
 struct Evil_PortalApp {
     Gui* gui;

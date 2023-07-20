@@ -9,7 +9,7 @@ static void evil_portal_close_storage() {
 }
 
 bool evil_portal_read_index_html(void* context) {
-    FuriString* file_path = furi_string_alloc();
+    FuriString* file_path = furi_string_alloc_set(EVIL_PORTAL_BASE_FOLDER);
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
