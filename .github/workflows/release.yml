@@ -12,7 +12,7 @@ jobs:
   release:
     if: |
       github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name &&
-      endsWith(github.event.pull_request.title, ' Release Candidate Changes') &&
+      endsWith(github.event.pull_request.title, ' Release') &&
       github.event.review.author_association == 'OWNER' &&
       startsWith(github.event.pull_request.title, 'V') &&
       github.event.pull_request.base.ref == 'main' &&
@@ -31,20 +31,20 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: "Read version tag"
+        run: bash .github/workflow_data/version.sh
+
       - name: 'Build the firmware'
         run: |
           set -e
           for TARGET in ${TARGETS}; do
             TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET_HW FORCE_NO_DIRTY=1 updater_package
+            ./fbt TARGET_HW=$TARGET_HW DIST_SUFFIX=$VERSION_TAG FORCE_NO_DIRTY=1 updater_package
           done
 
       - name: "Check for uncommitted changes"
         run: |
           git diff --exit-code
-
-      - name: "Read version tag"
-        run: bash .github/workflow_data/version.sh
 
       - name: "Make tgz, zip and sdk"
         run: bash .github/workflow_data/package.sh

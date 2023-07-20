@@ -1,6 +1,4 @@
 #!/usb/bin/env python3
-VERSION = "XFW-0049"
-
 import json
 import os
 import subprocess
@@ -32,14 +30,11 @@ class GitVersion:
         # (set by CI)
         branch = (
             os.environ.get("WORKFLOW_BRANCH_OR_TAG", None)
-            or VERSION
             or self._exec_git("rev-parse --abbrev-ref HEAD")
             or "unknown"
         )
 
-        branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
-
-        version = os.environ.get("DIST_SUFFIX", None) or VERSION or "unknown"
+        version = os.environ.get("DIST_SUFFIX", None).split("_")[0] or "unknown"
 
         force_no_dirty = os.environ.get("FORCE_NO_DIRTY", None) or ""
         if force_no_dirty != "":
