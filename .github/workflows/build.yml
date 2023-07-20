@@ -50,7 +50,7 @@ jobs:
         run: bash .github/workflow_data/package.sh
 
       - name: Send devbuild webhook
-        if: "github.event_name == 'push' && endsWith(github.event.push.ref, '/dev')"
+        if: "github.event_name == 'push' && github.ref_name == 'dev'"
         env:
           NC_HOST: "https://cloud.cynthialabs.net/"
           NC_USER: "${{ secrets.NC_USER }}"
