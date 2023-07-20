@@ -43,7 +43,7 @@ if __name__ == "__main__":
                         },
                         {
                             "name": "Changes since last release:",
-                            "value": f"[Compare release to {event['after'][:7]}]({event['compare'].rsplit('/', 1)[0] + 'main...' + event['after']})"
+                            "value": f"[Compare release to {event['after'][:7]}]({event['compare'].rsplit('/', 1)[0] + '/main...' + event['after']})"
                         },
                         {
                             "name": "Firmware download:",
