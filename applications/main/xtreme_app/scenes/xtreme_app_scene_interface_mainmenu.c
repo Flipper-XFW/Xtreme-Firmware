@@ -110,6 +110,8 @@ bool xtreme_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEve
         case VarItemListIndexRemoveApp:
             if(!CharList_size(app->mainmenu_app_labels)) break;
             if(!CharList_size(app->mainmenu_app_exes)) break;
+            free(*CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
+            free(*CharList_get(app->mainmenu_app_exes, app->mainmenu_app_index));
             CharList_remove_v(
                 app->mainmenu_app_labels, app->mainmenu_app_index, app->mainmenu_app_index + 1);
             CharList_remove_v(
