@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     body = release["body"]
     body = re.sub(
-        r"(https://github\.com/ClaraCrazy/Flipper-Xtreme/releases/download/[A-Za-z0-9_-]+?/)[A-Za-z0-9_-]+",
+        r"(https://github\.com/Flipper-XFW/Xtreme-Firmware/releases/download/[A-Za-z0-9_-]+?/)[A-Za-z0-9_-]+",
         r"\1" + os.environ['VERSION_TAG'],
         body
     )

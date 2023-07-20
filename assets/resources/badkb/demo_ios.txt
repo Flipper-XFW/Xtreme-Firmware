@@ -2,12 +2,12 @@ REM Version 1.0
 REM OS: iOS
 REM Author: Peaakss | Optimized for older versions by WillyJL
 REM Description: A simple payload that opens safari and inserts a link
-REM NOTICE CHANGE "STRING" to your desired link | EXAMPLE: STRING https://github.com/ClaraCrazy/Flipper-Xtreme |
+REM NOTICE CHANGE "STRING" to your desired link
 
 GUI h
 DELAY 420
 GUI SPACE
 DELAY 420
-STRING https://github.com/ClaraCrazy/Flipper-Xtreme
+STRING https://github.com/Flipper-XFW/Xtreme-Firmware
 DELAY 69
 ENTER
