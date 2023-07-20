@@ -39,11 +39,11 @@ if __name__ == "__main__":
                     "fields": [
                         {
                             "name": "Changes since last commit:",
-                            "value": f"[Compare {event['before']} to {event['after']}]({event['compare']})"
+                            "value": f"[Compare {event['before'][:7]} to {event['after'][:7]}]({event['compare']})"
                         },
                         {
                             "name": "Changes since last release:",
-                            "value": f"[Compare release to {event['after']}]({event['compare'].replace(event['before'], 'main')})"
+                            "value": f"[Compare release to {event['after'][:7]}]({event['compare'].rsplit('/', 1)[0] + 'main...' + event['after']})"
                         },
                         {
                             "name": "Firmware download:",
