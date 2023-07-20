@@ -243,6 +243,12 @@ XtremeApp* xtreme_app_alloc() {
             furi_string_replace_all(line, "\n", "");
             CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
             flipper_application_load_name_and_icon(line, storage, NULL, line);
+            if(furi_string_start_with_str(line, "[")) {
+                size_t trim = furi_string_search_str(line, "] ", 1);
+                if(trim != FURI_STRING_FAILURE) {
+                    furi_string_right(line, trim + 2);
+                }
+            }
             CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(line)));
         }
     }

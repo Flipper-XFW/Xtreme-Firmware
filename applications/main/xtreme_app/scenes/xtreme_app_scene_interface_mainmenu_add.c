@@ -42,6 +42,12 @@ static void
             Storage* storage = furi_record_open(RECORD_STORAGE);
             flipper_application_load_name_and_icon(temp_path, storage, NULL, temp_path);
             furi_record_close(RECORD_STORAGE);
+            if(furi_string_start_with_str(temp_path, "[")) {
+                size_t trim = furi_string_search_str(temp_path, "] ", 1);
+                if(trim != FURI_STRING_FAILURE) {
+                    furi_string_right(temp_path, trim + 2);
+                }
+            }
             CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(temp_path)));
             app->mainmenu_app_index = CharList_size(app->mainmenu_app_labels) - 1;
             app->save_mainmenu_apps = true;
