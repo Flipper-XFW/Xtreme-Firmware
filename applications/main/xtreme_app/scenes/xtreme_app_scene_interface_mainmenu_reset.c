@@ -1,7 +1,8 @@
 #include "../xtreme_app.h"
 
-static void
-    xtreme_app_scene_interface_mainmenu_reset_dialog_callback(DialogExResult result, void* context) {
+static void xtreme_app_scene_interface_mainmenu_reset_dialog_callback(
+    DialogExResult result,
+    void* context) {
     XtremeApp* app = context;
 
     view_dispatcher_send_custom_event(app->view_dispatcher, result);

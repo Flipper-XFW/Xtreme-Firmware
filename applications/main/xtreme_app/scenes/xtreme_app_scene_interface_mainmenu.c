@@ -76,8 +76,7 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
         xtreme_app_scene_interface_mainmenu_menu_app_changed,
         app);
     if(count) {
-        app->mainmenu_app_index =
-            CLAMP(app->mainmenu_app_index, count - 1, 0U);
+        app->mainmenu_app_index = CLAMP(app->mainmenu_app_index, count - 1, 0U);
         char label[13];
         snprintf(label, 13, "Menu App %u", 1 + app->mainmenu_app_index);
         variable_item_set_item_label(item, label);
