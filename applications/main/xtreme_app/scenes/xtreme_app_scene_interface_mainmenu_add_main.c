@@ -26,7 +26,7 @@ void xtreme_app_scene_interface_mainmenu_add_main_on_enter(void* context) {
             xtreme_app_scene_interface_mainmenu_add_main_submenu_callback,
             app);
     }
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT -1; i++) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
         submenu_add_item(
             submenu,
             FLIPPER_EXTERNAL_APPS[i].name,
