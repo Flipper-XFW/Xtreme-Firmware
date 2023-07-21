@@ -57,6 +57,7 @@ static void subghz_load_custom_presets(SubGhzSetting* setting) {
     furi_assert(setting);
 
     const char* presets[][2] = {
+        // FM95
         {"FM95",
          "02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 83 10 67 15 24 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00"},
 
@@ -71,6 +72,11 @@ static void subghz_load_custom_presets(SubGhzSetting* setting) {
         // # HND - FM preset
         {"HND_1",
          "02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 36 10 69 15 32 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00"},
+
+        // AM_Q
+        {"AM_Q",
+         "02 0D 03 07 08 32 0B 06 14 00 13 00 12 30 11 22 10 1C 18 18 19 18 1D 91 1C 00 1B 07 20 FB 22 11 21 B6 00 00 00 C0 00 00 00 00 00 00"},
+
     };
 
     FlipperFormat* fff_temp = flipper_format_string_alloc();

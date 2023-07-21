@@ -25,19 +25,6 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
         app->scene_manager, DesktopSettingsAppSceneKeybindsActionType);
 
     if(action_type == DesktopSettingsAppKeybindActionTypeMainApp) {
-        for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-            submenu_add_item(
-                submenu,
-                FLIPPER_EXTERNAL_APPS[i].name,
-                (uint32_t)FLIPPER_EXTERNAL_APPS[i].name,
-                desktop_settings_scene_keybinds_action_submenu_callback,
-                app);
-
-            // Select keybind item in submenu
-            if(!strncmp(FLIPPER_EXTERNAL_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
-                pre_select_item = (uint32_t)FLIPPER_EXTERNAL_APPS[i].name;
-            }
-        }
         for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
             submenu_add_item(
                 submenu,
@@ -49,6 +36,19 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
             // Select keybind item in submenu
             if(!strncmp(FLIPPER_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
                 pre_select_item = (uint32_t)FLIPPER_APPS[i].name;
+            }
+        }
+        for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+            submenu_add_item(
+                submenu,
+                FLIPPER_EXTERNAL_APPS[i].name,
+                (uint32_t)FLIPPER_EXTERNAL_APPS[i].name,
+                desktop_settings_scene_keybinds_action_submenu_callback,
+                app);
+
+            // Select keybind item in submenu
+            if(!strncmp(FLIPPER_EXTERNAL_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
+                pre_select_item = (uint32_t)FLIPPER_EXTERNAL_APPS[i].name;
             }
         }
     } else if(action_type == DesktopSettingsAppKeybindActionTypeMoreActions) {
@@ -67,7 +67,6 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
         }
     }
 
-    // submenu_set_header(submenu, "Keybind action:");
     submenu_set_selected_item(submenu, pre_select_item); // If set during loop, visual glitch.
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);

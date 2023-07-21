@@ -42,9 +42,9 @@ void mifare_fuzzer_scene_emulator_on_enter(void* context) {
         app->emulator_view, emulator->ticks_between_cards);
     // init default card data
     FuriHalNfcDevData nfc_dev_data;
-    nfc_dev_data.a_data.atqa[0] = 0x00;
-    nfc_dev_data.a_data.atqa[1] = 0x00;
-    nfc_dev_data.a_data.sak = 0x00;
+    nfc_dev_data.atqa[0] = 0x00;
+    nfc_dev_data.atqa[1] = 0x00;
+    nfc_dev_data.sak = 0x00;
     if(app->card == MifareCardUltralight) {
         nfc_dev_data.uid_len = 0x07;
     } else {
@@ -84,19 +84,19 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
             // Set card type
             // TODO: Move somewhere else, I do not like this to be there
             if(app->card == MifareCardClassic1k) {
-                nfc_dev_data.a_data.atqa[0] = 0x04;
-                nfc_dev_data.a_data.atqa[1] = 0x00;
-                nfc_dev_data.a_data.sak = 0x08;
+                nfc_dev_data.atqa[0] = 0x04;
+                nfc_dev_data.atqa[1] = 0x00;
+                nfc_dev_data.sak = 0x08;
                 nfc_dev_data.uid_len = 0x04;
             } else if(app->card == MifareCardClassic4k) {
-                nfc_dev_data.a_data.atqa[0] = 0x02;
-                nfc_dev_data.a_data.atqa[1] = 0x00;
-                nfc_dev_data.a_data.sak = 0x18;
+                nfc_dev_data.atqa[0] = 0x02;
+                nfc_dev_data.atqa[1] = 0x00;
+                nfc_dev_data.sak = 0x18;
                 nfc_dev_data.uid_len = 0x04;
             } else if(app->card == MifareCardUltralight) {
-                nfc_dev_data.a_data.atqa[0] = 0x44;
-                nfc_dev_data.a_data.atqa[1] = 0x00;
-                nfc_dev_data.a_data.sak = 0x00;
+                nfc_dev_data.atqa[0] = 0x44;
+                nfc_dev_data.atqa[1] = 0x00;
+                nfc_dev_data.sak = 0x00;
                 nfc_dev_data.uid_len = 0x07;
             }
 

@@ -6,8 +6,11 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <dialogs/dialogs.h>
+#include <gui/modules/dialog_ex.h>
 #include <assets_icons.h>
+#include <applications.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
 #include <lib/toolbox/value_index.h>
@@ -37,13 +40,15 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
+    Submenu* submenu;
     TextInput* text_input;
     Popup* popup;
+    DialogEx* dialog_ex;
 
     CharList_t asset_pack_names;
     uint8_t asset_pack_index;
-    CharList_t mainmenu_app_names;
-    CharList_t mainmenu_app_paths;
+    CharList_t mainmenu_app_labels;
+    CharList_t mainmenu_app_exes;
     uint8_t mainmenu_app_index;
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_freqs;
@@ -72,8 +77,10 @@ typedef struct {
 
 typedef enum {
     XtremeAppViewVarItemList,
+    XtremeAppViewSubmenu,
     XtremeAppViewTextInput,
     XtremeAppViewPopup,
+    XtremeAppViewDialogEx,
 } XtremeAppView;
 
 bool xtreme_app_apply(XtremeApp* app);

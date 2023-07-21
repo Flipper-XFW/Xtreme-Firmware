@@ -4,7 +4,7 @@
 #include <flipper_application/flipper_application.h>
 #include "loader.h"
 #include "loader_menu.h"
-#include "loader_extmainapp.h"
+#include "loader_menuapp.h"
 #include "loader_applications.h"
 
 typedef struct {
@@ -20,7 +20,7 @@ struct Loader {
     LoaderMenu* loader_menu;
     LoaderApplications* loader_applications;
     LoaderAppData app;
-    ExtMainAppList_t ext_main_apps;
+    MenuAppList_t menu_apps;
 };
 
 typedef enum {

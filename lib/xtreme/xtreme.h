@@ -9,7 +9,8 @@ extern "C" {
 
 #define XTREME_SETTINGS_PATH CFG_PATH("xtreme_settings.txt")
 #define XTREME_ASSETS_PATH EXT_PATH("dolphin_custom")
-#define XTREME_APPS_PATH CFG_PATH("xtreme_apps.txt")
+#define XTREME_MENU_OLD_PATH CFG_PATH("xtreme_apps.txt")
+#define XTREME_MENU_PATH CFG_PATH("xtreme_menu.txt")
 #define XTREME_ASSETS_PACK_NAME_LEN 32
 
 typedef enum {

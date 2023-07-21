@@ -1,6 +1,8 @@
 entry,status,name,type,params
-Version,+,34.1,,
+Version,+,34.3,,
+Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/favorite_timeout.h,,
+Header,+,applications/services/applications.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -52,7 +54,6 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_idle_timer.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_interrupt.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_nfc.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_os.h,,
-Header,-,firmware/targets/f7/furi_hal/furi_hal_power_calibration.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_pwm.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_resources.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_rfid.h,,
@@ -90,6 +91,7 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_version.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_vibro.h,,
 Header,+,lib/digital_signal/digital_signal.h,,
+Header,+,lib/drivers/cc1101_regs.h,,
 Header,+,lib/drivers/rgb_backlight.h,,
 Header,+,lib/flipper_application/api_hashtable/api_hashtable.h,,
 Header,+,lib/flipper_application/api_hashtable/compilesort.hpp,,
@@ -197,6 +199,7 @@ Header,+,lib/subghz/blocks/encoder.h,,
 Header,+,lib/subghz/blocks/generic.h,,
 Header,+,lib/subghz/blocks/math.h,,
 Header,+,lib/subghz/devices/cc1101_configs.h,,
+Header,+,lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h,,
 Header,+,lib/subghz/environment.h,,
 Header,+,lib/subghz/protocols/raw.h,,
 Header,+,lib/subghz/receiver.h,,
@@ -879,23 +882,6 @@ Function,-,fdim,double,"double, double"
 Function,-,fdimf,float,"float, float"
 Function,-,fdiml,long double,"long double, long double"
 Function,-,fdopen,FILE*,"int, const char*"
-Function,-,felica_check_ic_type,_Bool,uint8_t*
-Function,-,felica_clear,void,FelicaData*
-Function,-,felica_define_normal_block,void,"FelicaService*, uint16_t, uint8_t*"
-Function,+,felica_estimate_timing_us,uint_least32_t,"uint_least8_t, uint_least8_t"
-Function,-,felica_get_ic_type,FelicaICType,uint8_t*
-Function,-,felica_get_service_name,FuriString*,FelicaService*
-Function,+,felica_get_system_name,FuriString*,FelicaSystem*
-Function,-,felica_lite_dump_data,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaData*, FelicaSystem*"
-Function,-,felica_lite_is_issued,_Bool,FelicaLiteInfo*
-Function,-,felica_lite_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, _Bool, const uint8_t*, uint8_t"
-Function,-,felica_lite_prepare_unencrypted_write,uint8_t,"uint8_t*, const FelicaReader*, const uint8_t*, uint8_t, const uint8_t*"
-Function,-,felica_parse_unencrypted_read,uint16_t,"uint8_t*, uint8_t, FelicaReader*, uint8_t*, uint16_t"
-Function,-,felica_parse_unencrypted_write,_Bool,"uint8_t*, uint8_t, FelicaReader*"
-Function,-,felica_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, const uint16_t*, uint8_t, const uint32_t*, uint8_t"
-Function,-,felica_prepare_unencrypted_write,uint8_t,"uint8_t*, FelicaReader*, const uint16_t*, uint8_t, const uint32_t*, uint8_t, const uint8_t*"
-Function,-,felica_push_normal_block,void,"FelicaService*, uint8_t*"
-Function,-,felica_read_card,_Bool,"FuriHalNfcTxRxContext*, FelicaData*, uint8_t*, uint8_t*"
 Function,-,feof,int,FILE*
 Function,-,feof_unlocked,int,FILE*
 Function,-,ferror,int,FILE*
@@ -1346,6 +1332,7 @@ Function,-,furi_hal_power_insomnia_level,uint16_t,
 Function,+,furi_hal_power_is_charging,_Bool,
 Function,+,furi_hal_power_is_charging_done,_Bool,
 Function,+,furi_hal_power_is_otg_enabled,_Bool,
+Function,+,furi_hal_power_is_shutdown_requested,_Bool,
 Function,+,furi_hal_power_off,void,
 Function,+,furi_hal_power_reset,void,
 Function,+,furi_hal_power_set_battery_charge_voltage_limit,void,float
@@ -1683,6 +1670,7 @@ Function,+,furi_thread_suspend,void,FuriThreadId
 Function,+,furi_thread_yield,void,
 Function,+,furi_timer_alloc,FuriTimer*,"FuriTimerCallback, FuriTimerType, void*"
 Function,+,furi_timer_free,void,FuriTimer*
+Function,-,furi_timer_get_current_name,const char*,
 Function,+,furi_timer_is_running,uint32_t,FuriTimer*
 Function,+,furi_timer_pending_callback,void,"FuriTimerPendigCallback, void*, uint32_t"
 Function,+,furi_timer_start,FuriStatus,"FuriTimer*, uint32_t"
@@ -2033,7 +2021,7 @@ Function,-,mf_classic_auth_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicB
 Function,-,mf_classic_authenticate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey"
 Function,-,mf_classic_authenticate_skip_activate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey, _Bool, uint32_t"
 Function,-,mf_classic_block_to_value,_Bool,"const uint8_t*, int32_t*, uint8_t*"
-Function,-,mf_classic_check_card_type,_Bool,FuriHalNfcADevData*
+Function,-,mf_classic_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
 Function,+,mf_classic_dict_add_key,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_add_key_str,_Bool,"MfClassicDict*, FuriString*"
 Function,+,mf_classic_dict_alloc,MfClassicDict*,MfClassicDictType
@@ -2051,7 +2039,7 @@ Function,+,mf_classic_dict_is_key_present,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_is_key_present_str,_Bool,"MfClassicDict*, FuriString*"
 Function,-,mf_classic_dict_rewind,_Bool,MfClassicDict*
 Function,-,mf_classic_emulator,_Bool,"MfClassicEmulator*, FuriHalNfcTxRxContext*, _Bool"
-Function,-,mf_classic_get_classic_type,MfClassicType,FuriHalNfcADevData*
+Function,-,mf_classic_get_classic_type,MfClassicType,"uint8_t, uint8_t, uint8_t"
 Function,+,mf_classic_get_read_sectors_and_keys,void,"MfClassicData*, uint8_t*, uint8_t*"
 Function,+,mf_classic_get_sector_by_block,uint8_t,uint8_t
 Function,-,mf_classic_get_sector_trailer_block_num_by_sector,uint8_t,uint8_t
@@ -2092,7 +2080,7 @@ Function,+,mf_df_cat_file,void,"MifareDesfireFile*, FuriString*"
 Function,-,mf_df_cat_free_mem,void,"MifareDesfireFreeMemory*, FuriString*"
 Function,-,mf_df_cat_key_settings,void,"MifareDesfireKeySettings*, FuriString*"
 Function,-,mf_df_cat_version,void,"MifareDesfireVersion*, FuriString*"
-Function,-,mf_df_check_card_type,_Bool,FuriHalNfcADevData*
+Function,-,mf_df_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
 Function,-,mf_df_clear,void,MifareDesfireData*
 Function,-,mf_df_get_application,MifareDesfireApplication*,"MifareDesfireData*, const uint8_t[3]*"
 Function,-,mf_df_get_file,MifareDesfireFile*,"MifareDesfireApplication*, uint8_t"
@@ -2117,7 +2105,7 @@ Function,-,mf_df_prepare_read_data,uint16_t,"uint8_t*, uint8_t, uint32_t, uint32
 Function,-,mf_df_prepare_read_records,uint16_t,"uint8_t*, uint8_t, uint32_t, uint32_t"
 Function,-,mf_df_prepare_select_application,uint16_t,"uint8_t*, uint8_t[3]"
 Function,-,mf_df_read_card,_Bool,"FuriHalNfcTxRxContext*, MifareDesfireData*"
-Function,-,mf_ul_check_card_type,_Bool,FuriHalNfcADevData*
+Function,-,mf_ul_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
 Function,+,mf_ul_emulation_supported,_Bool,MfUltralightData*
 Function,+,mf_ul_is_full_capture,_Bool,MfUltralightData*
 Function,-,mf_ul_prepare_emulation,void,"MfUltralightEmulator*, MfUltralightData*"
@@ -2188,7 +2176,6 @@ Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_save_shadow,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_name,void,"NfcDevice*, const char*"
-Function,+,nfc_felica_type,const char*,FelicaICType
 Function,+,nfc_file_select,_Bool,NfcDevice*
 Function,-,nfc_generate_mf_classic,void,"NfcDeviceData*, uint8_t, MfClassicType"
 Function,+,nfc_get_dev_type,const char*,FuriHalNfcType
@@ -2807,6 +2794,7 @@ Function,+,subghz_custom_btn_get_original,uint8_t,
 Function,+,subghz_custom_btn_is_allowed,_Bool,
 Function,+,subghz_custom_btn_set,_Bool,uint8_t
 Function,+,subghz_custom_btns_reset,void,
+Function,-,subghz_device_cc1101_ext_ep,const FlipperAppPluginDescriptor*,
 Function,+,subghz_devices_begin,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_deinit,void,
 Function,+,subghz_devices_end,void,const SubGhzDevice*
@@ -3015,6 +3003,8 @@ Function,+,text_box_reset,void,TextBox*
 Function,+,text_box_set_focus,void,"TextBox*, TextBoxFocus"
 Function,+,text_box_set_font,void,"TextBox*, TextBoxFont"
 Function,+,text_box_set_text,void,"TextBox*, const char*"
+Function,+,text_input_add_extra_symbol,void,"TextInput*, char"
+Function,+,text_input_add_illegal_symbols,void,TextInput*
 Function,+,text_input_alloc,TextInput*,
 Function,+,text_input_free,void,TextInput*
 Function,+,text_input_get_validator_callback,TextInputValidatorCallback,TextInput*
@@ -3147,6 +3137,7 @@ Function,+,variable_item_list_set_enter_callback,void,"VariableItemList*, Variab
 Function,+,variable_item_list_set_selected_item,void,"VariableItemList*, uint8_t"
 Function,+,variable_item_set_current_value_index,void,"VariableItem*, uint8_t"
 Function,+,variable_item_set_current_value_text,void,"VariableItem*, const char*"
+Function,+,variable_item_set_item_label,void,"VariableItem*, const char*"
 Function,+,variable_item_set_locked,void,"VariableItem*, _Bool, const char*"
 Function,+,variable_item_set_values_count,void,"VariableItem*, uint8_t"
 Function,-,vasiprintf,int,"char**, const char*, __gnuc_va_list"
@@ -3303,6 +3294,20 @@ Variable,+,A_Sub1ghz_14,Icon,
 Variable,+,A_U2F_14,Icon,
 Variable,+,A_Xtreme_14,Icon,
 Variable,+,A_iButton_14,Icon,
+Variable,+,FLIPPER_APPS,const FlipperInternalApplication[],
+Variable,+,FLIPPER_APPS_COUNT,const size_t,
+Variable,-,FLIPPER_ARCHIVE,const FlipperInternalApplication,
+Variable,-,FLIPPER_AUTORUN_APP_NAME,const char*,
+Variable,+,FLIPPER_EXTERNAL_APPS,const FlipperExternalApplication[],
+Variable,+,FLIPPER_EXTERNAL_APPS_COUNT,const size_t,
+Variable,-,FLIPPER_ON_SYSTEM_START,const FlipperInternalOnStartHook[],
+Variable,-,FLIPPER_ON_SYSTEM_START_COUNT,const size_t,
+Variable,-,FLIPPER_SERVICES,const FlipperInternalApplication[],
+Variable,-,FLIPPER_SERVICES_COUNT,const size_t,
+Variable,+,FLIPPER_SETTINGS_APPS,const FlipperInternalApplication[],
+Variable,+,FLIPPER_SETTINGS_APPS_COUNT,const size_t,
+Variable,-,FLIPPER_SYSTEM_APPS,const FlipperInternalApplication[],
+Variable,-,FLIPPER_SYSTEM_APPS_COUNT,const size_t,
 Variable,+,ICON_PATHS,const IconPath[],
 Variable,+,ICON_PATHS_COUNT,const size_t,
 Variable,-,ITM_RxBuffer,volatile int32_t,
@@ -3774,6 +3779,7 @@ Variable,+,sequence_set_vibro_on,const NotificationSequence,
 Variable,+,sequence_single_vibro,const NotificationSequence,
 Variable,+,sequence_solid_yellow,const NotificationSequence,
 Variable,+,sequence_success,const NotificationSequence,
+Variable,-,subghz_device_cc1101_int,const SubGhzDevice,
 Variable,+,subghz_device_cc1101_preset_2fsk_dev2_38khz_async_regs,const uint8_t[],
 Variable,+,subghz_device_cc1101_preset_2fsk_dev47_6khz_async_regs,const uint8_t[],
 Variable,+,subghz_device_cc1101_preset_gfsk_9_99kb_async_regs,const uint8_t[],

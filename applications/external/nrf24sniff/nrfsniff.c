@@ -404,9 +404,7 @@ int32_t nrfsniff_app(void* p) {
                                 wrap_up(storage, notification);
                             }
                         } else {
-                            furi_hal_speaker_start(100, 100);
-                            furi_delay_ms(100);
-                            furi_hal_speaker_stop();
+                            notification_message(notification, &sequence_error);
                         }
 
                         break;

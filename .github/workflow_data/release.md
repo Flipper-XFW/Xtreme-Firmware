@@ -1,11 +1,11 @@
 ## ⬇️ Download
 >### [🖥️ Web Updater (chrome)](https://flipper-xtre.me/update) [recommended]
 
->### [🐬 qFlipper Package (.tgz)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{VERSION_TAG}/{ARTIFACT_TGZ})
+>### [🐬 qFlipper Package (.tgz)](https://github.com/Flipper-XFW/Xtreme-Firmware/releases/download/{VERSION_TAG}/{ARTIFACT_TGZ})
 
->### [📦 Zipped Archive (.zip)](https://github.com/ClaraCrazy/Flipper-Xtreme/releases/download/{VERSION_TAG}/{ARTIFACT_ZIP})
+>### [📦 Zipped Archive (.zip)](https://github.com/Flipper-XFW/Xtreme-Firmware/releases/download/{VERSION_TAG}/{ARTIFACT_ZIP})
 
-**Check the [install guide](https://github.com/ClaraCrazy/Flipper-Xtreme#install) if you're not sure, or [join our Discord](https://discord.gg/flipper-xtreme) if you have questions or encounter issues!**
+**Check the [install guide](https://github.com/Flipper-XFW/Xtreme-Firmware#install) if you're not sure, or [join our Discord](https://discord.gg/flipper-xtreme) if you have questions or encounter issues!**
 
 ## ❤️ Support
 If you like what you're seeing, **please consider donating to us**. We won't ever put this behind a paywall, but we'd still appreciate a few bucks!

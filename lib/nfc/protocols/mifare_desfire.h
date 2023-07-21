@@ -132,7 +132,7 @@ void mf_df_cat_application_info(MifareDesfireApplication* app, FuriString* out);
 void mf_df_cat_application(MifareDesfireApplication* app, FuriString* out);
 void mf_df_cat_file(MifareDesfireFile* file, FuriString* out);
 
-bool mf_df_check_card_type(FuriHalNfcADevData* data);
+bool mf_df_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
 MifareDesfireApplication* mf_df_get_application(MifareDesfireData* data, const uint8_t (*aid)[3]);
 MifareDesfireFile* mf_df_get_file(MifareDesfireApplication* app, uint8_t id);

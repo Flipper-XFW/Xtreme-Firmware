@@ -29,6 +29,7 @@ static void storage_cli_print_usage() {
         "\twrite_chunk\t - read data from cli and append it to file, <args> should contain how many bytes you want to write\r\n");
     printf("\tcopy\t - copy file to new file, <args> must contain new path\r\n");
     printf("\trename\t - move file to new file, <args> must contain new path\r\n");
+    printf("\tmigrate\t - \r\n");
     printf("\tmkdir\t - creates a new directory\r\n");
     printf("\tmd5\t - md5 hash of the file\r\n");
     printf("\tstat\t - info about file or dir\r\n");
@@ -466,6 +467,27 @@ static void storage_cli_rename(Cli* cli, FuriString* old_path, FuriString* args)
     furi_record_close(RECORD_STORAGE);
 }
 
+static void storage_cli_migrate(Cli* cli, FuriString* old_path, FuriString* args) {
+    UNUSED(cli);
+    Storage* api = furi_record_open(RECORD_STORAGE);
+    FuriString* new_path;
+    new_path = furi_string_alloc();
+
+    if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
+        storage_cli_print_usage();
+    } else {
+        FS_Error error = storage_common_migrate(
+            api, furi_string_get_cstr(old_path), furi_string_get_cstr(new_path));
+
+        if(error != FSE_OK) {
+            storage_cli_print_error(error);
+        }
+    }
+
+    furi_string_free(new_path);
+    furi_record_close(RECORD_STORAGE);
+}
+
 static void storage_cli_mkdir(Cli* cli, FuriString* path) {
     UNUSED(cli);
     Storage* api = furi_record_open(RECORD_STORAGE);
@@ -586,6 +608,11 @@ void storage_cli(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "rename") == 0) {
             storage_cli_rename(cli, path, args);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "migrate") == 0) {
+            storage_cli_migrate(cli, path, args);
             break;
         }
 

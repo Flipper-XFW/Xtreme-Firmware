@@ -7,7 +7,7 @@
 
 #include "loader.h"
 #include "loader_menu.h"
-#include "loader_extmainapp.h"
+#include "loader_menuapp.h"
 
 #define TAG "LoaderMenu"
 
@@ -56,23 +56,9 @@ static void loader_menu_start(const char* name) {
     furi_record_close(RECORD_LOADER);
 }
 
-static void loader_menu_apps_callback(void* context, uint32_t index) {
+static void loader_menu_callback(void* context, uint32_t index) {
     UNUSED(context);
-    const char* name_or_path = (const char*)index;
-    loader_menu_start(name_or_path);
-}
-
-static void loader_menu_applications_callback(void* context, uint32_t index) {
-    UNUSED(index);
-    UNUSED(context);
-    const char* name = LOADER_APPLICATIONS_NAME;
-    loader_menu_start(name);
-}
-
-static void loader_menu_settings_menu_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    const char* name = FLIPPER_SETTINGS_APPS[index].name;
-    loader_menu_start(name);
+    loader_menu_start((const char*)index);
 }
 
 static void loader_menu_switch_to_settings(void* context, uint32_t index) {
@@ -96,43 +82,30 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         app->primary_menu,
         LOADER_APPLICATIONS_NAME,
         &A_Plugins_14,
-        0,
-        loader_menu_applications_callback,
+        (uint32_t)LOADER_APPLICATIONS_NAME,
+        loader_menu_callback,
         (void*)menu);
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        menu_add_item(
-            app->primary_menu,
-            FLIPPER_EXTERNAL_APPS[i].name,
-            FLIPPER_EXTERNAL_APPS[i].icon,
-            (uint32_t)FLIPPER_EXTERNAL_APPS[i].name,
-            loader_menu_apps_callback,
-            (void*)menu);
-    }
 
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        menu_add_item(
-            app->primary_menu,
-            FLIPPER_APPS[i].name,
-            FLIPPER_APPS[i].icon,
-            (uint32_t)FLIPPER_APPS[i].name,
-            loader_menu_apps_callback,
-            (void*)menu);
-    }
-    menu_add_item(
-        app->primary_menu, "Settings", &A_Settings_14, 0, loader_menu_switch_to_settings, app);
     Loader* loader = furi_record_open(RECORD_LOADER);
-    ExtMainAppList_t* ext_main_apps = loader_get_ext_main_apps(loader);
-    for(size_t i = 0; i < ExtMainAppList_size(*ext_main_apps); i++) {
-        const ExtMainApp* ext_main_app = ExtMainAppList_get(*ext_main_apps, i);
+    MenuAppList_t* menu_apps = loader_get_menu_apps(loader);
+    for(size_t i = 0; i < MenuAppList_size(*menu_apps); i++) {
+        const MenuApp* menu_app = MenuAppList_get(*menu_apps, i);
         menu_add_item(
             app->primary_menu,
-            ext_main_app->name,
-            ext_main_app->icon,
-            (uint32_t)ext_main_app->path,
-            loader_menu_apps_callback,
+            menu_app->label,
+            menu_app->icon,
+            (uint32_t)menu_app->exe,
+            loader_menu_callback,
             (void*)menu);
     }
     furi_record_close(RECORD_LOADER);
+
+    const FlipperExternalApplication* last =
+        &FLIPPER_EXTERNAL_APPS[FLIPPER_EXTERNAL_APPS_COUNT - 1];
+    menu_add_item(
+        app->primary_menu, last->name, last->icon, (uint32_t)last->path, loader_menu_callback, app);
+    menu_add_item(
+        app->primary_menu, "Settings", &A_Settings_14, 0, loader_menu_switch_to_settings, app);
 };
 
 static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
@@ -140,8 +113,8 @@ static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_men
         submenu_add_item(
             app->settings_menu,
             FLIPPER_SETTINGS_APPS[i].name,
-            i,
-            loader_menu_settings_menu_callback,
+            (uint32_t)FLIPPER_SETTINGS_APPS[i].name,
+            loader_menu_callback,
             loader_menu);
     }
 }

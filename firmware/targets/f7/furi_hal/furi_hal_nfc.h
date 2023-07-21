@@ -70,24 +70,13 @@ typedef enum {
 } FuriHalNfcInterface;
 
 typedef struct {
-    uint32_t cuid;
-    uint8_t atqa[2];
-    uint8_t sak;
-} FuriHalNfcADevData;
-
-typedef struct {
-    uint8_t pmm[8];
-} FuriHalNfcFDevData;
-
-typedef struct {
     FuriHalNfcType type;
     FuriHalNfcInterface interface;
     uint8_t uid_len;
     uint8_t uid[10];
-    union {
-        FuriHalNfcADevData a_data;
-        FuriHalNfcFDevData f_data;
-    };
+    uint32_t cuid;
+    uint8_t atqa[2];
+    uint8_t sak;
 } FuriHalNfcDevData;
 
 typedef void (

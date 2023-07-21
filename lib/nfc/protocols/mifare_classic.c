@@ -374,10 +374,7 @@ bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num) {
                 data, block_num, MfClassicKeyB, MfClassicActionDataDec));
 }
 
-bool mf_classic_check_card_type(FuriHalNfcADevData* data) {
-    uint8_t ATQA0 = data->atqa[0];
-    uint8_t ATQA1 = data->atqa[1];
-    uint8_t SAK = data->sak;
+bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     if((ATQA0 == 0x44 || ATQA0 == 0x04) &&
        (SAK == 0x08 || SAK == 0x88 || SAK == 0x09 || SAK == 0x89)) {
         return true;
@@ -391,10 +388,7 @@ bool mf_classic_check_card_type(FuriHalNfcADevData* data) {
     }
 }
 
-MfClassicType mf_classic_get_classic_type(FuriHalNfcADevData* data) {
-    uint8_t ATQA0 = data->atqa[0];
-    uint8_t ATQA1 = data->atqa[1];
-    uint8_t SAK = data->sak;
+MfClassicType mf_classic_get_classic_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     if((ATQA0 == 0x44 || ATQA0 == 0x04)) {
         if((SAK == 0x08 || SAK == 0x88)) {
             return MfClassicType1k;

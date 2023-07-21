@@ -44,8 +44,6 @@ void nfc_scene_delete_on_enter(void* context) {
     } else if(protocol == NfcDeviceProtocolNfcV) {
         furi_string_set(temp_str, "ISO15693 tag");
         nfc_type = "NFC-V";
-    } else if(protocol == NfcDeviceProtocolFelica) {
-        furi_string_set(temp_str, "FeliCa");
     } else {
         furi_string_set(temp_str, "Unknown ISO tag");
     }

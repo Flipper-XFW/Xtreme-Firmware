@@ -37,6 +37,7 @@ typedef struct {
 typedef struct {
     bool gauge_is_ok;
     bool is_charging;
+    bool is_shutdown_requested;
     bool is_charge_capped;
 
     float current_charger;
