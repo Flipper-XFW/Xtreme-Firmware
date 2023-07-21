@@ -26,6 +26,9 @@ static void xtreme_app_scene_interface_mainmenu_menu_app_changed(VariableItem* i
     app->mainmenu_app_index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
+    char label[13];
+    snprintf(label, 13, "Menu App %u", 1 + app->mainmenu_app_index);
+    variable_item_set_item_label(item, label);
 }
 
 static void xtreme_app_scene_interface_mainmenu_move_app_changed(VariableItem* item) {
@@ -71,6 +74,9 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
     if(CharList_size(app->mainmenu_app_labels)) {
         app->mainmenu_app_index =
             CLAMP(app->mainmenu_app_index, CharList_size(app->mainmenu_app_labels) - 1, 0U);
+        char label[13];
+        snprintf(label, 13, "Menu App %u", 1 + app->mainmenu_app_index);
+        variable_item_set_item_label(item, label);
         variable_item_set_current_value_text(
             item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
     } else {
