@@ -3,7 +3,7 @@
 enum VarItemListIndex {
     VarItemListIndexMenuStyle,
     VarItemListIndexResetMenu,
-    VarItemListIndexMenuApp,
+    VarItemListIndexApp,
     VarItemListIndexAddApp,
     VarItemListIndexMoveApp,
     VarItemListIndexRemoveApp,
@@ -22,13 +22,14 @@ static void xtreme_app_scene_interface_mainmenu_wii_menu_changed(VariableItem* i
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_mainmenu_menu_app_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_mainmenu_app_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     app->mainmenu_app_index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
-    char label[13];
-    snprintf(label, 13, "Menu App %u", 1 + app->mainmenu_app_index);
+    size_t count = CharList_size(app->mainmenu_app_labels);
+    char label[20];
+    snprintf(label, 20, "App  %u/%u", 1 + app->mainmenu_app_index, count);
     variable_item_set_item_label(item, label);
 }
 
@@ -70,15 +71,11 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
 
     size_t count = CharList_size(app->mainmenu_app_labels);
     item = variable_item_list_add(
-        var_item_list,
-        "Menu App",
-        count,
-        xtreme_app_scene_interface_mainmenu_menu_app_changed,
-        app);
+        var_item_list, "App", count, xtreme_app_scene_interface_mainmenu_app_changed, app);
     if(count) {
         app->mainmenu_app_index = CLAMP(app->mainmenu_app_index, count - 1, 0U);
-        char label[13];
-        snprintf(label, 13, "Menu App %u", 1 + app->mainmenu_app_index);
+        char label[20];
+        snprintf(label, 20, "App  %u/%u", 1 + app->mainmenu_app_index, count);
         variable_item_set_item_label(item, label);
         variable_item_set_current_value_text(
             item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
