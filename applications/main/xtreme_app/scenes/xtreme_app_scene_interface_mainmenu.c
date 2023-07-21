@@ -2,6 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexMenuStyle,
+    VarItemListIndexResetMenu,
     VarItemListIndexMenuApp,
     VarItemListIndexAddApp,
     VarItemListIndexMoveApp,
@@ -26,6 +27,9 @@ static void xtreme_app_scene_interface_mainmenu_menu_app_changed(VariableItem* i
     app->mainmenu_app_index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
+    char label[13];
+    snprintf(label, 13, "Menu App %u", 1 + app->mainmenu_app_index);
+    variable_item_set_item_label(item, label);
 }
 
 static void xtreme_app_scene_interface_mainmenu_move_app_changed(VariableItem* item) {
@@ -62,15 +66,21 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
     variable_item_set_current_value_text(
         item, xtreme_settings->wii_menu ? "Wii Grid" : "App List");
 
+    variable_item_list_add(var_item_list, "Reset Menu", 0, NULL, app);
+
+    size_t count = CharList_size(app->mainmenu_app_labels);
     item = variable_item_list_add(
         var_item_list,
         "Menu App",
-        CharList_size(app->mainmenu_app_labels),
+        count,
         xtreme_app_scene_interface_mainmenu_menu_app_changed,
         app);
-    if(CharList_size(app->mainmenu_app_labels)) {
+    if(count) {
         app->mainmenu_app_index =
-            CLAMP(app->mainmenu_app_index, CharList_size(app->mainmenu_app_labels) - 1, 0U);
+            CLAMP(app->mainmenu_app_index, count - 1, 0U);
+        char label[13];
+        snprintf(label, 13, "Menu App %u", 1 + app->mainmenu_app_index);
+        variable_item_set_item_label(item, label);
         variable_item_set_current_value_text(
             item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
     } else {
@@ -85,6 +95,7 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
         var_item_list, "Move App", 3, xtreme_app_scene_interface_mainmenu_move_app_changed, app);
     variable_item_set_current_value_text(item, "");
     variable_item_set_current_value_index(item, 1);
+    variable_item_set_locked(item, count < 2, "Can't move\nwith less\nthan 2 apps!");
 
     variable_item_list_add(var_item_list, "Remove App", 0, NULL, app);
 
@@ -107,6 +118,9 @@ bool xtreme_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEve
             app->scene_manager, XtremeAppSceneInterfaceMainmenu, event.event);
         consumed = true;
         switch(event.event) {
+        case VarItemListIndexResetMenu:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenuReset);
+            break;
         case VarItemListIndexRemoveApp:
             if(!CharList_size(app->mainmenu_app_labels)) break;
             if(!CharList_size(app->mainmenu_app_exes)) break;
