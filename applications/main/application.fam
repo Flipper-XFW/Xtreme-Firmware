@@ -13,7 +13,6 @@ App(
         "u2f",
         "xtreme_app",
         "archive",
-        "nightstand",
         "main_apps_on_start",
     ],
 )

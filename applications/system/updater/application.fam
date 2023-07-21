@@ -6,7 +6,6 @@ App(
     requires=[
         "gui",
         "storage",
-        "archive",
     ],
     conflicts=["desktop"],
     entry_point="updater_srv",
@@ -23,7 +22,6 @@ App(
         "gui",
         "storage",
         "bt",
-        "archive",
     ],
     conflicts=["updater"],
     provides=["updater_start"],
