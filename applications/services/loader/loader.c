@@ -445,16 +445,21 @@ static LoaderStatus loader_start_external_app(
             break;
         } else if(api_mismatch) {
             // Successful map, but found api mismatch -> warn user
+            const FlipperApplicationManifest* manifest =
+                flipper_application_get_manifest(loader->app.fap);
+
+            char buf[66];
+            snprintf(
+                buf,
+                66,
+                "FAP: %i != FW: %i\nThis app might not work\nContinue anyways?",
+                manifest->base.api_version.major,
+                firmware_api_interface->api_version_major);
+
             DialogMessage* message = dialog_message_alloc();
             dialog_message_set_header(message, "API Mismatch", 64, 0, AlignCenter, AlignTop);
             dialog_message_set_buttons(message, "Cancel", NULL, "Continue");
-            dialog_message_set_text(
-                message,
-                "This app might not\nwork correctly\nContinue anyways?",
-                64,
-                32,
-                AlignCenter,
-                AlignCenter);
+            dialog_message_set_text(message, buf, 64, 32, AlignCenter, AlignCenter);
             DialogMessageButton res =
                 dialog_message_show(furi_record_open(RECORD_DIALOGS), message);
             dialog_message_free(message);
