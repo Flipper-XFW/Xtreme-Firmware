@@ -196,6 +196,10 @@ XtremeApp* xtreme_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
 
+    app->dialog_ex = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, XtremeAppViewDialogEx, dialog_ex_get_view(app->dialog_ex));
+
     // Settings init
 
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
@@ -315,6 +319,8 @@ void xtreme_app_free(XtremeApp* app) {
     text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewPopup);
     popup_free(app->popup);
+    view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewDialogEx);
+    dialog_ex_free(app->dialog_ex);
 
     // View Dispatcher and Scene Manager
     view_dispatcher_free(app->view_dispatcher);

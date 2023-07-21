@@ -2,6 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexMenuStyle,
+    VarItemListIndexResetMenu,
     VarItemListIndexMenuApp,
     VarItemListIndexAddApp,
     VarItemListIndexMoveApp,
@@ -65,6 +66,8 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
     variable_item_set_current_value_text(
         item, xtreme_settings->wii_menu ? "Wii Grid" : "App List");
 
+    variable_item_list_add(var_item_list, "Reset Menu", 0, NULL, app);
+
     item = variable_item_list_add(
         var_item_list,
         "Menu App",
@@ -113,6 +116,9 @@ bool xtreme_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEve
             app->scene_manager, XtremeAppSceneInterfaceMainmenu, event.event);
         consumed = true;
         switch(event.event) {
+        case VarItemListIndexResetMenu:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenuReset);
+            break;
         case VarItemListIndexRemoveApp:
             if(!CharList_size(app->mainmenu_app_labels)) break;
             if(!CharList_size(app->mainmenu_app_exes)) break;

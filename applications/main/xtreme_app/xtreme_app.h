@@ -6,6 +6,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <dialogs/dialogs.h>
+#include <gui/modules/dialog_ex.h>
 #include <assets_icons.h>
 #include <applications.h>
 #include <gui/modules/variable_item_list.h>
@@ -42,6 +43,7 @@ typedef struct {
     Submenu* submenu;
     TextInput* text_input;
     Popup* popup;
+    DialogEx* dialog_ex;
 
     CharList_t asset_pack_names;
     uint8_t asset_pack_index;
@@ -78,6 +80,7 @@ typedef enum {
     XtremeAppViewSubmenu,
     XtremeAppViewTextInput,
     XtremeAppViewPopup,
+    XtremeAppViewDialogEx,
 } XtremeAppView;
 
 bool xtreme_app_apply(XtremeApp* app);
