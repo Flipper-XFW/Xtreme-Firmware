@@ -2,6 +2,7 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <furi.h>
+#include <core/dangerous_defines.h>
 
 struct TextInput {
     View* view;
@@ -24,6 +25,7 @@ typedef struct {
     char* text_buffer;
     size_t text_buffer_size;
     size_t minimum_length;
+    char extra_symbols[9];
     bool clear_default_text;
 
     bool cursor_select;
@@ -100,7 +102,7 @@ static const TextInputKey keyboard_keys_row_3[] = {
     {'9', 120, 32},
 };
 
-static const TextInputKey symbol_keyboard_keys_row_1[] = {
+static TextInputKey symbol_keyboard_keys_row_1[] = {
     {'!', 2, 8},
     {'@', 12, 8},
     {'#', 22, 8},
@@ -116,7 +118,7 @@ static const TextInputKey symbol_keyboard_keys_row_1[] = {
     {'3', 120, 8},
 };
 
-static const TextInputKey symbol_keyboard_keys_row_2[] = {
+static TextInputKey symbol_keyboard_keys_row_2[] = {
     {'~', 2, 20},
     {'+', 12, 20},
     {'-', 22, 20},
@@ -131,7 +133,7 @@ static const TextInputKey symbol_keyboard_keys_row_2[] = {
     {'6', 120, 20},
 };
 
-static const TextInputKey symbol_keyboard_keys_row_3[] = {
+static TextInputKey symbol_keyboard_keys_row_3[] = {
     {SWITCH_KEYBOARD_KEY, 1, 23},
     {'.', 15, 32},
     {',', 29, 32},
@@ -339,7 +341,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                     canvas_set_color(canvas, ColorWhite);
                 }
 
-                if(model->clear_default_text || text_length == 0) {
+                if(model->selected_keyboard != symbol_keyboard.keyboard_index &&
+                   (model->clear_default_text || text_length == 0)) {
                     canvas_draw_glyph(
                         canvas,
                         keyboard_origin_x + keys[column].x,
@@ -464,7 +467,8 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
                 text_length = 0;
             }
             if(text_length < (model->text_buffer_size - 1)) {
-                if(shift != (text_length == 0)) {
+                if(shift != (text_length == 0) &&
+                   model->selected_keyboard != symbol_keyboard.keyboard_index) {
                     selected = char_to_uppercase(selected);
                 }
                 if(model->clear_default_text) {
@@ -587,6 +591,33 @@ void text_input_timer_callback(void* context) {
         true);
 }
 
+static void reset_extra_symbols(TextInputModel* model) {
+    memset(model->extra_symbols, 0, sizeof(model->extra_symbols));
+    size_t symbol = 0;
+    for(size_t row = 0; row < 3; row++) {
+        size_t size = get_row_size(&symbol_keyboard, row) - 3;
+        for(size_t i = 0; i < 3; i++) {
+            FURI_CONST_ASSIGN_(
+                char, get_row(&symbol_keyboard, row)[size++].text, '1' + (symbol++));
+        }
+    }
+    FURI_CONST_ASSIGN_(
+        char, get_row(&symbol_keyboard, 0)[get_row_size(&symbol_keyboard, 0) - 4].text, '0');
+}
+
+static void apply_extra_symbols(TextInputModel* model) {
+    size_t symbol = 0;
+    for(size_t row = 0; row < 3; row++) {
+        size_t size = get_row_size(&symbol_keyboard, row) - 3;
+        for(size_t i = 0; i < 3; i++) {
+            FURI_CONST_ASSIGN_(
+                char, get_row(&symbol_keyboard, row)[size++].text, model->extra_symbols[symbol++]);
+        }
+    }
+    FURI_CONST_ASSIGN_(
+        char, get_row(&symbol_keyboard, 0)[get_row_size(&symbol_keyboard, 0) - 4].text, '_');
+}
+
 TextInput* text_input_alloc() {
     TextInput* text_input = malloc(sizeof(TextInput));
     text_input->view = view_alloc();
@@ -603,6 +634,7 @@ TextInput* text_input_alloc() {
         {
             model->validator_text = furi_string_alloc();
             model->minimum_length = 1;
+            reset_extra_symbols(model);
             model->cursor_pos = 0;
             model->cursor_select = false;
         },
@@ -642,6 +674,7 @@ void text_input_reset(TextInput* text_input) {
             model->selected_column = 0;
             model->selected_keyboard = 0;
             model->minimum_length = 1;
+            reset_extra_symbols(model);
             model->clear_default_text = false;
             model->cursor_pos = 0;
             model->cursor_select = false;
@@ -697,6 +730,43 @@ void text_input_set_minimum_length(TextInput* text_input, size_t minimum_length)
         text_input->view,
         TextInputModel * model,
         { model->minimum_length = minimum_length; },
+        true);
+}
+
+void text_input_add_extra_symbol(TextInput* text_input, char symbol) {
+    if(!symbol) return;
+    with_view_model(
+        text_input->view,
+        TextInputModel * model,
+        {
+            for(size_t i = 0; i < sizeof(model->extra_symbols); i++) {
+                if(!model->extra_symbols[i]) {
+                    model->extra_symbols[i] = symbol;
+                    apply_extra_symbols(model);
+                    break;
+                }
+            }
+        },
+        true);
+}
+
+void text_input_add_illegal_symbols(TextInput* text_input) {
+    with_view_model(
+        text_input->view,
+        TextInputModel * model,
+        {
+            size_t i = 0;
+            model->extra_symbols[i++] = '<';
+            model->extra_symbols[i++] = '>';
+            model->extra_symbols[i++] = ':';
+            model->extra_symbols[i++] = '"';
+            model->extra_symbols[i++] = '/';
+            model->extra_symbols[i++] = '\\';
+            model->extra_symbols[i++] = '|';
+            model->extra_symbols[i++] = '?';
+            model->extra_symbols[i++] = '*';
+            apply_extra_symbols(model);
+        },
         true);
 }
 

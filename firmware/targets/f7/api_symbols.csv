@@ -3003,6 +3003,8 @@ Function,+,text_box_reset,void,TextBox*
 Function,+,text_box_set_focus,void,"TextBox*, TextBoxFocus"
 Function,+,text_box_set_font,void,"TextBox*, TextBoxFont"
 Function,+,text_box_set_text,void,"TextBox*, const char*"
+Function,+,text_input_add_extra_symbol,void,"TextInput*, char"
+Function,+,text_input_add_illegal_symbols,void,TextInput*
 Function,+,text_input_alloc,TextInput*,
 Function,+,text_input_free,void,TextInput*
 Function,+,text_input_get_validator_callback,TextInputValidatorCallback,TextInput*
