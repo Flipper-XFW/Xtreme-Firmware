@@ -465,6 +465,13 @@ static LoaderStatus loader_start_external_app(
             dialog_message_free(message);
             furi_record_close(RECORD_DIALOGS);
             if(res != DialogMessageButtonRight) {
+                const char* err_msg = flipper_application_preload_status_to_string(preload_res);
+                status = loader_make_status_error(
+                    LoaderStatusErrorAppStarted,
+                    error_message,
+                    "Preload failed, %s: %s",
+                    path,
+                    err_msg);
                 break;
             }
         }
