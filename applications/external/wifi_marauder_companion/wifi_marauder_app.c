@@ -68,9 +68,7 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        WifiMarauderAppViewTextInput,
-        text_input_get_view(app->text_input));
+        app->view_dispatcher, WifiMarauderAppViewTextInput, text_input_get_view(app->text_input));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(

@@ -58,9 +58,7 @@ UART_TerminalApp* uart_terminal_app_alloc() {
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        UART_TerminalAppViewTextInput,
-        text_input_get_view(app->text_input));
+        app->view_dispatcher, UART_TerminalAppViewTextInput, text_input_get_view(app->text_input));
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneStart);
 

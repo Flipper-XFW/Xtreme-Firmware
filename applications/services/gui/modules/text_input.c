@@ -354,7 +354,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                     canvas_draw_glyph(
                         canvas,
                         keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y - (glyph == '_' || char_is_lowercase(glyph)),
+                        keyboard_origin_y + keys[column].y -
+                            (glyph == '_' || char_is_lowercase(glyph)),
                         glyph);
                 }
             }
