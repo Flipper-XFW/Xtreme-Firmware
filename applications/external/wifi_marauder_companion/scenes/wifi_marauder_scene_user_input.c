@@ -139,7 +139,7 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
         WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE,
         false);
 
-    text_input_add_illegal_symbols(text_input);
+    text_input_add_illegal_symbols(app->text_input);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewTextInput);
 }
