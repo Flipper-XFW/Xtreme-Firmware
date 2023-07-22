@@ -64,9 +64,9 @@ static const TextInputKey keyboard_keys_row_1[] = {
     {'i', 64, 8},
     {'o', 73, 8},
     {'p', 82, 8},
-    {'0', 91, 8},
-    {'1', 100, 8},
-    {'2', 110, 8},
+    {'0', 92, 8},
+    {'1', 102, 8},
+    {'2', 111, 8},
     {'3', 120, 8},
 };
 
@@ -80,25 +80,25 @@ static const TextInputKey keyboard_keys_row_2[] = {
     {'j', 55, 20},
     {'k', 64, 20},
     {'l', 73, 20},
-    {BACKSPACE_KEY, 82, 12},
-    {'4', 100, 20},
-    {'5', 110, 20},
+    {BACKSPACE_KEY, 82, 11},
+    {'4', 102, 20},
+    {'5', 111, 20},
     {'6', 120, 20},
 };
 
 static const TextInputKey keyboard_keys_row_3[] = {
-    {SWITCH_KEYBOARD_KEY, 1, 23},
+    {SWITCH_KEYBOARD_KEY, 0, 23},
     {'z', 13, 32},
     {'x', 21, 32},
-    {'c', 28, 32},
-    {'v', 36, 32},
-    {'b', 44, 32},
-    {'n', 52, 32},
-    {'m', 59, 32},
-    {'_', 67, 32},
-    {ENTER_KEY, 74, 23},
-    {'7', 100, 32},
-    {'8', 110, 32},
+    {'c', 29, 32},
+    {'v', 37, 32},
+    {'b', 45, 32},
+    {'n', 53, 32},
+    {'m', 61, 32},
+    {'_', 69, 32},
+    {ENTER_KEY, 77, 23},
+    {'7', 102, 32},
+    {'8', 111, 32},
     {'9', 120, 32},
 };
 
@@ -112,9 +112,9 @@ static TextInputKey symbol_keyboard_keys_row_1[] = {
     {'&', 62, 8},
     {'(', 71, 8},
     {')', 81, 8},
-    {'0', 91, 8},
-    {'1', 100, 8},
-    {'2', 110, 8},
+    {'0', 92, 8},
+    {'1', 102, 8},
+    {'2', 111, 8},
     {'3', 120, 8},
 };
 
@@ -127,22 +127,22 @@ static TextInputKey symbol_keyboard_keys_row_2[] = {
     {']', 52, 20},
     {'{', 62, 20},
     {'}', 72, 20},
-    {BACKSPACE_KEY, 82, 12},
-    {'4', 100, 20},
-    {'5', 110, 20},
+    {BACKSPACE_KEY, 82, 11},
+    {'4', 102, 20},
+    {'5', 111, 20},
     {'6', 120, 20},
 };
 
 static TextInputKey symbol_keyboard_keys_row_3[] = {
-    {SWITCH_KEYBOARD_KEY, 1, 23},
+    {SWITCH_KEYBOARD_KEY, 0, 23},
     {'.', 15, 32},
     {',', 29, 32},
     {';', 41, 32},
     {'`', 53, 32},
     {'\'', 65, 32},
-    {ENTER_KEY, 74, 23},
-    {'7', 100, 32},
-    {'8', 110, 32},
+    {ENTER_KEY, 77, 23},
+    {'7', 102, 32},
+    {'8', 111, 32},
     {'9', 120, 32},
 };
 
@@ -308,6 +308,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontKeyboard);
 
+    bool uppercase = model->clear_default_text || text_length == 0;
+    bool symbols = model->selected_keyboard == symbol_keyboard.keyboard_index;
     for(uint8_t row = 0; row < keyboard_row_count; row++) {
         const uint8_t column_count = get_row_size(keyboards[model->selected_keyboard], row);
         const TextInputKey* keys = get_row(keyboards[model->selected_keyboard], row);
@@ -317,11 +319,11 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                             model->selected_column == column;
             const Icon* icon = NULL;
             if(keys[column].text == ENTER_KEY) {
-                icon = selected ? &I_KeySaveSelected_24x11 : &I_KeySave_24x11;
+                icon = selected ? &I_KeySaveSelected_22x11 : &I_KeySave_22x11;
             } else if(keys[column].text == SWITCH_KEYBOARD_KEY) {
                 icon = selected ? &I_KeyKeyboardSelected_10x11 : &I_KeyKeyboard_10x11;
             } else if(keys[column].text == BACKSPACE_KEY) {
-                icon = selected ? &I_KeyBackspaceSelected_16x9 : &I_KeyBackspace_16x9;
+                icon = selected ? &I_KeyBackspaceSelected_17x11 : &I_KeyBackspace_17x11;
             }
             canvas_set_color(canvas, ColorBlack);
             if(icon != NULL) {
@@ -332,28 +334,28 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                     icon);
             } else {
                 if(selected) {
-                    canvas_draw_box(
+                    elements_slightly_rounded_box(
                         canvas,
-                        keyboard_origin_x + keys[column].x - 1,
-                        keyboard_origin_y + keys[column].y - 8,
-                        7,
-                        10);
+                        keyboard_origin_x + keys[column].x - 2,
+                        keyboard_origin_y + keys[column].y - 9,
+                        9,
+                        11);
                     canvas_set_color(canvas, ColorWhite);
                 }
 
-                if(model->selected_keyboard != symbol_keyboard.keyboard_index &&
-                   (model->clear_default_text || text_length == 0)) {
+                char glyph = keys[column].text;
+                if(uppercase && !symbols) {
                     canvas_draw_glyph(
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        char_to_uppercase(keys[column].text));
+                        char_to_uppercase(glyph));
                 } else {
                     canvas_draw_glyph(
                         canvas,
                         keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        keys[column].text);
+                        keyboard_origin_y + keys[column].y - (glyph == '_' || char_is_lowercase(glyph)),
+                        glyph);
                 }
             }
         }
@@ -406,7 +408,7 @@ static void text_input_handle_down(TextInput* text_input, TextInputModel* model)
         }
         if(model->selected_row == 2 &&
            model->selected_keyboard == symbol_keyboard.keyboard_index) {
-            if(model->selected_column > 7)
+            if(model->selected_column > 6)
                 model->selected_column -= 2;
             else if(model->selected_column > 1)
                 model->selected_column -= 1;

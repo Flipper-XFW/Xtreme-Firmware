@@ -46,7 +46,7 @@ static const ByteInputKey keyboard_keys_row_1[] = {
     {'5', 55, 12},
     {'6', 66, 12},
     {'7', 77, 12},
-    {backspace_symbol, 103, 4},
+    {backspace_symbol, 100, 3},
 };
 
 static const ByteInputKey keyboard_keys_row_2[] = {
@@ -640,13 +640,13 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeySaveSelected_24x11);
+                            &I_KeySaveSelected_22x11);
                     } else {
                         canvas_draw_icon(
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeySave_24x11);
+                            &I_KeySave_22x11);
                     }
                 } else if(keys[column].value == backspace_symbol) {
                     canvas_set_color(canvas, ColorBlack);
@@ -655,18 +655,18 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeyBackspaceSelected_16x9);
+                            &I_KeyBackspaceSelected_17x11);
                     } else {
                         canvas_draw_icon(
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeyBackspace_16x9);
+                            &I_KeyBackspace_17x11);
                     }
                 } else {
                     if(model->selected_row == row && model->selected_column == column) {
                         canvas_set_color(canvas, ColorBlack);
-                        canvas_draw_box(
+                        elements_slightly_rounded_box(
                             canvas,
                             keyboard_origin_x + keys[column].x - 3,
                             keyboard_origin_y + keys[column].y - 10,
@@ -677,7 +677,7 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
                         model->selected_row == -1 && row == 0 &&
                         model->selected_column == column) {
                         canvas_set_color(canvas, ColorBlack);
-                        canvas_draw_frame(
+                        elements_slightly_rounded_frame(
                             canvas,
                             keyboard_origin_x + keys[column].x - 3,
                             keyboard_origin_y + keys[column].y - 10,
