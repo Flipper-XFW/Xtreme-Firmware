@@ -10,6 +10,7 @@ static void input_cli_usage() {
     printf("Cmd list:\r\n");
     printf("\tdump\t\t\t - dump input events\r\n");
     printf("\tsend <key> <type>\t - send input event\r\n");
+    printf("\tkeyboard\t - read keyboard input and control flipper with it\r\n");
 }
 
 static void input_cli_dump_events_callback(const void* value, void* ctx) {
@@ -38,6 +39,43 @@ static void input_cli_dump(Cli* cli, FuriString* args, Input* input) {
 
     furi_pubsub_unsubscribe(input->event_pubsub, input_subscription);
     furi_message_queue_free(input_queue);
+}
+
+static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
+    UNUSED(args);
+
+    printf("Press CTRL+C to stop\r\n");
+    while(cli_is_connected(cli)) {
+        char in_chr = cli_getc(cli);
+        if(in_chr == CliSymbolAsciiETX) break;
+
+        InputKey send_key = InputKeyMAX;
+
+        switch(in_chr) {
+            case CliSymbolAsciiEsc:
+                if(!cli_read(cli, (uint8_t*)&in_chr, 1) || in_chr != '[') break;
+                if(!cli_read(cli, (uint8_t*)&in_chr, 1)) break;
+                if(in_chr >= 'A' && in_chr <= 'D') {
+                    send_key = in_chr - 'A';
+                }
+                break;
+            case CliSymbolAsciiBackspace:
+                send_key = InputKeyBack;
+                break;
+            case CliSymbolAsciiCR:
+                send_key = InputKeyOk;
+                break;
+            case CliSymbolAsciiTab:
+                break;
+            default:
+                printf("ignoring key: %u\r\n", in_chr);
+                break;
+        }
+
+        if(send_key != InputKeyMAX) {
+            input_fake_event(input, send_key, InputTypeShort);
+        }
+    }
 }
 
 static void input_cli_send_print_usage() {
@@ -112,6 +150,10 @@ void input_cli(Cli* cli, FuriString* args, void* context) {
         }
         if(furi_string_cmp_str(cmd, "dump") == 0) {
             input_cli_dump(cli, args, input);
+            break;
+        }
+        if(furi_string_cmp_str(cmd, "keyboard") == 0) {
+            input_cli_keyboard(cli, args, input);
             break;
         }
         if(furi_string_cmp_str(cmd, "send") == 0) {
