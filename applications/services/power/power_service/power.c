@@ -338,9 +338,6 @@ Power* power_alloc() {
     power->settings_events_subscription =
         furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
 
-    power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
-    power->input_events_subscription = NULL;
-
     // State initialization
     power->state = PowerStateNotCharging;
     power->battery_low = false;
