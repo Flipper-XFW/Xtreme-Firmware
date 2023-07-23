@@ -46,3 +46,5 @@ void input_isr(void* _ctx);
 
 /** Input CLI command handler */
 void input_cli(Cli* cli, FuriString* args, void* context);
+
+void input_fake_event(Input* input, InputKey key, InputType type);
