@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,34.3,,
+Version,+,34.4,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/favorite_timeout.h,,
 Header,+,applications/services/applications.h,,
@@ -626,6 +626,8 @@ Function,+,bt_get_profile_pairing_method,GapPairing,Bt*
 Function,+,bt_keys_storage_set_default_path,void,Bt*
 Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
 Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
+Function,+,bt_open_rpc_connection,void,Bt*
+Function,+,bt_close_rpc_connection,void,Bt*
 Function,+,bt_set_profile,_Bool,"Bt*, BtProfile"
 Function,+,bt_set_profile_adv_name,void,"Bt*, const char*, ..."
 Function,+,bt_set_profile_mac_address,void,"Bt*, const uint8_t[6]"
