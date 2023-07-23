@@ -19,7 +19,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
-#include "wifi_marauder_text_input.h"
+#include <gui/modules/text_input.h>
 
 #include <esp32_wifi_marauder_icons.h>
 #include <assets_icons.h>
@@ -69,7 +69,7 @@ struct WifiMarauderApp {
     FuriString* text_box_store;
     size_t text_box_store_strlen;
     TextBox* text_box;
-    WIFI_TextInput* text_input;
+    TextInput* text_input;
     Storage* storage;
     File* capture_file;
     File* log_file;

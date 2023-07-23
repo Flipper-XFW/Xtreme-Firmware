@@ -392,6 +392,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
                     if(model->menu_can_switch) {
                         if((event->key == InputKeyLeft && model->menu_manage) ||
                            (event->key == InputKeyRight && !model->menu_manage)) {
+                            model->menu_idx = 0;
                             model->menu_manage = !model->menu_manage;
                             menu_array_reset(model->context_menu);
                         }
