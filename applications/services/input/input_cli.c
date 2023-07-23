@@ -3,6 +3,10 @@
 #include <furi.h>
 #include <cli/cli.h>
 #include <toolbox/args.h>
+#include <gui/view_i.h>
+#include <gui/view_port_i.h>
+#include <gui/view_dispatcher_i.h>
+#include <gui/modules/text_input_i.h>
 
 static void input_cli_usage() {
     printf("Usage:\r\n");
@@ -10,7 +14,7 @@ static void input_cli_usage() {
     printf("Cmd list:\r\n");
     printf("\tdump\t\t\t - dump input events\r\n");
     printf("\tsend <key> <type>\t - send input event\r\n");
-    printf("\tkeyboard\t - read keyboard input and control flipper with it\r\n");
+    printf("\tkeyboard\t\t - read keyboard input and control flipper with it\r\n");
 }
 
 static void input_cli_dump_events_callback(const void* value, void* ctx) {
@@ -43,39 +47,78 @@ static void input_cli_dump(Cli* cli, FuriString* args, Input* input) {
 
 static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     UNUSED(args);
+    Gui* gui = furi_record_open(RECORD_GUI);
 
-    printf("Press CTRL+C to stop\r\n");
+    printf("Using console keyboard feedback for flipper input\r\n");
+
+    printf("\r\nUsage:\r\n");
+    printf("\tMove = Arrows\r\n");
+    printf("\tOk = Enter\r\n");
+    printf("\tHold Ok = Shift + Enter\r\n");
+    printf("\tBack = Backspace\r\n");
+
+    printf("\r\nIn Keyboard:\r\n");
+    printf("\tType normally on PC Keyboard\r\n");
+    printf("\tQuit = Ctrl + Q\r\n");
+    printf("\tSelect All = Ctrl + A\r\n");
+    printf("\tMove Cursor = Arrows\r\n");
+    printf("\tSave Text = Enter\r\n");
+
+    printf("\r\nPress CTRL+C to stop\r\n");
     while(cli_is_connected(cli)) {
         char in_chr = cli_getc(cli);
         if(in_chr == CliSymbolAsciiETX) break;
-
         InputKey send_key = InputKeyMAX;
+        InputType send_type = InputTypeShort;
 
-        switch(in_chr) {
-            case CliSymbolAsciiEsc:
+        ViewPort* view_port = gui->ongoing_input_view_port;
+        if(view_port && view_port->input_callback == view_dispatcher_input_callback) {
+            ViewDispatcher* view_dispatcher = view_port->input_callback_context;
+            if(view_dispatcher) {
+                View* view = view_dispatcher->current_view;
+                if(view && view->input_callback == text_input_view_input_callback) {
+                    TextInput* text_input = view->context;
+                    if(text_input) {
+                        if(in_chr == 0x11) { // Ctrl Q = Close text input
+                            send_key = InputKeyBack;
+                        } else if(text_input_insert_character(text_input, in_chr)) {
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        if(send_key == InputKeyMAX) {
+            switch(in_chr) {
+            case CliSymbolAsciiEsc: // Escape code for arrows
                 if(!cli_read(cli, (uint8_t*)&in_chr, 1) || in_chr != '[') break;
                 if(!cli_read(cli, (uint8_t*)&in_chr, 1)) break;
-                if(in_chr >= 'A' && in_chr <= 'D') {
-                    send_key = in_chr - 'A';
+                if(in_chr >= 'A' && in_chr <= 'D') { // Arrows = Dpad
+                    send_key = in_chr - 'A'; // Arrows in same order as InputKey
                 }
                 break;
-            case CliSymbolAsciiBackspace:
+            case CliSymbolAsciiBackspace: // Backspace = Back
                 send_key = InputKeyBack;
                 break;
-            case CliSymbolAsciiCR:
+            case 0x4d: // Shift Enter = Hold Ok
+                send_type = InputTypeLong;
+                /* fall through */
+            case CliSymbolAsciiCR: // Enter = Ok
                 send_key = InputKeyOk;
-                break;
-            case CliSymbolAsciiTab:
                 break;
             default:
                 printf("ignoring key: %u\r\n", in_chr);
                 break;
+            }
         }
 
         if(send_key != InputKeyMAX) {
-            input_fake_event(input, send_key, InputTypeShort);
+            input_fake_event(input, send_key, send_type);
         }
     }
+
+    furi_record_close(RECORD_GUI);
 }
 
 static void input_cli_send_print_usage() {

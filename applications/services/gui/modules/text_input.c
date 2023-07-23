@@ -1,4 +1,4 @@
-#include "text_input.h"
+#include "text_input_i.h"
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <furi.h>
@@ -51,7 +51,7 @@ static const uint8_t keyboard_count = 2;
 
 #define ENTER_KEY '\r'
 #define BACKSPACE_KEY '\b'
-#define SWITCH_KEYBOARD_KEY 0xfe
+#define SWITCH_KEYBOARD_KEY '\t'
 
 static const TextInputKey keyboard_keys_row_1[] = {
     {'q', 1, 8},
@@ -490,7 +490,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
     }
 }
 
-static bool text_input_view_input_callback(InputEvent* event, void* context) {
+bool text_input_view_input_callback(InputEvent* event, void* context) {
     TextInput* text_input = context;
     furi_assert(text_input);
 
@@ -810,4 +810,56 @@ void* text_input_get_validator_callback_context(TextInput* text_input) {
 void text_input_set_header_text(TextInput* text_input, const char* text) {
     with_view_model(
         text_input->view, TextInputModel * model, { model->header = text; }, true);
+}
+
+bool text_input_insert_character(TextInput* text_input, char chr) {
+    if(chr == 0x1b) { // Arrow escape code = Select input row
+        with_view_model(
+            text_input->view,
+            TextInputModel * model,
+            {
+                model->cursor_select = true;
+                model->clear_default_text = false;
+                model->selected_row = 0;
+            },
+            true);
+        return false; // Don't consume so CLI gives arrow input
+    }
+    if(chr == 0x01) { // Ctrl A = Select all text
+        with_view_model(
+            text_input->view,
+            TextInputModel * model,
+            {
+                model->clear_default_text = true;
+            },
+            true);
+        return true;
+    }
+    for(size_t k = 0; k < keyboard_count; k++) {
+        const Keyboard* keyboard = keyboards[k];
+        for(size_t r = 0; r < keyboard_row_count; r++) {
+            const TextInputKey* row = get_row(keyboard, r);
+            uint8_t size = get_row_size(keyboard, r);
+            for(size_t key = 0; key < size; key++) {
+                char lower = row[key].text;
+                char upper = char_to_uppercase(lower);
+                if(chr == lower || chr == upper) {
+                    with_view_model(
+                        text_input->view,
+                        TextInputModel * model,
+                        {
+                            model->cursor_select = false;
+                            model->selected_keyboard = k;
+                            model->selected_row = r;
+                            model->selected_column = key;
+                            bool shift = (chr == upper) != (model->clear_default_text || strlen(model->text_buffer) == 0);
+                            text_input_handle_ok(text_input, model, shift ? InputTypeLong : InputTypeShort);
+                        },
+                        true);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
