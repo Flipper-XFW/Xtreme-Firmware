@@ -49,7 +49,8 @@ static void input_cli_send_print_usage() {
 
 static void input_cli_send(Cli* cli, FuriString* args, Input* input) {
     UNUSED(cli);
-    InputEvent event;
+    InputKey key;
+    InputType type;
     FuriString* key_str;
     key_str = furi_string_alloc();
     bool parsed = false;
@@ -60,29 +61,29 @@ static void input_cli_send(Cli* cli, FuriString* args, Input* input) {
             break;
         }
         if(!furi_string_cmp(key_str, "up")) {
-            event.key = InputKeyUp;
+            key = InputKeyUp;
         } else if(!furi_string_cmp(key_str, "down")) {
-            event.key = InputKeyDown;
+            key = InputKeyDown;
         } else if(!furi_string_cmp(key_str, "left")) {
-            event.key = InputKeyLeft;
+            key = InputKeyLeft;
         } else if(!furi_string_cmp(key_str, "right")) {
-            event.key = InputKeyRight;
+            key = InputKeyRight;
         } else if(!furi_string_cmp(key_str, "ok")) {
-            event.key = InputKeyOk;
+            key = InputKeyOk;
         } else if(!furi_string_cmp(key_str, "back")) {
-            event.key = InputKeyBack;
+            key = InputKeyBack;
         } else {
             break;
         }
         // Parse Type
         if(!furi_string_cmp(args, "press")) {
-            event.type = InputTypePress;
+            type = InputTypePress;
         } else if(!furi_string_cmp(args, "release")) {
-            event.type = InputTypeRelease;
+            type = InputTypeRelease;
         } else if(!furi_string_cmp(args, "short")) {
-            event.type = InputTypeShort;
+            type = InputTypeShort;
         } else if(!furi_string_cmp(args, "long")) {
-            event.type = InputTypeLong;
+            type = InputTypeLong;
         } else {
             break;
         }
@@ -90,7 +91,7 @@ static void input_cli_send(Cli* cli, FuriString* args, Input* input) {
     } while(false);
 
     if(parsed) { //-V547
-        furi_pubsub_publish(input->event_pubsub, &event);
+        input_fake_event(input, key, type);
     } else {
         input_cli_send_print_usage();
     }
