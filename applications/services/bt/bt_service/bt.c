@@ -218,7 +218,7 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
 
 // Open BT Connection
 void bt_open_rpc_connection(Bt* bt) {
-    if(!bt->rpc_session) {
+    if(!bt->rpc_session && bt->status == BtStatusConnected) {
         // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
         furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         if(bt->profile == BtProfileSerial) {
