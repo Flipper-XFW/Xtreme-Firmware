@@ -365,7 +365,8 @@ static void rpc_session_thread_state_callback(FuriThreadState thread_state, void
 }
 
 RpcSession* rpc_session_open(Rpc* rpc, RpcOwner owner) {
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) || XTREME_SETTINGS()->allow_locked_rpc_commands) {
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) ||
+       XTREME_SETTINGS()->allow_locked_rpc_commands) {
         furi_assert(rpc);
 
         RpcSession* session = malloc(sizeof(RpcSession));

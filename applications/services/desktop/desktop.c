@@ -242,7 +242,7 @@ void desktop_lock(Desktop* desktop, bool pin_lock) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
-        if (!XTREME_SETTINGS()->allow_locked_rpc_commands) {
+        if(!XTREME_SETTINGS()->allow_locked_rpc_commands) {
             Bt* bt = furi_record_open(RECORD_BT);
             bt_close_rpc_connection(bt);
             furi_record_close(RECORD_BT);

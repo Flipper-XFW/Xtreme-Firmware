@@ -32,7 +32,8 @@ static void xtreme_app_scene_interface_lockscreen_bad_pins_format_changed(Variab
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_lockscreen_allow_locked_rpc_commands_changed(VariableItem* item) {
+static void
+    xtreme_app_scene_interface_lockscreen_allow_locked_rpc_commands_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");

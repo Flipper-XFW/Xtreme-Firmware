@@ -250,7 +250,6 @@ void bt_close_rpc_connection(Bt* bt) {
     }
 }
 
-
 // Called from GAP thread
 static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     furi_assert(context);
