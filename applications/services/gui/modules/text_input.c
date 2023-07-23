@@ -827,12 +827,7 @@ bool text_input_insert_character(TextInput* text_input, char chr) {
     }
     if(chr == 0x01) { // Ctrl A = Select all text
         with_view_model(
-            text_input->view,
-            TextInputModel * model,
-            {
-                model->clear_default_text = true;
-            },
-            true);
+            text_input->view, TextInputModel * model, { model->clear_default_text = true; }, true);
         return true;
     }
     for(size_t k = 0; k < keyboard_count; k++) {
@@ -852,8 +847,10 @@ bool text_input_insert_character(TextInput* text_input, char chr) {
                             model->selected_keyboard = k;
                             model->selected_row = r;
                             model->selected_column = key;
-                            bool shift = (chr == upper) != (model->clear_default_text || strlen(model->text_buffer) == 0);
-                            text_input_handle_ok(text_input, model, shift ? InputTypeLong : InputTypeShort);
+                            bool shift = (chr == upper) != (model->clear_default_text ||
+                                                            strlen(model->text_buffer) == 0);
+                            text_input_handle_ok(
+                                text_input, model, shift ? InputTypeLong : InputTypeShort);
                         },
                         true);
                     return true;
