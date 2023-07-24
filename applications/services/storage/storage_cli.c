@@ -29,7 +29,8 @@ static void storage_cli_print_usage() {
         "\twrite_chunk\t - read data from cli and append it to file, <args> should contain how many bytes you want to write\r\n");
     printf("\tcopy\t - copy file to new file, <args> must contain new path\r\n");
     printf("\trename\t - move file to new file, <args> must contain new path\r\n");
-    printf("\tmigrate\t - \r\n");
+    printf(
+        "\tmigrate\t - move folder to new path, renaming already present files by adding numbers to the end\r\n");
     printf("\tmkdir\t - creates a new directory\r\n");
     printf("\tmd5\t - md5 hash of the file\r\n");
     printf("\tstat\t - info about file or dir\r\n");

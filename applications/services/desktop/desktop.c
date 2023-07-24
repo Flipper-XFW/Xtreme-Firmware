@@ -242,6 +242,11 @@ void desktop_lock(Desktop* desktop, bool pin_lock) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
+        if(!XTREME_SETTINGS()->allow_locked_rpc_commands) {
+            Bt* bt = furi_record_open(RECORD_BT);
+            bt_close_rpc_connection(bt);
+            furi_record_close(RECORD_BT);
+        }
     }
 
     desktop_auto_lock_inhibit(desktop);
@@ -269,6 +274,10 @@ void desktop_unlock(Desktop* desktop) {
         cli_session_open(cli, &cli_vcp);
         furi_record_close(RECORD_CLI);
     }
+
+    Bt* bt = furi_record_open(RECORD_BT);
+    bt_open_rpc_connection(bt);
+    furi_record_close(RECORD_BT);
 
     DesktopStatus status = {.locked = false};
     furi_pubsub_publish(desktop->status_pubsub, &status);
@@ -435,9 +444,7 @@ bool desktop_api_is_locked(Desktop* instance) {
 
 void desktop_api_unlock(Desktop* instance) {
     furi_assert(instance);
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) || XTREME_SETTINGS()->pin_unlock_from_app) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
-    }
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
 }
 
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {

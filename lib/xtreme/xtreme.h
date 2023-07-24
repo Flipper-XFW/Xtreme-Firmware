@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 #define XTREME_SETTINGS_PATH CFG_PATH("xtreme_settings.txt")
-#define XTREME_ASSETS_PATH EXT_PATH("dolphin_custom")
+#define XTREME_ASSETS_PATH EXT_PATH("asset_packs")
 #define XTREME_MENU_OLD_PATH CFG_PATH("xtreme_apps.txt")
 #define XTREME_MENU_PATH CFG_PATH("xtreme_menu.txt")
 #define XTREME_ASSETS_PACK_NAME_LEN 32
@@ -35,7 +35,7 @@ typedef struct {
     bool wii_menu;
     bool lock_on_boot;
     bool bad_pins_format;
-    bool pin_unlock_from_app;
+    bool allow_locked_rpc_commands;
     bool lockscreen_time;
     bool lockscreen_seconds;
     bool lockscreen_date;

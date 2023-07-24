@@ -81,4 +81,4 @@ fbt_options.py
 assets/dolphin/custom/*
 !assets/dolphin/custom/WatchDogs/
 !assets/dolphin/custom/ReadMe.md
-assets/resources/dolphin_custom/
+assets/resources/asset_packs/

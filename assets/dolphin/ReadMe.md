@@ -2,10 +2,9 @@
 
 Dolphin assets are split into 3 parts:
 
-- blocking - Essential animations that are used for blocking system notifications. They are packed to `assets_dolphin_blocking.[h,c]`.
+- blocking  - Essential animations that are used for blocking system notifications. They are packed to `assets_dolphin_blocking.[h,c]`.
 - internal  - Internal animations that are used for idle dolphin animation. Converted to `assets_dolphin_internal.[h,c]`.
 - external  - External animations that are used for idle dolphin animation. Packed to resource folder and placed on SD card.
-- custom    - Custom User-made animations that are used for a variety of scenes, such as `dolphin idle, passport, scanning`. Compiled to `.bmx` and found at `SD/dolphin_custom`
 
 # Files
 

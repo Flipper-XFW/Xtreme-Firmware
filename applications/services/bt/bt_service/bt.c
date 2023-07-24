@@ -216,19 +216,9 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
     }
 }
 
-// Called from GAP thread
-static bool bt_on_gap_event_callback(GapEvent event, void* context) {
-    furi_assert(context);
-    Bt* bt = context;
-    bool ret = false;
-    bt->pin = 0;
-
-    if(event.type == GapEventTypeConnected) {
-        // Update status bar
-        bt->status = BtStatusConnected;
-        BtMessage message = {.type = BtMessageTypeUpdateStatus};
-        furi_check(
-            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+// Open BT Connection
+void bt_open_rpc_connection(Bt* bt) {
+    if(!bt->rpc_session && bt->status == BtStatusConnected) {
         // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
         furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         if(bt->profile == BtProfileSerial) {
@@ -247,6 +237,33 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
                 FURI_LOG_W(TAG, "RPC is busy, failed to open new session");
             }
         }
+    }
+}
+
+void bt_close_rpc_connection(Bt* bt) {
+    if(bt->profile == BtProfileSerial && bt->rpc_session) {
+        FURI_LOG_I(TAG, "Close RPC connection");
+        furi_event_flag_set(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
+        rpc_session_close(bt->rpc_session);
+        furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
+        bt->rpc_session = NULL;
+    }
+}
+
+// Called from GAP thread
+static bool bt_on_gap_event_callback(GapEvent event, void* context) {
+    furi_assert(context);
+    Bt* bt = context;
+    bool ret = false;
+    bt->pin = 0;
+
+    if(event.type == GapEventTypeConnected) {
+        // Update status bar
+        bt->status = BtStatusConnected;
+        BtMessage message = {.type = BtMessageTypeUpdateStatus};
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+        bt_open_rpc_connection(bt);
         // Update battery level
         PowerInfo info;
         power_get_info(bt->power, &info);
@@ -321,16 +338,6 @@ static void bt_show_warning(Bt* bt, const char* text) {
     dialog_message_set_text(bt->dialog_message, text, 64, 28, AlignCenter, AlignCenter);
     dialog_message_set_buttons(bt->dialog_message, "Quit", NULL, NULL);
     dialog_message_show(bt->dialogs, bt->dialog_message);
-}
-
-static void bt_close_rpc_connection(Bt* bt) {
-    if(bt->profile == BtProfileSerial && bt->rpc_session) {
-        FURI_LOG_I(TAG, "Close RPC connection");
-        furi_event_flag_set(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
-        rpc_session_close(bt->rpc_session);
-        furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
-        bt->rpc_session = NULL;
-    }
 }
 
 static void bt_change_profile(Bt* bt, BtMessage* message) {

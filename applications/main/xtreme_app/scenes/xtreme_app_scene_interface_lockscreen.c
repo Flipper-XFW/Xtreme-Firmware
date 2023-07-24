@@ -32,11 +32,12 @@ static void xtreme_app_scene_interface_lockscreen_bad_pins_format_changed(Variab
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_lockscreen_pin_unlock_from_app_changed(VariableItem* item) {
+static void
+    xtreme_app_scene_interface_lockscreen_allow_locked_rpc_commands_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->pin_unlock_from_app = value;
+    XTREME_SETTINGS()->allow_locked_rpc_commands = value;
     app->save_settings = true;
 }
 
@@ -107,13 +108,13 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "PIN Unlock From App",
+        "Allow RPC while locked",
         2,
-        xtreme_app_scene_interface_lockscreen_pin_unlock_from_app_changed,
+        xtreme_app_scene_interface_lockscreen_allow_locked_rpc_commands_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->pin_unlock_from_app);
+    variable_item_set_current_value_index(item, xtreme_settings->allow_locked_rpc_commands);
     variable_item_set_current_value_text(
-        item, xtreme_settings->pin_unlock_from_app ? "ON" : "OFF");
+        item, xtreme_settings->allow_locked_rpc_commands ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
