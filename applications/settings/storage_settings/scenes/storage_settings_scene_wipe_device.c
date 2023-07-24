@@ -44,6 +44,9 @@ bool storage_settings_scene_wipe_device_on_event(void* context, SceneManagerEven
         case DialogExResultLeft:
             scene_manager_set_scene_state(app->scene_manager, StorageSettingsWipeDevice, 0);
             consumed = scene_manager_previous_scene(app->scene_manager);
+            if(!consumed) {
+                view_dispatcher_stop(app->view_dispatcher);
+            }
             break;
         case DialogExResultRight:
             counter++;
