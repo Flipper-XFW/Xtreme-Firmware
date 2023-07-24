@@ -14,7 +14,7 @@
 #include <xtreme.h>
 #define ANIMATION_META_FILE "meta.txt"
 #define TAG "AnimationStorage"
-char ANIMATION_DIR[26 /*"/ext/dolphin_custom//Anims"*/ + XTREME_ASSETS_PACK_NAME_LEN + 1];
+char ANIMATION_DIR[26 /*"/ext/asset_packs//Anims"*/ + XTREME_ASSETS_PACK_NAME_LEN + 1];
 char ANIMATION_MANIFEST_FILE[sizeof(ANIMATION_DIR) + 13 /*"/manifest.txt"*/];
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);

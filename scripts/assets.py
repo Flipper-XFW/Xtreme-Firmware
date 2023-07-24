@@ -283,8 +283,8 @@ extern const size_t ICON_PATHS_COUNT;
         self.logger.info("Packing custom asset packs")
         root_dir = pathlib.Path(__file__).absolute().parent.parent
         asset_packer.pack(
-            root_dir / "assets/dolphin/custom",
-            root_dir / f"assets/resources/dolphin_custom",
+            root_dir / "assets/packs",
+            root_dir / f"assets/resources/asset_packs",
             self.logger.info,
         )
 

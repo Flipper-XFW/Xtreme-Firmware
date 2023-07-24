@@ -74,6 +74,8 @@ void flipper_migrate_files() {
     }
     storage_common_copy(storage, U2F_KEY_OLD_FILE, U2F_KEY_FILE); // Ext -> Int
 
+    storage_common_migrate(storage, EXT_PATH("dolphin_custom"), EXT_PATH("asset_packs"));
+
     furi_record_close(RECORD_STORAGE);
 }
 
