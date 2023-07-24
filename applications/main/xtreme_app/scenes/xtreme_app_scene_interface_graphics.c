@@ -17,7 +17,7 @@ static void xtreme_app_scene_interface_graphics_asset_pack_changed(VariableItem*
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
-        item, index == 0 ? "SFW" : *CharList_get(app->asset_pack_names, index - 1));
+        item, index == 0 ? "Default" : *CharList_get(app->asset_pack_names, index - 1));
     strlcpy(
         XTREME_SETTINGS()->asset_pack,
         index == 0 ? "" : *CharList_get(app->asset_pack_names, index - 1),

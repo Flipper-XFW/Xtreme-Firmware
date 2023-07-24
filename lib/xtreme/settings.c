@@ -5,7 +5,7 @@
 #define TAG "XtremeSettings"
 
 XtremeSettings xtreme_settings = {
-    .asset_pack = "", // SFW
+    .asset_pack = "", // Default
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
