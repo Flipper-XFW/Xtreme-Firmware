@@ -175,6 +175,7 @@ void XTREME_SETTINGS_SAVE() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_always(file, XTREME_SETTINGS_PATH)) {
+        uint32_t e;
         flipper_format_write_string_cstr(file, "asset_pack", x->asset_pack);
         flipper_format_write_uint32(file, "anim_speed", &x->anim_speed, 1);
         flipper_format_write_int32(file, "cycle_anims", &x->cycle_anims, 1);
@@ -189,7 +190,8 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
         flipper_format_write_bool(file, "lockscreen_statusbar", &x->lockscreen_statusbar, 1);
         flipper_format_write_bool(file, "lockscreen_prompt", &x->lockscreen_prompt, 1);
-        flipper_format_write_uint32(file, "battery_icon", &x->battery_icon, 1);
+        e = x->battery_icon;
+        flipper_format_write_uint32(file, "battery_icon", &e, 1);
         flipper_format_write_bool(file, "statusbar_clock", &x->statusbar_clock, 1);
         flipper_format_write_bool(file, "status_icons", &x->status_icons, 1);
         flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);
