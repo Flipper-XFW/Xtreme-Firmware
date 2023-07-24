@@ -10,7 +10,7 @@ XtremeSettings xtreme_settings = {
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
     .fallback_anim = true, // ON
-    .wii_menu = true, // ON
+    .menu_style = MenuStyleWii, // Wii
     .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
     .allow_locked_rpc_commands = false, // OFF
@@ -68,8 +68,8 @@ void XTREME_SETTINGS_LOAD() {
             x->fallback_anim = b;
         }
         flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "wii_menu", &b, 1)) {
-            x->wii_menu = b;
+        if(flipper_format_read_uint32(file, "menu_style", &u, 1)) {
+            x->menu_style = CLAMP(u, MenuStyleCount - 1U, 0U);
         }
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "bad_pins_format", &b, 1)) {
@@ -181,7 +181,8 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_int32(file, "cycle_anims", &x->cycle_anims, 1);
         flipper_format_write_bool(file, "unlock_anims", &x->unlock_anims, 1);
         flipper_format_write_bool(file, "fallback_anim", &x->fallback_anim, 1);
-        flipper_format_write_bool(file, "wii_menu", &x->wii_menu, 1);
+        e = x->menu_style;
+        flipper_format_write_uint32(file, "menu_style", &e, 1);
         flipper_format_write_bool(file, "bad_pins_format", &x->bad_pins_format, 1);
         flipper_format_write_bool(file, "allow_locked_rpc_commands", &x->allow_locked_rpc_commands, 1);
         flipper_format_write_bool(file, "lock_on_boot", &x->lock_on_boot, 1);

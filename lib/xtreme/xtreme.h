@@ -24,6 +24,12 @@ typedef enum {
     BatteryIconCount,
 } BatteryIcon;
 
+typedef enum {
+    MenuStyleList,
+    MenuStyleWii,
+    MenuStyleCount,
+} MenuStyle;
+
 typedef struct {
     bool is_nsfw; // TODO: replace with packs text support
 
@@ -32,7 +38,7 @@ typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
     bool fallback_anim;
-    bool wii_menu;
+    MenuStyle menu_style;
     bool lock_on_boot;
     bool bad_pins_format;
     bool allow_locked_rpc_commands;
