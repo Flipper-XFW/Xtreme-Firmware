@@ -215,12 +215,10 @@ XtremeApp* xtreme_app_alloc() {
             if(info.flags & FSF_DIRECTORY) {
                 char* copy = strdup(name);
                 size_t idx = 0;
-                if(strcmp(copy, "NSFW") != 0) {
-                    for(; idx < CharList_size(app->asset_pack_names); idx++) {
-                        char* comp = *CharList_get(app->asset_pack_names, idx);
-                        if(strcasecmp(copy, comp) < 0 && strcmp(comp, "NSFW") != 0) {
-                            break;
-                        }
+                for(; idx < CharList_size(app->asset_pack_names); idx++) {
+                    char* comp = *CharList_get(app->asset_pack_names, idx);
+                    if(strcasecmp(copy, comp) < 0) {
+                        break;
                     }
                 }
                 CharList_push_at(app->asset_pack_names, idx, copy);

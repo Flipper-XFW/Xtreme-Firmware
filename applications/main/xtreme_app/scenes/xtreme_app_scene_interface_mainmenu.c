@@ -14,11 +14,15 @@ void xtreme_app_scene_interface_mainmenu_var_item_list_callback(void* context, u
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void xtreme_app_scene_interface_mainmenu_wii_menu_changed(VariableItem* item) {
+const char* const menu_style_names[MenuStyleCount] = {
+    "List",
+    "Wii",
+};
+static void xtreme_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "Wii Grid" : "App List");
-    XTREME_SETTINGS()->wii_menu = value;
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, menu_style_names[index]);
+    XTREME_SETTINGS()->menu_style = index;
     app->save_settings = true;
 }
 
@@ -62,10 +66,13 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list, "Menu Style", 2, xtreme_app_scene_interface_mainmenu_wii_menu_changed, app);
-    variable_item_set_current_value_index(item, xtreme_settings->wii_menu);
-    variable_item_set_current_value_text(
-        item, xtreme_settings->wii_menu ? "Wii Grid" : "App List");
+        var_item_list,
+        "Menu Style",
+        MenuStyleCount,
+        xtreme_app_scene_interface_mainmenu_menu_style_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings->menu_style);
+    variable_item_set_current_value_text(item, menu_style_names[xtreme_settings->menu_style]);
 
     variable_item_list_add(var_item_list, "Reset Menu", 0, NULL, app);
 

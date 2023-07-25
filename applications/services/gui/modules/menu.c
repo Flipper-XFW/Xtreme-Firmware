@@ -48,7 +48,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
     if(items_count) {
         MenuItem* item;
         size_t shift_position;
-        if(XTREME_SETTINGS()->wii_menu) {
+        switch(XTREME_SETTINGS()->menu_style) {
+        case MenuStyleWii: {
             FuriString* name = furi_string_alloc();
             if(items_count > 6 && position >= 4) {
                 if(position >= items_count - 2 + (items_count % 2)) {
@@ -102,7 +103,9 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 }
             }
             furi_string_free(name);
-        } else {
+            break;
+        }
+        case MenuStyleList: {
             // First line
             canvas_set_font(canvas, FontSecondary);
             shift_position = (0 + position + items_count - 1) % items_count;
@@ -149,6 +152,10 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             // Frame and scrollbar
             elements_frame(canvas, 0, 21, 128 - 5, 21);
             elements_scrollbar(canvas, position, items_count);
+            break;
+        }
+        default:
+            break;
         }
     } else {
         canvas_draw_str(canvas, 2, 32, "Empty");
@@ -354,19 +361,24 @@ static void menu_process_up(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            if(XTREME_SETTINGS()->wii_menu) {
+            switch(XTREME_SETTINGS()->menu_style) {
+            case MenuStyleWii:
                 if(model->position % 2 || (model->position == count - 1 && count % 2)) {
                     model->position--;
                 } else {
                     model->position++;
                 }
                 model->scroll_counter = 0;
-            } else {
+                break;
+            case MenuStyleList:
                 if(model->position > 0) {
                     model->position--;
                 } else {
                     model->position = count - 1;
                 }
+                break;
+            default:
+                break;
             }
 
             item = MenuItemArray_get(model->items, model->position);
@@ -388,19 +400,24 @@ static void menu_process_down(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            if(XTREME_SETTINGS()->wii_menu) {
+            switch(XTREME_SETTINGS()->menu_style) {
+            case MenuStyleWii:
                 if(model->position % 2 || (model->position == count - 1 && count % 2)) {
                     model->position--;
                 } else {
                     model->position++;
                 }
                 model->scroll_counter = 0;
-            } else {
+                break;
+            case MenuStyleList:
                 if(model->position < count - 1) {
                     model->position++;
                 } else {
                     model->position = 0;
                 }
+                break;
+            default:
+                break;
             }
 
             item = MenuItemArray_get(model->items, model->position);
@@ -412,27 +429,33 @@ static void menu_process_down(Menu* menu) {
 }
 
 static void menu_process_left(Menu* menu) {
-    if(!XTREME_SETTINGS()->wii_menu) return;
+    if(XTREME_SETTINGS()->menu_style == MenuStyleList) return;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
+            size_t count = MenuItemArray_size(model->items);
             MenuItem* item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {
                 icon_animation_stop(item->icon);
             }
 
-            size_t count = MenuItemArray_size(model->items);
-            if(model->position < 2) {
-                if(count % 2) {
-                    model->position = count - 1;
+            switch(XTREME_SETTINGS()->menu_style) {
+            case MenuStyleWii:
+                if(model->position < 2) {
+                    if(count % 2) {
+                        model->position = count - 1;
+                    } else {
+                        model->position = count - 2 + model->position % 2;
+                    }
                 } else {
-                    model->position = count - 2 + model->position % 2;
+                    model->position -= 2;
                 }
-            } else {
-                model->position -= 2;
+                model->scroll_counter = 0;
+                break;
+            default:
+                break;
             }
-            model->scroll_counter = 0;
 
             item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {
@@ -443,32 +466,38 @@ static void menu_process_left(Menu* menu) {
 }
 
 static void menu_process_right(Menu* menu) {
-    if(!XTREME_SETTINGS()->wii_menu) return;
+    if(XTREME_SETTINGS()->menu_style == MenuStyleList) return;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
+            size_t count = MenuItemArray_size(model->items);
             MenuItem* item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {
                 icon_animation_stop(item->icon);
             }
 
-            size_t count = MenuItemArray_size(model->items);
-            if(count % 2) {
-                if(model->position == count - 1) {
-                    model->position = 0;
-                } else if(model->position == count - 2) {
-                    model->position = count - 1;
+            switch(XTREME_SETTINGS()->menu_style) {
+            case MenuStyleWii:
+                if(count % 2) {
+                    if(model->position == count - 1) {
+                        model->position = 0;
+                    } else if(model->position == count - 2) {
+                        model->position = count - 1;
+                    } else {
+                        model->position += 2;
+                    }
                 } else {
                     model->position += 2;
+                    if(model->position >= count) {
+                        model->position = model->position % 2;
+                    }
                 }
-            } else {
-                model->position += 2;
-                if(model->position >= count) {
-                    model->position = model->position % 2;
-                }
+                model->scroll_counter = 0;
+                break;
+            default:
+                break;
             }
-            model->scroll_counter = 0;
 
             item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {

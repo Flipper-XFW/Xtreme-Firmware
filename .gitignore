@@ -78,7 +78,7 @@ commitnotes.md
 fbt_options.py
 
 # Asset packs
-assets/dolphin/custom/*
-!assets/dolphin/custom/WatchDogs/
-!assets/dolphin/custom/ReadMe.md
+assets/asset_packs/*
+!assets/asset_packs/WatchDogs/
+!assets/asset_packs/ReadMe.md
 assets/resources/asset_packs/

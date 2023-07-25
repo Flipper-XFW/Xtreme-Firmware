@@ -489,6 +489,8 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockKeypad);
     } else if(!strncmp(keybind, "Lock with PIN", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockWithPin);
+    } else if(!strncmp(keybind, "Wipe Device", MAX_KEYBIND_LENGTH)) {
+        loader_start_detached_with_gui_error(instance->loader, "Storage", "wipe");
     } else {
         loader_start_detached_with_gui_error(instance->loader, keybind, NULL);
     }
