@@ -65,7 +65,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
     } else if(plugin_state->addr_err) {
         canvas_draw_str_aligned(
-            canvas, 10, 10, AlignLeft, AlignBottom, "Error: No nrfsniff folder");
+            canvas, 10, 10, AlignLeft, AlignBottom, "Error: No nrf24sniff folder");
         canvas_draw_str_aligned(canvas, 10, 20, AlignLeft, AlignBottom, "or addresses.txt file");
         canvas_draw_str_aligned(
             canvas, 10, 30, AlignLeft, AlignBottom, "loading error / empty file");
