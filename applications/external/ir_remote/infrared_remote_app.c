@@ -6,6 +6,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
+#include "ir_remote_icons.h"
 #include <assets_icons.h>
 #include <dolphin/dolphin.h>
 
@@ -538,6 +539,7 @@ int32_t infrared_remote_app(char* p) {
                     is_transmitting = true;
                 }
             }
+            view_port_update(app->view_port);
         }
     }
 

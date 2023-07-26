@@ -16,10 +16,12 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
 
-#include <esp_flasher_icons.h>
+#include "esp_flasher_icons.h"
+#include <assets_icons.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
+#include <notification/notification_messages.h>
 
 #define ESP_FLASHER_TEXT_BOX_STORE_SIZE (4096)
 
@@ -47,12 +49,16 @@ struct EspFlasherApp {
     TextBox* text_box;
     Storage* storage;
     DialogsApp* dialogs;
+    NotificationApp* notification;
 
     VariableItemList* var_item_list;
     Widget* widget;
     Submenu* submenu;
 
     EspFlasherUart* uart;
+
+    bool reset;
+    bool boot;
 
     bool selected_flash_options[NUM_FLASH_OPTIONS];
     int num_selected_flash_options;

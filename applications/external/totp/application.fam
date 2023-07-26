@@ -4,15 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="totp_app",
     cdefines=["APP_TOTP"],
-    requires=[
-        "gui",
-        "cli",
-        "dialogs",
-        "storage",
-        "input", 
-        "notification",
-        "bt"
-    ],
+    requires=["gui", "cli", "dialogs", "storage", "input", "notification", "bt"],
     stack_size=2 * 1024,
     order=20,
     fap_version="2.3",

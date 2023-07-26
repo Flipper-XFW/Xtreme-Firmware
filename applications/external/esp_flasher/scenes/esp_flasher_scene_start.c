@@ -4,6 +4,8 @@ enum SubmenuIndex {
     SubmenuIndexEspFlasherDevboardFlash,
     SubmenuIndexEspFlasherFlash,
     SubmenuIndexEspFlasherAbout,
+    SubmenuIndexEspFlasherReset,
+    SubmenuIndexEspFlasherBootloader,
 };
 
 void esp_flasher_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -32,6 +34,18 @@ void esp_flasher_scene_start_on_enter(void* context) {
         app);
     submenu_add_item(
         submenu,
+        "Reset Board",
+        SubmenuIndexEspFlasherReset,
+        esp_flasher_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "Enter Bootloader",
+        SubmenuIndexEspFlasherBootloader,
+        esp_flasher_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
         "About",
         SubmenuIndexEspFlasherAbout,
         esp_flasher_scene_start_submenu_callback,
@@ -54,6 +68,14 @@ bool esp_flasher_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherFlash) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneBrowse);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEspFlasherReset) {
+            app->reset = true;
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEspFlasherBootloader) {
+            app->boot = true;
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherAbout) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneAbout);

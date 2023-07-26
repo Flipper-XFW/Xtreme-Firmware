@@ -3,6 +3,7 @@
 #include <furi_hal_power.h>
 #include <gui/gui.h>
 #include "coleco_icons.h"
+#include <assets_icons.h>
 
 #define CODE_0 0x0A
 #define CODE_1 0x0D

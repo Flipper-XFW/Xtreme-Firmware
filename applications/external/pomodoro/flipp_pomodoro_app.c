@@ -11,14 +11,14 @@ static bool flipp_pomodoro_app_back_event_callback(void* ctx) {
     furi_assert(ctx);
     FlippPomodoroApp* app = ctx;
     return scene_manager_handle_back_event(app->scene_manager);
-}
+};
 
 static void flipp_pomodoro_app_tick_event_callback(void* ctx) {
     furi_assert(ctx);
     FlippPomodoroApp* app = ctx;
 
     scene_manager_handle_custom_event(app->scene_manager, FlippPomodoroAppCustomEventTimerTick);
-}
+};
 
 static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) {
     furi_assert(ctx);
@@ -33,7 +33,7 @@ static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) 
     case FlippPomodoroAppCustomEventStageComplete:
         if(flipp_pomodoro__get_stage(app->state) == FlippPomodoroStageFocus) {
             // REGISTER a deed on work stage complete to get an acheivement
-            // dolphin_deed(DolphinDeedPluginGameWin);
+            dolphin_deed(DolphinDeedPluginGameWin);
             FURI_LOG_I(TAG, "Focus stage reward added");
 
             flipp_pomodoro_statistics__increase_focus_stages_completed(app->statistics);
@@ -50,7 +50,7 @@ static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) 
         break;
     }
     return scene_manager_handle_custom_event(app->scene_manager, event);
-}
+};
 
 FlippPomodoroApp* flipp_pomodoro_app_alloc() {
     FlippPomodoroApp* app = malloc(sizeof(FlippPomodoroApp));
@@ -89,7 +89,7 @@ FlippPomodoroApp* flipp_pomodoro_app_alloc() {
     scene_manager_next_scene(app->scene_manager, FlippPomodoroSceneTimer);
     FURI_LOG_I(TAG, "Alloc complete");
     return app;
-}
+};
 
 void flipp_pomodoro_app_free(FlippPomodoroApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, FlippPomodoroAppViewTimer);
@@ -103,7 +103,7 @@ void flipp_pomodoro_app_free(FlippPomodoroApp* app) {
     free(app);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
-}
+};
 
 int32_t flipp_pomodoro_app(void* p) {
     UNUSED(p);
@@ -118,4 +118,4 @@ int32_t flipp_pomodoro_app(void* p) {
     flipp_pomodoro_app_free(app);
 
     return 0;
-}
+};

@@ -6,6 +6,7 @@
 #include "flipp_pomodoro_info_view.h"
 // Auto-compiled icons
 #include "flipp_pomodoro_icons.h"
+#include <assets_icons.h>
 
 enum {
     ViewInputConsumed = true,
@@ -29,7 +30,7 @@ static void
 
     furi_string_printf(
         stats_string,
-        "So Long,\nand Thanks for All the Focus...\nand for completing\n%i pomodoro(s)",
+        "So Long,\nand Thanks for All the Focus...\nand for completing\n\e#%i\e# pomodoro(s)",
         model->pomodoros_completed);
     const char* stats_string_formatted = furi_string_get_cstr(stats_string);
 
