@@ -1,7 +1,6 @@
 /core2_firmware
 /resources/Manifest
 /resources/apps/*
-/resources/dolphin/*
-/resources/dolphin_custom/*
 /resources/asset_packs/*
+/resources/dolphin/*
 /resources/apps_data/**/*.fal

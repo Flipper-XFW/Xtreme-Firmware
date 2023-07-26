@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 #define XTREME_SETTINGS_PATH CFG_PATH("xtreme_settings.txt")
+#define XTREME_ASSETS_OLD_PATH EXT_PATH("dolphin_custom")
 #define XTREME_ASSETS_PATH EXT_PATH("asset_packs")
 #define XTREME_MENU_OLD_PATH CFG_PATH("xtreme_apps.txt")
 #define XTREME_MENU_PATH CFG_PATH("xtreme_menu.txt")

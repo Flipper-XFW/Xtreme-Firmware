@@ -34,7 +34,7 @@ Don't include assets that you are not using, compiler is not going to strip unus
 # Structure
 - `compiled`            - Output folder made for compiled assets, after building project, in `build` directory.
 - `dolphin`             - Dolphin game assets sources. Goes to `compiled` and `resources` folders in `build` directory.
-- `packs`               - User-made Asset packs used for basically all scenes. Compiled to `.bmx` and found at `SD/asset_packs`
+- `packs`               - Hot-swappable asset packs used system wide, both animations and icons. Compiled to `.bm` and `.bmx`, then put at `SD/asset_packs`
 - `icons`               - Icons sources. Goes to `compiled` folder in `build` directory.
 - `protobuf`            - Protobuf sources. Goes to `compiled` folder in `build` directory.
 - `resources`           - Assets that is going to be provisioned to SD card.
