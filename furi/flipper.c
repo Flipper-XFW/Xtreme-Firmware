@@ -5,6 +5,7 @@
 #include <furi_hal_memory.h>
 #include <furi_hal_rtc.h>
 #include <storage/storage.h>
+#include <gui/canvas_i.h>
 #include <bt/bt_settings.h>
 #include <bt/bt_service/bt_i.h>
 #include <power/power_settings.h>
@@ -95,34 +96,47 @@ void flipper_start_service(const FlipperInternalApplication* service) {
     furi_thread_start(thread);
 }
 
+static void flipper_boot_status(Canvas* canvas, const char* text) {
+    FURI_LOG_I(TAG, text);
+    canvas_reset(canvas);
+    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, text);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Xtreme is Booting");
+    canvas_commit(canvas);
+}
+
 void flipper_init() {
     furi_hal_light_sequence("rgb WB");
     flipper_print_version("Firmware", furi_hal_version_get_firmware_version());
     FURI_LOG_I(TAG, "Boot mode %d", furi_hal_rtc_get_boot_mode());
+    Canvas* canvas = canvas_init();
 
     // Start storage service first, thanks OFW :/
-    FURI_LOG_I(TAG, "Initialize Storage");
+    flipper_boot_status(canvas, "Initializing Storage");
     flipper_start_service(&FLIPPER_SERVICES[0]);
 
     if(furi_hal_is_normal_boot()) {
-        FURI_LOG_I(TAG, "Start Migrate");
+        furi_record_open(RECORD_STORAGE);
+        furi_record_close(RECORD_STORAGE);
+        flipper_boot_status(canvas, "Migrating Files");
         flipper_migrate_files();
-        FURI_LOG_I(TAG, "Start Namespoof");
+        flipper_boot_status(canvas, "Starting Namespoof");
         NAMESPOOF_INIT();
-        FURI_LOG_I(TAG, "Load Xtreme Settings");
+        flipper_boot_status(canvas, "Loading Xtreme Settings");
         XTREME_SETTINGS_LOAD();
-        furi_hal_light_sequence("rgb WRB");
-        FURI_LOG_I(TAG, "Load Xtreme Assets");
+        furi_hal_light_sequence("rgb RB");
+        flipper_boot_status(canvas, "Loading Xtreme Assets");
         XTREME_ASSETS_LOAD();
     } else {
         FURI_LOG_I(TAG, "Special boot, skipping optional components");
     }
 
     // Everything else
-    FURI_LOG_I(TAG, "Initialize services");
+    flipper_boot_status(canvas, "Initializing Services");
     for(size_t i = 1; i < FLIPPER_SERVICES_COUNT; i++) {
         flipper_start_service(&FLIPPER_SERVICES[i]);
     }
+    canvas_free(canvas);
 
     FURI_LOG_I(TAG, "Startup complete");
 }
