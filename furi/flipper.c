@@ -39,19 +39,21 @@ static void flipper_print_version(const char* target, const Version* version) {
 }
 
 void flipper_migrate_files() {
-    if(!furi_hal_is_normal_boot()) return;
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     // Revert cringe
+    FURI_LOG_I(TAG, "Migrate: Remove unused files");
     storage_common_remove(storage, INT_PATH(".passport.settings"));
     storage_common_remove(storage, INT_PATH(".region_data"));
 
     // Migrate files
+    FURI_LOG_I(TAG, "Migrate: Renames on external");
     storage_common_copy(storage, ARCHIVE_FAV_OLD_PATH, ARCHIVE_FAV_PATH);
     storage_common_remove(storage, ARCHIVE_FAV_OLD_PATH);
     storage_common_copy(storage, DESKTOP_KEYBINDS_OLD_PATH, DESKTOP_KEYBINDS_PATH);
     storage_common_remove(storage, DESKTOP_KEYBINDS_OLD_PATH);
     // Int -> Ext
+    FURI_LOG_I(TAG, "Migrate: Internal to External");
     storage_common_copy(storage, BT_SETTINGS_OLD_PATH, BT_SETTINGS_PATH);
     storage_common_remove(storage, BT_SETTINGS_OLD_PATH);
     storage_common_copy(storage, DOLPHIN_STATE_OLD_PATH, DOLPHIN_STATE_PATH);
@@ -63,10 +65,12 @@ void flipper_migrate_files() {
     storage_common_copy(storage, NOTIFICATION_SETTINGS_OLD_PATH, NOTIFICATION_SETTINGS_PATH);
     storage_common_remove(storage, NOTIFICATION_SETTINGS_OLD_PATH);
     // Ext -> Int
+    FURI_LOG_I(TAG, "Migrate: External to Internal");
     storage_common_copy(storage, DESKTOP_SETTINGS_OLD_PATH, DESKTOP_SETTINGS_PATH);
     storage_common_remove(storage, DESKTOP_SETTINGS_OLD_PATH);
 
     // Special care for U2F
+    FURI_LOG_I(TAG, "Migrate: U2F");
     FileInfo file_info;
     if(storage_common_stat(storage, U2F_CNT_OLD_FILE, &file_info) == FSE_OK &&
        file_info.size > 200) { // Is on Int and has content
@@ -74,6 +78,7 @@ void flipper_migrate_files() {
     }
     storage_common_copy(storage, U2F_KEY_OLD_FILE, U2F_KEY_FILE); // Ext -> Int
 
+    FURI_LOG_I(TAG, "Migrate: Asset Packs");
     storage_common_migrate(storage, XTREME_ASSETS_OLD_PATH, XTREME_ASSETS_PATH);
 
     furi_record_close(RECORD_STORAGE);
@@ -91,20 +96,30 @@ void flipper_start_service(const FlipperInternalApplication* service) {
 }
 
 void flipper_init() {
+    furi_hal_light_sequence("rgb WB");
     flipper_print_version("Firmware", furi_hal_version_get_firmware_version());
-
-    FURI_LOG_I(TAG, "Boot mode %d, starting services", furi_hal_rtc_get_boot_mode());
+    FURI_LOG_I(TAG, "Boot mode %d", furi_hal_rtc_get_boot_mode());
 
     // Start storage service first, thanks OFW :/
+    FURI_LOG_I(TAG, "Initialize Storage");
     flipper_start_service(&FLIPPER_SERVICES[0]);
 
-    flipper_migrate_files();
-
-    NAMESPOOF_INIT();
-    XTREME_SETTINGS_LOAD();
-    XTREME_ASSETS_LOAD();
+    if(furi_hal_is_normal_boot()) {
+        FURI_LOG_I(TAG, "Start Migrate");
+        flipper_migrate_files();
+        FURI_LOG_I(TAG, "Start Namespoof");
+        NAMESPOOF_INIT();
+        FURI_LOG_I(TAG, "Load Xtreme Settings");
+        XTREME_SETTINGS_LOAD();
+        furi_hal_light_sequence("rgb WRB");
+        FURI_LOG_I(TAG, "Load Xtreme Assets");
+        XTREME_ASSETS_LOAD();
+    } else {
+        FURI_LOG_I(TAG, "Special boot, skipping optional components");
+    }
 
     // Everything else
+    FURI_LOG_I(TAG, "Initialize services");
     for(size_t i = 1; i < FLIPPER_SERVICES_COUNT; i++) {
         flipper_start_service(&FLIPPER_SERVICES[i]);
     }

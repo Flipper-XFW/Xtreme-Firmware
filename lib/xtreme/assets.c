@@ -102,8 +102,6 @@ void free_icon(const Icon* icon) {
 }
 
 void XTREME_ASSETS_LOAD() {
-    if(!furi_hal_is_normal_boot()) return;
-
     const char* pack = XTREME_SETTINGS()->asset_pack;
     XTREME_SETTINGS()->is_nsfw = !strncmp(pack, "NSFW", strlen("NSFW"));
     if(pack[0] == '\0') return;
@@ -133,8 +131,6 @@ void XTREME_ASSETS_LOAD() {
 }
 
 void XTREME_ASSETS_FREE() {
-    if(!furi_hal_is_normal_boot()) return;
-
     for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
         if(ICON_PATHS[i].icon->original != NULL) {
             free_icon(ICON_PATHS[i].icon);
