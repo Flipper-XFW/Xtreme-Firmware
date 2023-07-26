@@ -33,7 +33,7 @@ static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) 
     case FlippPomodoroAppCustomEventStageComplete:
         if(flipp_pomodoro__get_stage(app->state) == FlippPomodoroStageFocus) {
             // REGISTER a deed on work stage complete to get an acheivement
-            dolphin_deed(DolphinDeedPluginGameWin);
+            // dolphin_deed(DolphinDeedPluginGameWin);
             FURI_LOG_I(TAG, "Focus stage reward added");
 
             flipp_pomodoro_statistics__increase_focus_stages_completed(app->statistics);

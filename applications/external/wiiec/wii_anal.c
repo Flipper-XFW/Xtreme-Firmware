@@ -454,13 +454,13 @@ int32_t wii_ec_anal(void) {
 
             //---------------------------------------------
             case EVID_WIIEC: // WiiMote Perhipheral
-                if(evWiiEC(&msg, state)) redraw = true;
+                evWiiEC(&msg, state);
                 break;
 
             //---------------------------------------------
             case EVID_KEY: // Key events
                 patBacklight(state);
-                if(evKey(&msg, state)) redraw = true;
+                evKey(&msg, state);
                 break;
 
             //---------------------------------------------
