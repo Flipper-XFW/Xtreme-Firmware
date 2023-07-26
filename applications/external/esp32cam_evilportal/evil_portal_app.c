@@ -33,7 +33,6 @@ Evil_PortalApp* evil_portal_app_alloc() {
     app->portal_logs = furi_string_alloc();
 
     app->gui = furi_record_open(RECORD_GUI);
-    app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&evil_portal_scene_handlers, app);
@@ -98,7 +97,6 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_DIALOGS);
 
     free(app);
 }
@@ -106,14 +104,21 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 int32_t evil_portal_app(void* p) {
     UNUSED(p);
 
-    // Enable 5v on startup
-    uint8_t attempts = 0;
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
-    }
-    furi_delay_ms(200);
+    // Enable uart listener
+    furi_hal_console_disable();
+    furi_hal_uart_set_br(UART_CH, BAUDRATE); // TODO: Clean this
+    //furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, evil_portal_uart_on_irq_cb, app);
 
+    furi_hal_power_disable_external_3_3v();
+    furi_hal_power_disable_otg();
+    furi_delay_ms(200);
+    furi_hal_power_enable_external_3_3v();
+    furi_hal_power_enable_otg();
+    for(int i = 0; i < 2; i++) {
+        furi_delay_ms(500);
+        furi_hal_uart_tx(UART_CH, (uint8_t[1]){'e'}, 1);
+    }
+    furi_delay_ms(1);
     Evil_PortalApp* evil_portal_app = evil_portal_app_alloc();
 
     evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
@@ -122,9 +127,7 @@ int32_t evil_portal_app(void* p) {
 
     evil_portal_app_free(evil_portal_app);
 
-    if(furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_disable_otg();
-    }
+    furi_hal_power_disable_otg();
 
     return 0;
 }

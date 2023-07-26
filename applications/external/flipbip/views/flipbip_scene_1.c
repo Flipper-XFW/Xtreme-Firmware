@@ -7,7 +7,7 @@
 #include <storage/storage.h>
 #include <string.h>
 #include "flipbip_icons.h"
-#include "assets_icons.h"
+#include <assets_icons.h>
 #include "../helpers/flipbip_haptic.h"
 #include "../helpers/flipbip_led.h"
 #include "../helpers/flipbip_string.h"

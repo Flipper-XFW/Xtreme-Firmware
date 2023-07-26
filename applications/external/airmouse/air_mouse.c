@@ -2,7 +2,6 @@
 #include <storage/storage.h>
 
 #include <furi.h>
-
 #include "tracking/imu/imu.h"
 
 #define TAG "AirMouseApp"

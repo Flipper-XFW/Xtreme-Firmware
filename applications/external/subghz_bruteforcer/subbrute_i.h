@@ -15,7 +15,9 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/widget.h>
 #include <gui/modules/loading.h>
+#include <gui/modules/variable_item_list.h>
 
+#include "subghz_bruteforcer_icons.h"
 #include <assets_icons.h>
 
 #include <dialogs/dialogs.h>
@@ -29,7 +31,7 @@
 #include "views/subbrute_attack_view.h"
 #include "views/subbrute_main_view.h"
 
-#define SUBBRUTEFORCER_VER "Sub-GHz BruteForcer 3.6"
+#define SUBBRUTEFORCER_VER "Sub-GHz BruteForcer 3.7"
 
 #ifdef FURI_DEBUG
 //#define SUBBRUTE_FAST_TRACK false
@@ -44,6 +46,7 @@ typedef enum {
     SubBruteViewPopup,
     SubBruteViewWidget,
     SubBruteViewStack,
+    SubBruteViewVarList,
 } SubBruteView;
 
 struct SubBruteState {
@@ -55,6 +58,7 @@ struct SubBruteState {
     TextInput* text_input;
     Popup* popup;
     Widget* widget;
+    VariableItemList* var_list;
     DialogsApp* dialogs;
     const SubGhzDevice* radio_device;
 
