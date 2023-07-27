@@ -164,26 +164,30 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 size_t pos_y = 36;
                 if(i == 0) {
                     width += 6;
-                    height += 6;
+                    height += 4;
                     elements_bold_rounded_frame(
-                        canvas, pos_x - width / 2, pos_y - height / 2, width, height + 4);
+                        canvas, pos_x - width / 2, pos_y - height / 2, width, height + 5);
                     canvas_set_font(canvas, FontBatteryPercent);
                     canvas_draw_str_aligned(
-                        canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "START");
+                        canvas, pos_x - 9, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "S");
+                    canvas_draw_str_aligned(
+                        canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "TAR");
+                    canvas_draw_str_aligned(
+                        canvas, pos_x + 9, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "T");
 
                     canvas_draw_rframe(canvas, 0, 0, 128, 18, 3);
                     canvas_draw_line(canvas, 60, 18, 64, 26);
                     canvas_draw_line(canvas, 64, 26, 68, 18);
                     canvas_set_color(canvas, ColorWhite);
                     canvas_draw_line(canvas, 60, 17, 68, 17);
-                    canvas_draw_box(canvas, 62, 20, 5, 2);
+                    canvas_draw_box(canvas, 62, 21, 5, 2);
                     canvas_set_color(canvas, ColorBlack);
 
                     canvas_set_font(canvas, FontPrimary);
                     canvas_draw_str_aligned(
                         canvas,
                         pos_x,
-                        pos_y - height / 2 - 7,
+                        pos_y - height / 2 - 8,
                         AlignCenter,
                         AlignBottom,
                         item->label);
