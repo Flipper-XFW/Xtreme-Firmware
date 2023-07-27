@@ -14,10 +14,14 @@
 #include <assets_icons.h>
 #include <dialogs/dialogs.h>
 
+#include <xtreme.h>
+
 #define NUM_MENU_ITEMS (4)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
-#define UART_CH (FuriHalUartIdUSART1)
+#define UART_CH                                                                   \
+    (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
+                                                            FuriHalUartIdLPUART1)
 
 #define SET_HTML_CMD "sethtml"
 #define SET_AP_CMD "setap"
