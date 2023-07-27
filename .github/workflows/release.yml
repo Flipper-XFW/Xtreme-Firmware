@@ -13,7 +13,7 @@ jobs:
     if: |
       github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name &&
       endsWith(github.event.pull_request.title, ' Release') &&
-      github.event.review.author_association == 'OWNER' &&
+      github.event.review.author_association == 'MEMBER' &&
       startsWith(github.event.pull_request.title, 'V') &&
       github.event.pull_request.base.ref == 'main' &&
       github.event.pull_request.head.ref == 'dev' &&
