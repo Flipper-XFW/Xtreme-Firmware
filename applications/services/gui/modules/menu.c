@@ -154,6 +154,47 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             furi_string_free(name);
             break;
         }
+        case MenuStyleDsi: {
+            for(int8_t i = -2; i <= 2; i++) {
+                shift_position = (position + items_count + i) % items_count;
+                item = MenuItemArray_get(model->items, shift_position);
+                size_t width = 24;
+                size_t height = 26;
+                size_t pos_x = 64;
+                size_t pos_y = 36;
+                if(i == 0) {
+                    width += 6;
+                    height += 6;
+                    elements_bold_rounded_frame(canvas, pos_x - width / 2, pos_y - height / 2, width, height + 4);
+                    canvas_set_font(canvas, FontBatteryPercent);
+                    canvas_draw_str_aligned(canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "START");
+
+                    canvas_draw_rframe(canvas, 0, 0, 128, 18, 3);
+                    canvas_draw_line(canvas, 60, 18, 64, 26);
+                    canvas_draw_line(canvas, 64, 26, 68, 18);
+                    canvas_set_color(canvas, ColorWhite);
+                    canvas_draw_line(canvas, 60, 17, 68, 17);
+                    canvas_draw_box(canvas, 62, 20, 5, 2);
+                    canvas_set_color(canvas, ColorBlack);
+
+                    canvas_set_font(canvas, FontPrimary);
+                    canvas_draw_str_aligned(canvas, pos_x, pos_y - height / 2 - 7, AlignCenter, AlignBottom, item->label);
+                } else {
+                    pos_x += (width + 6) * i;
+                    pos_y += 2;
+                    elements_slightly_rounded_frame(canvas, pos_x - width / 2, pos_y - height / 2, width, height);
+                }
+                if(item->icon) {
+                    canvas_draw_icon_animation(
+                        canvas,
+                        pos_x - item->icon->icon->width / 2,
+                        pos_y - item->icon->icon->height / 2,
+                        item->icon);
+                }
+            }
+            elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
+            break;
+        }
         default:
             break;
         }
@@ -351,6 +392,7 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
 }
 
 static void menu_process_up(Menu* menu) {
+    if(XTREME_SETTINGS()->menu_style == MenuStyleDsi) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -390,6 +432,7 @@ static void menu_process_up(Menu* menu) {
 }
 
 static void menu_process_down(Menu* menu) {
+    if(XTREME_SETTINGS()->menu_style == MenuStyleDsi) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -453,6 +496,13 @@ static void menu_process_left(Menu* menu) {
                 }
                 model->scroll_counter = 0;
                 break;
+            case MenuStyleDsi:
+                if(model->position > 0) {
+                    model->position--;
+                } else {
+                    model->position = count - 1;
+                }
+                break;
             default:
                 break;
             }
@@ -494,6 +544,13 @@ static void menu_process_right(Menu* menu) {
                     }
                 }
                 model->scroll_counter = 0;
+                break;
+            case MenuStyleDsi:
+                if(model->position < count - 1) {
+                    model->position++;
+                } else {
+                    model->position = 0;
+                }
                 break;
             default:
                 break;
