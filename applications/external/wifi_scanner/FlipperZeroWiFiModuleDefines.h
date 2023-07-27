@@ -18,6 +18,6 @@
 
 #include <xtreme.h>
 
-#define UART_CH                                                                   \
+#define UART_CH                                                                 \
     (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                            FuriHalUartIdLPUART1)
+                                                          FuriHalUartIdLPUART1)
