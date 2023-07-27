@@ -1,16 +1,35 @@
 #pragma once
 
-#include <gui/icon_i.h>
-#include <power/power_service/power.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define XTREME_SETTINGS_PATH CFG_PATH("xtreme_settings.txt")
-#define XTREME_ASSETS_PATH EXT_PATH("dolphin_custom")
-#define XTREME_APPS_PATH CFG_PATH("xtreme_apps.txt")
+#define XTREME_ASSETS_OLD_PATH EXT_PATH("dolphin_custom")
+#define XTREME_ASSETS_PATH EXT_PATH("asset_packs")
+#define XTREME_MENU_OLD_PATH CFG_PATH("xtreme_apps.txt")
+#define XTREME_MENU_PATH CFG_PATH("xtreme_menu.txt")
 #define XTREME_ASSETS_PACK_NAME_LEN 32
+
+typedef enum {
+    BatteryIconOff,
+    BatteryIconBar,
+    BatteryIconPercent,
+    BatteryIconInvertedPercent,
+    BatteryIconRetro3,
+    BatteryIconRetro5,
+    BatteryIconBarPercent,
+    BatteryIconCount,
+} BatteryIcon;
+
+typedef enum {
+    MenuStyleList,
+    MenuStyleWii,
+    MenuStyleCount,
+} MenuStyle;
 
 typedef struct {
     bool is_nsfw; // TODO: replace with packs text support
@@ -20,16 +39,16 @@ typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
     bool fallback_anim;
-    bool wii_menu;
+    MenuStyle menu_style;
     bool lock_on_boot;
     bool bad_pins_format;
-    bool pin_unlock_from_app;
+    bool allow_locked_rpc_commands;
     bool lockscreen_time;
     bool lockscreen_seconds;
     bool lockscreen_date;
     bool lockscreen_statusbar;
     bool lockscreen_prompt;
-    uint32_t battery_icon;
+    BatteryIcon battery_icon;
     bool statusbar_clock;
     bool status_icons;
     bool bar_borders;
@@ -46,8 +65,12 @@ typedef struct {
     uint32_t charge_cap;
 } XtremeSettings;
 
+void XTREME_SETTINGS_LOAD();
 void XTREME_SETTINGS_SAVE();
 XtremeSettings* XTREME_SETTINGS();
+
+void XTREME_ASSETS_LOAD();
+void XTREME_ASSETS_FREE();
 
 #ifdef __cplusplus
 }

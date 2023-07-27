@@ -105,6 +105,10 @@ def proto_ver_generator(target, source, env):
 
 def CompileIcons(env, target_dir, source_dir, *, icon_bundle_name="assets_icons"):
     # Gathering icons sources
+    try:
+        os.mkdir(str(source_dir))
+    except FileExistsError:
+        pass
     icons_src = env.GlobRecursive("*.png", source_dir)
     icons_src += env.GlobRecursive("frame_rate", source_dir)
 

@@ -2,7 +2,6 @@
 #include <storage/storage.h>
 
 #include <furi.h>
-
 #include "tracking/imu/imu.h"
 
 #define TAG "AirMouseApp"
@@ -54,8 +53,9 @@ AirMouse* air_mouse_app_alloc() {
     AirMouse* app = malloc(sizeof(AirMouse));
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_simply_mkdir(storage, EXT_PATH("apps_data/air_mouse"));
     storage_common_migrate(
-        storage, EXT_PATH(".calibration.data"), APP_DATA_PATH("calibration.data"));
+        storage, EXT_PATH(".calibration.data"), EXT_PATH("apps_data/air_mouse/calibration.data"));
     furi_record_close(RECORD_STORAGE);
 
     // Gui

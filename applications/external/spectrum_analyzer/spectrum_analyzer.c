@@ -11,8 +11,9 @@
 #include "spectrum_analyzer_worker.h"
 
 typedef struct {
-    uint16_t center_freq;
+    uint32_t center_freq;
     uint8_t width;
+    uint8_t modulation;
     uint8_t band;
     uint8_t vscroll;
 
@@ -20,6 +21,7 @@ typedef struct {
     uint32_t spacing;
 
     bool mode_change;
+    bool modulation_change;
 
     float max_rssi;
     uint8_t max_rssi_dec;
@@ -53,39 +55,56 @@ void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* m
     }
 
     // Draw scale tags
-    uint16_t tag_left;
-    uint16_t tag_center;
-    uint16_t tag_right;
+    uint32_t tag_left = 0;
+    uint32_t tag_center = 0;
+    uint32_t tag_right = 0;
     char temp_str[18];
 
     tag_center = model->center_freq;
 
     switch(model->width) {
     case NARROW:
-        tag_left = model->center_freq - 2;
-        tag_right = model->center_freq + 2;
+        tag_left = model->center_freq - 2000;
+        tag_right = model->center_freq + 2000;
         break;
     case ULTRANARROW:
-        tag_left = model->center_freq - 1;
-        tag_right = model->center_freq + 1;
+        tag_left = model->center_freq - 1000;
+        tag_right = model->center_freq + 1000;
+        break;
+    case PRECISE:
+        tag_left = model->center_freq - 200;
+        tag_right = model->center_freq + 200;
         break;
     case ULTRAWIDE:
-        tag_left = model->center_freq - 40;
-        tag_right = model->center_freq + 40;
+        tag_left = model->center_freq - 40000;
+        tag_right = model->center_freq + 40000;
         break;
     default:
-        tag_left = model->center_freq - 10;
-        tag_right = model->center_freq + 10;
+        tag_left = model->center_freq - 10000;
+        tag_right = model->center_freq + 10000;
     }
 
     canvas_set_font(canvas, FontSecondary);
-    snprintf(temp_str, 18, "%u", tag_left);
-    canvas_draw_str_aligned(canvas, FREQ_START_X, 63, AlignCenter, AlignBottom, temp_str);
-    snprintf(temp_str, 18, "%u", tag_center);
-    canvas_draw_str_aligned(canvas, 128 / 2, 63, AlignCenter, AlignBottom, temp_str);
-    snprintf(temp_str, 18, "%u", tag_right);
-    canvas_draw_str_aligned(
-        canvas, FREQ_START_X + FREQ_LENGTH_X - 1, 63, AlignCenter, AlignBottom, temp_str);
+    switch(model->width) {
+    case PRECISE:
+    case ULTRANARROW:
+        snprintf(temp_str, 18, "%.1f", ((double)tag_left) / 1000);
+        canvas_draw_str_aligned(canvas, FREQ_START_X, 63, AlignCenter, AlignBottom, temp_str);
+        snprintf(temp_str, 18, "%.1f", ((double)tag_center) / 1000);
+        canvas_draw_str_aligned(canvas, 128 / 2, 63, AlignCenter, AlignBottom, temp_str);
+        snprintf(temp_str, 18, "%.1f", ((double)tag_right) / 1000);
+        canvas_draw_str_aligned(
+            canvas, FREQ_START_X + FREQ_LENGTH_X - 1, 63, AlignCenter, AlignBottom, temp_str);
+        break;
+    default:
+        snprintf(temp_str, 18, "%lu", tag_left / 1000);
+        canvas_draw_str_aligned(canvas, FREQ_START_X, 63, AlignCenter, AlignBottom, temp_str);
+        snprintf(temp_str, 18, "%lu", tag_center / 1000);
+        canvas_draw_str_aligned(canvas, 128 / 2, 63, AlignCenter, AlignBottom, temp_str);
+        snprintf(temp_str, 18, "%lu", tag_right / 1000);
+        canvas_draw_str_aligned(
+            canvas, FREQ_START_X + FREQ_LENGTH_X - 1, 63, AlignCenter, AlignBottom, temp_str);
+    }
 }
 
 static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
@@ -115,6 +134,9 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
         case ULTRANARROW:
             strncpy(temp_mode_str, "ULTRANARROW", 12);
             break;
+        case PRECISE:
+            strncpy(temp_mode_str, "PRECISE", 12);
+            break;
         case ULTRAWIDE:
             strncpy(temp_mode_str, "ULTRAWIDE", 12);
             break;
@@ -128,6 +150,24 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
         snprintf(tmp_str, 21, "Mode: %s", temp_mode_str);
         canvas_draw_str_aligned(canvas, 127, 4, AlignRight, AlignTop, tmp_str);
     }
+
+    if(model->modulation_change) {
+        char temp_mod_str[12];
+        switch(model->modulation) {
+        case NARROW_MODULATION:
+            strncpy(temp_mod_str, "NARROW", 12);
+            break;
+        default:
+            strncpy(temp_mod_str, "DEFAULT", 12);
+            break;
+        }
+
+        // Current modulation label
+        char tmp_str[27];
+        snprintf(tmp_str, 27, "Modulation: %s", temp_mod_str);
+        canvas_draw_str_aligned(canvas, 127, 4, AlignRight, AlignTop, tmp_str);
+    }
+
     // Draw cross and label
     if(model->max_rssi > PEAK_THRESHOLD) {
         // Compress height to max of 64 values (255>>2)
@@ -175,8 +215,8 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
 
 static void spectrum_analyzer_input_callback(InputEvent* input_event, void* ctx) {
     SpectrumAnalyzer* spectrum_analyzer = ctx;
-    // Only handle short presses
-    if(input_event->type == InputTypeShort) {
+    // Handle short and long presses
+    if(input_event->type == InputTypeShort || input_event->type == InputTypeLong) {
         furi_message_queue_put(spectrum_analyzer->event_queue, input_event, FuriWaitForever);
     }
 }
@@ -207,12 +247,12 @@ void spectrum_analyzer_calculate_frequencies(SpectrumAnalyzerModel* model) {
     uint8_t new_band;
     uint32_t min_hz;
     uint32_t max_hz;
-    uint8_t margin;
-    uint8_t step;
-    uint16_t upper_limit;
-    uint16_t lower_limit;
-    uint16_t next_up;
-    uint16_t next_down;
+    uint32_t margin;
+    uint32_t step;
+    uint32_t upper_limit;
+    uint32_t lower_limit;
+    uint32_t next_up;
+    uint32_t next_down;
     uint8_t next_band_up;
     uint8_t next_band_down;
 
@@ -227,19 +267,24 @@ void spectrum_analyzer_calculate_frequencies(SpectrumAnalyzerModel* model) {
         step = ULTRANARROW_STEP;
         model->spacing = ULTRANARROW_SPACING;
         break;
+    case PRECISE:
+        margin = PRECISE_MARGIN;
+        step = PRECISE_STEP;
+        model->spacing = PRECISE_SPACING;
+        break;
     case ULTRAWIDE:
         margin = ULTRAWIDE_MARGIN;
         step = ULTRAWIDE_STEP;
         model->spacing = ULTRAWIDE_SPACING;
         /* nearest 20 MHz step */
-        model->center_freq = ((model->center_freq + 10) / 20) * 20;
+        model->center_freq = ((model->center_freq + 10000) / 20000) * 20000;
         break;
     default:
         margin = WIDE_MARGIN;
         step = WIDE_STEP;
         model->spacing = WIDE_SPACING;
         /* nearest 5 MHz step */
-        model->center_freq = ((model->center_freq + 2) / 5) * 5;
+        model->center_freq = ((model->center_freq + 2000) / 5000) * 5000;
         break;
     }
 
@@ -288,21 +333,21 @@ void spectrum_analyzer_calculate_frequencies(SpectrumAnalyzerModel* model) {
     /* doing everything in Hz from here on */
     switch(model->band) {
     case BAND_400:
-        min_hz = MIN_400 * 1000000;
-        max_hz = MAX_400 * 1000000;
+        min_hz = MIN_400 * 1000;
+        max_hz = MAX_400 * 1000;
         break;
     case BAND_300:
-        min_hz = MIN_300 * 1000000;
-        max_hz = MAX_300 * 1000000;
+        min_hz = MIN_300 * 1000;
+        max_hz = MAX_300 * 1000;
         break;
     default:
-        min_hz = MIN_900 * 1000000;
-        max_hz = MAX_900 * 1000000;
+        min_hz = MIN_900 * 1000;
+        max_hz = MAX_900 * 1000;
         break;
     }
 
     model->channel0_frequency =
-        model->center_freq * 1000000 - (model->spacing * ((NUM_CHANNELS / 2) + 1));
+        model->center_freq * 1000 - (model->spacing * ((NUM_CHANNELS / 2) + 1));
 
     // /* calibrate upper channels */
     // hz = model->center_freq * 1000000;
@@ -328,7 +373,7 @@ void spectrum_analyzer_calculate_frequencies(SpectrumAnalyzerModel* model) {
     model->max_rssi_dec = 0;
 
     FURI_LOG_D("Spectrum", "setup_frequencies - max_hz: %lu - min_hz: %lu", max_hz, min_hz);
-    FURI_LOG_D("Spectrum", "center_freq: %u", model->center_freq);
+    FURI_LOG_D("Spectrum", "center_freq: %lu", model->center_freq);
     FURI_LOG_D(
         "Spectrum",
         "ch[0]: %lu - ch[%u]: %lu",
@@ -352,6 +397,7 @@ SpectrumAnalyzer* spectrum_analyzer_alloc() {
 
     model->center_freq = DEFAULT_FREQ;
     model->width = WIDE;
+    model->modulation = DEFAULT_MODULATION;
     model->band = BAND_400;
 
     model->vscroll = DEFAULT_VSCROLL;
@@ -390,14 +436,6 @@ void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
 
     free(instance->model);
     free(instance);
-
-    furi_hal_subghz_idle();
-    furi_hal_subghz_sleep();
-
-    // Disable power for External CC1101 if it was enabled and module is connected
-    furi_hal_subghz_disable_ext_power();
-    // Reinit SPI handles for internal radio / nfc
-    furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
 }
 
 int32_t spectrum_analyzer_app(void* p) {
@@ -407,21 +445,18 @@ int32_t spectrum_analyzer_app(void* p) {
     SpectrumAnalyzer* spectrum_analyzer = spectrum_analyzer_alloc();
     InputEvent input;
 
-    // Enable power for External CC1101 if it is connected
-    furi_hal_subghz_enable_ext_power();
-    // Auto switch to internal radio if external radio is not available
-    furi_delay_ms(15);
-    if(!furi_hal_subghz_check_radio()) {
-        furi_hal_subghz_select_radio_type(SubGhzRadioInternal);
-        furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
-    }
-
     furi_hal_power_suppress_charge_enter();
 
     FURI_LOG_D("Spectrum", "Main Loop - Starting worker");
     furi_delay_ms(50);
 
     spectrum_analyzer_worker_start(spectrum_analyzer->worker);
+    spectrum_analyzer_calculate_frequencies(spectrum_analyzer->model);
+    spectrum_analyzer_worker_set_frequencies(
+        spectrum_analyzer->worker,
+        spectrum_analyzer->model->channel0_frequency,
+        spectrum_analyzer->model->spacing,
+        spectrum_analyzer->model->width);
 
     FURI_LOG_D("Spectrum", "Main Loop - Wait on queue");
     furi_delay_ms(50);
@@ -436,7 +471,7 @@ int32_t spectrum_analyzer_app(void* p) {
         SpectrumAnalyzerModel* model = spectrum_analyzer->model;
 
         uint8_t vstep = VERTICAL_SHORT_STEP;
-        uint8_t hstep;
+        uint32_t hstep;
 
         bool exit_loop = false;
 
@@ -450,67 +485,114 @@ int32_t spectrum_analyzer_app(void* p) {
         case ULTRAWIDE:
             hstep = ULTRAWIDE_STEP;
             break;
+        case PRECISE:
+            hstep = PRECISE_STEP;
+            break;
         default:
             hstep = WIDE_STEP;
             break;
         }
 
-        switch(input.key) {
-        case InputKeyUp:
-            model->vscroll = MAX(model->vscroll - vstep, MIN_VSCROLL);
-            FURI_LOG_D("Spectrum", "Vscroll: %u", model->vscroll);
-            break;
-        case InputKeyDown:
-            model->vscroll = MIN(model->vscroll + vstep, MAX_VSCROLL);
-            FURI_LOG_D("Spectrum", "Vscroll: %u", model->vscroll);
-            break;
-        case InputKeyRight:
-            model->center_freq += hstep;
-            FURI_LOG_D("Spectrum", "center_freq: %u", model->center_freq);
-            spectrum_analyzer_calculate_frequencies(model);
-            spectrum_analyzer_worker_set_frequencies(
-                spectrum_analyzer->worker, model->channel0_frequency, model->spacing, model->width);
-            break;
-        case InputKeyLeft:
-            model->center_freq -= hstep;
-            spectrum_analyzer_calculate_frequencies(model);
-            spectrum_analyzer_worker_set_frequencies(
-                spectrum_analyzer->worker, model->channel0_frequency, model->spacing, model->width);
-            FURI_LOG_D("Spectrum", "center_freq: %u", model->center_freq);
-            break;
-        case InputKeyOk: {
-            switch(model->width) {
-            case WIDE:
-                model->width = NARROW;
+        switch(input.type) {
+        case InputTypeShort:
+            switch(input.key) {
+            case InputKeyUp:
+                model->vscroll = MAX(model->vscroll - vstep, MIN_VSCROLL);
+                FURI_LOG_D("Spectrum", "Vscroll: %u", model->vscroll);
                 break;
-            case NARROW:
-                model->width = ULTRANARROW;
+            case InputKeyDown:
+                model->vscroll = MIN(model->vscroll + vstep, MAX_VSCROLL);
+                FURI_LOG_D("Spectrum", "Vscroll: %u", model->vscroll);
                 break;
-            case ULTRANARROW:
-                model->width = ULTRAWIDE;
+            case InputKeyRight:
+                model->center_freq += hstep;
+                FURI_LOG_D("Spectrum", "center_freq: %lu", model->center_freq);
+                spectrum_analyzer_calculate_frequencies(model);
+                spectrum_analyzer_worker_set_frequencies(
+                    spectrum_analyzer->worker,
+                    model->channel0_frequency,
+                    model->spacing,
+                    model->width);
                 break;
-            case ULTRAWIDE:
-                model->width = WIDE;
+            case InputKeyLeft:
+                model->center_freq -= hstep;
+                spectrum_analyzer_calculate_frequencies(model);
+                spectrum_analyzer_worker_set_frequencies(
+                    spectrum_analyzer->worker,
+                    model->channel0_frequency,
+                    model->spacing,
+                    model->width);
+                FURI_LOG_D("Spectrum", "center_freq: %lu", model->center_freq);
+                break;
+            case InputKeyOk: {
+                switch(model->width) {
+                case WIDE:
+                    model->width = NARROW;
+                    break;
+                case NARROW:
+                    model->width = ULTRANARROW;
+                    break;
+                case ULTRANARROW:
+                    model->width = PRECISE;
+                    break;
+                case PRECISE:
+                    model->width = ULTRAWIDE;
+                    break;
+                case ULTRAWIDE:
+                    model->width = WIDE;
+                    break;
+                default:
+                    model->width = WIDE;
+                    break;
+                }
+            }
+                model->mode_change = true;
+                view_port_update(spectrum_analyzer->view_port);
+
+                furi_delay_ms(1000);
+
+                model->mode_change = false;
+                spectrum_analyzer_calculate_frequencies(model);
+                spectrum_analyzer_worker_set_frequencies(
+                    spectrum_analyzer->worker,
+                    model->channel0_frequency,
+                    model->spacing,
+                    model->width);
+                FURI_LOG_D("Spectrum", "Width: %u", model->width);
+                break;
+            case InputKeyBack:
+                exit_loop = true;
                 break;
             default:
-                model->width = WIDE;
                 break;
             }
-        }
-
-            model->mode_change = true;
-            view_port_update(spectrum_analyzer->view_port);
-
-            furi_delay_ms(1000);
-
-            model->mode_change = false;
-            spectrum_analyzer_calculate_frequencies(model);
-            spectrum_analyzer_worker_set_frequencies(
-                spectrum_analyzer->worker, model->channel0_frequency, model->spacing, model->width);
-            FURI_LOG_D("Spectrum", "Width: %u", model->width);
             break;
-        case InputKeyBack:
-            exit_loop = true;
+        case InputTypeLong:
+            switch(input.key) {
+            case InputKeyOk:
+                FURI_LOG_D("Spectrum", "InputTypeLong");
+                switch(model->modulation) {
+                case NARROW_MODULATION:
+                    model->modulation = DEFAULT_MODULATION;
+                    break;
+                case DEFAULT_MODULATION:
+                default:
+                    model->modulation = NARROW_MODULATION;
+                    break;
+                }
+
+                model->modulation_change = true;
+                view_port_update(spectrum_analyzer->view_port);
+
+                furi_delay_ms(1000);
+
+                model->modulation_change = false;
+                spectrum_analyzer_worker_set_modulation(
+                    spectrum_analyzer->worker, spectrum_analyzer->model->modulation);
+                break;
+            default:
+                break;
+            }
             break;
         default:
             break;

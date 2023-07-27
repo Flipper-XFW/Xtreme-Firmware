@@ -4,6 +4,7 @@
 #include <input/input.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 static int matrix[6][7] = {0};
 static int cursorx = 3;

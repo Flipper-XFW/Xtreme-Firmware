@@ -581,6 +581,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
         if(err == ERR_NONE) {
             FURI_LOG_I(TAG, "Found key");
             memcpy(pacs->key, key, RFAL_PICOPASS_BLOCK_LEN);
+            pacs->elite_kdf = elite;
             err = picopass_read_card(AA1);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_read_card error %d", err);
@@ -758,7 +759,7 @@ void picopass_worker_write_key(PicopassWorker* picopass_worker) {
     uint8_t* oldKey = AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data;
 
     uint8_t newKey[RFAL_PICOPASS_BLOCK_LEN] = {0};
-    loclass_iclass_calc_div_key(csn, pacs->key, newKey, false);
+    loclass_iclass_calc_div_key(csn, pacs->key, newKey, pacs->elite_kdf);
 
     if((fuses & 0x80) == 0x80) {
         FURI_LOG_D(TAG, "Plain write for personalized mode key change");

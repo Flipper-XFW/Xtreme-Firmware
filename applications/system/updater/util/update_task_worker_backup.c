@@ -17,11 +17,6 @@
 
 #define TAG "UpdWorkerBackup"
 
-#define CHECK_RESULT(x) \
-    if(!(x)) {          \
-        break;          \
-    }
-
 static bool update_task_pre_update(UpdateTask* update_task) {
     bool success = false;
     FuriString* backup_file_path;
@@ -74,7 +69,7 @@ static bool update_task_resource_unpack_cb(const char* name, bool is_directory, 
 static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_t n_tar_entries) {
     ResourceManifestReader* manifest_reader = resource_manifest_reader_alloc(update_task->storage);
     do {
-        storage_simply_remove_recursive(update_task->storage, EXT_PATH("apps"));
+        // storage_simply_remove_recursive(update_task->storage, EXT_PATH("apps"));
 
         FURI_LOG_D(TAG, "Cleaning up old manifest");
         if(!resource_manifest_reader_open(manifest_reader, EXT_PATH("Manifest"))) {

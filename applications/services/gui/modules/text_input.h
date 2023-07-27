@@ -72,6 +72,12 @@ void text_input_set_validator(
 
 void text_input_set_minimum_length(TextInput* text_input, size_t minimum_length);
 
+// Add up to 9 extra characters for symbol keyboard
+void text_input_add_extra_symbol(TextInput* text_input, char symbol);
+
+// Add the 9 predefined illegal (windows) symbols <>:"/\|?*
+void text_input_add_illegal_symbols(TextInput* text_input);
+
 TextInputValidatorCallback text_input_get_validator_callback(TextInput* text_input);
 
 void* text_input_get_validator_callback_context(TextInput* text_input);
@@ -82,6 +88,8 @@ void* text_input_get_validator_callback_context(TextInput* text_input);
  * @param      text        text to be shown
  */
 void text_input_set_header_text(TextInput* text_input, const char* text);
+
+bool text_input_insert_character(TextInput* text_input, char c);
 
 #ifdef __cplusplus
 }

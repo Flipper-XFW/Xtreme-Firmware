@@ -4,6 +4,10 @@
 
 #include "crypto1.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MF_CLASSIC_BLOCK_SIZE (16)
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
 #define MF_MINI_TOTAL_SECTORS_NUM (5)
@@ -94,9 +98,9 @@ typedef struct {
 
 const char* mf_classic_get_type_str(MfClassicType type);
 
-bool mf_classic_check_card_type(FuriHalNfcADevData* data);
+bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
-MfClassicType mf_classic_get_classic_type(FuriHalNfcADevData* data);
+MfClassicType mf_classic_get_classic_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 
@@ -241,3 +245,7 @@ bool mf_classic_write_sector(
     MfClassicData* dest_data,
     MfClassicData* src_data,
     uint8_t sec_num);
+
+#ifdef __cplusplus
+}
+#endif

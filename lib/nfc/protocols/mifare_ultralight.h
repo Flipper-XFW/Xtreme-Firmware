@@ -2,6 +2,10 @@
 
 #include <furi_hal_nfc.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Largest tag is NTAG I2C Plus 2K, both data sectors plus SRAM
 #define MF_UL_MAX_DUMP_SIZE ((238 + 256 + 16) * 4)
 
@@ -203,7 +207,7 @@ typedef struct {
 
 void mf_ul_reset(MfUltralightData* data);
 
-bool mf_ul_check_card_type(FuriHalNfcADevData* data);
+bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
 bool mf_ultralight_read_version(
     FuriHalNfcTxRxContext* tx_rx,
@@ -259,3 +263,7 @@ uint32_t mf_ul_pwdgen_amiibo(FuriHalNfcDevData* data);
 uint32_t mf_ul_pwdgen_xiaomi(FuriHalNfcDevData* data);
 
 bool mf_ul_is_full_capture(MfUltralightData* data);
+
+#ifdef __cplusplus
+}
+#endif

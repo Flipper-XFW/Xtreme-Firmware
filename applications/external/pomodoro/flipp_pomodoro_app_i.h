@@ -1,6 +1,6 @@
 #pragma once
 
-#define FURI_DEBUG 1
+// #define FURI_DEBUG 1
 
 /**
  * Index of dependencies for the main app
@@ -15,6 +15,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/elements.h>
+#include <dolphin/dolphin.h>
 #include <input/input.h>
 
 // App resource imports
@@ -28,3 +29,4 @@
 
 // Auto-compiled icons
 #include "flipp_pomodoro_icons.h"
+#include <assets_icons.h>

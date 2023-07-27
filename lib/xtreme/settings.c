@@ -1,20 +1,19 @@
 #include "xtreme.h"
-#include "private.h"
 #include <furi_hal.h>
 #include <flipper_format/flipper_format.h>
 
 #define TAG "XtremeSettings"
 
 XtremeSettings xtreme_settings = {
-    .asset_pack = "", // SFW
+    .asset_pack = "", // Default
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
     .fallback_anim = true, // ON
-    .wii_menu = true, // ON
+    .menu_style = MenuStyleWii, // Wii
     .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
-    .pin_unlock_from_app = false, // OFF
+    .allow_locked_rpc_commands = false, // OFF
     .lockscreen_time = true, // ON
     .lockscreen_seconds = false, // OFF
     .lockscreen_date = true, // ON
@@ -38,8 +37,6 @@ XtremeSettings xtreme_settings = {
 };
 
 void XTREME_SETTINGS_LOAD() {
-    if(!furi_hal_is_normal_boot()) return;
-
     XtremeSettings* x = &xtreme_settings;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -69,16 +66,16 @@ void XTREME_SETTINGS_LOAD() {
             x->fallback_anim = b;
         }
         flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "wii_menu", &b, 1)) {
-            x->wii_menu = b;
+        if(flipper_format_read_uint32(file, "menu_style", &u, 1)) {
+            x->menu_style = CLAMP(u, MenuStyleCount - 1U, 0U);
         }
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "bad_pins_format", &b, 1)) {
             x->bad_pins_format = b;
         }
         flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "pin_unlock_from_app", &b, 1)) {
-            x->pin_unlock_from_app = b;
+        if(flipper_format_read_bool(file, "allow_locked_rpc_commands", &b, 1)) {
+            x->allow_locked_rpc_commands = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "lock_on_boot", &b, 1)) {
@@ -170,27 +167,28 @@ void XTREME_SETTINGS_LOAD() {
 }
 
 void XTREME_SETTINGS_SAVE() {
-    if(!furi_hal_is_normal_boot()) return;
-
     XtremeSettings* x = &xtreme_settings;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_always(file, XTREME_SETTINGS_PATH)) {
+        uint32_t e;
         flipper_format_write_string_cstr(file, "asset_pack", x->asset_pack);
         flipper_format_write_uint32(file, "anim_speed", &x->anim_speed, 1);
         flipper_format_write_int32(file, "cycle_anims", &x->cycle_anims, 1);
         flipper_format_write_bool(file, "unlock_anims", &x->unlock_anims, 1);
         flipper_format_write_bool(file, "fallback_anim", &x->fallback_anim, 1);
-        flipper_format_write_bool(file, "wii_menu", &x->wii_menu, 1);
+        e = x->menu_style;
+        flipper_format_write_uint32(file, "menu_style", &e, 1);
         flipper_format_write_bool(file, "bad_pins_format", &x->bad_pins_format, 1);
-        flipper_format_write_bool(file, "pin_unlock_from_app", &x->pin_unlock_from_app, 1);
+        flipper_format_write_bool(file, "allow_locked_rpc_commands", &x->allow_locked_rpc_commands, 1);
         flipper_format_write_bool(file, "lock_on_boot", &x->lock_on_boot, 1);
         flipper_format_write_bool(file, "lockscreen_time", &x->lockscreen_time, 1);
         flipper_format_write_bool(file, "lockscreen_seconds", &x->lockscreen_seconds, 1);
         flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
         flipper_format_write_bool(file, "lockscreen_statusbar", &x->lockscreen_statusbar, 1);
         flipper_format_write_bool(file, "lockscreen_prompt", &x->lockscreen_prompt, 1);
-        flipper_format_write_uint32(file, "battery_icon", &x->battery_icon, 1);
+        e = x->battery_icon;
+        flipper_format_write_uint32(file, "battery_icon", &e, 1);
         flipper_format_write_bool(file, "statusbar_clock", &x->statusbar_clock, 1);
         flipper_format_write_bool(file, "status_icons", &x->status_icons, 1);
         flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);

@@ -11,6 +11,29 @@
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
 #define TAG "SubGhzReadRAW"
 
+struct SubGhzReadRAW {
+    View* view;
+    SubGhzReadRAWCallback callback;
+    void* context;
+};
+
+typedef struct {
+    FuriString* frequency_str;
+    FuriString* preset_str;
+    FuriString* sample_write;
+    FuriString* file_name;
+    uint8_t* rssi_history;
+    uint8_t rssi_current;
+    bool rssi_history_end;
+    uint8_t ind_write;
+    uint8_t ind_sin;
+    SubGhzReadRAWStatus status;
+    bool raw_send_only;
+    float raw_threshold_rssi;
+    bool not_showing_samples;
+    SubGhzRadioDeviceType device_type;
+} SubGhzReadRAWModel;
+
 void subghz_read_raw_set_callback(
     SubGhzReadRAW* subghz_read_raw,
     SubGhzReadRAWCallback callback,
@@ -34,6 +57,14 @@ void subghz_read_raw_add_data_statusbar(
             furi_string_set(model->preset_str, preset_str);
         },
         true);
+}
+
+void subghz_read_raw_set_radio_device_type(
+    SubGhzReadRAW* instance,
+    SubGhzRadioDeviceType device_type) {
+    furi_assert(instance);
+    with_view_model(
+        instance->view, SubGhzReadRAWModel * model, { model->device_type = device_type; }, true);
 }
 
 void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi, bool trace) {
@@ -266,9 +297,15 @@ void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
     canvas_draw_str(canvas, 35, 7, furi_string_get_cstr(model->preset_str));
 
     if(model->not_showing_samples) {
-        canvas_draw_str(canvas, 77, 7, furi_hal_subghz_get_radio_type() ? "R: Ext" : "R: Int");
+        // TODO
+        canvas_draw_str(
+            canvas,
+            77,
+            7,
+            (model->device_type == SubGhzRadioDeviceTypeInternal) ? "R: Int" : "R: Ext");
     } else {
-        canvas_draw_str(canvas, 70, 7, furi_hal_subghz_get_radio_type() ? "E" : "I");
+        canvas_draw_str(
+            canvas, 70, 7, (model->device_type == SubGhzRadioDeviceTypeInternal) ? "I" : "E");
     }
 
     canvas_draw_str_aligned(

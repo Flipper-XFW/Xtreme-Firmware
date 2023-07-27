@@ -5,10 +5,11 @@
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
 #include "gpio_item.h"
-#include "timelapse_icons.h"
+#include "gpio_timelapse_icons.h"
 #include <assets_icons.h>
 
-#define CONFIG_FILE_PATH APP_DATA_PATH("timelapse.conf")
+#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/timelapse"
+#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/timelapse.conf"
 
 // Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
@@ -153,6 +154,10 @@ int32_t zeitraffer_app(void* p) {
     FlipperFormat* load = flipper_format_file_alloc(storage);
 
     do {
+        if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
+            notification_message(notifications, &sequence_error);
+            break;
+        }
         if(!flipper_format_file_open_existing(load, CONFIG_FILE_PATH)) {
             notification_message(notifications, &sequence_error);
             break;
@@ -321,6 +326,7 @@ int32_t zeitraffer_app(void* p) {
                     }
                 }
             }
+            view_port_update(view_port);
         }
 
         // Наше событие — это сработавший таймер
@@ -374,6 +380,8 @@ int32_t zeitraffer_app(void* p) {
             default:
                 notification_message(notifications, &sequence_display_backlight_enforce_auto);
             }
+
+            view_port_update(view_port);
         }
         if(Time < 1) Time = 1; // Не даём открутить таймер меньше единицы
         if(Count < -1)

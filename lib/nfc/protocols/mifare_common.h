@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "furi_hal_nfc.h"
 
 typedef enum {
     MifareTypeUnknown,
@@ -10,4 +9,4 @@ typedef enum {
     MifareTypeDesfire,
 } MifareType;
 
-MifareType mifare_common_get_type(FuriHalNfcADevData* data);
+MifareType mifare_common_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);

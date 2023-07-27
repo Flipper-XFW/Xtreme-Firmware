@@ -14,7 +14,6 @@
 #include <input/input.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <gui/canvas_i.h>
 
 #define Y_FIELD_SIZE 6
 #define Y_LAST (Y_FIELD_SIZE - 1)

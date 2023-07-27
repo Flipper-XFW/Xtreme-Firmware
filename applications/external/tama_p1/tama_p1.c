@@ -8,6 +8,7 @@
 #include "tamalib/tamalib.h"
 #include "tama.h"
 #include "compiled/assets_icons.h"
+#include <assets_icons.h>
 
 TamaApp* g_ctx;
 FuriMutex* g_state_mutex;

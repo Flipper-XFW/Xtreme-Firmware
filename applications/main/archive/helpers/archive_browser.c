@@ -57,19 +57,15 @@ static void archive_list_load_cb(void* context, uint32_t list_load_offset) {
         false);
 }
 
-static void archive_list_item_cb(
-    void* context,
-    FuriString* item_path,
-    uint32_t idx,
-    bool is_folder,
-    bool is_last) {
+static void
+    archive_list_item_cb(void* context, FuriString* item_path, bool is_folder, bool is_last) {
     furi_assert(context);
-    UNUSED(idx);
     ArchiveBrowserView* browser = (ArchiveBrowserView*)context;
 
     if(!is_last) {
         archive_add_file_item(browser, is_folder, furi_string_get_cstr(item_path));
     } else {
+        bool load_again = false;
         with_view_model(
             browser->view,
             ArchiveBrowserViewModel * model,
@@ -96,10 +92,19 @@ static void archive_list_item_cb(
                         model->item_idx = 0;
                     }
                 }
-                model->list_loading = false;
+                if(archive_is_file_list_load_required(model)) {
+                    model->list_loading = true;
+                    load_again = true;
+                } else {
+                    model->list_loading = false;
+                }
             },
             true);
-        archive_update_offset(browser);
+        if(load_again) {
+            archive_file_array_load(browser, 0);
+        } else {
+            archive_update_offset(browser);
+        }
     }
 }
 
@@ -143,6 +148,26 @@ bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx) {
     }
 
     return true;
+}
+
+bool archive_is_file_list_load_required(ArchiveBrowserViewModel* model) {
+    size_t array_size = files_array_size(model->files);
+
+    if((model->list_loading) || (array_size >= model->item_cnt)) {
+        return false;
+    }
+
+    if((model->array_offset > 0) &&
+       (model->item_idx < (model->array_offset + FILE_LIST_BUF_LEN / 4))) {
+        return true;
+    }
+
+    if(((model->array_offset + array_size) < model->item_cnt) &&
+       (model->item_idx > (int32_t)(model->array_offset + array_size - FILE_LIST_BUF_LEN / 4))) {
+        return true;
+    }
+
+    return false;
 }
 
 void archive_update_offset(ArchiveBrowserView* browser) {
@@ -444,18 +469,31 @@ void archive_show_file_menu(ArchiveBrowserView* browser, bool show, bool manage)
         {
             if(show) {
                 model->menu = true;
-                model->menu_manage = manage;
                 model->menu_idx = 0;
                 menu_array_reset(model->context_menu);
+                model->menu_manage = manage;
+                model->menu_can_switch = true;
                 if(archive_is_item_in_array(model, model->item_idx)) {
                     ArchiveFile_t* selected =
                         files_array_get(model->files, model->item_idx - model->array_offset);
                     selected->fav =
                         archive_is_favorite("%s", furi_string_get_cstr(selected->path));
+                    if(selected->type == ArchiveFileTypeSearch) {
+                        if(!furi_string_cmp_str(selected->path, "/app:search/Search for files")) {
+                            model->menu_manage = false;
+                            model->menu_can_switch = false;
+                        } else {
+                            model->menu = false;
+                        }
+                    }
+                } else {
+                    model->menu_manage = true;
+                    model->menu_can_switch = false;
                 }
             } else {
                 model->menu = false;
                 model->menu_idx = 0;
+                menu_array_reset(model->context_menu);
             }
         },
         true);

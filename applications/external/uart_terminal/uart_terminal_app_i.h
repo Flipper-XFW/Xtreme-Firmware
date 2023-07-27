@@ -10,7 +10,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/variable_item_list.h>
-#include "uart_text_input.h"
+#include <gui/modules/text_input.h>
 
 #define NUM_MENU_ITEMS (5)
 
@@ -27,7 +27,7 @@ struct UART_TerminalApp {
     FuriString* text_box_store;
     size_t text_box_store_strlen;
     TextBox* text_box;
-    UART_TextInput* text_input;
+    TextInput* text_input;
 
     VariableItemList* var_item_list;
 

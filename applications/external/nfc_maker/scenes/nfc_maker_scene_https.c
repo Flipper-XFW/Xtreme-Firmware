@@ -16,15 +16,17 @@ void nfc_maker_scene_https_on_enter(void* context) {
 
     text_input_set_header_text(text_input, "Enter Https Link:");
 
-    strlcpy(app->text_buf, "flipper-xtre.me", TEXT_INPUT_LEN);
+    strlcpy(app->big_buf, "flipper-xtre.me", BIG_INPUT_LEN);
 
     text_input_set_result_callback(
         text_input,
         nfc_maker_scene_https_text_input_callback,
         app,
-        app->text_buf,
-        TEXT_INPUT_LEN,
+        app->big_buf,
+        BIG_INPUT_LEN,
         true);
+
+    text_input_add_illegal_symbols(text_input);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, NfcMakerViewTextInput);
 }
@@ -37,7 +39,7 @@ bool nfc_maker_scene_https_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case TextInputResultOk:
-            scene_manager_next_scene(app->scene_manager, NfcMakerSceneName);
+            scene_manager_next_scene(app->scene_manager, NfcMakerSceneSave);
             break;
         default:
             break;

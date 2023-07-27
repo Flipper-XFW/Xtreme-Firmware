@@ -9,13 +9,15 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
-#include "uart_text_input.h"
+#include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
 #define NUM_MENU_ITEMS (3)
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
+#define UART_CH (FuriHalUartIdUSART1)
+#define BAUDRATE (230400)
 
 struct UART_TerminalApp {
     Gui* gui;
@@ -26,7 +28,7 @@ struct UART_TerminalApp {
     FuriString* text_box_store;
     size_t text_box_store_strlen;
     TextBox* text_box;
-    UART_TextInput* text_input;
+    TextInput* text_input;
 
     VariableItemList* var_item_list;
 

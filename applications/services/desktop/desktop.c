@@ -242,6 +242,11 @@ void desktop_lock(Desktop* desktop, bool pin_lock) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
+        if(!XTREME_SETTINGS()->allow_locked_rpc_commands) {
+            Bt* bt = furi_record_open(RECORD_BT);
+            bt_close_rpc_connection(bt);
+            furi_record_close(RECORD_BT);
+        }
     }
 
     desktop_auto_lock_inhibit(desktop);
@@ -269,6 +274,10 @@ void desktop_unlock(Desktop* desktop) {
         cli_session_open(cli, &cli_vcp);
         furi_record_close(RECORD_CLI);
     }
+
+    Bt* bt = furi_record_open(RECORD_BT);
+    bt_open_rpc_connection(bt);
+    furi_record_close(RECORD_BT);
 
     DesktopStatus status = {.locked = false};
     furi_pubsub_publish(desktop->status_pubsub, &status);
@@ -435,9 +444,7 @@ bool desktop_api_is_locked(Desktop* instance) {
 
 void desktop_api_unlock(Desktop* instance) {
     furi_assert(instance);
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) || XTREME_SETTINGS()->pin_unlock_from_app) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
-    }
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
 }
 
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
@@ -471,6 +478,9 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
         loader_start_detached_with_gui_error(instance->loader, LOADER_APPLICATIONS_NAME, NULL);
     } else if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenArchive);
+    } else if(!strncmp(keybind, "Clock", MAX_KEYBIND_LENGTH)) {
+        loader_start_detached_with_gui_error(
+            instance->loader, EXT_PATH("apps/Tools/nightstand.fap"), "");
     } else if(!strncmp(keybind, "Device Info", MAX_KEYBIND_LENGTH)) {
         loader_start_detached_with_gui_error(instance->loader, "Power", "about_battery");
     } else if(!strncmp(keybind, "Lock Menu", MAX_KEYBIND_LENGTH)) {
@@ -479,6 +489,8 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockKeypad);
     } else if(!strncmp(keybind, "Lock with PIN", MAX_KEYBIND_LENGTH)) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockWithPin);
+    } else if(!strncmp(keybind, "Wipe Device", MAX_KEYBIND_LENGTH)) {
+        loader_start_detached_with_gui_error(instance->loader, "Storage", "wipe");
     } else {
         loader_start_detached_with_gui_error(instance->loader, keybind, NULL);
     }
@@ -504,17 +516,7 @@ int32_t desktop_srv(void* p) {
         furi_hal_rtc_set_pin_fails(0);
     }
 
-    if(!DESKTOP_KEYBINDS_LOAD(&desktop->keybinds, sizeof(desktop->keybinds))) {
-        memset(&desktop->keybinds, 0, sizeof(desktop->keybinds));
-        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyUp].data, "Lock Menu");
-        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyDown].data, "Archive");
-        strcpy(desktop->keybinds[KeybindTypePress][KeybindKeyRight].data, "Passport");
-        strcpy(
-            desktop->keybinds[KeybindTypePress][KeybindKeyLeft].data,
-            EXT_PATH("apps/Misc/nightstand.fap"));
-        strcpy(desktop->keybinds[KeybindTypeHold][KeybindKeyRight].data, "Device Info");
-        strcpy(desktop->keybinds[KeybindTypeHold][KeybindKeyLeft].data, "Lock with PIN");
-    }
+    DESKTOP_KEYBINDS_LOAD(&desktop->keybinds, sizeof(desktop->keybinds));
 
     desktop_clock_toggle_view(desktop, XTREME_SETTINGS()->statusbar_clock);
 

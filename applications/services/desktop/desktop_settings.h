@@ -11,7 +11,8 @@
 #define DESKTOP_SETTINGS_MAGIC (0x17)
 #define DESKTOP_SETTINGS_VER (11)
 
-#define DESKTOP_KEYBINDS_PATH CFG_PATH(".desktop.keybinds")
+#define DESKTOP_KEYBINDS_OLD_PATH CFG_PATH(".desktop.keybinds")
+#define DESKTOP_KEYBINDS_PATH CFG_PATH("desktop.keybinds")
 #define DESKTOP_KEYBINDS_MAGIC (0x14)
 #define DESKTOP_KEYBINDS_VER (1)
 

@@ -28,7 +28,7 @@ const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
     case ArchiveFileTypeSubghzRemote:
         return EXT_PATH("apps/Sub-Ghz/subghz_remote.fap");
     case ArchiveFileTypeInfraredRemote:
-        return EXT_PATH("apps/Tools/ir_remote.fap");
+        return EXT_PATH("apps/Infrared/ir_remote.fap");
     case ArchiveFileTypeBadKb:
         return "Bad KB";
     case ArchiveFileTypeU2f:
@@ -63,10 +63,7 @@ static void
         while(archive_get_tab(browser) != ArchiveTabSearch) {
             archive_switch_tab(browser, TAB_LEFT);
         }
-        ArchiveApp* archive;
-        with_view_model(
-            browser->view, ArchiveBrowserViewModel * model, { archive = model->archive; }, false);
-        view_dispatcher_send_custom_event(archive->view_dispatcher, ArchiveBrowserEventSearch);
+        browser->callback(ArchiveBrowserEventSearch, browser->context);
     } else if(app_name) {
         if(selected->is_app) {
             char* param = strrchr(furi_string_get_cstr(selected->path), '/');
@@ -150,10 +147,7 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
-            if(selected->type == ArchiveFileTypeFolder) {
-                archive_switch_tab(browser, TAB_LEFT);
-                archive_enter_dir(browser, selected->path);
-            } else if(archive_is_known_app(selected->type)) {
+            if(archive_is_known_app(selected->type)) {
                 archive_run_in_app(browser, selected, favorites);
             }
             archive_show_file_menu(browser, false, false);
@@ -300,6 +294,9 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventEnterDir:
+            if(favorites) {
+                archive_switch_tab(browser, TAB_LEFT);
+            }
             archive_enter_dir(browser, selected->path);
             consumed = true;
             break;

@@ -20,12 +20,6 @@ extern "C" {
 #define FURI_HAL_VERSION_DEVICE_NAME_LENGTH \
     (1 + FURI_HAL_BT_ADV_NAME_LENGTH) // Used for custom BT name, BLE symbol + name
 
-#define FURI_HAL_BT_EMPTY_MAC_ADDR \
-    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
-
-#define FURI_HAL_BT_DEFAULT_MAC_ADDR \
-    { 0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72 }
-
 /** OTP Versions enum */
 typedef enum {
     FuriHalVersionOtpVersion0 = 0x00,
@@ -91,6 +85,12 @@ const char* furi_hal_version_get_fcc_id();
  * @return     IC id as C-string
  */
 const char* furi_hal_version_get_ic_id();
+
+/** Get MIC id
+ *
+ * @return     MIC id as C-string
+ */
+const char* furi_hal_version_get_mic_id();
 
 /** Get OTP version
  *

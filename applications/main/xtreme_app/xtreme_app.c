@@ -16,11 +16,12 @@ bool xtreme_app_apply(XtremeApp* app) {
 
     if(app->save_mainmenu_apps) {
         Stream* stream = file_stream_alloc(storage);
-        if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+        if(file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+            stream_write_format(stream, "MenuAppList Version %u\n", 0);
             CharList_it_t it;
-            CharList_it(it, app->mainmenu_app_paths);
-            for(uint i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
-                stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_app_paths, i));
+            CharList_it(it, app->mainmenu_app_exes);
+            for(size_t i = 0; i < CharList_size(app->mainmenu_app_exes); i++) {
+                stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_app_exes, i));
             }
         }
         file_stream_close(stream);
@@ -120,9 +121,7 @@ bool xtreme_app_apply(XtremeApp* app) {
 
     if(app->show_slideshow) {
         callback_reboot(NULL);
-    }
-
-    if(app->require_reboot) {
+    } else if(app->require_reboot) {
         popup_set_header(app->popup, "Rebooting...", 64, 26, AlignCenter, AlignCenter);
         popup_set_text(app->popup, "Applying changes...", 64, 40, AlignCenter, AlignCenter);
         popup_set_callback(app->popup, callback_reboot);
@@ -131,6 +130,16 @@ bool xtreme_app_apply(XtremeApp* app) {
         popup_enable_timeout(app->popup);
         view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewPopup);
         return true;
+    } else if(app->apply_pack) {
+        popup_set_header(app->popup, "Reloading...", 64, 26, AlignCenter, AlignCenter);
+        popup_set_text(app->popup, "Applying asset pack...", 64, 40, AlignCenter, AlignCenter);
+        popup_set_callback(app->popup, NULL);
+        popup_set_context(app->popup, NULL);
+        popup_set_timeout(app->popup, 0);
+        popup_disable_timeout(app->popup);
+        view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewPopup);
+        XTREME_ASSETS_FREE();
+        XTREME_ASSETS_LOAD();
     }
 
     furi_record_close(RECORD_STORAGE);
@@ -176,12 +185,20 @@ XtremeApp* xtreme_app_alloc() {
         XtremeAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, XtremeAppViewSubmenu, submenu_get_view(app->submenu));
+
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, XtremeAppViewTextInput, text_input_get_view(app->text_input));
 
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
+
+    app->dialog_ex = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, XtremeAppViewDialogEx, dialog_ex_get_view(app->dialog_ex));
 
     // Settings init
 
@@ -196,15 +213,12 @@ XtremeApp* xtreme_app_alloc() {
     if(storage_dir_open(folder, XTREME_ASSETS_PATH)) {
         while(storage_dir_read(folder, &info, name, XTREME_ASSETS_PACK_NAME_LEN)) {
             if(info.flags & FSF_DIRECTORY) {
-                char* copy = malloc(XTREME_ASSETS_PACK_NAME_LEN);
-                strlcpy(copy, name, XTREME_ASSETS_PACK_NAME_LEN);
-                uint idx = 0;
-                if(strcmp(copy, "NSFW") != 0) {
-                    for(; idx < CharList_size(app->asset_pack_names); idx++) {
-                        char* comp = *CharList_get(app->asset_pack_names, idx);
-                        if(strcasecmp(copy, comp) < 0 && strcmp(comp, "NSFW") != 0) {
-                            break;
-                        }
+                char* copy = strdup(name);
+                size_t idx = 0;
+                for(; idx < CharList_size(app->asset_pack_names); idx++) {
+                    char* comp = *CharList_get(app->asset_pack_names, idx);
+                    if(strcasecmp(copy, comp) < 0) {
+                        break;
                     }
                 }
                 CharList_push_at(app->asset_pack_names, idx, copy);
@@ -220,17 +234,24 @@ XtremeApp* xtreme_app_alloc() {
     free(name);
     storage_file_free(folder);
 
-    CharList_init(app->mainmenu_app_names);
-    CharList_init(app->mainmenu_app_paths);
+    CharList_init(app->mainmenu_app_labels);
+    CharList_init(app->mainmenu_app_exes);
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
-    if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        stream_read_line(stream, line);
         while(stream_read_line(stream, line)) {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
-            CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
+            CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
             flipper_application_load_name_and_icon(line, storage, NULL, line);
-            CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(line)));
+            if(furi_string_start_with_str(line, "[")) {
+                size_t trim = furi_string_search_str(line, "] ", 1);
+                if(trim != FURI_STRING_FAILURE) {
+                    furi_string_right(line, trim + 2);
+                }
+            }
+            CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(line)));
         }
     }
     furi_string_free(line);
@@ -290,10 +311,14 @@ void xtreme_app_free(XtremeApp* app) {
     // Gui modules
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewSubmenu);
+    submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewTextInput);
     text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewPopup);
     popup_free(app->popup);
+    view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewDialogEx);
+    dialog_ex_free(app->dialog_ex);
 
     // View Dispatcher and Scene Manager
     view_dispatcher_free(app->view_dispatcher);
@@ -307,14 +332,14 @@ void xtreme_app_free(XtremeApp* app) {
     }
     CharList_clear(app->asset_pack_names);
 
-    for(CharList_it(it, app->mainmenu_app_names); !CharList_end_p(it); CharList_next(it)) {
+    for(CharList_it(it, app->mainmenu_app_labels); !CharList_end_p(it); CharList_next(it)) {
         free(*CharList_cref(it));
     }
-    CharList_clear(app->mainmenu_app_names);
-    for(CharList_it(it, app->mainmenu_app_paths); !CharList_end_p(it); CharList_next(it)) {
+    CharList_clear(app->mainmenu_app_labels);
+    for(CharList_it(it, app->mainmenu_app_exes); !CharList_end_p(it); CharList_next(it)) {
         free(*CharList_cref(it));
     }
-    CharList_clear(app->mainmenu_app_paths);
+    CharList_clear(app->mainmenu_app_exes);
 
     FrequencyList_clear(app->subghz_static_freqs);
     FrequencyList_clear(app->subghz_hopper_freqs);

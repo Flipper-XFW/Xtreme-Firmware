@@ -7,6 +7,7 @@
 #include <notification/notification_messages.h>
 
 #include "roots_of_life_game_icons.h"
+#include <assets_icons.h>
 
 #define TAG "RootsOfLife"
 

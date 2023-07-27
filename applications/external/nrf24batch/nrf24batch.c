@@ -218,6 +218,21 @@ static void add_to_str_hex_bytes(char* out, uint8_t* arr, int bytes) {
     } while(--bytes);
 }
 
+// skip leading zeros
+static void add_to_str_hex_variable(char* out, uint8_t* arr, int size) {
+    if(size <= 0) return;
+    out += strlen(out);
+    arr += size - 1;
+    while(*arr == 0 && size > 1) {
+        arr--;
+        size--;
+    }
+    do {
+        snprintf(out, 3, "%02X", *arr--);
+        out += 2;
+    } while(--size);
+}
+
 void Edit_insert_digit(char new) {
     if(*Edit_pos == '-') return;
     if(what_doing <= 1) {
@@ -506,7 +521,7 @@ bool nrf24_read_newpacket() {
             else {
                 char hex[9];
                 hex[0] = '\0';
-                add_to_str_hex_bytes(hex, (uint8_t*)&var, size);
+                add_to_str_hex_variable(hex, (uint8_t*)&var, size);
                 if((cmd_array && cmd_array_hex) || furi_string_end_with_str(str, "0x"))
                     furi_string_cat_str(str, hex);
                 else {
@@ -883,7 +898,7 @@ static uint8_t load_settings_file() {
     NRF_INITED = false;
     while(stream_read_line(file_stream, str)) {
         char* p = (char*)furi_string_get_cstr(str);
-        if(*p <= ' ') continue;
+        if(*p <= '!' || *p == ';') continue;
         //char* delim_eq = strchr(p, '=');
         char* delim_col = strchr(p, ':');
         if(delim_col == NULL) { // Constant found - no ':'
@@ -1288,12 +1303,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                         int32_t n = get_payload_receive_field(pld, len);
                         if(hex) {
                             strcat(screen_buf, "0x");
-                            add_to_str_hex_bytes(screen_buf, pld, len);
+                            add_to_str_hex_variable(screen_buf, pld, len);
                         } else {
                             snprintf(screen_buf + strlen(screen_buf), 20, "%ld", n);
                             if(n > 9) {
                                 strcat(screen_buf, " (");
-                                add_to_str_hex_bytes(screen_buf, pld, len);
+                                add_to_str_hex_variable(screen_buf, pld, len);
                                 strcat(screen_buf, ")");
                             }
                         }

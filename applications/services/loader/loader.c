@@ -11,10 +11,24 @@
 #include <loader/firmware_api/firmware_api.h>
 #include <toolbox/stream/file_stream.h>
 #include <core/dangerous_defines.h>
+#include <gui/icon_i.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
-// api
+
+// helpers
+
+static const char* loader_find_external_application_by_name(const char* app_name) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
+            return FLIPPER_EXTERNAL_APPS[i].path;
+        }
+    }
+
+    return NULL;
+}
+
+// API
 
 LoaderStatus
     loader_start(Loader* loader, const char* name, const char* args, FuriString* error_message) {
@@ -42,8 +56,12 @@ static void loader_show_gui_error(LoaderStatus status, FuriString* error_message
         dialog_message_set_buttons(message, NULL, NULL, NULL);
 
         furi_string_replace(error_message, ":", "\n");
+        furi_string_replace(error_message, "/ext/apps/", "");
+        furi_string_replace(error_message, ", ", "\n");
+        furi_string_replace(error_message, ": ", "\n");
+
         dialog_message_set_text(
-            message, furi_string_get_cstr(error_message), 64, 32, AlignCenter, AlignCenter);
+            message, furi_string_get_cstr(error_message), 64, 35, AlignCenter, AlignCenter);
 
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
@@ -116,9 +134,9 @@ FuriPubSub* loader_get_pubsub(Loader* loader) {
     return loader->pubsub;
 }
 
-ExtMainAppList_t* loader_get_ext_main_apps(Loader* loader) {
+MenuAppList_t* loader_get_menu_apps(Loader* loader) {
     furi_assert(loader);
-    return &loader->ext_main_apps;
+    return &loader->menu_apps;
 }
 
 // callbacks
@@ -177,6 +195,31 @@ bool loader_menu_load_fap_meta(
     return true;
 }
 
+static void loader_make_menu_file(Storage* storage) {
+    Stream* new = file_stream_alloc(storage);
+    if(!storage_file_exists(storage, XTREME_MENU_PATH)) {
+        if(file_stream_open(new, XTREME_MENU_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            stream_write_format(new, "MenuAppList Version %u\n", 0);
+            for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+                stream_write_format(new, "%s\n", FLIPPER_APPS[i].name);
+            }
+            for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
+                stream_write_format(new, "%s\n", FLIPPER_EXTERNAL_APPS[i].name);
+            }
+            Stream* old = file_stream_alloc(storage);
+            if(file_stream_open(old, XTREME_MENU_OLD_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+                stream_copy(old, new, stream_size(old));
+            }
+            file_stream_close(old);
+            stream_free(old);
+            storage_common_remove(storage, XTREME_MENU_OLD_PATH);
+        }
+        file_stream_close(new);
+    }
+    file_stream_close(new);
+    stream_free(new);
+}
+
 static Loader* loader_alloc() {
     Loader* loader = malloc(sizeof(Loader));
     loader->pubsub = furi_pubsub_alloc();
@@ -187,33 +230,75 @@ static Loader* loader_alloc() {
     loader->app.thread = NULL;
     loader->app.insomniac = false;
     loader->app.fap = NULL;
-    ExtMainAppList_init(loader->ext_main_apps);
+    MenuAppList_init(loader->menu_apps);
 
-    if(furi_hal_is_normal_boot()) {
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        FuriString* path = furi_string_alloc();
-        FuriString* name = furi_string_alloc();
-        Stream* stream = file_stream_alloc(storage);
-        if(file_stream_open(stream, XTREME_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            while(stream_read_line(stream, path)) {
-                furi_string_replace_all(path, "\r", "");
-                furi_string_replace_all(path, "\n", "");
-                const Icon* icon;
-                if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
-                ExtMainAppList_push_back(
-                    loader->ext_main_apps,
-                    (ExtMainApp){
-                        .name = strdup(furi_string_get_cstr(name)),
-                        .path = strdup(furi_string_get_cstr(path)),
-                        .icon = icon});
+    if(!furi_hal_is_normal_boot()) return loader;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* stream = file_stream_alloc(storage);
+    FuriString* line = furi_string_alloc();
+    FuriString* name = furi_string_alloc();
+    do {
+        if(!file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+            file_stream_close(stream);
+            loader_make_menu_file(storage);
+            if(!file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
+                break;
+        }
+
+        uint32_t version;
+        if(!stream_read_line(stream, line) ||
+           sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
+           version > 0) {
+            file_stream_close(stream);
+            storage_common_remove(storage, XTREME_MENU_PATH);
+            loader_make_menu_file(storage);
+            if(!file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
+                break;
+            if(!stream_read_line(stream, line) ||
+               sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
+               version > 0)
+                break;
+        }
+
+        while(stream_read_line(stream, line)) {
+            furi_string_replace_all(line, "\r", "");
+            furi_string_replace_all(line, "\n", "");
+            const char* label = NULL;
+            const Icon* icon = NULL;
+            const char* exe = NULL;
+            if(storage_file_exists(storage, furi_string_get_cstr(line))) {
+                if(loader_menu_load_fap_meta(storage, line, name, &icon)) {
+                    label = strdup(furi_string_get_cstr(name));
+                    exe = strdup(furi_string_get_cstr(line));
+                }
+            } else {
+                for(size_t i = 0; !exe && i < FLIPPER_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
+                        label = FLIPPER_APPS[i].name;
+                        icon = FLIPPER_APPS[i].icon;
+                        exe = FLIPPER_APPS[i].name;
+                    }
+                }
+                for(size_t i = 0; !exe && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
+                        label = FLIPPER_EXTERNAL_APPS[i].name;
+                        icon = FLIPPER_EXTERNAL_APPS[i].icon;
+                        exe = FLIPPER_EXTERNAL_APPS[i].name;
+                    }
+                }
+            }
+            if(label && exe && icon) {
+                MenuAppList_push_back(
+                    loader->menu_apps, (MenuApp){.label = label, .icon = icon, .exe = exe});
             }
         }
-        file_stream_close(stream);
-        stream_free(stream);
-        furi_string_free(name);
-        furi_string_free(path);
-        furi_record_close(RECORD_STORAGE);
-    }
+
+    } while(false);
+    furi_string_free(name);
+    furi_string_free(line);
+    file_stream_close(stream);
+    stream_free(stream);
+    furi_record_close(RECORD_STORAGE);
     return loader;
 }
 
@@ -345,7 +430,7 @@ static LoaderStatus loader_start_external_app(
         } else if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
             status = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Preload failed %s: %s", path, err_msg);
+                LoaderStatusErrorInternal, error_message, "Preload failed, %s: %s", path, err_msg);
             break;
         }
 
@@ -360,21 +445,33 @@ static LoaderStatus loader_start_external_app(
             break;
         } else if(api_mismatch) {
             // Successful map, but found api mismatch -> warn user
+            const FlipperApplicationManifest* manifest =
+                flipper_application_get_manifest(loader->app.fap);
+
+            char buf[66];
+            snprintf(
+                buf,
+                66,
+                "FAP: %i != FW: %i\nThis app might not work\nContinue anyways?",
+                manifest->base.api_version.major,
+                firmware_api_interface->api_version_major);
+
             DialogMessage* message = dialog_message_alloc();
             dialog_message_set_header(message, "API Mismatch", 64, 0, AlignCenter, AlignTop);
             dialog_message_set_buttons(message, "Cancel", NULL, "Continue");
-            dialog_message_set_text(
-                message,
-                "This app might not\nwork correctly\nContinue anyways?",
-                64,
-                32,
-                AlignCenter,
-                AlignCenter);
+            dialog_message_set_text(message, buf, 64, 32, AlignCenter, AlignCenter);
             DialogMessageButton res =
                 dialog_message_show(furi_record_open(RECORD_DIALOGS), message);
             dialog_message_free(message);
             furi_record_close(RECORD_DIALOGS);
             if(res != DialogMessageButtonRight) {
+                const char* err_msg = flipper_application_preload_status_to_string(preload_res);
+                status = loader_make_status_error(
+                    LoaderStatusErrorAppStarted,
+                    error_message,
+                    "Preload failed, %s: %s",
+                    path,
+                    err_msg);
                 break;
             }
         }
@@ -472,15 +569,8 @@ static LoaderStatus loader_do_start_by_name(
         {
             const FlipperInternalApplication* app = loader_find_application_by_name(name);
             if(app) {
-                if(app->app == NULL) {
-                    // FAPP support
-                    status = loader_start_external_app(
-                        loader, furi_record_open(RECORD_STORAGE), app->appid, args, error_message);
-                    furi_record_close(RECORD_STORAGE);
-                } else {
-                    loader_start_internal_app(loader, app, args);
-                    status = loader_make_success_status(error_message);
-                }
+                loader_start_internal_app(loader, app, args);
+                status = loader_make_success_status(error_message);
                 break;
             }
         }
@@ -492,7 +582,15 @@ static LoaderStatus loader_do_start_by_name(
             break;
         }
 
-        // check external apps
+        // check External Applications
+        {
+            const char* path = loader_find_external_application_by_name(name);
+            if(path) {
+                name = path;
+            }
+        }
+
+        // check Faps
         {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, name)) {

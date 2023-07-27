@@ -149,14 +149,14 @@ def pack(
 if __name__ == "__main__":
     input(
         "This will look through all the subfolders next to this file and try to pack them\n"
-        "The resulting asset packs will be saved to 'dolphin_custom' in this folder\n"
+        "The resulting asset packs will be saved to 'asset_packs' in this folder\n"
         "Press [Enter] if you wish to continue"
     )
     print()
     here = pathlib.Path(__file__).absolute().parent
     start = time.perf_counter()
 
-    pack(here, here / "dolphin_custom", logger=print)
+    pack(here, here / "asset_packs", logger=print)
 
     end = time.perf_counter()
     input(f"\nFinished in {round(end - start, 2)}s\n" "Press [Enter] to exit")

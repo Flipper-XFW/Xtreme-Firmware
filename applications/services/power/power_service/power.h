@@ -25,17 +25,6 @@ typedef enum {
     PowerEventTypeBatteryLevelChanged,
 } PowerEventType;
 
-typedef enum {
-    BatteryIconOff,
-    BatteryIconBar,
-    BatteryIconPercent,
-    BatteryIconInvertedPercent,
-    BatteryIconRetro3,
-    BatteryIconRetro5,
-    BatteryIconBarPercent,
-    BatteryIconCount,
-} BatteryIcon;
-
 typedef union {
     uint8_t battery_level;
 } PowerEventData;
@@ -48,6 +37,7 @@ typedef struct {
 typedef struct {
     bool gauge_is_ok;
     bool is_charging;
+    bool is_shutdown_requested;
     bool is_charge_capped;
 
     float current_charger;

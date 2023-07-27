@@ -100,6 +100,7 @@ typedef struct {
     uint8_t menu_idx;
     bool menu;
     bool menu_manage;
+    bool menu_can_switch;
     char* clipboard;
     bool clipboard_copy;
     menu_array_t context_menu;
