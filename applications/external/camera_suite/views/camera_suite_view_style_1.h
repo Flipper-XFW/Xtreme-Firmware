@@ -14,6 +14,12 @@
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
 
+#include <xtreme.h>
+
+#define UART_CH                                                                   \
+    (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
+                                                            FuriHalUartIdLPUART1)
+
 #pragma once
 
 #define FRAME_WIDTH 128

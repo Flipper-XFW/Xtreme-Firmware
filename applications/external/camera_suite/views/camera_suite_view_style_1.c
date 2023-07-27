@@ -232,7 +232,7 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
             break;
         }
         // Send `data` to the ESP32-CAM
-        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        furi_hal_uart_tx(UART_CH, data, 1);
     }
     return true;
 }
@@ -254,7 +254,7 @@ static void camera_suite_view_style_1_enter(void* context) {
     uint8_t data[1];
     data[0] = 'S'; // Uppercase `S` to start the camera
     // Send `data` to the ESP32-CAM
-    furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+    furi_hal_uart_tx(UART_CH, data, 1);
 
     with_view_model(
         instance->view,
@@ -379,9 +379,13 @@ CameraSuiteViewStyle1* camera_suite_view_style_1_alloc() {
     furi_thread_start(instance->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, camera_on_irq_cb, instance);
+    if(UART_CH == FuriHalUartIdUSART1) {
+        furi_hal_console_disable();
+    } else if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(UART_CH, 230400);
+    }
+    furi_hal_uart_set_br(UART_CH, 230400);
+    furi_hal_uart_set_irq_cb(UART_CH, camera_on_irq_cb, instance);
 
     return instance;
 }
@@ -393,6 +397,14 @@ void camera_suite_view_style_1_free(CameraSuiteViewStyle1* instance) {
         instance->view, UartDumpModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
+
+    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
+
+    if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_deinit(UART_CH);
+    } else {
+        furi_hal_console_enable();
+    }
 }
 
 View* camera_suite_view_style_1_get_view(CameraSuiteViewStyle1* instance) {
