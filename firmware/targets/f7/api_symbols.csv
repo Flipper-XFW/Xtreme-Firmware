@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,34.4,,
+Version,+,34.5,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/favorite_timeout.h,,
 Header,+,applications/services/applications.h,,
@@ -841,6 +841,7 @@ Function,+,elements_scrollable_text_line,void,"Canvas*, uint8_t, uint8_t, uint8_
 Function,+,elements_scrollable_text_line_centered,void,"Canvas*, uint8_t, uint8_t, uint8_t, FuriString*, size_t, _Bool, _Bool"
 Function,+,elements_scrollable_text_line_str,void,"Canvas*, uint8_t, uint8_t, uint8_t, const char*, size_t, _Bool, _Bool"
 Function,+,elements_scrollbar,void,"Canvas*, uint16_t, uint16_t"
+Function,+,elements_scrollbar_horizontal,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint16_t, uint16_t"
 Function,+,elements_scrollbar_pos,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint16_t, uint16_t"
 Function,+,elements_slightly_rounded_box,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,elements_slightly_rounded_frame,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
