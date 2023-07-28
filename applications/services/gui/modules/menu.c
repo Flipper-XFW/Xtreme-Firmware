@@ -405,7 +405,8 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
 }
 
 static void menu_process_up(Menu* menu) {
-    if(XTREME_SETTINGS()->menu_style == MenuStyleDsi) return;
+    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
+    if(menu_style == MenuStyleDsi) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -416,7 +417,7 @@ static void menu_process_up(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            switch(XTREME_SETTINGS()->menu_style) {
+            switch(menu_style) {
             case MenuStyleList:
                 if(model->position > 0) {
                     model->position--;
@@ -445,7 +446,8 @@ static void menu_process_up(Menu* menu) {
 }
 
 static void menu_process_down(Menu* menu) {
-    if(XTREME_SETTINGS()->menu_style == MenuStyleDsi) return;
+    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
+    if(menu_style == MenuStyleDsi) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -456,7 +458,7 @@ static void menu_process_down(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            switch(XTREME_SETTINGS()->menu_style) {
+            switch(menu_style) {
             case MenuStyleList:
                 if(model->position < count - 1) {
                     model->position++;
@@ -485,7 +487,8 @@ static void menu_process_down(Menu* menu) {
 }
 
 static void menu_process_left(Menu* menu) {
-    if(XTREME_SETTINGS()->menu_style == MenuStyleList) return;
+    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
+    if(menu_style == MenuStyleList) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -496,7 +499,7 @@ static void menu_process_left(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            switch(XTREME_SETTINGS()->menu_style) {
+            switch(menu_style) {
             case MenuStyleWii:
                 if(model->position < 2) {
                     if(count % 2) {
@@ -529,7 +532,8 @@ static void menu_process_left(Menu* menu) {
 }
 
 static void menu_process_right(Menu* menu) {
-    if(XTREME_SETTINGS()->menu_style == MenuStyleList) return;
+    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
+    if(menu_style == MenuStyleList) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -540,7 +544,7 @@ static void menu_process_right(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            switch(XTREME_SETTINGS()->menu_style) {
+            switch(menu_style) {
             case MenuStyleWii:
                 if(count % 2) {
                     if(model->position == count - 1) {
