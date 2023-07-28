@@ -423,8 +423,12 @@ static void menu_process_up(Menu* menu) {
             case MenuStyleList:
                 if(model->position > 0) {
                     model->position--;
+                    if(model->vertical_offset && model->vertical_offset == model->position) {
+                        model->vertical_offset--;
+                    }
                 } else {
                     model->position = count - 1;
+                    model->vertical_offset = count - 8;
                 }
                 break;
             case MenuStyleWii:
@@ -433,6 +437,7 @@ static void menu_process_up(Menu* menu) {
                 } else {
                     model->position++;
                 }
+                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
@@ -464,8 +469,13 @@ static void menu_process_down(Menu* menu) {
             case MenuStyleList:
                 if(model->position < count - 1) {
                     model->position++;
+                    if(model->vertical_offset < count - 8 &&
+                       model->vertical_offset == model->position - 7) {
+                        model->vertical_offset++;
+                    }
                 } else {
                     model->position = 0;
+                    model->vertical_offset = 0;
                 }
                 break;
             case MenuStyleWii:
@@ -474,6 +484,7 @@ static void menu_process_down(Menu* menu) {
                 } else {
                     model->position++;
                 }
+                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
@@ -512,20 +523,18 @@ static void menu_process_left(Menu* menu) {
                 } else {
                     model->position -= 2;
                 }
+                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
-            case MenuStyleVertical:
-                if(model->vertical_offset > 0 && model->vertical_offset == model->position - 1) {
-                    model->vertical_offset--;
-                }
-                if(model->position == 0) {
-                    model->vertical_offset = count - 8;
-                }
-                /* fall through */
             case MenuStyleDsi:
+            case MenuStyleVertical:
                 if(model->position > 0) {
                     model->position--;
+                    if(model->vertical_offset && model->vertical_offset == model->position) {
+                        model->vertical_offset--;
+                    }
                 } else {
                     model->position = count - 1;
+                    model->vertical_offset = count - 8;
                 }
                 break;
             default:
@@ -570,21 +579,19 @@ static void menu_process_right(Menu* menu) {
                         model->position = model->position % 2;
                     }
                 }
+                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
-            case MenuStyleVertical:
-                if(model->vertical_offset < count - 8 &&
-                   model->vertical_offset == model->position - 6) {
-                    model->vertical_offset++;
-                }
-                if(model->position == count - 1) {
-                    model->vertical_offset = 0;
-                }
-                /* fall through */
             case MenuStyleDsi:
+            case MenuStyleVertical:
                 if(model->position < count - 1) {
                     model->position++;
+                    if(model->vertical_offset < count - 8 &&
+                       model->vertical_offset == model->position - 7) {
+                        model->vertical_offset++;
+                    }
                 } else {
                     model->position = 0;
+                    model->vertical_offset = 0;
                 }
                 break;
             default:
