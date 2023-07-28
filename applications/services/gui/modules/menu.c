@@ -48,7 +48,13 @@ static void menu_short_name(MenuItem* item, FuriString* name) {
     }
 }
 
-static void menu_centered_icon(Canvas* canvas, MenuItem* item, size_t x, size_t y, size_t width, size_t height) {
+static void menu_centered_icon(
+    Canvas* canvas,
+    MenuItem* item,
+    size_t x,
+    size_t y,
+    size_t width,
+    size_t height) {
     if(item->icon) {
         canvas_draw_icon_animation(
             canvas,
@@ -164,7 +170,14 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     canvas_set_font(canvas, FontPrimary);
                     size_t scroll_counter = menu_scroll_counter(model, true);
                     elements_scrollable_text_line_str(
-                        canvas, pos_x, pos_y - height / 2 - 8, 126, item->label, scroll_counter, false, true);
+                        canvas,
+                        pos_x,
+                        pos_y - height / 2 - 8,
+                        126,
+                        item->label,
+                        scroll_counter,
+                        false,
+                        true);
                 } else {
                     pos_x += (width + 6) * i;
                     pos_y += 2;
