@@ -1665,7 +1665,6 @@ Function,+,menu_alloc,Menu*,
 Function,+,menu_free,void,Menu*
 Function,+,menu_get_view,View*,Menu*
 Function,+,menu_reset,void,Menu*
-Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
 Function,-,mkdtemp,char*,char*
 Function,-,mkostemp,int,"char*, int"
 Function,-,mkostemps,int,"char*, int, int"
