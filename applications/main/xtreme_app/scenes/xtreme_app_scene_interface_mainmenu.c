@@ -18,6 +18,7 @@ const char* const menu_style_names[MenuStyleCount] = {
     "List",
     "Wii",
     "DSi",
+    "Vertical",
 };
 static void xtreme_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);

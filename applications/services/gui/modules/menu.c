@@ -4,6 +4,7 @@
 #include <assets_icons.h>
 #include <gui/icon_i.h>
 #include <gui/icon_animation_i.h>
+#include <gui/canvas_i.h>
 #include <furi.h>
 #include <m-array.h>
 #include <xtreme.h>
@@ -30,6 +31,7 @@ typedef struct {
     MenuItemArray_t items;
     size_t position;
     size_t scroll_counter;
+    size_t vertical_offset;
 } MenuModel;
 
 static void menu_process_up(Menu* menu);
@@ -187,6 +189,36 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 menu_centered_icon(canvas, item, pos_x - 7, pos_y - 7, 14, 14);
             }
             elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
+            break;
+        }
+        case MenuStyleVertical: {
+            canvas_set_orientation(canvas, CanvasOrientationVertical);
+            FuriString* name = furi_string_alloc();
+            shift_position = model->vertical_offset;
+            canvas_set_font(canvas, FontSecondary);
+            size_t item_i;
+            size_t y_off;
+            for(size_t i = 0; i < 8; i++) {
+                item_i = shift_position + i;
+                if(item_i >= items_count) continue;
+                y_off = 16 * i;
+                bool selected = item_i == position;
+                size_t scroll_counter = menu_scroll_counter(model, selected);
+                if(selected) {
+                    elements_slightly_rounded_box(canvas, 0, y_off, 64, 16);
+                    canvas_set_color(canvas, ColorWhite);
+                }
+                item = MenuItemArray_get(model->items, item_i);
+                menu_centered_icon(canvas, item, 0, y_off, 16, 16);
+                menu_short_name(item, name);
+                elements_scrollable_text_line(
+                    canvas, 17, y_off + 12, 46, name, scroll_counter, false);
+                if(selected) {
+                    canvas_set_color(canvas, ColorBlack);
+                }
+            }
+            furi_string_free(name);
+            canvas_set_orientation(canvas, CanvasOrientationHorizontal);
             break;
         }
         default:
@@ -375,7 +407,7 @@ void menu_reset(Menu* menu) {
 
 static void menu_process_up(Menu* menu) {
     MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleDsi) return;
+    if(menu_style == MenuStyleDsi || menu_style == MenuStyleVertical) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -416,7 +448,7 @@ static void menu_process_up(Menu* menu) {
 
 static void menu_process_down(Menu* menu) {
     MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleDsi) return;
+    if(menu_style == MenuStyleDsi || menu_style == MenuStyleVertical) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -481,6 +513,14 @@ static void menu_process_left(Menu* menu) {
                     model->position -= 2;
                 }
                 break;
+            case MenuStyleVertical:
+                if(model->vertical_offset > 0 && model->vertical_offset == model->position - 1) {
+                    model->vertical_offset--;
+                }
+                if(model->position == 0) {
+                    model->vertical_offset = count - 8;
+                }
+                /* fall through */
             case MenuStyleDsi:
                 if(model->position > 0) {
                     model->position--;
@@ -531,6 +571,15 @@ static void menu_process_right(Menu* menu) {
                     }
                 }
                 break;
+            case MenuStyleVertical:
+                if(model->vertical_offset < count - 8 &&
+                   model->vertical_offset == model->position - 6) {
+                    model->vertical_offset++;
+                }
+                if(model->position == count - 1) {
+                    model->vertical_offset = 0;
+                }
+                /* fall through */
             case MenuStyleDsi:
                 if(model->position < count - 1) {
                     model->position++;
