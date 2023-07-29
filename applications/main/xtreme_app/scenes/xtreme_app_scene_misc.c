@@ -68,12 +68,15 @@ bool xtreme_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case VarItemListIndexScreen:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneMiscScreen, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscScreen);
             break;
         case VarItemListIndexDolphin:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneMiscDolphin, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscDolphin);
             break;
         case VarItemListIndexChangeDeviceName:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneMiscRename, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscRename);
             break;
         default:

@@ -59,9 +59,13 @@ bool xtreme_app_scene_protocols_freqs_on_event(void* context, SceneManagerEvent 
         consumed = true;
         switch(event.event) {
         case VarItemListIndexStaticFreqs:
+            scene_manager_set_scene_state(
+                app->scene_manager, XtremeAppSceneProtocolsFreqsStatic, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFreqsStatic);
             break;
         case VarItemListIndexHopperFreqs:
+            scene_manager_set_scene_state(
+                app->scene_manager, XtremeAppSceneProtocolsFreqsHopper, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFreqsHopper);
             break;
         default:

@@ -51,18 +51,25 @@ bool xtreme_app_scene_interface_on_event(void* context, SceneManagerEvent event)
         consumed = true;
         switch(event.event) {
         case VarItemListIndexGraphics:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneInterfaceGraphics, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceGraphics);
             break;
         case VarItemListIndexMainmenu:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneInterfaceMainmenu, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenu);
             break;
         case VarItemListIndexLockscreen:
+            scene_manager_set_scene_state(
+                app->scene_manager, XtremeAppSceneInterfaceLockscreen, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceLockscreen);
             break;
         case VarItemListIndexStatusbar:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneInterfaceStatusbar, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceStatusbar);
             break;
         case VarItemListIndexFileBrowser:
+            scene_manager_set_scene_state(
+                app->scene_manager, XtremeAppSceneInterfaceFilebrowser, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceFilebrowser);
             break;
         default:

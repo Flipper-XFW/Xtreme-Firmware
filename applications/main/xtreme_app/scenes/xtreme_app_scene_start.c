@@ -46,12 +46,15 @@ bool xtreme_app_scene_start_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case VarItemListIndexInterface:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneInterface, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterface);
             break;
         case VarItemListIndexProtocols:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocols, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocols);
             break;
         case VarItemListIndexMisc:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneMisc, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneMisc);
             break;
         case VarItemListIndexVersion: {

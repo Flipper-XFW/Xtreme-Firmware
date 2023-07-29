@@ -172,6 +172,7 @@ bool xtreme_app_scene_protocols_on_event(void* context, SceneManagerEvent event)
         consumed = true;
         switch(event.event) {
         case VarItemListIndexSubghzFreqs:
+            scene_manager_set_scene_state(app->scene_manager, XtremeAppSceneProtocolsFreqs, 0);
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneProtocolsFreqs);
             break;
         default:
