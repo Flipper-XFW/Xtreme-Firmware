@@ -410,7 +410,19 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
         menu->view,
         MenuModel * model,
         {
-            if(index < MenuItemArray_size(model->items)) {
+            if(index < MenuItemArray_size(model->items) && index != model->position) {
+                model->scroll_counter = 0;
+
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item && item->icon) {
+                    icon_animation_stop(item->icon);
+                }
+
+                item = MenuItemArray_get(model->items, index);
+                if(item && item->icon) {
+                    icon_animation_start(item->icon);
+                }
+
                 model->position = index;
             }
         },
@@ -418,208 +430,178 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
 }
 
 static void menu_process_up(Menu* menu) {
-    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleDsi || menu_style == MenuStyleVertical) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(XTREME_SETTINGS()->menu_style) {
             case MenuStyleList:
-                if(model->position > 0) {
-                    model->position--;
-                    if(model->vertical_offset && model->vertical_offset == model->position) {
-                        model->vertical_offset--;
+                if(position > 0) {
+                    position--;
+                    if(vertical_offset && vertical_offset == position) {
+                        vertical_offset--;
                     }
                 } else {
-                    model->position = count - 1;
-                    model->vertical_offset = count - 8;
+                    position = count - 1;
+                    vertical_offset = count - 8;
                 }
                 break;
             case MenuStyleWii:
-                if(model->position % 2 || (model->position == count - 1 && count % 2)) {
-                    model->position--;
+                if(position % 2 || (position == count - 1 && count % 2)) {
+                    position--;
                 } else {
-                    model->position++;
+                    position++;
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_down(Menu* menu) {
-    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleDsi || menu_style == MenuStyleVertical) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(XTREME_SETTINGS()->menu_style) {
             case MenuStyleList:
-                if(model->position < count - 1) {
-                    model->position++;
-                    if(model->vertical_offset < count - 8 &&
-                       model->vertical_offset == model->position - 7) {
-                        model->vertical_offset++;
+                if(position < count - 1) {
+                    position++;
+                    if(vertical_offset < count - 8 && vertical_offset == position - 7) {
+                        vertical_offset++;
                     }
                 } else {
-                    model->position = 0;
-                    model->vertical_offset = 0;
+                    position = 0;
+                    vertical_offset = 0;
                 }
                 break;
             case MenuStyleWii:
-                if(model->position % 2 || (model->position == count - 1 && count % 2)) {
-                    model->position--;
+                if(position % 2 || (position == count - 1 && count % 2)) {
+                    position--;
                 } else {
-                    model->position++;
+                    position++;
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_left(Menu* menu) {
-    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleList) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(XTREME_SETTINGS()->menu_style) {
             case MenuStyleWii:
-                if(model->position < 2) {
+                if(position < 2) {
                     if(count % 2) {
-                        model->position = count - 1;
+                        position = count - 1;
                     } else {
-                        model->position = count - 2 + model->position % 2;
+                        position = count - 2 + position % 2;
                     }
                 } else {
-                    model->position -= 2;
+                    position -= 2;
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
             case MenuStyleVertical:
-                if(model->position > 0) {
-                    model->position--;
-                    if(model->vertical_offset && model->vertical_offset == model->position) {
-                        model->vertical_offset--;
+                if(position > 0) {
+                    position--;
+                    if(vertical_offset && vertical_offset == position) {
+                        vertical_offset--;
                     }
                 } else {
-                    model->position = count - 1;
-                    model->vertical_offset = count - 8;
+                    position = count - 1;
+                    vertical_offset = count - 8;
                 }
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_right(Menu* menu) {
-    MenuStyle menu_style = XTREME_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleList) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(XTREME_SETTINGS()->menu_style) {
             case MenuStyleWii:
                 if(count % 2) {
-                    if(model->position == count - 1) {
-                        model->position = 0;
-                    } else if(model->position == count - 2) {
-                        model->position = count - 1;
+                    if(position == count - 1) {
+                        position = 0;
+                    } else if(position == count - 2) {
+                        position = count - 1;
                     } else {
-                        model->position += 2;
+                        position += 2;
                     }
                 } else {
-                    model->position += 2;
-                    if(model->position >= count) {
-                        model->position = model->position % 2;
+                    position += 2;
+                    if(position >= count) {
+                        position = position % 2;
                     }
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
             case MenuStyleVertical:
-                if(model->position < count - 1) {
-                    model->position++;
-                    if(model->vertical_offset < count - 8 &&
-                       model->vertical_offset == model->position - 7) {
-                        model->vertical_offset++;
+                if(position < count - 1) {
+                    position++;
+                    if(vertical_offset < count - 8 && vertical_offset == position - 7) {
+                        vertical_offset++;
                     }
                 } else {
-                    model->position = 0;
-                    model->vertical_offset = 0;
+                    position = 0;
+                    vertical_offset = 0;
                 }
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_ok(Menu* menu) {
