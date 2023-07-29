@@ -119,11 +119,14 @@ static void subghz_scene_reciever_config_set_ext_mod_power_amp_text(VariableItem
 
     if(index == 1) {
         furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pc3, 0);
     } else {
         furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
     }
 
     subghz->last_settings->external_module_power_amp = index == 1;
+
+    furi_hal_subghz_set_ext_power_amp(subghz->last_settings->external_module_power_amp);
     subghz_last_settings_save(subghz->last_settings);
 }
 

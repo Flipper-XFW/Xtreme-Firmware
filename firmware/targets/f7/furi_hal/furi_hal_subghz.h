@@ -238,6 +238,16 @@ bool furi_hal_subghz_is_async_tx_complete();
  */
 void furi_hal_subghz_stop_async_tx();
 
+/** Get external amplifier power state
+ * @return     true if amplifier is enabled
+ */
+bool furi_hal_subghz_get_ext_power_amp();
+
+/** Set external amplifier power state
+ * @param      enabled  true to enable amplifier state, false to disable state
+ */
+void furi_hal_subghz_set_ext_power_amp(bool enabled);
+
 // /** Initialize and switch to power save mode Used by internal API-HAL
 //  * initialization routine Can be used to reinitialize device to safe state and
 //  * send it to sleep
