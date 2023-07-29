@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,v,34.3,,
+Version,+,34.3,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/favorite_timeout.h,,
 Header,+,applications/services/applications.h,,
