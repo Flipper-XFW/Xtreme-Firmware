@@ -437,7 +437,8 @@ static void menu_process_up(Menu* menu) {
                 } else {
                     model->position++;
                 }
-                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
@@ -484,7 +485,8 @@ static void menu_process_down(Menu* menu) {
                 } else {
                     model->position++;
                 }
-                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
@@ -523,7 +525,8 @@ static void menu_process_left(Menu* menu) {
                 } else {
                     model->position -= 2;
                 }
-                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
             case MenuStyleVertical:
@@ -579,7 +582,8 @@ static void menu_process_right(Menu* menu) {
                         model->position = model->position % 2;
                     }
                 }
-                model->vertical_offset = CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
             case MenuStyleVertical:
