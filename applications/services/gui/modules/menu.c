@@ -5,6 +5,8 @@
 #include <gui/icon_i.h>
 #include <gui/icon_animation_i.h>
 #include <gui/canvas_i.h>
+#include <dolphin/dolphin_i.h>
+#include <dolphin/helpers/dolphin_state.h>
 #include <furi.h>
 #include <m-array.h>
 #include <xtreme.h>
@@ -186,6 +188,54 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     elements_slightly_rounded_frame(
                         canvas, pos_x - width / 2, pos_y - height / 2, width, height);
                 }
+                menu_centered_icon(canvas, item, pos_x - 7, pos_y - 7, 14, 14);
+            }
+            elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
+            break;
+        }
+        case MenuStylePs4: {
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(
+                canvas, 1, 1, AlignLeft, AlignTop, furi_hal_version_get_name_ptr());
+            char str[10];
+            Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+            snprintf(str, 10, "Level %i", dolphin_get_level(dolphin->state->data.icounter));
+            furi_record_close(RECORD_DOLPHIN);
+            canvas_draw_str_aligned(canvas, 127, 1, AlignRight, AlignTop, str);
+            for(int8_t i = -1; i <= 4; i++) {
+                shift_position = position + i;
+                if(shift_position >= items_count) continue;
+                item = MenuItemArray_get(model->items, shift_position);
+                size_t width = 20;
+                size_t height = 20;
+                size_t pos_x = 36;
+                size_t pos_y = 27;
+                if(i == 0) {
+                    width += 10;
+                    height += 10;
+                    pos_y += 2;
+                    canvas_draw_box(canvas, pos_x - width / 2, pos_y + height / 2, width, 9);
+                    canvas_set_color(canvas, ColorWhite);
+                    canvas_set_font(canvas, FontBatteryPercent);
+                    canvas_draw_str_aligned(
+                        canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignTop, "Start");
+
+                    canvas_set_color(canvas, ColorBlack);
+                    canvas_set_font(canvas, FontSecondary);
+                    size_t scroll_counter = menu_scroll_counter(model, true);
+                    elements_scrollable_text_line_str(
+                        canvas,
+                        pos_x + width / 2 + 2,
+                        pos_y + height / 2 + 7,
+                        74,
+                        item->label,
+                        scroll_counter,
+                        false,
+                        false);
+                } else {
+                    pos_x += (width + 1) * i + (i < 0 ? -6 : 6);
+                }
+                canvas_draw_frame(canvas, pos_x - width / 2, pos_y - height / 2, width, height);
                 menu_centered_icon(canvas, item, pos_x - 7, pos_y - 7, 14, 14);
             }
             elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
@@ -533,6 +583,7 @@ static void menu_process_left(Menu* menu) {
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
+            case MenuStylePs4:
             case MenuStyleVertical:
                 if(position > 0) {
                     position--;
@@ -583,6 +634,7 @@ static void menu_process_right(Menu* menu) {
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
+            case MenuStylePs4:
             case MenuStyleVertical:
                 if(position < count - 1) {
                     position++;

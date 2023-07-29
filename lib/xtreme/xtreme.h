@@ -29,6 +29,7 @@ typedef enum {
     MenuStyleList,
     MenuStyleWii,
     MenuStyleDsi,
+    MenuStylePs4,
     MenuStyleVertical,
     MenuStyleCount,
 } MenuStyle;
