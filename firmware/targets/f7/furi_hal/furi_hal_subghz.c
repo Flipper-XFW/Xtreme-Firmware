@@ -53,9 +53,8 @@ typedef struct {
     const GpioPin* async_mirror_pin;
 
     uint8_t rolling_counter_mult;
-    bool timestamp_file_names : 1;
+    bool ext_power_amp : 1;
     bool extended_frequency_i : 1;
-    bool external_module_power_amp : 1;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
@@ -63,8 +62,8 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .regulation = SubGhzRegulationTxRx,
     .async_mirror_pin = NULL,
     .rolling_counter_mult = 1,
+    .ext_power_amp = false,
     .extended_frequency_i = false,
-    .external_module_power_amp = false,
 };
 
 uint8_t furi_hal_subghz_get_rolling_counter_mult(void) {
@@ -79,12 +78,12 @@ void furi_hal_subghz_set_extended_frequency(bool state_i) {
     furi_hal_subghz.extended_frequency_i = state_i;
 }
 
-bool furi_hal_subghz_get_ext_power_amp() {
-    return furi_hal_subghz.external_module_power_amp;
+void furi_hal_subghz_set_ext_power_amp(bool enabled) {
+    furi_hal_subghz.ext_power_amp = enabled;
 }
 
-void furi_hal_subghz_set_ext_power_amp(bool enabled) {
-    furi_hal_subghz.external_module_power_amp = enabled;
+bool furi_hal_subghz_get_ext_power_amp() {
+    return furi_hal_subghz.ext_power_amp;
 }
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {

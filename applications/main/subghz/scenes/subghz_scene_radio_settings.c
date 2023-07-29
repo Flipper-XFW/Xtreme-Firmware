@@ -119,14 +119,15 @@ static void subghz_scene_reciever_config_set_ext_mod_power_amp_text(VariableItem
 
     if(index == 1) {
         furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
-        furi_hal_gpio_write(&gpio_ext_pc3, 0);
     } else {
         furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
     }
 
     subghz->last_settings->external_module_power_amp = index == 1;
 
+    // Set globally in furi hal
     furi_hal_subghz_set_ext_power_amp(subghz->last_settings->external_module_power_amp);
+
     subghz_last_settings_save(subghz->last_settings);
 }
 
@@ -164,7 +165,7 @@ void subghz_scene_radio_settings_on_enter(void* context) {
 
     item = variable_item_list_add(
         variable_item_list,
-        "Ext high power",
+        "Ext Power Amp",
         EXT_MOD_POWER_AMP_COUNT,
         subghz_scene_reciever_config_set_ext_mod_power_amp_text,
         subghz);
@@ -174,7 +175,7 @@ void subghz_scene_radio_settings_on_enter(void* context) {
 
     item = variable_item_list_add(
         variable_item_list,
-        "Time in names",
+        "Time In Names",
         TIMESTAMP_NAMES_COUNT,
         subghz_scene_receiver_config_set_timestamp_file_names,
         subghz);
@@ -185,7 +186,7 @@ void subghz_scene_radio_settings_on_enter(void* context) {
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         item = variable_item_list_add(
             variable_item_list,
-            "Counter incr.",
+            "Counter Incr.",
             DEBUG_COUNTER_COUNT,
             subghz_scene_receiver_config_set_debug_counter,
             subghz);
@@ -214,7 +215,7 @@ void subghz_scene_radio_settings_on_enter(void* context) {
     } else {
         item = variable_item_list_add(
             variable_item_list,
-            "Counter incr.",
+            "Counter Incr.",
             3,
             subghz_scene_receiver_config_set_debug_counter,
             subghz);
