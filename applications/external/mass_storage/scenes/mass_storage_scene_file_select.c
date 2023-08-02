@@ -23,18 +23,15 @@ void mass_storage_scene_file_select_on_enter(void* context) {
         scene_manager_next_scene(mass_storage->scene_manager, MassStorageSceneWork);
     } else {
         scene_manager_previous_scene(mass_storage->scene_manager);
-        view_dispatcher_stop(mass_storage->view_dispatcher);
     }
 }
 
 bool mass_storage_scene_file_select_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-    // MassStorageApp* mass_storage = context;
     return false;
 }
 
 void mass_storage_scene_file_select_on_exit(void* context) {
     UNUSED(context);
-    // MassStorageApp* mass_storage = context;
 }

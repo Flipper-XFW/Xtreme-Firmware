@@ -55,12 +55,16 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         MassStorageAppViewWork,
         mass_storage_get_view(app->mass_storage_view));
 
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewSubmenu, submenu_get_view(app->submenu));
+
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     if(storage_file_exists(app->fs_api, furi_string_get_cstr(app->file_path))) {
         scene_manager_next_scene(app->scene_manager, MassStorageSceneWork);
     } else {
-        scene_manager_next_scene(app->scene_manager, MassStorageSceneFileSelect);
+        scene_manager_next_scene(app->scene_manager, MassStorageSceneStart);
     }
 
     return app;
@@ -72,6 +76,8 @@ void mass_storage_app_free(MassStorageApp* app) {
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewWork);
     mass_storage_free(app->mass_storage_view);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewSubmenu);
+    submenu_free(app->submenu);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
