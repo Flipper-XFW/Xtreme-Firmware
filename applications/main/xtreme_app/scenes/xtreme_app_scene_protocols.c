@@ -5,6 +5,11 @@ enum VarItemListIndex {
     VarItemListIndexBadbtRemember,
     VarItemListIndexSubghzFreqs,
     VarItemListIndexSubghzExtend,
+    VarItemListIndexSpiCc1101Handle,
+    VarItemListIndexSpiNrf24Handle,
+    VarItemListIndexUartEspChannel,
+    VarItemListIndexUartNmeaChannel,
+    VarItemListIndexUartGeneralChannel,
 };
 
 void xtreme_app_scene_protocols_var_item_list_callback(void* context, uint32_t index) {
