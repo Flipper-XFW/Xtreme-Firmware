@@ -6,9 +6,9 @@ static bool mass_storage_file_select(MassStorageApp* mass_storage) {
     furi_assert(mass_storage);
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(
-        &browser_options, MASS_STORAGE_APP_EXTENSION, &I_mass_storage_10px);
+    dialog_file_browser_set_basic_options(&browser_options, "*", &I_mass_storage_10px);
     browser_options.base_path = MASS_STORAGE_APP_PATH_FOLDER;
+    browser_options.hide_ext = false;
 
     // Input events and views are managed by file_select
     bool res = dialog_file_browser_show(
