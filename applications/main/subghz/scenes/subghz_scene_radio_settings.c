@@ -117,19 +117,19 @@ static void subghz_scene_reciever_config_set_ext_mod_power_amp_text(VariableItem
 
     variable_item_set_current_value_text(item, ext_mod_power_amp_text[index]);
 
-    if(index == 1) {
-        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
-        furi_hal_gpio_write(&gpio_ext_pc3, 0);
-    } else {
-        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
-    }
-
     subghz->last_settings->external_module_power_amp = index == 1;
 
     // Set globally in furi hal
     furi_hal_subghz_set_ext_power_amp(subghz->last_settings->external_module_power_amp);
 
     subghz_last_settings_save(subghz->last_settings);
+
+    // reinit external device
+    const SubGhzRadioDeviceType current = subghz_txrx_radio_device_get(subghz->txrx);
+    if(current != SubGhzRadioDeviceTypeInternal) {
+        subghz_txrx_radio_device_set(subghz->txrx, SubGhzRadioDeviceTypeInternal);
+        subghz_txrx_radio_device_set(subghz->txrx, current);
+    }
 }
 
 static void subghz_scene_receiver_config_set_timestamp_file_names(VariableItem* item) {
