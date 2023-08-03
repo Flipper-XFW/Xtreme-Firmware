@@ -19,9 +19,8 @@
 #define TAG "SubGhz_Device_CC1101_Ext"
 
 #define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO &gpio_ext_pb2
-#define SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE false
-
 #define SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO &gpio_ext_pc3
+#define SUBGHZ_DEVICE_CC1101_EXT_FORCE_EXTENDED_RANGE false
 
 #define SUBGHZ_DEVICE_CC1101_CONFIG_VER 1
 
@@ -201,7 +200,6 @@ bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
     subghz_device_cc1101_ext->regulation = SubGhzDeviceCC1101ExtRegulationTxRx;
     subghz_device_cc1101_ext->async_mirror_pin = NULL;
     subghz_device_cc1101_ext->g0_pin = SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO;
-    subghz_device_cc1101_ext->async_rx.capture_delta_duration = 0;
     subghz_device_cc1101_ext->power_amp = false;
     subghz_device_cc1101_ext->extended_range = false;
     if(conf) {
@@ -212,6 +210,8 @@ bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
             FURI_LOG_E(TAG, "Config version mismatch");
         }
     }
+
+    subghz_device_cc1101_ext->async_rx.capture_delta_duration = 0;
 
     subghz_device_cc1101_ext->spi_bus_handle =
         (XTREME_SETTINGS()->spi_cc1101_handle == SpiDefault ?
@@ -229,7 +229,6 @@ bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
     }
 
     furi_hal_spi_bus_handle_init(subghz_device_cc1101_ext->spi_bus_handle);
-
     if(subghz_device_cc1101_ext->power_amp) {
         furi_hal_gpio_init_simple(
             SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO, GpioModeOutputPushPull);
@@ -241,6 +240,7 @@ bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
 
 void subghz_device_cc1101_ext_free() {
     furi_assert(subghz_device_cc1101_ext != NULL);
+
     furi_hal_spi_bus_handle_deinit(subghz_device_cc1101_ext->spi_bus_handle);
     free(subghz_device_cc1101_ext);
 
@@ -486,14 +486,16 @@ bool subghz_device_cc1101_ext_is_frequency_valid(uint32_t value) {
 }
 
 bool subghz_device_cc1101_ext_is_tx_allowed(uint32_t value) {
-    if(!(SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE) &&
+    if(!(SUBGHZ_DEVICE_CC1101_EXT_FORCE_EXTENDED_RANGE ||
+         subghz_device_cc1101_ext->extended_range) &&
        !(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
        !(value >= 778999847 && value <= 928000000)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside default range");
         return false;
     } else if(
-        (SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE) &&
+        (SUBGHZ_DEVICE_CC1101_EXT_FORCE_EXTENDED_RANGE ||
+         subghz_device_cc1101_ext->extended_range) &&
         !subghz_device_cc1101_ext_is_frequency_valid(value)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
         return false;
@@ -583,7 +585,7 @@ void subghz_device_cc1101_ext_start_async_rx(
     furi_hal_bus_enable(FuriHalBusTIM17);
 
     // Configure TIM
-    //Set the timer resolution to 2 �s
+    //Set the timer resolution to 2 us
     LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(TIM17, 0xFFFF);
@@ -764,7 +766,7 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
     furi_hal_bus_enable(FuriHalBusTIM17);
 
     // Configure TIM
-    // Set the timer resolution to 2 �s
+    // Set the timer resolution to 2 us
     LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(TIM17, 0xFFFF);

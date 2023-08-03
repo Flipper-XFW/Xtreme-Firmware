@@ -18,7 +18,6 @@ typedef struct SubGhzDeviceRegistry SubGhzDeviceRegistry;
 typedef struct SubGhzDevice SubGhzDevice;
 typedef struct SubGhzDeviceConf SubGhzDeviceConf;
 
-// typedef bool (*SubGhzBegin)(void);
 typedef bool (*SubGhzBegin)(SubGhzDeviceConf* conf);
 typedef void (*SubGhzEnd)(void);
 typedef bool (*SubGhzIsConnect)(void);
