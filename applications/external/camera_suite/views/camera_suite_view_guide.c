@@ -3,7 +3,6 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-#include <dolphin/dolphin.h>
 
 struct CameraSuiteViewGuide {
     View* view;

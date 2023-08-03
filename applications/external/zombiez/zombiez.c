@@ -231,8 +231,6 @@ static void tick(PluginState* const plugin_state) {
                         free(z);
                         plugin_state->zombies[i] = NULL;
                         plugin_state->score++;
-                        //if(plugin_state->score % 15 == 0) dolphin_deed(getRandomDeed());
-                        //}
                     } else if(z->position.x <= WALL_X && z->position.x > 0) { // zombie got to the wall
                         plugin_state->zombies_count -= 1;
                         free(z);
@@ -312,9 +310,6 @@ int32_t zombiez_game_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
-
-    // Call dolphin deed on game start
-    // dolphin_deed(DolphinDeedPluginGameStart);
 
     PluginEvent event;
     bool isRunning = true;

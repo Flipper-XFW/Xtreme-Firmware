@@ -3,7 +3,6 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-//#include <dolphin/dolphin.h>
 #include <storage/storage.h>
 #include <string.h>
 #include "flipbip_icons.h"

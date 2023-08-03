@@ -1,6 +1,5 @@
 #include "fuzzer_i.h"
 #include "helpers/fuzzer_types.h"
-#include <dolphin/dolphin.h>
 
 static bool fuzzer_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -21,8 +20,6 @@ static void fuzzer_app_tick_event_callback(void* context) {
 }
 
 PacsFuzzerApp* fuzzer_app_alloc() {
-    dolphin_deed(DolphinDeedPluginStart);
-
     PacsFuzzerApp* app = malloc(sizeof(PacsFuzzerApp));
 
     app->fuzzer_state.menu_index = 0;

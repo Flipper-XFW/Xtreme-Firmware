@@ -381,7 +381,6 @@ int32_t bomberduck_app(void* p) {
         return 255;
     }
 
-    // dolphin_deed(DolphinDeedPluginGameStart);
     // Создаем новый view port
     ViewPort* view_port = view_port_alloc();
     // Создаем callback отрисовки, без контекста
@@ -456,7 +455,6 @@ int32_t bomberduck_app(void* p) {
                 world.running = 0;
                 world.level += 1;
                 // if(world.level % 5 == 0) {
-                //     dolphin_deed(DolphinDeedPluginGameWin);
                 // }
             }
             for(int i = 0; i < world.bombs_count; i++) {
