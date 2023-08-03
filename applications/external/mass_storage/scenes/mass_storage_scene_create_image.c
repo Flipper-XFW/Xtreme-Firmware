@@ -13,8 +13,7 @@ void mass_storage_scene_create_image_var_item_list_callback(void* context, uint3
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-const uint32_t image_size_values[] = {1,  2,  4,  8,  12,  16,  20,  25,  30,  35, 40,
-                                      45, 50, 69, 75, 100, 150, 200, 250, 500, 750};
+const uint32_t image_size_values[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
 static void mass_storage_scene_create_image_image_size_changed(VariableItem* item) {
     MassStorageApp* app = variable_item_get_context(item);
     app->create_image_size = image_size_values[variable_item_get_current_value_index(item)];
@@ -24,10 +23,8 @@ static void mass_storage_scene_create_image_image_size_changed(VariableItem* ite
 }
 
 const char* const size_unit_names[] = {
-    [SizeUnitBytes] = "Bytes",
-    [SizeUnitKb] = "Kb",
-    [SizeUnitMb] = "Mb",
-    [SizeUnitGb] = "Gb",
+    [SizeUnitMb] = "MB",
+    [SizeUnitGb] = "GB",
 };
 static void mass_storage_scene_create_image_size_unit_changed(VariableItem* item) {
     MassStorageApp* app = variable_item_get_context(item);
@@ -127,7 +124,7 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             if(storage_file_open(
                    app->file, furi_string_get_cstr(app->file_path), FSAM_WRITE, FSOM_CREATE_NEW)) {
                 uint64_t size = app->create_image_size;
-                for(size_t i = app->create_size_unit; i > 0; i--) size *= 1024;
+                for(size_t i = app->create_size_unit + 2; i > 0; i--) size *= 1024;
                 if(!storage_file_expand(app->file, size)) {
                     error = "Can't allocate data";
                 }

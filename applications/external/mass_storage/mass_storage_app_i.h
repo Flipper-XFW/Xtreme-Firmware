@@ -22,8 +22,6 @@
 #define MASS_STORAGE_FILE_NAME_LEN 40
 
 typedef enum {
-    SizeUnitBytes,
-    SizeUnitKb,
     SizeUnitMb,
     SizeUnitGb,
     SizeUnitCount,

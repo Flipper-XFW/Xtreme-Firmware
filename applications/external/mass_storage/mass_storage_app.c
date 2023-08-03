@@ -31,7 +31,7 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         furi_string_set_str(app->file_path, MASS_STORAGE_APP_PATH_FOLDER);
     }
 
-    app->create_image_size = 100;
+    app->create_image_size = 128;
     app->create_size_unit = SizeUnitMb;
 
     app->gui = furi_record_open(RECORD_GUI);
