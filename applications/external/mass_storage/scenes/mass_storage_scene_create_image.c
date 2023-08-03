@@ -100,14 +100,7 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             scene_manager_next_scene(app->scene_manager, MassStorageSceneCreateImageName);
             break;
         case VarItemListIndexCreate: {
-            popup_set_header(app->popup, "Creating Image...", 64, 32, AlignCenter, AlignCenter);
-            popup_set_text(app->popup, "", 0, 0, AlignLeft, AlignBottom);
-            popup_set_callback(app->popup, NULL);
-            popup_set_context(app->popup, NULL);
-            popup_set_timeout(app->popup, 0);
-            popup_disable_timeout(app->popup);
-            view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewPopup);
-
+            mass_storage_app_show_loading_popup(app, true);
             bool default_name = !strnlen(app->create_name, sizeof(app->create_name));
             if(default_name) {
                 snprintf(
@@ -117,7 +110,12 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
                     app->create_image_size,
                     size_unit_names[app->create_size_unit]);
             }
-            furi_string_printf(app->file_path, APP_DATA_PATH("%s.img"), app->create_name);
+            furi_string_printf(
+                app->file_path,
+                "%s/%s%s",
+                MASS_STORAGE_APP_PATH_FOLDER,
+                app->create_name,
+                MASS_STORAGE_APP_EXTENSION);
 
             app->file = storage_file_alloc(app->fs_api);
             const char* error = NULL;
@@ -136,6 +134,7 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
                 }
             }
             storage_file_free(app->file);
+            mass_storage_app_show_loading_popup(app, false);
 
             if(error) {
                 popup_set_header(
