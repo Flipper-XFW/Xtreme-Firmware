@@ -31,6 +31,9 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         furi_string_set_str(app->file_path, MASS_STORAGE_APP_PATH_FOLDER);
     }
 
+    app->create_image_size = 100;
+    app->create_size_unit = SizeUnitMb;
+
     app->gui = furi_record_open(RECORD_GUI);
     app->fs_api = furi_record_open(RECORD_STORAGE);
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
@@ -55,9 +58,23 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         MassStorageAppViewWork,
         mass_storage_get_view(app->mass_storage_view));
 
+    app->var_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        MassStorageAppViewVarItemList,
+        variable_item_list_get_view(app->var_item_list));
+
     app->submenu = submenu_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, MassStorageAppViewSubmenu, submenu_get_view(app->submenu));
+
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewTextInput, text_input_get_view(app->text_input));
+
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewPopup, popup_get_view(app->popup));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -78,8 +95,14 @@ void mass_storage_app_free(MassStorageApp* app) {
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewWork);
     mass_storage_free(app->mass_storage_view);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewVarItemList);
+    variable_item_list_free(app->var_item_list);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewSubmenu);
     submenu_free(app->submenu);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewTextInput);
+    text_input_free(app->text_input);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewPopup);
+    popup_free(app->popup);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

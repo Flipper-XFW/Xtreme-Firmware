@@ -17,6 +17,14 @@ void mass_storage_scene_start_on_enter(void* context) {
         mass_storage_scene_start_submenu_callback,
         app);
 
+    submenu_add_item(
+        submenu,
+        "Create Image",
+        MassStorageSceneCreateImage,
+        mass_storage_scene_start_submenu_callback,
+        app);
+    scene_manager_set_scene_state(app->scene_manager, MassStorageSceneCreateImage, 0);
+
     submenu_set_header(submenu, "USB Mass Storage");
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, MassStorageSceneStart));
