@@ -21,12 +21,6 @@
 #define MASS_STORAGE_APP_EXTENSION ".img"
 #define MASS_STORAGE_FILE_NAME_LEN 40
 
-typedef enum {
-    SizeUnitMb,
-    SizeUnitGb,
-    SizeUnitCount,
-} SizeUnit;
-
 struct MassStorageApp {
     Gui* gui;
     Storage* fs_api;
@@ -39,9 +33,8 @@ struct MassStorageApp {
     Popup* popup;
     Loading* loading;
 
-    uint32_t create_image_size;
-    SizeUnit create_size_unit;
-    char create_name[MASS_STORAGE_FILE_NAME_LEN];
+    uint8_t create_image_size;
+    char create_image_name[MASS_STORAGE_FILE_NAME_LEN];
 
     FuriString* file_path;
     File* file;

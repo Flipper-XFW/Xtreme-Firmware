@@ -21,8 +21,8 @@ void mass_storage_scene_create_image_name_on_enter(void* context) {
         text_input,
         mass_storage_scene_create_image_name_text_input_callback,
         app,
-        app->create_name,
-        sizeof(app->create_name),
+        app->create_image_name,
+        sizeof(app->create_image_name),
         false);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewTextInput);

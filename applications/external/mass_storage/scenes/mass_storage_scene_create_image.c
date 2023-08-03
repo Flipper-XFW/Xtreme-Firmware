@@ -3,9 +3,8 @@
 
 enum VarItemListIndex {
     VarItemListIndexImageSize,
-    VarItemListIndexSizeUnit,
-    VarItemListIndexName,
-    VarItemListIndexCreate,
+    VarItemListIndexImageName,
+    VarItemListIndexCreateImage,
 };
 
 void mass_storage_scene_create_image_var_item_list_callback(void* context, uint32_t index) {
@@ -13,59 +12,49 @@ void mass_storage_scene_create_image_var_item_list_callback(void* context, uint3
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-const uint32_t image_size_values[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+static const struct {
+    char* name;
+    uint64_t value;
+} image_sizes[] = {
+    {"1MB", 1LL * 1024 * 1024},
+    {"2MB", 2LL * 1024 * 1024},
+    {"4MB", 4LL * 1024 * 1024},
+    {"8MB", 8LL * 1024 * 1024},
+    {"16MB", 16LL * 1024 * 1024},
+    {"32MB", 32LL * 1024 * 1024},
+    {"64MB", 64LL * 1024 * 1024},
+    {"128MB", 128LL * 1024 * 1024},
+    {"256MB", 256LL * 1024 * 1024},
+    {"512MB", 512LL * 1024 * 1024},
+    {"1GB", 1LL * 1024 * 1024 * 1024},
+    {"2GB", 2LL * 1024 * 1024 * 1024},
+    {"3GB", 3LL * 1024 * 1024 * 1024},
+    {"4GB", 4LL * 1024 * 1024 * 1024 - 1},
+};
 static void mass_storage_scene_create_image_image_size_changed(VariableItem* item) {
     MassStorageApp* app = variable_item_get_context(item);
-    app->create_image_size = image_size_values[variable_item_get_current_value_index(item)];
-    char str[4];
-    snprintf(str, sizeof(str), "%lu", app->create_image_size);
-    variable_item_set_current_value_text(item, str);
-}
-
-const char* const size_unit_names[] = {
-    [SizeUnitMb] = "MB",
-    [SizeUnitGb] = "GB",
-};
-static void mass_storage_scene_create_image_size_unit_changed(VariableItem* item) {
-    MassStorageApp* app = variable_item_get_context(item);
-    app->create_size_unit = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, size_unit_names[app->create_size_unit]);
+    app->create_image_size = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, image_sizes[app->create_image_size].name);
 }
 
 void mass_storage_scene_create_image_on_enter(void* context) {
     MassStorageApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
-    uint8_t value_index;
 
-    value_index =
-        value_index_uint32(app->create_image_size, image_size_values, COUNT_OF(image_size_values));
-    app->create_image_size = image_size_values[value_index];
-    char str[4];
-    snprintf(str, sizeof(str), "%lu", app->create_image_size);
     item = variable_item_list_add(
         var_item_list,
         "Image Size",
-        COUNT_OF(image_size_values),
+        COUNT_OF(image_sizes),
         mass_storage_scene_create_image_image_size_changed,
         app);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, str);
+    variable_item_set_current_value_index(item, app->create_image_size);
+    variable_item_set_current_value_text(item, image_sizes[app->create_image_size].name);
 
-    app->create_size_unit = CLAMP(app->create_size_unit, SizeUnitCount - 1, 0);
-    item = variable_item_list_add(
-        var_item_list,
-        "Size Unit",
-        SizeUnitCount,
-        mass_storage_scene_create_image_size_unit_changed,
-        app);
-    variable_item_set_current_value_index(item, app->create_size_unit);
-    variable_item_set_current_value_text(item, size_unit_names[app->create_size_unit]);
+    item = variable_item_list_add(var_item_list, "Image Name", 0, NULL, app);
+    variable_item_set_current_value_text(item, app->create_image_name);
 
-    item = variable_item_list_add(var_item_list, "Name", 0, NULL, app);
-    variable_item_set_current_value_text(item, app->create_name);
-
-    variable_item_list_add(var_item_list, "Create", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Create Image", 0, NULL, app);
 
     variable_item_list_set_enter_callback(
         var_item_list, mass_storage_scene_create_image_var_item_list_callback, app);
@@ -79,7 +68,10 @@ void mass_storage_scene_create_image_on_enter(void* context) {
 
 static void popup_callback_ok(void* context) {
     MassStorageApp* app = context;
+    scene_manager_set_scene_state(
+        app->scene_manager, MassStorageSceneStart, MassStorageSceneFileSelect);
     scene_manager_previous_scene(app->scene_manager);
+    scene_manager_next_scene(app->scene_manager, MassStorageSceneFileSelect);
 }
 
 static void popup_callback_error(void* context) {
@@ -96,34 +88,26 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             app->scene_manager, MassStorageSceneCreateImage, event.event);
         consumed = true;
         switch(event.event) {
-        case VarItemListIndexName:
+        case VarItemListIndexImageName:
             scene_manager_next_scene(app->scene_manager, MassStorageSceneCreateImageName);
             break;
-        case VarItemListIndexCreate: {
+        case VarItemListIndexCreateImage: {
             mass_storage_app_show_loading_popup(app, true);
-            bool default_name = !strnlen(app->create_name, sizeof(app->create_name));
-            if(default_name) {
-                snprintf(
-                    app->create_name,
-                    sizeof(app->create_name),
-                    "%lu%s",
-                    app->create_image_size,
-                    size_unit_names[app->create_size_unit]);
-            }
+            const char* name = strnlen(app->create_image_name, sizeof(app->create_image_name)) ?
+                                   app->create_image_name :
+                                   image_sizes[app->create_image_size].name;
             furi_string_printf(
                 app->file_path,
                 "%s/%s%s",
                 MASS_STORAGE_APP_PATH_FOLDER,
-                app->create_name,
+                name,
                 MASS_STORAGE_APP_EXTENSION);
 
             app->file = storage_file_alloc(app->fs_api);
             const char* error = NULL;
             if(storage_file_open(
                    app->file, furi_string_get_cstr(app->file_path), FSAM_WRITE, FSOM_CREATE_NEW)) {
-                uint64_t size = app->create_image_size;
-                for(size_t i = app->create_size_unit + 2; i > 0; i--) size *= 1000;
-                if(!storage_file_expand(app->file, size)) {
+                if(!storage_file_expand(app->file, image_sizes[app->create_image_size].value)) {
                     error = storage_file_get_error_desc(app->file);
                     storage_file_close(app->file);
                     storage_common_remove(app->fs_api, furi_string_get_cstr(app->file_path));
@@ -132,8 +116,6 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
                 error = storage_file_get_error_desc(app->file);
             }
             storage_file_free(app->file);
-
-            if(default_name) strcpy(app->create_name, "");
             mass_storage_app_show_loading_popup(app, false);
 
             if(error) {
