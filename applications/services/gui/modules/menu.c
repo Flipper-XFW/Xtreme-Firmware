@@ -282,54 +282,49 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
 static bool menu_input_callback(InputEvent* event, void* context) {
     Menu* menu = context;
-    bool consumed = false;
+    bool consumed = true;
 
     if(event->type == InputTypeShort) {
         switch(event->key) {
         case InputKeyUp:
-            consumed = true;
             menu_process_up(menu);
             break;
         case InputKeyDown:
-            consumed = true;
             menu_process_down(menu);
             break;
         case InputKeyLeft:
-            consumed = true;
             menu_process_left(menu);
             break;
         case InputKeyRight:
-            consumed = true;
             menu_process_right(menu);
             break;
         case InputKeyOk:
-            consumed = true;
             menu_process_ok(menu);
             break;
         default:
+            consumed = false;
             break;
         }
     } else if(event->type == InputTypeRepeat) {
         switch(event->key) {
         case InputKeyUp:
-            consumed = true;
             menu_process_up(menu);
             break;
         case InputKeyDown:
-            consumed = true;
             menu_process_down(menu);
             break;
         case InputKeyLeft:
-            consumed = true;
             menu_process_left(menu);
             break;
         case InputKeyRight:
-            consumed = true;
             menu_process_right(menu);
             break;
         default:
+            consumed = false;
             break;
         }
+    } else {
+        consumed = false;
     }
 
     return consumed;
