@@ -283,6 +283,14 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 static bool menu_input_callback(InputEvent* event, void* context) {
     Menu* menu = context;
     bool consumed = true;
+    if(XTREME_SETTINGS()->menu_style == MenuStyleVertical &&
+       furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+        if(event->key == InputKeyLeft) {
+            event->key = InputKeyRight;
+        } else if(event->key == InputKeyRight) {
+            event->key = InputKeyLeft;
+        }
+    }
 
     if(event->type == InputTypeShort) {
         switch(event->key) {
