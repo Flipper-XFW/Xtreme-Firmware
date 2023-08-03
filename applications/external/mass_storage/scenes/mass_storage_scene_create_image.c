@@ -122,18 +122,18 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             if(storage_file_open(
                    app->file, furi_string_get_cstr(app->file_path), FSAM_WRITE, FSOM_CREATE_NEW)) {
                 uint64_t size = app->create_image_size;
-                for(size_t i = app->create_size_unit + 2; i > 0; i--) size *= 1024;
+                for(size_t i = app->create_size_unit + 2; i > 0; i--) size *= 1000;
                 if(!storage_file_expand(app->file, size)) {
-                    error = "Can't allocate data";
+                    error = storage_file_get_error_desc(app->file);
+                    storage_file_close(app->file);
+                    storage_common_remove(app->fs_api, furi_string_get_cstr(app->file_path));
                 }
             } else {
-                if(storage_file_exists(app->fs_api, furi_string_get_cstr(app->file_path))) {
-                    error = "File already exists";
-                } else {
-                    error = "Can't open file";
-                }
+                error = storage_file_get_error_desc(app->file);
             }
             storage_file_free(app->file);
+
+            if(default_name) strcpy(app->create_name, "");
             mass_storage_app_show_loading_popup(app, false);
 
             if(error) {
@@ -150,8 +150,6 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             popup_set_timeout(app->popup, 0);
             popup_disable_timeout(app->popup);
             view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewPopup);
-
-            if(default_name) strcpy(app->create_name, "");
             break;
         }
         default:
