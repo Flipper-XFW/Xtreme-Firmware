@@ -26,11 +26,11 @@ struct MassStorageApp {
     NotificationApp* notifications;
     DialogsApp* dialogs;
     Widget* widget;
+    MassStorage* mass_storage_view;
     Submenu* submenu;
 
     FuriString* file_path;
     File* file;
-    MassStorage* mass_storage_view;
 
     FuriMutex* usb_mutex;
     MassStorageUsb* usb;

@@ -2,6 +2,7 @@
 
 static void mass_storage_scene_start_submenu_callback(void* context, uint32_t index) {
     MassStorageApp* app = context;
+    scene_manager_set_scene_state(app->scene_manager, MassStorageSceneStart, index);
     scene_manager_next_scene(app->scene_manager, index);
 }
 
@@ -17,6 +18,8 @@ void mass_storage_scene_start_on_enter(void* context) {
         app);
 
     submenu_set_header(submenu, "USB Mass Storage");
+    submenu_set_selected_item(
+        submenu, scene_manager_get_scene_state(app->scene_manager, MassStorageSceneStart));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewSubmenu);
 }
