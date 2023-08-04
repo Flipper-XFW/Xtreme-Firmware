@@ -176,13 +176,7 @@ class AppBuilder:
                         deployable = False
                 app_artifacts.dist_entries.append((deployable, fal_path))
         else:
-            category = (
-                "assets"
-                if self.app.apptype == FlipperAppType.MENUEXTERNAL
-                and not self.app.fap_category
-                else self.app.fap_category
-            )
-            fap_path = f"apps/{category}/{app_artifacts.compact.name}"
+            fap_path = f"apps/{self.app.fap_category}/{app_artifacts.compact.name}"
             app_artifacts.dist_entries.append(
                 (self.app.is_default_deployable, fap_path)
             )
