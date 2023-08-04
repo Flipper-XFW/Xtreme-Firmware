@@ -1,6 +1,6 @@
 App(
     appid="magspoof",
-    name="MagSpoof",
+    name="[MAG] MagSpoof",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mag_app",
     requires=[
