@@ -33,6 +33,7 @@ struct MassStorageApp {
     Popup* popup;
     Loading* loading;
 
+    uint64_t create_image_max;
     uint8_t create_image_size;
     char create_image_name[MASS_STORAGE_FILE_NAME_LEN];
 

@@ -44,11 +44,28 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         furi_string_set_str(app->file_path, MASS_STORAGE_APP_PATH_FOLDER);
     }
 
-    app->create_image_size = 7; // 128MB
-
     app->gui = furi_record_open(RECORD_GUI);
     app->fs_api = furi_record_open(RECORD_STORAGE);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
+
+    app->create_image_size = (uint8_t)-1;
+    SDInfo sd_info;
+    if(storage_sd_info(app->fs_api, &sd_info) == FSE_OK) {
+        switch(sd_info.fs_type) {
+        case FST_FAT12:
+            app->create_image_max = 16LL * 1024 * 1024;
+            break;
+        case FST_FAT16:
+            app->create_image_max = 2LL * 1024 * 1024 * 1024;
+            break;
+        case FST_FAT32:
+            app->create_image_max = 4LL * 1024 * 1024 * 1024;
+            break;
+        default:
+            app->create_image_max = 0;
+            break;
+        }
+    }
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);

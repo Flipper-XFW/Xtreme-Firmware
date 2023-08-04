@@ -28,8 +28,14 @@ static const struct {
     {"512MB", 512LL * 1024 * 1024},
     {"1GB", 1LL * 1024 * 1024 * 1024},
     {"2GB", 2LL * 1024 * 1024 * 1024},
-    {"3GB", 3LL * 1024 * 1024 * 1024},
-    {"4GB", 4LL * 1024 * 1024 * 1024 - 1},
+    {"4GB", 4LL * 1024 * 1024 * 1024},
+    {"8GB", 8LL * 1024 * 1024 * 1024},
+    {"16GB", 16LL * 1024 * 1024 * 1024},
+    {"32GB", 32LL * 1024 * 1024 * 1024},
+    {"64GB", 64LL * 1024 * 1024 * 1024},
+    {"128GB", 128LL * 1024 * 1024 * 1024},
+    {"256GB", 256LL * 1024 * 1024 * 1024},
+    {"512GB", 512LL * 1024 * 1024 * 1024},
 };
 static void mass_storage_scene_create_image_image_size_changed(VariableItem* item) {
     MassStorageApp* app = variable_item_get_context(item);
@@ -42,10 +48,22 @@ void mass_storage_scene_create_image_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
+    uint8_t size_count = COUNT_OF(image_sizes);
+    if(app->create_image_max) {
+        for(size_t i = 1; i < size_count; i++) {
+            if(image_sizes[i].value > app->create_image_max) {
+                size_count = i;
+                break;
+            }
+        }
+    }
+    if(app->create_image_size == (uint8_t)-1) {
+        app->create_image_size = CLAMP(7, size_count - 2, 0); // 7 = 128MB
+    }
     item = variable_item_list_add(
         var_item_list,
         "Image Size",
-        COUNT_OF(image_sizes),
+        size_count,
         mass_storage_scene_create_image_image_size_changed,
         app);
     variable_item_set_current_value_index(item, app->create_image_size);
@@ -107,7 +125,11 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             const char* error = NULL;
             if(storage_file_open(
                    app->file, furi_string_get_cstr(app->file_path), FSAM_WRITE, FSOM_CREATE_NEW)) {
-                if(!storage_file_expand(app->file, image_sizes[app->create_image_size].value)) {
+                uint64_t size = image_sizes[app->create_image_size].value;
+                if(size == app->create_image_max) {
+                    size--;
+                }
+                if(!storage_file_expand(app->file, size)) {
                     error = storage_file_get_error_desc(app->file);
                     storage_file_close(app->file);
                     storage_common_remove(app->fs_api, furi_string_get_cstr(app->file_path));
