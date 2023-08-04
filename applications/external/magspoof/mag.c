@@ -168,8 +168,6 @@ int32_t mag_app(void* p) {
     Mag* mag = mag_alloc();
     UNUSED(p);
 
-    mag_make_app_folder(mag);
-
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(mag->scene_manager, MagSceneStart);
 
@@ -178,14 +176,6 @@ int32_t mag_app(void* p) {
     mag_free(mag);
 
     return 0;
-}
-
-void mag_make_app_folder(Mag* mag) {
-    furi_assert(mag);
-
-    if(!storage_simply_mkdir(mag->storage, MAG_APP_FOLDER)) {
-        dialog_message_show_storage_error(mag->dialogs, "Cannot create\napp folder");
-    }
 }
 
 void mag_text_store_set(Mag* mag, const char* text, ...) {

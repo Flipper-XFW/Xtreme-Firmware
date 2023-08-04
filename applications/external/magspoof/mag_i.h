@@ -92,8 +92,6 @@ void mag_text_store_clear(Mag* mag);
 
 void mag_show_loading_popup(void* context, bool show);
 
-void mag_make_app_folder(Mag* mag);
-
 void mag_popup_timeout_callback(void* context);
 
 void mag_widget_callback(GuiButtonType result, InputType type, void* context);
