@@ -108,7 +108,7 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Allow RPC while locked",
+        "Allow RPC While Locked",
         2,
         xtreme_app_scene_interface_lockscreen_allow_locked_rpc_commands_changed,
         app);

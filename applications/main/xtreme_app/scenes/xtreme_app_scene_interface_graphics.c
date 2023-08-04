@@ -132,7 +132,7 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Fallback Anim",
+        "Credits Anim",
         2,
         xtreme_app_scene_interface_graphics_fallback_anim_changed,
         app);
