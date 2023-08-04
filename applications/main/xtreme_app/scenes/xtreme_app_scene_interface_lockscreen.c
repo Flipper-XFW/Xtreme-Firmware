@@ -82,6 +82,15 @@ static void xtreme_app_scene_interface_lockscreen_lockscreen_prompt_changed(Vari
     app->save_settings = true;
 }
 
+static void
+    xtreme_app_scene_interface_lockscreen_lockscreen_transparent_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    XTREME_SETTINGS()->lockscreen_transparent = value;
+    app->save_settings = true;
+}
+
 void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
     XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
@@ -161,6 +170,16 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, xtreme_settings->lockscreen_prompt);
     variable_item_set_current_value_text(item, xtreme_settings->lockscreen_prompt ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Transparent (see animation)",
+        2,
+        xtreme_app_scene_interface_lockscreen_lockscreen_transparent_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings->lockscreen_transparent);
+    variable_item_set_current_value_text(
+        item, xtreme_settings->lockscreen_transparent ? "ON" : "OFF");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_interface_lockscreen_var_item_list_callback, app);
