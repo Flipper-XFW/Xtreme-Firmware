@@ -6,6 +6,7 @@
 #include <dialogs/dialogs.h>
 
 #include "magspoof_icons.h"
+#include <assets_icons.h>
 
 #define MAG_DEV_NAME_MAX_LEN 22
 #define MAG_DEV_TRACKS 3
