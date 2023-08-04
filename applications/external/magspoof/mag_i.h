@@ -2,7 +2,6 @@
 
 #include "mag_device.h"
 //#include "helpers/mag_helpers.h"
-#include "helpers/mag_text_input.h"
 #include "helpers/mag_types.h"
 
 #include <furi.h>
@@ -74,9 +73,6 @@ typedef struct {
     TextInput* text_input;
     Widget* widget;
     VariableItemList* variable_item_list;
-
-    // Custom views
-    Mag_TextInput* mag_text_input;
 
     // UART
     FuriThread* uart_rx_thread;
