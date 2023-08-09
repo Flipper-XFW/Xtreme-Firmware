@@ -29,6 +29,7 @@ struct VariableItemList {
 
 typedef struct {
     VariableItemArray_t items;
+    FuriString* header;
     uint8_t position;
     uint8_t window_position;
     size_t scroll_counter;
@@ -41,6 +42,11 @@ static void variable_item_list_process_left(VariableItemList* variable_item_list
 static void variable_item_list_process_right(VariableItemList* variable_item_list);
 static void variable_item_list_process_ok(VariableItemList* variable_item_list);
 
+static size_t variable_item_list_items_on_screen(bool header) {
+    size_t res = 4;
+    return (header) ? res - 1 : res;
+}
+
 static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
     VariableItemListModel* model = _model;
 
@@ -49,6 +55,11 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_clear(canvas);
 
+    if(!furi_string_empty(model->header)) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 4, 11, furi_string_get_cstr(model->header));
+    }
+
     canvas_set_font(canvas, FontSecondary);
 
     uint8_t position = 0;
@@ -56,8 +67,9 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
     for(VariableItemArray_it(it, model->items); !VariableItemArray_end_p(it);
         VariableItemArray_next(it)) {
         uint8_t item_position = position - model->window_position;
-        uint8_t items_on_screen = 4;
-        uint8_t y_offset = 0;
+        uint8_t items_on_screen =
+            variable_item_list_items_on_screen(!furi_string_empty(model->header));
+        uint8_t y_offset = furi_string_empty(model->header) ? 0 : item_height;
 
         if(item_position < items_on_screen) {
             const VariableItem* item = VariableItemArray_cref(it);
@@ -152,7 +164,8 @@ void variable_item_list_set_selected_item(VariableItemList* variable_item_list, 
                 model->window_position -= 1;
             }
 
-            uint8_t items_on_screen = 4;
+            uint8_t items_on_screen =
+                variable_item_list_items_on_screen(!furi_string_empty(model->header));
 
             if(items_size <= items_on_screen) {
                 model->window_position = 0;
@@ -171,6 +184,22 @@ uint8_t variable_item_list_get_selected_item_index(VariableItemList* variable_it
     uint8_t idx = model->position;
     view_commit_model(variable_item_list->view, false);
     return idx;
+}
+
+void variable_item_list_set_header(VariableItemList* variable_item_list, const char* header) {
+    furi_assert(variable_item_list);
+
+    with_view_model(
+        variable_item_list->view,
+        VariableItemListModel * model,
+        {
+            if(header == NULL) {
+                furi_string_reset(model->header);
+            } else {
+                furi_string_set_str(model->header, header);
+            }
+        },
+        true);
 }
 
 static bool variable_item_list_input_callback(InputEvent* event, void* context) {
@@ -248,7 +277,8 @@ void variable_item_list_process_up(VariableItemList* variable_item_list) {
         variable_item_list->view,
         VariableItemListModel * model,
         {
-            uint8_t items_on_screen = 4;
+            uint8_t items_on_screen =
+                variable_item_list_items_on_screen(!furi_string_empty(model->header));
             if(model->position > 0) {
                 model->position--;
 
@@ -271,7 +301,8 @@ void variable_item_list_process_down(VariableItemList* variable_item_list) {
         variable_item_list->view,
         VariableItemListModel * model,
         {
-            uint8_t items_on_screen = 4;
+            uint8_t items_on_screen =
+                variable_item_list_items_on_screen(!furi_string_empty(model->header));
             if(model->position < (VariableItemArray_size(model->items) - 1)) {
                 model->position++;
                 if((model->position - model->window_position) > (items_on_screen - 2) &&
@@ -405,6 +436,7 @@ VariableItemList* variable_item_list_alloc() {
             VariableItemArray_init(model->items);
             model->position = 0;
             model->window_position = 0;
+            model->header = furi_string_alloc();
             model->scroll_counter = 0;
         },
         true);
@@ -422,6 +454,7 @@ void variable_item_list_free(VariableItemList* variable_item_list) {
         variable_item_list->view,
         VariableItemListModel * model,
         {
+            furi_string_free(model->header);
             VariableItemArray_it_t it;
             for(VariableItemArray_it(it, model->items); !VariableItemArray_end_p(it);
                 VariableItemArray_next(it)) {
@@ -455,6 +488,7 @@ void variable_item_list_reset(VariableItemList* variable_item_list) {
                 furi_string_free(VariableItemArray_ref(it)->locked_message);
             }
             VariableItemArray_reset(model->items);
+            furi_string_reset(model->header);
         },
         false);
 }
