@@ -19,7 +19,7 @@ void mass_storage_scene_start_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Create Image",
+        "Create Disc Image",
         MassStorageSceneCreateImage,
         mass_storage_scene_start_submenu_callback,
         app);
