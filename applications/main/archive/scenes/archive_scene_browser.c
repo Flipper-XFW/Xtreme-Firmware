@@ -52,9 +52,32 @@ static void archive_loader_callback(const void* message, void* context) {
     }
 }
 
+static void archive_show_file(Loader* loader, const char* path) {
+    File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
+    bool text = true;
+    if(storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        uint8_t buf[1000];
+        size_t read = storage_file_read(file, buf, sizeof(buf));
+        for(size_t i = 0; i < read; i++) {
+            const char c = buf[i];
+            if((c < ' ' || c > '~') && c != '\r' && c != '\n') {
+                text = false;
+                break;
+            }
+        }
+    }
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+
+    if(text) {
+        loader_start_with_gui_error(loader, EXT_PATH("apps/Tools/text_viewer.fap"), path);
+    } else {
+        loader_start_with_gui_error(loader, EXT_PATH("apps/Tools/hex_viewer.fap"), path);
+    }
+}
+
 static void
     archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected, bool favorites) {
-    UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
 
     const char* app_name = archive_get_flipper_app_name(selected->type);
@@ -84,8 +107,10 @@ static void
                 loader_start_with_gui_error(loader, app_name, str);
             }
         }
-    } else {
+    } else if(selected->type == ArchiveFileTypeApplication) {
         loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
+    } else {
+        archive_show_file(loader, furi_string_get_cstr(selected->path));
     }
 
     furi_record_close(RECORD_LOADER);
@@ -176,10 +201,10 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuShow:
+            archive_show_file(
+                furi_record_open(RECORD_LOADER), furi_string_get_cstr(selected->path));
+            furi_record_close(RECORD_LOADER);
             archive_show_file_menu(browser, false, false);
-            scene_manager_set_scene_state(
-                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
-            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneShow);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuPaste:
