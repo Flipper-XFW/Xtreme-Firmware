@@ -1,6 +1,6 @@
 #include "lfrfid_i.h"
 #include <dolphin/dolphin.h>
-#include <applications/main/archive/helpers/favorite_timeout.h>
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 
 static bool lfrfid_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
