@@ -87,6 +87,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
     if(items_count) {
         MenuItem* item;
         size_t shift_position;
+        FuriString* name = furi_string_alloc();
         switch(XTREME_SETTINGS()->menu_style) {
         case MenuStyleList: {
             for(uint8_t i = 0; i < 3; i++) {
@@ -94,9 +95,10 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 shift_position = (position + items_count + i - 1) % items_count;
                 item = MenuItemArray_get(model->items, shift_position);
                 menu_centered_icon(canvas, item, 4, 3 + 22 * i, 14, 14);
+                menu_short_name(item, name);
                 size_t scroll_counter = menu_scroll_counter(model, i == 1);
-                elements_scrollable_text_line_str(
-                    canvas, 22, 14 + 22 * i, 98, item->label, scroll_counter, false, false);
+                elements_scrollable_text_line(
+                    canvas, 22, 14 + 22 * i, 98, name, scroll_counter, false);
             }
             // Frame and scrollbar
             elements_frame(canvas, 0, 21, 128 - 5, 21);
@@ -104,7 +106,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             break;
         }
         case MenuStyleWii: {
-            FuriString* name = furi_string_alloc();
             if(items_count > 6 && position >= 4) {
                 if(position >= items_count - 2 + (items_count % 2)) {
                     shift_position = position - (position % 2) - 4;
@@ -123,7 +124,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 x_off = (i / 2) * 43 + 1;
                 y_off = (i % 2) * 32;
                 bool selected = item_i == position;
-                size_t scroll_counter = menu_scroll_counter(model, selected);
                 if(selected) {
                     elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
                     canvas_set_color(canvas, ColorWhite);
@@ -131,6 +131,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 item = MenuItemArray_get(model->items, item_i);
                 menu_centered_icon(canvas, item, x_off, y_off, 40, 20);
                 menu_short_name(item, name);
+                size_t scroll_counter = menu_scroll_counter(model, selected);
                 elements_scrollable_text_line_centered(
                     canvas, 20 + x_off, 26 + y_off, 36, name, scroll_counter, false, true);
                 if(selected) {
@@ -139,7 +140,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     elements_frame(canvas, 0 + x_off, 0 + y_off, 40, 30);
                 }
             }
-            furi_string_free(name);
             break;
         }
         case MenuStyleDsi: {
@@ -172,13 +172,14 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     canvas_set_color(canvas, ColorBlack);
 
                     canvas_set_font(canvas, FontPrimary);
+                    menu_short_name(item, name);
                     size_t scroll_counter = menu_scroll_counter(model, true);
-                    elements_scrollable_text_line_str(
+                    elements_scrollable_text_line_centered(
                         canvas,
                         pos_x,
                         pos_y - height / 2 - 8,
                         126,
-                        item->label,
+                        name,
                         scroll_counter,
                         false,
                         true);
@@ -222,15 +223,15 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
                     canvas_set_color(canvas, ColorBlack);
                     canvas_set_font(canvas, FontSecondary);
+                    menu_short_name(item, name);
                     size_t scroll_counter = menu_scroll_counter(model, true);
-                    elements_scrollable_text_line_str(
+                    elements_scrollable_text_line(
                         canvas,
                         pos_x + width / 2 + 2,
                         pos_y + height / 2 + 7,
                         74,
-                        item->label,
+                        name,
                         scroll_counter,
-                        false,
                         false);
                 } else {
                     pos_x += (width + 1) * i + (i < 0 ? -6 : 6);
@@ -243,7 +244,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         }
         case MenuStyleVertical: {
             canvas_set_orientation(canvas, CanvasOrientationVertical);
-            FuriString* name = furi_string_alloc();
             shift_position = model->vertical_offset;
             canvas_set_font(canvas, FontSecondary);
             size_t item_i;
@@ -253,7 +253,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 if(item_i >= items_count) continue;
                 y_off = 16 * i;
                 bool selected = item_i == position;
-                size_t scroll_counter = menu_scroll_counter(model, selected);
                 if(selected) {
                     elements_slightly_rounded_box(canvas, 0, y_off, 64, 16);
                     canvas_set_color(canvas, ColorWhite);
@@ -261,13 +260,13 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 item = MenuItemArray_get(model->items, item_i);
                 menu_centered_icon(canvas, item, 0, y_off, 16, 16);
                 menu_short_name(item, name);
+                size_t scroll_counter = menu_scroll_counter(model, selected);
                 elements_scrollable_text_line(
                     canvas, 17, y_off + 12, 46, name, scroll_counter, false);
                 if(selected) {
                     canvas_set_color(canvas, ColorBlack);
                 }
             }
-            furi_string_free(name);
             canvas_set_orientation(canvas, CanvasOrientationHorizontal);
             break;
         }
@@ -327,6 +326,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         default:
             break;
         }
+        furi_string_free(name);
     } else {
         canvas_draw_str(canvas, 2, 32, "Empty");
         elements_scrollbar(canvas, 0, 0);
