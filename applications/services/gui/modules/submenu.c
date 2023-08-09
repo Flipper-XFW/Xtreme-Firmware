@@ -99,7 +99,7 @@ static void submenu_view_draw_callback(Canvas* canvas, void* _model) {
         const size_t item_position = position - model->window_position;
         const size_t items_on_screen =
             submenu_items_on_screen(!furi_string_empty(model->header), model->is_vertical);
-        uint8_t y_offset = furi_string_empty(model->header) ? 0 : 16;
+        uint8_t y_offset = furi_string_empty(model->header) ? 0 : item_height;
 
         if(item_position < items_on_screen) {
             if(position == model->position) {

@@ -45,14 +45,14 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
     VariableItemListModel* model = _model;
 
     const uint8_t item_height = 16;
-    const uint8_t item_width = 123;
+    uint8_t item_width = canvas_width(canvas) - 5;
 
     canvas_clear(canvas);
 
+    canvas_set_font(canvas, FontSecondary);
+
     uint8_t position = 0;
     VariableItemArray_it_t it;
-
-    canvas_set_font(canvas, FontSecondary);
     for(VariableItemArray_it(it, model->items); !VariableItemArray_end_p(it);
         VariableItemArray_next(it)) {
         uint8_t item_position = position - model->window_position;
@@ -139,7 +139,9 @@ void variable_item_list_set_selected_item(VariableItemList* variable_item_list, 
         VariableItemListModel * model,
         {
             uint8_t position = index;
-            if(position >= VariableItemArray_size(model->items)) {
+            const size_t items_size = VariableItemArray_size(model->items);
+
+            if(position >= items_size) {
                 position = 0;
             }
 
@@ -150,11 +152,14 @@ void variable_item_list_set_selected_item(VariableItemList* variable_item_list, 
                 model->window_position -= 1;
             }
 
-            if(VariableItemArray_size(model->items) <= 4) {
+            uint8_t items_on_screen = 4;
+
+            if(items_size <= items_on_screen) {
                 model->window_position = 0;
             } else {
-                if(model->window_position >= (VariableItemArray_size(model->items) - 4)) {
-                    model->window_position = (VariableItemArray_size(model->items) - 4);
+                const size_t pos = items_size - items_on_screen;
+                if(model->window_position > pos) {
+                    model->window_position = pos;
                 }
             }
         },
