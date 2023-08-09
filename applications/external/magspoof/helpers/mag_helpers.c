@@ -153,6 +153,7 @@ void tx_deinit_rfid() {
     furi_hal_gpio_write(RFID_PIN_OUT, 0);
 
     furi_hal_rfid_pins_reset();
+    furi_hal_power_disable_otg();
 }
 
 void tx_init_rf(int hz) {
@@ -186,6 +187,7 @@ bool tx_init(MagSetting* setting) {
         tx_init_rfid();
         break;
     case MagTxStateGPIO:
+        furi_hal_power_enable_otg();
         // gpio_item_configure_all_pins(GpioModeOutputPushPull);
         furi_hal_gpio_init(GPIO_PIN_A, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -236,6 +238,7 @@ bool tx_deinit(MagSetting* setting) {
         furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
         //gpio_item_configure_all_pins(GpioModeAnalog);
+        furi_hal_power_disable_otg();
         break;
     case MagTxStatePiezo:
         tx_deinit_piezo();
