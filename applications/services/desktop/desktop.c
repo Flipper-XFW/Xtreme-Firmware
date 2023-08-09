@@ -9,6 +9,7 @@
 #include <cli/cli.h>
 #include <cli/cli_vcp.h>
 #include <locale/locale.h>
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 #include <xtreme.h>
 
 #include "animations/animation_manager.h"
@@ -492,7 +493,7 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
     } else if(!strncmp(keybind, "Wipe Device", MAX_KEYBIND_LENGTH)) {
         loader_start_detached_with_gui_error(instance->loader, "Storage", "wipe");
     } else {
-        loader_start_detached_with_gui_error(instance->loader, keybind, NULL);
+        run_with_default_app(keybind);
     }
 }
 
