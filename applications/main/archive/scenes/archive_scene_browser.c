@@ -3,6 +3,7 @@
 #include "../helpers/archive_apps.h"
 #include "../helpers/archive_favorites.h"
 #include "../helpers/archive_browser.h"
+#include "../helpers/archive_helpers_ext.h"
 #include "../views/archive_browser_view.h"
 #include "archive/scenes/archive_scene.h"
 
@@ -114,6 +115,26 @@ static void
     }
 
     furi_record_close(RECORD_LOADER);
+}
+
+// Hijack existing archive code for default app choosing without needing archive running
+void run_with_default_app(const char* path) {
+    // Kostily
+    FileInfo info;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool is_dir = storage_common_stat(storage, path, &info) == FSE_OK &&
+                  info.flags & FSF_DIRECTORY;
+    furi_record_close(RECORD_STORAGE);
+
+    // Velosipedy
+    ArchiveFile_t item;
+    ArchiveFile_t_init(&item);
+    furi_string_set(item.path, path);
+    archive_set_file_type(&item, path, is_dir, false);
+
+    // Bydlo kod go brrr
+    archive_run_in_app(NULL, &item, false);
+    ArchiveFile_t_clear(&item);
 }
 
 void archive_scene_browser_callback(ArchiveBrowserEvent event, void* context) {
