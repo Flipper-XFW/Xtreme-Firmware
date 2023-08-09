@@ -271,7 +271,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             break;
         }
         case MenuStyleC64: {
-            FuriString* name = furi_string_alloc();
             FuriString* memstr = furi_string_alloc();
 
             size_t index;
@@ -319,7 +318,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             }
 
             furi_string_free(memstr);
-            furi_string_free(name);
 
             break;
         }
