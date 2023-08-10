@@ -493,7 +493,12 @@ void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
     } else if(!strncmp(keybind, "Wipe Device", MAX_KEYBIND_LENGTH)) {
         loader_start_detached_with_gui_error(instance->loader, "Storage", "wipe");
     } else {
-        run_with_default_app(keybind);
+        if(storage_common_exists(furi_record_open(RECORD_STORAGE), keybind)) {
+            run_with_default_app(keybind);
+        } else {
+            loader_start_detached_with_gui_error(instance->loader, keybind, NULL);
+        }
+        furi_record_close(RECORD_STORAGE);
     }
 }
 
