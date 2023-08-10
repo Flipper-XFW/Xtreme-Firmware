@@ -71,9 +71,9 @@ static void archive_show_file(Loader* loader, const char* path) {
     furi_record_close(RECORD_STORAGE);
 
     if(text) {
-        loader_start_with_gui_error(loader, EXT_PATH("apps/Tools/text_viewer.fap"), path);
+        loader_start_detached_with_gui_error(loader, EXT_PATH("apps/Tools/text_viewer.fap"), path);
     } else {
-        loader_start_with_gui_error(loader, EXT_PATH("apps/Tools/hex_viewer.fap"), path);
+        loader_start_detached_with_gui_error(loader, EXT_PATH("apps/Tools/hex_viewer.fap"), path);
     }
 }
 
@@ -105,11 +105,11 @@ static void
                 snprintf(arg, sizeof(arg), "fav%s", str);
                 loader_start_with_gui_error(loader, app_name, arg);
             } else {
-                loader_start_with_gui_error(loader, app_name, str);
+                loader_start_detached_with_gui_error(loader, app_name, str);
             }
         }
     } else if(selected->type == ArchiveFileTypeApplication) {
-        loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
+        loader_start_detached_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
     } else {
         archive_show_file(loader, furi_string_get_cstr(selected->path));
     }
