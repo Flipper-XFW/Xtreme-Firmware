@@ -81,8 +81,8 @@ void loader_start_detached_with_gui_error(Loader* loader, const char* name, cons
     LoaderMessage message;
 
     message.type = LoaderMessageTypeStartByNameDetachedWithGuiError;
-    message.start.name = name;
-    message.start.args = args;
+    message.start.name = name ? strdup(name) : NULL;
+    message.start.args = args ? strdup(args) : NULL;
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
@@ -683,6 +683,8 @@ int32_t loader_srv(void* p) {
                 LoaderStatus status = loader_do_start_by_name(
                     loader, message.start.name, message.start.args, error_message);
                 loader_show_gui_error(status, error_message);
+                if(message.start.name) free((void*)message.start.name);
+                if(message.start.args) free((void*)message.start.args);
                 furi_string_free(error_message);
                 break;
             }
