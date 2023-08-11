@@ -48,13 +48,13 @@ void esp_flasher_scene_quick_on_enter(void* context) {
         submenu_set_header(submenu, "Flash Evil Portal To:");
         submenu_add_item(
             submenu,
-            "WiFi Dev Board / S2",
+            "WiFi Dev (ESP32-S2)",
             QuickEvilportalWifidevS2,
             esp_flasher_scene_quick_submenu_callback,
             app);
         submenu_add_item(
             submenu,
-            "Dev Board Pro / WROOM",
+            "Dev Pro (ESP32-WROOM)",
             QuickEvilportalDevproWroom,
             esp_flasher_scene_quick_submenu_callback,
             app);
@@ -63,13 +63,13 @@ void esp_flasher_scene_quick_on_enter(void* context) {
         submenu_set_header(submenu, "Flash Marauder To:");
         submenu_add_item(
             submenu,
-            "WiFi Dev Board / S2",
+            "WiFi Dev (ESP32-S2)",
             QuickMarauderWifidevS2,
             esp_flasher_scene_quick_submenu_callback,
             app);
         submenu_add_item(
             submenu,
-            "Dev Board Pro / WROOM",
+            "Dev Pro (ESP32-WROOM)",
             QuickMarauderDevproWroom,
             esp_flasher_scene_quick_submenu_callback,
             app);
