@@ -96,7 +96,7 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
     variable_item_set_current_value_text(
         item,
         app->asset_pack_index == 0 ?
-            "SFW" :
+            "Default" :
             *CharList_get(app->asset_pack_names, app->asset_pack_index - 1));
 
     item = variable_item_list_add(
