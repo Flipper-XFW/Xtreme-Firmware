@@ -27,6 +27,9 @@ void esp_flasher_scene_quick_on_enter(void* context) {
 
     switch(state) {
     case QuickStart:
+    case QuickBlackmagic:
+    case QuickEvilportal:
+    case QuickMarauder:
         submenu_set_header(submenu, "Flash Firmware:");
         submenu_add_item(
             submenu, "Black Magic", QuickBlackmagic, esp_flasher_scene_quick_submenu_callback, app);
@@ -35,7 +38,7 @@ void esp_flasher_scene_quick_on_enter(void* context) {
         submenu_add_item(
             submenu, "Marauder", QuickMarauder, esp_flasher_scene_quick_submenu_callback, app);
         break;
-    case QuickBlackmagic:
+    case QuickBlackmagicWifidev:
         submenu_set_header(submenu, "Flash Black Magic To:");
         submenu_add_item(
             submenu,
@@ -44,7 +47,8 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             esp_flasher_scene_quick_submenu_callback,
             app);
         break;
-    case QuickEvilportal:
+    case QuickEvilportalWifidevS2:
+    case QuickEvilportalDevproWroom:
         submenu_set_header(submenu, "Flash Evil Portal To:");
         submenu_add_item(
             submenu,
@@ -59,7 +63,8 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             esp_flasher_scene_quick_submenu_callback,
             app);
         break;
-    case QuickMarauder:
+    case QuickMarauderWifidevS2:
+    case QuickMarauderDevproWroom:
         submenu_set_header(submenu, "Flash Marauder To:");
         submenu_add_item(
             submenu,
@@ -77,6 +82,8 @@ void esp_flasher_scene_quick_on_enter(void* context) {
     default:
         break;
     }
+
+    submenu_set_selected_item(submenu, state);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, EspFlasherAppViewSubmenu);
 }
@@ -101,7 +108,8 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
         case QuickBlackmagic:
         case QuickEvilportal:
         case QuickMarauder:
-            scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneQuick, event.event);
+            scene_manager_set_scene_state(
+                app->scene_manager, EspFlasherSceneQuick, event.event + 1);
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneQuick);
             flash = false;
             break;
@@ -141,6 +149,7 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
         }
 
         if(flash) {
+            scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneQuick, event.event);
             memset(app->selected_flash_options, 0, sizeof(app->selected_flash_options));
             app->bin_file_path_boot[0] = '\0';
             app->bin_file_path_part[0] = '\0';
@@ -176,7 +185,14 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneQuick, QuickStart);
+        uint32_t state = scene_manager_get_scene_state(app->scene_manager, EspFlasherSceneQuick);
+        if(state > QuickMarauder)
+            state = QuickMarauder;
+        else if(state > QuickEvilportal)
+            state = QuickEvilportal;
+        else if(state > QuickBlackmagic)
+            state = QuickBlackmagic;
+        scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneQuick, state);
     }
 
     return consumed;
