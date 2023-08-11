@@ -90,6 +90,7 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
 
         bool flash = true;
+        bool enter_bootloader = false;
         const char* boot = NULL; // 0x1000
         const char* part = NULL; // 0x8000
         const char* nvs = NULL; // 0x9000
@@ -109,11 +110,13 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             part = APP_DATA_PATH("assets/blackmagic/wifidev/partition-table.bin");
             nvs = APP_DATA_PATH("assets/blackmagic/wifidev/nvs.bin");
             firm = APP_DATA_PATH("assets/blackmagic/wifidev/blackmagic.bin");
+            enter_bootloader = true;
             break;
         case QuickEvilportalWifidevS2:
             boot = APP_DATA_PATH("assets/evilportal/wifidev-s2/EvilPortal.ino.bootloader.bin");
             part = APP_DATA_PATH("assets/evilportal/EvilPortal.ino.partitions.bin");
             firm = APP_DATA_PATH("assets/evilportal/wifidev-s2/EvilPortal.ino.bin");
+            enter_bootloader = true;
             break;
         case QuickEvilportalDevproWroom:
             boot = APP_DATA_PATH("assets/evilportal/devpro-wroom/EvilPortal.ino.bootloader.bin");
@@ -124,6 +127,7 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             boot = APP_DATA_PATH("assets/marauder/wifidev-s2/bootloader.bin");
             part = APP_DATA_PATH("assets/marauder/partitions.bin");
             firm = APP_DATA_PATH("assets/marauder/wifidev-s2/flipper_sd_serial.bin");
+            enter_bootloader = true;
             break;
         case QuickMarauderDevproWroom:
             boot = APP_DATA_PATH("assets/marauder/devpro-wroom/bootloader.bin");
@@ -166,9 +170,9 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
                 strncpy(app->bin_file_path_app, firm, sizeof(app->bin_file_path_app));
             }
 
-            app->boot = true;
             app->reset = false;
             app->quickflash = true;
+            app->boot = enter_bootloader;
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
