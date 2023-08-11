@@ -59,6 +59,7 @@ struct EspFlasherApp {
 
     bool reset;
     bool boot;
+    bool quickflash;
 
     bool selected_flash_options[NUM_FLASH_OPTIONS];
     int num_selected_flash_options;
