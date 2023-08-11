@@ -100,7 +100,7 @@ bool xtreme_app_apply(XtremeApp* app) {
     if(app->save_level || app->save_angry) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         if(app->save_level) {
-            int32_t xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+            int32_t xp = app->dolphin_level > 1 ? DOLPHIN_LEVELS[app->dolphin_level - 2] : 0;
             dolphin->state->data.icounter = xp + 1;
         }
         if(app->save_angry) {

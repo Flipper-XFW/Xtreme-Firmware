@@ -810,21 +810,20 @@ Function,+,dolphin_deed_get_app,DolphinApp,DolphinDeed
 Function,+,dolphin_deed_get_app_limit,uint8_t,DolphinApp
 Function,+,dolphin_deed_get_weight,uint8_t,DolphinDeed
 Function,+,dolphin_flush,void,Dolphin*
-Function,+,dolphin_get_level,uint8_t,int
-Function,+,dolphin_get_levels,const int*,
+Function,+,dolphin_get_level,uint8_t,uint32_t
 Function,+,dolphin_get_pubsub,FuriPubSub*,Dolphin*
 Function,+,dolphin_state_alloc,DolphinState*,
 Function,+,dolphin_state_butthurted,void,DolphinState*
 Function,+,dolphin_state_clear_limits,void,DolphinState*
 Function,+,dolphin_state_free,void,DolphinState*
 Function,+,dolphin_state_increase_level,void,DolphinState*
-Function,+,dolphin_state_is_levelup,_Bool,int
+Function,+,dolphin_state_is_levelup,_Bool,uint32_t
 Function,+,dolphin_state_load,_Bool,DolphinState*
 Function,+,dolphin_state_on_deed,void,"DolphinState*, DolphinDeed"
 Function,+,dolphin_state_save,_Bool,DolphinState*
 Function,+,dolphin_state_timestamp,uint64_t,
-Function,+,dolphin_state_xp_above_last_levelup,uint32_t,int
-Function,+,dolphin_state_xp_to_levelup,uint32_t,int
+Function,+,dolphin_state_xp_above_last_levelup,uint32_t,uint32_t
+Function,+,dolphin_state_xp_to_levelup,uint32_t,uint32_t
 Function,+,dolphin_stats,DolphinStats,Dolphin*
 Function,+,dolphin_upgrade_level,void,Dolphin*
 Function,-,dprintf,int,"int, const char*, ..."
@@ -3311,6 +3310,8 @@ Variable,+,A_Sub1ghz_14,Icon,
 Variable,+,A_U2F_14,Icon,
 Variable,+,A_Xtreme_14,Icon,
 Variable,+,A_iButton_14,Icon,
+Variable,+,DOLPHIN_LEVELS,const uint32_t[],
+Variable,+,DOLPHIN_LEVEL_COUNT,const size_t,
 Variable,+,FLIPPER_APPS,const FlipperInternalApplication[],
 Variable,+,FLIPPER_APPS_COUNT,const size_t,
 Variable,-,FLIPPER_ARCHIVE,const FlipperInternalApplication,
