@@ -4,15 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="totp_app",
     cdefines=["APP_TOTP"],
-    requires=[
-        "gui",
-        "cli",
-        "dialogs",
-        "storage",
-        "input", 
-        "notification",
-        "bt"
-    ],
+    requires=["gui", "cli", "dialogs", "storage", "input", "notification", "bt"],
     stack_size=2 * 1024,
     order=20,
     fap_version="4.01",
@@ -49,11 +41,11 @@ App(
                 "wolfcrypt/src/hash.c",
                 "wolfcrypt/src/sha.c",
                 "wolfcrypt/src/sha256.c",
-                "wolfcrypt/src/sha512.c"
+                "wolfcrypt/src/sha512.c",
             ],
             cflags=["-Wno-error"],
             cdefines=["HAVE_CONFIG_H"],
-            cincludes=["config/wolfssl"]
+            cincludes=["config/wolfssl"],
         ),
     ],
 )
