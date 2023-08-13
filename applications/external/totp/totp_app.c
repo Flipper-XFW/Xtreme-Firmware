@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include "features_config.h"
+#include "config/app/config.h"
 #include "services/config/config.h"
 #include "types/plugin_state.h"
 #include "types/token_info.h"
@@ -17,6 +17,7 @@
 #include "services/crypto/crypto_facade.h"
 #include "cli/cli.h"
 #include "version.h"
+#include <wolfssl/version.h>
 
 struct TotpRenderCallbackContext {
     FuriMutex* mutex;
@@ -217,6 +218,8 @@ int32_t totp_app() {
         TOTP_APP_VERSION_MAJOR,
         TOTP_APP_VERSION_MINOR,
         TOTP_APP_VERSION_PATCH);
+    FURI_LOG_I(LOGGING_TAG, "WolfSSL version: " LIBWOLFSSL_VERSION_STRING);
+
     PluginState* plugin_state = malloc(sizeof(PluginState));
     furi_check(plugin_state != NULL);
 

@@ -11,7 +11,8 @@
 #include "../../types/common.h"
 #include "../../types/token_info.h"
 #include "../type_code_common.h"
-#include "../../features_config.h"
+#include "../../config/app/config.h"
+#include "../../services/config/constants.h"
 
 #if TOTP_TARGET_FIRMWARE == TOTP_FIRMWARE_XTREME_UL
 #define TOTP_BT_WORKER_BT_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH

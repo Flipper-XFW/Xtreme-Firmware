@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <furi/core/mutex.h>
 #include "../../types/automation_kb_layout.h"
-#include "../../services/config/constants.h"
 
 #define TOTP_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/totp/.bt_hid.keys")
 
