@@ -7,6 +7,7 @@
 #include <gui/view_port_i.h>
 #include <gui/view_dispatcher_i.h>
 #include <gui/modules/text_input_i.h>
+#include <notification/notification_messages.h>
 
 static void input_cli_usage() {
     printf("Usage:\r\n");
@@ -48,6 +49,7 @@ static void input_cli_dump(Cli* cli, FuriString* args, Input* input) {
 static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     UNUSED(args);
     Gui* gui = furi_record_open(RECORD_GUI);
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     printf("Using console keyboard feedback for flipper input\r\n");
 
@@ -82,6 +84,7 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
                         if(in_chr == 0x11) { // Ctrl Q = Close text input
                             send_key = InputKeyBack;
                         } else if(text_input_insert_character(text_input, in_chr)) {
+                            notification_message(notification, &sequence_display_backlight_on);
                             continue;
                         }
                     }
@@ -115,12 +118,14 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
         }
 
         if(send_key != InputKeyMAX) {
+            notification_message(notification, &sequence_display_backlight_on);
             input_fake_event(input, send_key, hold ? InputTypeLong : InputTypeShort);
             hold = false;
         }
     }
 
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
 }
 
 static void input_cli_send_print_usage() {
