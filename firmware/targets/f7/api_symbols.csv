@@ -1733,6 +1733,7 @@ Function,+,hex_char_to_hex_nibble,_Bool,"char, uint8_t*"
 Function,+,hex_char_to_uint8,_Bool,"char, char, uint8_t*"
 Function,+,hex_chars_to_uint64,_Bool,"const char*, uint64_t*"
 Function,+,hex_chars_to_uint8,_Bool,"const char*, uint8_t*"
+Function,+,hsv2rgb,RgbColor,HsvColor
 Function,-,hypot,double,"double, double"
 Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
@@ -2555,6 +2556,7 @@ Function,-,rfal_platform_spi_acquire,void,
 Function,-,rfal_platform_spi_release,void,
 Function,-,rfal_set_callback_context,void,void*
 Function,-,rfal_set_state_changed_callback,void,RfalStateChangedCallback
+Function,+,rgb2hsv,HsvColor,RgbColor
 Function,+,rgb_backlight_get_color_count,uint8_t,
 Function,+,rgb_backlight_get_color_text,const char*,uint8_t
 Function,+,rgb_backlight_get_settings,RGBBacklightSettings*,
