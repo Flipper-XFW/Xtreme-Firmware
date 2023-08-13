@@ -98,7 +98,8 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
                     send_key = in_chr - 'A'; // Arrows in same order as InputKey
                 }
                 break;
-            case CliSymbolAsciiBackspace: // Backspace = Back
+            case CliSymbolAsciiBackspace: // (minicom) Backspace = Back
+            case CliSymbolAsciiDel: // (putty/picocom) Backspace = Back
                 send_key = InputKeyBack;
                 break;
             case 0x4d: // Shift Enter = Hold Ok
