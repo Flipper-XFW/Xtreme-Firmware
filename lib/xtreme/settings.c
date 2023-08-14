@@ -1,5 +1,6 @@
 #include "xtreme.h"
 #include <furi_hal.h>
+#include <rgb_backlight.h>
 #include <flipper_format/flipper_format.h>
 
 #define TAG "XtremeSettings"
@@ -194,6 +195,8 @@ void XTREME_SETTINGS_LOAD() {
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+
+    rgb_backlight_reconfigure(x->rgb_backlight);
 }
 
 void XTREME_SETTINGS_SAVE() {

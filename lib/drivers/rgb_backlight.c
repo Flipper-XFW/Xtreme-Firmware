@@ -64,6 +64,7 @@ static const struct {
 
 static struct {
     bool settings_loaded;
+    bool enabled;
     bool last_rainbow;
     uint8_t last_brightness;
     uint8_t last_color_index;
@@ -71,6 +72,7 @@ static struct {
     HsvColor rainbow_hsv;
 } rgb_state = {
     .settings_loaded = false,
+    .enabled = false,
     .last_rainbow = true,
     .last_brightness = 0,
     .last_color_index = 255,
@@ -96,8 +98,13 @@ static void rainbow_timer(void* ctx) {
     rgb_backlight_update(rgb_state.last_brightness, true);
 }
 
-static void rainbow_configure() {
-    if(rgb_settings.rainbow_mode != RGBBacklightRainbowModeOff) {
+void rgb_backlight_reconfigure(bool enabled) {
+    if(enabled && !rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_state.enabled = enabled;
+
+    if(rgb_state.enabled && rgb_settings.rainbow_mode != RGBBacklightRainbowModeOff) {
         if(rgb_state.rainbow_timer == NULL) {
             rgb_state.rainbow_timer = furi_timer_alloc(rainbow_timer, FuriTimerTypePeriodic, NULL);
         } else {
@@ -109,6 +116,8 @@ static void rainbow_configure() {
         furi_timer_free(rgb_state.rainbow_timer);
         rgb_state.rainbow_timer = NULL;
     }
+
+    rgb_backlight_update(rgb_state.last_brightness, false);
 }
 
 void rgb_backlight_load_settings(void) {
@@ -126,7 +135,7 @@ void rgb_backlight_load_settings(void) {
         RGB_BACKLIGHT_SETTINGS_VERSION);
 
     rgb_state.settings_loaded = true;
-    rainbow_configure();
+    rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
 void rgb_backlight_save_settings(void) {
@@ -144,6 +153,7 @@ void rgb_backlight_set_color(uint8_t color_index) {
     }
     if(color_index > (rgb_backlight_get_color_count() - 1)) color_index = 0;
     rgb_settings.display_color_index = color_index;
+    rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
 uint8_t rgb_backlight_get_color() {
@@ -159,7 +169,7 @@ void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode) {
     }
     if(rainbow_mode > (RGBBacklightRainbowModeCount - 1)) rainbow_mode = 0;
     rgb_settings.rainbow_mode = rainbow_mode;
-    rainbow_configure();
+    rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
 RGBBacklightRainbowMode rgb_backlight_get_rainbow_mode() {
@@ -188,7 +198,7 @@ void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval) {
         rgb_backlight_load_settings();
     }
     rgb_settings.rainbow_interval = rainbow_interval;
-    rainbow_configure();
+    rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
 uint32_t rgb_backlight_get_rainbow_interval() {
@@ -199,6 +209,7 @@ uint32_t rgb_backlight_get_rainbow_interval() {
 }
 
 void rgb_backlight_update(uint8_t brightness, bool tick) {
+    if(!rgb_state.enabled) return;
     if(!rgb_state.settings_loaded) {
         rgb_backlight_load_settings();
     }

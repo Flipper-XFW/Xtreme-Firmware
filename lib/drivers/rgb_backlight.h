@@ -47,6 +47,13 @@ uint8_t rgb_backlight_get_color_count(void);
 const char* rgb_backlight_get_color_text(uint8_t index);
 
 /**
+ * @brief Reconfigure rgb backlight with new settings
+ *
+ * @param enabled Whether the rgb backlight is enabled
+ */
+void rgb_backlight_reconfigure(bool enabled);
+
+/**
  * @brief Загрузить настройки подсветки с SD-карты
  */
 void rgb_backlight_load_settings();
