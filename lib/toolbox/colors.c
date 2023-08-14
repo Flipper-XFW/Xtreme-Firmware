@@ -2,6 +2,14 @@
 
 #include "colors.h"
 
+inline int rgbcmp(RgbColor* a, RgbColor* b) {
+    return memcmp(a, b, sizeof(RgbColor));
+}
+
+inline int hsvcmp(HsvColor* a, HsvColor* b) {
+    return memcmp(a, b, sizeof(HsvColor));
+}
+
 RgbColor hsv2rgb(HsvColor hsv) {
     RgbColor rgb;
     uint8_t region, remainder, p, q, t;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,6 +18,10 @@ typedef struct HsvColor {
     uint8_t s;
     uint8_t v;
 } HsvColor;
+
+int rgbcmp(RgbColor* a, RgbColor* b);
+
+int hsvcmp(HsvColor* a, HsvColor* b);
 
 RgbColor hsv2rgb(HsvColor hsv);
 

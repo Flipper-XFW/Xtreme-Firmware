@@ -1734,6 +1734,7 @@ Function,+,hex_char_to_uint8,_Bool,"char, char, uint8_t*"
 Function,+,hex_chars_to_uint64,_Bool,"const char*, uint64_t*"
 Function,+,hex_chars_to_uint8,_Bool,"const char*, uint8_t*"
 Function,+,hsv2rgb,RgbColor,HsvColor
+Function,+,hsvcmp,int,"HsvColor*, HsvColor*"
 Function,-,hypot,double,"double, double"
 Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
@@ -2571,6 +2572,7 @@ Function,+,rgb_backlight_set_rainbow_interval,void,uint32_t
 Function,+,rgb_backlight_set_rainbow_mode,void,RGBBacklightRainbowMode
 Function,+,rgb_backlight_set_rainbow_speed,void,uint8_t
 Function,-,rgb_backlight_update,void,"uint8_t, _Bool"
+Function,+,rgbcmp,int,"RgbColor*, RgbColor*"
 Function,-,rindex,char*,"const char*, int"
 Function,-,rint,double,double
 Function,-,rintf,float,float
