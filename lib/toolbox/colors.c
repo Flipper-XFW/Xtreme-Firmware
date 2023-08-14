@@ -2,11 +2,11 @@
 
 #include "colors.h"
 
-inline int rgbcmp(RgbColor* a, RgbColor* b) {
+inline int rgbcmp(const RgbColor* a, const RgbColor* b) {
     return memcmp(a, b, sizeof(RgbColor));
 }
 
-inline int hsvcmp(HsvColor* a, HsvColor* b) {
+inline int hsvcmp(const HsvColor* a, const HsvColor* b) {
     return memcmp(a, b, sizeof(HsvColor));
 }
 

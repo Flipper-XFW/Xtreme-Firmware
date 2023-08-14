@@ -19,9 +19,9 @@ typedef struct HsvColor {
     uint8_t v;
 } HsvColor;
 
-int rgbcmp(RgbColor* a, RgbColor* b);
+int rgbcmp(const RgbColor* a, const RgbColor* b);
 
-int hsvcmp(HsvColor* a, HsvColor* b);
+int hsvcmp(const HsvColor* a, const HsvColor* b);
 
 RgbColor hsv2rgb(HsvColor hsv);
 

@@ -53,12 +53,7 @@ static struct {
     .last_brightness = 0,
     .last_color = {0, 0, 0},
     .rainbow_timer = NULL,
-    .rainbow_hsv =
-        {
-            .h = 0,
-            .s = 255,
-            .v = 255,
-        },
+    .rainbow_hsv = {0, 255, 255},
 };
 
 static void rainbow_timer(void* ctx) {

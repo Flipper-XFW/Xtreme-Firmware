@@ -5,6 +5,9 @@ enum VarItemListIndex {
     VarItemListIndexLeftHanded,
     VarItemListIndexRgbBacklight,
     VarItemListIndexLcdColor,
+    VarItemListIndexRainbowLcd,
+    VarItemListIndexRainbowSpeed,
+    VarItemListIndexRainbowInterval,
 };
 
 void xtreme_app_scene_misc_screen_var_item_list_callback(void* context, uint32_t index) {
@@ -237,6 +240,7 @@ bool xtreme_app_scene_misc_screen_on_event(void* context, SceneManagerEvent even
             if(change) {
                 XTREME_SETTINGS()->rgb_backlight = !XTREME_SETTINGS()->rgb_backlight;
                 app->save_settings = true;
+                app->save_backlight = true;
                 notification_message(app->notification, &sequence_display_backlight_on);
                 rgb_backlight_reconfigure(XTREME_SETTINGS()->rgb_backlight);
                 scene_manager_previous_scene(app->scene_manager);
