@@ -30,11 +30,34 @@ static void xtreme_app_scene_misc_screen_hand_orient_changed(VariableItem* item)
     }
 }
 
+static const struct {
+    char* name;
+    RgbColor color;
+} lcd_colors[] = {
+    {"Orange", {255, 69, 0}},
+    {"Red", {255, 0, 0}},
+    {"Maroon", {128, 0, 0}},
+    {"Yellow", {255, 255, 0}},
+    {"Olive", {128, 128, 0}},
+    {"Lime", {0, 255, 0}},
+    {"Green", {0, 128, 0}},
+    {"Aqua", {0, 255, 127}},
+    {"Cyan", {0, 210, 210}},
+    {"Azure", {0, 127, 255}},
+    {"Teal", {0, 128, 128}},
+    {"Blue", {0, 0, 255}},
+    {"Navy", {0, 0, 128}},
+    {"Purple", {128, 0, 128}},
+    {"Fuchsia", {255, 0, 255}},
+    {"Pink", {173, 31, 173}},
+    {"Brown", {165, 42, 42}},
+    {"White", {255, 192, 203}},
+};
 static void xtreme_app_scene_misc_screen_lcd_color_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, rgb_backlight_get_color_text(index));
-    rgb_backlight_set_color(index);
+    variable_item_set_current_value_text(item, lcd_colors[index].name);
+    rgb_backlight_set_color(lcd_colors[index].color);
     app->save_backlight = true;
 }
 
@@ -121,12 +144,20 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list,
         "LCD Color",
-        rgb_backlight_get_color_count(),
+        COUNT_OF(lcd_colors),
         xtreme_app_scene_misc_screen_lcd_color_changed,
         app);
-    value_index = rgb_backlight_get_color();
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, rgb_backlight_get_color_text(value_index));
+    RgbColor color = rgb_backlight_get_color();
+    bool found = false;
+    for(size_t i = 0; i < COUNT_OF(lcd_colors); i++) {
+        if(rgbcmp(&color, &lcd_colors[i].color) == 0) {
+            value_index = i;
+            found = true;
+            break;
+        }
+    }
+    variable_item_set_current_value_index(item, found ? value_index : COUNT_OF(lcd_colors));
+    variable_item_set_current_value_text(item, found ? lcd_colors[value_index].name : "Custom");
     variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
 
     item = variable_item_list_add(

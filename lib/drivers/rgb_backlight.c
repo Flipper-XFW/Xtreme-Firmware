@@ -27,39 +27,15 @@
 #define RGB_BACKLIGHT_SETTINGS_PATH CFG_PATH("rgb_backlight.settings")
 
 static struct {
-    uint8_t display_color_index;
+    RgbColor color;
     RGBBacklightRainbowMode rainbow_mode;
     uint8_t rainbow_speed;
     uint32_t rainbow_interval;
 } rgb_settings = {
-    .display_color_index = 0,
+    .color = {255, 69, 0},
     .rainbow_mode = RGBBacklightRainbowModeOff,
     .rainbow_speed = 5,
     .rainbow_interval = 1000,
-};
-
-static const struct {
-    char* name;
-    RgbColor color;
-} colors[] = {
-    {"Orange", {255, 69, 0}},
-    {"Red", {255, 0, 0}},
-    {"Maroon", {128, 0, 0}},
-    {"Yellow", {255, 255, 0}},
-    {"Olive", {128, 128, 0}},
-    {"Lime", {0, 255, 0}},
-    {"Green", {0, 128, 0}},
-    {"Aqua", {0, 255, 127}},
-    {"Cyan", {0, 210, 210}},
-    {"Azure", {0, 127, 255}},
-    {"Teal", {0, 128, 128}},
-    {"Blue", {0, 0, 255}},
-    {"Navy", {0, 0, 128}},
-    {"Purple", {128, 0, 128}},
-    {"Fuchsia", {255, 0, 255}},
-    {"Pink", {173, 31, 173}},
-    {"Brown", {165, 42, 42}},
-    {"White", {255, 192, 203}},
 };
 
 static struct {
@@ -67,7 +43,7 @@ static struct {
     bool enabled;
     bool last_rainbow;
     uint8_t last_brightness;
-    uint8_t last_color_index;
+    RgbColor last_color;
     FuriTimer* rainbow_timer;
     HsvColor rainbow_hsv;
 } rgb_state = {
@@ -75,7 +51,7 @@ static struct {
     .enabled = false,
     .last_rainbow = true,
     .last_brightness = 0,
-    .last_color_index = 255,
+    .last_color = {0, 0, 0},
     .rainbow_timer = NULL,
     .rainbow_hsv =
         {
@@ -84,14 +60,6 @@ static struct {
             .v = 255,
         },
 };
-
-uint8_t rgb_backlight_get_color_count(void) {
-    return COUNT_OF(colors);
-}
-
-const char* rgb_backlight_get_color_text(uint8_t index) {
-    return colors[index].name;
-}
 
 static void rainbow_timer(void* ctx) {
     UNUSED(ctx);
@@ -147,20 +115,19 @@ void rgb_backlight_save_settings(void) {
         RGB_BACKLIGHT_SETTINGS_VERSION);
 }
 
-void rgb_backlight_set_color(uint8_t color_index) {
+void rgb_backlight_set_color(RgbColor color) {
     if(!rgb_state.settings_loaded) {
         rgb_backlight_load_settings();
     }
-    if(color_index > (rgb_backlight_get_color_count() - 1)) color_index = 0;
-    rgb_settings.display_color_index = color_index;
+    rgb_settings.color = color;
     rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
-uint8_t rgb_backlight_get_color() {
+RgbColor rgb_backlight_get_color() {
     if(!rgb_state.settings_loaded) {
         rgb_backlight_load_settings();
     }
-    return rgb_settings.display_color_index;
+    return rgb_settings.color;
 }
 
 void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode) {
@@ -216,15 +183,14 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
 
     switch(rgb_settings.rainbow_mode) {
     case RGBBacklightRainbowModeOff: {
-        if(rgb_state.last_brightness == brightness &&
-           rgb_state.last_color_index == rgb_settings.display_color_index &&
-           !rgb_state.last_rainbow) {
+        if(!rgb_state.last_rainbow && rgb_state.last_brightness == brightness &&
+           rgbcmp(&rgb_state.last_color, &rgb_settings.color) == 0) {
             return;
         }
         rgb_state.last_rainbow = false;
-        rgb_state.last_color_index = rgb_settings.display_color_index;
+        rgb_state.last_color = rgb_settings.color;
 
-        RgbColor rgb = colors[rgb_settings.display_color_index].color;
+        RgbColor rgb = rgb_settings.color;
         rgb.r *= (brightness / 255.0f);
         rgb.g *= (brightness / 255.0f);
         rgb.b *= (brightness / 255.0f);

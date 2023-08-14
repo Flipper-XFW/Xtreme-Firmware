@@ -32,21 +32,6 @@ typedef enum {
 } RGBBacklightRainbowMode;
 
 /**
- * @brief Получить количество доступных цветов
- *
- * @return Число доступных вариантов цвета
- */
-uint8_t rgb_backlight_get_color_count(void);
-
-/**
- * @brief Получить текстовое название цвета
- *
- * @param index Индекс из доступных вариантов цвета
- * @return Указатель на строку с названием цвета
- */
-const char* rgb_backlight_get_color_text(uint8_t index);
-
-/**
  * @brief Reconfigure rgb backlight with new settings
  *
  * @param enabled Whether the rgb backlight is enabled
@@ -64,13 +49,13 @@ void rgb_backlight_load_settings();
 void rgb_backlight_save_settings();
 
 /**
- * @brief Установить цвет RGB-подсветки
+ * @brief Change the color of the backlight
  *
- * @param color_index Индекс цвета (0 - rgb_backlight_get_color_count())
+ * @param color RGB color to use
  */
-void rgb_backlight_set_color(uint8_t color_index);
+void rgb_backlight_set_color(RgbColor color);
 
-uint8_t rgb_backlight_get_color();
+RgbColor rgb_backlight_get_color();
 
 /**
  * @brief Change rainbow mode
