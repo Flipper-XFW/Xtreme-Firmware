@@ -18,54 +18,18 @@
 
 #include <furi.h>
 #include "SK6805.h"
+#include <toolbox/colors.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-    char* name;
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-} RGBBacklightColor;
-
-typedef struct {
-    uint8_t version;
-    uint8_t display_color_index;
-    bool settings_is_loaded;
-} RGBBacklightSettings;
-
-/**
- * @brief Получить текущие настройки RGB-подсветки
- *
- * @return Указатель на структуру настроек
- */
-RGBBacklightSettings* rgb_backlight_get_settings(void);
-
-/**
- * @brief Загрузить настройки подсветки с SD-карты
- */
-void rgb_backlight_load_settings(void);
-
-/**
- * @brief Сохранить текущие настройки RGB-подсветки
- */
-void rgb_backlight_save_settings(void);
-
-/**
- * @brief Применить текущие настройки RGB-подсветки
- *
- * @param brightness Яркость свечения (0-255)
- */
-void rgb_backlight_update(uint8_t brightness);
-
-/**
- * @brief Установить цвет RGB-подсветки
- *
- * @param color_index Индекс цвета (0 - rgb_backlight_get_color_count())
- */
-void rgb_backlight_set_color(uint8_t color_index);
+typedef enum {
+    RGBBacklightRainbowModeOff,
+    RGBBacklightRainbowModeWave,
+    RGBBacklightRainbowModeSolid,
+    RGBBacklightRainbowModeCount,
+} RGBBacklightRainbowMode;
 
 /**
  * @brief Получить количество доступных цветов
@@ -81,6 +45,60 @@ uint8_t rgb_backlight_get_color_count(void);
  * @return Указатель на строку с названием цвета
  */
 const char* rgb_backlight_get_color_text(uint8_t index);
+
+/**
+ * @brief Загрузить настройки подсветки с SD-карты
+ */
+void rgb_backlight_load_settings();
+
+/**
+ * @brief Сохранить текущие настройки RGB-подсветки
+ */
+void rgb_backlight_save_settings();
+
+/**
+ * @brief Установить цвет RGB-подсветки
+ *
+ * @param color_index Индекс цвета (0 - rgb_backlight_get_color_count())
+ */
+void rgb_backlight_set_color(uint8_t color_index);
+
+uint8_t rgb_backlight_get_color();
+
+/**
+ * @brief Change rainbow mode
+ *
+ * @param rainbow_mode What mode to use (0 - RGBBacklightRainbowModeCount)
+ */
+void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode);
+
+RGBBacklightRainbowMode rgb_backlight_get_rainbow_mode();
+
+/**
+ * @brief Change rainbow speed
+ *
+ * @param rainbow_speed What speed to use (0 - 255)
+ */
+void rgb_backlight_set_rainbow_speed(uint8_t rainbow_speed);
+
+uint8_t rgb_backlight_get_rainbow_speed();
+
+/**
+ * @brief Change rainbow interval
+ *
+ * @param rainbow_interval What interval to use
+ */
+void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval);
+
+uint32_t rgb_backlight_get_rainbow_interval();
+
+/**
+ * @brief Применить текущие настройки RGB-подсветки
+ *
+ * @param brightness Яркость свечения (0-255)
+ * @param tick       Whether this update was a tick (for rainbow)
+ */
+void rgb_backlight_update(uint8_t brightness, bool tick);
 
 #ifdef __cplusplus
 }

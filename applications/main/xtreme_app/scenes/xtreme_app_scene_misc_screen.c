@@ -39,6 +39,65 @@ static void xtreme_app_scene_misc_screen_lcd_color_changed(VariableItem* item) {
     notification_message(app->notification, &sequence_display_backlight_on);
 }
 
+const char* const rainbow_lcd_names[RGBBacklightRainbowModeCount] = {
+    "OFF",
+    "Wave",
+    "Static",
+};
+static void xtreme_app_scene_misc_screen_rainbow_lcd_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, rainbow_lcd_names[index]);
+    rgb_backlight_set_rainbow_mode(index);
+    app->save_backlight = true;
+}
+
+static void xtreme_app_scene_misc_screen_rainbow_speed_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item) + 1;
+    char str[4];
+    snprintf(str, sizeof(str), "%d", index);
+    variable_item_set_current_value_text(item, str);
+    rgb_backlight_set_rainbow_speed(index);
+    app->save_backlight = true;
+}
+
+const char* const rainbow_interval_names[] = {
+    "0.25 S",
+    "0.50 S",
+    "0.75 S",
+    "1.00 S",
+    "1.25 S",
+    "1.50 S",
+    "1.75 S",
+    "2.00 S",
+    "2.50 S",
+    "3.00 S",
+    "4.00 S",
+    "5.00 S",
+};
+const uint32_t rainbow_interval_values[COUNT_OF(rainbow_interval_names)] = {
+    250,
+    500,
+    750,
+    1000,
+    1250,
+    1500,
+    1750,
+    2000,
+    2500,
+    3000,
+    4000,
+    5000,
+};
+static void xtreme_app_scene_misc_screen_rainbow_interval_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, rainbow_interval_names[index]);
+    rgb_backlight_set_rainbow_interval(rainbow_interval_values[index]);
+    app->save_backlight = true;
+}
+
 void xtreme_app_scene_misc_screen_on_enter(void* context) {
     XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
@@ -66,9 +125,47 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
         rgb_backlight_get_color_count(),
         xtreme_app_scene_misc_screen_lcd_color_changed,
         app);
-    value_index = rgb_backlight_get_settings()->display_color_index;
+    value_index = rgb_backlight_get_color();
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rgb_backlight_get_color_text(value_index));
+    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Rainbow LCD",
+        RGBBacklightRainbowModeCount,
+        xtreme_app_scene_misc_screen_rainbow_lcd_changed,
+        app);
+    value_index = rgb_backlight_get_rainbow_mode();
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, rainbow_lcd_names[value_index]);
+    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Rainbow Speed",
+        25,
+        xtreme_app_scene_misc_screen_rainbow_speed_changed,
+        app);
+    value_index = rgb_backlight_get_rainbow_speed();
+    variable_item_set_current_value_index(item, value_index - 1);
+    char str[4];
+    snprintf(str, sizeof(str), "%d", value_index);
+    variable_item_set_current_value_text(item, str);
+    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Rainbow Interval",
+        COUNT_OF(rainbow_interval_values),
+        xtreme_app_scene_misc_screen_rainbow_interval_changed,
+        app);
+    value_index = value_index_uint32(
+        rgb_backlight_get_rainbow_interval(),
+        rainbow_interval_values,
+        COUNT_OF(rainbow_interval_values));
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, rainbow_interval_names[value_index]);
     variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
 
     variable_item_list_set_enter_callback(
