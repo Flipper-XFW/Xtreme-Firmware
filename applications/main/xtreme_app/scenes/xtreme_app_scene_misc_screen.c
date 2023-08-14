@@ -248,6 +248,9 @@ bool xtreme_app_scene_misc_screen_on_event(void* context, SceneManagerEvent even
             }
             break;
         }
+        case VarItemListIndexLcdColor:
+            scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscScreenColor);
+            break;
         default:
             break;
         }
