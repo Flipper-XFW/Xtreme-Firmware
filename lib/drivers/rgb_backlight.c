@@ -35,7 +35,7 @@ static struct {
     .color = {255, 69, 0},
     .rainbow_mode = RGBBacklightRainbowModeOff,
     .rainbow_speed = 5,
-    .rainbow_interval = 1000,
+    .rainbow_interval = 250,
 };
 
 static struct {

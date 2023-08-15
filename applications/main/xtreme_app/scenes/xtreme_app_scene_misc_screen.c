@@ -88,20 +88,24 @@ static void xtreme_app_scene_misc_screen_rainbow_speed_changed(VariableItem* ite
 }
 
 const char* const rainbow_interval_names[] = {
+    "0.1 S",
+    "0.2 S",
     "0.25 S",
-    "0.50 S",
+    "0.5 S",
     "0.75 S",
-    "1.00 S",
+    "1 S",
     "1.25 S",
-    "1.50 S",
+    "1.5 S",
     "1.75 S",
-    "2.00 S",
-    "2.50 S",
-    "3.00 S",
-    "4.00 S",
-    "5.00 S",
+    "2 S",
+    "2.5 S",
+    "3 S",
+    "4 S",
+    "5 S",
 };
 const uint32_t rainbow_interval_values[COUNT_OF(rainbow_interval_names)] = {
+    100,
+    200,
     250,
     500,
     750,
