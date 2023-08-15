@@ -181,8 +181,13 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
             break;
         }
         variable_item_set_current_value_index(item, found ? value_index : lcd_sz);
-        variable_item_set_current_value_text(
-            item, found ? lcd_colors[value_index].name : "Custom");
+        if(found) {
+            variable_item_set_current_value_text(item, lcd_colors[value_index].name);
+        } else {
+            char str[7];
+            snprintf(str, sizeof(str), "%02X%02X%02X", color.r, color.g, color.b);
+            variable_item_set_current_value_text(item, str);
+        }
         variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
     }
 
