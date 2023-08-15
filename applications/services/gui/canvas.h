@@ -27,6 +27,9 @@ typedef enum {
     FontKeyboard,
     FontBigNumbers,
     FontBatteryPercent,
+    FontScummRomanOutline,
+    FontScummRoman,
+    FontEurocorp,
 
     // Keep last for fonts number calculation
     FontTotalNumber,
