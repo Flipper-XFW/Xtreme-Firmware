@@ -20,7 +20,6 @@
 #include <furi_hal.h>
 
 /* Настройки */
-#define SK6805_LED_COUNT 3 //Количество светодиодов на плате подсветки
 #define SK6805_LED_PIN &led_pin //Порт подключения светодиодов
 
 #ifdef FURI_DEBUG

@@ -27,12 +27,17 @@
 #define RGB_BACKLIGHT_SETTINGS_PATH CFG_PATH("rgb_backlight.settings")
 
 static struct {
-    RgbColor color;
+    RgbColor colors[SK6805_LED_COUNT];
     RGBBacklightRainbowMode rainbow_mode;
     uint8_t rainbow_speed;
     uint32_t rainbow_interval;
 } rgb_settings = {
-    .color = {255, 69, 0},
+    .colors =
+        {
+            {255, 69, 0},
+            {255, 69, 0},
+            {255, 69, 0},
+        },
     .rainbow_mode = RGBBacklightRainbowModeOff,
     .rainbow_speed = 5,
     .rainbow_interval = 250,
@@ -43,7 +48,7 @@ static struct {
     bool enabled;
     bool last_rainbow;
     uint8_t last_brightness;
-    RgbColor last_color;
+    RgbColor last_colors[SK6805_LED_COUNT];
     FuriTimer* rainbow_timer;
     HsvColor rainbow_hsv;
 } rgb_state = {
@@ -51,7 +56,12 @@ static struct {
     .enabled = false,
     .last_rainbow = true,
     .last_brightness = 0,
-    .last_color = {0, 0, 0},
+    .last_colors =
+        {
+            {0, 0, 0},
+            {0, 0, 0},
+            {0, 0, 0},
+        },
     .rainbow_timer = NULL,
     .rainbow_hsv = {0, 255, 255},
 };
@@ -110,19 +120,21 @@ void rgb_backlight_save_settings(void) {
         RGB_BACKLIGHT_SETTINGS_VERSION);
 }
 
-void rgb_backlight_set_color(RgbColor color) {
+void rgb_backlight_set_color(uint8_t index, RgbColor color) {
+    if(index >= COUNT_OF(rgb_settings.colors)) return;
     if(!rgb_state.settings_loaded) {
         rgb_backlight_load_settings();
     }
-    rgb_settings.color = color;
+    rgb_settings.colors[index] = color;
     rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
-RgbColor rgb_backlight_get_color() {
+RgbColor rgb_backlight_get_color(uint8_t index) {
+    if(index >= COUNT_OF(rgb_settings.colors)) return (RgbColor){0, 0, 0};
     if(!rgb_state.settings_loaded) {
         rgb_backlight_load_settings();
     }
-    return rgb_settings.color;
+    return rgb_settings.colors[index];
 }
 
 void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode) {
@@ -179,20 +191,19 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
     switch(rgb_settings.rainbow_mode) {
     case RGBBacklightRainbowModeOff: {
         if(!rgb_state.last_rainbow && rgb_state.last_brightness == brightness &&
-           rgbcmp(&rgb_state.last_color, &rgb_settings.color) == 0) {
+           memcmp(rgb_state.last_colors, rgb_settings.colors, sizeof(rgb_settings.colors)) == 0) {
             return;
         }
         rgb_state.last_rainbow = false;
-        rgb_state.last_color = rgb_settings.color;
+        memcpy(rgb_state.last_colors, rgb_settings.colors, sizeof(rgb_settings.colors));
 
-        RgbColor rgb = rgb_settings.color;
-        rgb.r *= (brightness / 255.0f);
-        rgb.g *= (brightness / 255.0f);
-        rgb.b *= (brightness / 255.0f);
-        FURI_LOG_I("RgbBacklight", "rgb %d %d %d", rgb.r, rgb.g, rgb.b);
-
+        float bright = brightness / 255.0f;
         for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
-            SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
+            SK6805_set_led_color(
+                i,
+                rgb_settings.colors[i].r * bright,
+                rgb_settings.colors[i].g * bright,
+                rgb_settings.colors[i].b * bright);
         }
         break;
     }

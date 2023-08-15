@@ -16,7 +16,8 @@ void xtreme_app_scene_misc_screen_color_on_enter(void* context) {
 
     byte_input_set_header_text(byte_input, "Set LCD Color (#RRGGBB)");
 
-    app->lcd_color = rgb_backlight_get_color();
+    app->lcd_color = rgb_backlight_get_color(
+        scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneMiscScreenColor));
 
     byte_input_set_result_callback(
         byte_input,
@@ -37,7 +38,9 @@ bool xtreme_app_scene_misc_screen_color_on_event(void* context, SceneManagerEven
         consumed = true;
         switch(event.event) {
         case ByteInputResultOk:
-            rgb_backlight_set_color(app->lcd_color);
+            rgb_backlight_set_color(
+                scene_manager_get_scene_state(app->scene_manager, XtremeAppSceneMiscScreenColor),
+                app->lcd_color);
             app->save_backlight = true;
             scene_manager_previous_scene(app->scene_manager);
             break;
