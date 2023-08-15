@@ -10,6 +10,7 @@ enum VarItemListIndex {
     VarItemListIndexRainbowLcd,
     VarItemListIndexRainbowSpeed,
     VarItemListIndexRainbowInterval,
+    VarItemListIndexRainbowSaturation,
 };
 
 void xtreme_app_scene_misc_screen_var_item_list_callback(void* context, uint32_t index) {
@@ -138,6 +139,16 @@ static void xtreme_app_scene_misc_screen_rainbow_interval_changed(VariableItem* 
     app->save_backlight = true;
 }
 
+static void xtreme_app_scene_misc_screen_rainbow_saturation_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item) + 1;
+    char str[4];
+    snprintf(str, sizeof(str), "%d", index);
+    variable_item_set_current_value_text(item, str);
+    rgb_backlight_set_rainbow_saturation(index);
+    app->save_backlight = true;
+}
+
 void xtreme_app_scene_misc_screen_on_enter(void* context) {
     XtremeApp* app = context;
     XtremeSettings* xtreme_settings = XTREME_SETTINGS();
@@ -210,9 +221,9 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
         app);
     value_index = rgb_backlight_get_rainbow_speed();
     variable_item_set_current_value_index(item, value_index - 1);
-    char str[4];
-    snprintf(str, sizeof(str), "%d", value_index);
-    variable_item_set_current_value_text(item, str);
+    char speed_str[4];
+    snprintf(speed_str, sizeof(speed_str), "%d", value_index);
+    variable_item_set_current_value_text(item, speed_str);
     variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
 
     item = variable_item_list_add(
@@ -227,6 +238,19 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
         COUNT_OF(rainbow_interval_values));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rainbow_interval_names[value_index]);
+    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Rainbow Saturation",
+        25,
+        xtreme_app_scene_misc_screen_rainbow_saturation_changed,
+        app);
+    value_index = rgb_backlight_get_rainbow_saturation();
+    variable_item_set_current_value_index(item, value_index - 1);
+    char saturation_str[4];
+    snprintf(saturation_str, sizeof(saturation_str), "%d", value_index);
+    variable_item_set_current_value_text(item, saturation_str);
     variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
 
     variable_item_list_set_enter_callback(

@@ -31,6 +31,7 @@ static struct {
     RGBBacklightRainbowMode rainbow_mode;
     uint8_t rainbow_speed;
     uint32_t rainbow_interval;
+    uint32_t rainbow_saturation;
 } rgb_settings = {
     .colors =
         {
@@ -41,6 +42,7 @@ static struct {
     .rainbow_mode = RGBBacklightRainbowModeOff,
     .rainbow_speed = 5,
     .rainbow_interval = 250,
+    .rainbow_saturation = 255,
 };
 
 static struct {
@@ -89,6 +91,7 @@ void rgb_backlight_reconfigure(bool enabled) {
         furi_timer_free(rgb_state.rainbow_timer);
         rgb_state.rainbow_timer = NULL;
     }
+    rgb_state.rainbow_hsv.s = rgb_settings.rainbow_saturation;
 
     rgb_backlight_update(rgb_state.last_brightness, false);
 }
@@ -181,6 +184,21 @@ uint32_t rgb_backlight_get_rainbow_interval() {
         rgb_backlight_load_settings();
     }
     return rgb_settings.rainbow_interval;
+}
+
+void rgb_backlight_set_rainbow_saturation(uint8_t rainbow_saturation) {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_settings.rainbow_saturation = rainbow_saturation;
+    rgb_backlight_reconfigure(rgb_state.enabled);
+}
+
+uint8_t rgb_backlight_get_rainbow_saturation() {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    return rgb_settings.rainbow_saturation;
 }
 
 void rgb_backlight_update(uint8_t brightness, bool tick) {

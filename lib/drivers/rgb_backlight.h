@@ -87,6 +87,15 @@ void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval);
 uint32_t rgb_backlight_get_rainbow_interval();
 
 /**
+ * @brief Change rainbow saturation
+ *
+ * @param rainbow_saturation What saturation to use (0 - 255)
+ */
+void rgb_backlight_set_rainbow_saturation(uint8_t rainbow_saturation);
+
+uint8_t rgb_backlight_get_rainbow_saturation();
+
+/**
  * @brief Apply current RGB lighting settings
  *
  * @param brightness Backlight intensity (0-255)
