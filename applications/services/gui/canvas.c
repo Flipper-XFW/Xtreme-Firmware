@@ -18,7 +18,7 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontScummRomanOutline] =
         {.leading_default = 12, .leading_min = 11, .height = 12, .descender = 2},
     [FontScummRoman] = {.leading_default = 12, .leading_min = 11, .height = 10, .descender = 2},
-    [FontEurocorp] = {.leading_default = 12, .leading_min = 11, .height = 18, .descender = 2},
+    [FontEurocorp] = {.leading_default = 12, .leading_min = 11, .height = 16, .descender = 2},
 };
 
 Canvas* canvas_init() {
