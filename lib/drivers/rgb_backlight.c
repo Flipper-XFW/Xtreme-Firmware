@@ -138,10 +138,10 @@ RgbColor rgb_backlight_get_color(uint8_t index) {
 }
 
 void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode) {
+    if(rainbow_mode >= RGBBacklightRainbowModeCount) return;
     if(!rgb_state.settings_loaded) {
         rgb_backlight_load_settings();
     }
-    if(rainbow_mode > (RGBBacklightRainbowModeCount - 1)) rainbow_mode = 0;
     rgb_settings.rainbow_mode = rainbow_mode;
     rgb_backlight_reconfigure(rgb_state.enabled);
 }
@@ -168,6 +168,7 @@ uint8_t rgb_backlight_get_rainbow_speed() {
 }
 
 void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval) {
+    if(rainbow_interval < 100) return;
     if(!rgb_state.settings_loaded) {
         rgb_backlight_load_settings();
     }
@@ -222,15 +223,12 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
         }
 
         HsvColor hsv = rgb_state.rainbow_hsv;
-        FURI_LOG_I("RgbBacklight", "hsv %d %d %d", hsv.h, hsv.s, hsv.v);
         RgbColor rgb = hsv2rgb(hsv);
-        FURI_LOG_I("RgbBacklight", "rgb %d %d %d", rgb.r, rgb.g, rgb.b);
 
         for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
             if(i && rgb_settings.rainbow_mode == RGBBacklightRainbowModeWave) {
                 hsv.h += (50 * i);
                 rgb = hsv2rgb(hsv);
-                FURI_LOG_I("RgbBacklight", "rgb %d %d %d", rgb.r, rgb.g, rgb.b);
             }
             SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
         }

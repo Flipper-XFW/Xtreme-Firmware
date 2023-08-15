@@ -19,6 +19,8 @@
 #include "SK6805.h"
 #include <furi_hal.h>
 
+#define TAG "SK6805"
+
 /* Настройки */
 #define SK6805_LED_PIN &led_pin //Порт подключения светодиодов
 
@@ -52,6 +54,7 @@ void SK6805_set_led_color(uint8_t led_index, uint8_t r, uint8_t g, uint8_t b) {
     led_buffer[led_index][0] = g;
     led_buffer[led_index][1] = r;
     led_buffer[led_index][2] = b;
+    FURI_LOG_T(TAG, "led: %d, r: %d, g: %d, b: %d", led_index, r, g, b);
 }
 
 void SK6805_update(void) {
