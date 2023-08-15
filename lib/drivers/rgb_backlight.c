@@ -94,7 +94,7 @@ void rgb_backlight_reconfigure(bool enabled) {
 }
 
 void rgb_backlight_load_settings(void) {
-    //Не загружать данные из внутренней памяти при загрузке в режиме DFU
+    // Do not load data from internal memory when booting in DFU mode
     if(!furi_hal_is_normal_boot() || rgb_state.settings_loaded) {
         rgb_state.settings_loaded = true;
         return;

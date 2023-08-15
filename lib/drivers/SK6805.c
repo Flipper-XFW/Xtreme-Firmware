@@ -22,7 +22,7 @@
 #define TAG "SK6805"
 
 /* Настройки */
-#define SK6805_LED_PIN &led_pin //Порт подключения светодиодов
+#define SK6805_LED_PIN &led_pin // LED connection port
 
 #ifdef FURI_DEBUG
 #define DEBUG_PIN &gpio_ext_pa7
@@ -61,11 +61,11 @@ void SK6805_update(void) {
     SK6805_init();
     furi_kernel_lock();
     uint32_t end;
-    /* Последовательная отправка цветов светодиодов */
+    // Sequential sending LEDs
     for(uint8_t lednumber = 0; lednumber < SK6805_LED_COUNT; lednumber++) {
-        //Последовательная отправка цветов светодиода
+        // Sequential sending colors
         for(uint8_t color = 0; color < 3; color++) {
-            //Последовательная отправка битов цвета
+            // Sequentially sending color bits
             uint8_t i = 0b10000000;
             while(i != 0) {
                 if(led_buffer[lednumber][color] & (i)) {

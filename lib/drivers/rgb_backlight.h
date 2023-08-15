@@ -1,6 +1,7 @@
 /*
     RGB backlight FlipperZero driver
     Copyright (C) 2022-2023 Victor Nikitchuk (https://github.com/quen0n)
+    Heavily modified by Willy-JL and Z3bro
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,12 +40,12 @@ typedef enum {
 void rgb_backlight_reconfigure(bool enabled);
 
 /**
- * @brief Загрузить настройки подсветки с SD-карты
+ * @brief Load backlight settings from SD card
  */
 void rgb_backlight_load_settings();
 
 /**
- * @brief Сохранить текущие настройки RGB-подсветки
+ * @brief Save Current RGB Lighting Settings
  */
 void rgb_backlight_save_settings();
 
@@ -86,9 +87,9 @@ void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval);
 uint32_t rgb_backlight_get_rainbow_interval();
 
 /**
- * @brief Применить текущие настройки RGB-подсветки
+ * @brief Apply current RGB lighting settings
  *
- * @param brightness Яркость свечения (0-255)
+ * @param brightness Backlight intensity (0-255)
  * @param tick       Whether this update was a tick (for rainbow)
  */
 void rgb_backlight_update(uint8_t brightness, bool tick);
