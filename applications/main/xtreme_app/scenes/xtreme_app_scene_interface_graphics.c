@@ -27,10 +27,34 @@ static void xtreme_app_scene_interface_graphics_asset_pack_changed(VariableItem*
     app->apply_pack = true;
 }
 
-const char* const anim_speed_names[] =
-    {"25%", "50%", "75%", "100%", "125%", "150%", "175%", "200%", "225%", "250%", "275%", "300%"};
-const uint32_t anim_speed_values[COUNT_OF(anim_speed_names)] =
-    {25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300};
+const char* const anim_speed_names[] = {
+    "25%",
+    "50%",
+    "75%",
+    "100%",
+    "125%",
+    "150%",
+    "175%",
+    "200%",
+    "225%",
+    "250%",
+    "275%",
+    "300%",
+};
+const uint32_t anim_speed_values[COUNT_OF(anim_speed_names)] = {
+    25,
+    50,
+    75,
+    100,
+    125,
+    150,
+    175,
+    200,
+    225,
+    250,
+    275,
+    300,
+};
 static void xtreme_app_scene_interface_graphics_anim_speed_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -52,9 +76,23 @@ const char* const cycle_anims_names[] = {
     "2 H",
     "6 H",
     "12 H",
-    "24 H"};
-const int32_t cycle_anims_values[COUNT_OF(cycle_anims_names)] =
-    {-1, 0, 30, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400};
+    "24 H",
+};
+const int32_t cycle_anims_values[COUNT_OF(cycle_anims_names)] = {
+    -1,
+    0,
+    30,
+    60,
+    300,
+    600,
+    900,
+    1800,
+    3600,
+    7200,
+    21600,
+    43200,
+    86400,
+};
 static void xtreme_app_scene_interface_graphics_cycle_anims_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
