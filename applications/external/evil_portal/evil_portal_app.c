@@ -106,6 +106,11 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 int32_t evil_portal_app(void* p) {
     UNUSED(p);
 
+    // turn off 5v, so it gets reset on startup
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+
     // Enable 5v on startup
     uint8_t attempts = 0;
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {

@@ -135,6 +135,8 @@ Evil_PortalUart* evil_portal_uart_init(Evil_PortalApp* app) {
     furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
     furi_hal_uart_set_irq_cb(UART_CH, evil_portal_uart_on_irq_cb, uart);
 
+    evil_portal_uart_tx((uint8_t*)("XFW#EVILPORTAL=1\n"), strlen("XFW#EVILPORTAL=1\n"));
+
     return uart;
 }
 
