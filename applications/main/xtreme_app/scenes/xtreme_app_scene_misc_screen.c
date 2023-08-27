@@ -175,9 +175,9 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
         const char* str;
         VariableItemChangeCallback cb;
     } lcd_cols[] = {
-        {0, "LCD Left", xtreme_app_scene_misc_screen_lcd_color_0_changed},
+        {2, "LCD Left", xtreme_app_scene_misc_screen_lcd_color_2_changed},
         {1, "LCD Middle", xtreme_app_scene_misc_screen_lcd_color_1_changed},
-        {2, "LCD Right", xtreme_app_scene_misc_screen_lcd_color_2_changed},
+        {0, "LCD Right", xtreme_app_scene_misc_screen_lcd_color_0_changed},
     };
     size_t lcd_sz = COUNT_OF(lcd_colors);
 
