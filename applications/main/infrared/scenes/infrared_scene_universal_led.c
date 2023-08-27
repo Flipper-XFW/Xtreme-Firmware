@@ -20,8 +20,8 @@ void infrared_scene_universal_led_on_enter(void* context) {
         0,
         3,
         19,
-        &I_Power_25x27,
-        &I_Power_hvr_25x27,
+        &I_power_19x20,
+        &I_power_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "POWER");
@@ -44,8 +44,8 @@ void infrared_scene_universal_led_on_enter(void* context) {
         1,
         3,
         64,
-        &I_Vol_up_25x27,
-        &I_Vol_up_hvr_25x27,
+        &I_volup_24x21,
+        &I_volup_hover_24x21,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "BRIGHTNESS+");
@@ -56,8 +56,8 @@ void infrared_scene_universal_led_on_enter(void* context) {
         1,
         36,
         64,
-        &I_Vol_down_25x27,
-        &I_Vol_down_hvr_25x27,
+        &I_voldown_24x21,
+        &I_voldown_hover_24x21,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "BRIGHTNESS-");

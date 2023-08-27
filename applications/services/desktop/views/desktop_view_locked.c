@@ -165,6 +165,7 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
 
     if(view_state == DesktopViewLockedStateCoverClosing &&
        !desktop_view_locked_cover_move(model, true)) {
+        locked_view->callback(DesktopLockedEventCoversClosed, locked_view->context);
         model->view_state = DesktopViewLockedStateLocked;
     } else if(
         view_state == DesktopViewLockedStateCoverOpening &&

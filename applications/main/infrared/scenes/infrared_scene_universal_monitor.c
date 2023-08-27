@@ -21,8 +21,8 @@ void infrared_scene_universal_monitor_on_enter(void* context) {
         0,
         3,
         24,
-        &I_Power_25x27,
-        &I_Power_hvr_25x27,
+        &I_power_19x20,
+        &I_power_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "POWER");
@@ -45,8 +45,8 @@ void infrared_scene_universal_monitor_on_enter(void* context) {
         1,
         3,
         66,
-        &I_Mode_25x27,
-        &I_Mode_hvr_25x27,
+        &I_mode_19x20,
+        &I_mode_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "MENU");

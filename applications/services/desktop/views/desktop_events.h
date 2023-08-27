@@ -13,6 +13,7 @@ typedef enum {
     DesktopLockedEventUnlocked,
     DesktopLockedEventUpdate,
     DesktopLockedEventShowPinInput,
+    DesktopLockedEventCoversClosed,
 
     DesktopPinInputEventResetWrongPinLabel,
     DesktopPinInputEventUnlocked,
