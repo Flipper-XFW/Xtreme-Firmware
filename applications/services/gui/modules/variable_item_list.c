@@ -12,9 +12,10 @@ struct VariableItem {
     FuriString* current_value_text;
     uint8_t values_count;
     VariableItemChangeCallback change_callback;
+    void* context;
+
     bool locked;
     FuriString* locked_message;
-    void* context;
 };
 
 ARRAY_DEF(VariableItemArray, VariableItem, M_POD_OPLIST);
@@ -23,15 +24,17 @@ struct VariableItemList {
     View* view;
     VariableItemListEnterCallback callback;
     void* context;
+
     FuriTimer* scroll_timer;
     FuriTimer* locked_timer;
 };
 
 typedef struct {
     VariableItemArray_t items;
-    FuriString* header;
     uint8_t position;
     uint8_t window_position;
+
+    FuriString* header;
     size_t scroll_counter;
     bool locked_message_visible;
 } VariableItemListModel;

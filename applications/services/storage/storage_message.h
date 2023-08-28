@@ -141,7 +141,6 @@ typedef enum {
     StorageCommandCommonTimestamp,
     StorageCommandCommonStat,
     StorageCommandCommonRemove,
-    StorageCommandCommonRename,
     StorageCommandCommonMkDir,
     StorageCommandCommonFSInfo,
     StorageCommandSDFormat,
@@ -149,6 +148,8 @@ typedef enum {
     StorageCommandSDInfo,
     StorageCommandSDStatus,
     StorageCommandCommonResolvePath,
+
+    StorageCommandCommonRename,
 } StorageCommand;
 
 typedef struct {

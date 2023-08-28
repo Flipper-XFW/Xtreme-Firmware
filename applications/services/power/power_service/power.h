@@ -38,7 +38,6 @@ typedef struct {
     bool gauge_is_ok;
     bool is_charging;
     bool is_shutdown_requested;
-    bool is_charge_capped;
 
     float current_charger;
     float current_gauge;
@@ -56,6 +55,8 @@ typedef struct {
 
     uint8_t charge;
     uint8_t health;
+
+    bool is_charge_capped;
 } PowerInfo;
 
 /** Power off device

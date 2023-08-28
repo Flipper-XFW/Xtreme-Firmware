@@ -169,13 +169,14 @@ typedef struct {
 typedef struct {
     FS_Error (*const stat)(void* context, const char* path, FileInfo* fileinfo);
     FS_Error (*const remove)(void* context, const char* path);
-    FS_Error (*const rename)(void* context, const char* old, const char* new);
     FS_Error (*const mkdir)(void* context, const char* path);
     FS_Error (*const fs_info)(
         void* context,
         const char* fs_path,
         uint64_t* total_space,
         uint64_t* free_space);
+
+    FS_Error (*const rename)(void* context, const char* old, const char* new);
 } FS_Common_Api;
 
 /** Full filesystem api structure */

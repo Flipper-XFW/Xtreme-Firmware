@@ -62,7 +62,6 @@ struct Gui {
     FuriMutex* mutex;
 
     // Layers and Canvas
-    uint16_t hide_statusbar_count;
     bool lockdown;
     bool direct_draw;
     ViewPortArray_t layers[GuiLayerMAX];
@@ -74,6 +73,8 @@ struct Gui {
     FuriPubSub* input_events;
     uint8_t ongoing_input;
     ViewPort* ongoing_input_view_port;
+
+    uint16_t hide_statusbar_count;
 };
 
 /** Find enabled ViewPort in ViewPortArray

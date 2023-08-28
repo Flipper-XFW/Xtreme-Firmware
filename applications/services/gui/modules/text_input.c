@@ -24,24 +24,24 @@ typedef struct {
     const char* header;
     char* text_buffer;
     size_t text_buffer_size;
-    size_t minimum_length;
-    char extra_symbols[9];
     bool clear_default_text;
-
-    bool cursor_select;
-    size_t cursor_pos;
 
     TextInputCallback callback;
     void* callback_context;
 
     uint8_t selected_row;
     uint8_t selected_column;
-    uint8_t selected_keyboard;
 
     TextInputValidatorCallback validator_callback;
     void* validator_callback_context;
     FuriString* validator_text;
     bool validator_message_visible;
+
+    size_t minimum_length;
+    char extra_symbols[9];
+    bool cursor_select;
+    size_t cursor_pos;
+    uint8_t selected_keyboard;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;

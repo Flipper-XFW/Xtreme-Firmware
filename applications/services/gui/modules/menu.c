@@ -14,6 +14,7 @@
 
 struct Menu {
     View* view;
+
     FuriTimer* scroll_timer;
 };
 
@@ -32,6 +33,7 @@ ARRAY_DEF(MenuItemArray, MenuItem, M_POD_OPLIST);
 typedef struct {
     MenuItemArray_t items;
     size_t position;
+
     size_t scroll_counter;
     size_t vertical_offset;
 } MenuModel;
