@@ -69,7 +69,7 @@ void infrared_scene_universal_led_on_enter(void* context) {
     button_panel_add_icon(button_panel, 6, 75, &I_flash_text_21x5);
     infrared_brute_force_add_record(brute_force, i++, "FLASH");
 
-    button_panel_add_label(button_panel, 5, 11, FontPrimary, "LED Remote");
+    button_panel_add_label(button_panel, 21, 11, FontPrimary, "LEDs");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

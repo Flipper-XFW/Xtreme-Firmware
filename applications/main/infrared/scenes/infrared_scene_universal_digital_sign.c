@@ -69,7 +69,7 @@ void infrared_scene_universal_digital_sign_on_enter(void* context) {
     button_panel_add_icon(button_panel, 38, 80, &I_stop_text_19x5);
     infrared_brute_force_add_record(brute_force, i++, "STOP");
 
-    button_panel_add_label(button_panel, 6, 11, FontPrimary, "Digital Sign");
+    button_panel_add_label(button_panel, 1, 11, FontPrimary, "Digital Signs");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

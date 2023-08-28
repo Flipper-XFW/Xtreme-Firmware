@@ -70,7 +70,7 @@ void infrared_scene_universal_monitor_on_enter(void* context) {
     button_panel_add_icon(button_panel, 39, 80, &I_exit_text_18x5);
     infrared_brute_force_add_record(brute_force, i++, "EXIT");
 
-    button_panel_add_label(button_panel, 11, 11, FontPrimary, "Monitor");
+    button_panel_add_label(button_panel, 10, 11, FontPrimary, "Monitors");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
