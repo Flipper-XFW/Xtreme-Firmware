@@ -16,6 +16,8 @@
 #include <gui/modules/loading.h>
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
+#include <mass_storage_icons.h>
+#include <assets_icons.h>
 
 #define MASS_STORAGE_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define MASS_STORAGE_APP_EXTENSION ".img"
@@ -33,16 +35,18 @@ struct MassStorageApp {
     Popup* popup;
     Loading* loading;
 
-    uint64_t create_image_max;
-    uint8_t create_image_size;
-    char create_image_name[MASS_STORAGE_FILE_NAME_LEN];
-
     FuriString* file_path;
     File* file;
     MassStorage* mass_storage_view;
 
     FuriMutex* usb_mutex;
     MassStorageUsb* usb;
+
+    uint64_t create_image_max;
+    uint8_t create_image_size;
+    char create_image_name[MASS_STORAGE_FILE_NAME_LEN];
+
+    uint32_t bytes_read, bytes_written;
 };
 
 typedef enum {
@@ -53,5 +57,12 @@ typedef enum {
     MassStorageAppViewLoading,
     MassStorageAppViewWork,
 } MassStorageAppView;
+
+enum MassStorageCustomEvent {
+    // Reserve first 100 events for button types and indexes, starting from 0
+    MassStorageCustomEventReserved = 100,
+
+    MassStorageCustomEventEject,
+};
 
 void mass_storage_app_show_loading_popup(MassStorageApp* app, bool show);

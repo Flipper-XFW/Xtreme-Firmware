@@ -21,6 +21,7 @@ static bool file_read(
     uint16_t clamp = MIN(out_cap, count * SCSI_BLOCK_SIZE);
     *out_len = storage_file_read(app->file, out, clamp);
     FURI_LOG_T(TAG, "%lu/%lu", *out_len, count * SCSI_BLOCK_SIZE);
+    app->bytes_read += *out_len;
     return *out_len == clamp;
 }
 
@@ -35,6 +36,7 @@ static bool file_write(void* ctx, uint32_t lba, uint16_t count, uint8_t* buf, ui
         FURI_LOG_W(TAG, "seek failed");
         return false;
     }
+    app->bytes_written += len;
     return storage_file_write(app->file, buf, len) == len;
 }
 
@@ -46,24 +48,23 @@ static uint32_t file_num_blocks(void* ctx) {
 static void file_eject(void* ctx) {
     MassStorageApp* app = ctx;
     FURI_LOG_D(TAG, "EJECT");
-    furi_check(furi_mutex_acquire(app->usb_mutex, FuriWaitForever) == FuriStatusOk);
-    mass_storage_usb_stop(app->usb);
-    app->usb = NULL;
-    furi_check(furi_mutex_release(app->usb_mutex) == FuriStatusOk);
+    view_dispatcher_send_custom_event(app->view_dispatcher, MassStorageCustomEventEject);
 }
 
 bool mass_storage_scene_work_on_event(void* context, SceneManagerEvent event) {
     MassStorageApp* app = context;
     bool consumed = false;
-    if(event.type == SceneManagerEventTypeTick) {
-        bool ejected;
-        furi_check(furi_mutex_acquire(app->usb_mutex, FuriWaitForever) == FuriStatusOk);
-        ejected = app->usb == NULL;
-        furi_check(furi_mutex_release(app->usb_mutex) == FuriStatusOk);
-        if(ejected) {
-            scene_manager_previous_scene(app->scene_manager);
-            consumed = true;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == MassStorageCustomEventEject) {
+            consumed = scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, MassStorageSceneFileSelect);
+            if(!consumed) {
+                consumed = scene_manager_search_and_switch_to_previous_scene(
+                    app->scene_manager, MassStorageSceneStart);
+            }
         }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        mass_storage_set_stats(app->mass_storage_view, app->bytes_read, app->bytes_written);
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
             app->scene_manager, MassStorageSceneFileSelect);
@@ -77,6 +78,7 @@ bool mass_storage_scene_work_on_event(void* context, SceneManagerEvent event) {
 
 void mass_storage_scene_work_on_enter(void* context) {
     MassStorageApp* app = context;
+    app->bytes_read = app->bytes_written = 0;
 
     if(!storage_file_exists(app->fs_api, furi_string_get_cstr(app->file_path))) {
         scene_manager_search_and_switch_to_previous_scene(

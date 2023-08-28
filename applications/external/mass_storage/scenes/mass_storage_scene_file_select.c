@@ -1,6 +1,5 @@
 #include "../mass_storage_app_i.h"
 #include "furi_hal_power.h"
-#include <mass_storage_icons.h>
 
 static bool mass_storage_file_select(MassStorageApp* mass_storage) {
     furi_assert(mass_storage);

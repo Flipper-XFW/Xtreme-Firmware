@@ -77,7 +77,7 @@ void mass_storage_scene_create_image_on_enter(void* context) {
     variable_item_list_set_enter_callback(
         var_item_list, mass_storage_scene_create_image_var_item_list_callback, app);
 
-    variable_item_list_set_header(var_item_list, "Create Disc Image");
+    variable_item_list_set_header(var_item_list, "Create Disk Image");
 
     variable_item_list_set_selected_item(
         var_item_list,

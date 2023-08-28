@@ -12,14 +12,14 @@ void mass_storage_scene_start_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Select Disc Image",
+        "Select Disk Image",
         MassStorageSceneFileSelect,
         mass_storage_scene_start_submenu_callback,
         app);
 
     submenu_add_item(
         submenu,
-        "Create Disc Image",
+        "Create Disk Image",
         MassStorageSceneCreateImage,
         mass_storage_scene_start_submenu_callback,
         app);

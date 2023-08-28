@@ -8,7 +8,7 @@ App(
         "dialogs",
     ],
     stack_size=2 * 1024,
-    order=20,
+    fap_description="Implements a mass storage device over USB for disk images",
     fap_icon="assets/mass_storage_10px.png",
     fap_icon_assets="assets",
     fap_category="USB",
