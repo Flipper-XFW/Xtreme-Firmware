@@ -4,7 +4,7 @@ import json
 import shutil
 import tarfile
 import zipfile
-from os import makedirs, walk, environ
+from os import makedirs, walk
 from os.path import basename, exists, join, relpath
 
 from ansi.color import fg
