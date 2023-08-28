@@ -125,19 +125,33 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
 
             app->file = storage_file_alloc(app->fs_api);
             const char* error = NULL;
-            if(storage_file_open(
-                   app->file, furi_string_get_cstr(app->file_path), FSAM_WRITE, FSOM_CREATE_NEW)) {
+            bool success = false;
+
+            uint8_t* buffer = malloc(WRITE_BUF_LEN);
+            do {
+                if(!storage_file_open(
+                       app->file,
+                       furi_string_get_cstr(app->file_path),
+                       FSAM_WRITE,
+                       FSOM_CREATE_NEW))
+                    break;
+
                 uint64_t size = image_sizes[app->create_image_size].value;
-                if(size == app->create_image_max) {
-                    size--;
-                }
-                if(!storage_file_expand(app->file, size)) {
-                    error = storage_file_get_error_desc(app->file);
-                    storage_file_close(app->file);
-                    storage_common_remove(app->fs_api, furi_string_get_cstr(app->file_path));
-                }
-            } else {
+                if(size == app->create_image_max) size--;
+                if(!storage_file_seek(file, size, true)) break;
+
+                // Zero out first 4k - partition table and adjacent data
+                if(!storage_file_seek(file, 0, true)) break;
+                if(!storage_file_write(file, buffer, WRITE_BUF_LEN)) break;
+
+                success = true;
+            } while(false);
+            free(buffer);
+
+            if(!success) {
                 error = storage_file_get_error_desc(app->file);
+                storage_file_close(app->file);
+                storage_common_remove(app->fs_api, furi_string_get_cstr(app->file_path));
             }
             storage_file_free(app->file);
             mass_storage_app_show_loading_popup(app, false);
