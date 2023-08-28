@@ -118,8 +118,10 @@ void updater_free(Updater* updater) {
     free(updater);
 }
 
-int32_t updater_srv(const char* p) {
-    Updater* updater = updater_alloc(p);
+int32_t updater_srv(void* p) {
+    const char* cfgpath = p;
+
+    Updater* updater = updater_alloc(cfgpath);
     view_dispatcher_run(updater->view_dispatcher);
     updater_free(updater);
 

@@ -97,16 +97,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } break;
 
-        case DesktopMainEventOpenLockMenu:
-            scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
-            consumed = true;
-            break;
-
-        case DesktopMainEventOpenDebug:
-            scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
-            consumed = true;
-            break;
-
         case DesktopMainEventLockKeypad:
             desktop_lock(desktop, false);
             consumed = true;
@@ -114,6 +104,16 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
         case DesktopMainEventLockWithPin:
             desktop_lock(desktop, true);
+            consumed = true;
+            break;
+
+        case DesktopMainEventOpenLockMenu:
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
+            consumed = true;
+            break;
+
+        case DesktopMainEventOpenDebug:
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
             consumed = true;
             break;
 
