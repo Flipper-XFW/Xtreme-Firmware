@@ -259,10 +259,10 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
         if(event->key == InputKeyOk && event->type == InputTypeShort) {
             switch(pin_lock) {
             case 0:
-                desktop_event = DesktopLockMenuEventLock;
+                desktop_event = DesktopLockMenuEventLockKeypad;
                 break;
             case 1:
-                desktop_event = DesktopLockMenuEventLockPin;
+                desktop_event = DesktopLockMenuEventLockPinCode;
                 break;
             case 2:
                 desktop_event = DesktopLockMenuEventLockPinOff;
