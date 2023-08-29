@@ -127,7 +127,8 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             const char* error = NULL;
             bool success = false;
 
-            uint8_t* buffer = malloc(WRITE_BUF_LEN);
+            size_t wipe_4k = 4096;
+            uint8_t* buffer = malloc(wipe_4k);
             do {
                 if(!storage_file_open(
                        app->file,
@@ -138,11 +139,11 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
 
                 uint64_t size = image_sizes[app->create_image_size].value;
                 if(size == app->create_image_max) size--;
-                if(!storage_file_seek(file, size, true)) break;
+                if(!storage_file_seek(app->file, size, true)) break;
 
                 // Zero out first 4k - partition table and adjacent data
-                if(!storage_file_seek(file, 0, true)) break;
-                if(!storage_file_write(file, buffer, WRITE_BUF_LEN)) break;
+                if(!storage_file_seek(app->file, 0, true)) break;
+                if(!storage_file_write(app->file, buffer, wipe_4k)) break;
 
                 success = true;
             } while(false);
