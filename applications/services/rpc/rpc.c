@@ -365,47 +365,45 @@ static void rpc_session_thread_state_callback(FuriThreadState thread_state, void
 }
 
 RpcSession* rpc_session_open(Rpc* rpc, RpcOwner owner) {
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) ||
-       XTREME_SETTINGS()->allow_locked_rpc_commands) {
-        furi_assert(rpc);
-
-        RpcSession* session = malloc(sizeof(RpcSession));
-        session->callbacks_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-        session->stream = furi_stream_buffer_alloc(RPC_BUFFER_SIZE, 1);
-        session->rpc = rpc;
-        session->terminate = false;
-        session->decode_error = false;
-        session->owner = owner;
-        RpcHandlerDict_init(session->handlers);
-
-        session->decoded_message = malloc(sizeof(PB_Main));
-        session->decoded_message->cb_content.funcs.decode = rpc_pb_content_callback;
-        session->decoded_message->cb_content.arg = session;
-
-        session->system_contexts = malloc(COUNT_OF(rpc_systems) * sizeof(void*));
-        for(size_t i = 0; i < COUNT_OF(rpc_systems); ++i) {
-            session->system_contexts[i] = rpc_systems[i].alloc(session);
-        }
-
-        RpcHandler rpc_handler = {
-            .message_handler = rpc_close_session_process,
-            .decode_submessage = NULL,
-            .context = session,
-        };
-        rpc_add_handler(session, PB_Main_stop_session_tag, &rpc_handler);
-
-        session->thread =
-            furi_thread_alloc_ex("RpcSessionWorker", 3072, rpc_session_worker, session);
-
-        furi_thread_set_state_context(session->thread, session);
-        furi_thread_set_state_callback(session->thread, rpc_session_thread_state_callback);
-
-        furi_thread_start(session->thread);
-
-        return session;
-    } else {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) &&
+       !XTREME_SETTINGS()->allow_locked_rpc_commands)
         return NULL;
+
+    furi_assert(rpc);
+
+    RpcSession* session = malloc(sizeof(RpcSession));
+    session->callbacks_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    session->stream = furi_stream_buffer_alloc(RPC_BUFFER_SIZE, 1);
+    session->rpc = rpc;
+    session->terminate = false;
+    session->decode_error = false;
+    session->owner = owner;
+    RpcHandlerDict_init(session->handlers);
+
+    session->decoded_message = malloc(sizeof(PB_Main));
+    session->decoded_message->cb_content.funcs.decode = rpc_pb_content_callback;
+    session->decoded_message->cb_content.arg = session;
+
+    session->system_contexts = malloc(COUNT_OF(rpc_systems) * sizeof(void*));
+    for(size_t i = 0; i < COUNT_OF(rpc_systems); ++i) {
+        session->system_contexts[i] = rpc_systems[i].alloc(session);
     }
+
+    RpcHandler rpc_handler = {
+        .message_handler = rpc_close_session_process,
+        .decode_submessage = NULL,
+        .context = session,
+    };
+    rpc_add_handler(session, PB_Main_stop_session_tag, &rpc_handler);
+
+    session->thread = furi_thread_alloc_ex("RpcSessionWorker", 3072, rpc_session_worker, session);
+
+    furi_thread_set_state_context(session->thread, session);
+    furi_thread_set_state_callback(session->thread, rpc_session_thread_state_callback);
+
+    furi_thread_start(session->thread);
+
+    return session;
 }
 
 void rpc_session_close(RpcSession* session) {
