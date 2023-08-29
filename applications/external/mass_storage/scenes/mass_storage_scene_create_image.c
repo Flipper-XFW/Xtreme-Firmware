@@ -139,7 +139,7 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
 
                 uint64_t size = image_sizes[app->create_image_size].value;
                 if(size == app->create_image_max) size--;
-                if(!storage_file_seek(app->file, size, true)) break;
+                if(!storage_file_expand(app->file, size)) break;
 
                 // Zero out first 4k - partition table and adjacent data
                 if(!storage_file_seek(app->file, 0, true)) break;
