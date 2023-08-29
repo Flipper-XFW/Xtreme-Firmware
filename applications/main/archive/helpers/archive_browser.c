@@ -676,6 +676,6 @@ void archive_refresh_dir(ArchiveBrowserView* browser) {
     if(current != NULL) {
         path_extract_basename(furi_string_get_cstr(current->path), str);
     }
-    file_browser_worker_folder_refresh(browser->worker, furi_string_get_cstr(str));
+    file_browser_worker_folder_refresh_sel(browser->worker, furi_string_get_cstr(str));
     furi_string_free(str);
 }
