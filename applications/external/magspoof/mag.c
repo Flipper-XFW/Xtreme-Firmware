@@ -168,14 +168,37 @@ int32_t mag_app(void* p) {
     Mag* mag = mag_alloc();
     UNUSED(p);
 
+    mag_make_app_folder(mag);
+
+    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(mag->scene_manager, MagSceneStart);
 
     view_dispatcher_run(mag->view_dispatcher);
 
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
+
     mag_free(mag);
 
     return 0;
+}
+
+void mag_make_app_folder(Mag* mag) {
+    furi_assert(mag);
+
+    if(!storage_simply_mkdir(mag->storage, MAG_APP_FOLDER)) {
+        dialog_message_show_storage_error(mag->dialogs, "Cannot create\napp folder");
+    }
 }
 
 void mag_text_store_set(Mag* mag, const char* text, ...) {

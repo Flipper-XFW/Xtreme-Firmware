@@ -1,5 +1,6 @@
 #include "avr_isp_view_chip_detect.h"
-#include <avr_isp_icons.h>
+#include "avr_isp_icons.h"
+#include <assets_icons.h>
 #include <gui/elements.h>
 
 #include "../helpers/avr_isp_worker_rw.h"

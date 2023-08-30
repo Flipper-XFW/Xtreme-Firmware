@@ -76,6 +76,8 @@ static bool mag_device_save_file(
             // Make path to file to be saved
             furi_string_cat_printf(temp_str, "/%s%s", dev_name, extension);
         } else {
+            // Create mag directory if necessary
+            if(!storage_simply_mkdir((mag_dev->storage), MAG_APP_FOLDER)) break;
             // First remove mag device file if it was saved
             furi_string_printf(temp_str, "%s/%s%s", folder, dev_name, extension);
         }

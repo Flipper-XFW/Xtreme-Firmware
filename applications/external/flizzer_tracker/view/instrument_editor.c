@@ -4,7 +4,8 @@
 #include "../macros.h"
 #include "opcode_description.h"
 
-#include <flizzer_tracker_icons.h>
+#include "flizzer_tracker_icons.h"
+#include <assets_icons.h>
 
 void draw_inst_flag(
     FlizzerTrackerApp* tracker,

@@ -5,7 +5,6 @@ App(
     entry_point="mifare_nested_app",
     requires=["storage", "gui", "nfc"],
     stack_size=4 * 1024,
-    order=30,
     fap_icon="assets/icon.png",
     fap_category="NFC",
     fap_private_libs=[Lib(name="nested"), Lib(name="parity"), Lib(name="crypto1")],

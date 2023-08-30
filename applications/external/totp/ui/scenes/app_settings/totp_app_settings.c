@@ -1,6 +1,7 @@
 #include "totp_app_settings.h"
 #include <math.h>
-#include <totp_icons.h>
+#include "totp_icons.h"
+#include <assets_icons.h>
 #include <available_fonts.h>
 #include "../../canvas_extensions.h"
 #include "../../ui_controls.h"

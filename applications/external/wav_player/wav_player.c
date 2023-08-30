@@ -12,6 +12,7 @@
 #include "wav_player_view.h"
 #include <math.h>
 
+#include "wav_player_icons.h"
 #include <assets_icons.h>
 
 #define TAG "WavPlayer"

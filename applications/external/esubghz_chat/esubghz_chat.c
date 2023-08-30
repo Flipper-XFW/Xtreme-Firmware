@@ -1,14 +1,13 @@
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
-#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
+#include "helpers/radio_device_loader.h"
 #include "esubghz_chat_i.h"
 
 #define CHAT_LEAVE_DELAY 10
 #define TICK_INTERVAL 50
 #define MESSAGE_COMPLETION_TIMEOUT 500
-#define TIMEOUT_BETWEEN_MESSAGES 500
 
 #define KBD_UNLOCK_CNT 3
 #define KBD_UNLOCK_TIMEOUT 1000
@@ -125,14 +124,22 @@ void tx_msg_input(ESubGhzChatState* state) {
     subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer, tx_size);
 }
 
-/* Displays whether or not encryption has been enabled in the text box. Also
- * clears the text input buffer to remove the password and starts the Sub-GHz
- * worker. After starting the worker a join message is transmitted. */
+/* Displays information on frequency, encryption and radio type in the text
+ * box. Also clears the text input buffer to remove the password and starts the
+ * Sub-GHz worker. After starting the worker a join message is transmitted. */
 void enter_chat(ESubGhzChatState* state) {
+    furi_string_cat_printf(state->chat_box_store, "Frequency: %lu", state->frequency);
+
     furi_string_cat_printf(
         state->chat_box_store, "\nEncrypted: %s", (state->encrypted ? "yes" : "no"));
 
     subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device, state->frequency);
+
+    if(strcmp(state->subghz_device->name, "cc1101_ext") == 0) {
+        furi_string_cat_printf(state->chat_box_store, "\nRadio: External");
+    } else {
+        furi_string_cat_printf(state->chat_box_store, "\nRadio: Internal");
+    }
 
     /* concatenate the name prefix and join message */
     furi_string_set(state->msg_input, state->name_prefix);
@@ -523,6 +530,9 @@ int32_t esubghz_chat(void) {
         goto err_alloc_crypto;
     }
 
+    /* set the default frequency */
+    state->frequency = DEFAULT_FREQ;
+
     /* set the have_read callback of the Sub-GHz worker */
     subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker, have_read_cb, state);
 
@@ -531,7 +541,12 @@ int32_t esubghz_chat(void) {
 
     /* init internal device */
     subghz_devices_init();
-    state->subghz_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+
+    state->subghz_device =
+        radio_device_loader_set(state->subghz_device, SubGhzRadioDeviceTypeExternalCC1101);
+
+    subghz_devices_reset(state->subghz_device);
+    subghz_devices_idle(state->subghz_device);
 
     /* set chat name prefix */
     furi_string_printf(state->name_prefix, "%s", furi_hal_version_get_name_ptr());
@@ -582,8 +597,8 @@ int32_t esubghz_chat(void) {
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(state->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
-    /* switch to the frequency input scene */
-    scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
+    /* switch to the key menu scene */
+    scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyMenu);
 
     /* run the view dispatcher, this call only returns when we close the
 	 * application */
@@ -627,6 +642,8 @@ int32_t esubghz_chat(void) {
     crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
 
     /* deinit devices */
+    radio_device_loader_end(state->subghz_device);
+
     subghz_devices_deinit();
 
     /* exit suppress charge mode */

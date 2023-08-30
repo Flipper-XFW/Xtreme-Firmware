@@ -2,7 +2,7 @@
 #include <gui/gui.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <totp_icons.h>
+#include "totp_icons.h"
 #include <assets_icons.h>
 #include <roll_value.h>
 #include <available_fonts.h>
@@ -246,7 +246,7 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             SCREEN_HEIGHT_CENTER + 10,
             AlignCenter,
             AlignCenter,
-            "Press OK button to access menu");
+            "Press OK button to open menu");
         return;
     }
 

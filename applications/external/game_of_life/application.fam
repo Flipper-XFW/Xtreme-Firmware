@@ -6,7 +6,6 @@ App(
     cdefines=["APP_GAMEOFLIFE_GAME"],
     requires=["gui"],
     stack_size=2 * 1024,
-    order=110,
     fap_icon="golIcon.png",
     fap_category="Games",
     fap_author="@tgxn (original by @itsyourbedtime)",

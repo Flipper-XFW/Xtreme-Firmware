@@ -8,7 +8,6 @@ App(
     cdefines=["APP_JETPACK_GAME"],
     requires=["gui"],
     stack_size=4 * 1024,
-    order=100,
     fap_icon="icon.png",
     fap_category="Games",
     fap_icon_assets="assets",

@@ -4,6 +4,7 @@
 #include <input/input.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 static int matrix[6][7] = {0};
 static int cursorx = 3;
@@ -233,6 +234,8 @@ int32_t four_in_row_app(void* p) {
         free(fourinrow_state);
         return 255;
     }
+
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     // Создаем новый view port
     ViewPort* view_port = view_port_alloc();

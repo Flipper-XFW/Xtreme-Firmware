@@ -15,6 +15,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/elements.h>
+#include <dolphin/dolphin.h>
 #include <input/input.h>
 
 // App resource imports

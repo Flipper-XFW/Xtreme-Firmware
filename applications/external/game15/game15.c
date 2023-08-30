@@ -3,6 +3,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <storage/storage.h>
+#include <dolphin/dolphin.h>
 
 #include "sandbox.h"
 
@@ -118,6 +119,7 @@ static bool storage_game_state_load() {
     storage_common_migrate(storage, EXT_PATH("apps/Games/game15.save"), SAVING_FILENAME);
 
     File* file = storage_file_alloc(storage);
+
     uint16_t bytes_readed = 0;
     if(storage_file_open(file, SAVING_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING))
         bytes_readed = storage_file_read(file, &game_state, sizeof(game_state_t));
@@ -455,6 +457,9 @@ int32_t game15_app() {
 
     sandbox_init(
         FPS, (SandboxRenderCallback)render_callback, (SandboxEventHandler)game_event_handler);
+
+    // Call dolphin deed on game start
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     sandbox_loop();
     sandbox_free();

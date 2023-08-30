@@ -9,6 +9,7 @@
 #include <dialogs/dialogs.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 #include <nrf24.h>
 #include <u8g2.h>
 

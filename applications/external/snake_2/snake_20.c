@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
@@ -398,6 +399,8 @@ int32_t snake_20_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
+
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     SnakeEvent event;
     for(bool processing = true; processing;) {

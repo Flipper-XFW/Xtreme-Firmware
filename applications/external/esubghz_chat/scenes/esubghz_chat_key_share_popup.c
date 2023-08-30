@@ -1,4 +1,25 @@
 #include "../esubghz_chat_i.h"
+#include "../helpers/nfc_helpers.h"
+
+struct ReplayDictNfcWriterContext {
+    uint8_t* cur;
+    uint8_t* max;
+};
+
+static bool replay_dict_nfc_writer(uint64_t run_id, uint32_t counter, void* context) {
+    struct ReplayDictNfcWriterContext* ctx = (struct ReplayDictNfcWriterContext*)context;
+
+    struct ReplayDictNfcEntry entry = {.run_id = run_id, .counter = __htonl(counter), .unused = 0};
+
+    if(ctx->cur + sizeof(entry) > ctx->max) {
+        return false;
+    }
+
+    memcpy(ctx->cur, &entry, sizeof(entry));
+    ctx->cur += sizeof(entry);
+
+    return true;
+}
 
 static void prepare_nfc_dev_data(ESubGhzChatState* state) {
     NfcDeviceData* dev_data = state->nfc_dev_data;
@@ -20,9 +41,32 @@ static void prepare_nfc_dev_data(ESubGhzChatState* state) {
     dev_data->mf_ul_data.version.storage_size = 0x11;
     dev_data->mf_ul_data.version.protocol_type = 0x03;
 
-    /* Add 16 to the size for config pages */
-    dev_data->mf_ul_data.data_size = (KEY_BITS / 8) + 16;
+    size_t data_written = 0;
+
+    /* write key */
     crypto_ctx_get_key(state->crypto_ctx, dev_data->mf_ul_data.data);
+    data_written += (KEY_BITS / 8);
+
+    /* write frequency */
+    struct FreqNfcEntry* freq_entry =
+        (struct FreqNfcEntry*)(dev_data->mf_ul_data.data + data_written);
+    freq_entry->frequency = __htonl(state->frequency);
+    freq_entry->unused1 = 0;
+    freq_entry->unused2 = 0;
+    freq_entry->unused3 = 0;
+    data_written += sizeof(struct FreqNfcEntry);
+
+    /* write the replay dict */
+    struct ReplayDictNfcWriterContext wr_ctx = {
+        .cur = dev_data->mf_ul_data.data + data_written,
+        .max = dev_data->mf_ul_data.data + NFC_MAX_BYTES};
+
+    size_t n_entries =
+        crypto_ctx_dump_replay_dict(state->crypto_ctx, replay_dict_nfc_writer, &wr_ctx);
+    data_written += n_entries * sizeof(struct ReplayDictNfcEntry);
+
+    /* calculate size of data, add 16 for config pages */
+    dev_data->mf_ul_data.data_size = data_written + (NFC_CONFIG_PAGES * 4);
 }
 
 /* Prepares the key share popup scene. */

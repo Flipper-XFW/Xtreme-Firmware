@@ -5,7 +5,6 @@ App(
     entry_point="swd_probe_app_main",
     requires=["notification", "gui", "storage", "dialogs", "cli"],
     stack_size=2 * 1024,
-    order=10,
     fap_icon="icons/app.png",
     fap_category="GPIO",
     fap_icon_assets="icons",

@@ -1,7 +1,8 @@
 #include <gui/gui.h>
 #include <furi_hal.h>
 #include "constants.h"
-#include <doom_icons.h>
+#include "doom_icons.h"
+#include <assets_icons.h>
 #include "assets.h"
 
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))

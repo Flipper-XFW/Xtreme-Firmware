@@ -7,6 +7,7 @@
 #include <notification/notification_messages.h>
 #include <nrf24.h>
 #include "nrf24channelscanner_icons.h"
+#include <assets_icons.h>
 
 const uint8_t num_channels = 128;
 static uint8_t nrf24values[128] = {0}; //to store channel data

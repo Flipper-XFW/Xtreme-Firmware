@@ -15,7 +15,7 @@
 #include "usb/dap_v2_usb.h"
 #include <dialogs/dialogs.h>
 #include "dap_link_icons.h"
-#include "assets_icons.h"
+#include <assets_icons.h>
 
 /***************************************************************************/
 /****************************** DAP COMMON *********************************/

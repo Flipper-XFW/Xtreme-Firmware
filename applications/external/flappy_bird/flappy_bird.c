@@ -1,9 +1,11 @@
 #include <stdlib.h>
 
-#include <flappy_bird_icons.h>
+#include "flappy_bird_icons.h"
+#include <assets_icons.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "Flappy"
 #define DEBUG false
@@ -310,6 +312,9 @@ int32_t flappy_game_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+    // Call dolphin deed on game start
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     GameEvent event;
     for(bool processing = true; processing;) {

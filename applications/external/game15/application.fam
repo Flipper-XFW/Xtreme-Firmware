@@ -6,7 +6,6 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     fap_icon="game15_10px.png",
-    order=30,
     fap_category="Games",
     fap_author="@x27",
     fap_version="1.0",

@@ -13,6 +13,7 @@
 #include "level.h"
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 #define SOUND
 
@@ -155,9 +156,6 @@ void spawnEntity(uint8_t type, uint8_t x, uint8_t y, PluginState* const plugin_s
     case E_MEDIKIT:
         plugin_state->entity[plugin_state->num_entities] = create_medikit(x, y);
         plugin_state->num_entities++;
-        break;
-
-    default:
         break;
     }
 }
@@ -462,9 +460,6 @@ void updateEntities(const uint8_t level[], Canvas* const canvas, PluginState* co
             }
             break;
         }
-
-        default:
-            break;
         }
 
         i++;
@@ -993,6 +988,9 @@ int32_t doom_app() {
     music_player_worker_load_rtttl_from_string(plugin_state->music_instance->worker, dsintro);
     music_player_worker_start(plugin_state->music_instance->worker);
 #endif
+    // Call dolphin deed on game start
+    dolphin_deed(DolphinDeedPluginGameStart);
+
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);

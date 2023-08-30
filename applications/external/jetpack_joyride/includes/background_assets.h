@@ -9,7 +9,8 @@
 #include "point.h"
 #include "states.h"
 #include "game_sprites.h"
-#include <jetpack_joyride_icons.h>
+#include "jetpack_joyride_icons.h"
+#include <assets_icons.h>
 
 #define BG_ASSETS_MAX 3
 

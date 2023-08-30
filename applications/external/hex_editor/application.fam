@@ -9,7 +9,6 @@ App(
         "dialogs",
     ],
     stack_size=2 * 1024,
-    order=20,
     fap_icon="icons/edit_10px.png",
     fap_category="Tools",
     fap_icon_assets="icons",

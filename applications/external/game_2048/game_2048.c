@@ -13,6 +13,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <storage/storage.h>
+#include <dolphin/dolphin.h>
 
 #include "digits.h"
 #include "array_utils.h"
@@ -392,6 +393,9 @@ int32_t game_2048_app() {
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+    // Call dolphin deed on game start
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     bool is_finished = false;
     while(!is_finished) {

@@ -11,6 +11,7 @@
 #include <notification/notification_messages.h>
 #include <nrf24.h>
 #include "mousejacker_ducky.h"
+#include "nrf24mousejacker_icons.h"
 #include <assets_icons.h>
 
 #define TAG "mousejacker"

@@ -10,7 +10,7 @@
 
 #define LOGITECH_MAX_CHANNEL 85
 #define COUNT_THRESHOLD 2
-#define DEFAULT_SAMPLE_TIME 4000
+#define DEFAULT_SAMPLE_TIME 8000
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
@@ -350,10 +350,6 @@ int32_t nrfsniff_app(void* p) {
     storage_common_migrate(storage, EXT_PATH("nrfsniff"), NRFSNIFF_APP_PATH_FOLDER);
     storage_common_mkdir(storage, NRFSNIFF_APP_PATH_FOLDER);
 
-    while(!furi_hal_speaker_acquire(100)) {
-        furi_delay_ms(100);
-    }
-
     PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
@@ -459,7 +455,6 @@ int32_t nrfsniff_app(void* p) {
     target_rate = 8; // rate can be either 8 (2Mbps) or 0 (1Mbps)
     sniffing_state = false;
     nrf24_deinit();
-    furi_hal_speaker_release();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);

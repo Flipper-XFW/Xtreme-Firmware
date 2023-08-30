@@ -3,6 +3,7 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
+#include <dolphin/dolphin.h>
 #include "../helpers/camera_suite_haptic.h"
 #include "../helpers/camera_suite_speaker.h"
 #include "../helpers/camera_suite_led.h"

@@ -18,8 +18,8 @@
 #include "crypto_wrapper.h"
 #include "scenes/esubghz_chat_scene.h"
 
-#include <assets_icons.h>
 #include "esubghz_chat_icons.h"
+#include <assets_icons.h>
 
 #define APPLICATION_NAME "ESubGhzChat"
 

@@ -5,7 +5,6 @@ App(
     entry_point="i2ctools_app",
     requires=["gui"],
     stack_size=2 * 1024,
-    order=175,
     fap_icon="i2ctools.png",
     fap_category="GPIO",
     fap_icon_assets="images",

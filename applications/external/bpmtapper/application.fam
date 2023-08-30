@@ -9,7 +9,6 @@ App(
     fap_icon="bpm_10px.png",
     fap_category="Media",
     fap_icon_assets="icons",
-    order=15,
     fap_author="@panki27",
     fap_weburl="https://github.com/panki27/bpm-tapper",
     fap_version="1.0",
