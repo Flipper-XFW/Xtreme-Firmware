@@ -122,7 +122,7 @@ static void loader_applications_start_app(LoaderApplicationsApp* app) {
 
     if(!furi_string_start_with_str(app->fap_path, EXT_PATH("apps/Games/")) &&
        !furi_string_start_with_str(app->fap_path, EXT_PATH("apps/Media/"))) {
-        dolphin_deed(DolphinDeedPluginStart);
+        dolphin_deed(DolphinDeedPluginInternalStart);
     }
 
     // load app
