@@ -2,6 +2,8 @@
 
 enum SubmenuIndex {
     SubmenuIndexEspFlasherQuickFlash,
+    SubmenuIndexEspFlasherSwitchA,
+    SubmenuIndexEspFlasherSwitchB,
     SubmenuIndexEspFlasherManualFlash,
     SubmenuIndexEspFlasherReset,
     SubmenuIndexEspFlasherBootloader,
@@ -25,6 +27,18 @@ void esp_flasher_scene_start_on_enter(void* context) {
         submenu,
         "Quick Flash",
         SubmenuIndexEspFlasherQuickFlash,
+        esp_flasher_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "Switch to Firmware A",
+        SubmenuIndexEspFlasherSwitchA,
+        esp_flasher_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "Switch to Firmware B",
+        SubmenuIndexEspFlasherSwitchB,
         esp_flasher_scene_start_submenu_callback,
         app);
     submenu_add_item(
@@ -66,6 +80,14 @@ bool esp_flasher_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexEspFlasherQuickFlash) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneQuick);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEspFlasherSwitchA) {
+            app->switch_fw = SwitchToFirmwareA;
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEspFlasherSwitchB) {
+            app->switch_fw = SwitchToFirmwareB;
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherManualFlash) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneBrowse);
