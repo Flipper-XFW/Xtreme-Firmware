@@ -1,5 +1,4 @@
 #include "subbrute_i.h"
-#include "subbrute_custom_event.h"
 #include "scenes/subbrute_scene.h"
 
 #define TAG "SubBruteApp"
@@ -51,8 +50,8 @@ SubBruteState* subbrute_alloc() {
     subghz_devices_init();
 
     // init radio device
-    instance->radio_device =
-        radio_device_loader_set(instance->radio_device, SubGhzRadioDeviceTypeExternalCC1101);
+    instance->radio_device = subbrute_radio_device_loader_set(
+        instance->radio_device, SubGhzRadioDeviceTypeExternalCC1101);
 
     subghz_devices_reset(instance->radio_device);
     subghz_devices_idle(instance->radio_device);
@@ -106,6 +105,8 @@ SubBruteState* subbrute_alloc() {
         SubBruteViewAttack,
         subbrute_attack_view_get_view(instance->view_attack));
 
+    instance->settings = subbrute_settings_alloc();
+    subbrute_settings_load(instance->settings);
     //instance->flipper_format = flipper_format_string_alloc();
     //instance->environment = subghz_environment_alloc();
 
@@ -127,8 +128,10 @@ void subbrute_free(SubBruteState* instance) {
 
     // SubBruteDevice
     subbrute_device_free(instance->device);
-
     subghz_devices_deinit();
+
+    //subbrute_settings_save(instance->settings);
+    subbrute_settings_free(instance->settings);
 
     // Notifications
     notification_message(instance->notifications, &sequence_blink_stop);

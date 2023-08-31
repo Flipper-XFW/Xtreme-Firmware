@@ -59,7 +59,7 @@ void subbrute_worker_free(SubBruteWorker* instance) {
     furi_thread_free(instance->thread);
 
     subghz_devices_sleep(instance->radio_device);
-    radio_device_loader_end(instance->radio_device);
+    subbrute_radio_device_loader_end(instance->radio_device);
 
     free(instance);
 }
@@ -85,7 +85,7 @@ bool subbrute_worker_init_default_attack(
     SubBruteAttacks attack_type,
     uint64_t step,
     const SubBruteProtocol* protocol,
-    uint8_t extra_repeats) {
+    uint8_t repeats) {
     furi_assert(instance);
 
     if(instance->worker_running) {
@@ -100,7 +100,7 @@ bool subbrute_worker_init_default_attack(
     instance->step = step;
     instance->bits = protocol->bits;
     instance->te = protocol->te;
-    instance->repeat = protocol->repeat + extra_repeats;
+    instance->repeat = repeats;
     instance->load_index = 0;
     instance->file_key = 0;
     instance->two_bytes = false;
@@ -133,7 +133,7 @@ bool subbrute_worker_init_file_attack(
     uint8_t load_index,
     uint64_t file_key,
     SubBruteProtocol* protocol,
-    uint8_t extra_repeats,
+    uint8_t repeats,
     bool two_bytes) {
     furi_assert(instance);
 
@@ -150,7 +150,7 @@ bool subbrute_worker_init_file_attack(
     instance->bits = protocol->bits;
     instance->te = protocol->te;
     instance->load_index = load_index;
-    instance->repeat = protocol->repeat + extra_repeats;
+    instance->repeat = repeats;
     instance->file_key = file_key;
     instance->two_bytes = two_bytes;
 
@@ -490,6 +490,7 @@ bool subbrute_worker_is_tx_allowed(SubBruteWorker* instance, uint32_t value) {
     bool res = false;
 
     if(!subghz_devices_is_frequency_valid(instance->radio_device, value)) {
+        return false;
     } else {
         subghz_devices_set_frequency(instance->radio_device, value);
         res = subghz_devices_set_tx(instance->radio_device);
