@@ -1,6 +1,7 @@
 #include "barcode_app.h"
 
 #include "barcode_app_icons.h"
+#include <assets_icons.h>
 
 /**
  * Opens a file browser dialog and returns the filepath of the selected file

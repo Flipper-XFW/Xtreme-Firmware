@@ -54,7 +54,7 @@ void xtreme_app_scene_interface_filebrowser_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Sort Dirs First",
+        "Folders Above Files",
         2,
         xtreme_app_scene_interface_filebrowser_sort_dirs_first_changed,
         app);

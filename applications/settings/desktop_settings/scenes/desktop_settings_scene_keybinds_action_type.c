@@ -4,6 +4,7 @@
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 #include <flipper_application/flipper_application.h>
+#include <xtreme.h>
 
 static bool keybinds_fap_selector_item_callback(
     FuriString* file_path,
@@ -29,17 +30,31 @@ static void
     case DesktopSettingsAppKeybindActionTypeMoreActions:
         scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneKeybindsAction);
         break;
-    case DesktopSettingsAppKeybindActionTypeExternalApp: {
+    case DesktopSettingsAppKeybindActionTypeExternalApp:
+    case DesktopSettingsAppKeybindActionTypeOpenFile: {
+        const char* base_path;
+        const char* extension;
+        bool hide_ext;
+        if(index == DesktopSettingsAppKeybindActionTypeExternalApp) {
+            base_path = EXT_PATH("apps");
+            extension = ".fap";
+            hide_ext = true;
+        } else {
+            base_path = STORAGE_EXT_PATH_PREFIX;
+            extension = "*";
+            hide_ext = false;
+        }
         const DialogsFileBrowserOptions browser_options = {
-            .extension = ".fap",
+            .extension = extension,
             .icon = &I_unknown_10px,
+            .hide_dot_files = !XTREME_SETTINGS()->show_hidden_files,
             .skip_assets = true,
-            .hide_ext = true,
+            .hide_ext = hide_ext,
             .item_loader_callback = keybinds_fap_selector_item_callback,
             .item_loader_context = app,
-            .base_path = EXT_PATH("apps"),
+            .base_path = base_path,
         };
-        FuriString* temp_path = furi_string_alloc_set_str(EXT_PATH("apps"));
+        FuriString* temp_path = furi_string_alloc_set_str(base_path);
         if(storage_file_exists(furi_record_open(RECORD_STORAGE), keybind)) {
             furi_string_set_str(temp_path, keybind);
         }
@@ -85,6 +100,13 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
+        "Open File",
+        DesktopSettingsAppKeybindActionTypeOpenFile,
+        desktop_settings_scene_keybinds_action_type_submenu_callback,
+        app);
+
+    submenu_add_item(
+        submenu,
         "More Actions",
         DesktopSettingsAppKeybindActionTypeMoreActions,
         desktop_settings_scene_keybinds_action_type_submenu_callback,
@@ -112,7 +134,13 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
         }
 
         if(storage_file_exists(furi_record_open(RECORD_STORAGE), keybind)) {
-            selected = DesktopSettingsAppKeybindActionTypeExternalApp;
+            FuriString* tmp = furi_string_alloc_set(keybind);
+            if(furi_string_end_with_str(tmp, ".fap")) {
+                selected = DesktopSettingsAppKeybindActionTypeExternalApp;
+            } else {
+                selected = DesktopSettingsAppKeybindActionTypeOpenFile;
+            }
+            furi_string_free(tmp);
         }
         furi_record_close(RECORD_STORAGE);
 

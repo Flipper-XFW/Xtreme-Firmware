@@ -100,7 +100,7 @@ bool xtreme_app_apply(XtremeApp* app) {
     if(app->save_level || app->save_angry) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         if(app->save_level) {
-            int32_t xp = app->dolphin_level > 1 ? dolphin_get_levels()[app->dolphin_level - 2] : 0;
+            int32_t xp = app->dolphin_level > 1 ? DOLPHIN_LEVELS[app->dolphin_level - 2] : 0;
             dolphin->state->data.icounter = xp + 1;
         }
         if(app->save_angry) {
@@ -192,6 +192,10 @@ XtremeApp* xtreme_app_alloc() {
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, XtremeAppViewTextInput, text_input_get_view(app->text_input));
+
+    app->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, XtremeAppViewByteInput, byte_input_get_view(app->byte_input));
 
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XtremeAppViewPopup, popup_get_view(app->popup));
@@ -315,6 +319,8 @@ void xtreme_app_free(XtremeApp* app) {
     submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewTextInput);
     text_input_free(app->text_input);
+    view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewByteInput);
+    byte_input_free(app->byte_input);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewPopup);
     popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, XtremeAppViewDialogEx);

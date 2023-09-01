@@ -53,7 +53,7 @@ typedef struct {
     const GpioPin* async_mirror_pin;
 
     uint8_t rolling_counter_mult;
-    bool timestamp_file_names : 1;
+    bool ext_power_amp : 1;
     bool extended_frequency_i : 1;
 } FuriHalSubGhz;
 
@@ -62,6 +62,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .regulation = SubGhzRegulationTxRx,
     .async_mirror_pin = NULL,
     .rolling_counter_mult = 1,
+    .ext_power_amp = false,
     .extended_frequency_i = false,
 };
 
@@ -75,6 +76,14 @@ void furi_hal_subghz_set_rolling_counter_mult(uint8_t mult) {
 
 void furi_hal_subghz_set_extended_frequency(bool state_i) {
     furi_hal_subghz.extended_frequency_i = state_i;
+}
+
+void furi_hal_subghz_set_ext_power_amp(bool enabled) {
+    furi_hal_subghz.ext_power_amp = enabled;
+}
+
+bool furi_hal_subghz_get_ext_power_amp() {
+    return furi_hal_subghz.ext_power_amp;
 }
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
@@ -225,7 +234,7 @@ bool furi_hal_subghz_rx_pipe_not_empty() {
     cc1101_read_reg(
         &furi_hal_spi_bus_handle_subghz, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-    // TODO: you can add a buffer overflow flag if needed
+    // TODO: Find reason why RXFIFO_OVERFLOW doesnt work correctly
     if(status->NUM_RXBYTES > 0) {
         return true;
     } else {

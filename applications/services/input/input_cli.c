@@ -7,6 +7,7 @@
 #include <gui/view_port_i.h>
 #include <gui/view_dispatcher_i.h>
 #include <gui/modules/text_input_i.h>
+#include <notification/notification_messages.h>
 
 static void input_cli_usage() {
     printf("Usage:\r\n");
@@ -48,14 +49,15 @@ static void input_cli_dump(Cli* cli, FuriString* args, Input* input) {
 static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     UNUSED(args);
     Gui* gui = furi_record_open(RECORD_GUI);
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     printf("Using console keyboard feedback for flipper input\r\n");
 
     printf("\r\nUsage:\r\n");
     printf("\tMove = Arrows\r\n");
     printf("\tOk = Enter\r\n");
-    printf("\tHold Ok = Shift + Enter\r\n");
     printf("\tBack = Backspace\r\n");
+    printf("\tToggle hold for next key = Space\r\n");
 
     printf("\r\nIn Keyboard:\r\n");
     printf("\tType normally on PC Keyboard\r\n");
@@ -65,11 +67,11 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     printf("\tSave Text = Enter\r\n");
 
     printf("\r\nPress CTRL+C to stop\r\n");
+    bool hold = false;
     while(cli_is_connected(cli)) {
         char in_chr = cli_getc(cli);
         if(in_chr == CliSymbolAsciiETX) break;
         InputKey send_key = InputKeyMAX;
-        InputType send_type = InputTypeShort;
 
         ViewPort* view_port = gui->ongoing_input_view_port;
         if(view_port && view_port->input_callback == view_dispatcher_input_callback) {
@@ -82,6 +84,7 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
                         if(in_chr == 0x11) { // Ctrl Q = Close text input
                             send_key = InputKeyBack;
                         } else if(text_input_insert_character(text_input, in_chr)) {
+                            notification_message(notification, &sequence_display_backlight_on);
                             continue;
                         }
                     }
@@ -98,12 +101,13 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
                     send_key = in_chr - 'A'; // Arrows in same order as InputKey
                 }
                 break;
-            case CliSymbolAsciiBackspace: // Backspace = Back
+            case CliSymbolAsciiBackspace: // (minicom) Backspace = Back
+            case CliSymbolAsciiDel: // (putty/picocom) Backspace = Back
                 send_key = InputKeyBack;
                 break;
-            case 0x4d: // Shift Enter = Hold Ok
-                send_type = InputTypeLong;
-                /* fall through */
+            case CliSymbolAsciiSpace: // Space = Toggle hold next key
+                hold = !hold;
+                break;
             case CliSymbolAsciiCR: // Enter = Ok
                 send_key = InputKeyOk;
                 break;
@@ -114,11 +118,14 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
         }
 
         if(send_key != InputKeyMAX) {
-            input_fake_event(input, send_key, send_type);
+            notification_message(notification, &sequence_display_backlight_on);
+            input_fake_event(input, send_key, hold ? InputTypeLong : InputTypeShort);
+            hold = false;
         }
     }
 
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
 }
 
 static void input_cli_send_print_usage() {

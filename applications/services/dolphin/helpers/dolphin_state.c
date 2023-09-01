@@ -13,10 +13,10 @@
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
 
-const int DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT] = {100,  200,  300,  450,  600,  750,  950,  1150,
-                                                 1350, 1600, 1850, 2100, 2400, 2700, 3000, 3350,
-                                                 3700, 4050, 4450, 4850, 5250, 5700, 6150, 6600,
-                                                 7100, 7600, 8100, 8650, 9200};
+const uint32_t DOLPHIN_LEVELS[] = {100,  200,  300,  450,  600,  750,  950,  1150, 1350, 1600,
+                                   1850, 2100, 2400, 2700, 3000, 3350, 3700, 4050, 4450, 4850,
+                                   5250, 5700, 6150, 6600, 7100, 7600, 8100, 8650, 9200};
+const size_t DOLPHIN_LEVEL_COUNT = COUNT_OF(DOLPHIN_LEVELS);
 
 DolphinState* dolphin_state_alloc() {
     return malloc(sizeof(DolphinState));
@@ -78,8 +78,8 @@ uint64_t dolphin_state_timestamp() {
     return furi_hal_rtc_datetime_to_timestamp(&datetime);
 }
 
-bool dolphin_state_is_levelup(int icounter) {
-    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+bool dolphin_state_is_levelup(uint32_t icounter) {
+    for(size_t i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
         if((icounter == DOLPHIN_LEVELS[i])) {
             return true;
         }
@@ -87,12 +87,8 @@ bool dolphin_state_is_levelup(int icounter) {
     return false;
 }
 
-const int* dolphin_get_levels() {
-    return DOLPHIN_LEVELS;
-}
-
-uint8_t dolphin_get_level(int icounter) {
-    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+uint8_t dolphin_get_level(uint32_t icounter) {
+    for(size_t i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
         if(icounter <= DOLPHIN_LEVELS[i]) {
             return i + 1;
         }
@@ -100,20 +96,18 @@ uint8_t dolphin_get_level(int icounter) {
     return DOLPHIN_LEVEL_COUNT + 1;
 }
 
-uint32_t dolphin_state_xp_above_last_levelup(int icounter) {
-    for(int i = DOLPHIN_LEVEL_COUNT; i >= 0; --i) {
-        if(icounter >= DOLPHIN_LEVELS[i]) {
-            return icounter - DOLPHIN_LEVELS[i];
-        }
+uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
+    uint8_t level_idx = dolphin_get_level(icounter) - 1; // Level = index + 1
+    if(level_idx > 0) {
+        return icounter - DOLPHIN_LEVELS[level_idx - 1]; // Get prev level
     }
     return icounter;
 }
 
-uint32_t dolphin_state_xp_to_levelup(int icounter) {
-    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
-        if(icounter <= DOLPHIN_LEVELS[i]) {
-            return DOLPHIN_LEVELS[i] - icounter;
-        }
+uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
+    uint8_t level_idx = dolphin_get_level(icounter) - 1; // Level = index + 1
+    if(level_idx < DOLPHIN_LEVEL_COUNT) {
+        return DOLPHIN_LEVELS[level_idx] - icounter;
     }
     return (uint32_t)-1;
 }
@@ -172,7 +166,7 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
 
     FURI_LOG_D(
         TAG,
-        "icounter %ld, butthurt %ld",
+        "icounter %lu, butthurt %ld",
         dolphin_state->data.icounter,
         dolphin_state->data.butthurt);
 }
@@ -194,7 +188,7 @@ void dolphin_state_increase_level(DolphinState* dolphin_state) {
 void dolphin_state_clear_limits(DolphinState* dolphin_state) {
     furi_assert(dolphin_state);
 
-    for(int i = 0; i < DolphinAppMAX; ++i) {
+    for(size_t i = 0; i < DolphinAppMAX; ++i) {
         dolphin_state->data.icounter_daily_limit[i] = 0;
     }
     dolphin_state->data.butthurt_daily_limit = 0;

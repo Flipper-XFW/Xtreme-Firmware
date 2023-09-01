@@ -20,20 +20,22 @@ struct Loader {
     LoaderMenu* loader_menu;
     LoaderApplications* loader_applications;
     LoaderAppData app;
+
     MenuAppList_t menu_apps;
 };
 
 typedef enum {
     LoaderMessageTypeStartByName,
-    LoaderMessageTypeStartByNameDetachedWithGuiError,
     LoaderMessageTypeAppClosed,
     LoaderMessageTypeShowMenu,
-    LoaderMessageTypeShowSettings,
     LoaderMessageTypeMenuClosed,
     LoaderMessageTypeApplicationsClosed,
     LoaderMessageTypeLock,
     LoaderMessageTypeUnlock,
     LoaderMessageTypeIsLocked,
+
+    LoaderMessageTypeStartByNameDetachedWithGuiError,
+    LoaderMessageTypeShowSettings,
 } LoaderMessageType;
 
 typedef struct {

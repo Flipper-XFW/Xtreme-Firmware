@@ -2,7 +2,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <dolphin/dolphin.h>
 
 static bool wifi_marauder_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -24,7 +23,6 @@ static void wifi_marauder_app_tick_event_callback(void* context) {
 
 WifiMarauderApp* wifi_marauder_app_alloc() {
     WifiMarauderApp* app = malloc(sizeof(WifiMarauderApp));
-    dolphin_deed(DolphinDeedPluginStart);
 
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -85,9 +83,6 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->submenu = submenu_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, WifiMarauderAppViewSubmenu, submenu_get_view(app->submenu));
-
-    app->flash_mode = false;
-    app->flash_worker_busy = false;
 
     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneStart);
 
@@ -164,7 +159,9 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     scene_manager_free(app->scene_manager);
 
     wifi_marauder_uart_free(app->uart);
-    wifi_marauder_uart_free(app->lp_uart);
+    if(app->ok_to_save_pcaps) {
+        wifi_marauder_uart_free(app->pcap_uart);
+    }
 
     // Close records
     furi_record_close(RECORD_GUI);
@@ -189,8 +186,13 @@ int32_t wifi_marauder_app(void* p) {
     wifi_marauder_make_app_folder(wifi_marauder_app);
     wifi_marauder_load_settings(wifi_marauder_app);
 
-    wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
-    wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
+    if(wifi_marauder_app->ok_to_save_pcaps) {
+        wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
+        wifi_marauder_app->pcap_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
+    } else {
+        wifi_marauder_app->uart =
+            wifi_marauder_uart_init(wifi_marauder_app, XTREME_UART_CH, "WifiMarauderUartRxThread");
+    }
 
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 

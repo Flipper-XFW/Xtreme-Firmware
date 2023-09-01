@@ -1,7 +1,5 @@
 #include "../wifi_marauder_app_i.h"
 
-#include "../wifi_marauder_flasher.h"
-
 char* _wifi_marauder_get_prefix_from_cmd(const char* command) {
     int end = strcspn(command, " ");
     char* prefix = (char*)malloc(sizeof(char) * (end + 1));
@@ -103,22 +101,14 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
 
     // Register callbacks to receive data
-    // setup callback for general log rx thread
-    if(app->flash_mode) {
-        wifi_marauder_uart_set_handle_rx_data_cb(
-            app->uart,
-            wifi_marauder_flash_handle_rx_data_cb); // setup callback for general log rx thread
-    } else {
-        wifi_marauder_uart_set_handle_rx_data_cb(
-            app->uart,
-            wifi_marauder_console_output_handle_rx_data_cb); // setup callback for general log rx thread
-    }
     wifi_marauder_uart_set_handle_rx_data_cb(
-        app->lp_uart,
-        wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
+        app->uart,
+        wifi_marauder_console_output_handle_rx_data_cb); // setup callback for general log rx thread
 
-    if(app->flash_mode) {
-        wifi_marauder_flash_start_thread(app);
+    if(app->ok_to_save_pcaps) {
+        wifi_marauder_uart_set_handle_rx_data_cb(
+            app->pcap_uart,
+            wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
     }
 
     // Get ready to send command
@@ -159,14 +149,21 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
 
         // Send command with newline '\n'
         if(app->selected_tx_string) {
-            wifi_marauder_uart_tx(
-                (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+            if(app->ok_to_save_pcaps) {
+                wifi_marauder_usart_tx(
+                    (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+                wifi_marauder_usart_tx((uint8_t*)("\n"), 1);
+            } else {
+                wifi_marauder_xtreme_uart_tx(
+                    (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+                wifi_marauder_xtreme_uart_tx((uint8_t*)("\n"), 1);
+            }
         }
 
         // Run the script if the file with the script has been opened
         if(app->script != NULL) {
             app->script_worker = wifi_marauder_script_worker_alloc();
+            app->script_worker->save_pcaps = app->ok_to_save_pcaps;
             wifi_marauder_script_worker_start(app->script_worker, app->script);
         }
     }
@@ -182,11 +179,6 @@ bool wifi_marauder_scene_console_output_on_event(void* context, SceneManagerEven
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
         consumed = true;
-    } else {
-        if(app->flash_worker_busy) {
-            // ignore button presses while flashing
-            consumed = true;
-        }
     }
 
     return consumed;
@@ -197,17 +189,20 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
 
     // Automatically stop the scan when exiting view
     if(app->is_command) {
-        wifi_marauder_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
-        furi_delay_ms(50);
-    }
+        if(app->ok_to_save_pcaps) {
+            wifi_marauder_usart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+        } else {
+            wifi_marauder_xtreme_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+        }
 
-    if(app->flash_mode) {
-        wifi_marauder_flash_stop_thread(app);
+        furi_delay_ms(50);
     }
 
     // Unregister rx callback
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, NULL);
-    wifi_marauder_uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+    if(app->ok_to_save_pcaps) {
+        wifi_marauder_uart_set_handle_rx_data_cb(app->pcap_uart, NULL);
+    }
 
     wifi_marauder_script_worker_free(app->script_worker);
     app->script_worker = NULL;

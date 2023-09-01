@@ -1,6 +1,6 @@
 #include "lfrfid_i.h"
 #include <dolphin/dolphin.h>
-#include <applications/main/archive/helpers/favorite_timeout.h>
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 
 static bool lfrfid_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -193,12 +193,9 @@ int32_t lfrfid_app(char* args) {
                 scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
                 dolphin_deed(DolphinDeedRfidEmulate);
             } else {
-                // TODO: exit properly
-                lfrfid_free(app);
-                return 0;
+                view_dispatcher_stop(app->view_dispatcher);
             }
         }
-
     } else {
         view_dispatcher_attach_to_gui(
             app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);

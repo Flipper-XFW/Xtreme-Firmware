@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
-#include <jetpack_joyride_icons.h>
+#include "jetpack_joyride_icons.h"
+#include <assets_icons.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/icon_animation.h>

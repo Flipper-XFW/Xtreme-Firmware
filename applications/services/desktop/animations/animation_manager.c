@@ -55,6 +55,7 @@ struct AnimationManager {
     FuriString* freezed_animation_name;
     int32_t freezed_animation_time_left;
     ViewStack* view_stack;
+    bool _dummy_mode; // Unused, kept for compatibility
 };
 
 static StorageAnimation*

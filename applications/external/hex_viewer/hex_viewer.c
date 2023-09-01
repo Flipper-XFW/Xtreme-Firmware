@@ -1,7 +1,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <hex_viewer_icons.h>
+#include "hex_viewer_icons.h"
+#include <assets_icons.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <dialogs/dialogs.h>
@@ -163,7 +164,7 @@ static bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
             FURI_LOG_E(TAG, "Unable to open stream: %s", file_path);
             isOk = false;
             break;
-        }
+        };
 
         hex_viewer->model->file_size = stream_size(hex_viewer->model->stream);
     } while(false);

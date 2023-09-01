@@ -47,7 +47,7 @@ FuriHalNfcReturn rfalPicoPassPollerInitialize(void) {
         FuriHalNfcModePollPicopass, FuriHalNfcBitrate26p48, FuriHalNfcBitrate26p48);
     if(ret != FuriHalNfcReturnOk) {
         return ret;
-    }
+    };
 
     furi_hal_nfc_ll_set_error_handling(FuriHalNfcErrorHandlingNfc);
     furi_hal_nfc_ll_set_guard_time(FURI_HAL_NFC_LL_GT_PICOPASS);

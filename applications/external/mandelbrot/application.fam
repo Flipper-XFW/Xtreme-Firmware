@@ -6,7 +6,6 @@ App(
     cdefines=["APP_MANDELBROT_GAME"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=130,
     fap_icon="Mandelbrot.png",
     fap_category="Media",
     fap_author="@Possibly-Matt",

@@ -1,4 +1,4 @@
-#include "favorite_timeout.h"
+#include "archive_helpers_ext.h"
 #include <xtreme.h>
 
 bool process_favorite_launch(char** args) {

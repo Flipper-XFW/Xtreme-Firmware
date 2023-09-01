@@ -7,4 +7,5 @@ App(
     icon="A_GPIO_14",
     order=50,
     fap_icon="icon.png",
+    fap_category="GPIO",
 )

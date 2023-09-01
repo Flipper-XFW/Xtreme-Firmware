@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 
 //ORIGINAL REPO: https://github.com/Dooskington/flipperzero-zombiez
 //AUTHORS: https://github.com/Dooskington | https://github.com/DevMilanIan
@@ -314,7 +315,7 @@ int32_t zombiez_game_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     // Call dolphin deed on game start
-    // dolphin_deed(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     PluginEvent event;
     bool isRunning = true;

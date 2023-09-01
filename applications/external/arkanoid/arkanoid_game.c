@@ -5,6 +5,7 @@
 #include <gui/view.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "Arkanoid"
 
@@ -398,7 +399,7 @@ int32_t arkanoid_game_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     // Call dolphin deed on game start
-    // dolphin_deed(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     GameEvent event;
     for(bool processing = true; processing;) {

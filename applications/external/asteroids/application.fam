@@ -6,7 +6,6 @@ App(
     cdefines=["APP_ASTEROIDS"],
     requires=["gui"],
     stack_size=8 * 1024,
-    order=50,
     fap_icon="appicon.png",
     fap_icon_assets="assets",
     fap_category="Games",

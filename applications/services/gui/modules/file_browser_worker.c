@@ -32,6 +32,8 @@ typedef enum {
     (WorkerEvtStop | WorkerEvtLoad | WorkerEvtFolderEnter | WorkerEvtFolderExit | \
      WorkerEvtFolderRefresh | WorkerEvtConfigChange)
 
+ARRAY_DEF(_idx_last_array, int32_t) // Unused, kept for compatibility
+
 struct BrowserWorker {
     FuriThread* thread;
 
@@ -39,17 +41,20 @@ struct BrowserWorker {
     FuriString* path_start;
     FuriString* path_current;
     FuriString* path_next;
-    bool keep_selection;
+    int32_t _item_sel_idx; // Unused, kept for compatibility
     uint32_t load_offset;
     uint32_t load_count;
     bool skip_assets;
     bool hide_dot_files;
+    _idx_last_array_t _idx_last; // Unused, kept for compatibility
 
     void* cb_ctx;
     BrowserWorkerFolderOpenCallback folder_cb;
     BrowserWorkerListLoadCallback list_load_cb;
     BrowserWorkerListItemCallback list_item_cb;
     BrowserWorkerLongLoadCallback long_load_cb;
+
+    bool keep_selection;
 };
 
 static bool browser_path_is_file(FuriString* path) {
@@ -574,7 +579,7 @@ void file_browser_worker_folder_exit(BrowserWorker* browser) {
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderExit);
 }
 
-void file_browser_worker_folder_refresh(BrowserWorker* browser, const char* item_name) {
+void file_browser_worker_folder_refresh_sel(BrowserWorker* browser, const char* item_name) {
     furi_assert(browser);
     if(item_name != NULL) {
         furi_string_set(browser->path_next, item_name);
@@ -582,6 +587,11 @@ void file_browser_worker_folder_refresh(BrowserWorker* browser, const char* item
         furi_string_reset(browser->path_next);
     }
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderRefresh);
+}
+
+void file_browser_worker_folder_refresh(BrowserWorker* browser, int32_t item_idx) {
+    UNUSED(item_idx);
+    file_browser_worker_folder_refresh_sel(browser, NULL);
 }
 
 void file_browser_worker_load(BrowserWorker* browser, uint32_t offset, uint32_t count) {

@@ -6,7 +6,6 @@ App(
     cdefines=["APP_DICE"],
     requires=["gui"],
     stack_size=2 * 1024,
-    order=70,
     fap_icon="dice.png",
     fap_category="Games",
 )

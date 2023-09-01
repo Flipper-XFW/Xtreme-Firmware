@@ -6,6 +6,7 @@
 #include <string.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_gpio.h>
+#include <dolphin/dolphin.h>
 
 #define BORDER_OFFSET 1
 #define MARGIN_OFFSET 3
@@ -388,7 +389,7 @@ int32_t tetris_game_app() {
     uint8_t downRepeatCounter = 0;
 
     // Call dolphin deed on game start
-    // dolphin_deed(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     for(bool processing = true; processing;) {
         // This 10U implicitly sets the game loop speed. downRepeatCounter relies on this value

@@ -35,11 +35,17 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
     {2, DolphinAppIbutton}, // DolphinDeedIbuttonAdd
 
     {3, DolphinAppBadKb}, // DolphinDeedBadKbPlayScript
+
     {3, DolphinAppPlugin}, // DolphinDeedU2fAuthorized
 
     {1, DolphinAppPlugin}, // DolphinDeedGpioUartBridge
 
-    {1, DolphinAppPlugin}, // DolphinDeedPluginStart
+    // Values set to 0 to handle deeds in loader not by individual apps
+    {0, DolphinAppPlugin}, // DolphinDeedPluginStart
+    {0, DolphinAppPlugin}, // DolphinDeedPluginGameStart
+    {0, DolphinAppPlugin}, // DolphinDeedPluginGameWin
+    // Only for pentesting apps, yielded by loader
+    {2, DolphinAppPlugin}, // DolphinDeedPluginInternalStart
 };
 
 static uint8_t dolphin_deed_limits[] = {

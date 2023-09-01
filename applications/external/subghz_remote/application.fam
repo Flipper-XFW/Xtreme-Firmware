@@ -4,7 +4,6 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="subghz_remote_app",
     stack_size=2 * 1024,
-    order=11,
     fap_icon="icon.png",
     fap_description="SubGhz Remote, uses up to 5 .sub files",
     fap_category="Sub-GHz",

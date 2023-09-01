@@ -29,10 +29,30 @@ static void xtreme_app_scene_misc_dolphin_dolphin_angry_changed(VariableItem* it
     app->save_angry = true;
 }
 
-const char* const butthurt_timer_names[] =
-    {"OFF", "30 M", "1 H", "2 H", "4 H", "6 H", "8 H", "12 H", "24 H", "48 H"};
-const uint32_t butthurt_timer_values[COUNT_OF(butthurt_timer_names)] =
-    {0, 1800, 3600, 7200, 14400, 21600, 28800, 43200, 86400, 172800};
+const char* const butthurt_timer_names[] = {
+    "OFF",
+    "30 M",
+    "1 H",
+    "2 H",
+    "4 H",
+    "6 H",
+    "8 H",
+    "12 H",
+    "24 H",
+    "48 H",
+};
+const uint32_t butthurt_timer_values[COUNT_OF(butthurt_timer_names)] = {
+    0,
+    1800,
+    3600,
+    7200,
+    14400,
+    21600,
+    28800,
+    43200,
+    86400,
+    172800,
+};
 static void xtreme_app_scene_misc_dolphin_butthurt_timer_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);

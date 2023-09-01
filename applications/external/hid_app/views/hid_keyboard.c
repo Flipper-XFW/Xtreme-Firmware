@@ -3,6 +3,8 @@
 #include <gui/elements.h>
 #include <gui/icon_i.h>
 #include "../hid.h"
+#include "hid_icons.h"
+#include <assets_icons.h>
 
 #define TAG "HidKeyboard"
 

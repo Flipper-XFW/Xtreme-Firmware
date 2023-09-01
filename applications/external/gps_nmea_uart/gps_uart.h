@@ -2,11 +2,16 @@
 
 #include <furi_hal.h>
 #include <notification/notification_messages.h>
+#include <xtreme.h>
+
+#define UART_CH                                                                  \
+    (XTREME_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : \
+                                                           FuriHalUartIdLPUART1)
 
 #define RX_BUF_SIZE 1024
 
 static const int gps_baudrates[5] = {9600, 19200, 38400, 57600, 115200};
-static int current_gps_baudrate = 3;
+static int current_gps_baudrate = 0;
 
 typedef struct {
     bool valid;

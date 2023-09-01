@@ -90,6 +90,29 @@ void elements_scrollbar_pos(
     }
 }
 
+void elements_scrollbar_horizontal(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint16_t pos,
+    uint16_t total) {
+    furi_assert(canvas);
+    // prevent overflows
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x, y - 3, width, 3);
+    // dot line
+    canvas_set_color(canvas, ColorBlack);
+    for(uint8_t i = x; i < width + x; i += 2) {
+        canvas_draw_dot(canvas, i, y - 2);
+    }
+    // Position block
+    if(total) {
+        float block_w = ((float)width) / total;
+        canvas_draw_box(canvas, x + (block_w * pos), y - 3, MAX(block_w, 1), 3);
+    }
+}
+
 void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total) {
     furi_assert(canvas);
 
@@ -236,11 +259,11 @@ static size_t
     }
 
     if(len_px > px_left) {
-        uint8_t excess_symbols_approximately =
-            roundf((float)(len_px - px_left) / ((float)len_px / (float)text_size));
+        size_t excess_symbols_approximately =
+            ceilf((float)(len_px - px_left) / ((float)len_px / (float)text_size));
         // reduce to 5 to be sure dash fit, and next line will be at least 5 symbols long
         if(excess_symbols_approximately > 0) {
-            excess_symbols_approximately = MAX(excess_symbols_approximately, 5);
+            excess_symbols_approximately = MAX(excess_symbols_approximately, 5u);
             result = text_size - excess_symbols_approximately - 1;
         } else {
             result = text_size;

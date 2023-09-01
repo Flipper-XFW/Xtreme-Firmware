@@ -206,6 +206,19 @@ static uint64_t storage_process_file_tell(Storage* app, File* file) {
     return ret;
 }
 
+static bool storage_process_file_expand(Storage* app, File* file, const uint64_t size) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+
+    if(storage == NULL) {
+        file->error_id = FSE_INVALID_PARAMETER;
+    } else {
+        FS_CALL(storage, file.expand(storage, file, size));
+    }
+
+    return ret;
+}
+
 static bool storage_process_file_truncate(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
@@ -417,7 +430,7 @@ static FS_Error storage_process_common_fs_info(
 }
 
 /****************** Raw SD API ******************/
-// TODO think about implementing a custom storage API to split that kind of api linkage
+// TODO FL-3521: think about implementing a custom storage API to split that kind of api linkage
 #include "storages/storage_ext.h"
 
 static FS_Error storage_process_sd_format(Storage* app) {
@@ -574,6 +587,10 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
     case StorageCommandFileTell:
         message->return_data->uint64_value =
             storage_process_file_tell(app, message->data->file.file);
+        break;
+    case StorageCommandFileExpand:
+        message->return_data->bool_value = storage_process_file_expand(
+            app, message->data->fexpand.file, message->data->fexpand.size);
         break;
     case StorageCommandFileTruncate:
         message->return_data->bool_value =

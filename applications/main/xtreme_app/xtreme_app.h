@@ -12,6 +12,7 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/popup.h>
 #include <lib/toolbox/value_index.h>
 #include <toolbox/stream/file_stream.h>
@@ -42,6 +43,7 @@ typedef struct {
     VariableItemList* var_item_list;
     Submenu* submenu;
     TextInput* text_input;
+    ByteInput* byte_input;
     Popup* popup;
     DialogEx* dialog_ex;
 
@@ -57,6 +59,7 @@ typedef struct {
     uint8_t subghz_hopper_index;
     char subghz_freq_buffer[XTREME_SUBGHZ_FREQ_BUFFER_SIZE];
     bool subghz_extend;
+    RgbColor lcd_color;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
     int32_t dolphin_level;
     int32_t dolphin_angry;
@@ -79,6 +82,7 @@ typedef enum {
     XtremeAppViewVarItemList,
     XtremeAppViewSubmenu,
     XtremeAppViewTextInput,
+    XtremeAppViewByteInput,
     XtremeAppViewPopup,
     XtremeAppViewDialogEx,
 } XtremeAppView;

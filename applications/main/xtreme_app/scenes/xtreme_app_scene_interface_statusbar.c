@@ -13,8 +13,15 @@ void xtreme_app_scene_interface_statusbar_var_item_list_callback(void* context, 
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-const char* const battery_icon_names[BatteryIconCount] =
-    {"OFF", "Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %"};
+const char* const battery_icon_names[BatteryIconCount] = {
+    "OFF",
+    "Bar",
+    "%",
+    "Inv. %",
+    "Retro 3",
+    "Retro 5",
+    "Bar %",
+};
 static void xtreme_app_scene_interface_statusbar_battery_icon_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);

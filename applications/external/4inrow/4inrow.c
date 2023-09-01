@@ -235,7 +235,7 @@ int32_t four_in_row_app(void* p) {
         return 255;
     }
 
-    // dolphin_deed(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     // Создаем новый view port
     ViewPort* view_port = view_port_alloc();

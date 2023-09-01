@@ -4,14 +4,13 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
-#include <dolphin/dolphin.h>
 
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
 
 #define LOGITECH_MAX_CHANNEL 85
 #define COUNT_THRESHOLD 2
-#define DEFAULT_SAMPLE_TIME 4000
+#define DEFAULT_SAMPLE_TIME 8000
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
@@ -315,7 +314,6 @@ static void start_sniffing() {
 
 int32_t nrfsniff_app(void* p) {
     UNUSED(p);
-    dolphin_deed(DolphinDeedPluginStart);
     uint8_t address[5] = {0};
     uint32_t start = 0;
     hexlify(address, 5, top_address);
@@ -327,6 +325,12 @@ int32_t nrfsniff_app(void* p) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(plugin_state);
         return 255;
+    }
+
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
     }
 
     nrf24_init();
@@ -345,10 +349,6 @@ int32_t nrfsniff_app(void* p) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_common_migrate(storage, EXT_PATH("nrfsniff"), NRFSNIFF_APP_PATH_FOLDER);
     storage_common_mkdir(storage, NRFSNIFF_APP_PATH_FOLDER);
-
-    while(!furi_hal_speaker_acquire(100)) {
-        furi_delay_ms(100);
-    }
 
     PluginEvent event;
     for(bool processing = true; processing;) {
@@ -455,7 +455,6 @@ int32_t nrfsniff_app(void* p) {
     target_rate = 8; // rate can be either 8 (2Mbps) or 0 (1Mbps)
     sniffing_state = false;
     nrf24_deinit();
-    furi_hal_speaker_release();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
@@ -465,6 +464,10 @@ int32_t nrfsniff_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }

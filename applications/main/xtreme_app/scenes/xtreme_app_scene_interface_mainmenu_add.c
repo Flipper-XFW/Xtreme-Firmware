@@ -67,6 +67,8 @@ void xtreme_app_scene_interface_mainmenu_add_on_enter(void* context) {
     XtremeApp* app = context;
     Submenu* submenu = app->submenu;
 
+    submenu_set_header(submenu, "Add Menu App:");
+
     submenu_add_item(
         submenu,
         "Main App",
@@ -80,8 +82,6 @@ void xtreme_app_scene_interface_mainmenu_add_on_enter(void* context) {
         SubmenuIndexExternalApp,
         xtreme_app_scene_interface_mainmenu_add_submenu_callback,
         app);
-
-    submenu_set_header(submenu, "Add Menu App:");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XtremeAppViewSubmenu);
 }

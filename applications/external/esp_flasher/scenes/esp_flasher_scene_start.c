@@ -1,11 +1,13 @@
 #include "../esp_flasher_app_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexEspFlasherDevboardFlash,
-    SubmenuIndexEspFlasherFlash,
-    SubmenuIndexEspFlasherAbout,
+    SubmenuIndexEspFlasherQuickFlash,
+    SubmenuIndexEspFlasherSwitchA,
+    SubmenuIndexEspFlasherSwitchB,
+    SubmenuIndexEspFlasherManualFlash,
     SubmenuIndexEspFlasherReset,
     SubmenuIndexEspFlasherBootloader,
+    SubmenuIndexEspFlasherAbout,
 };
 
 void esp_flasher_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -20,16 +22,29 @@ void esp_flasher_scene_start_on_enter(void* context) {
 
     EspFlasherApp* app = context;
     Submenu* submenu = app->submenu;
+    submenu_set_header(submenu, "ESP Flasher");
     submenu_add_item(
         submenu,
-        "Flash Wifi Devboard",
-        SubmenuIndexEspFlasherDevboardFlash,
+        "Quick Flash",
+        SubmenuIndexEspFlasherQuickFlash,
         esp_flasher_scene_start_submenu_callback,
         app);
     submenu_add_item(
         submenu,
-        "Flash Generic ESP",
-        SubmenuIndexEspFlasherFlash,
+        "Select Evil Portal (Fw A)",
+        SubmenuIndexEspFlasherSwitchA,
+        esp_flasher_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "Select Marauder (Fw B)",
+        SubmenuIndexEspFlasherSwitchB,
+        esp_flasher_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "Manual Flash",
+        SubmenuIndexEspFlasherManualFlash,
         esp_flasher_scene_start_submenu_callback,
         app);
     submenu_add_item(
@@ -63,10 +78,22 @@ bool esp_flasher_scene_start_on_event(void* context, SceneManagerEvent event) {
     EspFlasherApp* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexEspFlasherDevboardFlash) {
-            scene_manager_next_scene(app->scene_manager, EspFlasherSceneDevboard);
+        if(event.event == SubmenuIndexEspFlasherQuickFlash) {
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneQuick);
             consumed = true;
-        } else if(event.event == SubmenuIndexEspFlasherFlash) {
+        } else if(event.event == SubmenuIndexEspFlasherSwitchA) {
+            app->boot = true;
+            app->quickflash = true;
+            app->switch_fw = SwitchToFirmwareA;
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEspFlasherSwitchB) {
+            app->boot = true;
+            app->quickflash = true;
+            app->switch_fw = SwitchToFirmwareB;
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEspFlasherManualFlash) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneBrowse);
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherReset) {

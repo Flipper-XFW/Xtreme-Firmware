@@ -53,9 +53,15 @@ typedef enum {
     DolphinDeedBadKbPlayScript,
 
     DolphinDeedU2fAuthorized,
+
     DolphinDeedGpioUartBridge,
 
+    // Values set to 0 to handle deeds in loader not by individual apps
     DolphinDeedPluginStart,
+    DolphinDeedPluginGameStart,
+    DolphinDeedPluginGameWin,
+    // Only for pentesting apps, yielded by loader
+    DolphinDeedPluginInternalStart,
 
     DolphinDeedMAX,
 

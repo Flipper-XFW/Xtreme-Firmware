@@ -62,6 +62,12 @@ struct File {
  *      @param file pointer to file object
  *      @return current r/w pointer position
  * 
+ *  @var FS_File_Api::expand
+ *      @brief Expand the file (allocate space for it) 
+ *      @param file pointer to file object
+ *      @param size how many bytes to allocate
+ *      @return success flag
+ * 
  *  @var FS_File_Api::truncate
  *      @brief Truncate file size to current r/w pointer position
  *      @param file pointer to file object
@@ -98,6 +104,8 @@ typedef struct {
     uint64_t (*size)(void* context, File* file);
     bool (*const sync)(void* context, File* file);
     bool (*const eof)(void* context, File* file);
+
+    bool (*const expand)(void* context, File* file, uint64_t size);
 } FS_File_Api;
 
 /** Dir api structure
@@ -169,13 +177,14 @@ typedef struct {
 typedef struct {
     FS_Error (*const stat)(void* context, const char* path, FileInfo* fileinfo);
     FS_Error (*const remove)(void* context, const char* path);
-    FS_Error (*const rename)(void* context, const char* old, const char* new);
     FS_Error (*const mkdir)(void* context, const char* path);
     FS_Error (*const fs_info)(
         void* context,
         const char* fs_path,
         uint64_t* total_space,
         uint64_t* free_space);
+
+    FS_Error (*const rename)(void* context, const char* old, const char* new);
 } FS_Common_Api;
 
 /** Full filesystem api structure */

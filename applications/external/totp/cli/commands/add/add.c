@@ -11,7 +11,7 @@
 struct TotpAddContext {
     FuriString* args;
     Cli* cli;
-    uint8_t* iv;
+    const CryptoSettings* crypto_settings;
 };
 
 enum TotpIteratorUpdateTokenResultsEx {
@@ -54,7 +54,7 @@ static TotpIteratorUpdateTokenResult
 
     // Reading token secret
     furi_string_reset(temp_str);
-    TOTP_CLI_PRINTF("Enter token secret and confirm with [ENTER]\r\n");
+    TOTP_CLI_PRINTF("Enter token secret and confirm with [ENTER]:\r\n");
     if(!totp_cli_read_line(context_t->cli, temp_str, mask_user_input)) {
         totp_cli_delete_last_line();
         furi_string_secure_free(temp_str);
@@ -68,7 +68,7 @@ static TotpIteratorUpdateTokenResult
         furi_string_get_cstr(temp_str),
         furi_string_size(temp_str),
         token_secret_encoding,
-        context_t->iv);
+        context_t->crypto_settings);
 
     furi_string_secure_free(temp_str);
 
@@ -79,6 +79,7 @@ static TotpIteratorUpdateTokenResult
     return TotpIteratorUpdateTokenResultSuccess;
 }
 
+#ifdef TOTP_CLI_RICH_HELP_ENABLED
 void totp_cli_command_add_docopt_commands() {
     TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_ADD ", " TOTP_CLI_COMMAND_ADD_ALT
                     ", " TOTP_CLI_COMMAND_ADD_ALT2 "     Add new token\r\n");
@@ -155,6 +156,7 @@ void totp_cli_command_add_docopt_options() {
     TOTP_CLI_PRINTF("                 # " TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME
                     " - Type slower\r\n");
 }
+#endif
 
 void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
     if(!totp_cli_ensure_authenticated(plugin_state, cli)) {
@@ -166,7 +168,8 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
 
     TOTP_CLI_LOCK_UI(plugin_state);
 
-    struct TotpAddContext add_context = {.args = args, .cli = cli, .iv = &plugin_state->iv[0]};
+    struct TotpAddContext add_context = {
+        .args = args, .cli = cli, .crypto_settings = &plugin_state->crypto_settings};
     TotpIteratorUpdateTokenResult add_result =
         totp_token_info_iterator_add_new_token(iterator_context, &add_token_handler, &add_context);
 

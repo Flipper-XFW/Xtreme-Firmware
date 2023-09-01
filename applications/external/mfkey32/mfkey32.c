@@ -13,6 +13,7 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include "mfkey32_icons.h"
+#include <assets_icons.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>

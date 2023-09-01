@@ -55,10 +55,10 @@ struct Desktop {
     ViewStack* locked_view_stack;
 
     DesktopSettings settings;
-    Keybind keybinds[KeybindTypeCount][KeybindKeyCount];
     DesktopViewPinInput* pin_input_view;
 
     ViewPort* lock_icon_viewport;
+    ViewPort* _dummy_mode_icon_viewport; // Unused, kept for compatibility
     ViewPort* clock_viewport;
     ViewPort* stealth_mode_icon_viewport;
 
@@ -74,11 +74,14 @@ struct Desktop {
     FuriTimer* update_clock_timer;
 
     FuriPubSub* status_pubsub;
-    uint8_t hour;
-    uint8_t minute;
-    bool clock_type : 1; // true - 24h false - 12h
+
+    uint8_t time_hour;
+    uint8_t time_minute;
+    bool time_format_12 : 1; // 1 - 12 hour, 0 - 24H
 
     bool in_transition : 1;
+
+    Keybind keybinds[KeybindTypeCount][KeybindKeyCount];
 };
 
 Desktop* desktop_alloc();

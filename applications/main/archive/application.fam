@@ -8,6 +8,6 @@ App(
     stack_size=6 * 1024,
     order=0,
     sdk_headers=[
-        "helpers/favorite_timeout.h",
+        "helpers/archive_helpers_ext.h",
     ],
 )

@@ -1,13 +1,12 @@
 #include "subbrute_attack_view.h"
 #include "../subbrute_i.h"
-#include "../subbrute_protocols.h"
 #include "../helpers/gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
-#include <gui/icon.h>
 #include <gui/icon_animation.h>
-#include <subghz_bruteforcer_icons.h>
+#include "subghz_bruteforcer_icons.h"
+#include <assets_icons.h>
 
 #define TAG "SubBruteAttackView"
 
@@ -26,7 +25,7 @@ typedef struct {
     SubBruteAttacks attack_type;
     uint64_t max_value;
     uint64_t current_step;
-    uint8_t extra_repeats;
+    uint8_t repeat_count;
     bool is_attacking;
     IconAnimation* icon;
 } SubBruteAttackViewModel;
@@ -126,10 +125,10 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
                 model->current_step = instance->current_step;
                 model->is_attacking = instance->is_attacking;
             },
-            true);
+            update);
     }
 
-    return true;
+    return update;
 }
 
 SubBruteAttackView* subbrute_attack_view_alloc() {
@@ -236,7 +235,7 @@ void subbrute_attack_view_init_values(
             model->attack_type = index;
             model->current_step = current_step;
             model->is_attacking = is_attacking;
-            model->extra_repeats = extra_repeats;
+            model->repeat_count = extra_repeats;
             if(is_attacking) {
                 icon_animation_start(model->icon);
             } else {
@@ -308,7 +307,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             buffer,
             sizeof(buffer),
             "x%d",
-            model->extra_repeats); // + subbrute_protocol_repeats_count(model->attack_type));
+            model->repeat_count); // + subbrute_protocol_repeats_count(model->attack_type));
         canvas_draw_str_aligned(canvas, 60, 6, AlignCenter, AlignCenter, buffer);
 
         elements_button_left(canvas, "-1");
@@ -335,7 +334,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             buffer,
             sizeof(buffer),
             "x%d",
-            model->extra_repeats); // + subbrute_protocol_repeats_count(model->attack_type));
+            model->repeat_count); // + subbrute_protocol_repeats_count(model->attack_type));
         canvas_draw_str(canvas, 4, y - 8, buffer);
         canvas_draw_str(canvas, 4, y - 1, "repeats");
 

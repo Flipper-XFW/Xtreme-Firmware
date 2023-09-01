@@ -14,21 +14,24 @@ typedef void (*DesktopLockMenuViewCallback)(DesktopEvent event, void* context);
 struct DesktopLockMenuView {
     View* view;
     DesktopLockMenuViewCallback callback;
+    void* context;
+
     NotificationApp* notification;
     Bt* bt;
     bool save_notification;
     bool save_xtreme;
     bool save_bt;
-    void* context;
 };
 
 typedef struct {
     uint8_t idx;
+    bool _dummy_mode; // Unused, kept for compatibility
+    bool stealth_mode;
+
     bool pin_is_set;
     int pin_lock;
     bool show_lock_menu;
     DesktopLockMenuView* lock_menu;
-    bool stealth_mode;
 } DesktopLockMenuViewModel;
 
 void desktop_lock_menu_set_callback(

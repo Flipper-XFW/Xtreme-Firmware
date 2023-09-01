@@ -6,6 +6,7 @@
 #include <gui/gui.h>
 #include <gui/view_holder.h>
 #include <gui/modules/loading.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "LoaderApplications"
 
@@ -118,6 +119,11 @@ static void loader_pubsub_callback(const void* message, void* context) {
 
 static void loader_applications_start_app(LoaderApplicationsApp* app) {
     const char* name = furi_string_get_cstr(app->fap_path);
+
+    if(!furi_string_start_with_str(app->fap_path, EXT_PATH("apps/Games/")) &&
+       !furi_string_start_with_str(app->fap_path, EXT_PATH("apps/Media/"))) {
+        dolphin_deed(DolphinDeedPluginInternalStart);
+    }
 
     // load app
     FuriThreadId thread_id = furi_thread_get_current_id();

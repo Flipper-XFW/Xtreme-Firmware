@@ -4,7 +4,7 @@
 #include <lib/toolbox/path.h>
 #include "subghz_i.h"
 #include <lib/subghz/protocols/protocol_items.h>
-#include <applications/main/archive/helpers/favorite_timeout.h>
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 #include <xtreme.h>
 
 #define TAG "SubGhzApp"

@@ -2,7 +2,7 @@
 
 #include <toolbox/path.h>
 #include <dolphin/dolphin.h>
-#include <applications/main/archive/helpers/favorite_timeout.h>
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 
 #define TAG "iButtonApp"
 

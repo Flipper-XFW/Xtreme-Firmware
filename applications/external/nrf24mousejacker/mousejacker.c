@@ -11,8 +11,8 @@
 #include <notification/notification_messages.h>
 #include <nrf24.h>
 #include "mousejacker_ducky.h"
+#include "nrf24mousejacker_icons.h"
 #include <assets_icons.h>
-#include <dolphin/dolphin.h>
 
 #define TAG "mousejacker"
 #define LOGITECH_MAX_CHANNEL 85
@@ -279,7 +279,6 @@ static int32_t mj_worker_thread(void* ctx) {
 int32_t mousejacker_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
-    dolphin_deed(DolphinDeedPluginStart);
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     mousejacker_state_init(plugin_state);
@@ -289,6 +288,12 @@ int32_t mousejacker_app(void* p) {
         furi_message_queue_free(event_queue);
         free(plugin_state);
         return 255;
+    }
+
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
     }
 
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
@@ -393,6 +398,10 @@ int32_t mousejacker_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }

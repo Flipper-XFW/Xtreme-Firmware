@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../subbrute_protocols.h"
-#include "radio_device_loader.h"
+#include "subbrute_radio_device_loader.h"
 
 typedef enum {
     SubBruteWorkerStateIDLE,
@@ -24,14 +24,14 @@ bool subbrute_worker_init_default_attack(
     SubBruteAttacks attack_type,
     uint64_t step,
     const SubBruteProtocol* protocol,
-    uint8_t extra_repeats);
+    uint8_t repeats);
 bool subbrute_worker_init_file_attack(
     SubBruteWorker* instance,
     uint64_t step,
     uint8_t load_index,
     uint64_t file_key,
     SubBruteProtocol* protocol,
-    uint8_t extra_repeats,
+    uint8_t repeats,
     bool two_bytes);
 bool subbrute_worker_start(SubBruteWorker* instance);
 void subbrute_worker_stop(SubBruteWorker* instance);

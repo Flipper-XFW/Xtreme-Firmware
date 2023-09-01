@@ -81,12 +81,12 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             furi_record_close(RECORD_LOADER);
             consumed = true;
             break;
-        case DesktopLockMenuEventLock:
+        case DesktopLockMenuEventLockKeypad:
             desktop_scene_lock_menu_save_settings(desktop);
             desktop_lock(desktop, false);
             consumed = true;
             break;
-        case DesktopLockMenuEventLockPin:
+        case DesktopLockMenuEventLockPinCode:
             desktop_scene_lock_menu_save_settings(desktop);
             if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
                 desktop_lock(desktop, true);

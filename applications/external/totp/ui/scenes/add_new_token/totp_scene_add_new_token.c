@@ -1,4 +1,5 @@
 #include "totp_scene_add_new_token.h"
+#ifdef TOTP_UI_ADD_NEW_TOKEN_ENABLED
 #include "../../../types/common.h"
 #include "../../constants.h"
 #include "../../scene_director.h"
@@ -8,7 +9,6 @@
 #include "../../ui_controls.h"
 #include "../../common_dialogs.h"
 #include <roll_value.h>
-#include "../generate_token/totp_scene_generate_token.h"
 
 char* TOKEN_ALGO_LIST[] = {"SHA1", "SHA256", "SHA512", "Steam"};
 char* TOKEN_DIGITS_TEXT_LIST[] = {"5 digits", "6 digits", "8 digits"};
@@ -42,7 +42,7 @@ typedef struct {
 
 struct TotpAddContext {
     SceneState* scene_state;
-    uint8_t* iv;
+    const CryptoSettings* crypto_settings;
 };
 
 enum TotpIteratorUpdateTokenResultsEx { TotpIteratorUpdateTokenResultInvalidSecret = 1 };
@@ -58,7 +58,7 @@ static TotpIteratorUpdateTokenResult add_token_handler(TokenInfo* tokenInfo, con
            context_t->scene_state->token_secret,
            context_t->scene_state->token_secret_length,
            PlainTokenSecretEncodingBase32,
-           context_t->iv)) {
+           context_t->crypto_settings)) {
         return TotpIteratorUpdateTokenResultInvalidSecret;
     }
 
@@ -271,7 +271,7 @@ bool totp_scene_add_new_token_handle_event(
             break;
         case ConfirmButton: {
             struct TotpAddContext add_context = {
-                .iv = plugin_state->iv, .scene_state = scene_state};
+                .scene_state = scene_state, .crypto_settings = &plugin_state->crypto_settings};
             TokenInfoIteratorContext* iterator_context =
                 totp_config_get_token_iterator_context(plugin_state);
             TotpIteratorUpdateTokenResult add_result = totp_token_info_iterator_add_new_token(
@@ -318,3 +318,4 @@ void totp_scene_add_new_token_deactivate(PluginState* plugin_state) {
     free(plugin_state->current_scene_state);
     plugin_state->current_scene_state = NULL;
 }
+#endif

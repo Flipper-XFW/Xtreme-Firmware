@@ -5,7 +5,6 @@ App(
     entry_point="protoview_app_entry",
     requires=["gui"],
     stack_size=8 * 1024,
-    order=50,
     fap_icon="appicon.png",
     fap_category="Sub-GHz",
     fap_author="@antirez & (fixes by @xMasterX)",
