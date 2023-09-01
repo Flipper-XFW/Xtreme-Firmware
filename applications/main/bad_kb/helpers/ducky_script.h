@@ -56,6 +56,7 @@ struct BadKbState {
     uint32_t delay_remain;
     uint16_t error_line;
     char error[64];
+    uint32_t elapsed;
 };
 
 typedef struct BadKbApp BadKbApp;

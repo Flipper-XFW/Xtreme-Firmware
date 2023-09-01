@@ -36,6 +36,9 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     }
     if(model->state.pin) {
         furi_string_cat_printf(disp_str, "  PIN: %ld", model->state.pin);
+    } else {
+        uint32_t e = model->state.elapsed;
+        furi_string_cat_printf(disp_str, "  %02lu:%02lu.%ld", e / 60 / 1000, e / 1000, e % 1000);
     }
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_draw_str(
@@ -143,7 +146,8 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         furi_string_reset(disp_str);
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
         canvas_set_font(canvas, FontSecondary);
-        furi_string_printf(disp_str, "delay %lus", model->state.delay_remain);
+        uint32_t delay = model->state.delay_remain / 10;
+        if(delay) furi_string_printf(disp_str, "delay %lus", delay);
         canvas_draw_str_aligned(
             canvas, 127, 50, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
