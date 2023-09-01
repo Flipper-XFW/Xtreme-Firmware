@@ -82,10 +82,14 @@ bool esp_flasher_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneQuick);
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherSwitchA) {
+            app->boot = true;
+            app->quickflash = true;
             app->switch_fw = SwitchToFirmwareA;
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherSwitchB) {
+            app->boot = true;
+            app->quickflash = true;
             app->switch_fw = SwitchToFirmwareB;
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
             consumed = true;
