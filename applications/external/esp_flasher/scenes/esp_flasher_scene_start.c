@@ -31,13 +31,13 @@ void esp_flasher_scene_start_on_enter(void* context) {
         app);
     submenu_add_item(
         submenu,
-        "Switch to Firmware A",
+        "Select Evil Portal (Fw A)",
         SubmenuIndexEspFlasherSwitchA,
         esp_flasher_scene_start_submenu_callback,
         app);
     submenu_add_item(
         submenu,
-        "Switch to Firmware B",
+        "Select Marauder (Fw B)",
         SubmenuIndexEspFlasherSwitchB,
         esp_flasher_scene_start_submenu_callback,
         app);
