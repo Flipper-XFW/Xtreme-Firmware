@@ -75,6 +75,7 @@ FIRMWARE_APPS = {
     "unit_tests": [
         "basic_services",
         "updater_app",
+        "radio_device_cc1101_ext",
         "unit_tests",
     ],
 }
