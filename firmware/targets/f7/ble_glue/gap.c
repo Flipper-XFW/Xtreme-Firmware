@@ -37,6 +37,9 @@ typedef struct {
     FuriThread* thread;
     FuriMessageQueue* command_queue;
     bool enable_adv;
+
+    size_t custom_adv_len;
+    const uint8_t* custom_adv_data;
 } Gap;
 
 typedef enum {
@@ -431,20 +434,28 @@ static void gap_advertise_start(GapState new_state) {
         }
     }
     // Configure advertising
-    status = aci_gap_set_discoverable(
-        ADV_IND,
-        min_interval,
-        max_interval,
-        CFG_IDENTITY_ADDRESS,
-        0,
-        strlen(gap->service.adv_name),
-        (uint8_t*)gap->service.adv_name,
-        gap->service.adv_svc_uuid_len,
-        gap->service.adv_svc_uuid,
-        0,
-        0);
+    if(gap->custom_adv_data) {
+        status = aci_gap_set_discoverable(
+            ADV_IND, min_interval, max_interval, CFG_IDENTITY_ADDRESS, 0, 0, NULL, 0, NULL, 0, 0);
+        status = aci_gap_update_adv_data(gap->custom_adv_len, gap->custom_adv_data);
+    } else {
+        status = aci_gap_set_discoverable(
+            ADV_IND,
+            min_interval,
+            max_interval,
+            CFG_IDENTITY_ADDRESS,
+            0,
+            strlen(gap->service.adv_name),
+            (uint8_t*)gap->service.adv_name,
+            gap->service.adv_svc_uuid_len,
+            gap->service.adv_svc_uuid,
+            0,
+            0);
+    }
     if(status) {
         FURI_LOG_E(TAG, "set_discoverable failed %d", status);
+    } else {
+        FURI_LOG_D(TAG, "set_discoverable success");
     }
     gap->state = new_state;
     GapEvent event = {.type = GapEventTypeStartAdvertising};
@@ -558,6 +569,11 @@ uint32_t gap_get_remote_conn_rssi(int8_t* rssi) {
         if(gap->time_rssi_sample) return furi_get_tick() - gap->time_rssi_sample;
     }
     return 0;
+}
+
+void gap_set_custom_adv_data(size_t adv_len, const uint8_t* adv_data) {
+    gap->custom_adv_len = adv_len;
+    gap->custom_adv_data = adv_data;
 }
 
 GapState gap_get_state() {
