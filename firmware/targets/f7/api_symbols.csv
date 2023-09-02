@@ -2196,6 +2196,7 @@ Function,+,nfc_device_delete,_Bool,"NfcDevice*, _Bool"
 Function,+,nfc_device_free,void,NfcDevice*
 Function,+,nfc_device_load,_Bool,"NfcDevice*, const char*, _Bool"
 Function,+,nfc_device_load_key_cache,_Bool,NfcDevice*
+Function,+,nfc_device_prepare_format_string,void,"NfcDevice*, FuriString*"
 Function,+,nfc_device_restore,_Bool,"NfcDevice*, _Bool"
 Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_save_shadow,_Bool,"NfcDevice*, const char*"

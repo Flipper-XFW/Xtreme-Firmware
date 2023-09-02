@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-#define NFC_DEV_NAME_MAX_LEN 22
+#define NFC_DEV_NAME_MAX_LEN 31
 #define NFC_READER_DATA_MAX_SIZE 64
 #define NFC_DICT_KEY_BATCH_SIZE 10
 
@@ -122,6 +122,8 @@ bool nfc_device_delete(NfcDevice* dev, bool use_load_path);
 bool nfc_device_restore(NfcDevice* dev, bool use_load_path);
 
 void nfc_device_set_loading_callback(NfcDevice* dev, NfcLoadingCallback callback, void* context);
+
+void nfc_device_prepare_format_string(NfcDevice* dev, FuriString* format_string);
 
 #ifdef __cplusplus
 }
