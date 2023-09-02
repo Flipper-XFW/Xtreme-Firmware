@@ -19,8 +19,10 @@ void name_generator_make_auto(char* name, size_t max_name_size, const char* pref
  *
  * @param      name           buffer to write random name
  * @param      max_name_size  length of given buffer
+ * @param[in]  prefix         The prefix of the name
  */
 void name_generator_make_random(char* name, size_t max_name_size);
+void name_generator_make_random_prefixed(char* name, size_t max_name_size, const char* prefix);
 
 /** Generates detailed name
  *

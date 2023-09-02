@@ -48,11 +48,11 @@ void name_generator_make_auto(char* name, size_t max_name_size, const char* pref
     if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagRandomFilename)) {
         name_generator_make_detailed(name, max_name_size, prefix);
     } else {
-        name_generator_make_random(name, max_name_size);
+        name_generator_make_random_prefixed(name, max_name_size, prefix);
     }
 }
 
-void name_generator_make_random(char* name, size_t max_name_size) {
+void name_generator_make_random_prefixed(char* name, size_t max_name_size, const char* prefix) {
     furi_assert(name);
     furi_assert(max_name_size);
 
@@ -62,12 +62,18 @@ void name_generator_make_random(char* name, size_t max_name_size) {
     snprintf(
         name,
         max_name_size,
-        "%s_%s",
+        "%s%s%s-%s",
+        prefix ? prefix : "",
+        prefix ? "_" : "",
         name_generator_left[name_generator_left_i],
         name_generator_right[name_generator_right_i]);
 
     // Set first symbol to upper case
-    name[0] = name[0] - 0x20;
+    if(islower((int)name[0])) name[0] = name[0] - 0x20;
+}
+
+void name_generator_make_random(char* name, size_t max_name_size) {
+    name_generator_make_random_prefixed(name, max_name_size, NULL);
 }
 
 void name_generator_make_detailed(char* name, size_t max_name_size, const char* prefix) {
@@ -81,11 +87,14 @@ void name_generator_make_detailed(char* name, size_t max_name_size, const char* 
     snprintf(
         name,
         max_name_size,
-        "%s-%.4d_%.2d_%.2d-%.2d_%.2d",
+        "%s_%.4d-%.2d-%.2d_%.2d,%.2d",
         prefix,
         dateTime.year,
         dateTime.month,
         dateTime.day,
         dateTime.hour,
         dateTime.minute);
+
+    // Set first symbol to upper case
+    if(islower((int)name[0])) name[0] = name[0] - 0x20;
 }

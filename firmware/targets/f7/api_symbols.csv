@@ -2176,6 +2176,7 @@ Function,-,music_worker_stop,void,MusicWorker*
 Function,+,name_generator_make_auto,void,"char*, size_t, const char*"
 Function,+,name_generator_make_detailed,void,"char*, size_t, const char*"
 Function,+,name_generator_make_random,void,"char*, size_t"
+Function,+,name_generator_make_random_prefixed,void,"char*, size_t, const char*"
 Function,-,nan,double,const char*
 Function,-,nanf,float,const char*
 Function,-,nanl,long double,const char*
