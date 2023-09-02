@@ -16,7 +16,7 @@ void nfc_maker_scene_save_on_enter(void* context) {
 
     text_input_set_header_text(text_input, "Save the NFC tag:");
 
-    set_random_name(app->save_buf, BIG_INPUT_LEN);
+    name_generator_make_auto(app->save_buf, BIG_INPUT_LEN, "NFC");
 
     text_input_set_result_callback(
         text_input,
