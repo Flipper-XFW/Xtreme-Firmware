@@ -154,6 +154,7 @@ typedef enum {
     StorageCommandSDInfo,
     StorageCommandSDStatus,
     StorageCommandCommonResolvePath,
+    StorageCommandSDMount,
 
     StorageCommandFileExpand,
     StorageCommandCommonRename,

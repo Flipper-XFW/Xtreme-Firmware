@@ -9,7 +9,7 @@
 
 #include <furi.h>
 
-#define TAG "libmgr"
+#define TAG "PluginManager"
 
 #define MAX_NAME_LEN 254
 

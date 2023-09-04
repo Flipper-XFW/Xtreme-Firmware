@@ -10,7 +10,7 @@
 #define MAX_NAME_LENGTH 254
 #define FILE_BUFFER_SIZE 512
 
-#define TAG "StorageAPI"
+#define TAG "StorageApi"
 
 #define S_API_PROLOGUE FuriApiLock lock = api_lock_alloc_locked();
 
@@ -859,6 +859,14 @@ FS_Error storage_sd_unmount(Storage* storage) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDUnmount);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error storage_sd_mount(Storage* storage) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandSDMount);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }

@@ -19,7 +19,7 @@ const uint8_t BAD_KB_EMPTY_MAC[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
 // Adjusts to serial MAC +2 in app init
 uint8_t BAD_KB_BOUND_MAC[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
 
-#define TAG "BadKB"
+#define TAG "BadKb"
 #define WORKER_TAG TAG "Worker"
 
 #define BADKB_ASCII_TO_KEY(script, x) \
