@@ -19,6 +19,7 @@ typedef union {
         uint8_t type;
     } nearby_action;
     struct {
+        uint8_t prefix;
         uint16_t model;
     } proximity_pair;
 } ContinuityData;
