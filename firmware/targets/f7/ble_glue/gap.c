@@ -435,8 +435,18 @@ static void gap_advertise_start(GapState new_state) {
     }
     // Configure advertising
     if(gap->custom_adv_data) {
+        // Custom adv logic from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
+        static const uint16_t gap_appearance = 0x0000; //GAP_APPEARANCE_UNKNOWN
+        status = aci_gatt_update_char_value(
+            gap->service.gap_svc_handle,
+            gap->service.gap_svc_handle,
+            0,
+            sizeof(gap_appearance),
+            (uint8_t*)&gap_appearance);
         status = aci_gap_set_discoverable(
             ADV_IND, min_interval, max_interval, CFG_IDENTITY_ADDRESS, 0, 0, NULL, 0, NULL, 0, 0);
+        status = aci_gap_delete_ad_type(AD_TYPE_FLAGS);
+        status = aci_gap_delete_ad_type(AD_TYPE_TX_POWER_LEVEL);
         status = aci_gap_update_adv_data(gap->custom_adv_len, gap->custom_adv_data);
     } else {
         status = aci_gap_set_discoverable(
