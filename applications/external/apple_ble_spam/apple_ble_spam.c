@@ -8,194 +8,194 @@
 
 typedef struct {
     const char* title;
-    ContinuityMessage msg;
+    ContinuityMsg msg;
 } Payload;
 
 // Hacked together by @Willy-JL
 // Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
-// Proximity Pairing IDs from https://github.com/ECTO-1A/AppleJuice/
+// Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
 // Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 static const Payload payloads[] = {
     {.title = "AirPods Pro",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0E20}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0E20}},
          }},
     {.title = "PowerBeats",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0320}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0320}},
          }},
     {.title = "Airtag",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0055}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0055}},
          }},
     {.title = "Setup New Phone",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x09}},
+             .data = {.nearby_action = {.type = 0x09}},
          }},
     {.title = "Transfer Number",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x02}},
+             .data = {.nearby_action = {.type = 0x02}},
          }},
     {.title = "AppleTV AutoFill",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x13}},
+             .data = {.nearby_action = {.type = 0x13}},
          }},
     {.title = "AppleTV Pair",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x06}},
+             .data = {.nearby_action = {.type = 0x06}},
          }},
     {.title = "HomePod Setup",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0B}},
+             .data = {.nearby_action = {.type = 0x0B}},
          }},
     {.title = "AirPods",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0220}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0220}},
          }},
     {.title = "AirPods Max",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0A20}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0A20}},
          }},
     {.title = "AirPods Gen 2",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0F20}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0F20}},
          }},
     {.title = "AirPods Gen 3",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x1320}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x1320}},
          }},
     {.title = "AirPods Pro Gen 2",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x1420}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x1420}},
          }},
     {.title = "PowerBeats Pro",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0B20}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0B20}},
          }},
     {.title = "Beats Solo Pro",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0C20}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0C20}},
          }},
     {.title = "Beats Studio Buds",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x1120}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x1120}},
          }},
     {.title = "Beats Flex",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x1020}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x1020}},
          }},
     {.title = "Beats X",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0520}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0520}},
          }},
     {.title = "Beats Solo 3",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0620}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0620}},
          }},
     {.title = "Beats Studio 3",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x0920}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x0920}},
          }},
     {.title = "Beats Studio Pro",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x1720}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x1720}},
          }},
     {.title = "Beats Fit Pro",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x1220}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x1220}},
          }},
     {.title = "Beats Studio Buds+",
      .msg =
          {
-             .type = ContinuityTypeProximityPairing,
-             .data = {.proximity_pairing = {.device_model = 0x1620}},
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.model = 0x1620}},
          }},
     {.title = "AppleTV Setup",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x01}},
+             .data = {.nearby_action = {.type = 0x01}},
          }},
     {.title = "AppleTV Homekit Setup",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x0D}},
+             .data = {.nearby_action = {.type = 0x0D}},
          }},
     {.title = "AppleTV New User",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x20}},
+             .data = {.nearby_action = {.type = 0x20}},
          }},
     {.title = "AppleTV AppleID Setup",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x2B}},
+             .data = {.nearby_action = {.type = 0x2B}},
          }},
     {.title = "AppleTV Audio Sync",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x19}},
+             .data = {.nearby_action = {.type = 0x19}},
          }},
     {.title = "AppleTV Network",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x27}},
+             .data = {.nearby_action = {.type = 0x27}},
          }},
     {.title = "TV Color Balance",
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.action_type = 0x13}},
+             .data = {.nearby_action = {.type = 0x13}},
          }},
 };
 
@@ -204,7 +204,7 @@ typedef struct {
     size_t delay;
     size_t size;
     uint8_t* packet;
-    const ContinuityMessage* msg;
+    const ContinuityMsg* msg;
     FuriThread* thread;
     size_t index;
 } State;
