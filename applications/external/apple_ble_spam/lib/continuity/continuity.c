@@ -7,40 +7,36 @@
 // Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 static const char* continuity_type_names[ContinuityTypeCount] = {
-    [ContinuityTypeNearbyAction] = "Nearby Action",
     [ContinuityTypeProximityPair] = "Proximity Pair",
+    [ContinuityTypeNearbyAction] = "Nearby Action",
 };
 const char* continuity_get_type_name(ContinuityType type) {
     return continuity_type_names[type];
 }
 
 static size_t continuity_packet_sizes[ContinuityTypeCount] = {
-    [ContinuityTypeNearbyAction] = 11,
     [ContinuityTypeProximityPair] = 31,
+    [ContinuityTypeNearbyAction] = 11,
 };
 size_t continuity_get_packet_size(ContinuityType type) {
     return continuity_packet_sizes[type];
 }
 
 void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
+    size_t size = continuity_get_packet_size(msg->type);
     size_t i = 0;
-    packet[i++] = continuity_get_packet_size(msg->type) - 1;
-    packet[i++] = 0xff;
-    packet[i++] = 0x4c;
-    packet[i++] = 0x00;
+
+    packet[i] = size - i - 1; // Packet Length
+    i++;
+    packet[i++] = 0xff; // Packet Header
+    packet[i++] = 0x4c; // ...
+    packet[i++] = 0x00; // ...
+    packet[i++] = msg->type; // Type
+    packet[i] = size - i - 1; // Message Length
+    i++;
+
     switch(msg->type) {
-    case ContinuityTypeNearbyAction:
-        packet[i++] = 0x0f; // Type (Nearby Action)
-        packet[i++] = 0x05; // Length
-        packet[i++] = 0xc1; // Action Flags
-        packet[i++] = msg->data.nearby_action.type;
-        packet[i++] = (rand() % 256); // Authentication Tag
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        break;
     case ContinuityTypeProximityPair:
-        packet[i++] = 0x07; // Type (Proximity Pair)
-        packet[i++] = 0x19; // Length
         packet[i++] = msg->data.proximity_pair.prefix; // Prefix (paired 0x01 new0x07 airtag 0x05)
         packet[i++] = msg->data.proximity_pair.model >> 8;
         packet[i++] = msg->data.proximity_pair.model & 0xFF;
@@ -67,6 +63,15 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         packet[i++] = (rand() % 256); // ...
         packet[i++] = (rand() % 256); // ...
         break;
+
+    case ContinuityTypeNearbyAction:
+        packet[i++] = 0xc1; // Action Flags
+        packet[i++] = msg->data.nearby_action.type;
+        packet[i++] = (rand() % 256); // Authentication Tag
+        packet[i++] = (rand() % 256); // ...
+        packet[i++] = (rand() % 256); // ...
+        break;
+
     default:
         break;
     }

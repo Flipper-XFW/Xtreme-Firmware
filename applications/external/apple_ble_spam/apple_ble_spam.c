@@ -21,14 +21,6 @@ typedef struct {
 static Payload
     payloads[] =
         {
-            {.title = "Random Action",
-             .text = "Spam shuffle Nearby Actions",
-             .random = true,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x00}},
-                 }},
             {.title = "Random Pair",
              .text = "Spam shuffle Proximity Pairs",
              .random = true,
@@ -36,6 +28,14 @@ static Payload
                  {
                      .type = ContinuityTypeProximityPair,
                      .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
+                 }},
+            {.title = "Random Action",
+             .text = "Spam shuffle Nearby Actions",
+             .random = true,
+             .msg =
+                 {
+                     .type = ContinuityTypeNearbyAction,
+                     .data = {.nearby_action = {.type = 0x00}},
                  }},
             {.title = "AirPods Pro",
              .text = "Modal, spammy (auto close)",
@@ -385,6 +385,7 @@ int32_t apple_ble_spam(void* p) {
         randoms[payloads[payload_i].msg.type].count++;
     }
     for(ContinuityType type = 0; type < ContinuityTypeCount; type++) {
+        if(!randoms[type].count) continue;
         randoms[type].datas = malloc(sizeof(ContinuityData*) * randoms[type].count);
         size_t random_i = 0;
         for(size_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {

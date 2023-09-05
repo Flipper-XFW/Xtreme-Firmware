@@ -9,19 +9,19 @@
 // Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 typedef enum {
-    ContinuityTypeNearbyAction,
-    ContinuityTypeProximityPair,
+    ContinuityTypeProximityPair = 0x07,
+    ContinuityTypeNearbyAction = 0x0F,
     ContinuityTypeCount
 } ContinuityType;
 
 typedef union {
     struct {
-        uint8_t type;
-    } nearby_action;
-    struct {
         uint8_t prefix;
         uint16_t model;
     } proximity_pair;
+    struct {
+        uint8_t type;
+    } nearby_action;
 } ContinuityData;
 
 typedef struct {
