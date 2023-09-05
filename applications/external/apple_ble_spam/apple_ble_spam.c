@@ -21,24 +21,22 @@ typedef struct {
 static Payload
     payloads[] =
         {
-            [ContinuityTypeNearbyAction] =
-                {.title = "Random Action",
-                 .text = "Spam shuffle Nearby Actions",
-                 .random = true,
-                 .msg =
-                     {
-                         .type = ContinuityTypeNearbyAction,
-                         .data = {.nearby_action = {.type = 0x00}},
-                     }},
-            [ContinuityTypeProximityPair] =
-                {.title = "Random Pair",
-                 .text = "Spam shuffle Proximity Pairs",
-                 .random = true,
-                 .msg =
-                     {
-                         .type = ContinuityTypeProximityPair,
-                         .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
-                     }},
+            {.title = "Random Action",
+             .text = "Spam shuffle Nearby Actions",
+             .random = true,
+             .msg =
+                 {
+                     .type = ContinuityTypeNearbyAction,
+                     .data = {.nearby_action = {.type = 0x00}},
+                 }},
+            {.title = "Random Pair",
+             .text = "Spam shuffle Proximity Pairs",
+             .random = true,
+             .msg =
+                 {
+                     .type = ContinuityTypeProximityPair,
+                     .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
+                 }},
             {.title = "AirPods Pro",
              .text = "Modal, spammy (auto close)",
              .random = false,
@@ -291,11 +289,8 @@ static Payload
 
 struct {
     size_t count;
-    ContinuityData** data;
-} randoms[ContinuityTypeCount] = {
-    [ContinuityTypeNearbyAction] = {0, NULL},
-    [ContinuityTypeProximityPair] = {0, NULL},
-};
+    ContinuityData** datas;
+} randoms[ContinuityTypeCount] = {0};
 
 typedef struct {
     bool advertising;
@@ -315,7 +310,7 @@ static int32_t adv_thread(void* ctx) {
     while(state->advertising) {
         if(payload->random) {
             size_t random_i = rand() % randoms[type].count;
-            memcpy(&msg->data, randoms[type].data[random_i], sizeof(msg->data));
+            memcpy(&msg->data, randoms[type].datas[random_i], sizeof(msg->data));
         }
         continuity_generate_packet(msg, state->packet);
         furi_hal_bt_set_custom_adv_data(state->packet, state->size);
@@ -385,15 +380,17 @@ static void input_callback(InputEvent* input, void* ctx) {
 
 int32_t apple_ble_spam(void* p) {
     UNUSED(p);
-    for(size_t payload_i = ContinuityTypeCount; payload_i < COUNT_OF(payloads); payload_i++) {
+    for(size_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
+        if(payloads[payload_i].random) continue;
         randoms[payloads[payload_i].msg.type].count++;
     }
-    for(size_t random_i = 0; random_i < ContinuityTypeCount; random_i++) {
-        randoms[random_i].data = malloc(sizeof(ContinuityData*) * randoms[random_i].count);
-        size_t data_i = 0;
-        for(size_t payload_i = ContinuityTypeCount; payload_i < COUNT_OF(payloads); payload_i++) {
-            if(payloads[payload_i].msg.type == random_i) {
-                randoms[random_i].data[data_i++] = &payloads[payload_i].msg.data;
+    for(ContinuityType type = 0; type < ContinuityTypeCount; type++) {
+        randoms[type].datas = malloc(sizeof(ContinuityData*) * randoms[type].count);
+        size_t random_i = 0;
+        for(size_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
+            if(payloads[payload_i].random) continue;
+            if(payloads[payload_i].msg.type == type) {
+                randoms[type].datas[random_i++] = &payloads[payload_i].msg.data;
             }
         }
     }
@@ -465,8 +462,8 @@ int32_t apple_ble_spam(void* p) {
     furi_thread_free(state->thread);
     free(state);
 
-    for(size_t random_i = 0; random_i < ContinuityTypeCount; random_i++) {
-        free(randoms[random_i].data);
+    for(ContinuityType type = 0; type < ContinuityTypeCount; type++) {
+        free(randoms[type].datas);
     }
     return 0;
 }
