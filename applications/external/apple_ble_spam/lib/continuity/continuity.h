@@ -9,16 +9,28 @@
 // Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 typedef enum {
+    ContinuityTypeAirDrop = 0x05,
     ContinuityTypeProximityPair = 0x07,
+    ContinuityTypeAirplayTarget = 0x09,
+    ContinuityTypeHandoff = 0x0C,
+    ContinuityTypeTetheringSource = 0x0E,
     ContinuityTypeNearbyAction = 0x0F,
     ContinuityTypeCount
 } ContinuityType;
 
 typedef union {
     struct {
+    } airdrop;
+    struct {
         uint8_t prefix;
         uint16_t model;
     } proximity_pair;
+    struct {
+    } airplay_target;
+    struct {
+    } handoff;
+    struct {
+    } tethering_source;
     struct {
         uint8_t type;
     } nearby_action;
