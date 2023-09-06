@@ -1,6 +1,7 @@
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <furi_hal_bt.h>
+#include <furi_hal_random.h>
 #include <assets_icons.h>
 #include "apple_ble_spam_icons.h"
 
@@ -367,6 +368,7 @@ typedef struct {
     uint8_t* packet;
     Payload* payload;
     FuriThread* thread;
+    uint8_t mac[GAP_MAC_ADDR_SIZE];
     size_t index;
 } State;
 
@@ -399,16 +401,8 @@ static void stop_adv(State* state) {
 static void start_adv(State* state) {
     state->advertising = true;
     furi_thread_start(state->thread);
-    uint8_t mac[GAP_MAC_ADDR_SIZE] = {
-        rand() % 256,
-        rand() % 256,
-        rand() % 256,
-        rand() % 256,
-        rand() % 256,
-        rand() % 256,
-    };
     size_t delay = delays[state->delay];
-    furi_hal_bt_custom_adv_start(delay, delay, 0x00, mac, 0x1F);
+    furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
 }
 
 static void toggle_adv(State* state, Payload* payload) {
@@ -423,6 +417,7 @@ static void toggle_adv(State* state, Payload* payload) {
         state->size = continuity_get_packet_size(payload->msg.type);
         state->packet = malloc(state->size);
         state->payload = payload;
+        furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
         state->resume = furi_hal_bt_is_active();
         furi_hal_bt_stop_advertising();
         start_adv(state);
