@@ -359,10 +359,10 @@ static void toggle_adv(State* state, Payload* payload) {
         furi_thread_flags_set(furi_thread_get_id(state->thread), true);
         furi_thread_join(state->thread);
         state->payload = NULL;
+        furi_hal_bt_set_custom_adv_data(NULL, 0);
         free(state->packet);
         state->packet = NULL;
         state->size = 0;
-        furi_hal_bt_set_custom_adv_data(NULL, 0);
     } else {
         state->size = continuity_get_packet_size(payload->msg.type);
         state->packet = malloc(state->size);
