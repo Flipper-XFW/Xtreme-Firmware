@@ -340,6 +340,25 @@ struct {
     ContinuityData** datas;
 } randoms[ContinuityTypeCount] = {0};
 
+size_t delays[] = {
+    20,
+    50,
+    100,
+    150,
+    200,
+    300,
+    400,
+    500,
+    750,
+    1000,
+    1500,
+    2000,
+    2500,
+    3000,
+    4000,
+    5000,
+};
+
 typedef struct {
     bool advertising;
     size_t delay;
@@ -363,7 +382,7 @@ static int32_t adv_thread(void* ctx) {
         }
         continuity_generate_packet(msg, state->packet);
         furi_hal_bt_custom_adv_set(state->packet, state->size);
-        furi_thread_flags_wait(true, FuriFlagWaitAny, state->delay);
+        furi_thread_flags_wait(true, FuriFlagWaitAny, delays[state->delay]);
     }
 
     return 0;
@@ -387,7 +406,8 @@ static void start_adv(State* state) {
         rand() % 256,
         rand() % 256,
     };
-    furi_hal_bt_custom_adv_start(state->delay, state->delay, 0x00, mac, 0x1F);
+    size_t delay = delays[state->delay];
+    furi_hal_bt_custom_adv_start(delay, delay, 0x00, mac, 0x1F);
 }
 
 static void toggle_adv(State* state, Payload* payload) {
@@ -414,7 +434,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 14, 12, "Apple BLE Spam");
     canvas_set_font(canvas, FontBatteryPercent);
     char delay[14];
-    snprintf(delay, sizeof(delay), "%ims", state->delay);
+    snprintf(delay, sizeof(delay), "%ims", delays[state->delay]);
     canvas_draw_str_aligned(canvas, 116, 12, AlignRight, AlignBottom, delay);
     canvas_draw_icon(canvas, 119, 6, &I_SmallArrowUp_3x5);
     canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
@@ -464,7 +484,6 @@ int32_t apple_ble_spam(void* p) {
     }
 
     State* state = malloc(sizeof(State));
-    state->delay = 500;
     state->thread = furi_thread_alloc();
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
@@ -489,16 +508,16 @@ int32_t apple_ble_spam(void* p) {
             toggle_adv(state, payload);
             break;
         case InputKeyUp:
-            if(state->delay < 5000) {
+            if(state->delay < COUNT_OF(delays) - 1) {
                 if(advertising) stop_adv(state);
-                state->delay += 100;
+                state->delay++;
                 if(advertising) start_adv(state);
             }
             break;
         case InputKeyDown:
-            if(state->delay > 100) {
+            if(state->delay > 0) {
                 if(advertising) stop_adv(state);
-                state->delay -= 100;
+                state->delay--;
                 if(advertising) start_adv(state);
             }
             break;
