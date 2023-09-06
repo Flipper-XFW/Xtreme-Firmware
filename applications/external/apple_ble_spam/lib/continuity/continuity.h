@@ -32,6 +32,7 @@ typedef union {
     struct {
     } tethering_source;
     struct {
+        uint8_t flags;
         uint8_t type;
     } nearby_action;
 } ContinuityData;

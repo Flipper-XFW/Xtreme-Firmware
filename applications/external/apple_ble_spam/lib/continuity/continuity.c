@@ -129,7 +129,7 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         break;
 
     case ContinuityTypeNearbyAction:
-        packet[i++] = 0xc1; // Action Flags
+        packet[i++] = msg->data.nearby_action.flags; // Action Flags
         packet[i++] = msg->data.nearby_action.type;
         packet[i++] = (rand() % 256); // Authentication Tag
         packet[i++] = (rand() % 256); // ...
