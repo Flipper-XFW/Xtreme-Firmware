@@ -117,6 +117,14 @@ static Payload payloads[] = {
              .type = ContinuityTypeProximityPair,
              .data = {.proximity_pair = {.prefix = 0x05, .model = 0x0030}},
          }},
+    {.title = "Setup New iPhone",
+     .text = "Modal, locked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x09}},
+         }},
     {.title = "AppleTV AutoFill",
      .text = "Banner, unlocked, long range",
      .random = false,
@@ -149,14 +157,6 @@ static Payload payloads[] = {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x1E}},
          }},
-    {.title = "Setup New iPhone",
-     .text = "Modal, locked",
-     .random = false,
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.flags = 0xC0, .type = 0x09}},
-         }},
     {.title = "Transfer Phone Number",
      .text = "Modal, locked",
      .random = false,
@@ -164,14 +164,6 @@ static Payload payloads[] = {
          {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x02}},
-         }},
-    {.title = "Pair AppleTV",
-     .text = "Modal, unlocked",
-     .random = false,
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.flags = 0xC0, .type = 0x06}},
          }},
     {.title = "HomePod Setup",
      .text = "Modal, unlocked",
@@ -292,6 +284,14 @@ static Payload payloads[] = {
          {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x01}},
+         }},
+    {.title = "Pair AppleTV",
+     .text = "Modal, unlocked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x06}},
          }},
     {.title = "HomeKit AppleTV Setup",
      .text = "Modal, unlocked",
