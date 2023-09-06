@@ -18,7 +18,7 @@ const char* continuity_get_type_name(ContinuityType type) {
     return continuity_type_names[type];
 }
 
-static size_t continuity_packet_sizes[ContinuityTypeCount] = {
+static uint8_t continuity_packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeAirDrop] = 24,
     [ContinuityTypeProximityPair] = 31,
     [ContinuityTypeAirplayTarget] = 12,
@@ -26,13 +26,13 @@ static size_t continuity_packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeTetheringSource] = 12,
     [ContinuityTypeNearbyAction] = 11,
 };
-size_t continuity_get_packet_size(ContinuityType type) {
+uint8_t continuity_get_packet_size(ContinuityType type) {
     return continuity_packet_sizes[type];
 }
 
 void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
-    size_t size = continuity_get_packet_size(msg->type);
-    size_t i = 0;
+    uint8_t size = continuity_get_packet_size(msg->type);
+    uint8_t i = 0;
 
     packet[i] = size - i - 1; // Packet Length
     i++;

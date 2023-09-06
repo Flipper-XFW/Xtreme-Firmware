@@ -337,11 +337,11 @@ static Payload payloads[] = {
 };
 
 struct {
-    size_t count;
+    uint8_t count;
     ContinuityData** datas;
 } randoms[ContinuityTypeCount] = {0};
 
-size_t delays[] = {
+uint16_t delays[] = {
     20,
     50,
     100,
@@ -363,13 +363,13 @@ size_t delays[] = {
 typedef struct {
     bool resume;
     bool advertising;
-    size_t delay;
-    size_t size;
+    uint8_t delay;
+    uint8_t size;
     uint8_t* packet;
     Payload* payload;
     FuriThread* thread;
     uint8_t mac[GAP_MAC_ADDR_SIZE];
-    size_t index;
+    uint8_t index;
 } State;
 
 static int32_t adv_thread(void* ctx) {
@@ -380,7 +380,7 @@ static int32_t adv_thread(void* ctx) {
 
     while(state->advertising) {
         if(payload->random) {
-            size_t random_i = rand() % randoms[type].count;
+            uint8_t random_i = rand() % randoms[type].count;
             memcpy(&msg->data, randoms[type].datas[random_i], sizeof(msg->data));
         }
         continuity_generate_packet(msg, state->packet);
@@ -401,7 +401,7 @@ static void stop_adv(State* state) {
 static void start_adv(State* state) {
     state->advertising = true;
     furi_thread_start(state->thread);
-    size_t delay = delays[state->delay];
+    uint16_t delay = delays[state->delay];
     furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
 }
 
@@ -466,15 +466,15 @@ static void input_callback(InputEvent* input, void* ctx) {
 
 int32_t apple_ble_spam(void* p) {
     UNUSED(p);
-    for(size_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
+    for(uint8_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
         if(payloads[payload_i].random) continue;
         randoms[payloads[payload_i].msg.type].count++;
     }
     for(ContinuityType type = 0; type < ContinuityTypeCount; type++) {
         if(!randoms[type].count) continue;
         randoms[type].datas = malloc(sizeof(ContinuityData*) * randoms[type].count);
-        size_t random_i = 0;
-        for(size_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
+        uint8_t random_i = 0;
+        for(uint8_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
             if(payloads[payload_i].random) continue;
             if(payloads[payload_i].msg.type == type) {
                 randoms[type].datas[random_i++] = &payloads[payload_i].msg.data;
