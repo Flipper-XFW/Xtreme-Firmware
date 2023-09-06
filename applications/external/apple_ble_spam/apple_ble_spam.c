@@ -117,6 +117,14 @@ static Payload payloads[] = {
              .type = ContinuityTypeProximityPair,
              .data = {.proximity_pair = {.prefix = 0x05, .model = 0x0030}},
          }},
+    {.title = "Dismiss Active Actions",
+     .text = "Close current Nearby Actions",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0x00, .type = 0x00}},
+         }},
     {.title = "Setup New iPhone",
      .text = "Modal, locked",
      .random = false,
@@ -124,6 +132,14 @@ static Payload payloads[] = {
          {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x09}},
+         }},
+    {.title = "Setup New Random",
+     .text = "Modal, locked, glitched",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0x40, .type = 0x09}},
          }},
     {.title = "AppleTV AutoFill",
      .text = "Banner, unlocked, long range",
