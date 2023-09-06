@@ -355,25 +355,45 @@ static int32_t adv_thread(void* ctx) {
     Payload* payload = state->payload;
     ContinuityMsg* msg = &payload->msg;
     ContinuityType type = msg->type;
+
     while(state->advertising) {
         if(payload->random) {
             size_t random_i = rand() % randoms[type].count;
             memcpy(&msg->data, randoms[type].datas[random_i], sizeof(msg->data));
         }
         continuity_generate_packet(msg, state->packet);
-        furi_hal_bt_set_custom_adv_data(state->packet, state->size);
+        furi_hal_bt_custom_adv_set(state->packet, state->size);
         furi_thread_flags_wait(true, FuriFlagWaitAny, state->delay);
     }
+
     return 0;
+}
+
+static void stop_adv(State* state) {
+    state->advertising = false;
+    furi_thread_flags_set(furi_thread_get_id(state->thread), true);
+    furi_thread_join(state->thread);
+    furi_hal_bt_custom_adv_stop();
+}
+
+static void start_adv(State* state) {
+    state->advertising = true;
+    furi_thread_start(state->thread);
+    uint8_t mac[GAP_MAC_ADDR_SIZE] = {
+        rand() % 256,
+        rand() % 256,
+        rand() % 256,
+        rand() % 256,
+        rand() % 256,
+        rand() % 256,
+    };
+    furi_hal_bt_custom_adv_start(state->delay, state->delay, 0x00, mac, 0x1F);
 }
 
 static void toggle_adv(State* state, Payload* payload) {
     if(state->advertising) {
-        state->advertising = false;
-        furi_thread_flags_set(furi_thread_get_id(state->thread), true);
-        furi_thread_join(state->thread);
+        stop_adv(state);
         state->payload = NULL;
-        furi_hal_bt_set_custom_adv_data(NULL, 0);
         free(state->packet);
         state->packet = NULL;
         state->size = 0;
@@ -381,8 +401,7 @@ static void toggle_adv(State* state, Payload* payload) {
         state->size = continuity_get_packet_size(payload->msg.type);
         state->packet = malloc(state->size);
         state->payload = payload;
-        state->advertising = true;
-        furi_thread_start(state->thread);
+        start_adv(state);
     }
 }
 
@@ -464,36 +483,39 @@ int32_t apple_ble_spam(void* p) {
         furi_check(furi_message_queue_get(input_queue, &input, FuriWaitForever) == FuriStatusOk);
 
         Payload* payload = &payloads[state->index];
+        bool advertising = state->advertising;
         switch(input.key) {
         case InputKeyOk:
             toggle_adv(state, payload);
             break;
         case InputKeyUp:
             if(state->delay < 5000) {
+                if(advertising) stop_adv(state);
                 state->delay += 100;
-                furi_thread_flags_set(furi_thread_get_id(state->thread), true);
+                if(advertising) start_adv(state);
             }
             break;
         case InputKeyDown:
             if(state->delay > 100) {
+                if(advertising) stop_adv(state);
                 state->delay -= 100;
-                furi_thread_flags_set(furi_thread_get_id(state->thread), true);
+                if(advertising) start_adv(state);
             }
             break;
         case InputKeyLeft:
             if(state->index > 0) {
-                if(state->advertising) toggle_adv(state, payload);
+                if(advertising) toggle_adv(state, payload);
                 state->index--;
             }
             break;
         case InputKeyRight:
             if(state->index < COUNT_OF(payloads) - 1) {
-                if(state->advertising) toggle_adv(state, payload);
+                if(advertising) toggle_adv(state, payload);
                 state->index++;
             }
             break;
         case InputKeyBack:
-            if(state->advertising) toggle_adv(state, payload);
+            if(advertising) toggle_adv(state, payload);
             running = false;
             break;
         default:
