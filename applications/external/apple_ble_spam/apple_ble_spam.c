@@ -360,6 +360,7 @@ size_t delays[] = {
 };
 
 typedef struct {
+    bool resume;
     bool advertising;
     size_t delay;
     size_t size;
@@ -413,6 +414,7 @@ static void start_adv(State* state) {
 static void toggle_adv(State* state, Payload* payload) {
     if(state->advertising) {
         stop_adv(state);
+        if(state->resume) furi_hal_bt_start_advertising();
         state->payload = NULL;
         free(state->packet);
         state->packet = NULL;
@@ -421,6 +423,8 @@ static void toggle_adv(State* state, Payload* payload) {
         state->size = continuity_get_packet_size(payload->msg.type);
         state->packet = malloc(state->size);
         state->payload = payload;
+        state->resume = furi_hal_bt_is_active();
+        furi_hal_bt_stop_advertising();
         start_adv(state);
     }
 }
