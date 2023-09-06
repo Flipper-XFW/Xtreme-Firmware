@@ -36,8 +36,8 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
 
     packet[i] = size - i - 1; // Packet Length
     i++;
-    packet[i++] = 0xff; // Packet Header
-    packet[i++] = 0x4c; // ...
+    packet[i++] = 0xFF; // Packet Header
+    packet[i++] = 0x4C; // ...
     packet[i++] = 0x00; // ...
     packet[i++] = msg->type; // Type
     packet[i] = size - i - 1; // Message Length
