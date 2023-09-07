@@ -15,9 +15,11 @@ typedef struct {
 } Payload;
 
 // Hacked together by @Willy-JL
+// Custom adv logic by @Willy-JL and @xMasterX
+// Extensive testing and research on behavior and parameters by @Willy-JL and @ECTO-1A
 // Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
-// Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
+// Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 static Payload payloads[] = {
 #if false
