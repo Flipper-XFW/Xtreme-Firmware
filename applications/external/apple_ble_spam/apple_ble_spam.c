@@ -64,14 +64,6 @@ static Payload payloads[] = {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x00}},
          }},
-    {.title = "Dismiss Active Actions",
-     .text = "Close current Nearby Actions",
-     .random = false,
-     .msg =
-         {
-             .type = ContinuityTypeNearbyAction,
-             .data = {.nearby_action = {.flags = 0x00, .type = 0x00}},
-         }},
     {.title = "AppleTV AutoFill",
      .text = "Banner, unlocked, long range",
      .random = false,
