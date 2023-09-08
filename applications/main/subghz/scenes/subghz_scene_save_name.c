@@ -130,7 +130,15 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 furi_string_set(subghz->file_path, subghz->file_path_tmp);
             }
         }
-        scene_manager_previous_scene(subghz->scene_manager);
+        if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSetSeed)) {
+            scene_manager_search_and_switch_to_previous_scene(
+                subghz->scene_manager, SubGhzSceneSetType);
+        } else {
+            scene_manager_previous_scene(subghz->scene_manager);
+        }
+        // Set file path to default
+        furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
+
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventSceneSaveName) {

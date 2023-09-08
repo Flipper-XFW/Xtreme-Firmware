@@ -2,7 +2,7 @@
 
 App(
     appid="wifisniffer",  # Must be unique
-    name="[ESP32 GPS] Advanced Wifi Sniffer",  # Displayed in menus
+    name="[ESP32GPS] Wifi Sniff",  # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifisniffer_app",
     stack_size=2 * 1024,
