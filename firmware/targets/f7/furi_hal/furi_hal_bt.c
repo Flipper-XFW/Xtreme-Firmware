@@ -489,7 +489,7 @@ bool furi_hal_bt_custom_adv_set(const uint8_t* adv_data, size_t adv_len) {
         FURI_LOG_E(TAG, "custom_adv_set failed %d", status);
         return false;
     } else {
-        FURI_LOG_I(TAG, "custom_adv_set success");
+        FURI_LOG_D(TAG, "custom_adv_set success");
         return true;
     }
 }
@@ -511,7 +511,7 @@ bool furi_hal_bt_custom_adv_start(
         FURI_LOG_E(TAG, "custom_adv_start failed %d", status);
         return false;
     } else {
-        FURI_LOG_I(TAG, "custom_adv_start success");
+        FURI_LOG_D(TAG, "custom_adv_start success");
         return true;
     }
 }
@@ -522,7 +522,7 @@ bool furi_hal_bt_custom_adv_stop() {
         FURI_LOG_E(TAG, "custom_adv_stop failed %d", status);
         return false;
     } else {
-        FURI_LOG_I(TAG, "custom_adv_stop success");
+        FURI_LOG_D(TAG, "custom_adv_stop success");
         return true;
     }
 }
