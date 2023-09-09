@@ -64,6 +64,14 @@ static Payload payloads[] = {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x00}},
          }},
+    {.title = "Random Pair",
+     .text = "Spam shuffle Proximity Pairs",
+     .random = true,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
+         }},
     {.title = "AppleTV AutoFill",
      .text = "Banner, unlocked, long range",
      .random = false,
@@ -135,14 +143,6 @@ static Payload payloads[] = {
          {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x0B}},
-         }},
-    {.title = "Random Pair",
-     .text = "Spam shuffle Proximity Pairs",
-     .random = true,
-     .msg =
-         {
-             .type = ContinuityTypeProximityPair,
-             .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
          }},
     {.title = "AirPods Pro",
      .text = "Modal, spammy (auto close)",
