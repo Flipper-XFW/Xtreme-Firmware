@@ -359,25 +359,25 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             size_t index;
             size_t y_off, x_off;
 
-            canvas_set_font(canvas, FontKeyboard);
+            canvas_set_font(canvas, FontBatteryPercent);
 
             for(size_t i = 0; i < 2; i++) {
-                for(size_t j = 0; j < 7; j++) {
-                    index = i * 7 + j + (position - (position % 14));
+                for(size_t j = 0; j < 8; j++) {
+                    index = i * 8 + j + (position - (position % 16));
                     if(index >= items_count) continue;
-                    y_off = (9 * j) - 4;
+                    y_off = (8 * j);
                     x_off = 64 * i;
                     bool selected = index == position;
                     size_t scroll_counter = menu_scroll_counter(model, selected);
                     if(selected) {
-                        canvas_draw_box(canvas, x_off, y_off + 4, 64, 9);
+                        canvas_draw_box(canvas, x_off, y_off, 64, 8);
                         canvas_set_color(canvas, ColorWhite);
                     }
                     item = MenuItemArray_get(model->items, index);
                     menu_short_name(item, name);
 
                     elements_scrollable_text_line(
-                        canvas, x_off + 2, y_off + 12, 64, name, scroll_counter, false);
+                        canvas, x_off + 1, y_off + 7, 62, name, scroll_counter, false);
 
                     if(selected) {
                         canvas_set_color(canvas, ColorBlack);
@@ -744,10 +744,10 @@ static void menu_process_left(Menu* menu) {
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleCompact:
-                if((position % 14) < 7) {
-                    position = position + 7;
+                if((position % 16) < 8) {
+                    position = position + 8;
                 } else {
-                    position = position - 7;
+                    position = position - 8;
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
@@ -811,10 +811,10 @@ static void menu_process_right(Menu* menu) {
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleCompact:
-                if((position % 14) < 7) {
-                    position = position + 7;
+                if((position % 16) < 8) {
+                    position = position + 8;
                 } else {
-                    position = position - 7;
+                    position = position - 8;
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
