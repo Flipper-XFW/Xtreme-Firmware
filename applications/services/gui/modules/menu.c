@@ -362,6 +362,48 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             }
             break;
         }
+        case MenuStyleCompact: {
+            FuriString* memstr = furi_string_alloc();
+
+            size_t index;
+            size_t y_off, x_off;
+
+            canvas_set_font(canvas, FontKeyboard);
+
+            for(size_t i = 0; i < 2; i++) {
+                for(size_t j = 0; j < 7; j++) {
+                    index = i * 7 + j + (position - (position % 14));
+                    if(index >= items_count) continue;
+                    y_off = (9 * j) - 4;
+                    x_off = 64 * i;
+                    bool selected = index == position;
+                    size_t scroll_counter = menu_scroll_counter(model, selected);
+                    if(selected) {
+                        canvas_draw_box(canvas, x_off, y_off + 4, 64, 9);
+                        canvas_set_color(canvas, ColorWhite);
+                    }
+                    item = MenuItemArray_get(model->items, index);
+                    menu_short_name(item, name);
+
+                    FuriString* item_str = furi_string_alloc();
+
+                    furi_string_printf(item_str, "%s", furi_string_get_cstr(name));
+
+                    elements_scrollable_text_line(
+                        canvas, x_off + 2, y_off + 12, 64, item_str, scroll_counter, false);
+
+                    furi_string_free(item_str);
+
+                    if(selected) {
+                        canvas_set_color(canvas, ColorBlack);
+                    }
+                }
+            }
+
+            furi_string_free(memstr);
+
+            break;
+        }
         default:
             break;
         }
@@ -612,6 +654,13 @@ static void menu_process_up(Menu* menu) {
                     position = count - 1;
                 }
                 break;
+            case MenuStyleCompact:
+                if(position > 0) {
+                    position--;
+                } else {
+                    position = count - 1;
+                }
+                break;
             default:
                 break;
             }
@@ -654,6 +703,13 @@ static void menu_process_down(Menu* menu) {
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleC64:
+                if(position < count - 1) {
+                    position++;
+                } else {
+                    position = 0;
+                }
+                break;
+            case MenuStyleCompact:
                 if(position < count - 1) {
                     position++;
                 } else {
@@ -712,6 +768,14 @@ static void menu_process_left(Menu* menu) {
                 } else if((position % 10) >= 5) {
                     position = position - 5;
                 }
+                break;
+            case MenuStyleCompact:
+                if((position % 16) < 8) {
+                    position = position + 7;
+                } else if((position % 16) >= 8) {
+                    position = position - 7;
+                }
+                break;
             default:
                 break;
             }
@@ -769,6 +833,14 @@ static void menu_process_right(Menu* menu) {
                 } else if((position % 10) >= 5 && position < count) {
                     position = position - 5;
                 }
+                break;
+            case MenuStyleCompact:
+                if(position >= (count - count) && (position % 16) < 8) {
+                    position = position + 7;
+                } else if((position % 16) >= 8 && position < count) {
+                    position = position - 7;
+                }
+                break;
             default:
                 break;
             }
