@@ -371,10 +371,10 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             canvas_set_font(canvas, FontKeyboard);
 
             for(size_t i = 0; i < 2; i++) {
-                for(size_t j = 0; j < 7; j++) { // Change 5 to 6 to accommodate the extra row
-                    index = i * 7 + j + (position - (position % 14)); // Change 10 to 12
+                for(size_t j = 0; j < 7; j++) {
+                    index = i * 7 + j + (position - (position % 14));
                     if(index >= items_count) continue;
-                    y_off = (9 * j) - 4; // Adjust the y offset
+                    y_off = (9 * j) - 4;
                     x_off = 64 * i;
                     bool selected = index == position;
                     size_t scroll_counter = menu_scroll_counter(model, selected);
