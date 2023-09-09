@@ -315,7 +315,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     furi_string_replace_at(name, 0, 0, indexstr);
 
                     elements_scrollable_text_line(
-                        canvas, x_off + 2, y_off + 12, 64, name, scroll_counter, false);
+                        canvas, x_off + 2, y_off + 12, 60, name, scroll_counter, false);
 
                     if(selected) {
                         canvas_set_color(canvas, ColorBlack);
