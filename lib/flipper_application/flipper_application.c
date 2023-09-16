@@ -102,9 +102,14 @@ static FlipperApplicationPreloadStatus
         return FlipperApplicationPreloadStatusTargetMismatch;
     }
 
-    if(!flipper_application_manifest_is_compatible(
+    if(!flipper_application_manifest_is_too_old(
            &app->manifest, elf_file_get_api_interface(app->elf))) {
-        return FlipperApplicationPreloadStatusApiMismatch;
+        return FlipperApplicationPreloadStatusApiTooOld;
+    }
+
+    if(!flipper_application_manifest_is_too_new(
+           &app->manifest, elf_file_get_api_interface(app->elf))) {
+        return FlipperApplicationPreloadStatusApiTooNew;
     }
 
     return FlipperApplicationPreloadStatusSuccess;
@@ -258,7 +263,10 @@ static const char* preload_status_strings[] = {
     [FlipperApplicationPreloadStatusUnspecifiedError] = "Unknown error",
     [FlipperApplicationPreloadStatusInvalidFile] = "Invalid file",
     [FlipperApplicationPreloadStatusInvalidManifest] = "Invalid file manifest",
-    [FlipperApplicationPreloadStatusApiMismatch] = "API version mismatch",
+    [FlipperApplicationPreloadStatusApiTooOld] =
+        "Update Application to use with this Firmware (ApiTooOld)",
+    [FlipperApplicationPreloadStatusApiTooNew] =
+        "Update Firmware to use with this Application (ApiTooNew)",
     [FlipperApplicationPreloadStatusTargetMismatch] = "Hardware target mismatch",
 };
 
@@ -266,7 +274,8 @@ static const char* load_status_strings[] = {
     [FlipperApplicationLoadStatusSuccess] = "Success",
     [FlipperApplicationLoadStatusUnspecifiedError] = "Unknown error",
     [FlipperApplicationLoadStatusNoFreeMemory] = "Out of memory",
-    [FlipperApplicationLoadStatusMissingImports] = "Found unsatisfied imports",
+    [FlipperApplicationLoadStatusMissingImports] =
+        "Update Firmware to use with this Application (MissingImports)",
 };
 
 const char* flipper_application_preload_status_to_string(FlipperApplicationPreloadStatus status) {
@@ -330,7 +339,8 @@ bool flipper_application_load_name_and_icon(
             flipper_application_preload_manifest(app, furi_string_get_cstr(path));
 
         if(preload_res == FlipperApplicationPreloadStatusSuccess ||
-           preload_res == FlipperApplicationPreloadStatusApiMismatch) {
+           preload_res == FlipperApplicationPreloadStatusApiTooOld ||
+           preload_res == FlipperApplicationPreloadStatusApiTooNew) {
             const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
             if(manifest->has_icon && icon_ptr != NULL && *icon_ptr != NULL) {
                 memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);

@@ -40,23 +40,12 @@ static const struct {
     char* name;
     RgbColor color;
 } lcd_colors[] = {
-    {"Orange", {255, 69, 0}},
-    {"Red", {255, 0, 0}},
-    {"Maroon", {128, 0, 0}},
-    {"Yellow", {255, 255, 0}},
-    {"Olive", {128, 128, 0}},
-    {"Lime", {0, 255, 0}},
-    {"Green", {0, 128, 0}},
-    {"Aqua", {0, 255, 127}},
-    {"Cyan", {0, 210, 210}},
-    {"Azure", {0, 127, 255}},
-    {"Teal", {0, 128, 128}},
-    {"Blue", {0, 0, 255}},
-    {"Navy", {0, 0, 128}},
-    {"Purple", {128, 0, 128}},
-    {"Fuchsia", {255, 0, 255}},
-    {"Pink", {173, 31, 173}},
-    {"Brown", {165, 42, 42}},
+    {"Off", {0, 0, 0}},         {"Orange", {255, 69, 0}},  {"Red", {255, 0, 0}},
+    {"Maroon", {128, 0, 0}},    {"Yellow", {255, 255, 0}}, {"Olive", {128, 128, 0}},
+    {"Lime", {0, 255, 0}},      {"Green", {0, 128, 0}},    {"Aqua", {0, 255, 127}},
+    {"Cyan", {0, 210, 210}},    {"Azure", {0, 127, 255}},  {"Teal", {0, 128, 128}},
+    {"Blue", {0, 0, 255}},      {"Navy", {0, 0, 128}},     {"Purple", {128, 0, 128}},
+    {"Fuchsia", {255, 0, 255}}, {"Pink", {173, 31, 173}},  {"Brown", {165, 42, 42}},
     {"White", {255, 192, 203}},
 };
 static void xtreme_app_scene_misc_screen_lcd_color_changed(VariableItem* item, uint8_t led) {
@@ -172,17 +161,18 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
 
     struct {
         uint8_t led;
-        const char* str;
         VariableItemChangeCallback cb;
     } lcd_cols[] = {
-        {2, "LCD Left", xtreme_app_scene_misc_screen_lcd_color_2_changed},
-        {1, "LCD Middle", xtreme_app_scene_misc_screen_lcd_color_1_changed},
-        {0, "LCD Right", xtreme_app_scene_misc_screen_lcd_color_0_changed},
+        {0, xtreme_app_scene_misc_screen_lcd_color_0_changed},
+        {1, xtreme_app_scene_misc_screen_lcd_color_1_changed},
+        {2, xtreme_app_scene_misc_screen_lcd_color_2_changed},
     };
     size_t lcd_sz = COUNT_OF(lcd_colors);
 
     for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
-        item = variable_item_list_add(var_item_list, lcd_cols[i].str, lcd_sz, lcd_cols[i].cb, app);
+        char name[12];
+        snprintf(name, sizeof(name), "LCD LED %u", lcd_cols[i].led + 1);
+        item = variable_item_list_add(var_item_list, name, lcd_sz, lcd_cols[i].cb, app);
         RgbColor color = rgb_backlight_get_color(lcd_cols[i].led);
         bool found = false;
         for(size_t i = 0; i < lcd_sz; i++) {
