@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,36.1,,
+Version,+,38.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/services/applications.h,,
@@ -951,8 +951,9 @@ Function,+,flipper_application_get_manifest,const FlipperApplicationManifest*,Fl
 Function,+,flipper_application_is_plugin,_Bool,FlipperApplication*
 Function,+,flipper_application_load_name_and_icon,_Bool,"FuriString*, Storage*, uint8_t**, FuriString*"
 Function,+,flipper_application_load_status_to_string,const char*,FlipperApplicationLoadStatus
-Function,+,flipper_application_manifest_is_compatible,_Bool,"const FlipperApplicationManifest*, const ElfApiInterface*"
 Function,+,flipper_application_manifest_is_target_compatible,_Bool,const FlipperApplicationManifest*
+Function,+,flipper_application_manifest_is_too_new,_Bool,"const FlipperApplicationManifest*, const ElfApiInterface*"
+Function,+,flipper_application_manifest_is_too_old,_Bool,"const FlipperApplicationManifest*, const ElfApiInterface*"
 Function,+,flipper_application_manifest_is_valid,_Bool,const FlipperApplicationManifest*
 Function,+,flipper_application_map_to_memory,FlipperApplicationLoadStatus,FlipperApplication*
 Function,+,flipper_application_plugin_get_descriptor,const FlipperAppPluginDescriptor*,FlipperApplication*
@@ -1432,6 +1433,14 @@ Function,+,furi_hal_rtc_set_pin_fails,void,uint32_t
 Function,+,furi_hal_rtc_set_register,void,"FuriHalRtcRegister, uint32_t"
 Function,+,furi_hal_rtc_sync_shadow,void,
 Function,+,furi_hal_rtc_validate_datetime,_Bool,FuriHalRtcDateTime*
+Function,+,furi_hal_sd_get_card_state,FuriStatus,
+Function,+,furi_hal_sd_info,FuriStatus,FuriHalSdInfo*
+Function,+,furi_hal_sd_init,FuriStatus,_Bool
+Function,+,furi_hal_sd_is_present,_Bool,
+Function,+,furi_hal_sd_max_mount_retry_count,uint8_t,
+Function,+,furi_hal_sd_presence_init,void,
+Function,+,furi_hal_sd_read_blocks,FuriStatus,"uint32_t*, uint32_t, uint32_t"
+Function,+,furi_hal_sd_write_blocks,FuriStatus,"const uint32_t*, uint32_t, uint32_t"
 Function,-,furi_hal_set_is_normal_boot,void,_Bool
 Function,+,furi_hal_speaker_acquire,_Bool,uint32_t
 Function,-,furi_hal_speaker_deinit,void,
@@ -1731,9 +1740,6 @@ Function,+,gui_set_hide_statusbar,void,"Gui*, _Bool"
 Function,+,gui_set_lockdown,void,"Gui*, _Bool"
 Function,-,gui_view_port_send_to_back,void,"Gui*, ViewPort*"
 Function,+,gui_view_port_send_to_front,void,"Gui*, ViewPort*"
-Function,+,hal_sd_detect,_Bool,
-Function,+,hal_sd_detect_init,void,
-Function,+,hal_sd_detect_set_low,void,
 Function,+,hex_char_to_hex_nibble,_Bool,"char, uint8_t*"
 Function,+,hex_char_to_uint8,_Bool,"char, char, uint8_t*"
 Function,+,hex_chars_to_uint64,_Bool,"const char*, uint64_t*"
@@ -3396,6 +3402,7 @@ Variable,+,I_Circles_47x47,Icon,
 Variable,+,I_Clock_18x18,Icon,
 Variable,+,I_Connect_me_62x31,Icon,
 Variable,+,I_Connected_62x31,Icon,
+Variable,+,I_Cos_9x7,Icon,
 Variable,+,I_Cry_dolph_55x52,Icon,
 Variable,+,I_DFU_128x50,Icon,
 Variable,+,I_DolphinCommon_56x48,Icon,
@@ -3593,7 +3600,6 @@ Variable,+,furi_hal_i2c_bus_external,FuriHalI2cBus,
 Variable,+,furi_hal_i2c_bus_power,FuriHalI2cBus,
 Variable,+,furi_hal_i2c_handle_external,FuriHalI2cBusHandle,
 Variable,+,furi_hal_i2c_handle_power,FuriHalI2cBusHandle,
-Variable,+,furi_hal_sd_spi_handle,FuriHalSpiBusHandle*,
 Variable,+,furi_hal_spi_bus_d,FuriHalSpiBus,
 Variable,+,furi_hal_spi_bus_handle_display,FuriHalSpiBusHandle,
 Variable,+,furi_hal_spi_bus_handle_external,FuriHalSpiBusHandle,

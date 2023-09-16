@@ -431,7 +431,8 @@ static LoaderStatus loader_start_external_app(
         FlipperApplicationPreloadStatus preload_res =
             flipper_application_preload(loader->app.fap, path);
         bool api_mismatch = false;
-        if(preload_res == FlipperApplicationPreloadStatusApiMismatch) {
+        if(preload_res == FlipperApplicationPreloadStatusApiTooOld ||
+           preload_res == FlipperApplicationPreloadStatusApiTooNew) {
             api_mismatch = true;
         } else if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
