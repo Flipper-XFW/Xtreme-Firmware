@@ -40,23 +40,12 @@ static const struct {
     char* name;
     RgbColor color;
 } lcd_colors[] = {
-    {"Orange", {255, 69, 0}},
-    {"Red", {255, 0, 0}},
-    {"Maroon", {128, 0, 0}},
-    {"Yellow", {255, 255, 0}},
-    {"Olive", {128, 128, 0}},
-    {"Lime", {0, 255, 0}},
-    {"Green", {0, 128, 0}},
-    {"Aqua", {0, 255, 127}},
-    {"Cyan", {0, 210, 210}},
-    {"Azure", {0, 127, 255}},
-    {"Teal", {0, 128, 128}},
-    {"Blue", {0, 0, 255}},
-    {"Navy", {0, 0, 128}},
-    {"Purple", {128, 0, 128}},
-    {"Fuchsia", {255, 0, 255}},
-    {"Pink", {173, 31, 173}},
-    {"Brown", {165, 42, 42}},
+    {"Off", {0, 0, 0}},         {"Orange", {255, 69, 0}},  {"Red", {255, 0, 0}},
+    {"Maroon", {128, 0, 0}},    {"Yellow", {255, 255, 0}}, {"Olive", {128, 128, 0}},
+    {"Lime", {0, 255, 0}},      {"Green", {0, 128, 0}},    {"Aqua", {0, 255, 127}},
+    {"Cyan", {0, 210, 210}},    {"Azure", {0, 127, 255}},  {"Teal", {0, 128, 128}},
+    {"Blue", {0, 0, 255}},      {"Navy", {0, 0, 128}},     {"Purple", {128, 0, 128}},
+    {"Fuchsia", {255, 0, 255}}, {"Pink", {173, 31, 173}},  {"Brown", {165, 42, 42}},
     {"White", {255, 192, 203}},
 };
 static void xtreme_app_scene_misc_screen_lcd_color_changed(VariableItem* item, uint8_t led) {
