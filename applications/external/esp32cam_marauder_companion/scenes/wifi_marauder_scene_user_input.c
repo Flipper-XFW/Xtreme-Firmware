@@ -108,6 +108,7 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
                 *app->user_input_string_reference,
                 strlen(*app->user_input_string_reference) + 1);
         }
+        text_input_add_illegal_symbols(app->text_input);
         break;
     // Loads the numerical value of the reference
     case WifiMarauderUserInputTypeNumber:
@@ -138,8 +139,6 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
         app->text_input_store,
         WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE,
         false);
-
-    text_input_add_illegal_symbols(app->text_input);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewTextInput);
 }
