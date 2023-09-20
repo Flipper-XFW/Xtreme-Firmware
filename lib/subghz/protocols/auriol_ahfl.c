@@ -238,7 +238,7 @@ void ws_protocol_decoder_auriol_ahfl_get_string(void* context, FuriString* outpu
     WSProtocolDecoderAuriol_AHFL* instance = context;
     furi_string_cat_printf(
         output,
-        "%s %dbit\r\n"
+        "%s\r\n%dbit\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%lX Ch:%d  Bat:%d\r\n"
         "Temp:%3.1f C Hum:%d%%",

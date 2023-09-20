@@ -387,7 +387,7 @@ void ws_protocol_decoder_oregon2_get_string(void* context, FuriString* output) {
     furi_string_cat_printf(
         output,
         "%s\r\n"
-        "ID: 0x%04lX, ch: %d, bat: %d, rc: 0x%02lX\r\n",
+        "ID: 0x%04lX, ch: %d,\r\nbat: %d, rc: 0x%02lX\r\n",
         instance->generic.protocol_name,
         instance->generic.id,
         instance->generic.channel,
