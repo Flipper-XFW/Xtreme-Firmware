@@ -82,7 +82,7 @@ const SubGhzProtocolEncoder ws_protocol_wendox_w6726_encoder = {
 
 const SubGhzProtocol ws_protocol_wendox_w6726 = {
     .name = WS_PROTOCOL_WENDOX_W6726_NAME,
-    .type = SubGhzProtocolWeatherStation,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather,
 

@@ -271,5 +271,6 @@ bool subghz_history_add_to_history(
 
     furi_string_free(text);
     instance->last_index_write++;
+    FURI_LOG_E(TAG, "Add history exit");
     return true;
 }

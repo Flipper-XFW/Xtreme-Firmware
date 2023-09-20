@@ -67,7 +67,7 @@ const SubGhzProtocolEncoder ws_protocol_acurite_606tx_encoder = {
 
 const SubGhzProtocol ws_protocol_acurite_606tx = {
     .name = WS_PROTOCOL_ACURITE_606TX_NAME,
-    .type = SubGhzProtocolWeatherStation,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather,
 

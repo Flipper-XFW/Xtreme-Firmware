@@ -93,7 +93,7 @@ const SubGhzProtocolEncoder ws_protocol_oregon_v1_encoder = {
 
 const SubGhzProtocol ws_protocol_oregon_v1 = {
     .name = WS_PROTOCOL_OREGON_V1_NAME,
-    .type = SubGhzProtocolWeatherStation,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather,
 

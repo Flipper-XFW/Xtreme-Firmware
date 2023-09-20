@@ -88,7 +88,7 @@ const SubGhzProtocolEncoder ws_protocol_tx_8300_encoder = {
 
 const SubGhzProtocol ws_protocol_tx_8300 = {
     .name = WS_PROTOCOL_TX_8300_NAME,
-    .type = SubGhzProtocolWeatherStation,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather,
 
