@@ -70,7 +70,8 @@ const SubGhzProtocol ws_protocol_acurite_609txc = {
     .name = WS_PROTOCOL_ACURITE_609TXC_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_acurite_609txc_decoder,
     .encoder = &ws_protocol_acurite_609txc_encoder,

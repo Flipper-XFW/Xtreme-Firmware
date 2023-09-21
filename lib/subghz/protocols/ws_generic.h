@@ -22,7 +22,7 @@ extern "C" {
 #define WS_NO_TEMPERATURE -273.0f
 
 #define WS_KEY_FILE_VERSION 1
-#define WS_KEY_FILE_TYPE "Flipper Weather Station Key File"
+#define WS_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
 typedef struct WSBlockGeneric WSBlockGeneric;
 
