@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 #define PCSG_KEY_FILE_VERSION 1
-#define PCSG_KEY_FILE_TYPE "Flipper POCSAG Pager Key File"
+#define PCSG_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
 typedef struct PCSGBlockGeneric PCSGBlockGeneric;
 

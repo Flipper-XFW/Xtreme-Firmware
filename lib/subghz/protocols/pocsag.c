@@ -367,7 +367,6 @@ const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
 const SubGhzProtocolEncoder subghz_protocol_pocsag_encoder = {
     .alloc = NULL,
     .free = NULL,
-
     .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
