@@ -364,6 +364,15 @@ const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
     .get_string = subhz_protocol_decoder_pocsag_get_string,
 };
 
+const SubGhzProtocolEncoder subghz_protocol_pocsag_encoder = {
+    .alloc = NULL,
+    .free = NULL,
+
+    .deserialize = NULL,
+    .stop = NULL,
+    .yield = NULL,
+};
+
 const SubGhzProtocol subghz_protocol_pocsag = {
     .name = SUBGHZ_PROTOCOL_POCSAG_NAME,
     .type = SubGhzProtocolTypeStatic,
@@ -371,4 +380,5 @@ const SubGhzProtocol subghz_protocol_pocsag = {
             SubGhzProtocolFlag_Load,
 
     .decoder = &subghz_protocol_pocsag_decoder,
+    .encoder = &subghz_protocol_pocsag_encoder,
 };
