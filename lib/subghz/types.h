@@ -108,7 +108,6 @@ typedef enum {
     SubGhzProtocolTypeStatic,
     SubGhzProtocolTypeDynamic,
     SubGhzProtocolTypeRAW,
-    SubGhzProtocolWeatherStation,
     SubGhzProtocolCustom,
     SubGhzProtocolTypeBinRAW,
 } SubGhzProtocolType;
