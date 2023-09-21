@@ -101,7 +101,8 @@ const SubGhzProtocol tpms_protocol_schrader_gg4 = {
     .name = TPMS_PROTOCOL_SCHRADER_GG4_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_AM |
-            SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_TPMS,
+            SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_TPMS | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &tpms_protocol_schrader_gg4_decoder,
     .encoder = &tpms_protocol_schrader_gg4_encoder,

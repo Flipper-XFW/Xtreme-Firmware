@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 #define TPMS_KEY_FILE_VERSION 1
-#define TPMS_KEY_FILE_TYPE "Flipper Tire Pressure Monitoring System Key File"
+#define TPMS_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
 #define TPMS_NO_BATT 0xFF
 
