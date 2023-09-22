@@ -25,6 +25,7 @@
  * - humidity is 8 bits
  * The sensors can be bought at Clas Ohlsen (Nexus) and Pearl (infactory/FreeTec).
  * 
+ *  Generate test files: https://htotoo.github.io/FlipperSUBGenerator/nexus-th-generator/index.html
  */
 
 #define NEXUS_TH_CONST_DATA 0b1111
