@@ -30,8 +30,8 @@
 #define NEXUS_TH_CONST_DATA 0b1111
 
 static const SubGhzBlockConst ws_protocol_nexus_th_const = {
-    .te_short = 500,
-    .te_long = 2000,
+    .te_short = 490,
+    .te_long = 1980,
     .te_delta = 150,
     .min_count_bit_for_found = 36,
 };
@@ -56,38 +56,26 @@ typedef enum {
     Nexus_THDecoderStepCheckDuration,
 } Nexus_THDecoderStep;
 
-const SubGhzProtocolDecoder ws_protocol_nexus_th_decoder = {
-    .alloc = ws_protocol_decoder_nexus_th_alloc,
-    .free = ws_protocol_decoder_nexus_th_free,
+void* ws_protocol_encoder_nexus_th_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
+    WSProtocolEncoderNexus_TH* instance = malloc(sizeof(WSProtocolEncoderNexus_TH));
 
-    .feed = ws_protocol_decoder_nexus_th_feed,
-    .reset = ws_protocol_decoder_nexus_th_reset,
+    instance->base.protocol = &ws_protocol_nexus_th;
+    instance->generic.protocol_name = instance->base.protocol->name;
 
-    .get_hash_data = ws_protocol_decoder_nexus_th_get_hash_data,
-    .serialize = ws_protocol_decoder_nexus_th_serialize,
-    .deserialize = ws_protocol_decoder_nexus_th_deserialize,
-    .get_string = ws_protocol_decoder_nexus_th_get_string,
-};
+    instance->encoder.repeat = 12;
+    instance->encoder.size_upload = ws_protocol_nexus_th_const.min_count_bit_for_found * 2 + 2;
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.is_running = false;
+    return instance;
+}
 
-const SubGhzProtocolEncoder ws_protocol_nexus_th_encoder = {
-    .alloc = NULL,
-    .free = NULL,
-
-    .deserialize = NULL,
-    .stop = NULL,
-    .yield = NULL,
-};
-
-const SubGhzProtocol ws_protocol_nexus_th = {
-    .name = WS_PROTOCOL_NEXUS_TH_NAME,
-    .type = SubGhzProtocolTypeStatic,
-    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
-
-    .decoder = &ws_protocol_nexus_th_decoder,
-    .encoder = &ws_protocol_nexus_th_encoder,
-};
+void ws_protocol_encoder_nexus_th_free(void* context) {
+    furi_assert(context);
+    WSProtocolEncoderNexus_TH* instance = context;
+    free(instance->encoder.upload);
+    free(instance);
+}
 
 void* ws_protocol_decoder_nexus_th_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
@@ -118,6 +106,93 @@ static bool ws_protocol_nexus_th_check(WSProtocolDecoderNexus_TH* instance) {
         return false;
     }
     return true;
+}
+
+static bool ws_protocol_encoder_nexus_th_get_upload(WSProtocolEncoderNexus_TH* instance) {
+    furi_assert(instance);
+    size_t index = 0;
+    size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
+    if(size_upload > instance->encoder.size_upload) {
+        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
+        return false;
+    } else {
+        instance->encoder.size_upload = size_upload;
+    }
+
+    for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
+        if(!bit_read(instance->generic.data, i - 1)) {
+            //send bit 1
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)ws_protocol_nexus_th_const.te_short);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)ws_protocol_nexus_th_const.te_short * 2);
+        } else {
+            //send bit 0
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)ws_protocol_nexus_th_const.te_short);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)ws_protocol_nexus_th_const.te_short * 4);
+        }
+    }
+
+    instance->encoder.upload[index++] =
+        level_duration_make(true, (uint32_t)ws_protocol_nexus_th_const.te_short);
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)ws_protocol_nexus_th_const.te_short * 8);
+
+    return true;
+}
+
+SubGhzProtocolStatus
+    ws_protocol_encoder_nexus_th_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    WSProtocolEncoderNexus_TH* instance = context;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
+    do {
+        ret = ws_block_generic_deserialize(&instance->generic, flipper_format);
+        if(ret != SubGhzProtocolStatusOk) {
+            break;
+        }
+        if((instance->generic.data_count_bit >
+            ws_protocol_nexus_th_const.min_count_bit_for_found + 1)) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            ret = SubGhzProtocolStatusErrorValueBitCount;
+            break;
+        }
+        //optional parameter parameter
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 12);
+
+        if(!ws_protocol_encoder_nexus_th_get_upload(instance)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
+        instance->encoder.is_running = true;
+    } while(false);
+
+    return ret;
+}
+
+LevelDuration ws_protocol_encoder_nexus_th_yield(void* context) {
+    WSProtocolEncoderNexus_TH* instance = context;
+
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
+        return level_duration_reset();
+    }
+
+    LevelDuration ret = instance->encoder.upload[instance->encoder.front];
+
+    if(++instance->encoder.front == instance->encoder.size_upload) {
+        instance->encoder.repeat--;
+        instance->encoder.front = 0;
+    }
+    return ret;
+}
+
+void ws_protocol_encoder_nexus_th_stop(void* context) {
+    WSProtocolEncoderNexus_TH* instance = context;
+    instance->encoder.is_running = false;
 }
 
 /**
@@ -253,3 +328,36 @@ void ws_protocol_decoder_nexus_th_get_string(void* context, FuriString* output) 
         (double)instance->generic.temp,
         instance->generic.humidity);
 }
+
+const SubGhzProtocolDecoder ws_protocol_nexus_th_decoder = {
+    .alloc = ws_protocol_decoder_nexus_th_alloc,
+    .free = ws_protocol_decoder_nexus_th_free,
+
+    .feed = ws_protocol_decoder_nexus_th_feed,
+    .reset = ws_protocol_decoder_nexus_th_reset,
+
+    .get_hash_data = ws_protocol_decoder_nexus_th_get_hash_data,
+    .serialize = ws_protocol_decoder_nexus_th_serialize,
+    .deserialize = ws_protocol_decoder_nexus_th_deserialize,
+    .get_string = ws_protocol_decoder_nexus_th_get_string,
+};
+
+const SubGhzProtocolEncoder ws_protocol_nexus_th_encoder = {
+    .alloc = ws_protocol_encoder_nexus_th_alloc,
+    .free = ws_protocol_encoder_nexus_th_free,
+
+    .deserialize = ws_protocol_encoder_nexus_th_deserialize,
+    .stop = ws_protocol_encoder_nexus_th_stop,
+    .yield = ws_protocol_encoder_nexus_th_yield,
+};
+
+const SubGhzProtocol ws_protocol_nexus_th = {
+    .name = WS_PROTOCOL_NEXUS_TH_NAME,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
+
+    .decoder = &ws_protocol_nexus_th_decoder,
+    .encoder = &ws_protocol_nexus_th_encoder,
+};
