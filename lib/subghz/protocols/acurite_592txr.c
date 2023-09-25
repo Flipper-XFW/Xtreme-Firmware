@@ -72,12 +72,12 @@ const SubGhzProtocolDecoder ws_protocol_acurite_592txr_decoder = {
 };
 
 const SubGhzProtocolEncoder ws_protocol_acurite_592txr_encoder = {
-    .alloc = NULL,
-    .free = NULL,
+    .alloc = ws_protocol_encoder_acurite_592txr_alloc,
+    .free = ws_protocol_encoder_acurite_592txr_free,
 
-    .deserialize = NULL,
-    .stop = NULL,
-    .yield = NULL,
+    .deserialize = ws_protocol_encoder_acurite_592txr_deserialize,
+    .stop = ws_protocol_encoder_acurite_592txr_stop,
+    .yield = ws_protocol_encoder_acurite_592txr_yield,
 };
 
 const SubGhzProtocol ws_protocol_acurite_592txr = {
@@ -85,7 +85,7 @@ const SubGhzProtocol ws_protocol_acurite_592txr = {
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &ws_protocol_acurite_592txr_decoder,
     .encoder = &ws_protocol_acurite_592txr_encoder,
@@ -296,4 +296,121 @@ void ws_protocol_decoder_acurite_592txr_get_string(void* context, FuriString* ou
         instance->generic.battery_low,
         (double)instance->generic.temp,
         instance->generic.humidity);
+}
+
+void* ws_protocol_encoder_acurite_592txr_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
+    WSProtocolEncoderAcurite_592TXR* instance = malloc(sizeof(WSProtocolEncoderAcurite_592TXR));
+
+    instance->base.protocol = &ws_protocol_acurite_592txr;
+    instance->generic.protocol_name = instance->base.protocol->name;
+
+    instance->encoder.repeat = 6;
+    instance->encoder.size_upload =
+        ws_protocol_acurite_592txr_const.min_count_bit_for_found * 2 + 8;
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.is_running = false;
+    return instance;
+}
+
+void ws_protocol_encoder_acurite_592txr_free(void* context) {
+    furi_assert(context);
+    WSProtocolEncoderAcurite_592TXR* instance = context;
+    free(instance->encoder.upload);
+    free(instance);
+}
+
+bool ws_protocol_encoder_acurite_592txr_get_upload(WSProtocolEncoderAcurite_592TXR* instance) {
+    furi_assert(instance);
+    size_t index = 0;
+    size_t size_upload = (instance->generic.data_count_bit * 2) + 8;
+    if(size_upload > instance->encoder.size_upload) {
+        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
+        return false;
+    } else {
+        instance->encoder.size_upload = size_upload;
+    }
+    instance->encoder.upload[index++] =
+        level_duration_make(true, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+    instance->encoder.upload[index++] =
+        level_duration_make(true, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+    instance->encoder.upload[index++] =
+        level_duration_make(true, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+    instance->encoder.upload[index++] =
+        level_duration_make(true, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)ws_protocol_acurite_592txr_const.te_short * 3);
+
+    for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
+        if(!bit_read(instance->generic.data, i - 1)) {
+            //send bit 1
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)ws_protocol_acurite_592txr_const.te_short);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)ws_protocol_acurite_592txr_const.te_long);
+        } else {
+            //send bit 0
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)ws_protocol_acurite_592txr_const.te_long);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)ws_protocol_acurite_592txr_const.te_short);
+        }
+    }
+
+    return true;
+}
+
+SubGhzProtocolStatus
+    ws_protocol_encoder_acurite_592txr_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    WSProtocolEncoderAcurite_592TXR* instance = context;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
+    do {
+        ret = ws_block_generic_deserialize(&instance->generic, flipper_format);
+        if(ret != SubGhzProtocolStatusOk) {
+            break;
+        }
+        if((instance->generic.data_count_bit >
+            ws_protocol_acurite_592txr_const.min_count_bit_for_found)) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            ret = SubGhzProtocolStatusErrorValueBitCount;
+            break;
+        }
+        //optional parameter parameter
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 6);
+
+        if(!ws_protocol_encoder_acurite_592txr_get_upload(instance)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
+        instance->encoder.is_running = true;
+    } while(false);
+
+    return ret;
+}
+
+LevelDuration ws_protocol_encoder_acurite_592txr_yield(void* context) {
+    WSProtocolEncoderAcurite_592TXR* instance = context;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
+        return level_duration_reset();
+    }
+    LevelDuration ret = instance->encoder.upload[instance->encoder.front];
+    if(++instance->encoder.front == instance->encoder.size_upload) {
+        instance->encoder.repeat--;
+        instance->encoder.front = 0;
+    }
+    return ret;
+}
+
+void ws_protocol_encoder_acurite_592txr_stop(void* context) {
+    WSProtocolEncoderAcurite_592TXR* instance = context;
+    instance->encoder.is_running = false;
 }

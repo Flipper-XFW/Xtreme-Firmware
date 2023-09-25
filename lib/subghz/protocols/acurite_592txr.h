@@ -78,3 +78,11 @@ SubGhzProtocolStatus
  * @param output Resulting text
  */
 void ws_protocol_decoder_acurite_592txr_get_string(void* context, FuriString* output);
+
+void* ws_protocol_encoder_acurite_592txr_alloc(SubGhzEnvironment* environment);
+void ws_protocol_encoder_acurite_592txr_free(void* context);
+bool ws_protocol_encoder_acurite_592txr_get_upload(WSProtocolEncoderAcurite_592TXR* instance);
+SubGhzProtocolStatus
+    ws_protocol_encoder_acurite_592txr_deserialize(void* context, FlipperFormat* flipper_format);
+LevelDuration ws_protocol_encoder_acurite_592txr_yield(void* context);
+void ws_protocol_encoder_acurite_592txr_stop(void* context);
