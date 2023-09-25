@@ -26,6 +26,8 @@
  *   - However 14 bits available for temperature, giving possible range of -100 C to 1538.4 C
  *   - @todo - check if high 3 bits ever used for anything else
  * 
+ *   SUB file generator: https://htotoo.github.io/FlipperSUBGenerator/acurite_592txr-generator/index.html
+ * 
  */
 
 static const SubGhzBlockConst ws_protocol_acurite_592txr_const = {
