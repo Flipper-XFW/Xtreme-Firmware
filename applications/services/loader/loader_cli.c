@@ -55,7 +55,8 @@ static void loader_cli_open(FuriString* args, Loader* loader) {
         const char* app_name_str = furi_string_get_cstr(app_name);
 
         NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
-        notification_message_block(notifications, &sequence_display_backlight_on);
+        notification_message(notifications, &sequence_display_backlight_on);
+        furi_record_close(RECORD_NOTIFICATION);
 
         FuriString* error_message = furi_string_alloc();
         if(loader_start(loader, app_name_str, args_str, error_message) != LoaderStatusOk) {
