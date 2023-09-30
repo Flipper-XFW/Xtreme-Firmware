@@ -23,38 +23,38 @@ typedef struct {
 
 static Payload payloads[] = {
 #if false
-            {.title = "AirDrop",
-             .text = "",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeAirDrop,
-                     .data = {.airdrop = {}},
-                 }},
-            {.title = "Airplay Target",
-             .text = "",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeAirplayTarget,
-                     .data = {.airplay_target = {}},
-                 }},
-            {.title = "Handoff",
-             .text = "",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeHandoff,
-                     .data = {.handoff = {}},
-                 }},
-            {.title = "Tethering Source",
-             .text = "",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeTetheringSource,
-                     .data = {.tethering_source = {}},
-                 }},
+    {.title = "AirDrop",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeAirDrop,
+             .data = {.airdrop = {}},
+         }},
+    {.title = "Airplay Target",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeAirplayTarget,
+             .data = {.airplay_target = {}},
+         }},
+    {.title = "Handoff",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeHandoff,
+             .data = {.handoff = {}},
+         }},
+    {.title = "Tethering Source",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeTetheringSource,
+             .data = {.tethering_source = {}},
+         }},
     {.title = "Mobile Backup",
      .text = "",
      .random = false,
