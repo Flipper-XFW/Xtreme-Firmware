@@ -453,8 +453,11 @@ static bool notification_load_settings(NotificationApp* app) {
 static void input_event_callback(const void* value, void* context) {
     furi_assert(value);
     furi_assert(context);
+    const InputEvent* event = value;
     NotificationApp* app = context;
-    notification_message(app, &sequence_display_backlight_on);
+    if(event->sequence_source == INPUT_SEQUENCE_SOURCE_HARDWARE) {
+        notification_message(app, &sequence_display_backlight_on);
+    }
 }
 
 // App alloc
