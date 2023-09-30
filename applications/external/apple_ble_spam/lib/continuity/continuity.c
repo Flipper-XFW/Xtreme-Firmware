@@ -20,13 +20,14 @@ const char* continuity_get_type_name(ContinuityType type) {
     return continuity_type_names[type];
 }
 
+#define HEADER_LEN (6) // 1 Length + 1 ? + 2 Company ID + 1 Continuity Type + 1 Continuity Length
 static uint8_t continuity_packet_sizes[ContinuityTypeCount] = {
-    [ContinuityTypeAirDrop] = 24,
-    [ContinuityTypeProximityPair] = 31,
-    [ContinuityTypeAirplayTarget] = 12,
-    [ContinuityTypeHandoff] = 20,
-    [ContinuityTypeTetheringSource] = 12,
-    [ContinuityTypeNearbyAction] = 11,
+    [ContinuityTypeAirDrop] = HEADER_LEN + 18,
+    [ContinuityTypeProximityPair] = HEADER_LEN + 25,
+    [ContinuityTypeAirplayTarget] = HEADER_LEN + 6,
+    [ContinuityTypeHandoff] = HEADER_LEN + 14,
+    [ContinuityTypeTetheringSource] = HEADER_LEN + 6,
+    [ContinuityTypeNearbyAction] = HEADER_LEN + 5,
 };
 uint8_t continuity_get_packet_size(ContinuityType type) {
     return continuity_packet_sizes[type];
@@ -37,11 +38,11 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
     uint8_t i = 0;
 
     packet[i++] = size - 1; // Packet Length
-    packet[i++] = 0xFF; // Packet Header
-    packet[i++] = 0x4C; // ...
+    packet[i++] = 0xFF; // Packet Type (Manufacturer Specific)
+    packet[i++] = 0x4C; // Packet Company ID (Apple, Inc.)
     packet[i++] = 0x00; // ...
-    packet[i++] = msg->type; // Type
-    packet[i] = size - i - 1; // Message Length
+    packet[i++] = msg->type; // Continuity Type
+    packet[i] = size - i - 1; // Continuity Length
     i++;
 
     switch(msg->type) {
