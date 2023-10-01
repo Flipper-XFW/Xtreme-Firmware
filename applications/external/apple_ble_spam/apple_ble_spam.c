@@ -16,6 +16,7 @@ typedef struct {
 
 // Hacked together by @Willy-JL
 // Custom adv logic by @Willy-JL (idea by @xMasterX)
+// iOS 17 Crash by @ECTO-1A
 // Extensive testing and research on behavior and parameters by @Willy-JL and @ECTO-1A
 // Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
@@ -686,10 +687,10 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             48,
             AlignLeft,
             AlignTop,
-            "App+spam by \e#WillyJL\e# XFW\n"
-            "Pair codes by \e#ECTO-1A\e#\n"
-            "BLE docs by \e#furiousMAC\e#\n"
-            "                        Version \e#1.1\e#",
+            "App+Spam by \e#WillyJL\e# XFW\n"
+            "IDs and Crash by \e#ECTO-1A\e#\n"
+            "Continuity by \e#furiousMAC\e#\n"
+            "                                   Version \e#1.2\e#",
             false);
         break;
     default: {
