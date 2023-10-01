@@ -33,16 +33,11 @@ typedef enum {
 } RGBBacklightRainbowMode;
 
 /**
- * @brief Reconfigure rgb backlight with new settings
+ * @brief Load backlight settings from SD card. Needs to be run at boot
  *
  * @param enabled Whether the rgb backlight is enabled
  */
-void rgb_backlight_reconfigure(bool enabled);
-
-/**
- * @brief Load backlight settings from SD card
- */
-void rgb_backlight_load_settings();
+void rgb_backlight_load_settings(bool enabled);
 
 /**
  * @brief Save Current RGB Lighting Settings
@@ -94,6 +89,13 @@ uint32_t rgb_backlight_get_rainbow_interval();
 void rgb_backlight_set_rainbow_saturation(uint8_t rainbow_saturation);
 
 uint8_t rgb_backlight_get_rainbow_saturation();
+
+/**
+ * @brief Reconfigure rgb backlight with new settings
+ *
+ * @param enabled Whether the rgb backlight is enabled
+ */
+void rgb_backlight_reconfigure(bool enabled);
 
 /**
  * @brief Apply current RGB lighting settings

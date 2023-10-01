@@ -196,7 +196,7 @@ void XTREME_SETTINGS_LOAD() {
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 
-    rgb_backlight_reconfigure(x->rgb_backlight);
+    rgb_backlight_load_settings(x->rgb_backlight);
 }
 
 void XTREME_SETTINGS_SAVE() {
