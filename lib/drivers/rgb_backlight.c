@@ -49,23 +49,14 @@ static struct {
     bool settings_loaded;
     FuriMutex* mutex;
     bool enabled;
-    bool last_rainbow;
     uint8_t last_brightness;
-    RgbColor last_colors[SK6805_LED_COUNT];
     FuriTimer* rainbow_timer;
     HsvColor rainbow_hsv;
 } rgb_state = {
     .settings_loaded = false,
     .mutex = NULL,
     .enabled = false,
-    .last_rainbow = true,
     .last_brightness = 0,
-    .last_colors =
-        {
-            {0, 0, 0},
-            {0, 0, 0},
-            {0, 0, 0},
-        },
     .rainbow_timer = NULL,
     .rainbow_hsv = {0, 255, 255},
 };
@@ -252,14 +243,6 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
 
     switch(rgb_settings.rainbow_mode) {
     case RGBBacklightRainbowModeOff: {
-        if(!rgb_state.last_rainbow && rgb_state.last_brightness == brightness &&
-           memcmp(rgb_state.last_colors, rgb_settings.colors, sizeof(rgb_settings.colors)) == 0) {
-            furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
-            return;
-        }
-        rgb_state.last_rainbow = false;
-        memcpy(rgb_state.last_colors, rgb_settings.colors, sizeof(rgb_settings.colors));
-
         float bright = brightness / 255.0f;
         for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
             SK6805_set_led_color(
@@ -273,15 +256,9 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
 
     case RGBBacklightRainbowModeWave:
     case RGBBacklightRainbowModeSolid: {
-        rgb_state.last_rainbow = true;
-
         if(tick && brightness) {
             rgb_state.rainbow_hsv.h += rgb_settings.rainbow_speed;
         } else {
-            if(rgb_state.last_brightness == brightness && rgb_state.last_rainbow) {
-                furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
-                return;
-            }
             rgb_state.rainbow_hsv.v = brightness;
         }
 
