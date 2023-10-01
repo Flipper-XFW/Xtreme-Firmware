@@ -39,13 +39,13 @@
 static const GpioPin led_pin = {.port = GPIOA, .pin = LL_GPIO_PIN_8};
 static uint8_t led_buffer[SK6805_LED_COUNT][3];
 
-void SK6805_init(void) {
+void SK6805_init() {
     DEBUG_INIT();
     furi_hal_gpio_write(SK6805_LED_PIN, false);
     furi_hal_gpio_init(SK6805_LED_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 }
 
-uint8_t SK6805_get_led_count(void) {
+uint8_t SK6805_get_led_count() {
     return (const uint8_t)SK6805_LED_COUNT;
 }
 void SK6805_set_led_color(uint8_t led_index, uint8_t r, uint8_t g, uint8_t b) {
@@ -57,7 +57,7 @@ void SK6805_set_led_color(uint8_t led_index, uint8_t r, uint8_t g, uint8_t b) {
     FURI_LOG_T(TAG, "led: %d, r: %d, g: %d, b: %d", led_index, r, g, b);
 }
 
-void SK6805_update(void) {
+void SK6805_update() {
     SK6805_init();
     furi_kernel_lock();
     uint32_t end;

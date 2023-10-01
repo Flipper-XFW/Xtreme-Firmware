@@ -92,7 +92,7 @@ void rgb_backlight_load_settings(bool enabled) {
     rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
-void rgb_backlight_save_settings(void) {
+void rgb_backlight_save_settings() {
     if(!rgb_state.settings_loaded) return;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
