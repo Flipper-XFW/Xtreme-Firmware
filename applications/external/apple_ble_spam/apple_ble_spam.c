@@ -184,6 +184,14 @@ static Payload payloads[] = {
              .data = {.nearby_info = {}},
          }},
 #endif
+    {.title = "Lockup Crash",
+     .text = "iOS 17, locked, long range",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeCustomCrash,
+             .data = {.custom_crash = {}},
+         }},
     {.title = "Random Action",
      .text = "Spam shuffle Nearby Actions",
      .random = true,
