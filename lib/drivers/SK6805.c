@@ -49,15 +49,16 @@ uint8_t SK6805_get_led_count() {
     return (const uint8_t)SK6805_LED_COUNT;
 }
 void SK6805_set_led_color(uint8_t led_index, uint8_t r, uint8_t g, uint8_t b) {
+    FURI_LOG_T(TAG, "led: %d, r: %d, g: %d, b: %d", led_index, r, g, b);
     furi_check(led_index < SK6805_LED_COUNT);
 
     led_buffer[led_index][0] = g;
     led_buffer[led_index][1] = r;
     led_buffer[led_index][2] = b;
-    FURI_LOG_T(TAG, "led: %d, r: %d, g: %d, b: %d", led_index, r, g, b);
 }
 
 void SK6805_update() {
+    FURI_LOG_T(TAG, "update");
     SK6805_init();
     furi_kernel_lock();
     uint32_t end;
