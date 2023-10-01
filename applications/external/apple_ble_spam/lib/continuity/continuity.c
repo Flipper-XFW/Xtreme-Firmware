@@ -15,6 +15,7 @@ static const char* continuity_type_names[ContinuityTypeCount] = {
     [ContinuityTypeHandoff] = "Handoff",
     [ContinuityTypeTetheringSource] = "Tethering Source",
     [ContinuityTypeNearbyAction] = "Nearby Action",
+    [ContinuityTypeNearbyInfo] = "Nearby Info",
 };
 const char* continuity_get_type_name(ContinuityType type) {
     return continuity_type_names[type];
@@ -28,6 +29,7 @@ static uint8_t continuity_packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeHandoff] = HEADER_LEN + 14,
     [ContinuityTypeTetheringSource] = HEADER_LEN + 6,
     [ContinuityTypeNearbyAction] = HEADER_LEN + 5,
+    [ContinuityTypeNearbyInfo] = HEADER_LEN + 5,
 };
 uint8_t continuity_get_packet_size(ContinuityType type) {
     return continuity_packet_sizes[type];
@@ -123,6 +125,14 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         packet[i++] = msg->data.nearby_action.type;
         furi_hal_random_fill_buf(&packet[i], 3); // Authentication Tag
         i += 3;
+        break;
+
+    case ContinuityTypeNearbyInfo:
+        packet[i++] = ((rand() % 16) << 4) + (rand() % 16); // Status Flags and Action Code
+        packet[i++] = (rand() % 256); // Status Flags
+        packet[i++] = (rand() % 256); // Authentication Tag
+        packet[i++] = (rand() % 256); // ...
+        packet[i++] = (rand() % 256); // ...
         break;
 
     default:

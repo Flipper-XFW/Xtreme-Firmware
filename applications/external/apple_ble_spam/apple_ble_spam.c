@@ -175,6 +175,14 @@ static Payload payloads[] = {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x17}},
          }},
+    {.title = "Nearby Info",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyInfo,
+             .data = {.nearby_info = {}},
+         }},
 #endif
     {.title = "Random Action",
      .text = "Spam shuffle Nearby Actions",

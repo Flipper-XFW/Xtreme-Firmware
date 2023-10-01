@@ -17,6 +17,7 @@ typedef enum {
     ContinuityTypeHandoff = 0x0C,
     ContinuityTypeTetheringSource = 0x0E,
     ContinuityTypeNearbyAction = 0x0F,
+    ContinuityTypeNearbyInfo = 0x10,
     ContinuityTypeCount
 } ContinuityType;
 
@@ -37,6 +38,8 @@ typedef union {
         uint8_t flags;
         uint8_t type;
     } nearby_action;
+    struct {
+    } nearby_info;
 } ContinuityData;
 
 typedef struct {
