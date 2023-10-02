@@ -1,9 +1,9 @@
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
-#include <applications/external/subghz_playlist/playlist_file.h>
-#include <applications/external/subghz_remote/subghz_remote_app_i.h>
-#include <applications/external/ir_remote/infrared_remote.h>
+#include <applications/system/subghz_playlist/playlist_file.h>
+#include <applications/system/subghz_remote/subghz_remote_app_i.h>
+#include <applications/system/ir_remote/infrared_remote.h>
 
 #define TAG "Archive"
 

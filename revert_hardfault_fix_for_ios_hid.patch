@@ -1,0 +1,4889 @@
+diff --git a/SConstruct b/SConstruct
+index 698ea85ec..8d389b70b 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -77,8 +77,6 @@ if GetOption("fullenv") or any(
+         "${COPRO_DISCLAIMER}",
+         "--obdata",
+         '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
+-        "--stackversion",
+-        "${COPRO_CUBE_VERSION}",
+     ]
+     dist_resource_arguments = [
+         "-r",
+diff --git a/applications/services/bt/bt_service/bt.c b/applications/services/bt/bt_service/bt.c
+index 31fa54161..d75a88888 100644
+--- a/applications/services/bt/bt_service/bt.c
++++ b/applications/services/bt/bt_service/bt.c
+@@ -1,7 +1,7 @@
+ #include "bt_i.h"
++#include "battery_service.h"
+ #include "bt_keys_storage.h"
+ 
+-#include <services/battery_service.h>
+ #include <notification/notification_messages.h>
+ #include <gui/elements.h>
+ #include <assets_icons.h>
+diff --git a/fbt_options.py b/fbt_options.py
+index 3f44bec3b..18b636822 100644
+--- a/fbt_options.py
++++ b/fbt_options.py
+@@ -25,7 +25,7 @@ DIST_SUFFIX = f"XFW-DEV_@{subprocess.check_output(['git', 'rev-parse', '--short=
+ COPRO_OB_DATA = "scripts/ob.data"
+ 
+ # Must match lib/stm32wb_copro version
+-COPRO_CUBE_VERSION = "1.17.2"
++COPRO_CUBE_VERSION = "1.15.0"
+ 
+ COPRO_CUBE_DIR = "lib/stm32wb_copro"
+ 
+diff --git a/firmware/targets/f18/api_symbols.csv b/firmware/targets/f18/api_symbols.csv
+index 338697ad7..30b63ca3a 100644
+--- a/firmware/targets/f18/api_symbols.csv
++++ b/firmware/targets/f18/api_symbols.csv
+@@ -1025,10 +1025,8 @@ Function,+,furi_hal_clock_mco_disable,void,
+ Function,+,furi_hal_clock_mco_enable,void,"FuriHalClockMcoSourceId, FuriHalClockMcoDivisorId"
+ Function,-,furi_hal_clock_resume_tick,void,
+ Function,-,furi_hal_clock_suspend_tick,void,
+-Function,-,furi_hal_clock_switch_hse2hsi,void,
+-Function,-,furi_hal_clock_switch_hse2pll,_Bool,
+-Function,-,furi_hal_clock_switch_hsi2hse,void,
+-Function,-,furi_hal_clock_switch_pll2hse,_Bool,
++Function,-,furi_hal_clock_switch_to_hsi,void,
++Function,-,furi_hal_clock_switch_to_pll,void,
+ Function,+,furi_hal_console_disable,void,
+ Function,+,furi_hal_console_enable,void,
+ Function,+,furi_hal_console_init,void,
+diff --git a/firmware/targets/f7/api_symbols.csv b/firmware/targets/f7/api_symbols.csv
+index 32646daef..01095b832 100644
+--- a/firmware/targets/f7/api_symbols.csv
++++ b/firmware/targets/f7/api_symbols.csv
+@@ -1162,10 +1162,8 @@ Function,+,furi_hal_clock_mco_disable,void,
+ Function,+,furi_hal_clock_mco_enable,void,"FuriHalClockMcoSourceId, FuriHalClockMcoDivisorId"
+ Function,-,furi_hal_clock_resume_tick,void,
+ Function,-,furi_hal_clock_suspend_tick,void,
+-Function,-,furi_hal_clock_switch_hse2hsi,void,
+-Function,-,furi_hal_clock_switch_hse2pll,_Bool,
+-Function,-,furi_hal_clock_switch_hsi2hse,void,
+-Function,-,furi_hal_clock_switch_pll2hse,_Bool,
++Function,-,furi_hal_clock_switch_to_hsi,void,
++Function,-,furi_hal_clock_switch_to_pll,void,
+ Function,+,furi_hal_console_disable,void,
+ Function,+,furi_hal_console_enable,void,
+ Function,+,furi_hal_console_init,void,
+diff --git a/firmware/targets/f7/ble_glue/app_common.h b/firmware/targets/f7/ble_glue/app_common.h
+index e969636d2..8eaf23085 100644
+--- a/firmware/targets/f7/ble_glue/app_common.h
++++ b/firmware/targets/f7/ble_glue/app_common.h
+@@ -1,4 +1,30 @@
+-#pragma once
++/* USER CODE BEGIN Header */
++/**
++ ******************************************************************************
++  * File Name          : app_common.h
++  * Description        : App Common application configuration file for STM32WPAN Middleware.
++  *
++  ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license
++  * SLA0044, the "License"; You may not use this file except in compliance with
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++/* USER CODE END Header */
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef APP_COMMON_H
++#define APP_COMMON_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #include <stdint.h>
+ #include <string.h>
+@@ -10,3 +36,5 @@
+ #include <tl.h>
+ 
+ #include "app_conf.h"
++
++#endif
+diff --git a/firmware/targets/f7/ble_glue/app_conf.h b/firmware/targets/f7/ble_glue/app_conf.h
+index 25fa688c7..ee5115cfe 100644
+--- a/firmware/targets/f7/ble_glue/app_conf.h
++++ b/firmware/targets/f7/ble_glue/app_conf.h
+@@ -1,32 +1,80 @@
+ #pragma once
+ 
+-#include <ble/core/ble_defs.h>
++#include "hw_conf.h"
++#include "hw_if.h"
++
++#include <interface/patterns/ble_thread/hw.h>
++#include <ble/core/ble_bufsize.h>
+ 
+ #define CFG_TX_POWER (0x19) /* +0dBm */
+ 
+ #define CFG_IDENTITY_ADDRESS GAP_PUBLIC_ADDR
+ 
++/**
++ * Define Advertising parameters
++ */
++#define CFG_ADV_BD_ADDRESS (0x7257acd87a6c)
++#define CFG_FAST_CONN_ADV_INTERVAL_MIN (0x80) /**< 80ms */
++#define CFG_FAST_CONN_ADV_INTERVAL_MAX (0xa0) /**< 100ms */
++#define CFG_LP_CONN_ADV_INTERVAL_MIN (0x640) /**< 1s */
++#define CFG_LP_CONN_ADV_INTERVAL_MAX (0xfa0) /**< 2.5s */
++
+ /**
+  * Define IO Authentication
+  */
+-#define CFG_USED_FIXED_PIN USE_FIXED_PIN_FOR_PAIRING_FORBIDDEN
++#define CFG_BONDING_MODE (1)
++#define CFG_FIXED_PIN (111111)
++#define CFG_USED_FIXED_PIN (1)
+ #define CFG_ENCRYPTION_KEY_SIZE_MAX (16)
+ #define CFG_ENCRYPTION_KEY_SIZE_MIN (8)
+ 
+ /**
+  * Define IO capabilities
+  */
+-#define CFG_IO_CAPABILITY IO_CAP_DISPLAY_YES_NO
++#define CFG_IO_CAPABILITY_DISPLAY_ONLY (0x00)
++#define CFG_IO_CAPABILITY_DISPLAY_YES_NO (0x01)
++#define CFG_IO_CAPABILITY_KEYBOARD_ONLY (0x02)
++#define CFG_IO_CAPABILITY_NO_INPUT_NO_OUTPUT (0x03)
++#define CFG_IO_CAPABILITY_KEYBOARD_DISPLAY (0x04)
++
++#define CFG_IO_CAPABILITY CFG_IO_CAPABILITY_DISPLAY_YES_NO
+ 
+ /**
+  * Define MITM modes
+  */
+-#define CFG_MITM_PROTECTION MITM_PROTECTION_REQUIRED
++#define CFG_MITM_PROTECTION_NOT_REQUIRED (0x00)
++#define CFG_MITM_PROTECTION_REQUIRED (0x01)
++
++#define CFG_MITM_PROTECTION CFG_MITM_PROTECTION_REQUIRED
+ 
+ /**
+  * Define Secure Connections Support
+  */
+-#define CFG_SC_SUPPORT SC_PAIRING_OPTIONAL
++#define CFG_SECURE_NOT_SUPPORTED (0x00)
++#define CFG_SECURE_OPTIONAL (0x01)
++#define CFG_SECURE_MANDATORY (0x02)
++
++#define CFG_SC_SUPPORT CFG_SECURE_OPTIONAL
++
++/**
++ * Define Keypress Notification Support
++ */
++#define CFG_KEYPRESS_NOT_SUPPORTED (0x00)
++#define CFG_KEYPRESS_SUPPORTED (0x01)
++
++#define CFG_KEYPRESS_NOTIFICATION_SUPPORT CFG_KEYPRESS_NOT_SUPPORTED
++
++/**
++ * Numeric Comparison Answers
++ */
++#define YES (0x01)
++#define NO (0x00)
++
++/**
++ * Device name configuration for Generic Access Service
++ */
++#define CFG_GAP_DEVICE_NAME "TEMPLATE"
++#define CFG_GAP_DEVICE_NAME_LENGTH (8)
+ 
+ /**
+  * Define PHY
+@@ -39,6 +87,42 @@
+ #define RX_1M 0x01
+ #define RX_2M 0x02
+ 
++/**
++*   Identity root key used to derive LTK and CSRK
++*/
++#define CFG_BLE_IRK                                                                               \
++    {                                                                                             \
++        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, \
++            0xf0                                                                                  \
++    }
++
++/**
++* Encryption root key used to derive LTK and CSRK
++*/
++#define CFG_BLE_ERK                                                                               \
++    {                                                                                             \
++        0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21, 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, \
++            0x21                                                                                  \
++    }
++
++/* USER CODE BEGIN Generic_Parameters */
++/**
++ * SMPS supply
++ * SMPS not used when Set to 0
++ * SMPS used when Set to 1
++ */
++#define CFG_USE_SMPS 1
++/* USER CODE END Generic_Parameters */
++
++/**< specific parameters */
++/*****************************************************/
++
++/**
++* AD Element - Group B Feature
++*/
++/* LSB - Second Byte */
++#define CFG_FEATURE_OTA_REBOOT (0x20)
++
+ /******************************************************************************
+  * BLE Stack
+  ******************************************************************************/
+@@ -119,9 +203,7 @@
+  *  1 : external high speed crystal HSE/32/32
+  *  0 : external low speed crystal ( no calibration )
+  */
+-#define CFG_BLE_LSE_SOURCE                                                        \
+-    SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | \
+-        SHCI_C2_BLE_INIT_CFG_BLE_LS_CALIB
++#define CFG_BLE_LSE_SOURCE 0
+ 
+ /**
+  * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
+@@ -171,8 +253,8 @@
+  */
+ #define CFG_BLE_OPTIONS                                                                 \
+     (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | \
+-     SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV |       \
+-     SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
++     SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV |    \
++     SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
+ 
+ /**
+  * Queue length of BLE Event
+@@ -200,3 +282,187 @@
+     255 /**< Set to 255 with the memory manager and the mailbox */
+ 
+ #define TL_BLE_EVENT_FRAME_SIZE (TL_EVT_HDR_SIZE + CFG_TLBLE_MOST_EVENT_PAYLOAD_SIZE)
++/******************************************************************************
++ * UART interfaces
++ ******************************************************************************/
++
++/**
++ * Select UART interfaces
++ */
++#define CFG_DEBUG_TRACE_UART hw_uart1
++#define CFG_CONSOLE_MENU 0
++
++/******************************************************************************
++ * Low Power
++ ******************************************************************************/
++/**
++ *  When set to 1, the low power mode is enable
++ *  When set to 0, the device stays in RUN mode
++ */
++#define CFG_LPM_SUPPORTED 1
++
++/******************************************************************************
++ * Timer Server
++ ******************************************************************************/
++/**
++ *  CFG_RTC_WUCKSEL_DIVIDER:  This sets the RTCCLK divider to the wakeup timer.
++ *  The lower is the value, the better is the power consumption and the accuracy of the timerserver
++ *  The higher is the value, the finest is the granularity
++ *
++ *  CFG_RTC_ASYNCH_PRESCALER: This sets the asynchronous prescaler of the RTC. It should as high as possible ( to ouput
++ *  clock as low as possible) but the output clock should be equal or higher frequency compare to the clock feeding
++ *  the wakeup timer. A lower clock speed would impact the accuracy of the timer server.
++ *
++ *  CFG_RTC_SYNCH_PRESCALER: This sets the synchronous prescaler of the RTC.
++ *  When the 1Hz calendar clock is required, it shall be sets according to other settings
++ *  When the 1Hz calendar clock is not needed, CFG_RTC_SYNCH_PRESCALER should be set to 0x7FFF (MAX VALUE)
++ *
++ *  CFG_RTCCLK_DIVIDER_CONF:
++ *  Shall be set to either 0,2,4,8,16
++ *  When set to either 2,4,8,16, the 1Hhz calendar is supported
++ *  When set to 0, the user sets its own configuration
++ *
++ *  The following settings are computed with LSI as input to the RTC
++ */
++#define CFG_RTCCLK_DIVIDER_CONF 0
++
++#if(CFG_RTCCLK_DIVIDER_CONF == 0)
++/**
++ * Custom configuration
++ * It does not support 1Hz calendar
++ * It divides the RTC CLK by 16
++ */
++#define CFG_RTCCLK_DIV (16)
++#define CFG_RTC_WUCKSEL_DIVIDER (0)
++#define CFG_RTC_ASYNCH_PRESCALER (CFG_RTCCLK_DIV - 1)
++#define CFG_RTC_SYNCH_PRESCALER (0x7FFF)
++
++#else
++
++#if(CFG_RTCCLK_DIVIDER_CONF == 2)
++/**
++ * It divides the RTC CLK by 2
++ */
++#define CFG_RTC_WUCKSEL_DIVIDER (3)
++#endif
++
++#if(CFG_RTCCLK_DIVIDER_CONF == 4)
++/**
++ * It divides the RTC CLK by 4
++ */
++#define CFG_RTC_WUCKSEL_DIVIDER (2)
++#endif
++
++#if(CFG_RTCCLK_DIVIDER_CONF == 8)
++/**
++ * It divides the RTC CLK by 8
++ */
++#define CFG_RTC_WUCKSEL_DIVIDER (1)
++#endif
++
++#if(CFG_RTCCLK_DIVIDER_CONF == 16)
++/**
++ * It divides the RTC CLK by 16
++ */
++#define CFG_RTC_WUCKSEL_DIVIDER (0)
++#endif
++
++#define CFG_RTCCLK_DIV CFG_RTCCLK_DIVIDER_CONF
++#define CFG_RTC_ASYNCH_PRESCALER (CFG_RTCCLK_DIV - 1)
++#define CFG_RTC_SYNCH_PRESCALER (DIVR(LSE_VALUE, (CFG_RTC_ASYNCH_PRESCALER + 1)) - 1)
++
++#endif
++
++/** tick timer value in us */
++#define CFG_TS_TICK_VAL DIVR((CFG_RTCCLK_DIV * 1000000), LSE_VALUE)
++
++typedef enum {
++    CFG_TIM_PROC_ID_ISR,
++    /* USER CODE BEGIN CFG_TimProcID_t */
++
++    /* USER CODE END CFG_TimProcID_t */
++} CFG_TimProcID_t;
++
++/******************************************************************************
++ * Debug
++ ******************************************************************************/
++/**
++ * When set, this resets some hw resources to set the device in the same state than the power up
++ * The FW resets only register that may prevent the FW to run properly
++ *
++ * This shall be set to 0 in a final product
++ *
++ */
++#define CFG_HW_RESET_BY_FW 0
++
++/**
++ * keep debugger enabled while in any low power mode when set to 1
++ * should be set to 0 in production
++ */
++#define CFG_DEBUGGER_SUPPORTED 1
++
++/**
++ * When set to 1, the traces are enabled in the BLE services
++ */
++#define CFG_DEBUG_BLE_TRACE 0
++
++/**
++ * Enable or Disable traces in application
++ */
++#define CFG_DEBUG_APP_TRACE 0
++
++#if(CFG_DEBUG_APP_TRACE != 0)
++#define APP_DBG_MSG PRINT_MESG_DBG
++#else
++#define APP_DBG_MSG PRINT_NO_MESG
++#endif
++
++#if((CFG_DEBUG_BLE_TRACE != 0) || (CFG_DEBUG_APP_TRACE != 0))
++#define CFG_DEBUG_TRACE 1
++#endif
++
++#if(CFG_DEBUG_TRACE != 0)
++#undef CFG_LPM_SUPPORTED
++#undef CFG_DEBUGGER_SUPPORTED
++#define CFG_LPM_SUPPORTED 0
++#define CFG_DEBUGGER_SUPPORTED 1
++#endif
++
++/**
++ * When CFG_DEBUG_TRACE_FULL is set to 1, the trace are output with the API name, the file name and the line number
++ * When CFG_DEBUG_TRACE_LIGHT is set to 1, only the debug message is output
++ *
++ * When both are set to 0, no trace are output
++ * When both are set to 1,  CFG_DEBUG_TRACE_FULL is selected
++ */
++#define CFG_DEBUG_TRACE_LIGHT 0
++#define CFG_DEBUG_TRACE_FULL 0
++
++#if((CFG_DEBUG_TRACE != 0) && (CFG_DEBUG_TRACE_LIGHT == 0) && (CFG_DEBUG_TRACE_FULL == 0))
++#undef CFG_DEBUG_TRACE_FULL
++#undef CFG_DEBUG_TRACE_LIGHT
++#define CFG_DEBUG_TRACE_FULL 0
++#define CFG_DEBUG_TRACE_LIGHT 1
++#endif
++
++#if(CFG_DEBUG_TRACE == 0)
++#undef CFG_DEBUG_TRACE_FULL
++#undef CFG_DEBUG_TRACE_LIGHT
++#define CFG_DEBUG_TRACE_FULL 0
++#define CFG_DEBUG_TRACE_LIGHT 0
++#endif
++
++/**
++ * When not set, the traces is looping on sending the trace over UART
++ */
++#define DBG_TRACE_USE_CIRCULAR_QUEUE 0
++
++/**
++ * max buffer Size to queue data traces and max data trace allowed.
++ * Only Used if DBG_TRACE_USE_CIRCULAR_QUEUE is defined
++ */
++#define DBG_TRACE_MSG_QUEUE_SIZE 4096
++#define MAX_DBG_TRACE_MSG_SIZE 1024
++
++#define CFG_OTP_BASE_ADDRESS OTP_AREA_BASE
++#define CFG_OTP_END_ADRESS OTP_AREA_END_ADDR
+diff --git a/firmware/targets/f7/ble_glue/app_debug.c b/firmware/targets/f7/ble_glue/app_debug.c
+index fe76687b9..b443bee21 100644
+--- a/firmware/targets/f7/ble_glue/app_debug.c
++++ b/firmware/targets/f7/ble_glue/app_debug.c
+@@ -6,9 +6,6 @@
+ #include <utilities/dbg_trace.h>
+ #include <utilities/utilities_common.h>
+ 
+-#include "stm32wbxx_ll_bus.h"
+-#include "stm32wbxx_ll_pwr.h"
+-
+ #include <furi_hal.h>
+ 
+ typedef PACKED_STRUCT {
+@@ -111,6 +108,10 @@ static void APPD_SetCPU2GpioConfig(void);
+ static void APPD_BleDtbCfg(void);
+ 
+ void APPD_Init() {
++#if(CFG_DEBUG_TRACE != 0)
++    DbgTraceInit();
++#endif
++
+     APPD_SetCPU2GpioConfig();
+     APPD_BleDtbCfg();
+ }
+@@ -195,14 +196,14 @@ static void APPD_SetCPU2GpioConfig(void) {
+         gpio_config.Pin = gpiob_pin_list;
+         LL_C2_AHB2_GRP1_EnableClock(LL_C2_AHB2_GRP1_PERIPH_GPIOB);
+         LL_GPIO_Init(GPIOB, &gpio_config);
+-        LL_GPIO_ResetOutputPin(GPIOB, gpiob_pin_list);
++        LL_GPIO_ResetOutputPin(GPIOB, gpioa_pin_list);
+     }
+ 
+     if(gpioc_pin_list != 0) {
+         gpio_config.Pin = gpioc_pin_list;
+         LL_C2_AHB2_GRP1_EnableClock(LL_C2_AHB2_GRP1_PERIPH_GPIOC);
+         LL_GPIO_Init(GPIOC, &gpio_config);
+-        LL_GPIO_ResetOutputPin(GPIOC, gpioc_pin_list);
++        LL_GPIO_ResetOutputPin(GPIOC, gpioa_pin_list);
+     }
+ }
+ 
+@@ -251,3 +252,13 @@ static void APPD_BleDtbCfg(void) {
+     }
+ #endif
+ }
++
++#if(CFG_DEBUG_TRACE != 0)
++void DbgOutputInit(void) {
++}
++
++void DbgOutputTraces(uint8_t* p_data, uint16_t size, void (*cb)(void)) {
++    furi_hal_console_tx(p_data, size);
++    cb();
++}
++#endif
+diff --git a/firmware/targets/f7/ble_glue/app_debug.h b/firmware/targets/f7/ble_glue/app_debug.h
+index 213470bed..92a54d75b 100644
+--- a/firmware/targets/f7/ble_glue/app_debug.h
++++ b/firmware/targets/f7/ble_glue/app_debug.h
+@@ -1,4 +1,26 @@
+-#pragma once
++/* USER CODE BEGIN Header */
++/**
++ ******************************************************************************
++  * File Name          : app_debug.h
++  * Description        : Header for app_debug.c module
++ ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license
++  * SLA0044, the "License"; You may not use this file except in compliance with
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++/* USER CODE END Header */
++
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef __APP_DEBUG_H
++#define __APP_DEBUG_H
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -10,3 +32,7 @@ void APPD_EnableCPU2(void);
+ #ifdef __cplusplus
+ }
+ #endif
++
++#endif /*__APP_DEBUG_H */
++
++/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/ble_glue/services/battery_service.c b/firmware/targets/f7/ble_glue/battery_service.c
+similarity index 53%
+rename from firmware/targets/f7/ble_glue/services/battery_service.c
+rename to firmware/targets/f7/ble_glue/battery_service.c
+index 63f736b3b..8c371efad 100644
+--- a/firmware/targets/f7/ble_glue/services/battery_service.c
++++ b/firmware/targets/f7/ble_glue/battery_service.c
+@@ -1,7 +1,5 @@
+ #include "battery_service.h"
+ #include "app_common.h"
+-#include "gatt_char.h"
+-
+ #include <ble/ble.h>
+ 
+ #include <furi.h>
+@@ -9,6 +7,12 @@
+ 
+ #define TAG "BtBatterySvc"
+ 
++typedef struct {
++    uint16_t svc_handle;
++    uint16_t battery_level_char_handle;
++    uint16_t power_state_char_handle;
++} BatterySvc;
++
+ enum {
+     // Common states
+     BatterySvcPowerStateUnknown = 0b00,
+@@ -36,44 +40,13 @@ typedef struct {
+ 
+ _Static_assert(sizeof(BattrySvcPowerState) == 1, "Incorrect structure size");
+ 
++static BatterySvc* battery_svc = NULL;
++
+ #define BATTERY_POWER_STATE (0x2A1A)
+ 
+ static const uint16_t service_uuid = BATTERY_SERVICE_UUID;
+-
+-typedef enum {
+-    BatterySvcGattCharacteristicBatteryLevel = 0,
+-    BatterySvcGattCharacteristicPowerState,
+-    BatterySvcGattCharacteristicCount,
+-} BatterySvcGattCharacteristicId;
+-
+-static const FlipperGattCharacteristicParams battery_svc_chars[BatterySvcGattCharacteristicCount] =
+-    {[BatterySvcGattCharacteristicBatteryLevel] =
+-         {.name = "Battery Level",
+-          .data_prop_type = FlipperGattCharacteristicDataFixed,
+-          .data.fixed.length = 1,
+-          .uuid.Char_UUID_16 = BATTERY_LEVEL_CHAR_UUID,
+-          .uuid_type = UUID_TYPE_16,
+-          .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+-          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-     [BatterySvcGattCharacteristicPowerState] = {
+-         .name = "Power State",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = 1,
+-         .uuid.Char_UUID_16 = BATTERY_POWER_STATE,
+-         .uuid_type = UUID_TYPE_16,
+-         .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+-         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-         .is_variable = CHAR_VALUE_LEN_CONSTANT}};
+-
+-typedef struct {
+-    uint16_t svc_handle;
+-    FlipperGattCharacteristicInstance chars[BatterySvcGattCharacteristicCount];
+-} BatterySvc;
+-
+-static BatterySvc* battery_svc = NULL;
++static const uint16_t battery_level_char_uuid = BATTERY_LEVEL_CHAR_UUID;
++static const uint16_t power_state_char_uuid = BATTERY_POWER_STATE;
+ 
+ void battery_svc_start() {
+     battery_svc = malloc(sizeof(BatterySvc));
+@@ -85,19 +58,53 @@ void battery_svc_start() {
+     if(status) {
+         FURI_LOG_E(TAG, "Failed to add Battery service: %d", status);
+     }
+-    for(size_t i = 0; i < BatterySvcGattCharacteristicCount; i++) {
+-        flipper_gatt_characteristic_init(
+-            battery_svc->svc_handle, &battery_svc_chars[i], &battery_svc->chars[i]);
++    // Add Battery level characteristic
++    status = aci_gatt_add_char(
++        battery_svc->svc_handle,
++        UUID_TYPE_16,
++        (Char_UUID_t*)&battery_level_char_uuid,
++        1,
++        CHAR_PROP_READ | CHAR_PROP_NOTIFY,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &battery_svc->battery_level_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add Battery level characteristic: %d", status);
+     }
+-
++    // Add Power state characteristic
++    status = aci_gatt_add_char(
++        battery_svc->svc_handle,
++        UUID_TYPE_16,
++        (Char_UUID_t*)&power_state_char_uuid,
++        1,
++        CHAR_PROP_READ | CHAR_PROP_NOTIFY,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &battery_svc->power_state_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add Battery level characteristic: %d", status);
++    }
++    // Update power state charachteristic
+     battery_svc_update_power_state();
+ }
+ 
+ void battery_svc_stop() {
+     tBleStatus status;
+     if(battery_svc) {
+-        for(size_t i = 0; i < BatterySvcGattCharacteristicCount; i++) {
+-            flipper_gatt_characteristic_delete(battery_svc->svc_handle, &battery_svc->chars[i]);
++        // Delete Battery level characteristic
++        status =
++            aci_gatt_del_char(battery_svc->svc_handle, battery_svc->battery_level_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete Battery level characteristic: %d", status);
++        }
++        // Delete Power state characteristic
++        status = aci_gatt_del_char(battery_svc->svc_handle, battery_svc->power_state_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete Battery level characteristic: %d", status);
+         }
+         // Delete Battery service
+         status = aci_gatt_del_service(battery_svc->svc_handle);
+@@ -119,10 +126,13 @@ bool battery_svc_update_level(uint8_t battery_charge) {
+         return false;
+     }
+     // Update battery level characteristic
+-    return flipper_gatt_characteristic_update(
+-        battery_svc->svc_handle,
+-        &battery_svc->chars[BatterySvcGattCharacteristicBatteryLevel],
+-        &battery_charge);
++    FURI_LOG_D(TAG, "Updating battery level characteristic");
++    tBleStatus result = aci_gatt_update_char_value(
++        battery_svc->svc_handle, battery_svc->battery_level_char_handle, 0, 1, &battery_charge);
++    if(result) {
++        FURI_LOG_E(TAG, "Failed updating RX characteristic: %d", result);
++    }
++    return result != BLE_STATUS_SUCCESS;
+ }
+ 
+ bool battery_svc_update_power_state() {
+@@ -142,9 +152,15 @@ bool battery_svc_update_power_state() {
+         power_state.charging = BatterySvcPowerStateNotCharging;
+         power_state.discharging = BatterySvcPowerStateDischarging;
+     }
+-
+-    return flipper_gatt_characteristic_update(
++    FURI_LOG_D(TAG, "Updating power state characteristic");
++    tBleStatus result = aci_gatt_update_char_value(
+         battery_svc->svc_handle,
+-        &battery_svc->chars[BatterySvcGattCharacteristicPowerState],
+-        &power_state);
++        battery_svc->power_state_char_handle,
++        0,
++        1,
++        (uint8_t*)&power_state);
++    if(result) {
++        FURI_LOG_E(TAG, "Failed updating Power state characteristic: %d", result);
++    }
++    return result != BLE_STATUS_SUCCESS;
+ }
+diff --git a/firmware/targets/f7/ble_glue/services/battery_service.h b/firmware/targets/f7/ble_glue/battery_service.h
+similarity index 100%
+rename from firmware/targets/f7/ble_glue/services/battery_service.h
+rename to firmware/targets/f7/ble_glue/battery_service.h
+diff --git a/firmware/targets/f7/ble_glue/ble_app.c b/firmware/targets/f7/ble_glue/ble_app.c
+index 37ec3d0b9..ed62b1884 100644
+--- a/firmware/targets/f7/ble_glue/ble_app.c
++++ b/firmware/targets/f7/ble_glue/ble_app.c
+@@ -18,8 +18,8 @@ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
+ PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SIZE];
+ 
+ _Static_assert(
+-    sizeof(SHCI_C2_Ble_Init_Cmd_Packet_t) == 58,
+-    "Ble stack config structure size mismatch (check new config options - last updated for v.1.17.2)");
++    sizeof(SHCI_C2_Ble_Init_Cmd_Packet_t) == 57,
++    "Ble stack config structure size mismatch (check new config options - last updated for v.1.15.0)");
+ 
+ typedef struct {
+     FuriMutex* hci_mtx;
+@@ -33,54 +33,6 @@ static int32_t ble_app_hci_thread(void* context);
+ static void ble_app_hci_event_handler(void* pPayload);
+ static void ble_app_hci_status_not_handler(HCI_TL_CmdStatus_t status);
+ 
+-static const HCI_TL_HciInitConf_t hci_tl_config = {
+-    .p_cmdbuffer = (uint8_t*)&ble_app_cmd_buffer,
+-    .StatusNotCallBack = ble_app_hci_status_not_handler,
+-};
+-
+-static const SHCI_C2_CONFIG_Cmd_Param_t config_param = {
+-    .PayloadCmdSize = SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
+-    .Config1 = SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
+-    .BleNvmRamAddress = (uint32_t)ble_app_nvm,
+-    .EvtMask1 = SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
+-};
+-
+-static const SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
+-    .Header = {{0, 0, 0}}, // Header unused
+-    .Param = {
+-        .pBleBufferAddress = 0, // pBleBufferAddress not used
+-        .BleBufferSize = 0, // BleBufferSize not used
+-        .NumAttrRecord = CFG_BLE_NUM_GATT_ATTRIBUTES,
+-        .NumAttrServ = CFG_BLE_NUM_GATT_SERVICES,
+-        .AttrValueArrSize = CFG_BLE_ATT_VALUE_ARRAY_SIZE,
+-        .NumOfLinks = CFG_BLE_NUM_LINK,
+-        .ExtendedPacketLengthEnable = CFG_BLE_DATA_LENGTH_EXTENSION,
+-        .PrWriteListSize = CFG_BLE_PREPARE_WRITE_LIST_SIZE,
+-        .MblockCount = CFG_BLE_MBLOCK_COUNT,
+-        .AttMtu = CFG_BLE_MAX_ATT_MTU,
+-        .SlaveSca = CFG_BLE_SLAVE_SCA,
+-        .MasterSca = CFG_BLE_MASTER_SCA,
+-        .LsSource = CFG_BLE_LSE_SOURCE,
+-        .MaxConnEventLength = CFG_BLE_MAX_CONN_EVENT_LENGTH,
+-        .HsStartupTime = CFG_BLE_HSE_STARTUP_TIME,
+-        .ViterbiEnable = CFG_BLE_VITERBI_MODE,
+-        .Options = CFG_BLE_OPTIONS,
+-        .HwVersion = 0,
+-        .max_coc_initiator_nbr = 32,
+-        .min_tx_power = 0,
+-        .max_tx_power = 0,
+-        .rx_model_config = 1,
+-        /* New stack (13.3->15.0) */
+-        .max_adv_set_nbr = 1, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
+-        .max_adv_data_len = 1650, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
+-        .tx_path_compens = 0, // RF TX Path Compensation, * 0.1 dB
+-        .rx_path_compens = 0, // RF RX Path Compensation, * 0.1 dB
+-        .ble_core_version = SHCI_C2_BLE_INIT_BLE_CORE_5_4,
+-        /*15.0->17.0*/
+-        .Options_extension = SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED |
+-                             SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY,
+-    }};
+-
+ bool ble_app_init() {
+     SHCI_CmdStatus_t status;
+     ble_app = malloc(sizeof(BleApp));
+@@ -92,16 +44,58 @@ bool ble_app_init() {
+     furi_thread_start(ble_app->thread);
+ 
+     // Initialize Ble Transport Layer
++    HCI_TL_HciInitConf_t hci_tl_config = {
++        .p_cmdbuffer = (uint8_t*)&ble_app_cmd_buffer,
++        .StatusNotCallBack = ble_app_hci_status_not_handler,
++    };
+     hci_init(ble_app_hci_event_handler, (void*)&hci_tl_config);
+ 
+     // Configure NVM store for pairing data
+-    status = SHCI_C2_Config((SHCI_C2_CONFIG_Cmd_Param_t*)&config_param);
++    SHCI_C2_CONFIG_Cmd_Param_t config_param = {
++        .PayloadCmdSize = SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
++        .Config1 = SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
++        .BleNvmRamAddress = (uint32_t)ble_app_nvm,
++        .EvtMask1 = SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
++    };
++    status = SHCI_C2_Config(&config_param);
+     if(status) {
+         FURI_LOG_E(TAG, "Failed to configure 2nd core: %d", status);
+     }
+ 
+     // Start ble stack on 2nd core
+-    status = SHCI_C2_BLE_Init((SHCI_C2_Ble_Init_Cmd_Packet_t*)&ble_init_cmd_packet);
++    SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
++        .Header = {{0, 0, 0}}, // Header unused
++        .Param = {
++            .pBleBufferAddress = 0, // pBleBufferAddress not used
++            .BleBufferSize = 0, // BleBufferSize not used
++            .NumAttrRecord = CFG_BLE_NUM_GATT_ATTRIBUTES,
++            .NumAttrServ = CFG_BLE_NUM_GATT_SERVICES,
++            .AttrValueArrSize = CFG_BLE_ATT_VALUE_ARRAY_SIZE,
++            .NumOfLinks = CFG_BLE_NUM_LINK,
++            .ExtendedPacketLengthEnable = CFG_BLE_DATA_LENGTH_EXTENSION,
++            .PrWriteListSize = CFG_BLE_PREPARE_WRITE_LIST_SIZE,
++            .MblockCount = CFG_BLE_MBLOCK_COUNT,
++            .AttMtu = CFG_BLE_MAX_ATT_MTU,
++            .SlaveSca = CFG_BLE_SLAVE_SCA,
++            .MasterSca = CFG_BLE_MASTER_SCA,
++            .LsSource = CFG_BLE_LSE_SOURCE,
++            .MaxConnEventLength = CFG_BLE_MAX_CONN_EVENT_LENGTH,
++            .HsStartupTime = CFG_BLE_HSE_STARTUP_TIME,
++            .ViterbiEnable = CFG_BLE_VITERBI_MODE,
++            .Options = CFG_BLE_OPTIONS,
++            .HwVersion = 0,
++            .max_coc_initiator_nbr = 32,
++            .min_tx_power = 0,
++            .max_tx_power = 0,
++            .rx_model_config = 1,
++            /* New stack (13.3->15.0) */
++            .max_adv_set_nbr = 1, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
++            .max_adv_data_len = 31, // Only used if SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV is set
++            .tx_path_compens = 0, // RF TX Path Compensation, * 0.1 dB
++            .rx_path_compens = 0, // RF RX Path Compensation, * 0.1 dB
++            .ble_core_version = 11, // BLE Core Version: 11(5.2), 12(5.3)
++        }};
++    status = SHCI_C2_BLE_Init(&ble_init_cmd_packet);
+     if(status) {
+         FURI_LOG_E(TAG, "Failed to start ble stack: %d", status);
+     }
+diff --git a/firmware/targets/f7/ble_glue/ble_app.h b/firmware/targets/f7/ble_glue/ble_app.h
+index 2e6babab7..495005ec4 100644
+--- a/firmware/targets/f7/ble_glue/ble_app.h
++++ b/firmware/targets/f7/ble_glue/ble_app.h
+@@ -1,12 +1,12 @@
+ #pragma once
+ 
+-#include <stdbool.h>
+-#include <stdint.h>
+-
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
++#include <stdbool.h>
++#include <stdint.h>
++
+ bool ble_app_init();
+ void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size);
+ void ble_app_thread_stop();
+diff --git a/firmware/targets/f7/ble_glue/ble_conf.h b/firmware/targets/f7/ble_glue/ble_conf.h
+index 2b9c22dfe..a04d1def1 100644
+--- a/firmware/targets/f7/ble_glue/ble_conf.h
++++ b/firmware/targets/f7/ble_glue/ble_conf.h
+@@ -1,7 +1,51 @@
+-#pragma once
++/**
++ ******************************************************************************
++  * File Name          : App/ble_conf.h
++  * Description        : Configuration file for BLE Middleware.
++  *
++ ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license
++  * SLA0044, the "License"; You may not use this file except in compliance with
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef BLE_CONF_H
++#define BLE_CONF_H
+ 
+ #include "app_conf.h"
+ 
++#ifndef __weak
++#define __weak __attribute__((weak))
++#endif
++
++/******************************************************************************
++ *
++ * BLE SERVICES CONFIGURATION
++ * blesvc
++ *
++ ******************************************************************************/
++
++/**
++ * This setting shall be set to '1' if the device needs to support the Peripheral Role
++ * In the MS configuration, both BLE_CFG_PERIPHERAL and BLE_CFG_CENTRAL shall be set to '1'
++ */
++#define BLE_CFG_PERIPHERAL 1
++
++/**
++ * This setting shall be set to '1' if the device needs to support the Central Role
++ * In the MS configuration, both BLE_CFG_PERIPHERAL and BLE_CFG_CENTRAL shall be set to '1'
++ */
++#define BLE_CFG_CENTRAL 0
++
+ /**
+  * There is one handler per service enabled
+  * Note: There is no handler for the Device Information Service
+@@ -12,3 +56,18 @@
+ #define BLE_CFG_SVC_MAX_NBR_CB 7
+ 
+ #define BLE_CFG_CLT_MAX_NBR_CB 0
++
++/******************************************************************************
++ * GAP Service - Apprearance
++ ******************************************************************************/
++
++#define BLE_CFG_UNKNOWN_APPEARANCE (0)
++#define BLE_CFG_GAP_APPEARANCE (0x0086)
++
++/******************************************************************************
++ * Over The Air Feature (OTA) - STM Proprietary
++ ******************************************************************************/
++#define BLE_CFG_OTA_REBOOT_CHAR 0 /**< REBOOT OTA MODE CHARACTERISTIC */
++
++#endif /*BLE_CONF_H */
++/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/ble_glue/ble_const.h b/firmware/targets/f7/ble_glue/ble_const.h
+index 1e6647d90..85f734b62 100644
+--- a/firmware/targets/f7/ble_glue/ble_const.h
++++ b/firmware/targets/f7/ble_glue/ble_const.h
+@@ -1,4 +1,22 @@
+-#pragma once
++/*****************************************************************************
++ * @file    ble_const.h
++ * @author  MDG
++ * @brief   This file contains the definitions which are compiler dependent.
++ *****************************************************************************
++ * @attention
++ *
++ * Copyright (c) 2018-2022 STMicroelectronics.
++ * All rights reserved.
++ *
++ * This software is licensed under terms that can be found in the LICENSE file
++ * in the root directory of this software component.
++ * If no LICENSE file comes with this software, it is provided AS-IS.
++ *
++ *****************************************************************************
++ */
++
++#ifndef BLE_CONST_H__
++#define BLE_CONST_H__
+ 
+ #include <stdint.h>
+ #include <string.h>
+@@ -97,3 +115,5 @@ extern int hci_send_req(struct hci_request* req, uint8_t async);
+ #ifndef MAX
+ #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+ #endif
++
++#endif /* BLE_CONST_H__ */
+diff --git a/firmware/targets/f7/ble_glue/ble_dbg_conf.h b/firmware/targets/f7/ble_glue/ble_dbg_conf.h
+index 6f70f09be..8305f8106 100644
+--- a/firmware/targets/f7/ble_glue/ble_dbg_conf.h
++++ b/firmware/targets/f7/ble_glue/ble_dbg_conf.h
+@@ -1 +1,199 @@
+-#pragma once
++/**
++ ******************************************************************************
++  * File Name          : App/ble_dbg_conf.h
++  * Description        : Debug configuration file for BLE Middleware.
++  *
++ ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license
++  * SLA0044, the "License"; You may not use this file except in compliance with
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef __BLE_DBG_CONF_H
++#define __BLE_DBG_CONF_H
++
++/**
++ * Enable or Disable traces from BLE
++ */
++
++#define BLE_DBG_APP_EN 1
++#define BLE_DBG_DIS_EN 1
++#define BLE_DBG_HRS_EN 1
++#define BLE_DBG_SVCCTL_EN 1
++#define BLE_DBG_BLS_EN 1
++#define BLE_DBG_HTS_EN 1
++#define BLE_DBG_P2P_STM_EN 1
++
++/**
++ * Macro definition
++ */
++#if(BLE_DBG_APP_EN != 0)
++#define BLE_DBG_APP_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_APP_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_DIS_EN != 0)
++#define BLE_DBG_DIS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_DIS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_HRS_EN != 0)
++#define BLE_DBG_HRS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_HRS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_P2P_STM_EN != 0)
++#define BLE_DBG_P2P_STM_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_P2P_STM_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_TEMPLATE_STM_EN != 0)
++#define BLE_DBG_TEMPLATE_STM_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_TEMPLATE_STM_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_EDS_STM_EN != 0)
++#define BLE_DBG_EDS_STM_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_EDS_STM_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_LBS_STM_EN != 0)
++#define BLE_DBG_LBS_STM_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_LBS_STM_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_SVCCTL_EN != 0)
++#define BLE_DBG_SVCCTL_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_SVCCTL_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_CTS_EN != 0)
++#define BLE_DBG_CTS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_CTS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_HIDS_EN != 0)
++#define BLE_DBG_HIDS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_HIDS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_PASS_EN != 0)
++#define BLE_DBG_PASS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_PASS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_BLS_EN != 0)
++#define BLE_DBG_BLS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_BLS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_HTS_EN != 0)
++#define BLE_DBG_HTS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_HTS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_ANS_EN != 0)
++#define BLE_DBG_ANS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_ANS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_ESS_EN != 0)
++#define BLE_DBG_ESS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_ESS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_GLS_EN != 0)
++#define BLE_DBG_GLS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_GLS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_BAS_EN != 0)
++#define BLE_DBG_BAS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_BAS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_RTUS_EN != 0)
++#define BLE_DBG_RTUS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_RTUS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_HPS_EN != 0)
++#define BLE_DBG_HPS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_HPS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_TPS_EN != 0)
++#define BLE_DBG_TPS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_TPS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_LLS_EN != 0)
++#define BLE_DBG_LLS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_LLS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_IAS_EN != 0)
++#define BLE_DBG_IAS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_IAS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_WSS_EN != 0)
++#define BLE_DBG_WSS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_WSS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_LNS_EN != 0)
++#define BLE_DBG_LNS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_LNS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_SCPS_EN != 0)
++#define BLE_DBG_SCPS_MSG PRINT_MESG_DBG
++#else
++#define BLE_DBG_SCPS_MSG PRINT_NO_MESG
++#endif
++
++#if(BLE_DBG_DTS_EN != 0)
++#define BLE_DBG_DTS_MSG PRINT_MESG_DBG
++#define BLE_DBG_DTS_BUF PRINT_LOG_BUFF_DBG
++#else
++#define BLE_DBG_DTS_MSG PRINT_NO_MESG
++#define BLE_DBG_DTS_BUF PRINT_NO_MESG
++#endif
++
++#endif /*__BLE_DBG_CONF_H */
++
++/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/ble_glue/ble_glue.c b/firmware/targets/f7/ble_glue/ble_glue.c
+index 5f129ba8c..2c30612b5 100644
+--- a/firmware/targets/f7/ble_glue/ble_glue.c
++++ b/firmware/targets/f7/ble_glue/ble_glue.c
+@@ -32,6 +32,7 @@ static uint8_t ble_glue_ble_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_
+ 
+ typedef struct {
+     FuriMutex* shci_mtx;
++    FuriSemaphore* shci_sem;
+     FuriThread* thread;
+     BleGlueStatus status;
+     BleGlueKeyStorageChangedCallback callback;
+@@ -103,6 +104,7 @@ void ble_glue_init() {
+     TL_Init();
+ 
+     ble_glue->shci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
++    ble_glue->shci_sem = furi_semaphore_alloc(1, 0);
+ 
+     // FreeRTOS system task creation
+     ble_glue->thread = furi_thread_alloc_ex("BleShciDriver", 1024, ble_glue_shci_thread, ble_glue);
+@@ -391,6 +393,7 @@ void ble_glue_thread_stop() {
+         furi_thread_free(ble_glue->thread);
+         // Free resources
+         furi_mutex_free(ble_glue->shci_mtx);
++        furi_semaphore_free(ble_glue->shci_sem);
+         ble_glue_clear_shared_memory();
+         free(ble_glue);
+         ble_glue = NULL;
+@@ -424,6 +427,22 @@ void shci_notify_asynch_evt(void* pdata) {
+     }
+ }
+ 
++void shci_cmd_resp_release(uint32_t flag) {
++    UNUSED(flag);
++    if(ble_glue) {
++        furi_semaphore_release(ble_glue->shci_sem);
++    }
++}
++
++void shci_cmd_resp_wait(uint32_t timeout) {
++    UNUSED(timeout);
++    if(ble_glue) {
++        furi_hal_power_insomnia_enter();
++        furi_semaphore_acquire(ble_glue->shci_sem, FuriWaitForever);
++        furi_hal_power_insomnia_exit();
++    }
++}
++
+ bool ble_glue_reinit_c2() {
+     return SHCI_C2_Reinit() == SHCI_Success;
+ }
+diff --git a/firmware/targets/f7/ble_glue/compiler.h b/firmware/targets/f7/ble_glue/compiler.h
+index 1d32c2a2e..98a93d712 100644
+--- a/firmware/targets/f7/ble_glue/compiler.h
++++ b/firmware/targets/f7/ble_glue/compiler.h
+@@ -1,4 +1,22 @@
+-#pragma once
++/*****************************************************************************
++ * @file    compiler.h
++ * @author  MDG
++ * @brief   This file contains the definitions which are compiler dependent.
++ *****************************************************************************
++ * @attention
++ *
++ * Copyright (c) 2018-2023 STMicroelectronics.
++ * All rights reserved.
++ *
++ * This software is licensed under terms that can be found in the LICENSE file
++ * in the root directory of this software component.
++ * If no LICENSE file comes with this software, it is provided AS-IS.
++ *
++ *****************************************************************************
++ */
++
++#ifndef COMPILER_H__
++#define COMPILER_H__
+ 
+ #ifndef __PACKED_STRUCT
+ #define __PACKED_STRUCT PACKED(struct)
+@@ -136,3 +154,5 @@
+ #endif
+ #endif
+ #endif
++
++#endif /* COMPILER_H__ */
+diff --git a/firmware/targets/f7/ble_glue/dev_info_service.c b/firmware/targets/f7/ble_glue/dev_info_service.c
+new file mode 100644
+index 000000000..d24058632
+--- /dev/null
++++ b/firmware/targets/f7/ble_glue/dev_info_service.c
+@@ -0,0 +1,220 @@
++#include "dev_info_service.h"
++#include "app_common.h"
++#include <ble/ble.h>
++
++#include <furi.h>
++#include <protobuf_version.h>
++#include <lib/toolbox/version.h>
++
++#define TAG "BtDevInfoSvc"
++
++typedef struct {
++    uint16_t service_handle;
++    uint16_t man_name_char_handle;
++    uint16_t serial_num_char_handle;
++    uint16_t firmware_rev_char_handle;
++    uint16_t software_rev_char_handle;
++    uint16_t rpc_version_char_handle;
++    FuriString* version_string;
++    char hardware_revision[4];
++} DevInfoSvc;
++
++static DevInfoSvc* dev_info_svc = NULL;
++
++static const char dev_info_man_name[] = "Flipper Devices Inc.";
++static const char dev_info_serial_num[] = "1.0";
++static const char dev_info_rpc_version[] = TOSTRING(PROTOBUF_MAJOR_VERSION.PROTOBUF_MINOR_VERSION);
++
++static const uint8_t dev_info_rpc_version_uuid[] =
++    {0x33, 0xa9, 0xb5, 0x3e, 0x87, 0x5d, 0x1a, 0x8e, 0xc8, 0x47, 0x5e, 0xae, 0x6d, 0x66, 0xf6, 0x03};
++
++void dev_info_svc_start() {
++    dev_info_svc = malloc(sizeof(DevInfoSvc));
++    dev_info_svc->version_string = furi_string_alloc_printf(
++        "%s %s %s %s",
++        version_get_githash(NULL),
++        version_get_version(NULL),
++        version_get_gitbranchnum(NULL),
++        version_get_builddate(NULL));
++    snprintf(
++        dev_info_svc->hardware_revision,
++        sizeof(dev_info_svc->hardware_revision),
++        "%d",
++        version_get_target(NULL));
++    tBleStatus status;
++
++    // Add Device Information Service
++    uint16_t uuid = DEVICE_INFORMATION_SERVICE_UUID;
++    status = aci_gatt_add_service(
++        UUID_TYPE_16, (Service_UUID_t*)&uuid, PRIMARY_SERVICE, 11, &dev_info_svc->service_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add Device Information Service: %d", status);
++    }
++
++    // Add characteristics
++    uuid = MANUFACTURER_NAME_UUID;
++    status = aci_gatt_add_char(
++        dev_info_svc->service_handle,
++        UUID_TYPE_16,
++        (Char_UUID_t*)&uuid,
++        strlen(dev_info_man_name),
++        CHAR_PROP_READ,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &dev_info_svc->man_name_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add manufacturer name char: %d", status);
++    }
++    uuid = SERIAL_NUMBER_UUID;
++    status = aci_gatt_add_char(
++        dev_info_svc->service_handle,
++        UUID_TYPE_16,
++        (Char_UUID_t*)&uuid,
++        strlen(dev_info_serial_num),
++        CHAR_PROP_READ,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &dev_info_svc->serial_num_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add serial number char: %d", status);
++    }
++    uuid = FIRMWARE_REVISION_UUID;
++    status = aci_gatt_add_char(
++        dev_info_svc->service_handle,
++        UUID_TYPE_16,
++        (Char_UUID_t*)&uuid,
++        strlen(dev_info_svc->hardware_revision),
++        CHAR_PROP_READ,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &dev_info_svc->firmware_rev_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add firmware revision char: %d", status);
++    }
++    uuid = SOFTWARE_REVISION_UUID;
++    status = aci_gatt_add_char(
++        dev_info_svc->service_handle,
++        UUID_TYPE_16,
++        (Char_UUID_t*)&uuid,
++        furi_string_size(dev_info_svc->version_string),
++        CHAR_PROP_READ,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &dev_info_svc->software_rev_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add software revision char: %d", status);
++    }
++    status = aci_gatt_add_char(
++        dev_info_svc->service_handle,
++        UUID_TYPE_128,
++        (const Char_UUID_t*)dev_info_rpc_version_uuid,
++        strlen(dev_info_rpc_version),
++        CHAR_PROP_READ,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &dev_info_svc->rpc_version_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add rpc version characteristic: %d", status);
++    }
++
++    // Update characteristics
++    status = aci_gatt_update_char_value(
++        dev_info_svc->service_handle,
++        dev_info_svc->man_name_char_handle,
++        0,
++        strlen(dev_info_man_name),
++        (uint8_t*)dev_info_man_name);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to update manufacturer name char: %d", status);
++    }
++    status = aci_gatt_update_char_value(
++        dev_info_svc->service_handle,
++        dev_info_svc->serial_num_char_handle,
++        0,
++        strlen(dev_info_serial_num),
++        (uint8_t*)dev_info_serial_num);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to update serial number char: %d", status);
++    }
++    status = aci_gatt_update_char_value(
++        dev_info_svc->service_handle,
++        dev_info_svc->firmware_rev_char_handle,
++        0,
++        strlen(dev_info_svc->hardware_revision),
++        (uint8_t*)dev_info_svc->hardware_revision);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to update firmware revision char: %d", status);
++    }
++    status = aci_gatt_update_char_value(
++        dev_info_svc->service_handle,
++        dev_info_svc->software_rev_char_handle,
++        0,
++        furi_string_size(dev_info_svc->version_string),
++        (uint8_t*)furi_string_get_cstr(dev_info_svc->version_string));
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to update software revision char: %d", status);
++    }
++    status = aci_gatt_update_char_value(
++        dev_info_svc->service_handle,
++        dev_info_svc->rpc_version_char_handle,
++        0,
++        strlen(dev_info_rpc_version),
++        (uint8_t*)dev_info_rpc_version);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to update rpc version char: %d", status);
++    }
++}
++
++void dev_info_svc_stop() {
++    tBleStatus status;
++    if(dev_info_svc) {
++        furi_string_free(dev_info_svc->version_string);
++        // Delete service characteristics
++        status =
++            aci_gatt_del_char(dev_info_svc->service_handle, dev_info_svc->man_name_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete manufacturer name char: %d", status);
++        }
++        status =
++            aci_gatt_del_char(dev_info_svc->service_handle, dev_info_svc->serial_num_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete serial number char: %d", status);
++        }
++        status = aci_gatt_del_char(
++            dev_info_svc->service_handle, dev_info_svc->firmware_rev_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete firmware revision char: %d", status);
++        }
++        status = aci_gatt_del_char(
++            dev_info_svc->service_handle, dev_info_svc->software_rev_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete software revision char: %d", status);
++        }
++        status =
++            aci_gatt_del_char(dev_info_svc->service_handle, dev_info_svc->rpc_version_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete rpc version char: %d", status);
++        }
++        // Delete service
++        status = aci_gatt_del_service(dev_info_svc->service_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete device info service: %d", status);
++        }
++        free(dev_info_svc);
++        dev_info_svc = NULL;
++    }
++}
++
++bool dev_info_svc_is_started() {
++    return dev_info_svc != NULL;
++}
+diff --git a/firmware/targets/f7/ble_glue/services/dev_info_service.h b/firmware/targets/f7/ble_glue/dev_info_service.h
+similarity index 100%
+rename from firmware/targets/f7/ble_glue/services/dev_info_service.h
+rename to firmware/targets/f7/ble_glue/dev_info_service.h
+diff --git a/firmware/targets/f7/ble_glue/hid_service.c b/firmware/targets/f7/ble_glue/hid_service.c
+new file mode 100644
+index 000000000..a31d6015f
+--- /dev/null
++++ b/firmware/targets/f7/ble_glue/hid_service.c
+@@ -0,0 +1,416 @@
++#include "hid_service.h"
++#include "app_common.h"
++#include <ble/ble.h>
++
++#include <furi.h>
++
++#define TAG "BtHid"
++
++typedef struct {
++    uint16_t svc_handle;
++    uint16_t protocol_mode_char_handle;
++    uint16_t report_char_handle[HID_SVC_REPORT_COUNT];
++    uint16_t report_ref_desc_handle[HID_SVC_REPORT_COUNT];
++    uint16_t report_map_char_handle;
++    uint16_t info_char_handle;
++    uint16_t ctrl_point_char_handle;
++    // led state
++    uint16_t led_state_char_handle;
++    uint16_t led_state_desc_handle;
++    HidLedStateEventCallback led_state_event_callback;
++    void* led_state_ctx;
++} HIDSvc;
++
++static HIDSvc* hid_svc = NULL;
++
++static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void* event) {
++    SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
++    hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
++    evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
++    // aci_gatt_attribute_modified_event_rp0* attribute_modified;
++    if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
++        if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
++            // Process modification events
++            ret = SVCCTL_EvtAckFlowEnable;
++        } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
++            // Process notification confirmation
++            ret = SVCCTL_EvtAckFlowEnable;
++        } else if(blecore_evt->ecode == ACI_GATT_WRITE_PERMIT_REQ_VSEVT_CODE) {
++            // Process write request
++            aci_gatt_write_permit_req_event_rp0* req =
++                (aci_gatt_write_permit_req_event_rp0*)blecore_evt->data;
++
++            furi_check(hid_svc->led_state_event_callback && hid_svc->led_state_ctx);
++
++            // this check is likely to be incorrect, it will actually work in our case
++            // but we need to investigate gatt api to see what is the rules
++            // that specify attibute handle value from char handle (or the reverse)
++            if(req->Attribute_Handle == (hid_svc->led_state_char_handle + 1)) {
++                hid_svc->led_state_event_callback(req->Data[0], hid_svc->led_state_ctx);
++                aci_gatt_write_resp(
++                    req->Connection_Handle,
++                    req->Attribute_Handle,
++                    0x00, /* write_status = 0 (no error))*/
++                    0x00, /* err_code */
++                    req->Data_Length,
++                    req->Data);
++                aci_gatt_write_char_value(
++                    req->Connection_Handle,
++                    hid_svc->led_state_char_handle,
++                    req->Data_Length,
++                    req->Data);
++                ret = SVCCTL_EvtAckFlowEnable;
++            }
++        }
++    }
++    return ret;
++}
++
++void hid_svc_start() {
++    tBleStatus status;
++    hid_svc = malloc(sizeof(HIDSvc));
++    Service_UUID_t svc_uuid = {};
++    Char_Desc_Uuid_t desc_uuid = {};
++    Char_UUID_t char_uuid = {};
++
++    // Register event handler
++    SVCCTL_RegisterSvcHandler(hid_svc_event_handler);
++    // Add service
++    svc_uuid.Service_UUID_16 = HUMAN_INTERFACE_DEVICE_SERVICE_UUID;
++    /**
++     *  Add Human Interface Device Service
++     */
++    status = aci_gatt_add_service(
++        UUID_TYPE_16,
++        &svc_uuid,
++        PRIMARY_SERVICE,
++        2 + /* protocol mode */
++            (4 * HID_SVC_INPUT_REPORT_COUNT) + (3 * HID_SVC_OUTPUT_REPORT_COUNT) +
++            (3 * HID_SVC_FEATURE_REPORT_COUNT) + 1 + 2 + 2 + 2 +
++            4, /* Service + Report Map + HID Information + HID Control Point + LED state */
++        &hid_svc->svc_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add HID service: %d", status);
++    }
++    // Add Protocol mode characteristics
++    char_uuid.Char_UUID_16 = PROTOCOL_MODE_CHAR_UUID;
++    status = aci_gatt_add_char(
++        hid_svc->svc_handle,
++        UUID_TYPE_16,
++        &char_uuid,
++        1,
++        CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP,
++        ATTR_PERMISSION_NONE,
++        GATT_NOTIFY_ATTRIBUTE_WRITE,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &hid_svc->protocol_mode_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add protocol mode characteristic: %d", status);
++    }
++    // Update Protocol mode characteristic
++    uint8_t protocol_mode = 1;
++    status = aci_gatt_update_char_value(
++        hid_svc->svc_handle, hid_svc->protocol_mode_char_handle, 0, 1, &protocol_mode);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to update protocol mode characteristic: %d", status);
++    }
++
++#if(HID_SVC_REPORT_COUNT != 0)
++    for(uint8_t i = 0; i < HID_SVC_REPORT_COUNT; i++) {
++        if(i < HID_SVC_INPUT_REPORT_COUNT) { //-V547
++            uint8_t buf[2] = {i + 1, 1}; // 1 input
++            char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
++            status = aci_gatt_add_char(
++                hid_svc->svc_handle,
++                UUID_TYPE_16,
++                &char_uuid,
++                HID_SVC_REPORT_MAX_LEN,
++                CHAR_PROP_READ | CHAR_PROP_NOTIFY,
++                ATTR_PERMISSION_NONE,
++                GATT_DONT_NOTIFY_EVENTS,
++                10,
++                CHAR_VALUE_LEN_VARIABLE,
++                &(hid_svc->report_char_handle[i]));
++            if(status) {
++                FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
++            }
++
++            desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
++            status = aci_gatt_add_char_desc(
++                hid_svc->svc_handle,
++                hid_svc->report_char_handle[i],
++                UUID_TYPE_16,
++                &desc_uuid,
++                HID_SVC_REPORT_REF_LEN,
++                HID_SVC_REPORT_REF_LEN,
++                buf,
++                ATTR_PERMISSION_NONE,
++                ATTR_ACCESS_READ_WRITE,
++                GATT_DONT_NOTIFY_EVENTS,
++                MIN_ENCRY_KEY_SIZE,
++                CHAR_VALUE_LEN_CONSTANT,
++                &(hid_svc->report_ref_desc_handle[i]));
++            if(status) {
++                FURI_LOG_E(TAG, "Failed to add report reference descriptor: %d", status);
++            }
++        } else if((i - HID_SVC_INPUT_REPORT_COUNT) < HID_SVC_OUTPUT_REPORT_COUNT) {
++            uint8_t buf[2] = {i + 1, 2}; // 2 output
++            char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
++            status = aci_gatt_add_char(
++                hid_svc->svc_handle,
++                UUID_TYPE_16,
++                &char_uuid,
++                HID_SVC_REPORT_MAX_LEN,
++                CHAR_PROP_READ | CHAR_PROP_NOTIFY,
++                ATTR_PERMISSION_NONE,
++                GATT_DONT_NOTIFY_EVENTS,
++                10,
++                CHAR_VALUE_LEN_VARIABLE,
++                &(hid_svc->report_char_handle[i]));
++            if(status) {
++                FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
++            }
++
++            desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
++            status = aci_gatt_add_char_desc(
++                hid_svc->svc_handle,
++                hid_svc->report_char_handle[i],
++                UUID_TYPE_16,
++                &desc_uuid,
++                HID_SVC_REPORT_REF_LEN,
++                HID_SVC_REPORT_REF_LEN,
++                buf,
++                ATTR_PERMISSION_NONE,
++                ATTR_ACCESS_READ_WRITE,
++                GATT_DONT_NOTIFY_EVENTS,
++                MIN_ENCRY_KEY_SIZE,
++                CHAR_VALUE_LEN_CONSTANT,
++                &(hid_svc->report_ref_desc_handle[i]));
++            if(status) {
++                FURI_LOG_E(TAG, "Failed to add report reference descriptor: %d", status);
++            }
++        } else {
++            uint8_t buf[2] = {i + 1, 3}; // 3 feature
++            char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
++            status = aci_gatt_add_char(
++                hid_svc->svc_handle,
++                UUID_TYPE_16,
++                &char_uuid,
++                HID_SVC_REPORT_MAX_LEN,
++                CHAR_PROP_READ | CHAR_PROP_NOTIFY,
++                ATTR_PERMISSION_NONE,
++                GATT_DONT_NOTIFY_EVENTS,
++                10,
++                CHAR_VALUE_LEN_VARIABLE,
++                &(hid_svc->report_char_handle[i]));
++            if(status) {
++                FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
++            }
++
++            desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
++            status = aci_gatt_add_char_desc(
++                hid_svc->svc_handle,
++                hid_svc->report_char_handle[i],
++                UUID_TYPE_16,
++                &desc_uuid,
++                HID_SVC_REPORT_REF_LEN,
++                HID_SVC_REPORT_REF_LEN,
++                buf,
++                ATTR_PERMISSION_NONE,
++                ATTR_ACCESS_READ_WRITE,
++                GATT_DONT_NOTIFY_EVENTS,
++                MIN_ENCRY_KEY_SIZE,
++                CHAR_VALUE_LEN_CONSTANT,
++                &(hid_svc->report_ref_desc_handle[i]));
++            if(status) {
++                FURI_LOG_E(TAG, "Failed to add report reference descriptor: %d", status);
++            }
++        }
++    }
++#endif
++    // Add led state output report
++    char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
++    status = aci_gatt_add_char(
++        hid_svc->svc_handle,
++        UUID_TYPE_16,
++        &char_uuid,
++        1,
++        CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE,
++        ATTR_PERMISSION_NONE,
++        GATT_NOTIFY_ATTRIBUTE_WRITE | GATT_NOTIFY_WRITE_REQ_AND_WAIT_FOR_APPL_RESP,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &(hid_svc->led_state_char_handle));
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add led state characteristic: %d", status);
++    }
++
++    // Add led state char descriptor specifying it is an output report
++    uint8_t buf[2] = {HID_SVC_REPORT_COUNT + 1, 2};
++    desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
++    status = aci_gatt_add_char_desc(
++        hid_svc->svc_handle,
++        hid_svc->led_state_char_handle,
++        UUID_TYPE_16,
++        &desc_uuid,
++        HID_SVC_REPORT_REF_LEN,
++        HID_SVC_REPORT_REF_LEN,
++        buf,
++        ATTR_PERMISSION_NONE,
++        ATTR_ACCESS_READ_WRITE,
++        GATT_DONT_NOTIFY_EVENTS,
++        MIN_ENCRY_KEY_SIZE,
++        CHAR_VALUE_LEN_CONSTANT,
++        &(hid_svc->led_state_desc_handle));
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add led state descriptor: %d", status);
++    }
++    // Add Report Map characteristic
++    char_uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID;
++    status = aci_gatt_add_char(
++        hid_svc->svc_handle,
++        UUID_TYPE_16,
++        &char_uuid,
++        HID_SVC_REPORT_MAP_MAX_LEN,
++        CHAR_PROP_READ,
++        ATTR_PERMISSION_NONE,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_VARIABLE,
++        &hid_svc->report_map_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add report map characteristic: %d", status);
++    }
++
++    // Add Information characteristic
++    char_uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID;
++    status = aci_gatt_add_char(
++        hid_svc->svc_handle,
++        UUID_TYPE_16,
++        &char_uuid,
++        HID_SVC_INFO_LEN,
++        CHAR_PROP_READ,
++        ATTR_PERMISSION_NONE,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &hid_svc->info_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add information characteristic: %d", status);
++    }
++    // Add Control Point characteristic
++    char_uuid.Char_UUID_16 = HID_CONTROL_POINT_CHAR_UUID;
++    status = aci_gatt_add_char(
++        hid_svc->svc_handle,
++        UUID_TYPE_16,
++        &char_uuid,
++        HID_SVC_CONTROL_POINT_LEN,
++        CHAR_PROP_WRITE_WITHOUT_RESP,
++        ATTR_PERMISSION_NONE,
++        GATT_NOTIFY_ATTRIBUTE_WRITE,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &hid_svc->ctrl_point_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add control point characteristic: %d", status);
++    }
++
++    hid_svc->led_state_event_callback = NULL;
++    hid_svc->led_state_ctx = NULL;
++}
++
++bool hid_svc_update_report_map(const uint8_t* data, uint16_t len) {
++    furi_assert(data);
++    furi_assert(hid_svc);
++
++    tBleStatus status = aci_gatt_update_char_value(
++        hid_svc->svc_handle, hid_svc->report_map_char_handle, 0, len, data);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed updating report map characteristic: %d", status);
++        return false;
++    }
++    return true;
++}
++
++bool hid_svc_update_input_report(uint8_t input_report_num, uint8_t* data, uint16_t len) {
++    furi_assert(data);
++    furi_assert(hid_svc);
++
++    tBleStatus status = aci_gatt_update_char_value(
++        hid_svc->svc_handle, hid_svc->report_char_handle[input_report_num], 0, len, data);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed updating report characteristic: %d", status);
++        return false;
++    }
++    return true;
++}
++
++bool hid_svc_update_info(uint8_t* data, uint16_t len) {
++    furi_assert(data);
++    furi_assert(hid_svc);
++
++    tBleStatus status =
++        aci_gatt_update_char_value(hid_svc->svc_handle, hid_svc->info_char_handle, 0, len, data);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed updating info characteristic: %d", status);
++        return false;
++    }
++    return true;
++}
++
++void hid_svc_register_led_state_callback(HidLedStateEventCallback callback, void* context) {
++    furi_assert(hid_svc);
++    furi_assert(callback);
++    furi_assert(context);
++
++    hid_svc->led_state_event_callback = callback;
++    hid_svc->led_state_ctx = context;
++}
++
++bool hid_svc_is_started() {
++    return hid_svc != NULL;
++}
++
++void hid_svc_stop() {
++    tBleStatus status;
++    if(hid_svc) {
++        // Delete characteristics
++        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->report_map_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete Report Map characteristic: %d", status);
++        }
++#if(HID_SVC_INPUT_REPORT_COUNT != 0)
++        for(uint8_t i = 0; i < HID_SVC_REPORT_COUNT; i++) {
++            status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->report_char_handle[i]);
++            if(status) {
++                FURI_LOG_E(TAG, "Failed to delete Report characteristic: %d", status);
++            }
++        }
++#endif
++        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->protocol_mode_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete Protocol Mode characteristic: %d", status);
++        }
++        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->info_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete Information characteristic: %d", status);
++        }
++        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->ctrl_point_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete Control Point characteristic: %d", status);
++        }
++        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->led_state_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete led state characteristic: %d", status);
++        }
++        // Delete service
++        status = aci_gatt_del_service(hid_svc->svc_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete HID service: %d", status);
++        }
++        // Delete buffer size mutex
++        free(hid_svc);
++        hid_svc = NULL;
++    }
++}
+diff --git a/firmware/targets/f7/ble_glue/services/hid_service.h b/firmware/targets/f7/ble_glue/hid_service.h
+similarity index 89%
+rename from firmware/targets/f7/ble_glue/services/hid_service.h
+rename to firmware/targets/f7/ble_glue/hid_service.h
+index 4d0ed4c4f..b8f6b244d 100644
+--- a/firmware/targets/f7/ble_glue/services/hid_service.h
++++ b/firmware/targets/f7/ble_glue/hid_service.h
+@@ -27,7 +27,6 @@ bool hid_svc_update_report_map(const uint8_t* data, uint16_t len);
+ 
+ bool hid_svc_update_input_report(uint8_t input_report_num, uint8_t* data, uint16_t len);
+ 
+-// Expects data to be of length HID_SVC_INFO_LEN (4 bytes)
+-bool hid_svc_update_info(uint8_t* data);
++bool hid_svc_update_info(uint8_t* data, uint16_t len);
+ 
+ void hid_svc_register_led_state_callback(HidLedStateEventCallback callback, void* context);
+diff --git a/firmware/targets/f7/ble_glue/hsem_map.h b/firmware/targets/f7/ble_glue/hsem_map.h
+deleted file mode 100644
+index 9a5f51d20..000000000
+--- a/firmware/targets/f7/ble_glue/hsem_map.h
++++ /dev/null
+@@ -1,81 +0,0 @@
+-#pragma once
+-
+-/******************************************************************************
+- * Semaphores
+- * THIS SHALL NO BE CHANGED AS THESE SEMAPHORES ARE USED AS WELL ON THE CM0+
+- *****************************************************************************/
+-/**
+-* Index of the semaphore used the prevent conflicts after standby sleep.
+-* Each CPUs takes this semaphore at standby wakeup until conflicting elements are restored.
+-*/
+-#define CFG_HW_PWR_STANDBY_SEMID 10
+-/**
+-*  The CPU2 may be configured to store the Thread persistent data either in internal NVM storage on CPU2 or in
+-*  SRAM2 buffer provided by the user application. This can be configured with the system command SHCI_C2_Config()
+-*  When the CPU2 is requested to store persistent data in SRAM2, it can write data in this buffer at any time when needed.
+-*  In order to read consistent data with the CPU1 from the SRAM2 buffer, the flow should be:
+-*  + CPU1 takes CFG_HW_THREAD_NVM_SRAM_SEMID semaphore
+-*  + CPU1 reads all persistent data from SRAM2 (most of the time, the goal is to write these data into an NVM managed by CPU1)
+-*  + CPU1 releases CFG_HW_THREAD_NVM_SRAM_SEMID semaphore
+-*  CFG_HW_THREAD_NVM_SRAM_SEMID semaphore makes sure CPU2 does not update the persistent data in SRAM2 at the same time CPU1 is reading them.
+-*  There is no timing constraint on how long this semaphore can be kept.
+-*/
+-#define CFG_HW_THREAD_NVM_SRAM_SEMID 9
+-
+-/**
+-*  The CPU2 may be configured to store the BLE persistent data either in internal NVM storage on CPU2 or in
+-*  SRAM2 buffer provided by the user application. This can be configured with the system command SHCI_C2_Config()
+-*  When the CPU2 is requested to store persistent data in SRAM2, it can write data in this buffer at any time when needed.
+-*  In order to read consistent data with the CPU1 from the SRAM2 buffer, the flow should be:
+-*  + CPU1 takes CFG_HW_BLE_NVM_SRAM_SEMID semaphore
+-*  + CPU1 reads all persistent data from SRAM2 (most of the time, the goal is to write these data into an NVM managed by CPU1)
+-*  + CPU1 releases CFG_HW_BLE_NVM_SRAM_SEMID semaphore
+-*  CFG_HW_BLE_NVM_SRAM_SEMID semaphore makes sure CPU2 does not update the persistent data in SRAM2 at the same time CPU1 is reading them.
+-*  There is no timing constraint on how long this semaphore can be kept.
+-*/
+-#define CFG_HW_BLE_NVM_SRAM_SEMID 8
+-
+-/**
+-*  Index of the semaphore used by CPU2 to prevent the CPU1 to either write or erase data in flash
+-*  The CPU1 shall not either write or erase in flash when this semaphore is taken by the CPU2
+-*  When the CPU1 needs to either write or erase in flash, it shall first get the semaphore and release it just
+-*  after writing a raw (64bits data) or erasing one sector.
+-*  Once the Semaphore has been released, there shall be at least 1us before it can be taken again. This is required
+-*  to give the opportunity to CPU2 to take it.
+-*  On v1.4.0 and older CPU2 wireless firmware, this semaphore is unused and CPU2 is using PES bit.
+-*  By default, CPU2 is using the PES bit to protect its timing. The CPU1 may request the CPU2 to use the semaphore
+-*  instead of the PES bit by sending the system command SHCI_C2_SetFlashActivityControl()
+-*/
+-#define CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID 7
+-
+-/**
+-*  Index of the semaphore used by CPU1 to prevent the CPU2 to either write or erase data in flash
+-*  In order to protect its timing, the CPU1 may get this semaphore to prevent the  CPU2 to either
+-*  write or erase in flash (as this will stall both CPUs)
+-*  The PES bit shall not be used as this may stall the CPU2 in some cases.
+-*/
+-#define CFG_HW_BLOCK_FLASH_REQ_BY_CPU1_SEMID 6
+-
+-/**
+-*  Index of the semaphore used to manage the CLK48 clock configuration
+-*  When the USB is required, this semaphore shall be taken before configuring te CLK48 for USB
+-*  and should be released after the application switch OFF the clock when the USB is not used anymore
+-*  When using the RNG, it is good enough to use CFG_HW_RNG_SEMID to control CLK48.
+-*  More details in AN5289
+-*/
+-#define CFG_HW_CLK48_CONFIG_SEMID 5
+-
+-/* Index of the semaphore used to manage the entry Stop Mode procedure */
+-#define CFG_HW_ENTRY_STOP_MODE_SEMID 4
+-
+-/* Index of the semaphore used to access the RCC */
+-#define CFG_HW_RCC_SEMID 3
+-
+-/* Index of the semaphore used to access the FLASH */
+-#define CFG_HW_FLASH_SEMID 2
+-
+-/* Index of the semaphore used to access the PKA */
+-#define CFG_HW_PKA_SEMID 1
+-
+-/* Index of the semaphore used to access the RNG */
+-#define CFG_HW_RNG_SEMID 0
+diff --git a/firmware/targets/f7/ble_glue/hw_conf.h b/firmware/targets/f7/ble_glue/hw_conf.h
+new file mode 100644
+index 000000000..bf18a7d0e
+--- /dev/null
++++ b/firmware/targets/f7/ble_glue/hw_conf.h
+@@ -0,0 +1,231 @@
++/* USER CODE BEGIN Header */
++/**
++ ******************************************************************************
++ * @file    hw_conf.h
++ * @author  MCD Application Team
++ * @brief   Configuration of hardware interface
++  ******************************************************************************
++  * @attention
++  *
++ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license 
++  * SLA0044, the "License"; You may not use this file except in compliance with 
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++/* USER CODE END Header */
++
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef HW_CONF_H
++#define HW_CONF_H
++
++#include "FreeRTOSConfig.h"
++
++/******************************************************************************
++ * Semaphores
++ * THIS SHALL NO BE CHANGED AS THESE SEMAPHORES ARE USED AS WELL ON THE CM0+
++ *****************************************************************************/
++/**
++* Index of the semaphore used the prevent conflicts after standby sleep.
++* Each CPUs takes this semaphore at standby wakeup until conclicting elements are restored.
++*/
++#define CFG_HW_PWR_STANDBY_SEMID 10
++/**
++*  The CPU2 may be configured to store the Thread persistent data either in internal NVM storage on CPU2 or in
++*  SRAM2 buffer provided by the user application. This can be configured with the system command SHCI_C2_Config()
++*  When the CPU2 is requested to store persistent data in SRAM2, it can write data in this buffer at any time when needed.
++*  In order to read consistent data with the CPU1 from the SRAM2 buffer, the flow should be:
++*  + CPU1 takes CFG_HW_THREAD_NVM_SRAM_SEMID semaphore
++*  + CPU1 reads all persistent data from SRAM2 (most of the time, the goal is to write these data into an NVM managed by CPU1)
++*  + CPU1 releases CFG_HW_THREAD_NVM_SRAM_SEMID semaphore
++*  CFG_HW_THREAD_NVM_SRAM_SEMID semaphore makes sure CPU2 does not update the persistent data in SRAM2 at the same time CPU1 is reading them.
++*  There is no timing constraint on how long this semaphore can be kept.
++*/
++#define CFG_HW_THREAD_NVM_SRAM_SEMID 9
++
++/**
++*  The CPU2 may be configured to store the BLE persistent data either in internal NVM storage on CPU2 or in
++*  SRAM2 buffer provided by the user application. This can be configured with the system command SHCI_C2_Config()
++*  When the CPU2 is requested to store persistent data in SRAM2, it can write data in this buffer at any time when needed.
++*  In order to read consistent data with the CPU1 from the SRAM2 buffer, the flow should be:
++*  + CPU1 takes CFG_HW_BLE_NVM_SRAM_SEMID semaphore
++*  + CPU1 reads all persistent data from SRAM2 (most of the time, the goal is to write these data into an NVM managed by CPU1)
++*  + CPU1 releases CFG_HW_BLE_NVM_SRAM_SEMID semaphore
++*  CFG_HW_BLE_NVM_SRAM_SEMID semaphore makes sure CPU2 does not update the persistent data in SRAM2 at the same time CPU1 is reading them.
++*  There is no timing constraint on how long this semaphore can be kept.
++*/
++#define CFG_HW_BLE_NVM_SRAM_SEMID 8
++
++/**
++*  Index of the semaphore used by CPU2 to prevent the CPU1 to either write or erase data in flash
++*  The CPU1 shall not either write or erase in flash when this semaphore is taken by the CPU2
++*  When the CPU1 needs to either write or erase in flash, it shall first get the semaphore and release it just
++*  after writing a raw (64bits data) or erasing one sector.
++*  Once the Semaphore has been released, there shall be at least 1us before it can be taken again. This is required
++*  to give the opportunity to CPU2 to take it.
++*  On v1.4.0 and older CPU2 wireless firmware, this semaphore is unused and CPU2 is using PES bit.
++*  By default, CPU2 is using the PES bit to protect its timing. The CPU1 may request the CPU2 to use the semaphore
++*  instead of the PES bit by sending the system command SHCI_C2_SetFlashActivityControl()
++*/
++#define CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID 7
++
++/**
++*  Index of the semaphore used by CPU1 to prevent the CPU2 to either write or erase data in flash
++*  In order to protect its timing, the CPU1 may get this semaphore to prevent the  CPU2 to either
++*  write or erase in flash (as this will stall both CPUs)
++*  The PES bit shall not be used as this may stall the CPU2 in some cases.
++*/
++#define CFG_HW_BLOCK_FLASH_REQ_BY_CPU1_SEMID 6
++
++/**
++*  Index of the semaphore used to manage the CLK48 clock configuration
++*  When the USB is required, this semaphore shall be taken before configuring te CLK48 for USB
++*  and should be released after the application switch OFF the clock when the USB is not used anymore
++*  When using the RNG, it is good enough to use CFG_HW_RNG_SEMID to control CLK48.
++*  More details in AN5289
++*/
++#define CFG_HW_CLK48_CONFIG_SEMID 5
++
++/* Index of the semaphore used to manage the entry Stop Mode procedure */
++#define CFG_HW_ENTRY_STOP_MODE_SEMID 4
++
++/* Index of the semaphore used to access the RCC */
++#define CFG_HW_RCC_SEMID 3
++
++/* Index of the semaphore used to access the FLASH */
++#define CFG_HW_FLASH_SEMID 2
++
++/* Index of the semaphore used to access the PKA */
++#define CFG_HW_PKA_SEMID 1
++
++/* Index of the semaphore used to access the RNG */
++#define CFG_HW_RNG_SEMID 0
++
++/******************************************************************************
++ * HW TIMER SERVER
++ *****************************************************************************/
++/**
++ * The user may define the maximum number of virtual timers supported.
++ * It shall not exceed 255
++ */
++#define CFG_HW_TS_MAX_NBR_CONCURRENT_TIMER 6
++
++/**
++ * The user may define the priority in the NVIC of the RTC_WKUP interrupt handler that is used to manage the
++ * wakeup timer.
++ * This setting is the preemptpriority part of the NVIC.
++ */
++#define CFG_HW_TS_NVIC_RTC_WAKEUP_IT_PREEMPTPRIO \
++    (configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1) /* FreeRTOS requirement */
++
++/**
++ * The user may define the priority in the NVIC of the RTC_WKUP interrupt handler that is used to manage the
++ * wakeup timer.
++ * This setting is the subpriority part of the NVIC. It does not exist on all processors. When it is not supported
++ * on the CPU, the setting is ignored
++ */
++#define CFG_HW_TS_NVIC_RTC_WAKEUP_IT_SUBPRIO 0
++
++/**
++ *  Define a critical section in the Timer server
++ *  The Timer server does not support the API to be nested
++ *  The  Application shall either:
++ *    a) Ensure this will never happen
++ *    b) Define the critical section
++ *  The default implementations is masking all interrupts using the PRIMASK bit
++ *  The TimerServer driver uses critical sections to avoid context corruption. This is achieved with the macro
++ *  TIMER_ENTER_CRITICAL_SECTION and TIMER_EXIT_CRITICAL_SECTION. When CFG_HW_TS_USE_PRIMASK_AS_CRITICAL_SECTION is set
++ *  to 1, all STM32 interrupts are masked with the PRIMASK bit of the CortexM CPU. It is possible to use the BASEPRI
++ *  register of the CortexM CPU to keep allowed some interrupts with high priority. In that case, the user shall
++ *  re-implement TIMER_ENTER_CRITICAL_SECTION and TIMER_EXIT_CRITICAL_SECTION and shall make sure that no TimerServer
++ *  API are called when the TIMER critical section is entered
++ */
++#define CFG_HW_TS_USE_PRIMASK_AS_CRITICAL_SECTION 1
++
++/**
++   * This value shall reflect the maximum delay there could be in the application between the time the RTC interrupt
++   * is generated by the Hardware and the time when the  RTC interrupt handler is called. This time is measured in
++   * number of RTCCLK ticks.
++   * A relaxed timing would be 10ms
++   * When the value is too short, the timerserver will not be able to count properly and all timeout may be random.
++   * When the value is too long, the device may wake up more often than the most optimal configuration. However, the
++   * impact on power consumption would be marginal (unless the value selected is extremely too long). It is strongly
++   * recommended to select a value large enough to make sure it is not too short to ensure reliability of the system
++   * as this will have marginal impact on low power mode
++   */
++#define CFG_HW_TS_RTC_HANDLER_MAX_DELAY (10 * (LSI_VALUE / 1000))
++
++/**
++   * Interrupt ID in the NVIC of the RTC Wakeup interrupt handler
++   * It shall be type of IRQn_Type
++   */
++#define CFG_HW_TS_RTC_WAKEUP_HANDLER_ID RTC_WKUP_IRQn
++
++/******************************************************************************
++ * HW UART
++ *****************************************************************************/
++#define CFG_HW_LPUART1_ENABLED 0
++#define CFG_HW_LPUART1_DMA_TX_SUPPORTED 0
++
++#define CFG_HW_USART1_ENABLED 1
++#define CFG_HW_USART1_DMA_TX_SUPPORTED 1
++
++/**
++ * UART1
++ */
++#define CFG_HW_USART1_PREEMPTPRIORITY 0x0F
++#define CFG_HW_USART1_SUBPRIORITY 0
++
++/** < The application shall check the selected source clock is enable */
++#define CFG_HW_USART1_SOURCE_CLOCK RCC_USART1CLKSOURCE_SYSCLK
++
++#define CFG_HW_USART1_BAUDRATE 115200
++#define CFG_HW_USART1_WORDLENGTH UART_WORDLENGTH_8B
++#define CFG_HW_USART1_STOPBITS UART_STOPBITS_1
++#define CFG_HW_USART1_PARITY UART_PARITY_NONE
++#define CFG_HW_USART1_HWFLOWCTL UART_HWCONTROL_NONE
++#define CFG_HW_USART1_MODE UART_MODE_TX_RX
++#define CFG_HW_USART1_ADVFEATUREINIT UART_ADVFEATURE_NO_INIT
++#define CFG_HW_USART1_OVERSAMPLING UART_OVERSAMPLING_8
++
++#define CFG_HW_USART1_TX_PORT_CLK_ENABLE __HAL_RCC_GPIOB_CLK_ENABLE
++#define CFG_HW_USART1_TX_PORT GPIOB
++#define CFG_HW_USART1_TX_PIN GPIO_PIN_6
++#define CFG_HW_USART1_TX_MODE GPIO_MODE_AF_PP
++#define CFG_HW_USART1_TX_PULL GPIO_NOPULL
++#define CFG_HW_USART1_TX_SPEED GPIO_SPEED_FREQ_VERY_HIGH
++#define CFG_HW_USART1_TX_ALTERNATE GPIO_AF7_USART1
++
++#define CFG_HW_USART1_RX_PORT_CLK_ENABLE __HAL_RCC_GPIOB_CLK_ENABLE
++#define CFG_HW_USART1_RX_PORT GPIOB
++#define CFG_HW_USART1_RX_PIN GPIO_PIN_7
++#define CFG_HW_USART1_RX_MODE GPIO_MODE_AF_PP
++#define CFG_HW_USART1_RX_PULL GPIO_NOPULL
++#define CFG_HW_USART1_RX_SPEED GPIO_SPEED_FREQ_VERY_HIGH
++#define CFG_HW_USART1_RX_ALTERNATE GPIO_AF7_USART1
++
++#define CFG_HW_USART1_CTS_PORT_CLK_ENABLE __HAL_RCC_GPIOA_CLK_ENABLE
++#define CFG_HW_USART1_CTS_PORT GPIOA
++#define CFG_HW_USART1_CTS_PIN GPIO_PIN_11
++#define CFG_HW_USART1_CTS_MODE GPIO_MODE_AF_PP
++#define CFG_HW_USART1_CTS_PULL GPIO_PULLDOWN
++#define CFG_HW_USART1_CTS_SPEED GPIO_SPEED_FREQ_VERY_HIGH
++#define CFG_HW_USART1_CTS_ALTERNATE GPIO_AF7_USART1
++
++#define CFG_HW_USART1_DMA_TX_PREEMPTPRIORITY 0x0F
++#define CFG_HW_USART1_DMA_TX_SUBPRIORITY 0
++
++#define CFG_HW_USART1_DMAMUX_CLK_ENABLE __HAL_RCC_DMAMUX1_CLK_ENABLE
++#define CFG_HW_USART1_DMA_CLK_ENABLE __HAL_RCC_DMA2_CLK_ENABLE
++#define CFG_HW_USART1_TX_DMA_REQ DMA_REQUEST_USART1_TX
++#define CFG_HW_USART1_TX_DMA_CHANNEL DMA2_Channel4
++#define CFG_HW_USART1_TX_DMA_IRQn DMA2_Channel4_IRQn
++#define CFG_HW_USART1_DMA_TX_IRQHandler DMA2_Channel4_IRQHandler
++
++#endif /*HW_CONF_H */
++
++/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/ble_glue/hw_if.h b/firmware/targets/f7/ble_glue/hw_if.h
+new file mode 100644
+index 000000000..a0ac23df3
+--- /dev/null
++++ b/firmware/targets/f7/ble_glue/hw_if.h
+@@ -0,0 +1,102 @@
++/* USER CODE BEGIN Header */
++/**
++  ******************************************************************************
++  * @file    hw_if.h
++  * @author  MCD Application Team
++  * @brief   Hardware Interface
++  ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license
++  * SLA0044, the "License"; You may not use this file except in compliance with
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++/* USER CODE END Header */
++
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef HW_IF_H
++#define HW_IF_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/* Includes ------------------------------------------------------------------*/
++#include "stm32wbxx.h"
++#include "stm32wbxx_ll_exti.h"
++#include "stm32wbxx_ll_system.h"
++#include "stm32wbxx_ll_rcc.h"
++#include "stm32wbxx_ll_ipcc.h"
++#include "stm32wbxx_ll_bus.h"
++#include "stm32wbxx_ll_pwr.h"
++#include "stm32wbxx_ll_cortex.h"
++#include "stm32wbxx_ll_utils.h"
++#include "stm32wbxx_ll_hsem.h"
++#include "stm32wbxx_ll_gpio.h"
++#include "stm32wbxx_ll_rtc.h"
++
++#ifdef USE_STM32WBXX_USB_DONGLE
++#include "stm32wbxx_usb_dongle.h"
++#endif
++#ifdef USE_STM32WBXX_NUCLEO
++#include "stm32wbxx_nucleo.h"
++#endif
++#ifdef USE_X_NUCLEO_EPD
++#include "x_nucleo_epd.h"
++#endif
++
++/* Private includes ----------------------------------------------------------*/
++/* USER CODE BEGIN Includes */
++
++/* USER CODE END Includes */
++
++/******************************************************************************
++   * HW UART
++   ******************************************************************************/
++typedef enum {
++    hw_uart1,
++    hw_uart2,
++    hw_lpuart1,
++} hw_uart_id_t;
++
++typedef enum {
++    hw_uart_ok,
++    hw_uart_error,
++    hw_uart_busy,
++    hw_uart_to,
++} hw_status_t;
++
++void HW_UART_Init(hw_uart_id_t hw_uart_id);
++void HW_UART_Receive_IT(
++    hw_uart_id_t hw_uart_id,
++    uint8_t* pData,
++    uint16_t Size,
++    void (*Callback)(void));
++void HW_UART_Transmit_IT(
++    hw_uart_id_t hw_uart_id,
++    uint8_t* pData,
++    uint16_t Size,
++    void (*Callback)(void));
++hw_status_t
++    HW_UART_Transmit(hw_uart_id_t hw_uart_id, uint8_t* p_data, uint16_t size, uint32_t timeout);
++hw_status_t HW_UART_Transmit_DMA(
++    hw_uart_id_t hw_uart_id,
++    uint8_t* p_data,
++    uint16_t size,
++    void (*Callback)(void));
++void HW_UART_Interrupt_Handler(hw_uart_id_t hw_uart_id);
++void HW_UART_DMA_Interrupt_Handler(hw_uart_id_t hw_uart_id);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /*HW_IF_H */
++
++/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/ble_glue/hw_ipcc.c b/firmware/targets/f7/ble_glue/hw_ipcc.c
+index c2397f351..7c84df09f 100644
+--- a/firmware/targets/f7/ble_glue/hw_ipcc.c
++++ b/firmware/targets/f7/ble_glue/hw_ipcc.c
+@@ -1,52 +1,160 @@
++/**
++ ******************************************************************************
++  * File Name          : Target/hw_ipcc.c
++  * Description        : Hardware IPCC source file for STM32WPAN Middleware.
++  *
++ ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license
++  * SLA0044, the "License"; You may not use this file except in compliance with
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++
++/* Includes ------------------------------------------------------------------*/
+ #include "app_common.h"
+ #include <interface/patterns/ble_thread/tl/mbox_def.h>
+-#include <interface/patterns/ble_thread/hw.h>
+-#include <furi_hal.h>
+-
+-#include <stm32wbxx_ll_ipcc.h>
+-#include <stm32wbxx_ll_pwr.h>
+-
+-#include <hsem_map.h>
+-
+-#define HW_IPCC_TX_PENDING(channel)                     \
+-    ((!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && \
+-     LL_C1_IPCC_IsEnabledTransmitChannel(IPCC, channel))
+-#define HW_IPCC_RX_PENDING(channel)                \
+-    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel) && \
+-     LL_C1_IPCC_IsEnabledReceiveChannel(IPCC, channel))
+ 
+-static void (*FreeBufCb)();
+-
+-static void HW_IPCC_BLE_EvtHandler();
+-static void HW_IPCC_BLE_AclDataEvtHandler();
+-static void HW_IPCC_MM_FreeBufHandler();
+-static void HW_IPCC_SYS_CmdEvtHandler();
+-static void HW_IPCC_SYS_EvtHandler();
+-static void HW_IPCC_TRACES_EvtHandler();
+-
+-void HW_IPCC_Rx_Handler() {
++/* Global variables ---------------------------------------------------------*/
++/* Private defines -----------------------------------------------------------*/
++#define HW_IPCC_TX_PENDING(channel) \
++    (!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && (((~(IPCC->C1MR)) & ((channel) << 16U)))
++#define HW_IPCC_RX_PENDING(channel) \
++    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel)) && (((~(IPCC->C1MR)) & ((channel) << 0U)))
++
++/* Private macros ------------------------------------------------------------*/
++/* Private typedef -----------------------------------------------------------*/
++/* Private variables ---------------------------------------------------------*/
++static void (*FreeBufCb)(void);
++
++/* Private function prototypes -----------------------------------------------*/
++static void HW_IPCC_BLE_EvtHandler(void);
++static void HW_IPCC_BLE_AclDataEvtHandler(void);
++static void HW_IPCC_MM_FreeBufHandler(void);
++static void HW_IPCC_SYS_CmdEvtHandler(void);
++static void HW_IPCC_SYS_EvtHandler(void);
++static void HW_IPCC_TRACES_EvtHandler(void);
++
++#ifdef THREAD_WB
++static void HW_IPCC_OT_CmdEvtHandler(void);
++static void HW_IPCC_THREAD_NotEvtHandler(void);
++static void HW_IPCC_THREAD_CliNotEvtHandler(void);
++#endif
++
++#ifdef LLD_TESTS_WB
++static void HW_IPCC_LLDTESTS_ReceiveCliRspHandler(void);
++static void HW_IPCC_LLDTESTS_ReceiveM0CmdHandler(void);
++#endif
++#ifdef LLD_BLE_WB
++/*static void HW_IPCC_LLD_BLE_ReceiveCliRspHandler( void );*/
++static void HW_IPCC_LLD_BLE_ReceiveRspHandler(void);
++static void HW_IPCC_LLD_BLE_ReceiveM0CmdHandler(void);
++#endif
++
++#ifdef MAC_802_15_4_WB
++static void HW_IPCC_MAC_802_15_4_CmdEvtHandler(void);
++static void HW_IPCC_MAC_802_15_4_NotEvtHandler(void);
++#endif
++
++#ifdef ZIGBEE_WB
++static void HW_IPCC_ZIGBEE_CmdEvtHandler(void);
++static void HW_IPCC_ZIGBEE_StackNotifEvtHandler(void);
++static void HW_IPCC_ZIGBEE_StackM0RequestHandler(void);
++#endif
++
++/* Public function definition -----------------------------------------------*/
++
++/******************************************************************************
++ * INTERRUPT HANDLER
++ ******************************************************************************/
++void HW_IPCC_Rx_Handler(void) {
+     if(HW_IPCC_RX_PENDING(HW_IPCC_SYSTEM_EVENT_CHANNEL)) {
+         HW_IPCC_SYS_EvtHandler();
+-    } else if(HW_IPCC_RX_PENDING(HW_IPCC_BLE_EVENT_CHANNEL)) {
++    }
++#ifdef MAC_802_15_4_WB
++    else if(HW_IPCC_RX_PENDING(HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL)) {
++        HW_IPCC_MAC_802_15_4_NotEvtHandler();
++    }
++#endif /* MAC_802_15_4_WB */
++#ifdef THREAD_WB
++    else if(HW_IPCC_RX_PENDING(HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL)) {
++        HW_IPCC_THREAD_NotEvtHandler();
++    } else if(HW_IPCC_RX_PENDING(HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL)) {
++        HW_IPCC_THREAD_CliNotEvtHandler();
++    }
++#endif /* THREAD_WB */
++#ifdef LLD_TESTS_WB
++    else if(HW_IPCC_RX_PENDING(HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL)) {
++        HW_IPCC_LLDTESTS_ReceiveCliRspHandler();
++    } else if(HW_IPCC_RX_PENDING(HW_IPCC_LLDTESTS_M0_CMD_CHANNEL)) {
++        HW_IPCC_LLDTESTS_ReceiveM0CmdHandler();
++    }
++#endif /* LLD_TESTS_WB */
++#ifdef LLD_BLE_WB
++    else if(HW_IPCC_RX_PENDING(HW_IPCC_LLD_BLE_RSP_CHANNEL)) {
++        HW_IPCC_LLD_BLE_ReceiveRspHandler();
++    } else if(HW_IPCC_RX_PENDING(HW_IPCC_LLD_BLE_M0_CMD_CHANNEL)) {
++        HW_IPCC_LLD_BLE_ReceiveM0CmdHandler();
++    }
++#endif /* LLD_TESTS_WB */
++#ifdef ZIGBEE_WB
++    else if(HW_IPCC_RX_PENDING(HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL)) {
++        HW_IPCC_ZIGBEE_StackNotifEvtHandler();
++    } else if(HW_IPCC_RX_PENDING(HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL)) {
++        HW_IPCC_ZIGBEE_StackM0RequestHandler();
++    }
++#endif /* ZIGBEE_WB */
++    else if(HW_IPCC_RX_PENDING(HW_IPCC_BLE_EVENT_CHANNEL)) {
+         HW_IPCC_BLE_EvtHandler();
+     } else if(HW_IPCC_RX_PENDING(HW_IPCC_TRACES_CHANNEL)) {
+         HW_IPCC_TRACES_EvtHandler();
+     }
++
++    return;
+ }
+ 
+-void HW_IPCC_Tx_Handler() {
++void HW_IPCC_Tx_Handler(void) {
+     if(HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
+         HW_IPCC_SYS_CmdEvtHandler();
+-    } else if(HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
++    }
++#ifdef MAC_802_15_4_WB
++    else if(HW_IPCC_TX_PENDING(HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL)) {
++        HW_IPCC_MAC_802_15_4_CmdEvtHandler();
++    }
++#endif /* MAC_802_15_4_WB */
++#ifdef THREAD_WB
++    else if(HW_IPCC_TX_PENDING(HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL)) {
++        HW_IPCC_OT_CmdEvtHandler();
++    }
++#endif /* THREAD_WB */
++#ifdef LLD_TESTS_WB
++// No TX handler for LLD tests
++#endif /* LLD_TESTS_WB */
++#ifdef ZIGBEE_WB
++    if(HW_IPCC_TX_PENDING(HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL)) {
++        HW_IPCC_ZIGBEE_CmdEvtHandler();
++    }
++#endif /* ZIGBEE_WB */
++    else if(HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
+         HW_IPCC_SYS_CmdEvtHandler();
+     } else if(HW_IPCC_TX_PENDING(HW_IPCC_MM_RELEASE_BUFFER_CHANNEL)) {
+         HW_IPCC_MM_FreeBufHandler();
+     } else if(HW_IPCC_TX_PENDING(HW_IPCC_HCI_ACL_DATA_CHANNEL)) {
+         HW_IPCC_BLE_AclDataEvtHandler();
+     }
+-}
+ 
+-void HW_IPCC_Enable() {
++    return;
++}
++/******************************************************************************
++ * GENERAL
++ ******************************************************************************/
++void HW_IPCC_Enable(void) {
+     /**
+   * Such as IPCC IP available to the CPU2, it is required to keep the IPCC clock running
+     when FUS is running on CPU2 and CPU1 enters deep sleep mode
+@@ -69,9 +177,11 @@ void HW_IPCC_Enable() {
+     __SEV(); /* Set the internal event flag and send an event to the CPU2 */
+     __WFE(); /* Clear the internal event flag */
+     LL_PWR_EnableBootC2();
++
++    return;
+ }
+ 
+-void HW_IPCC_Init() {
++void HW_IPCC_Init(void) {
+     LL_C1_IPCC_EnableIT_RXO(IPCC);
+     LL_C1_IPCC_EnableIT_TXF(IPCC);
+ 
+@@ -79,62 +189,366 @@ void HW_IPCC_Init() {
+     NVIC_EnableIRQ(IPCC_C1_RX_IRQn);
+     NVIC_SetPriority(IPCC_C1_TX_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+     NVIC_EnableIRQ(IPCC_C1_TX_IRQn);
++
++    return;
+ }
+ 
+-void HW_IPCC_BLE_Init() {
++/******************************************************************************
++ * BLE
++ ******************************************************************************/
++void HW_IPCC_BLE_Init(void) {
+     LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_BLE_EVENT_CHANNEL);
++
++    return;
+ }
+ 
+-void HW_IPCC_BLE_SendCmd() {
++void HW_IPCC_BLE_SendCmd(void) {
+     LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_BLE_CMD_CHANNEL);
++
++    return;
+ }
+ 
+-static void HW_IPCC_BLE_EvtHandler() {
++static void HW_IPCC_BLE_EvtHandler(void) {
+     HW_IPCC_BLE_RxEvtNot();
+ 
+     LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_BLE_EVENT_CHANNEL);
++
++    return;
+ }
+ 
+-void HW_IPCC_BLE_SendAclData() {
++void HW_IPCC_BLE_SendAclData(void) {
+     LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL);
+     LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL);
++
++    return;
+ }
+ 
+-static void HW_IPCC_BLE_AclDataEvtHandler() {
++static void HW_IPCC_BLE_AclDataEvtHandler(void) {
+     LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL);
+ 
+     HW_IPCC_BLE_AclDataAckNot();
++
++    return;
+ }
+ 
+-void HW_IPCC_SYS_Init() {
++__weak void HW_IPCC_BLE_AclDataAckNot(void){};
++__weak void HW_IPCC_BLE_RxEvtNot(void){};
++
++/******************************************************************************
++ * SYSTEM
++ ******************************************************************************/
++void HW_IPCC_SYS_Init(void) {
+     LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL);
++
++    return;
+ }
+ 
+-void HW_IPCC_SYS_SendCmd() {
++void HW_IPCC_SYS_SendCmd(void) {
+     LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
++    LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
+ 
+-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(33000000);
+-
+-    while(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
+-        furi_check(!furi_hal_cortex_timer_is_expired(timer), "HW_IPCC_SYS_SendCmd timeout");
+-    }
+-
+-    HW_IPCC_SYS_CmdEvtHandler();
++    return;
+ }
+ 
+-static void HW_IPCC_SYS_CmdEvtHandler() {
++static void HW_IPCC_SYS_CmdEvtHandler(void) {
+     LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
+ 
+     HW_IPCC_SYS_CmdEvtNot();
++
++    return;
+ }
+ 
+-static void HW_IPCC_SYS_EvtHandler() {
++static void HW_IPCC_SYS_EvtHandler(void) {
+     HW_IPCC_SYS_EvtNot();
+ 
+     LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL);
++
++    return;
++}
++
++__weak void HW_IPCC_SYS_CmdEvtNot(void){};
++__weak void HW_IPCC_SYS_EvtNot(void){};
++
++/******************************************************************************
++ * MAC 802.15.4
++ ******************************************************************************/
++#ifdef MAC_802_15_4_WB
++void HW_IPCC_MAC_802_15_4_Init(void) {
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_MAC_802_15_4_SendCmd(void) {
++    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL);
++    LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_MAC_802_15_4_SendAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL);
++
++    return;
++}
++
++static void HW_IPCC_MAC_802_15_4_CmdEvtHandler(void) {
++    LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL);
++
++    HW_IPCC_MAC_802_15_4_CmdEvtNot();
++
++    return;
++}
++
++static void HW_IPCC_MAC_802_15_4_NotEvtHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL);
++
++    HW_IPCC_MAC_802_15_4_EvtNot();
++
++    return;
++}
++__weak void HW_IPCC_MAC_802_15_4_CmdEvtNot(void){};
++__weak void HW_IPCC_MAC_802_15_4_EvtNot(void){};
++#endif
++
++/******************************************************************************
++ * THREAD
++ ******************************************************************************/
++#ifdef THREAD_WB
++void HW_IPCC_THREAD_Init(void) {
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_OT_SendCmd(void) {
++    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL);
++    LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_CLI_SendCmd(void) {
++    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_THREAD_CLI_CMD_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_THREAD_SendAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_THREAD_CliSendAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
++
++    return;
++}
++
++static void HW_IPCC_OT_CmdEvtHandler(void) {
++    LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL);
++
++    HW_IPCC_OT_CmdEvtNot();
++
++    return;
+ }
+ 
+-void HW_IPCC_MM_SendFreeBuf(void (*cb)()) {
++static void HW_IPCC_THREAD_NotEvtHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
++
++    HW_IPCC_THREAD_EvtNot();
++
++    return;
++}
++
++static void HW_IPCC_THREAD_CliNotEvtHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
++
++    HW_IPCC_THREAD_CliEvtNot();
++
++    return;
++}
++
++__weak void HW_IPCC_OT_CmdEvtNot(void){};
++__weak void HW_IPCC_CLI_CmdEvtNot(void){};
++__weak void HW_IPCC_THREAD_EvtNot(void){};
++
++#endif /* THREAD_WB */
++
++/******************************************************************************
++ * LLD TESTS
++ ******************************************************************************/
++#ifdef LLD_TESTS_WB
++void HW_IPCC_LLDTESTS_Init(void) {
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL);
++    return;
++}
++
++void HW_IPCC_LLDTESTS_SendCliCmd(void) {
++    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_LLDTESTS_CLI_CMD_CHANNEL);
++    return;
++}
++
++static void HW_IPCC_LLDTESTS_ReceiveCliRspHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL);
++    HW_IPCC_LLDTESTS_ReceiveCliRsp();
++    return;
++}
++
++void HW_IPCC_LLDTESTS_SendCliRspAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL);
++    return;
++}
++
++static void HW_IPCC_LLDTESTS_ReceiveM0CmdHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL);
++    HW_IPCC_LLDTESTS_ReceiveM0Cmd();
++    return;
++}
++
++void HW_IPCC_LLDTESTS_SendM0CmdAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL);
++    return;
++}
++__weak void HW_IPCC_LLDTESTS_ReceiveCliRsp(void){};
++__weak void HW_IPCC_LLDTESTS_ReceiveM0Cmd(void){};
++#endif /* LLD_TESTS_WB */
++
++/******************************************************************************
++ * LLD BLE
++ ******************************************************************************/
++#ifdef LLD_BLE_WB
++void HW_IPCC_LLD_BLE_Init(void) {
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL);
++    return;
++}
++
++void HW_IPCC_LLD_BLE_SendCliCmd(void) {
++    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_LLD_BLE_CLI_CMD_CHANNEL);
++    return;
++}
++
++/*static void HW_IPCC_LLD_BLE_ReceiveCliRspHandler( void )
++{
++  LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_CLI_RSP_CHANNEL );
++  HW_IPCC_LLD_BLE_ReceiveCliRsp();
++  return;
++}*/
++
++void HW_IPCC_LLD_BLE_SendCliRspAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_LLD_BLE_CLI_RSP_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLD_BLE_CLI_RSP_CHANNEL);
++    return;
++}
++
++static void HW_IPCC_LLD_BLE_ReceiveM0CmdHandler(void) {
++    //LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL );
++    HW_IPCC_LLD_BLE_ReceiveM0Cmd();
++    return;
++}
++
++void HW_IPCC_LLD_BLE_SendM0CmdAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL);
++    //LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL );
++    return;
++}
++__weak void HW_IPCC_LLD_BLE_ReceiveCliRsp(void){};
++__weak void HW_IPCC_LLD_BLE_ReceiveM0Cmd(void){};
++
++/* Transparent Mode */
++void HW_IPCC_LLD_BLE_SendCmd(void) {
++    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_LLD_BLE_CMD_CHANNEL);
++    return;
++}
++
++static void HW_IPCC_LLD_BLE_ReceiveRspHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL);
++    HW_IPCC_LLD_BLE_ReceiveRsp();
++    return;
++}
++
++void HW_IPCC_LLD_BLE_SendRspAck(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL);
++    return;
++}
++
++#endif /* LLD_BLE_WB */
++
++/******************************************************************************
++ * ZIGBEE
++ ******************************************************************************/
++#ifdef ZIGBEE_WB
++void HW_IPCC_ZIGBEE_Init(void) {
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_ZIGBEE_SendM4RequestToM0(void) {
++    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL);
++    LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL);
++
++    return;
++}
++
++void HW_IPCC_ZIGBEE_SendM4AckToM0Notify(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL);
++
++    return;
++}
++
++static void HW_IPCC_ZIGBEE_CmdEvtHandler(void) {
++    LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL);
++
++    HW_IPCC_ZIGBEE_RecvAppliAckFromM0();
++
++    return;
++}
++
++static void HW_IPCC_ZIGBEE_StackNotifEvtHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL);
++
++    HW_IPCC_ZIGBEE_RecvM0NotifyToM4();
++
++    return;
++}
++
++static void HW_IPCC_ZIGBEE_StackM0RequestHandler(void) {
++    LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL);
++
++    HW_IPCC_ZIGBEE_RecvM0RequestToM4();
++
++    return;
++}
++
++void HW_IPCC_ZIGBEE_SendM4AckToM0Request(void) {
++    LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL);
++    LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL);
++
++    return;
++}
++
++__weak void HW_IPCC_ZIGBEE_RecvAppliAckFromM0(void){};
++__weak void HW_IPCC_ZIGBEE_RecvM0NotifyToM4(void){};
++__weak void HW_IPCC_ZIGBEE_RecvM0RequestToM4(void){};
++#endif /* ZIGBEE_WB */
++
++/******************************************************************************
++ * MEMORY MANAGER
++ ******************************************************************************/
++void HW_IPCC_MM_SendFreeBuf(void (*cb)(void)) {
+     if(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL)) {
+         FreeBufCb = cb;
+         LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
+@@ -143,22 +557,37 @@ void HW_IPCC_MM_SendFreeBuf(void (*cb)()) {
+ 
+         LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
+     }
++
++    return;
+ }
+ 
+-static void HW_IPCC_MM_FreeBufHandler() {
++static void HW_IPCC_MM_FreeBufHandler(void) {
+     LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
+ 
+     FreeBufCb();
+ 
+     LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
++
++    return;
+ }
+ 
+-void HW_IPCC_TRACES_Init() {
++/******************************************************************************
++ * TRACES
++ ******************************************************************************/
++void HW_IPCC_TRACES_Init(void) {
+     LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_TRACES_CHANNEL);
++
++    return;
+ }
+ 
+-static void HW_IPCC_TRACES_EvtHandler() {
++static void HW_IPCC_TRACES_EvtHandler(void) {
+     HW_IPCC_TRACES_EvtNot();
+ 
+     LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_TRACES_CHANNEL);
++
++    return;
+ }
++
++__weak void HW_IPCC_TRACES_EvtNot(void){};
++
++/******************* (C) COPYRIGHT 2019 STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/ble_glue/osal.h b/firmware/targets/f7/ble_glue/osal.h
+index 0cde06179..e5e0c4f68 100644
+--- a/firmware/targets/f7/ble_glue/osal.h
++++ b/firmware/targets/f7/ble_glue/osal.h
+@@ -1,4 +1,25 @@
+-#pragma once
++/*****************************************************************************
++ * @file    osal.h
++ * @author  MDG
++ * @brief   This header file defines the OS abstraction layer used by
++ *          the BLE stack. OSAL defines the set of functions which needs to be
++ *          ported to target operating system and target platform.
++ *          Actually, only memset, memcpy and memcmp wrappers are defined.
++ *****************************************************************************
++ * @attention
++ *
++ * Copyright (c) 2018-2022 STMicroelectronics.
++ * All rights reserved.
++ *
++ * This software is licensed under terms that can be found in the LICENSE file
++ * in the root directory of this software component.
++ * If no LICENSE file comes with this software, it is provided AS-IS.
++ *
++ *****************************************************************************
++ */
++
++#ifndef OSAL_H__
++#define OSAL_H__
+ 
+ /**
+  * This function copies size number of bytes from a 
+@@ -38,3 +59,5 @@ extern void* Osal_MemSet(void* ptr, int value, unsigned int size);
+  * @return  0 if the two buffers are equal, 1 otherwise
+  */
+ extern int Osal_MemCmp(const void* s1, const void* s2, unsigned int size);
++
++#endif /* OSAL_H__ */
+diff --git a/firmware/targets/f7/ble_glue/services/serial_service.c b/firmware/targets/f7/ble_glue/serial_service.c
+similarity index 57%
+rename from firmware/targets/f7/ble_glue/services/serial_service.c
+rename to firmware/targets/f7/ble_glue/serial_service.c
+index 0db25b3d3..c6421dc28 100644
+--- a/firmware/targets/f7/ble_glue/services/serial_service.c
++++ b/firmware/targets/f7/ble_glue/serial_service.c
+@@ -1,67 +1,17 @@
+ #include "serial_service.h"
+ #include "app_common.h"
+ #include <ble/ble.h>
+-#include "gatt_char.h"
+ 
+ #include <furi.h>
+ 
+-#include "serial_service_uuid.inc"
+-
+ #define TAG "BtSerialSvc"
+ 
+-typedef enum {
+-    SerialSvcGattCharacteristicRx = 0,
+-    SerialSvcGattCharacteristicTx,
+-    SerialSvcGattCharacteristicFlowCtrl,
+-    SerialSvcGattCharacteristicStatus,
+-    SerialSvcGattCharacteristicCount,
+-} SerialSvcGattCharacteristicId;
+-
+-static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattCharacteristicCount] = {
+-    [SerialSvcGattCharacteristicRx] =
+-        {.name = "RX",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
+-         .uuid.Char_UUID_128 = SERIAL_SVC_RX_CHAR_UUID,
+-         .uuid_type = UUID_TYPE_128,
+-         .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
+-         .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
+-         .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+-         .is_variable = CHAR_VALUE_LEN_VARIABLE},
+-    [SerialSvcGattCharacteristicTx] =
+-        {.name = "TX",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
+-         .uuid.Char_UUID_128 = SERIAL_SVC_TX_CHAR_UUID,
+-         .uuid_type = UUID_TYPE_128,
+-         .char_properties = CHAR_PROP_READ | CHAR_PROP_INDICATE,
+-         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-         .is_variable = CHAR_VALUE_LEN_VARIABLE},
+-    [SerialSvcGattCharacteristicFlowCtrl] =
+-        {.name = "Flow control",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = sizeof(uint32_t),
+-         .uuid.Char_UUID_128 = SERIAL_SVC_FLOW_CONTROL_UUID,
+-         .uuid_type = UUID_TYPE_128,
+-         .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+-         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-         .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-    [SerialSvcGattCharacteristicStatus] = {
+-        .name = "RPC status",
+-        .data_prop_type = FlipperGattCharacteristicDataFixed,
+-        .data.fixed.length = sizeof(SerialServiceRpcStatus),
+-        .uuid.Char_UUID_128 = SERIAL_SVC_RPC_STATUS_UUID,
+-        .uuid_type = UUID_TYPE_128,
+-        .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_NOTIFY,
+-        .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
+-        .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+-        .is_variable = CHAR_VALUE_LEN_CONSTANT}};
+-
+ typedef struct {
+     uint16_t svc_handle;
+-    FlipperGattCharacteristicInstance chars[SerialSvcGattCharacteristicCount];
++    uint16_t rx_char_handle;
++    uint16_t tx_char_handle;
++    uint16_t flow_ctrl_char_handle;
++    uint16_t rpc_status_char_handle;
+     FuriMutex* buff_size_mtx;
+     uint32_t buff_size;
+     uint16_t bytes_ready_to_receive;
+@@ -71,6 +21,17 @@ typedef struct {
+ 
+ static SerialSvc* serial_svc = NULL;
+ 
++static const uint8_t service_uuid[] =
++    {0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48, 0x2a, 0x98, 0x4a, 0x7f, 0x2e, 0xd5, 0xb3, 0xe5, 0x8f};
++static const uint8_t char_tx_uuid[] =
++    {0x00, 0x00, 0xfe, 0x61, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
++static const uint8_t char_rx_uuid[] =
++    {0x00, 0x00, 0xfe, 0x62, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
++static const uint8_t flow_ctrl_uuid[] =
++    {0x00, 0x00, 0xfe, 0x63, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
++static const uint8_t rpc_status_uuid[] =
++    {0x00, 0x00, 0xfe, 0x64, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
++
+ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void* event) {
+     SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
+     hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
+@@ -79,14 +40,11 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void* event) {
+     if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
+         if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
+             attribute_modified = (aci_gatt_attribute_modified_event_rp0*)blecore_evt->data;
+-            if(attribute_modified->Attr_Handle ==
+-               serial_svc->chars[SerialSvcGattCharacteristicRx].handle + 2) {
++            if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 2) {
+                 // Descriptor handle
+                 ret = SVCCTL_EvtAckFlowEnable;
+                 FURI_LOG_D(TAG, "RX descriptor event");
+-            } else if(
+-                attribute_modified->Attr_Handle ==
+-                serial_svc->chars[SerialSvcGattCharacteristicRx].handle + 1) {
++            } else if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 1) {
+                 FURI_LOG_D(TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
+                 if(serial_svc->callback) {
+                     furi_check(
+@@ -112,9 +70,7 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void* event) {
+                     furi_check(furi_mutex_release(serial_svc->buff_size_mtx) == FuriStatusOk);
+                 }
+                 ret = SVCCTL_EvtAckFlowEnable;
+-            } else if(
+-                attribute_modified->Attr_Handle ==
+-                serial_svc->chars[SerialSvcGattCharacteristicStatus].handle + 1) {
++            } else if(attribute_modified->Attr_Handle == serial_svc->rpc_status_char_handle + 1) {
+                 SerialServiceRpcStatus* rpc_status =
+                     (SerialServiceRpcStatus*)attribute_modified->Attr_Data;
+                 if(*rpc_status == SerialServiceRpcStatusNotActive) {
+@@ -141,12 +97,18 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void* event) {
+ }
+ 
+ static void serial_svc_update_rpc_char(SerialServiceRpcStatus status) {
+-    flipper_gatt_characteristic_update(
+-        serial_svc->svc_handle, &serial_svc->chars[SerialSvcGattCharacteristicStatus], &status);
++    tBleStatus ble_status = aci_gatt_update_char_value(
++        serial_svc->svc_handle,
++        serial_svc->rpc_status_char_handle,
++        0,
++        sizeof(SerialServiceRpcStatus),
++        (uint8_t*)&status);
++    if(ble_status) {
++        FURI_LOG_E(TAG, "Failed to update RPC status char: %d", ble_status);
++    }
+ }
+ 
+ void serial_svc_start() {
+-    UNUSED(serial_svc_chars);
+     tBleStatus status;
+     serial_svc = malloc(sizeof(SerialSvc));
+     // Register event handler
+@@ -154,17 +116,72 @@ void serial_svc_start() {
+ 
+     // Add service
+     status = aci_gatt_add_service(
+-        UUID_TYPE_128, &service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle);
++        UUID_TYPE_128, (Service_UUID_t*)service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle);
+     if(status) {
+         FURI_LOG_E(TAG, "Failed to add Serial service: %d", status);
+     }
+ 
+-    // Add characteristics
+-    for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
+-        flipper_gatt_characteristic_init(
+-            serial_svc->svc_handle, &serial_svc_chars[i], &serial_svc->chars[i]);
++    // Add RX characteristics
++    status = aci_gatt_add_char(
++        serial_svc->svc_handle,
++        UUID_TYPE_128,
++        (const Char_UUID_t*)char_rx_uuid,
++        SERIAL_SVC_DATA_LEN_MAX,
++        CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
++        ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
++        GATT_NOTIFY_ATTRIBUTE_WRITE,
++        10,
++        CHAR_VALUE_LEN_VARIABLE,
++        &serial_svc->rx_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add RX characteristic: %d", status);
+     }
+ 
++    // Add TX characteristic
++    status = aci_gatt_add_char(
++        serial_svc->svc_handle,
++        UUID_TYPE_128,
++        (const Char_UUID_t*)char_tx_uuid,
++        SERIAL_SVC_DATA_LEN_MAX,
++        CHAR_PROP_READ | CHAR_PROP_INDICATE,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_VARIABLE,
++        &serial_svc->tx_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add TX characteristic: %d", status);
++    }
++    // Add Flow Control characteristic
++    status = aci_gatt_add_char(
++        serial_svc->svc_handle,
++        UUID_TYPE_128,
++        (const Char_UUID_t*)flow_ctrl_uuid,
++        sizeof(uint32_t),
++        CHAR_PROP_READ | CHAR_PROP_NOTIFY,
++        ATTR_PERMISSION_AUTHEN_READ,
++        GATT_DONT_NOTIFY_EVENTS,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &serial_svc->flow_ctrl_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add Flow Control characteristic: %d", status);
++    }
++    // Add RPC status characteristic
++    status = aci_gatt_add_char(
++        serial_svc->svc_handle,
++        UUID_TYPE_128,
++        (const Char_UUID_t*)rpc_status_uuid,
++        sizeof(SerialServiceRpcStatus),
++        CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_NOTIFY,
++        ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
++        GATT_NOTIFY_ATTRIBUTE_WRITE,
++        10,
++        CHAR_VALUE_LEN_CONSTANT,
++        &serial_svc->rpc_status_char_handle);
++    if(status) {
++        FURI_LOG_E(TAG, "Failed to add RPC status characteristic: %d", status);
++    }
+     serial_svc_update_rpc_char(SerialServiceRpcStatusNotActive);
+     // Allocate buffer size mutex
+     serial_svc->buff_size_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
+@@ -179,12 +196,13 @@ void serial_svc_set_callbacks(
+     serial_svc->context = context;
+     serial_svc->buff_size = buff_size;
+     serial_svc->bytes_ready_to_receive = buff_size;
+-
+     uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
+-    flipper_gatt_characteristic_update(
++    aci_gatt_update_char_value(
+         serial_svc->svc_handle,
+-        &serial_svc->chars[SerialSvcGattCharacteristicFlowCtrl],
+-        &buff_size_reversed);
++        serial_svc->flow_ctrl_char_handle,
++        0,
++        sizeof(uint32_t),
++        (uint8_t*)&buff_size_reversed);
+ }
+ 
+ void serial_svc_notify_buffer_is_empty() {
+@@ -195,12 +213,13 @@ void serial_svc_notify_buffer_is_empty() {
+     if(serial_svc->bytes_ready_to_receive == 0) {
+         FURI_LOG_D(TAG, "Buffer is empty. Notifying client");
+         serial_svc->bytes_ready_to_receive = serial_svc->buff_size;
+-
+         uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
+-        flipper_gatt_characteristic_update(
++        aci_gatt_update_char_value(
+             serial_svc->svc_handle,
+-            &serial_svc->chars[SerialSvcGattCharacteristicFlowCtrl],
+-            &buff_size_reversed);
++            serial_svc->flow_ctrl_char_handle,
++            0,
++            sizeof(uint32_t),
++            (uint8_t*)&buff_size_reversed);
+     }
+     furi_check(furi_mutex_release(serial_svc->buff_size_mtx) == FuriStatusOk);
+ }
+@@ -208,8 +227,22 @@ void serial_svc_notify_buffer_is_empty() {
+ void serial_svc_stop() {
+     tBleStatus status;
+     if(serial_svc) {
+-        for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
+-            flipper_gatt_characteristic_delete(serial_svc->svc_handle, &serial_svc->chars[i]);
++        // Delete characteristics
++        status = aci_gatt_del_char(serial_svc->svc_handle, serial_svc->tx_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete TX characteristic: %d", status);
++        }
++        status = aci_gatt_del_char(serial_svc->svc_handle, serial_svc->rx_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete RX characteristic: %d", status);
++        }
++        status = aci_gatt_del_char(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete Flow Control characteristic: %d", status);
++        }
++        status = aci_gatt_del_char(serial_svc->svc_handle, serial_svc->rpc_status_char_handle);
++        if(status) {
++            FURI_LOG_E(TAG, "Failed to delete RPC Status characteristic: %d", status);
+         }
+         // Delete service
+         status = aci_gatt_del_service(serial_svc->svc_handle);
+@@ -240,7 +273,7 @@ bool serial_svc_update_tx(uint8_t* data, uint16_t data_len) {
+         tBleStatus result = aci_gatt_update_char_value_ext(
+             0,
+             serial_svc->svc_handle,
+-            serial_svc->chars[SerialSvcGattCharacteristicTx].handle,
++            serial_svc->tx_char_handle,
+             remained ? 0x00 : 0x02,
+             data_len,
+             value_offset,
+diff --git a/firmware/targets/f7/ble_glue/services/serial_service.h b/firmware/targets/f7/ble_glue/serial_service.h
+similarity index 100%
+rename from firmware/targets/f7/ble_glue/services/serial_service.h
+rename to firmware/targets/f7/ble_glue/serial_service.h
+diff --git a/firmware/targets/f7/ble_glue/services/dev_info_service.c b/firmware/targets/f7/ble_glue/services/dev_info_service.c
+deleted file mode 100644
+index 5bee97b41..000000000
+--- a/firmware/targets/f7/ble_glue/services/dev_info_service.c
++++ /dev/null
+@@ -1,176 +0,0 @@
+-#include "dev_info_service.h"
+-#include "app_common.h"
+-#include "gatt_char.h"
+-#include <ble/ble.h>
+-
+-#include <furi.h>
+-#include <protobuf_version.h>
+-#include <lib/toolbox/version.h>
+-
+-#include "dev_info_service_uuid.inc"
+-
+-#define TAG "BtDevInfoSvc"
+-
+-typedef enum {
+-    DevInfoSvcGattCharacteristicMfgName = 0,
+-    DevInfoSvcGattCharacteristicSerial,
+-    DevInfoSvcGattCharacteristicFirmwareRev,
+-    DevInfoSvcGattCharacteristicSoftwareRev,
+-    DevInfoSvcGattCharacteristicRpcVersion,
+-    DevInfoSvcGattCharacteristicCount,
+-} DevInfoSvcGattCharacteristicId;
+-
+-#define DEVICE_INFO_HARDWARE_REV_SIZE 4
+-typedef struct {
+-    uint16_t service_handle;
+-    FlipperGattCharacteristicInstance characteristics[DevInfoSvcGattCharacteristicCount];
+-    FuriString* version_string;
+-    char hardware_revision[DEVICE_INFO_HARDWARE_REV_SIZE];
+-} DevInfoSvc;
+-
+-static DevInfoSvc* dev_info_svc = NULL;
+-
+-static const char dev_info_man_name[] = "Flipper Devices Inc.";
+-static const char dev_info_serial_num[] = "1.0";
+-static const char dev_info_rpc_version[] = TOSTRING(PROTOBUF_MAJOR_VERSION.PROTOBUF_MINOR_VERSION);
+-
+-static bool dev_info_char_firmware_rev_callback(
+-    const void* context,
+-    const uint8_t** data,
+-    uint16_t* data_len) {
+-    const DevInfoSvc* dev_info_svc = *(DevInfoSvc**)context;
+-    *data_len = sizeof(dev_info_svc->hardware_revision);
+-    if(data) {
+-        *data = (const uint8_t*)&dev_info_svc->hardware_revision;
+-    }
+-    return false;
+-}
+-
+-static bool dev_info_char_software_rev_callback(
+-    const void* context,
+-    const uint8_t** data,
+-    uint16_t* data_len) {
+-    const DevInfoSvc* dev_info_svc = *(DevInfoSvc**)context;
+-    *data_len = furi_string_size(dev_info_svc->version_string);
+-    if(data) {
+-        *data = (const uint8_t*)furi_string_get_cstr(dev_info_svc->version_string);
+-    }
+-    return false;
+-}
+-
+-static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCharacteristicCount] =
+-    {[DevInfoSvcGattCharacteristicMfgName] =
+-         {.name = "Manufacturer Name",
+-          .data_prop_type = FlipperGattCharacteristicDataFixed,
+-          .data.fixed.length = sizeof(dev_info_man_name) - 1,
+-          .data.fixed.ptr = (const uint8_t*)&dev_info_man_name,
+-          .uuid.Char_UUID_16 = MANUFACTURER_NAME_UUID,
+-          .uuid_type = UUID_TYPE_16,
+-          .char_properties = CHAR_PROP_READ,
+-          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-     [DevInfoSvcGattCharacteristicSerial] =
+-         {.name = "Serial Number",
+-          .data_prop_type = FlipperGattCharacteristicDataFixed,
+-          .data.fixed.length = sizeof(dev_info_serial_num) - 1,
+-          .data.fixed.ptr = (const uint8_t*)&dev_info_serial_num,
+-          .uuid.Char_UUID_16 = SERIAL_NUMBER_UUID,
+-          .uuid_type = UUID_TYPE_16,
+-          .char_properties = CHAR_PROP_READ,
+-          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-     [DevInfoSvcGattCharacteristicFirmwareRev] =
+-         {.name = "Firmware Revision",
+-          .data_prop_type = FlipperGattCharacteristicDataCallback,
+-          .data.callback.context = &dev_info_svc,
+-          .data.callback.fn = dev_info_char_firmware_rev_callback,
+-          .uuid.Char_UUID_16 = FIRMWARE_REVISION_UUID,
+-          .uuid_type = UUID_TYPE_16,
+-          .char_properties = CHAR_PROP_READ,
+-          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-     [DevInfoSvcGattCharacteristicSoftwareRev] =
+-         {.name = "Software Revision",
+-          .data_prop_type = FlipperGattCharacteristicDataCallback,
+-          .data.callback.context = &dev_info_svc,
+-          .data.callback.fn = dev_info_char_software_rev_callback,
+-          .uuid.Char_UUID_16 = SOFTWARE_REVISION_UUID,
+-          .uuid_type = UUID_TYPE_16,
+-          .char_properties = CHAR_PROP_READ,
+-          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-     [DevInfoSvcGattCharacteristicRpcVersion] = {
+-         .name = "RPC Version",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = sizeof(dev_info_rpc_version) - 1,
+-         .data.fixed.ptr = (const uint8_t*)&dev_info_rpc_version,
+-         .uuid.Char_UUID_128 = DEV_INVO_RPC_VERSION_UID,
+-         .uuid_type = UUID_TYPE_128,
+-         .char_properties = CHAR_PROP_READ,
+-         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+-         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-         .is_variable = CHAR_VALUE_LEN_CONSTANT}};
+-
+-void dev_info_svc_start() {
+-    dev_info_svc = malloc(sizeof(DevInfoSvc));
+-    dev_info_svc->version_string = furi_string_alloc_printf(
+-        "%s %s %s %s",
+-        version_get_githash(NULL),
+-        version_get_version(NULL),
+-        version_get_gitbranchnum(NULL),
+-        version_get_builddate(NULL));
+-    snprintf(
+-        dev_info_svc->hardware_revision,
+-        sizeof(dev_info_svc->hardware_revision),
+-        "%d",
+-        version_get_target(NULL));
+-    tBleStatus status;
+-
+-    // Add Device Information Service
+-    uint16_t uuid = DEVICE_INFORMATION_SERVICE_UUID;
+-    status = aci_gatt_add_service(
+-        UUID_TYPE_16,
+-        (Service_UUID_t*)&uuid,
+-        PRIMARY_SERVICE,
+-        1 + 2 * DevInfoSvcGattCharacteristicCount,
+-        &dev_info_svc->service_handle);
+-    if(status) {
+-        FURI_LOG_E(TAG, "Failed to add Device Information Service: %d", status);
+-    }
+-
+-    for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
+-        flipper_gatt_characteristic_init(
+-            dev_info_svc->service_handle,
+-            &dev_info_svc_chars[i],
+-            &dev_info_svc->characteristics[i]);
+-        flipper_gatt_characteristic_update(
+-            dev_info_svc->service_handle, &dev_info_svc->characteristics[i], NULL);
+-    }
+-}
+-
+-void dev_info_svc_stop() {
+-    tBleStatus status;
+-    if(dev_info_svc) {
+-        furi_string_free(dev_info_svc->version_string);
+-        // Delete service characteristics
+-        for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
+-            flipper_gatt_characteristic_delete(
+-                dev_info_svc->service_handle, &dev_info_svc->characteristics[i]);
+-        }
+-        // Delete service
+-        status = aci_gatt_del_service(dev_info_svc->service_handle);
+-        if(status) {
+-            FURI_LOG_E(TAG, "Failed to delete device info service: %d", status);
+-        }
+-        free(dev_info_svc);
+-        dev_info_svc = NULL;
+-    }
+-}
+-
+-bool dev_info_svc_is_started() {
+-    return dev_info_svc != NULL;
+-}
+diff --git a/firmware/targets/f7/ble_glue/services/dev_info_service_uuid.inc b/firmware/targets/f7/ble_glue/services/dev_info_service_uuid.inc
+deleted file mode 100644
+index ad520f62e..000000000
+--- a/firmware/targets/f7/ble_glue/services/dev_info_service_uuid.inc
++++ /dev/null
+@@ -1,3 +0,0 @@
+-#define DEV_INVO_RPC_VERSION_UID \
+-    { 0x33, 0xa9, 0xb5, 0x3e, 0x87, 0x5d, 0x1a, 0x8e, 0xc8, 0x47, 0x5e, 0xae, 0x6d, 0x66, 0xf6, 0x03 }
+-
+diff --git a/firmware/targets/f7/ble_glue/services/gatt_char.c b/firmware/targets/f7/ble_glue/services/gatt_char.c
+deleted file mode 100644
+index c06403f55..000000000
+--- a/firmware/targets/f7/ble_glue/services/gatt_char.c
++++ /dev/null
+@@ -1,122 +0,0 @@
+-#include "gatt_char.h"
+-
+-#include <furi.h>
+-
+-#define TAG "GattChar"
+-
+-#define GATT_MIN_READ_KEY_SIZE (10)
+-
+-void flipper_gatt_characteristic_init(
+-    uint16_t svc_handle,
+-    const FlipperGattCharacteristicParams* char_descriptor,
+-    FlipperGattCharacteristicInstance* char_instance) {
+-    furi_assert(char_descriptor);
+-    furi_assert(char_instance);
+-
+-    // Copy the descriptor to the instance, since it may point to stack memory
+-    char_instance->characteristic = malloc(sizeof(FlipperGattCharacteristicParams));
+-    memcpy(
+-        (void*)char_instance->characteristic,
+-        char_descriptor,
+-        sizeof(FlipperGattCharacteristicParams));
+-
+-    uint16_t char_data_size = 0;
+-    if(char_descriptor->data_prop_type == FlipperGattCharacteristicDataFixed) {
+-        char_data_size = char_descriptor->data.fixed.length;
+-    } else if(char_descriptor->data_prop_type == FlipperGattCharacteristicDataCallback) {
+-        char_descriptor->data.callback.fn(
+-            char_descriptor->data.callback.context, NULL, &char_data_size);
+-    }
+-
+-    tBleStatus status = aci_gatt_add_char(
+-        svc_handle,
+-        char_descriptor->uuid_type,
+-        &char_descriptor->uuid,
+-        char_data_size,
+-        char_descriptor->char_properties,
+-        char_descriptor->security_permissions,
+-        char_descriptor->gatt_evt_mask,
+-        GATT_MIN_READ_KEY_SIZE,
+-        char_descriptor->is_variable,
+-        &char_instance->handle);
+-    if(status) {
+-        FURI_LOG_E(TAG, "Failed to add %s char: %d", char_descriptor->name, status);
+-    }
+-
+-    char_instance->descriptor_handle = 0;
+-    if((status == 0) && char_descriptor->descriptor_params) {
+-        uint8_t const* char_data = NULL;
+-        const FlipperGattCharacteristicDescriptorParams* char_data_descriptor =
+-            char_descriptor->descriptor_params;
+-        bool release_data = char_data_descriptor->data_callback.fn(
+-            char_data_descriptor->data_callback.context, &char_data, &char_data_size);
+-
+-        status = aci_gatt_add_char_desc(
+-            svc_handle,
+-            char_instance->handle,
+-            char_data_descriptor->uuid_type,
+-            &char_data_descriptor->uuid,
+-            char_data_descriptor->max_length,
+-            char_data_size,
+-            char_data,
+-            char_data_descriptor->security_permissions,
+-            char_data_descriptor->access_permissions,
+-            char_data_descriptor->gatt_evt_mask,
+-            MIN_ENCRY_KEY_SIZE,
+-            char_data_descriptor->is_variable,
+-            &char_instance->descriptor_handle);
+-        if(status) {
+-            FURI_LOG_E(TAG, "Failed to add %s char descriptor: %d", char_descriptor->name, status);
+-        }
+-        if(release_data) {
+-            free((void*)char_data);
+-        }
+-    }
+-}
+-
+-void flipper_gatt_characteristic_delete(
+-    uint16_t svc_handle,
+-    FlipperGattCharacteristicInstance* char_instance) {
+-    tBleStatus status = aci_gatt_del_char(svc_handle, char_instance->handle);
+-    if(status) {
+-        FURI_LOG_E(
+-            TAG, "Failed to delete %s char: %d", char_instance->characteristic->name, status);
+-    }
+-    free((void*)char_instance->characteristic);
+-}
+-
+-bool flipper_gatt_characteristic_update(
+-    uint16_t svc_handle,
+-    FlipperGattCharacteristicInstance* char_instance,
+-    const void* source) {
+-    furi_assert(char_instance);
+-    const FlipperGattCharacteristicParams* char_descriptor = char_instance->characteristic;
+-    FURI_LOG_D(TAG, "Updating %s char", char_descriptor->name);
+-
+-    const uint8_t* char_data = NULL;
+-    uint16_t char_data_size = 0;
+-    bool release_data = false;
+-    if(char_descriptor->data_prop_type == FlipperGattCharacteristicDataFixed) {
+-        char_data = char_descriptor->data.fixed.ptr;
+-        if(source) {
+-            char_data = (uint8_t*)source;
+-        }
+-        char_data_size = char_descriptor->data.fixed.length;
+-    } else if(char_descriptor->data_prop_type == FlipperGattCharacteristicDataCallback) {
+-        const void* context = char_descriptor->data.callback.context;
+-        if(source) {
+-            context = source;
+-        }
+-        release_data = char_descriptor->data.callback.fn(context, &char_data, &char_data_size);
+-    }
+-
+-    tBleStatus result = aci_gatt_update_char_value(
+-        svc_handle, char_instance->handle, 0, char_data_size, char_data);
+-    if(result) {
+-        FURI_LOG_E(TAG, "Failed updating %s characteristic: %d", char_descriptor->name, result);
+-    }
+-    if(release_data) {
+-        free((void*)char_data);
+-    }
+-    return result != BLE_STATUS_SUCCESS;
+-}
+\ No newline at end of file
+diff --git a/firmware/targets/f7/ble_glue/services/gatt_char.h b/firmware/targets/f7/ble_glue/services/gatt_char.h
+deleted file mode 100644
+index 959ab67a4..000000000
+--- a/firmware/targets/f7/ble_glue/services/gatt_char.h
++++ /dev/null
+@@ -1,96 +0,0 @@
+-#pragma once
+-
+-#include <stdint.h>
+-#include <stdbool.h>
+-#include <stdio.h>
+-
+-#include <ble/ble.h>
+-
+-#ifdef __cplusplus
+-extern "C" {
+-#endif
+-
+-// Callback signature for getting characteristic data
+-// Is called when characteristic is created to get max data length. Data ptr is NULL in this case
+-//   The result is passed to aci_gatt_add_char as "Char_Value_Length"
+-// For updates, called with a context - see flipper_gatt_characteristic_update
+-// Returns true if *data ownership is transferred to the caller and will be freed
+-typedef bool (*cbFlipperGattCharacteristicData)(
+-    const void* context,
+-    const uint8_t** data,
+-    uint16_t* data_len);
+-
+-typedef enum {
+-    FlipperGattCharacteristicDataFixed,
+-    FlipperGattCharacteristicDataCallback,
+-} FlipperGattCharacteristicDataType;
+-
+-typedef struct {
+-    Char_Desc_Uuid_t uuid;
+-    struct {
+-        cbFlipperGattCharacteristicData fn;
+-        const void* context;
+-    } data_callback;
+-    uint8_t uuid_type;
+-    uint8_t max_length;
+-    uint8_t security_permissions;
+-    uint8_t access_permissions;
+-    uint8_t gatt_evt_mask;
+-    uint8_t is_variable;
+-} FlipperGattCharacteristicDescriptorParams;
+-
+-typedef struct {
+-    const char* name;
+-    FlipperGattCharacteristicDescriptorParams* descriptor_params;
+-    union {
+-        struct {
+-            const uint8_t* ptr;
+-            uint16_t length;
+-        } fixed;
+-        struct {
+-            cbFlipperGattCharacteristicData fn;
+-            const void* context;
+-        } callback;
+-    } data;
+-    Char_UUID_t uuid;
+-    // Some packed bitfields to save space
+-    FlipperGattCharacteristicDataType data_prop_type : 2;
+-    uint8_t is_variable : 2;
+-    uint8_t uuid_type : 2;
+-    uint8_t char_properties;
+-    uint8_t security_permissions;
+-    uint8_t gatt_evt_mask;
+-} FlipperGattCharacteristicParams;
+-
+-_Static_assert(
+-    sizeof(FlipperGattCharacteristicParams) == 36,
+-    "FlipperGattCharacteristicParams size must be 36 bytes");
+-
+-typedef struct {
+-    const FlipperGattCharacteristicParams* characteristic;
+-    uint16_t handle;
+-    uint16_t descriptor_handle;
+-} FlipperGattCharacteristicInstance;
+-
+-// Initialize a characteristic instance; copies the characteristic descriptor into the instance
+-void flipper_gatt_characteristic_init(
+-    uint16_t svc_handle,
+-    const FlipperGattCharacteristicParams* char_descriptor,
+-    FlipperGattCharacteristicInstance* char_instance);
+-
+-// Delete a characteristic instance; frees the copied characteristic descriptor from the instance
+-void flipper_gatt_characteristic_delete(
+-    uint16_t svc_handle,
+-    FlipperGattCharacteristicInstance* char_instance);
+-
+-// Update a characteristic instance; if source==NULL, uses the data from the characteristic
+-//  - For fixed data, fixed.ptr is used as the source if source==NULL
+-//  - For callback-based data, collback.context is passed as the context if source==NULL
+-bool flipper_gatt_characteristic_update(
+-    uint16_t svc_handle,
+-    FlipperGattCharacteristicInstance* char_instance,
+-    const void* source);
+-
+-#ifdef __cplusplus
+-}
+-#endif
+\ No newline at end of file
+diff --git a/firmware/targets/f7/ble_glue/services/hid_service.c b/firmware/targets/f7/ble_glue/services/hid_service.c
+deleted file mode 100644
+index d3fad0108..000000000
+--- a/firmware/targets/f7/ble_glue/services/hid_service.c
++++ /dev/null
+@@ -1,366 +0,0 @@
+-#include "hid_service.h"
+-#include "app_common.h"
+-#include <ble/ble.h>
+-#include "gatt_char.h"
+-
+-#include <furi.h>
+-
+-#define TAG "BtHid"
+-
+-typedef enum {
+-    HidSvcGattCharacteristicProtocolMode = 0,
+-    HidSvcGattCharacteristicReportMap,
+-    HidSvcGattCharacteristicInfo,
+-    HidSvcGattCharacteristicCtrlPoint,
+-    HidSvcGattCharacteristicLed,
+-    HidSvcGattCharacteristicCount,
+-} HidSvcGattCharacteristicId;
+-
+-typedef struct {
+-    uint8_t report_idx;
+-    uint8_t report_type;
+-} HidSvcReportId;
+-
+-static_assert(sizeof(HidSvcReportId) == sizeof(uint16_t), "HidSvcReportId must be 2 bytes");
+-
+-static const Service_UUID_t hid_svc_uuid = {
+-    .Service_UUID_16 = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
+-};
+-
+-static bool
+-    hid_svc_char_desc_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
+-    const HidSvcReportId* report_id = context;
+-    *data_len = sizeof(HidSvcReportId);
+-    if(data) {
+-        *data = (const uint8_t*)report_id;
+-    }
+-    return false;
+-}
+-
+-typedef struct {
+-    const void* data_ptr;
+-    uint16_t data_len;
+-} HidSvcDataWrapper;
+-
+-static bool
+-    hid_svc_report_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
+-    const HidSvcDataWrapper* report_data = context;
+-    if(data) {
+-        *data = report_data->data_ptr;
+-        *data_len = report_data->data_len;
+-    } else {
+-        *data_len = HID_SVC_REPORT_MAP_MAX_LEN;
+-    }
+-    return false;
+-}
+-
+-// LED Descriptor params for BadBT
+-
+-static uint8_t led_desc_context_buf[2] = {HID_SVC_REPORT_COUNT + 1, 2};
+-
+-static FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_led = {
+-    .uuid_type = UUID_TYPE_16,
+-    .uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID,
+-    .max_length = HID_SVC_REPORT_REF_LEN,
+-    .data_callback.fn = hid_svc_char_desc_data_callback,
+-    .data_callback.context = led_desc_context_buf,
+-    .security_permissions = ATTR_PERMISSION_NONE,
+-    .access_permissions = ATTR_ACCESS_READ_WRITE,
+-    .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-    .is_variable = CHAR_VALUE_LEN_CONSTANT,
+-};
+-
+-static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteristicCount] = {
+-    [HidSvcGattCharacteristicProtocolMode] =
+-        {.name = "Protocol Mode",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = 1,
+-         .uuid.Char_UUID_16 = PROTOCOL_MODE_CHAR_UUID,
+-         .uuid_type = UUID_TYPE_16,
+-         .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP,
+-         .security_permissions = ATTR_PERMISSION_NONE,
+-         .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+-         .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-    [HidSvcGattCharacteristicReportMap] =
+-        {.name = "Report Map",
+-         .data_prop_type = FlipperGattCharacteristicDataCallback,
+-         .data.callback.fn = hid_svc_report_data_callback,
+-         .data.callback.context = NULL,
+-         .uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID,
+-         .uuid_type = UUID_TYPE_16,
+-         .char_properties = CHAR_PROP_READ,
+-         .security_permissions = ATTR_PERMISSION_NONE,
+-         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-         .is_variable = CHAR_VALUE_LEN_VARIABLE},
+-    [HidSvcGattCharacteristicInfo] =
+-        {.name = "HID Information",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = HID_SVC_INFO_LEN,
+-         .data.fixed.ptr = NULL,
+-         .uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID,
+-         .uuid_type = UUID_TYPE_16,
+-         .char_properties = CHAR_PROP_READ,
+-         .security_permissions = ATTR_PERMISSION_NONE,
+-         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-         .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-    [HidSvcGattCharacteristicCtrlPoint] =
+-        {.name = "HID Control Point",
+-         .data_prop_type = FlipperGattCharacteristicDataFixed,
+-         .data.fixed.length = HID_SVC_CONTROL_POINT_LEN,
+-         .uuid.Char_UUID_16 = HID_CONTROL_POINT_CHAR_UUID,
+-         .uuid_type = UUID_TYPE_16,
+-         .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP,
+-         .security_permissions = ATTR_PERMISSION_NONE,
+-         .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+-         .is_variable = CHAR_VALUE_LEN_CONSTANT},
+-    [HidSvcGattCharacteristicLed] =
+-        {
+-            .name =
+-                "HID LED State", // LED Characteristic and descriptor for BadBT to get numlock state for altchars
+-            .data_prop_type = FlipperGattCharacteristicDataFixed,
+-            .data.fixed.length = 1,
+-            .uuid.Char_UUID_16 = REPORT_CHAR_UUID,
+-            .uuid_type = UUID_TYPE_16,
+-            .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE,
+-            .security_permissions = ATTR_PERMISSION_NONE,
+-            .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE |
+-                             GATT_NOTIFY_WRITE_REQ_AND_WAIT_FOR_APPL_RESP,
+-            .is_variable = CHAR_VALUE_LEN_CONSTANT,
+-            .descriptor_params = &hid_svc_char_descr_led,
+-        },
+-};
+-
+-static const FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_template = {
+-    .uuid_type = UUID_TYPE_16,
+-    .uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID,
+-    .max_length = HID_SVC_REPORT_REF_LEN,
+-    .data_callback.fn = hid_svc_char_desc_data_callback,
+-    .security_permissions = ATTR_PERMISSION_NONE,
+-    .access_permissions = ATTR_ACCESS_READ_WRITE,
+-    .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-    .is_variable = CHAR_VALUE_LEN_CONSTANT,
+-};
+-
+-static const FlipperGattCharacteristicParams hid_svc_report_template = {
+-    .name = "Report",
+-    .data_prop_type = FlipperGattCharacteristicDataCallback,
+-    .data.callback.fn = hid_svc_report_data_callback,
+-    .data.callback.context = NULL,
+-    .uuid.Char_UUID_16 = REPORT_CHAR_UUID,
+-    .uuid_type = UUID_TYPE_16,
+-    .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+-    .security_permissions = ATTR_PERMISSION_NONE,
+-    .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+-    .is_variable = CHAR_VALUE_LEN_VARIABLE,
+-};
+-
+-typedef struct {
+-    uint16_t svc_handle;
+-    FlipperGattCharacteristicInstance chars[HidSvcGattCharacteristicCount];
+-    FlipperGattCharacteristicInstance input_report_chars[HID_SVC_INPUT_REPORT_COUNT];
+-    FlipperGattCharacteristicInstance output_report_chars[HID_SVC_OUTPUT_REPORT_COUNT];
+-    FlipperGattCharacteristicInstance feature_report_chars[HID_SVC_FEATURE_REPORT_COUNT];
+-    // led state
+-    HidLedStateEventCallback led_state_event_callback;
+-    void* led_state_ctx;
+-} HIDSvc;
+-
+-static HIDSvc* hid_svc = NULL;
+-
+-static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void* event) {
+-    SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
+-    hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
+-    evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
+-    // aci_gatt_attribute_modified_event_rp0* attribute_modified;
+-    if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
+-        if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
+-            // Process modification events
+-            ret = SVCCTL_EvtAckFlowEnable;
+-        } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
+-            // Process notification confirmation
+-            ret = SVCCTL_EvtAckFlowEnable;
+-        } else if(blecore_evt->ecode == ACI_GATT_WRITE_PERMIT_REQ_VSEVT_CODE) {
+-            // LED Characteristic and descriptor for BadBT to get numlock state for altchars
+-            //
+-            // Process write request
+-            aci_gatt_write_permit_req_event_rp0* req =
+-                (aci_gatt_write_permit_req_event_rp0*)blecore_evt->data;
+-
+-            furi_check(hid_svc->led_state_event_callback && hid_svc->led_state_ctx);
+-
+-            // this check is likely to be incorrect, it will actually work in our case
+-            // but we need to investigate gatt api to see what is the rules
+-            // that specify attibute handle value from char handle (or the reverse)
+-            if(req->Attribute_Handle == (hid_svc->chars[HidSvcGattCharacteristicLed].handle + 1)) {
+-                hid_svc->led_state_event_callback(req->Data[0], hid_svc->led_state_ctx);
+-                aci_gatt_write_resp(
+-                    req->Connection_Handle,
+-                    req->Attribute_Handle,
+-                    0x00, /* write_status = 0 (no error))*/
+-                    0x00, /* err_code */
+-                    req->Data_Length,
+-                    req->Data);
+-                aci_gatt_write_char_value(
+-                    req->Connection_Handle,
+-                    hid_svc->chars[HidSvcGattCharacteristicLed].handle,
+-                    req->Data_Length,
+-                    req->Data);
+-                ret = SVCCTL_EvtAckFlowEnable;
+-            }
+-        }
+-    }
+-    return ret;
+-}
+-
+-void hid_svc_start() {
+-    tBleStatus status;
+-    hid_svc = malloc(sizeof(HIDSvc));
+-
+-    // Register event handler
+-    SVCCTL_RegisterSvcHandler(hid_svc_event_handler);
+-    /**
+-     *  Add Human Interface Device Service
+-     */
+-    status = aci_gatt_add_service(
+-        UUID_TYPE_16,
+-        &hid_svc_uuid,
+-        PRIMARY_SERVICE,
+-        2 + /* protocol mode */
+-            (4 * HID_SVC_INPUT_REPORT_COUNT) + (3 * HID_SVC_OUTPUT_REPORT_COUNT) +
+-            (3 * HID_SVC_FEATURE_REPORT_COUNT) + 1 + 2 + 2 + 2 +
+-            4, /* Service + Report Map + HID Information + HID Control Point + LED state */
+-        &hid_svc->svc_handle);
+-    if(status) {
+-        FURI_LOG_E(TAG, "Failed to add HID service: %d", status);
+-    }
+-
+-    for(size_t i = 0; i < HidSvcGattCharacteristicCount; i++) {
+-        flipper_gatt_characteristic_init(
+-            hid_svc->svc_handle, &hid_svc_chars[i], &hid_svc->chars[i]);
+-    }
+-    uint8_t protocol_mode = 1;
+-    flipper_gatt_characteristic_update(
+-        hid_svc->svc_handle,
+-        &hid_svc->chars[HidSvcGattCharacteristicProtocolMode],
+-        &protocol_mode);
+-
+-    // reports
+-    FlipperGattCharacteristicDescriptorParams hid_svc_char_descr;
+-    FlipperGattCharacteristicParams report_char;
+-    HidSvcReportId report_id;
+-
+-    memcpy(&hid_svc_char_descr, &hid_svc_char_descr_template, sizeof(hid_svc_char_descr));
+-    memcpy(&report_char, &hid_svc_report_template, sizeof(report_char));
+-
+-    hid_svc_char_descr.data_callback.context = &report_id;
+-    report_char.descriptor_params = &hid_svc_char_descr;
+-
+-    typedef struct {
+-        uint8_t report_type;
+-        uint8_t report_count;
+-        FlipperGattCharacteristicInstance* chars;
+-    } HidSvcReportCharProps;
+-
+-    HidSvcReportCharProps hid_report_chars[] = {
+-        {0x01, HID_SVC_INPUT_REPORT_COUNT, hid_svc->input_report_chars},
+-        {0x02, HID_SVC_OUTPUT_REPORT_COUNT, hid_svc->output_report_chars},
+-        {0x03, HID_SVC_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
+-    };
+-
+-    for(size_t report_type_idx = 0; report_type_idx < COUNT_OF(hid_report_chars);
+-        report_type_idx++) {
+-        report_id.report_type = hid_report_chars[report_type_idx].report_type;
+-        for(size_t report_idx = 0; report_idx < hid_report_chars[report_type_idx].report_count;
+-            report_idx++) {
+-            report_id.report_idx = report_idx + 1;
+-            flipper_gatt_characteristic_init(
+-                hid_svc->svc_handle,
+-                &report_char,
+-                &hid_report_chars[report_type_idx].chars[report_idx]);
+-        }
+-    }
+-}
+-
+-bool hid_svc_update_report_map(const uint8_t* data, uint16_t len) {
+-    furi_assert(data);
+-    furi_assert(hid_svc);
+-
+-    HidSvcDataWrapper report_data = {
+-        .data_ptr = data,
+-        .data_len = len,
+-    };
+-    return flipper_gatt_characteristic_update(
+-        hid_svc->svc_handle, &hid_svc->chars[HidSvcGattCharacteristicReportMap], &report_data);
+-}
+-
+-bool hid_svc_update_input_report(uint8_t input_report_num, uint8_t* data, uint16_t len) {
+-    furi_assert(data);
+-    furi_assert(hid_svc);
+-    furi_assert(input_report_num < HID_SVC_INPUT_REPORT_COUNT);
+-
+-    HidSvcDataWrapper report_data = {
+-        .data_ptr = data,
+-        .data_len = len,
+-    };
+-    return flipper_gatt_characteristic_update(
+-        hid_svc->svc_handle, &hid_svc->input_report_chars[input_report_num], &report_data);
+-}
+-
+-bool hid_svc_update_info(uint8_t* data) {
+-    furi_assert(data);
+-    furi_assert(hid_svc);
+-
+-    return flipper_gatt_characteristic_update(
+-        hid_svc->svc_handle, &hid_svc->chars[HidSvcGattCharacteristicInfo], &data);
+-}
+-
+-void hid_svc_register_led_state_callback(HidLedStateEventCallback callback, void* context) {
+-    furi_assert(hid_svc);
+-    furi_assert(callback);
+-    furi_assert(context);
+-
+-    hid_svc->led_state_event_callback = callback;
+-    hid_svc->led_state_ctx = context;
+-}
+-
+-bool hid_svc_is_started() {
+-    return hid_svc != NULL;
+-}
+-
+-void hid_svc_stop() {
+-    tBleStatus status;
+-    if(hid_svc) {
+-        // Delete characteristics
+-        for(size_t i = 0; i < HidSvcGattCharacteristicCount; i++) {
+-            flipper_gatt_characteristic_delete(hid_svc->svc_handle, &hid_svc->chars[i]);
+-        }
+-
+-        typedef struct {
+-            uint8_t report_count;
+-            FlipperGattCharacteristicInstance* chars;
+-        } HidSvcReportCharProps;
+-
+-        HidSvcReportCharProps hid_report_chars[] = {
+-            {HID_SVC_INPUT_REPORT_COUNT, hid_svc->input_report_chars},
+-            {HID_SVC_OUTPUT_REPORT_COUNT, hid_svc->output_report_chars},
+-            {HID_SVC_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
+-        };
+-
+-        for(size_t report_type_idx = 0; report_type_idx < COUNT_OF(hid_report_chars);
+-            report_type_idx++) {
+-            for(size_t report_idx = 0; report_idx < hid_report_chars[report_type_idx].report_count;
+-                report_idx++) {
+-                flipper_gatt_characteristic_delete(
+-                    hid_svc->svc_handle, &hid_report_chars[report_type_idx].chars[report_idx]);
+-            }
+-        }
+-
+-        // Delete service
+-        status = aci_gatt_del_service(hid_svc->svc_handle);
+-        if(status) {
+-            FURI_LOG_E(TAG, "Failed to delete HID service: %d", status);
+-        }
+-        free(hid_svc);
+-        hid_svc = NULL;
+-    }
+-}
+diff --git a/firmware/targets/f7/ble_glue/services/serial_service_uuid.inc b/firmware/targets/f7/ble_glue/services/serial_service_uuid.inc
+deleted file mode 100644
+index a297d9ad6..000000000
+--- a/firmware/targets/f7/ble_glue/services/serial_service_uuid.inc
++++ /dev/null
+@@ -1,12 +0,0 @@
+-
+-static const Service_UUID_t service_uuid = { .Service_UUID_128 = \
+-    { 0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48, 0x2a, 0x98, 0x4a, 0x7f, 0x2e, 0xd5, 0xb3, 0xe5, 0x8f }};
+-
+-#define SERIAL_SVC_TX_CHAR_UUID      \
+-    { 0x00, 0x00, 0xfe, 0x61, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19 }
+-#define SERIAL_SVC_RX_CHAR_UUID      \
+-    { 0x00, 0x00, 0xfe, 0x62, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19 }
+-#define SERIAL_SVC_FLOW_CONTROL_UUID \
+-    { 0x00, 0x00, 0xfe, 0x63, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19 }
+-#define SERIAL_SVC_RPC_STATUS_UUID   \
+-    { 0x00, 0x00, 0xfe, 0x64, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19 }
+diff --git a/firmware/targets/f7/ble_glue/tl_dbg_conf.h b/firmware/targets/f7/ble_glue/tl_dbg_conf.h
+index daaa9d82b..ce58af32b 100644
+--- a/firmware/targets/f7/ble_glue/tl_dbg_conf.h
++++ b/firmware/targets/f7/ble_glue/tl_dbg_conf.h
+@@ -1,12 +1,39 @@
+-#pragma once
++/* USER CODE BEGIN Header */
++/**
++ ******************************************************************************
++  * File Name          : App/tl_dbg_conf.h
++  * Description        : Debug configuration file for stm32wpan transport layer interface.
++  *
++  ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under Ultimate Liberty license
++  * SLA0044, the "License"; You may not use this file except in compliance with
++  * the License. You may obtain a copy of the License at:
++  *                             www.st.com/SLA0044
++  *
++  ******************************************************************************
++  */
++/* USER CODE END Header */
+ 
+-#include "app_conf.h" /* required as some configuration used in dbg_trace.h are set there */
+-#include "dbg_trace.h"
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef __TL_DBG_CONF_H
++#define __TL_DBG_CONF_H
+ 
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
++/* USER CODE BEGIN Tl_Conf */
++
++/* Includes ------------------------------------------------------------------*/
++#include "app_conf.h" /* required as some configuration used in dbg_trace.h are set there */
++#include "dbg_trace.h"
++#include "hw_if.h"
++
+ /**
+  * Enable or Disable traces
+  * The raw data output is the hci binary packet format as specified by the BT specification *
+@@ -97,6 +124,12 @@ extern "C" {
+ #define TL_MM_DBG_MSG(...)
+ #endif
+ 
++/* USER CODE END Tl_Conf */
++
+ #ifdef __cplusplus
+ }
+ #endif
++
++#endif /*__TL_DBG_CONF_H */
++
++/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/ble_glue/utilities_conf.h b/firmware/targets/f7/ble_glue/utilities_conf.h
+new file mode 100644
+index 000000000..9c15f2263
+--- /dev/null
++++ b/firmware/targets/f7/ble_glue/utilities_conf.h
+@@ -0,0 +1,68 @@
++/* USER CODE BEGIN Header */
++/**
++ ******************************************************************************
++  * File Name          : utilities_conf.h
++  * Description        : Configuration file for STM32 Utilities.
++  *
++ ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under BSD 3-Clause license,
++  * the "License"; You may not use this file except in compliance with the
++  * License. You may obtain a copy of the License at:
++  *                        opensource.org/licenses/BSD-3-Clause
++  *
++  ******************************************************************************
++  */
++/* USER CODE END Header */
++
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef UTILITIES_CONF_H
++#define UTILITIES_CONF_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#include "cmsis_compiler.h"
++#include "string.h"
++#include <furi.h>
++
++/******************************************************************************
++ * common
++ ******************************************************************************/
++#define UTILS_ENTER_CRITICAL_SECTION() FURI_CRITICAL_ENTER()
++
++#define UTILS_EXIT_CRITICAL_SECTION() FURI_CRITICAL_EXIT()
++
++#define UTILS_MEMSET8(dest, value, size) memset(dest, value, size);
++
++/******************************************************************************
++ * tiny low power manager
++ * (any macro that does not need to be modified can be removed)
++ ******************************************************************************/
++#define UTIL_LPM_INIT_CRITICAL_SECTION()
++#define UTIL_LPM_ENTER_CRITICAL_SECTION() UTILS_ENTER_CRITICAL_SECTION()
++#define UTIL_LPM_EXIT_CRITICAL_SECTION() UTILS_EXIT_CRITICAL_SECTION()
++
++/******************************************************************************
++ * sequencer
++ * (any macro that does not need to be modified can be removed)
++ ******************************************************************************/
++#define UTIL_SEQ_INIT_CRITICAL_SECTION()
++#define UTIL_SEQ_ENTER_CRITICAL_SECTION() UTILS_ENTER_CRITICAL_SECTION()
++#define UTIL_SEQ_EXIT_CRITICAL_SECTION() UTILS_EXIT_CRITICAL_SECTION()
++#define UTIL_SEQ_CONF_TASK_NBR (32)
++#define UTIL_SEQ_CONF_PRIO_NBR (2)
++#define UTIL_SEQ_MEMSET8(dest, value, size) UTILS_MEMSET8(dest, value, size)
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /*UTILITIES_CONF_H */
++
++/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_bt.c b/firmware/targets/f7/furi_hal/furi_hal_bt.c
+index 9defefbfe..ce6e9e291 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_bt.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_bt.c
+@@ -2,18 +2,15 @@
+ 
+ #include <ble/ble.h>
+ #include <interface/patterns/ble_thread/shci/shci.h>
+-
+ #include <stm32wbxx.h>
+-#include <stm32wbxx_ll_hsem.h>
+-
+-#include <hsem_map.h>
+ 
+ #include <furi_hal_version.h>
+ #include <furi_hal_power.h>
+ #include <furi_hal_bt_hid.h>
+ #include <furi_hal_bt_serial.h>
+ #include <furi_hal_bus.c>
+-#include <services/battery_service.h>
++#include "battery_service.h"
++
+ #include <furi.h>
+ 
+ #define TAG "FuriHalBt"
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_bt_hid.c b/firmware/targets/f7/furi_hal/furi_hal_bt_hid.c
+index 2bbfc1523..8e05a9904 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_bt_hid.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_bt_hid.c
+@@ -1,11 +1,11 @@
+ #include <furi_hal_bt_hid.h>
+ #include <furi_hal_usb_hid.h>
+-#include <services/dev_info_service.h>
+-#include <services/battery_service.h>
+-#include <services/hid_service.h>
++#include "usb_hid.h"
++#include "dev_info_service.h"
++#include "battery_service.h"
++#include "hid_service.h"
+ 
+ #include <furi.h>
+-#include <usb_hid.h>
+ 
+ #define FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION (0x0101)
+ #define FURI_HAL_BT_INFO_COUNTRY_CODE (0x00)
+@@ -221,7 +221,7 @@ void furi_hal_bt_hid_start() {
+         FURI_HAL_BT_HID_INFO_FLAG_REMOTE_WAKE_MSK |
+             FURI_HAL_BT_HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK,
+     };
+-    hid_svc_update_info(hid_info_val);
++    hid_svc_update_info(hid_info_val, sizeof(hid_info_val));
+ }
+ 
+ void furi_hal_bt_hid_stop() {
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_bt_serial.c b/firmware/targets/f7/furi_hal/furi_hal_bt_serial.c
+index 2927d946f..2539e6bd0 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_bt_serial.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_bt_serial.c
+@@ -1,7 +1,7 @@
+ #include <furi_hal_bt_serial.h>
+-#include <services/dev_info_service.h>
+-#include <services/battery_service.h>
+-#include <services/serial_service.h>
++#include "dev_info_service.h"
++#include "battery_service.h"
++#include "serial_service.h"
+ 
+ #include <furi.h>
+ 
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_clock.c b/firmware/targets/f7/furi_hal/furi_hal_clock.c
+index 86c8fd467..736ad9f7c 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_clock.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_clock.c
+@@ -4,26 +4,19 @@
+ 
+ #include <stm32wbxx_ll_pwr.h>
+ #include <stm32wbxx_ll_rcc.h>
+-#include <stm32wbxx_ll_hsem.h>
+ #include <stm32wbxx_ll_utils.h>
+ #include <stm32wbxx_ll_cortex.h>
+ 
+-#include <hsem_map.h>
+-#include <interface/patterns/ble_thread/shci/shci.h>
+-
+ #define TAG "FuriHalClock"
+ 
+-#define CPU_CLOCK_EARLY_HZ 4000000
+-#define CPU_CLOCK_HSI16_HZ 16000000
+-#define CPU_CLOCK_HSE_HZ 32000000
+-#define CPU_CLOCK_PLL_HZ 64000000
+-
++#define CPU_CLOCK_HZ_EARLY 4000000
++#define CPU_CLOCK_HZ_MAIN 64000000
+ #define TICK_INT_PRIORITY 15U
+ #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
+ #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
+ 
+ void furi_hal_clock_init_early() {
+-    LL_SetSystemCoreClock(CPU_CLOCK_EARLY_HZ);
++    LL_SetSystemCoreClock(CPU_CLOCK_HZ_EARLY);
+     LL_Init1msTick(SystemCoreClock);
+ }
+ 
+@@ -31,6 +24,11 @@ void furi_hal_clock_deinit_early() {
+ }
+ 
+ void furi_hal_clock_init() {
++    /* Prepare Flash memory for 64MHz system clock */
++    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
++    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
++        ;
++
+     /* HSE and HSI configuration and activation */
+     LL_RCC_HSE_SetCapacitorTuning(0x26);
+     LL_RCC_HSE_Enable();
+@@ -51,6 +49,9 @@ void furi_hal_clock_init() {
+     while(!LS_CLOCK_IS_READY())
+         ;
+ 
++    /* RF wakeup */
++    LL_RCC_SetRFWKPClockSource(LL_RCC_RFWKP_CLKSOURCE_LSE);
++
+     LL_EXTI_EnableIT_0_31(
+         LL_EXTI_LINE_18); /* Why? Because that's why. See RM0434, Table 61. CPU1 vector table. */
+     LL_EXTI_EnableRisingTrig_0_31(LL_EXTI_LINE_18);
+@@ -78,17 +79,12 @@ void furi_hal_clock_init() {
+         ;
+ 
+     /* Sysclk activation on the main PLL */
+-    /* Set CPU1 prescaler */
++    /* Set CPU1 prescaler*/
+     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+ 
+-    /* Set CPU2 prescaler, from this point we are not allowed to touch it. */
++    /* Set CPU2 prescaler*/
+     LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
+ 
+-    /* Prepare Flash memory for work on 64MHz system clock */
+-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
+-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
+-        ;
+-
+     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+         ;
+@@ -108,7 +104,7 @@ void furi_hal_clock_init() {
+         ;
+ 
+     /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
+-    LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
++    LL_SetSystemCoreClock(CPU_CLOCK_HZ_MAIN);
+ 
+     /* Update the time base */
+     LL_Init1msTick(SystemCoreClock);
+@@ -126,7 +122,7 @@ void furi_hal_clock_init() {
+     FURI_LOG_I(TAG, "Init OK");
+ }
+ 
+-void furi_hal_clock_switch_hse2hsi() {
++void furi_hal_clock_switch_to_hsi() {
+     LL_RCC_HSI_Enable();
+ 
+     while(!LL_RCC_HSI_IsReady())
+@@ -138,77 +134,46 @@ void furi_hal_clock_switch_hse2hsi() {
+     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI)
+         ;
+ 
++    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
++
+     LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
+     while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0)
+         ;
+ }
+ 
+-void furi_hal_clock_switch_hsi2hse() {
++void furi_hal_clock_switch_to_pll() {
+ #ifdef FURI_HAL_CLOCK_TRACK_STARTUP
+     uint32_t clock_start_time = DWT->CYCCNT;
+ #endif
+ 
+     LL_RCC_HSE_Enable();
+-    while(!LL_RCC_HSE_IsReady())
+-        ;
+-
+-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
+-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1)
+-        ;
+-
+-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSE);
+-
+-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE)
+-        ;
+-
+-#ifdef FURI_HAL_CLOCK_TRACK_STARTUP
+-    uint32_t total = DWT->CYCCNT - clock_start_time;
+-    if(total > (20 * 0x148)) {
+-        furi_crash("Slow HSE/PLL startup");
+-    }
+-#endif
+-}
+-
+-bool furi_hal_clock_switch_hse2pll() {
+-    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+-
+     LL_RCC_PLL_Enable();
+     LL_RCC_PLLSAI1_Enable();
+ 
++    while(!LL_RCC_HSE_IsReady())
++        ;
+     while(!LL_RCC_PLL_IsReady())
+         ;
+     while(!LL_RCC_PLLSAI1_IsReady())
+         ;
+ 
+-    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL) != SHCI_Success) {
+-        return false;
+-    }
+-
+-    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+-
+-    LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
+-    SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
++    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
+ 
+-    return true;
+-}
++    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
++    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
++        ;
+ 
+-bool furi_hal_clock_switch_pll2hse() {
+-    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
++    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+ 
+-    LL_RCC_HSE_Enable();
+-    while(!LL_RCC_HSE_IsReady())
++    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+         ;
+ 
+-    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE) != SHCI_Success) {
+-        return false;
++#ifdef FURI_HAL_CLOCK_TRACK_STARTUP
++    uint32_t total = DWT->CYCCNT - clock_start_time;
++    if(total > (20 * 0x148)) {
++        furi_crash("Slow HSE/PLL startup");
+     }
+-
+-    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+-
+-    LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
+-    SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
+-
+-    return true;
++#endif
+ }
+ 
+ void furi_hal_clock_suspend_tick() {
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_clock.h b/firmware/targets/f7/furi_hal/furi_hal_clock.h
+index 3100b619f..5e651bbd3 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_clock.h
++++ b/firmware/targets/f7/furi_hal/furi_hal_clock.h
+@@ -1,12 +1,11 @@
+ #pragma once
+ 
+-#include <stm32wbxx_ll_rcc.h>
+-#include <stdbool.h>
+-
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
++#include <stm32wbxx_ll_rcc.h>
++
+ typedef enum {
+     FuriHalClockMcoLse,
+     FuriHalClockMcoSysclk,
+@@ -41,23 +40,11 @@ void furi_hal_clock_deinit_early();
+ /** Initialize clocks */
+ void furi_hal_clock_init();
+ 
+-/** Switch clock from HSE to HSI */
+-void furi_hal_clock_switch_hse2hsi();
+-
+-/** Switch clock from HSI to HSE */
+-void furi_hal_clock_switch_hsi2hse();
+-
+-/** Switch clock from HSE to PLL
+- *
+- * @return     true if changed, false if failed or not possible at this moment
+- */
+-bool furi_hal_clock_switch_hse2pll();
++/** Switch to HSI clock */
++void furi_hal_clock_switch_to_hsi();
+ 
+-/** Switch clock from PLL to HSE
+- *
+- * @return     true if changed, false if failed or not possible at this moment
+- */
+-bool furi_hal_clock_switch_pll2hse();
++/** Switch to PLL clock */
++void furi_hal_clock_switch_to_pll();
+ 
+ /** Stop SysTick counter without resetting */
+ void furi_hal_clock_suspend_tick();
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_console.c b/firmware/targets/f7/furi_hal/furi_hal_console.c
+index 0b113d2da..2bdc57250 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_console.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_console.c
+@@ -5,6 +5,8 @@
+ #include <stm32wbxx_ll_gpio.h>
+ #include <stm32wbxx_ll_usart.h>
+ 
++#include <utilities_conf.h>
++
+ #include <furi.h>
+ 
+ #define TAG "FuriHalConsole"
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_flash.c b/firmware/targets/f7/furi_hal/furi_hal_flash.c
+index bc65b29eb..796d20b19 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_flash.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_flash.c
+@@ -7,9 +7,6 @@
+ #include <interface/patterns/ble_thread/shci/shci.h>
+ 
+ #include <stm32wbxx.h>
+-#include <stm32wbxx_ll_hsem.h>
+-
+-#include <hsem_map.h>
+ 
+ #define TAG "FuriHalFlash"
+ 
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_memory.c b/firmware/targets/f7/furi_hal/furi_hal_memory.c
+index 3f8df1f44..7f69b90ca 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_memory.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_memory.c
+@@ -4,6 +4,9 @@
+ 
+ #define TAG "FuriHalMemory"
+ 
++// STM(TM) Copro(TM) bug(TM) workaround size
++#define RAM2B_COPRO_GAP_SIZE_KB 2
++
+ typedef enum {
+     SRAM_A,
+     SRAM_B,
+@@ -35,20 +38,13 @@ void furi_hal_memory_init() {
+     uint32_t sbrsa = (FLASH->SRRVR & FLASH_SRRVR_SBRSA_Msk) >> FLASH_SRRVR_SBRSA_Pos;
+     uint32_t snbrsa = (FLASH->SRRVR & FLASH_SRRVR_SNBRSA_Msk) >> FLASH_SRRVR_SNBRSA_Pos;
+ 
+-    // STM(TM) Copro(TM) bug(TM): SNBRSA is incorrect if stack version is higher than 1.13 and lower than 1.17.2+
+-    // Radio core started, but not yet ready, so we'll try to guess
+-    // This will be true only if BLE light radio stack used,
+-    // 0x0D is known to be incorrect, 0x0B is known to be correct since 1.17.2+
+-    // Lower value by 2 pages to match real memory layout
+-    if(snbrsa > 0x0B) {
+-        FURI_LOG_E(TAG, "SNBRSA workaround");
+-        snbrsa -= 2;
+-    }
+-
+     uint32_t sram2a_busy_size = (uint32_t)&__sram2a_free__ - (uint32_t)&__sram2a_start__;
+     uint32_t sram2a_unprotected_size = (sbrsa)*1024;
+     uint32_t sram2b_unprotected_size = (snbrsa)*1024;
+ 
++    // STM(TM) Copro(TM) bug(TM) workaround
++    sram2b_unprotected_size -= 1024 * RAM2B_COPRO_GAP_SIZE_KB;
++
+     memory->region[SRAM_A].start = (uint8_t*)&__sram2a_free__;
+     memory->region[SRAM_B].start = (uint8_t*)&__sram2b_start__;
+ 
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_os.c b/firmware/targets/f7/furi_hal/furi_hal_os.c
+index 046cf79dc..3fc1fbea8 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_os.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_os.c
+@@ -170,35 +170,27 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
+         return;
+     }
+ 
+-    // Core2 shenanigans takes extra time, so we want to compensate tick skew by reducing sleep duration by 1 tick
+-    TickType_t unexpected_idle_ticks = expected_idle_ticks - 1;
+-
+     // Limit amount of ticks to maximum that timer can count
+-    if(unexpected_idle_ticks > FURI_HAL_OS_MAX_SLEEP) {
+-        unexpected_idle_ticks = FURI_HAL_OS_MAX_SLEEP;
++    if(expected_idle_ticks > FURI_HAL_OS_MAX_SLEEP) {
++        expected_idle_ticks = FURI_HAL_OS_MAX_SLEEP;
+     }
+ 
+     // Stop IRQ handling, no one should disturb us till we finish
+     __disable_irq();
+-    do {
+-        // Confirm OS that sleep is still possible
+-        if(eTaskConfirmSleepModeStatus() == eAbortSleep || furi_hal_os_is_pending_irq()) {
+-            break;
+-        }
+ 
+-        // Sleep and track how much ticks we spent sleeping
+-        uint32_t completed_ticks = furi_hal_os_sleep(unexpected_idle_ticks);
+-        // Notify system about time spent in sleep
+-        if(completed_ticks > 0) {
+-            if(completed_ticks > expected_idle_ticks) {
+-#ifdef FURI_HAL_OS_DEBUG
+-                furi_hal_console_printf(">%lu\r\n", completed_ticks - expected_idle_ticks);
+-#endif
+-                completed_ticks = expected_idle_ticks;
+-            }
+-            vTaskStepTick(completed_ticks);
+-        }
+-    } while(0);
++    // Confirm OS that sleep is still possible
++    if(eTaskConfirmSleepModeStatus() == eAbortSleep || furi_hal_os_is_pending_irq()) {
++        __enable_irq();
++        return;
++    }
++
++    // Sleep and track how much ticks we spent sleeping
++    uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);
++    // Notify system about time spent in sleep
++    if(completed_ticks > 0) {
++        vTaskStepTick(MIN(completed_ticks, expected_idle_ticks));
++    }
++
+     // Reenable IRQ
+     __enable_irq();
+ }
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_power.c b/firmware/targets/f7/furi_hal/furi_hal_power.c
+index c14de8569..035919d78 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_power.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_power.c
+@@ -13,7 +13,7 @@
+ #include <stm32wbxx_ll_cortex.h>
+ #include <stm32wbxx_ll_gpio.h>
+ 
+-#include <hsem_map.h>
++#include <hw_conf.h>
+ #include <bq27220.h>
+ #include <bq27220_data_memory.h>
+ #include <bq25896.h>
+@@ -162,11 +162,6 @@ static inline void furi_hal_power_resume_aux_periphs() {
+ static inline void furi_hal_power_deep_sleep() {
+     furi_hal_power_suspend_aux_periphs();
+ 
+-    if(!furi_hal_clock_switch_pll2hse()) {
+-        // Hello core2 my old friend
+-        return;
+-    }
+-
+     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
+         ;
+ 
+@@ -176,13 +171,13 @@ static inline void furi_hal_power_deep_sleep() {
+             LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
+ 
+             // The switch on HSI before entering Stop Mode is required
+-            furi_hal_clock_switch_hse2hsi();
++            furi_hal_clock_switch_to_hsi();
+         }
+     } else {
+         /**
+          * The switch on HSI before entering Stop Mode is required 
+          */
+-        furi_hal_clock_switch_hse2hsi();
++        furi_hal_clock_switch_to_hsi();
+     }
+ 
+     /* Release RCC semaphore */
+@@ -206,14 +201,12 @@ static inline void furi_hal_power_deep_sleep() {
+     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
+         ;
+ 
+-    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE) {
+-        furi_hal_clock_switch_hsi2hse();
++    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
++        furi_hal_clock_switch_to_pll();
+     }
+ 
+     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
+ 
+-    furi_check(furi_hal_clock_switch_hse2pll());
+-
+     furi_hal_power_resume_aux_periphs();
+     furi_hal_rtc_sync_shadow();
+ }
+diff --git a/firmware/targets/f7/furi_hal/furi_hal_random.c b/firmware/targets/f7/furi_hal/furi_hal_random.c
+index 225519303..cf4b552f6 100644
+--- a/firmware/targets/f7/furi_hal/furi_hal_random.c
++++ b/firmware/targets/f7/furi_hal/furi_hal_random.c
+@@ -6,7 +6,7 @@
+ #include <stm32wbxx_ll_rcc.h>
+ #include <stm32wbxx_ll_hsem.h>
+ 
+-#include <hsem_map.h>
++#include <hw_conf.h>
+ 
+ #define TAG "FuriHalRandom"
+ 
+diff --git a/firmware/targets/furi_hal_include/furi_hal_bt.h b/firmware/targets/furi_hal_include/furi_hal_bt.h
+index 25a20c4c3..b7d4eae1a 100644
+--- a/firmware/targets/furi_hal_include/furi_hal_bt.h
++++ b/firmware/targets/furi_hal_include/furi_hal_bt.h
+@@ -8,7 +8,7 @@
+ #include <furi.h>
+ #include <stdbool.h>
+ #include <gap.h>
+-#include <services/serial_service.h>
++#include <serial_service.h>
+ #include <ble_glue.h>
+ #include <ble_app.h>
+ 
+diff --git a/firmware/targets/furi_hal_include/furi_hal_bt_serial.h b/firmware/targets/furi_hal_include/furi_hal_bt_serial.h
+index 0472d31d1..1b6e79ab0 100644
+--- a/firmware/targets/furi_hal_include/furi_hal_bt_serial.h
++++ b/firmware/targets/furi_hal_include/furi_hal_bt_serial.h
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include <services/serial_service.h>
++#include "serial_service.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+diff --git a/lib/stm32wb.scons b/lib/stm32wb.scons
+index 8a8ad9644..94a1c7075 100644
+--- a/lib/stm32wb.scons
++++ b/lib/stm32wb.scons
+@@ -64,6 +64,7 @@ sources += [
+     "stm32wb_copro/wpan/ble/core/auto/ble_l2cap_aci.c",
+     "stm32wb_copro/wpan/ble/core/template/osal.c",
+     "stm32wb_copro/wpan/utilities/dbg_trace.c",
++    "stm32wb_copro/wpan/utilities/otp.c",
+     "stm32wb_copro/wpan/utilities/stm_list.c",
+ ]
+ 
+diff --git a/lib/stm32wb_copro b/lib/stm32wb_copro
+index bbccbefae..6c9c54f05 160000
+--- a/lib/stm32wb_copro
++++ b/lib/stm32wb_copro
+@@ -1 +1 @@
+-Subproject commit bbccbefae26a2301b8a4b58e57ebdeb93c08269b
++Subproject commit 6c9c54f05669b2c4d436df58bb691d3b0d7c86df
+diff --git a/scripts/ob.data b/scripts/ob.data
+index 9f6f1d081..605faccbf 100644
+--- a/scripts/ob.data
++++ b/scripts/ob.data
+@@ -14,15 +14,15 @@ IWDGSTOP:0x1:rw
+ IWDGSW:0x1:rw
+ IPCCDBA:0x0:rw
+ ESE:0x1:r
+-SFSA:0xD7:r
++SFSA:0xD5:r
+ FSD:0x0:r
+ DDS:0x1:r
+ C2OPT:0x1:r
+ NBRSD:0x0:r
+-SNBRSA:0xB:r
++SNBRSA:0xD:r
+ BRSD:0x0:r
+ SBRSA:0x12:r
+-SBRV:0x35C00:r
++SBRV:0x35400:r
+ PCROP1A_STRT:0x1FF:r
+ PCROP1A_END:0x0:r
+ PCROP_RDP:0x1:rw
+diff --git a/scripts/update.py b/scripts/update.py
+index da4a93aee..e6c69d35f 100755
+--- a/scripts/update.py
++++ b/scripts/update.py
+@@ -74,9 +74,6 @@ class Main(App):
+         self.parser_generate.add_argument(
+             "--I-understand-what-I-am-doing", dest="disclaimer", required=False
+         )
+-        self.parser_generate.add_argument(
+-            "--stackversion", dest="stack_version", required=False, default=""
+-        )
+ 
+         self.parser_generate.set_defaults(func=self.generate)
+ 
+@@ -97,13 +94,6 @@ class Main(App):
+             if not self.args.radiotype:
+                 raise ValueError("Missing --radiotype")
+             radio_meta = CoproBinary(self.args.radiobin)
+-            if self.args.stack_version:
+-                actual_stack_version_str = f"{radio_meta.img_sig.version_major}.{radio_meta.img_sig.version_minor}.{radio_meta.img_sig.version_sub}"
+-                if actual_stack_version_str != self.args.stack_version:
+-                    self.logger.error(
+-                        f"Stack version mismatch: expected {self.args.stack_version}, actual {actual_stack_version_str}"
+-                    )
+-                    return 1
+             radio_version = self.copro_version_as_int(radio_meta, self.args.radiotype)
+             if (
+                 get_stack_type(self.args.radiotype) not in self.WHITELISTED_STACK_TYPES
