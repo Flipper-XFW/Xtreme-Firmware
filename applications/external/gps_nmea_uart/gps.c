@@ -93,6 +93,14 @@ int32_t gps_app(void* p) {
         return 255;
     }
 
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
+
     // set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, gps_uart);
@@ -185,6 +193,10 @@ int32_t gps_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(gps_uart->mutex);
     gps_uart_disable(gps_uart);
+
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }
