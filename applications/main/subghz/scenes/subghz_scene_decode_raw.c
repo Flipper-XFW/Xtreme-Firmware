@@ -6,7 +6,8 @@
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
     FuriString* history_stat_str = furi_string_alloc();
-    if(!subghz_history_get_text_space_left(subghz->history, history_stat_str)) {
+    if(!subghz_history_get_text_space_left(
+           subghz->history, history_stat_str, subghz->gps->satellites)) {
         FuriString* frequency_str = furi_string_alloc();
         FuriString* modulation_str = furi_string_alloc();
 
@@ -51,6 +52,8 @@ static void subghz_scene_add_to_history_callback(
     FuriString* item_time = furi_string_alloc();
     uint16_t idx = subghz_history_get_item(subghz->history);
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
+    preset.latitude = subghz->gps->latitude;
+    preset.longitude = subghz->gps->longitude;
 
     if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
         furi_string_reset(item_name);

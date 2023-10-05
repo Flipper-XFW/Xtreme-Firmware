@@ -17,6 +17,11 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, v
     } else if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoSave);
+    } else if(
+        (result == GuiButtonTypeLeft) && (type == InputTypeShort) &&
+        subghz->last_settings->gps_enabled) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoSats);
     }
 }
 
@@ -37,6 +42,8 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
             subghz->txrx,
             furi_string_get_cstr(preset->name),
             preset->frequency,
+            0,
+            0,
             preset->data,
             preset->data_size);
 
@@ -73,6 +80,15 @@ void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
         subghz_protocol_decoder_base_get_string(subghz_txrx_get_decoder(subghz->txrx), text);
         widget_add_string_multiline_element(
             subghz->widget, 0, 0, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(text));
+
+        if(subghz->last_settings->gps_enabled) {
+            widget_add_button_element(
+                subghz->widget,
+                GuiButtonTypeLeft,
+                "Geo",
+                subghz_scene_receiver_info_callback,
+                subghz);
+        }
 
         furi_string_free(frequency_str);
         furi_string_free(modulation_str);
@@ -111,7 +127,7 @@ void subghz_scene_receiver_info_on_enter(void* context) {
 
     subghz_scene_receiver_info_draw_widget(subghz);
 
-    if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
+    if(!subghz_history_get_text_space_left(subghz->history, NULL, 0)) {
         subghz->state_notifications = SubGhzNotificationStateRx;
     }
 }
@@ -147,7 +163,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 subghz_txrx_rx_start(subghz->txrx);
 
                 subghz_txrx_hopper_unpause(subghz->txrx);
-                if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
+                if(!subghz_history_get_text_space_left(subghz->history, NULL, 0)) {
                     subghz->state_notifications = SubGhzNotificationStateRx;
                 }
             }
@@ -168,6 +184,13 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             }
             return true;
+        } else if(event.event == SubGhzCustomEventSceneReceiverInfoSats) {
+            if(subghz->last_settings->gps_enabled) {
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowGps);
+                return true;
+            } else {
+                return false;
+            }
         }
     } else if(event.type == SceneManagerEventTypeTick) {
         if(subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
@@ -178,7 +201,15 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             notification_message(subghz->notifications, &sequence_blink_magenta_10);
             break;
         case SubGhzNotificationStateRx:
-            notification_message(subghz->notifications, &sequence_blink_cyan_10);
+            if(subghz->last_settings->gps_enabled) {
+                if(subghz->gps->satellites > 0) {
+                    notification_message(subghz->notifications, &sequence_blink_green_10);
+                } else {
+                    notification_message(subghz->notifications, &sequence_blink_red_10);
+                }
+            } else {
+                notification_message(subghz->notifications, &sequence_blink_cyan_10);
+            }
             break;
         case SubGhzNotificationStateRxDone:
             notification_message(subghz->notifications, &sequence_blink_green_100);

@@ -39,6 +39,7 @@
 #include "helpers/subghz_threshold_rssi.h"
 
 #include "helpers/subghz_txrx.h"
+#include "helpers/subghz_gps.h"
 
 #define SUBGHZ_MAX_LEN_NAME 64
 #define SUBGHZ_EXT_PRESET_NAME true
@@ -93,6 +94,7 @@ struct SubGhz {
     SubGhzThresholdRssi* threshold_rssi;
     SubGhzRxKeyState rx_key_state;
     SubGhzHistory* history;
+    SubGhzGPS* gps;
 
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;

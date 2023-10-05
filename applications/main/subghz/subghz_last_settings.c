@@ -15,6 +15,7 @@
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER "ExtPower"
 #define SUBGHZ_LAST_SETTING_FIELD_TIMESTAMP_FILE_NAMES "TimestampNames"
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER_AMP "ExtPowerAmp"
+#define SUBGHZ_LAST_SETTING_FIELD_GPS "Gps"
 #define SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE "Hopping"
 #define SUBGHZ_LAST_SETTING_FIELD_IGNORE_FILTER "IgnoreFilter"
 #define SUBGHZ_LAST_SETTING_FIELD_FILTER "Filter"
@@ -55,6 +56,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool ignore_filter_was_read = false;
     bool frequency_analyzer_feedback_level_was_read = false;
     bool frequency_analyzer_trigger_was_read = false;
+    bool temp_gps_enabled = false;
 
     if(FSE_OK == storage_sd_status(storage) && SUBGHZ_LAST_SETTINGS_PATH &&
        flipper_format_file_open_existing(fff_data_file, SUBGHZ_LAST_SETTINGS_PATH)) {
@@ -93,6 +95,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             (bool*)&temp_external_module_power_amp,
             1);
         flipper_format_read_bool(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_GPS, (bool*)&temp_gps_enabled, 1);
+        flipper_format_read_bool(
             fff_data_file,
             SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE,
             (bool*)&temp_enable_hopping,
@@ -121,6 +125,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->external_module_enabled = false;
         instance->timestamp_file_names = false;
         instance->external_module_power_amp = false;
+        instance->gps_enabled = false;
         instance->enable_hopping = false;
         instance->ignore_filter = 0x00;
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
@@ -175,6 +180,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
 #endif
         // Set globally in furi hal
         furi_hal_subghz_set_ext_power_amp(instance->external_module_power_amp);
+
+        instance->gps_enabled = temp_gps_enabled;
     }
 
     flipper_format_file_close(fff_data_file);
@@ -252,6 +259,10 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER_AMP,
                &instance->external_module_power_amp,
                1)) {
+            break;
+        }
+        if(!flipper_format_insert_or_update_bool(
+               file, SUBGHZ_LAST_SETTING_FIELD_GPS, &instance->gps_enabled, 1)) {
             break;
         }
         if(!flipper_format_insert_or_update_bool(

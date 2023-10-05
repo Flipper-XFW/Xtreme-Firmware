@@ -97,12 +97,16 @@ void subghz_txrx_set_preset(
     SubGhzTxRx* instance,
     const char* preset_name,
     uint32_t frequency,
+    float latitude,
+    float longitude,
     uint8_t* preset_data,
     size_t preset_data_size) {
     furi_assert(instance);
     furi_string_set(instance->preset->name, preset_name);
     SubGhzRadioPreset* preset = instance->preset;
     preset->frequency = frequency;
+    preset->latitude = latitude;
+    preset->longitude = longitude;
     preset->data = preset_data;
     preset->data_size = preset_data_size;
 }
@@ -151,6 +155,20 @@ void subghz_txrx_get_frequency_and_modulation(
         } else {
             furi_string_printf(modulation, "%.2s", furi_string_get_cstr(preset->name));
         }
+    }
+}
+
+void subghz_txrx_get_latitude_and_longitude(
+    SubGhzTxRx* instance,
+    FuriString* latitude,
+    FuriString* longitude) {
+    furi_assert(instance);
+    SubGhzRadioPreset* preset = instance->preset;
+    if(latitude != NULL) {
+        furi_string_printf(latitude, "%f", (double)preset->latitude);
+    }
+    if(longitude != NULL) {
+        furi_string_printf(longitude, "%f", (double)preset->longitude);
     }
 }
 
@@ -680,7 +698,7 @@ void subghz_txrx_set_default_preset(SubGhzTxRx* instance, uint32_t frequency) {
     if(frequency == 0) {
         frequency = subghz_setting_get_default_frequency(subghz_txrx_get_setting(instance));
     }
-    subghz_txrx_set_preset(instance, default_modulation, frequency, NULL, 0);
+    subghz_txrx_set_preset(instance, default_modulation, frequency, 0, 0, NULL, 0);
 }
 
 const char*
@@ -695,6 +713,8 @@ const char*
         instance,
         preset_name,
         frequency,
+        0,
+        0,
         subghz_setting_get_preset_data(setting, index),
         subghz_setting_get_preset_data_size(setting, index));
 

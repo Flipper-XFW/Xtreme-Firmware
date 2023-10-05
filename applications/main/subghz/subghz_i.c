@@ -71,6 +71,8 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     SubGhzLoadKeyState load_key_state = SubGhzLoadKeyStateParseErr;
     FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
+    float temp_lat = NAN; // NAN or 0.0?? because 0.0 is valid value
+    float temp_lon = NAN;
 
     do {
         stream_clean(fff_data_stream);
@@ -136,12 +138,26 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
                 break;
             }
         }
+
+        //Load latitute and longitude if present
+        if(!flipper_format_read_float(fff_data_file, "Latitute", (float*)&temp_lat, 1)) {
+            FURI_LOG_E(TAG, "Missing Latitude (optional)");
+        }
+        flipper_format_rewind(fff_data_file);
+
+        if(!flipper_format_read_float(fff_data_file, "Longitude", (float*)&temp_lon, 1)) {
+            FURI_LOG_E(TAG, "Missing Longitude (optional)");
+        }
+        flipper_format_rewind(fff_data_file);
+
         size_t preset_index =
             subghz_setting_get_inx_preset_by_name(setting, furi_string_get_cstr(temp_str));
         subghz_txrx_set_preset(
             subghz->txrx,
             furi_string_get_cstr(temp_str),
             temp_data32,
+            temp_lat,
+            temp_lon,
             subghz_setting_get_preset_data(setting, preset_index),
             subghz_setting_get_preset_data_size(setting, preset_index));
 

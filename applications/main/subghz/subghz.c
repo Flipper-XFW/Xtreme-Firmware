@@ -244,6 +244,8 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     //Init Error_str
     subghz->error_str = furi_string_alloc();
 
+    subghz->gps = subghz_gps_init();
+
     return subghz;
 }
 
@@ -339,6 +341,8 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     // Path strings
     furi_string_free(subghz->file_path);
     furi_string_free(subghz->file_path_tmp);
+
+    subghz_gps_deinit(subghz->gps);
 
     // The rest
     free(subghz);

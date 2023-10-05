@@ -32,6 +32,12 @@ const char* const debug_pin_text[DEBUG_P_COUNT] = {
     "17(1W)",
 };
 
+#define GPS_COUNT 2
+const char* const gps_text[GPS_COUNT] = {
+    "OFF",
+    "ON",
+};
+
 #define DEBUG_COUNTER_COUNT 13
 const char* const debug_counter_text[DEBUG_COUNTER_COUNT] = {
     "+1",
@@ -115,6 +121,17 @@ static void subghz_scene_reciever_config_set_ext_mod_power_amp_text(VariableItem
     }
 }
 
+static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, gps_text[index]);
+
+    subghz->last_settings->gps_enabled = index == 1;
+    subghz_last_settings_save(
+        subghz->last_settings); //TODO, make it to choose baudrate. now it is 9600
+}
+
 static void subghz_scene_receiver_config_set_timestamp_file_names(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -156,6 +173,12 @@ void subghz_scene_radio_settings_on_enter(void* context) {
     value_index = subghz->last_settings->external_module_power_amp ? 1 : 0;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, ext_mod_power_amp_text[value_index]);
+
+    item = variable_item_list_add(
+        variable_item_list, "GPS", GPS_COUNT, subghz_scene_receiver_config_set_gps, subghz);
+    value_index = subghz->last_settings->gps_enabled ? 1 : 0;
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, gps_text[value_index]);
 
     item = variable_item_list_add(
         variable_item_list,

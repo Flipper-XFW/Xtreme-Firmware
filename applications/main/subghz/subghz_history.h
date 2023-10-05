@@ -90,9 +90,10 @@ void subghz_history_get_time_item_menu(SubGhzHistory* instance, FuriString* outp
  * 
  * @param instance  - SubGhzHistory instance
  * @param output    - FuriString* output
+ * @param sats      - Number of satellites
  * @return bool - is FULL
  */
-bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output);
+bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output, uint8_t sats);
 
 /** Return last index
  *
@@ -120,3 +121,19 @@ bool subghz_history_add_to_history(
  * @return SubGhzProtocolCommonLoad*
  */
 FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx);
+
+/** Get latitude to history[idx]
+ * 
+ * @param instance  - SubGhzHistory instance
+ * @param idx       - Record index  
+ * @return latitude - Float
+*/
+float subghz_history_get_latitude(SubGhzHistory* instance, uint16_t idx);
+
+/** Get longitude to history[idx]
+ * 
+ * @param instance  - SubGhzHistory instance
+ * @param idx       - Record index  
+ * @return longitude - Float
+*/
+float subghz_history_get_longitude(SubGhzHistory* instance, uint16_t idx);

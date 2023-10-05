@@ -37,6 +37,8 @@ typedef struct {
     uint32_t frequency;
     uint8_t* data;
     size_t data_size;
+    float latitude;
+    float longitude;
 } SubGhzRadioPreset;
 
 typedef enum {
@@ -59,6 +61,8 @@ typedef enum {
     SubGhzProtocolStatusErrorEncoderGetUpload = (-12), ///< Payload encoder failure
     // Special Values
     SubGhzProtocolStatusErrorProtocolNotFound = (-13), ///< Protocol not found
+    SubGhzProtocolStatusErrorParserLatitude = (-14), ///< Missing `Latitude`
+    SubGhzProtocolStatusErrorParserLongitude = (-15), ///< Missing `Longitude`
     SubGhzProtocolStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
 } SubGhzProtocolStatus;
 
