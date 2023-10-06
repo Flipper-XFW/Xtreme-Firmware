@@ -1,3 +1,7 @@
+
+//Docs:
+//https://www.raveon.com/pdfiles/AN142(POCSAG).pdf  , https://habr.com/en/articles/438906/
+
 #include "pocsag.h"
 
 #include <inttypes.h>
@@ -47,7 +51,15 @@ struct SubGhzProtocolDecoderPocsag {
     FuriString* done_msg;
 };
 
+struct SubGhzProtocolEncoderPocsag {
+    SubGhzProtocolEncoderBase base;
+
+    SubGhzProtocolBlockEncoder encoder;
+    PCSGBlockGeneric generic;
+};
+
 typedef struct SubGhzProtocolDecoderPocsag SubGhzProtocolDecoderPocsag;
+typedef struct SubGhzProtocolEncoderPocsag SubGhzProtocolEncoderPocsag;
 
 typedef enum {
     PocsagDecoderStepReset = 0,
@@ -353,6 +365,83 @@ void subhz_protocol_decoder_pocsag_get_string(void* context, FuriString* output)
     furi_string_cat(output, instance->done_msg);
 }
 
+LevelDuration subghz_protocol_pocsag_encoder_yield(void* context) {
+    SubGhzProtocolEncoderPocsag* instance = context;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
+        return level_duration_reset();
+    }
+    LevelDuration ret = instance->encoder.upload[instance->encoder.front];
+    if(++instance->encoder.front == instance->encoder.size_upload) {
+        instance->encoder.repeat--;
+        instance->encoder.front = 0;
+    }
+    return ret;
+}
+
+void subghz_protocol_pocsag_encoder_stop(void* context) {
+    SubGhzProtocolEncoderPocsag* instance = context;
+    instance->encoder.is_running = false;
+}
+
+void* subghz_protocol_pocsag_encoder_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
+    SubGhzProtocolEncoderPocsag* instance = malloc(sizeof(SubGhzProtocolEncoderPocsag));
+
+    instance->base.protocol = &subghz_protocol_pocsag;
+    instance->generic.protocol_name = instance->base.protocol->name;
+
+    instance->encoder.repeat = 1;
+    instance->encoder.size_upload = 1; //todo
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.is_running = false;
+    return instance;
+}
+
+void subghz_protocol_pocsag_encoder_free(void* context) {
+    furi_assert(context);
+    SubGhzProtocolEncoderPocsag* instance = context;
+    free(instance->encoder.upload);
+    free(instance);
+}
+
+bool subghz_protocol_pocsag_encoder_upload(SubGhzProtocolEncoderPocsag* instance) {
+    furi_assert(instance);
+    //todo
+    return false;
+}
+
+SubGhzProtocolStatus
+    subghz_protocol_pocsag_encoder_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    SubGhzProtocolEncoderPocsag* instance = context;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
+    do {
+        ret = pcsg_block_generic_deserialize(&instance->generic, flipper_format);
+        if(ret != SubGhzProtocolStatusOk) {
+            break;
+        }
+        //check bit count TODO
+        // if((instance->generic.data_count_bit > 32)) {
+        //    FURI_LOG_E(TAG, "Wrong number of bits in key");
+        //    ret = SubGhzProtocolStatusErrorValueBitCount;
+        //    break;
+        //}
+
+        //optional parameter
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+
+        if(!subghz_protocol_pocsag_encoder_upload(instance)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
+        instance->encoder.is_running = true;
+    } while(false);
+
+    return ret;
+}
+
 const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
     .alloc = subghz_protocol_decoder_pocsag_alloc,
     .free = subghz_protocol_decoder_pocsag_free,
@@ -365,18 +454,18 @@ const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
 };
 
 const SubGhzProtocolEncoder subghz_protocol_pocsag_encoder = {
-    .alloc = NULL,
-    .free = NULL,
-    .deserialize = NULL,
-    .stop = NULL,
-    .yield = NULL,
+    .alloc = subghz_protocol_pocsag_encoder_alloc,
+    .free = subghz_protocol_pocsag_encoder_free,
+    .deserialize = subghz_protocol_pocsag_encoder_deserialize,
+    .stop = subghz_protocol_pocsag_encoder_stop,
+    .yield = subghz_protocol_pocsag_encoder_yield,
 };
 
 const SubGhzProtocol subghz_protocol_pocsag = {
     .name = SUBGHZ_PROTOCOL_POCSAG_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Save |
-            SubGhzProtocolFlag_Load,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_pocsag_decoder,
     .encoder = &subghz_protocol_pocsag_encoder,
