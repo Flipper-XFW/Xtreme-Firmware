@@ -55,20 +55,23 @@ void subghz_scene_show_gps_draw_satellites(void* context) {
     if(isnan(subghz->gps->latitude)) {
         furi_string_printf(lat_str, "N/A");
     } else {
-        furi_string_printf(lat_str, "%f", (double)subghz->gps->latitude);
+        furi_string_printf(
+            lat_str,
+            "%f",
+            (double)subghz_history_get_latitude(subghz->history, subghz->idx_menu_chosen));
     }
 
     if(isnan(subghz->gps->longitude)) {
         furi_string_printf(lon_str, "N/A");
     } else {
-        furi_string_printf(lon_str, "%f", (double)subghz->gps->longitude);
+        furi_string_printf(
+            lon_str,
+            "%f",
+            (double)subghz_history_get_longitude(subghz->history, subghz->idx_menu_chosen));
     }
 
     furi_string_printf(
         text,
-        // "Captured at: %f,\r\n%f Time: %s\r\n\r\nRealtime:  Sats: %d\r\nDistance: %.2f%s Dir: %s\r\nGPS time: %d:%d:%d UTC",
-        // (double)subghz_history_get_latitude(subghz->history, subghz->idx_menu_chosen),
-        // (double)subghz_history_get_longitude(subghz->history, subghz->idx_menu_chosen),
         "Captured at: %s,\r\n%s Time: %s\r\n\r\nRealtime:  Sats: %d\r\nDistance: %.2f%s Dir: %s\r\nGPS time: %d:%d:%d UTC",
         furi_string_get_cstr(lat_str),
         furi_string_get_cstr(lon_str),
