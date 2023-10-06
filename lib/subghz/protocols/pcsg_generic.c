@@ -83,6 +83,14 @@ SubGhzProtocolStatus pcsg_block_generic_serialize(
             FURI_LOG_E(TAG, "Unable to add Message");
             break;
         }
+        if(!flipper_format_write_string(flipper_format, "Data", instance->dataHex)) {
+            FURI_LOG_E(TAG, "Unable to add DataHex");
+            break;
+        }
+        if(!flipper_format_write_uint32(flipper_format, "Bit", &instance->bits, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Bit count");
+            break;
+        }
 
         res = SubGhzProtocolStatusOk;
     } while(false);
@@ -96,6 +104,7 @@ SubGhzProtocolStatus
     SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     FuriString* temp_data = furi_string_alloc();
     FuriString* temp_data2 = furi_string_alloc();
+    FuriString* temp_data3 = furi_string_alloc();
 
     do {
         if(!flipper_format_rewind(flipper_format)) {
@@ -122,12 +131,25 @@ SubGhzProtocolStatus
         } else {
             instance->result_msg = furi_string_alloc_set(temp_data);
         }
-
+        if(!flipper_format_read_string(flipper_format, "Data", temp_data3)) {
+            FURI_LOG_E(TAG, "Missing Data");
+            break;
+        }
+        if(instance->dataHex != NULL) {
+            furi_string_set(instance->dataHex, temp_data3);
+        } else {
+            instance->dataHex = furi_string_alloc_set(temp_data3);
+        }
+        if(!flipper_format_read_uint32(flipper_format, "Bit", &instance->bits, 1)) {
+            FURI_LOG_E(TAG, "Missing Bits");
+            break;
+        }
         res = SubGhzProtocolStatusOk;
     } while(0);
 
     furi_string_free(temp_data);
     furi_string_free(temp_data2);
+    furi_string_free(temp_data3);
 
     return res;
 }

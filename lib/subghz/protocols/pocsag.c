@@ -82,7 +82,10 @@ void* subghz_protocol_decoder_pocsag_alloc(SubGhzEnvironment* environment) {
     if(instance->generic.result_ric == NULL) {
         instance->generic.result_ric = furi_string_alloc();
     }
-
+    if(instance->generic.dataHex == NULL) {
+        instance->generic.dataHex = furi_string_alloc();
+    }
+    instance->generic.bits = 0;
     return instance;
 }
 
@@ -104,8 +107,10 @@ void subghz_protocol_decoder_pocsag_reset(void* context) {
     instance->codeword_idx = 0;
     instance->char_bits = 0;
     instance->char_data = 0;
+    instance->generic.bits = 0;
     furi_string_reset(instance->msg);
     furi_string_reset(instance->done_msg);
+    furi_string_reset(instance->generic.dataHex);
     furi_string_reset(instance->generic.result_msg);
     furi_string_reset(instance->generic.result_ric);
 }
@@ -230,12 +235,17 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                 instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                 instance->decoder.decode_count_bit = 0;
                 instance->decoder.decode_data = 0UL;
+                //add to hex
+                furi_string_cat(instance->generic.dataHex, "7CD215D8");
+                instance->generic.bits += 32;
             }
             break;
         case PocsagDecoderStepFoundPreamble:
             // handle codewords
             if(instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                furi_string_cat_printf(instance->generic.dataHex, "%08" PRIx32, codeword);
+                instance->generic.bits += 32;
                 switch(codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     instance->codeword_idx++;
@@ -259,6 +269,8 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         case PocsagDecoderStepMessage:
             if(instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                furi_string_cat_printf(instance->generic.dataHex, "%08" PRIx32, codeword);
+                instance->generic.bits += 32;
                 switch(codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     // Idle during the message stops the message

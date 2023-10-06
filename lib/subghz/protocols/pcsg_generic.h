@@ -22,6 +22,8 @@ struct PCSGBlockGeneric {
     const char* protocol_name;
     FuriString* result_ric;
     FuriString* result_msg;
+    FuriString* dataHex; //store all batch data in hex
+    uint32_t bits; //all batch size
 };
 
 /**
