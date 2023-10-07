@@ -244,7 +244,7 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
             // handle codewords
             if(instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
-                furi_string_cat_printf(instance->generic.dataHex, "%08" PRIx32, codeword);
+                furi_string_cat_printf(instance->generic.dataHex, "%08" PRIX32, codeword);
                 instance->generic.bits += 32;
                 switch(codeword) {
                 case POCSAG_IDLE_CODE_WORD:
@@ -269,7 +269,7 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         case PocsagDecoderStepMessage:
             if(instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
-                furi_string_cat_printf(instance->generic.dataHex, "%08" PRIx32, codeword);
+                furi_string_cat_printf(instance->generic.dataHex, "%08" PRIX32, codeword);
                 instance->generic.bits += 32;
                 switch(codeword) {
                 case POCSAG_IDLE_CODE_WORD:
@@ -403,9 +403,10 @@ void* subghz_protocol_pocsag_encoder_alloc(SubGhzEnvironment* environment) {
     instance->base.protocol = &subghz_protocol_pocsag;
     instance->generic.protocol_name = instance->base.protocol->name;
 
-    instance->encoder.repeat = 1;
-    instance->encoder.size_upload = 1; //todo
-    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.repeat = 2;
+    instance->encoder.size_upload = 0;
+    instance->encoder.upload =
+        NULL; //malloc(instance->encoder.size_upload * sizeof(LevelDuration)); //will alloc when deserialized, since it is dynamic sized
     instance->encoder.is_running = false;
     return instance;
 }
@@ -413,14 +414,65 @@ void* subghz_protocol_pocsag_encoder_alloc(SubGhzEnvironment* environment) {
 void subghz_protocol_pocsag_encoder_free(void* context) {
     furi_assert(context);
     SubGhzProtocolEncoderPocsag* instance = context;
-    free(instance->encoder.upload);
+    if(instance->encoder.upload != NULL) {
+        free(instance->encoder.upload);
+    }
     free(instance);
 }
 
 bool subghz_protocol_pocsag_encoder_upload(SubGhzProtocolEncoderPocsag* instance) {
     furi_assert(instance);
-    //todo
-    return false;
+    if(instance->encoder.upload == NULL) {
+        return false; //malloc error before
+    }
+    uint32_t i = 0;
+    //add pre
+    for(uint8_t ii = 0; ii < 20; ++ii) {
+        instance->encoder.upload[i++] = level_duration_make(true, (uint32_t)pocsag_const.te_short);
+        instance->encoder.upload[i++] =
+            level_duration_make(false, (uint32_t)pocsag_const.te_short);
+    }
+    size_t dhl = furi_string_size(instance->generic.dataHex);
+    for(size_t ii = 0; ii < dhl; ii++) {
+        char ch = furi_string_get_char(instance->generic.dataHex, ii);
+        uint8_t value = 0;
+        if(ch >= 'A' && ch <= 'F') {
+            value = ch - 'A' + 10;
+        } else if(ch >= '0' && ch <= '9') {
+            value = ch - '0';
+        }
+
+        if(((value >> 0) & 1) == 1) {
+            instance->encoder.upload[i++] =
+                level_duration_make(false, (uint32_t)pocsag_const.te_short);
+        } else {
+            instance->encoder.upload[i++] =
+                level_duration_make(true, (uint32_t)pocsag_const.te_short);
+        }
+        if(((value >> 1) & 1) == 1) {
+            instance->encoder.upload[i++] =
+                level_duration_make(false, (uint32_t)pocsag_const.te_short);
+        } else {
+            instance->encoder.upload[i++] =
+                level_duration_make(true, (uint32_t)pocsag_const.te_short);
+        }
+        if(((value >> 2) & 1) == 1) {
+            instance->encoder.upload[i++] =
+                level_duration_make(false, (uint32_t)pocsag_const.te_short);
+        } else {
+            instance->encoder.upload[i++] =
+                level_duration_make(true, (uint32_t)pocsag_const.te_short);
+        }
+        if(((value >> 3) & 1) == 1) {
+            instance->encoder.upload[i++] =
+                level_duration_make(false, (uint32_t)pocsag_const.te_short);
+        } else {
+            instance->encoder.upload[i++] =
+                level_duration_make(true, (uint32_t)pocsag_const.te_short);
+        }
+    }
+
+    return true;
 }
 
 SubGhzProtocolStatus
@@ -434,12 +486,13 @@ SubGhzProtocolStatus
             break;
         }
         //check bit count TODO
-        // if((instance->generic.data_count_bit > 32)) {
-        //    FURI_LOG_E(TAG, "Wrong number of bits in key");
-        //    ret = SubGhzProtocolStatusErrorValueBitCount;
-        //    break;
-        //}
-
+        if((instance->generic.bits <= 32)) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            ret = SubGhzProtocolStatusErrorValueBitCount;
+            break;
+        }
+        instance->encoder.upload =
+            malloc((instance->generic.bits + 40) * sizeof(LevelDuration)); //40 pre
         //optional parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
