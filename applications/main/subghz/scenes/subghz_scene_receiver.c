@@ -148,10 +148,6 @@ void subghz_scene_receiver_on_enter(void* context) {
     SubGhz* subghz = context;
     SubGhzHistory* history = subghz->history;
 
-    if(subghz->last_settings->gps_enabled) {
-        furi_thread_start(subghz->gps->thread);
-    }
-
     FuriString* item_name = furi_string_alloc();
     FuriString* item_time = furi_string_alloc();
 
@@ -340,9 +336,5 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
 }
 
 void subghz_scene_receiver_on_exit(void* context) {
-    SubGhz* subghz = context;
-    if(subghz->last_settings->gps_enabled) {
-        furi_thread_flags_set(furi_thread_get_id(subghz->gps->thread), WorkerEvtStop);
-        furi_thread_join(subghz->gps->thread);
-    }
+    UNUSED(context);
 }
