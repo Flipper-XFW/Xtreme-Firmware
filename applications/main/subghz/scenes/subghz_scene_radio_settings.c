@@ -130,6 +130,12 @@ static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
     subghz->last_settings->gps_enabled = index == 1;
     subghz_last_settings_save(
         subghz->last_settings); //TODO, make it to choose baudrate. now it is 9600
+
+    if(subghz->last_settings->gps_enabled) {
+        subghz_gps_start(subghz->gps);
+    } else {
+        subghz_gps_stop(subghz->gps);
+    }
 }
 
 static void subghz_scene_receiver_config_set_timestamp_file_names(VariableItem* item) {
