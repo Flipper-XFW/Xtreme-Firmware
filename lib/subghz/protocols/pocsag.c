@@ -376,6 +376,7 @@ void subhz_protocol_decoder_pocsag_get_string(void* context, FuriString* output)
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
     furi_string_cat_printf(output, "%s\r\n", instance->generic.protocol_name);
+    furi_string_cat_printf(output, "Addr: %lu\r\n", instance->ric);
     furi_string_cat(output, instance->done_msg);
 }
 
