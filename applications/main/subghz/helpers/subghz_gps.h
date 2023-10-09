@@ -62,6 +62,14 @@ void subghz_gps_start(SubGhzGPS* subghz_gps);
 void subghz_gps_stop(SubGhzGPS* subghz_gps);
 
 /**
+ * Set baudrate for GPS
+ * 
+ * @param baudrate Baudrate
+ * @return void
+*/
+void subghz_gps_set_baudrate(uint32_t baudrate);
+
+/**
  * Convert degree to radian
  * 
  * @param deg Degree

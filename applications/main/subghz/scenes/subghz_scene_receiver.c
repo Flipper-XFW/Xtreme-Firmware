@@ -290,7 +290,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         SubGhzThresholdRssiData ret_rssi = subghz_threshold_get_rssi_data(
             subghz->threshold_rssi, subghz_txrx_radio_device_get_rssi(subghz->txrx));
 
-        if(subghz->last_settings->gps_enabled) {
+        if(subghz->last_settings->gps_baudrate != 0) {
             FuriHalRtcDateTime datetime;
             furi_hal_rtc_get_datetime(&datetime);
             if((datetime.second - subghz->gps->fix_second) > 15) {
@@ -310,7 +310,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
 
         switch(subghz->state_notifications) {
         case SubGhzNotificationStateRx:
-            if(subghz->last_settings->gps_enabled) {
+            if(subghz->last_settings->gps_baudrate != 0) {
                 if(subghz->gps->satellites > 0) {
                     notification_message(subghz->notifications, &sequence_blink_green_10);
                 } else {
