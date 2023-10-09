@@ -52,7 +52,7 @@ static void xtreme_app_scene_misc_screen_lcd_color_changed(VariableItem* item, u
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, lcd_colors[index].name);
-    rgb_backlight_set_color(led, lcd_colors[index].color);
+    rgb_backlight_set_color(led, &lcd_colors[index].color);
     app->save_backlight = true;
 }
 static void xtreme_app_scene_misc_screen_lcd_color_0_changed(VariableItem* item) {
@@ -169,11 +169,12 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
     };
     size_t lcd_sz = COUNT_OF(lcd_colors);
 
+    RgbColor color;
     for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
         char name[12];
         snprintf(name, sizeof(name), "LCD LED %u", lcd_cols[i].led + 1);
         item = variable_item_list_add(var_item_list, name, lcd_sz, lcd_cols[i].cb, app);
-        RgbColor color = rgb_backlight_get_color(lcd_cols[i].led);
+        rgb_backlight_get_color(lcd_cols[i].led, &color);
         bool found = false;
         for(size_t i = 0; i < lcd_sz; i++) {
             if(rgbcmp(&color, &lcd_colors[i].color) != 0) continue;

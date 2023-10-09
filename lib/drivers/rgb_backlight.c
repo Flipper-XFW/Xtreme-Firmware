@@ -97,28 +97,27 @@ void rgb_backlight_save_settings() {
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
-void rgb_backlight_set_color(uint8_t index, RgbColor color) {
+void rgb_backlight_set_color(uint8_t index, const RgbColor* color) {
     if(index >= COUNT_OF(rgb_settings.colors)) return;
 
     if(!rgb_state.settings_loaded) return;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
-    rgb_settings.colors[index] = color;
+    memcpy(&rgb_settings.colors[index], color, sizeof(RgbColor));
     rgb_backlight_reconfigure(rgb_state.enabled);
 
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
-RgbColor rgb_backlight_get_color(uint8_t index) {
-    if(index >= COUNT_OF(rgb_settings.colors)) return (RgbColor){0, 0, 0};
+void rgb_backlight_get_color(uint8_t index, RgbColor* color) {
+    if(index >= COUNT_OF(rgb_settings.colors)) return;
 
-    if(!rgb_state.settings_loaded) return (RgbColor){0, 0, 0};
+    if(!rgb_state.settings_loaded) return;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
-    RgbColor color = rgb_settings.colors[index];
+    memcpy(color, &rgb_settings.colors[index], sizeof(RgbColor));
 
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
-    return color;
 }
 
 void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode) {
@@ -262,15 +261,22 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
             rgb_state.rainbow_hsv.v = brightness;
         }
 
-        HsvColor hsv = rgb_state.rainbow_hsv;
-        RgbColor rgb = hsv2rgb(hsv);
+        RgbColor rgb;
+        hsv2rgb(&rgb_state.rainbow_hsv, &rgb);
 
-        for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
-            if(i && rgb_settings.rainbow_mode == RGBBacklightRainbowModeWave) {
-                hsv.h += (50 * i);
-                rgb = hsv2rgb(hsv);
+        if(rgb_settings.rainbow_mode == RGBBacklightRainbowModeWave) {
+            HsvColor hsv = rgb_state.rainbow_hsv;
+            for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
+                if(i) {
+                    hsv.h += (50 * i);
+                    hsv2rgb(&hsv, &rgb);
+                }
+                SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
             }
-            SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
+        } else {
+            for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
+                SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
+            }
         }
         break;
     }
