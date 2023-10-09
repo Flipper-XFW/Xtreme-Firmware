@@ -106,7 +106,7 @@ void subghz_scene_show_gps_on_enter(void* context) {
 
     subghz_scene_show_gps_draw_satellites(subghz);
 
-    if(subghz->last_settings->gps_enabled) {
+    if(subghz->last_settings->gps_baudrate != 0) {
         subghz->gps->timer =
             furi_timer_alloc(subghz_scene_show_gps_refresh_screen, FuriTimerTypePeriodic, subghz);
         furi_timer_start(subghz->gps->timer, 1000);
@@ -117,7 +117,7 @@ bool subghz_scene_show_gps_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeTick) {
         if(subghz->state_notifications == SubGhzNotificationStateRx) {
-            if(subghz->last_settings->gps_enabled) {
+            if(subghz->last_settings->gps_baudrate != 0) {
                 if(subghz->gps->satellites > 0) {
                     notification_message(subghz->notifications, &sequence_blink_green_10);
                 } else {
@@ -134,7 +134,7 @@ bool subghz_scene_show_gps_on_event(void* context, SceneManagerEvent event) {
 void subghz_scene_show_gps_on_exit(void* context) {
     SubGhz* subghz = context;
 
-    if(subghz->last_settings->gps_enabled) {
+    if(subghz->last_settings->gps_baudrate != 0) {
         furi_timer_stop(subghz->gps->timer);
         furi_timer_free(subghz->gps->timer);
     }

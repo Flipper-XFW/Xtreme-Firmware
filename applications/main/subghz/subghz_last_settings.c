@@ -56,7 +56,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool ignore_filter_was_read = false;
     bool frequency_analyzer_feedback_level_was_read = false;
     bool frequency_analyzer_trigger_was_read = false;
-    bool temp_gps_enabled = false;
+    uint32_t temp_gps_baudrate = 0;
 
     if(FSE_OK == storage_sd_status(storage) && SUBGHZ_LAST_SETTINGS_PATH &&
        flipper_format_file_open_existing(fff_data_file, SUBGHZ_LAST_SETTINGS_PATH)) {
@@ -94,8 +94,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER_AMP,
             (bool*)&temp_external_module_power_amp,
             1);
-        flipper_format_read_bool(
-            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_GPS, (bool*)&temp_gps_enabled, 1);
+        flipper_format_read_uint32(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_GPS, (uint32_t*)&temp_gps_baudrate, 1);
         flipper_format_read_bool(
             fff_data_file,
             SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE,
@@ -125,7 +125,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->external_module_enabled = false;
         instance->timestamp_file_names = false;
         instance->external_module_power_amp = false;
-        instance->gps_enabled = false;
+        instance->gps_baudrate = 0;
         instance->enable_hopping = false;
         instance->ignore_filter = 0x00;
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
@@ -181,7 +181,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         // Set globally in furi hal
         furi_hal_subghz_set_ext_power_amp(instance->external_module_power_amp);
 
-        instance->gps_enabled = temp_gps_enabled;
+        instance->gps_baudrate = temp_gps_baudrate;
     }
 
     flipper_format_file_close(fff_data_file);
@@ -261,8 +261,8 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                1)) {
             break;
         }
-        if(!flipper_format_insert_or_update_bool(
-               file, SUBGHZ_LAST_SETTING_FIELD_GPS, &instance->gps_enabled, 1)) {
+        if(!flipper_format_insert_or_update_uint32(
+               file, SUBGHZ_LAST_SETTING_FIELD_GPS, &instance->gps_baudrate, 1)) {
             break;
         }
         if(!flipper_format_insert_or_update_bool(
@@ -313,7 +313,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
     FURI_LOG_I(
         TAG,
         "Frequency: %03ld.%02ld, FeedbackLevel: %ld, FATrigger: %.2f, External: %s, ExtPower: %s, TimestampNames: %s, ExtPowerAmp: %s,\n"
-        "Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
+        "GPSBaudrate: %ld, Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
         "Starline: %s, Cars: %s, Magellan: %s, BinRAW: %s",
         instance->frequency / 1000000 % 1000,
         instance->frequency / 10000 % 100,
@@ -323,6 +323,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         bool_to_char(instance->external_module_power_5v_disable),
         bool_to_char(instance->timestamp_file_names),
         bool_to_char(instance->external_module_power_amp),
+        instance->gps_baudrate,
         bool_to_char(instance->enable_hopping),
         instance->preset_index,
         (double)instance->rssi,
