@@ -27,6 +27,8 @@ static const SubGhzBlockConst pocsag_const = {
 #define POCSAG_FUNC_ALERT2 2
 #define POCSAG_FUNC_ALPHANUM 3
 
+#define POCSAG_PRECOUNT 140
+
 static const char* func_msg[] = {"\e#Num:\e# ", "\e#Alert\e#", "\e#Alert:\e# ", "\e#Msg:\e# "};
 static const char* bcd_chars = "*U -)(";
 
@@ -404,7 +406,7 @@ void* subghz_protocol_pocsag_encoder_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 2;
-    instance->encoder.size_upload = 0;
+    instance->encoder.size_upload = POCSAG_PRECOUNT; //will be recalculated later
     instance->encoder.upload =
         NULL; //malloc(instance->encoder.size_upload * sizeof(LevelDuration)); //will alloc when deserialized, since it is dynamic sized
     instance->encoder.is_running = false;
@@ -420,58 +422,70 @@ void subghz_protocol_pocsag_encoder_free(void* context) {
     free(instance);
 }
 
+/*
+    Params: instance, the proto's instance
+    i: the Level counter
+    updown - the signal to send
+    lastPos - the count of the ups / downs. negative: downs count, positive ups count.
+    finishLast - true if it is AFTER the last bit, so send the collected ones
+*/
+void subghz_protocol_pocsag_upload_deefer(
+    SubGhzProtocolEncoderPocsag* instance,
+    uint32_t* i,
+    bool updown,
+    int16_t* lastPos,
+    bool finishLast) {
+    bool changed = false;
+    if((*lastPos > 0 && !updown) || (*lastPos < 0 && updown)) changed = true;
+
+    if(!finishLast && !changed) {
+        if(*lastPos >= 0 && updown) ++(*lastPos);
+        if(*lastPos <= 0 && !updown) --(*lastPos);
+        return;
+    }
+    //here maybe changed OR finishlast
+    //add pachet
+    instance->encoder.upload[(*i)++] = level_duration_make(
+        ((*lastPos) < 0), (uint32_t)pocsag_const.te_short * abs((int)(*lastPos)));
+    if(!finishLast) {
+        *lastPos = (updown) ? 1 : -1;
+    }
+}
+
 bool subghz_protocol_pocsag_encoder_upload(SubGhzProtocolEncoderPocsag* instance) {
     furi_assert(instance);
     if(instance->encoder.upload == NULL) {
         return false; //malloc error before
     }
     uint32_t i = 0;
+    int16_t lastPos = 0; //to store last position ( + high / - low and the count of it)
     //add pre
-    for(uint8_t ii = 0; ii < 20; ++ii) {
-        instance->encoder.upload[i++] = level_duration_make(true, (uint32_t)pocsag_const.te_short);
-        instance->encoder.upload[i++] =
-            level_duration_make(false, (uint32_t)pocsag_const.te_short);
+    for(uint8_t ii = 0; ii < POCSAG_PRECOUNT / 2; ++ii) {
+        subghz_protocol_pocsag_upload_deefer(instance, &i, true, &lastPos, false);
+        subghz_protocol_pocsag_upload_deefer(instance, &i, false, &lastPos, false);
     }
     size_t dhl = furi_string_size(instance->generic.dataHex);
+
     for(size_t ii = 0; ii < dhl; ii++) {
         char ch = furi_string_get_char(instance->generic.dataHex, ii);
+
         uint8_t value = 0;
         if(ch >= 'A' && ch <= 'F') {
             value = ch - 'A' + 10;
         } else if(ch >= '0' && ch <= '9') {
             value = ch - '0';
         }
-
-        if(((value >> 0) & 1) == 1) {
-            instance->encoder.upload[i++] =
-                level_duration_make(false, (uint32_t)pocsag_const.te_short);
-        } else {
-            instance->encoder.upload[i++] =
-                level_duration_make(true, (uint32_t)pocsag_const.te_short);
-        }
-        if(((value >> 1) & 1) == 1) {
-            instance->encoder.upload[i++] =
-                level_duration_make(false, (uint32_t)pocsag_const.te_short);
-        } else {
-            instance->encoder.upload[i++] =
-                level_duration_make(true, (uint32_t)pocsag_const.te_short);
-        }
-        if(((value >> 2) & 1) == 1) {
-            instance->encoder.upload[i++] =
-                level_duration_make(false, (uint32_t)pocsag_const.te_short);
-        } else {
-            instance->encoder.upload[i++] =
-                level_duration_make(true, (uint32_t)pocsag_const.te_short);
-        }
-        if(((value >> 3) & 1) == 1) {
-            instance->encoder.upload[i++] =
-                level_duration_make(false, (uint32_t)pocsag_const.te_short);
-        } else {
-            instance->encoder.upload[i++] =
-                level_duration_make(true, (uint32_t)pocsag_const.te_short);
-        }
+        subghz_protocol_pocsag_upload_deefer(
+            instance, &i, (((value >> 3) & 1) == 1), &lastPos, false);
+        subghz_protocol_pocsag_upload_deefer(
+            instance, &i, (((value >> 2) & 1) == 1), &lastPos, false);
+        subghz_protocol_pocsag_upload_deefer(
+            instance, &i, (((value >> 1) & 1) == 1), &lastPos, false);
+        subghz_protocol_pocsag_upload_deefer(
+            instance, &i, (((value >> 0) & 1) == 1), &lastPos, false);
     }
-
+    subghz_protocol_pocsag_upload_deefer(instance, &i, false, &lastPos, true); //finishlast packet!
+    //instance->encoder.upload[i++] = level_duration_wait((uint32_t)pocsag_const.te_short * 10); //wait at the end
     return true;
 }
 
@@ -485,14 +499,14 @@ SubGhzProtocolStatus
         if(ret != SubGhzProtocolStatusOk) {
             break;
         }
-        //check bit count TODO
+        //check bit count
         if((instance->generic.bits <= 32)) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             ret = SubGhzProtocolStatusErrorValueBitCount;
             break;
         }
-        instance->encoder.upload =
-            malloc((instance->generic.bits + 40) * sizeof(LevelDuration)); //40 pre
+        instance->encoder.size_upload = instance->generic.bits + POCSAG_PRECOUNT;
+        instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
         //optional parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
