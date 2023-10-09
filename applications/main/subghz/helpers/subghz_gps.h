@@ -30,9 +30,44 @@ typedef struct {
     uint8_t fix_hour;
 } SubGhzGPS;
 
+/**
+ * Initialize SubGhzGPS object
+ * 
+ * @return SubGhzGPS* SubGhzGPS object
+*/
 SubGhzGPS* subghz_gps_init();
 
+/**
+ * Deinitialize SubGhzGPS object
+ * 
+ * @param subghz_gps SubGhzGPS object
+ * @return void
+*/
 void subghz_gps_deinit(SubGhzGPS* subghz_gps);
+
+/**
+ * Start GPS thread
+ * 
+ * @param subghz_gps SubGhzGPS object
+ * @return void
+*/
+void subghz_gps_start(SubGhzGPS* subghz_gps);
+
+/**
+ * Stop GPS thread
+ * 
+ * @param subghz_gps SubGhzGPS object
+ * @return void
+*/
+void subghz_gps_stop(SubGhzGPS* subghz_gps);
+
+/**
+ * Set baudrate for GPS
+ * 
+ * @param baudrate Baudrate
+ * @return void
+*/
+void subghz_gps_set_baudrate(uint32_t baudrate);
 
 /**
  * Convert degree to radian

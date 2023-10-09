@@ -32,10 +32,14 @@ const char* const debug_pin_text[DEBUG_P_COUNT] = {
     "17(1W)",
 };
 
-#define GPS_COUNT 2
+#define GPS_COUNT 6
 const char* const gps_text[GPS_COUNT] = {
     "OFF",
-    "ON",
+    "9600",
+    "19200",
+    "38400",
+    "57600",
+    "115200",
 };
 
 #define DEBUG_COUNTER_COUNT 13
@@ -127,9 +131,34 @@ static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
 
     variable_item_set_current_value_text(item, gps_text[index]);
 
-    subghz->last_settings->gps_enabled = index == 1;
-    subghz_last_settings_save(
-        subghz->last_settings); //TODO, make it to choose baudrate. now it is 9600
+    switch(index) {
+    case 0:
+        subghz->last_settings->gps_baudrate = 0;
+        break;
+    case 1:
+        subghz->last_settings->gps_baudrate = 9600;
+        break;
+    case 2:
+        subghz->last_settings->gps_baudrate = 19200;
+        break;
+    case 3:
+        subghz->last_settings->gps_baudrate = 38400;
+        break;
+    case 4:
+        subghz->last_settings->gps_baudrate = 57600;
+        break;
+    case 5:
+        subghz->last_settings->gps_baudrate = 115200;
+        break;
+    }
+    subghz_last_settings_save(subghz->last_settings);
+
+    if(subghz->last_settings->gps_baudrate != 0) {
+        subghz_gps_set_baudrate(subghz->last_settings->gps_baudrate);
+        subghz_gps_start(subghz->gps);
+    } else {
+        subghz_gps_stop(subghz->gps);
+    }
 }
 
 static void subghz_scene_receiver_config_set_timestamp_file_names(VariableItem* item) {
@@ -175,8 +204,15 @@ void subghz_scene_radio_settings_on_enter(void* context) {
     variable_item_set_current_value_text(item, ext_mod_power_amp_text[value_index]);
 
     item = variable_item_list_add(
-        variable_item_list, "GPS", GPS_COUNT, subghz_scene_receiver_config_set_gps, subghz);
-    value_index = subghz->last_settings->gps_enabled ? 1 : 0;
+        variable_item_list,
+        "GPS Baudrate",
+        GPS_COUNT,
+        subghz_scene_receiver_config_set_gps,
+        subghz);
+    value_index = value_index_uint32(
+        subghz->last_settings->gps_baudrate,
+        (const uint32_t[]){0, 9600, 19200, 38400, 57600, 115200},
+        GPS_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, gps_text[value_index]);
 

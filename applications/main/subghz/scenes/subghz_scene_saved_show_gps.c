@@ -30,26 +30,28 @@ void subghz_scene_saved_show_gps_draw_satellites(void* context) {
     float angle = subghz_gps_calc_angle(
         latitude, longitude, (double)subghz->gps->latitude, (double)subghz->gps->longitude);
 
-    char* angle_str = "N";
-    if(angle > 22.5 && angle <= 67.5) {
+    char* angle_str = "?";
+    if(angle > -22.5 && angle <= 22.5) {
+        angle_str = "E";
+    } else if(angle > 22.5 && angle <= 67.5) {
         angle_str = "NE";
     } else if(angle > 67.5 && angle <= 112.5) {
-        angle_str = "E";
+        angle_str = "N";
     } else if(angle > 112.5 && angle <= 157.5) {
-        angle_str = "SE";
-    } else if(angle > 157.5 && angle <= 202.5) {
-        angle_str = "S";
-    } else if(angle > 202.5 && angle <= 247.5) {
-        angle_str = "SW";
-    } else if(angle > 247.5 && angle <= 292.5) {
-        angle_str = "W";
-    } else if(angle > 292.5 && angle <= 337.5) {
         angle_str = "NW";
+    } else if(angle < -22.5 && angle >= -67.5) {
+        angle_str = "SE";
+    } else if(angle < -67.5 && angle >= -112.5) {
+        angle_str = "S";
+    } else if(angle < -112.5 && angle >= -157.5) {
+        angle_str = "SW";
+    } else if(angle < -157.5 || angle >= 157.5) {
+        angle_str = "W";
     }
 
     furi_string_printf(
         text_str,
-        "Captured at: %f,\r\n%f\r\n\r\nRealtime:  Sats: %d\r\nDistance: %.2f%s Dir: %s\r\nGPS time: %d:%d:%d UTC",
+        "Captured at: %f,\r\n%f\r\n\r\nRealtime:  Sats: %d\r\nDistance: %.2f%s Dir: %s\r\nGPS time: %02d:%02d:%02d UTC",
         latitude,
         longitude,
         subghz->gps->satellites,
@@ -76,15 +78,13 @@ void subghz_scene_saved_show_gps_refresh_screen(void* context) {
 void subghz_scene_saved_show_gps_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    if(subghz->last_settings->gps_enabled) {
-        furi_thread_start(subghz->gps->thread);
-    }
-
     subghz_scene_saved_show_gps_draw_satellites(subghz);
 
-    subghz->gps->timer = furi_timer_alloc(
-        subghz_scene_saved_show_gps_refresh_screen, FuriTimerTypePeriodic, subghz);
-    furi_timer_start(subghz->gps->timer, 1000);
+    if(subghz->last_settings->gps_baudrate != 0) {
+        subghz->gps->timer = furi_timer_alloc(
+            subghz_scene_saved_show_gps_refresh_screen, FuriTimerTypePeriodic, subghz);
+        furi_timer_start(subghz->gps->timer, 1000);
+    }
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 }
@@ -98,13 +98,10 @@ bool subghz_scene_saved_show_gps_on_event(void* context, SceneManagerEvent event
 void subghz_scene_saved_show_gps_on_exit(void* context) {
     SubGhz* subghz = context;
 
-    if(subghz->last_settings->gps_enabled) {
-        furi_thread_flags_set(furi_thread_get_id(subghz->gps->thread), WorkerEvtStop);
-        furi_thread_join(subghz->gps->thread);
+    if(subghz->last_settings->gps_baudrate != 0) {
+        furi_timer_stop(subghz->gps->timer);
+        furi_timer_free(subghz->gps->timer);
     }
-
-    furi_timer_stop(subghz->gps->timer);
-    furi_timer_free(subghz->gps->timer);
 
     widget_reset(subghz->widget);
 }

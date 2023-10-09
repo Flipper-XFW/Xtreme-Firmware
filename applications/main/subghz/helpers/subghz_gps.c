@@ -113,6 +113,9 @@ SubGhzGPS* subghz_gps_init() {
     subghz_gps->latitude = NAN;
     subghz_gps->longitude = NAN;
     subghz_gps->satellites = 0;
+    subghz_gps->fix_hour = 0;
+    subghz_gps->fix_minute = 0;
+    subghz_gps->fix_second = 0;
 
     subghz_gps->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
 
@@ -121,7 +124,6 @@ SubGhzGPS* subghz_gps_init() {
     furi_thread_set_stack_size(subghz_gps->thread, 1024);
     furi_thread_set_context(subghz_gps->thread, subghz_gps);
     furi_thread_set_callback(subghz_gps->thread, subghz_gps_uart_worker);
-    // furi_thread_start(subghz_gps->thread);
 
     if(UART_CH == FuriHalUartIdUSART1) {
         furi_hal_console_disable();
@@ -130,15 +132,12 @@ SubGhzGPS* subghz_gps_init() {
     }
 
     furi_hal_uart_set_irq_cb(UART_CH, subghz_gps_uart_on_irq_cb, subghz_gps);
-    furi_hal_uart_set_br(UART_CH, 9600);
 
     return subghz_gps;
 }
 
 void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     furi_assert(subghz_gps);
-    // furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtStop);
-    // furi_thread_join(subghz_gps->thread);
     furi_thread_free(subghz_gps->thread);
 
     free(subghz_gps);
@@ -149,6 +148,19 @@ void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     } else {
         furi_hal_console_enable();
     }
+}
+
+void subghz_gps_start(SubGhzGPS* subghz_gps) {
+    furi_thread_start(subghz_gps->thread);
+}
+
+void subghz_gps_stop(SubGhzGPS* subghz_gps) {
+    furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtStop);
+    furi_thread_join(subghz_gps->thread);
+}
+
+void subghz_gps_set_baudrate(uint32_t baudrate) {
+    furi_hal_uart_set_br(UART_CH, baudrate);
 }
 
 double subghz_gps_deg2rad(double deg) {

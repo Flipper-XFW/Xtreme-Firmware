@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.1,,
+Version,+,39.2,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/services/applications.h,,
@@ -1753,7 +1753,7 @@ Function,+,hex_char_to_hex_nibble,_Bool,"char, uint8_t*"
 Function,+,hex_char_to_uint8,_Bool,"char, char, uint8_t*"
 Function,+,hex_chars_to_uint64,_Bool,"const char*, uint64_t*"
 Function,+,hex_chars_to_uint8,_Bool,"const char*, uint8_t*"
-Function,+,hsv2rgb,RgbColor,HsvColor
+Function,+,hsv2rgb,void,"const HsvColor*, RgbColor*"
 Function,+,hsvcmp,int,"const HsvColor*, const HsvColor*"
 Function,-,hypot,double,"double, double"
 Function,-,hypotf,float,"float, float"
@@ -2583,8 +2583,8 @@ Function,-,rfal_platform_spi_acquire,void,
 Function,-,rfal_platform_spi_release,void,
 Function,-,rfal_set_callback_context,void,void*
 Function,-,rfal_set_state_changed_callback,void,RfalStateChangedCallback
-Function,+,rgb2hsv,HsvColor,RgbColor
-Function,+,rgb_backlight_get_color,RgbColor,uint8_t
+Function,+,rgb2hsv,void,"const RgbColor*, HsvColor*"
+Function,+,rgb_backlight_get_color,void,"uint8_t, RgbColor*"
 Function,+,rgb_backlight_get_rainbow_interval,uint32_t,
 Function,+,rgb_backlight_get_rainbow_mode,RGBBacklightRainbowMode,
 Function,+,rgb_backlight_get_rainbow_saturation,uint8_t,
@@ -2592,7 +2592,7 @@ Function,+,rgb_backlight_get_rainbow_speed,uint8_t,
 Function,-,rgb_backlight_load_settings,void,_Bool
 Function,+,rgb_backlight_reconfigure,void,_Bool
 Function,+,rgb_backlight_save_settings,void,
-Function,+,rgb_backlight_set_color,void,"uint8_t, RgbColor"
+Function,+,rgb_backlight_set_color,void,"uint8_t, const RgbColor*"
 Function,+,rgb_backlight_set_rainbow_interval,void,uint32_t
 Function,+,rgb_backlight_set_rainbow_mode,void,RGBBacklightRainbowMode
 Function,+,rgb_backlight_set_rainbow_saturation,void,uint8_t
@@ -2729,7 +2729,7 @@ Function,+,storage_file_open,_Bool,"File*, const char*, FS_AccessMode, FS_OpenMo
 Function,+,storage_file_read,uint16_t,"File*, void*, uint16_t"
 Function,+,storage_file_seek,_Bool,"File*, uint32_t, _Bool"
 Function,+,storage_file_size,uint64_t,File*
-Function,-,storage_file_sync,_Bool,File*
+Function,+,storage_file_sync,_Bool,File*
 Function,+,storage_file_tell,uint64_t,File*
 Function,+,storage_file_truncate,_Bool,File*
 Function,+,storage_file_write,uint16_t,"File*, const void*, uint16_t"
@@ -3433,6 +3433,7 @@ Variable,+,I_FaceConfused_29x14,Icon,
 Variable,+,I_FaceNopower_29x14,Icon,
 Variable,+,I_FaceNormal_29x14,Icon,
 Variable,+,I_Fishing_123x52,Icon,
+Variable,+,I_Hashmark_7x7,Icon,
 Variable,+,I_Health_16x16,Icon,
 Variable,+,I_Hidden_window_9x8,Icon,
 Variable,+,I_InfraredArrowDown_4x8,Icon,
@@ -3496,6 +3497,8 @@ Variable,+,I_Voltage_16x16,Icon,
 Variable,+,I_Volup_8x6,Icon,
 Variable,+,I_WarningDolphin_45x42,Icon,
 Variable,+,I_Warning_30x23,Icon,
+Variable,+,I_arrow_nano_down,Icon,
+Variable,+,I_arrow_nano_up,Icon,
 Variable,+,I_back_10px,Icon,
 Variable,+,I_badkb_10px,Icon,
 Variable,+,I_bright_text_30x30,Icon,

@@ -50,9 +50,9 @@ void rgb_backlight_save_settings();
  * @param index What led to set the color to (0 - SK6805_LED_COUNT-1)
  * @param color RGB color to use
  */
-void rgb_backlight_set_color(uint8_t index, RgbColor color);
+void rgb_backlight_set_color(uint8_t index, const RgbColor* color);
 
-RgbColor rgb_backlight_get_color(uint8_t index);
+void rgb_backlight_get_color(uint8_t index, RgbColor* color);
 
 /**
  * @brief Change rainbow mode
