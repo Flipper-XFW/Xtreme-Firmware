@@ -62,5 +62,6 @@
 #include "wendox_w6726.h"
 #include "auriol_ahfl.h"
 #include "pocsag.h"
+#include "pocsag2400.h"
 #include "schrader_gg4.h"
 #include "bin_raw.h"
