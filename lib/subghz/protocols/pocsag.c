@@ -507,10 +507,13 @@ SubGhzProtocolStatus
             break;
         }
         instance->encoder.size_upload = instance->generic.bits + POCSAG_PRECOUNT;
+        if(instance->encoder.upload != NULL) {
+            free(instance->encoder.upload);
+        }
         instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
         //optional parameter
         flipper_format_read_uint32(
-            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 2);
 
         if(!subghz_protocol_pocsag_encoder_upload(instance)) {
             ret = SubGhzProtocolStatusErrorEncoderGetUpload;
