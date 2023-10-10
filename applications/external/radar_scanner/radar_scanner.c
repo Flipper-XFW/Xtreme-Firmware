@@ -132,7 +132,7 @@ int32_t app_radar_scanner(void* p) {
     furi_hal_gpio_init(altGroundPin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_write(altGroundPin, false);
 
-    // Auto 5v- Thanks Willy!!
+    // Auto 5v power
     uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
