@@ -1,6 +1,7 @@
 
 //Docs:
 //https://www.raveon.com/pdfiles/AN142(POCSAG).pdf  , https://habr.com/en/articles/438906/
+// Sender part by @HTotoo, Receiver is @Shmuma's work
 
 #include "pocsag.h"
 
