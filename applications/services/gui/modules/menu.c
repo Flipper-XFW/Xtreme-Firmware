@@ -387,9 +387,56 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
             break;
         }
+        case MenuStyleTerminal: {
+            canvas_set_font(canvas, FontBatteryPercent);
+            canvas_set_color(canvas, ColorBlack);
+            canvas_clear(canvas);
+
+            // Draw a border around the screen
+            canvas_draw_frame(canvas, 0, 0, 128, 64);
+
+            char prefix[20]; // 20 char buffer to be safe
+            char title[20]; // name should be 18 + 1(null terminator)
+
+            snprintf(prefix, sizeof(prefix), "%s@fz:~$", furi_hal_version_get_name_ptr());
+            snprintf(title, sizeof(prefix), "%s@fz: ~/Home", furi_hal_version_get_name_ptr());
+
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 20, 10, title); // current dir on the title bar
+
+            canvas_draw_str(canvas, 118, 9, "x"); // "X" button on the top-right corner
+            canvas_draw_frame(canvas, 116, 2, 8, 9);
+            canvas_draw_frame(canvas, 0, 0, 128, 13);
+            canvas_set_font(canvas, FontBatteryPercent);
+
+            // Display the user's name line at the bottom
+            canvas_draw_str(canvas, 2, 56, prefix);
+
+            size_t name_start_x = 2 + (strlen(prefix) - 1) * 6;
+
+            for(size_t i = 0; i < 4 && (position + i) < items_count; i++) {
+                item = MenuItemArray_get(model->items, position + i);
+                menu_short_name(item, name);
+
+                size_t scroll_counter = menu_scroll_counter(model, item);
+                if(i == 0) {
+                    // Display selected item to the right of the $ symbol
+                    // May want to reduce spacing
+                    elements_scrollable_text_line(
+                        canvas, name_start_x, 56, 60, name, scroll_counter, false);
+                } else {
+                    // Display the previous items above the user's name line
+                    canvas_draw_str(canvas, 2, 56 - i * 12, item->label);
+                }
+            }
+
+            break;
+        }
+
         default:
             break;
         }
+
         furi_string_free(name);
     } else {
         canvas_draw_str(canvas, 2, 32, "Empty");
@@ -639,6 +686,10 @@ static void menu_process_up(Menu* menu) {
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
+            case MenuStyleTerminal:
+                position = (position + count - 1) % count;
+                break;
+
             default:
                 break;
             }
@@ -689,6 +740,10 @@ static void menu_process_down(Menu* menu) {
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
+            case MenuStyleTerminal:
+                position = (position + 1) % count;
+                break;
+
             default:
                 break;
             }
@@ -751,6 +806,7 @@ static void menu_process_left(Menu* menu) {
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
+            case MenuStyleTerminal:
             default:
                 break;
             }
@@ -818,6 +874,7 @@ static void menu_process_right(Menu* menu) {
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
+            case MenuStyleTerminal:
             default:
                 break;
             }
