@@ -1,6 +1,7 @@
 #include "hid.h"
 #include "views.h"
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "HidApp"
 
@@ -10,7 +11,7 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexKeyboard,
     HidSubmenuIndexNumpad,
     HidSubmenuIndexMedia,
-    HidSubmenuIndexTikShorts,
+    HidSubmenuIndexTikTok,
     HidSubmenuIndexMouse,
     HidSubmenuIndexMouseClicker,
     HidSubmenuIndexMouseJiggler,
@@ -39,9 +40,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexMouse) {
         app->view_id = HidViewMouse;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouse);
-    } else if(index == HidSubmenuIndexTikShorts) {
-        app->view_id = BtHidViewTikShorts;
-        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewTikShorts);
+    } else if(index == HidSubmenuIndexTikTok) {
+        app->view_id = BtHidViewTikTok;
+        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewTikTok);
     } else if(index == HidSubmenuIndexMouseClicker) {
         app->view_id = HidViewMouseClicker;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouseClicker);
@@ -69,7 +70,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
-    hid_tikshorts_set_connected_status(hid->hid_tikshorts, connected);
+    hid_tiktok_set_connected_status(hid->hid_tiktok, connected);
 }
 
 static void hid_dialog_callback(DialogExResult result, void* context) {
@@ -133,7 +134,7 @@ Hid* hid_alloc(HidTransport transport) {
         submenu_add_item(
             app->device_type_submenu,
             "TikTok / YT Shorts",
-            HidSubmenuIndexTikShorts,
+            HidSubmenuIndexTikTok,
             hid_submenu_callback,
             app);
     }
@@ -195,11 +196,11 @@ Hid* hid_app_alloc_view(void* context) {
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMedia, hid_media_get_view(app->hid_media));
 
-    // TikTok / YT Shorts view
-    app->hid_tikshorts = hid_tikshorts_alloc(app);
-    view_set_previous_callback(hid_tikshorts_get_view(app->hid_tikshorts), hid_exit_confirm_view);
+    // TikTok view
+    app->hid_tiktok = hid_tiktok_alloc(app);
+    view_set_previous_callback(hid_tiktok_get_view(app->hid_tiktok), hid_exit_confirm_view);
     view_dispatcher_add_view(
-        app->view_dispatcher, BtHidViewTikShorts, hid_tikshorts_get_view(app->hid_tikshorts));
+        app->view_dispatcher, BtHidViewTikTok, hid_tiktok_get_view(app->hid_tiktok));
 
     // Mouse view
     app->hid_mouse = hid_mouse_alloc(app);
@@ -255,8 +256,8 @@ void hid_free(Hid* app) {
     hid_mouse_clicker_free(app->hid_mouse_clicker);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseJiggler);
     hid_mouse_jiggler_free(app->hid_mouse_jiggler);
-    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikShorts);
-    hid_tikshorts_free(app->hid_tikshorts);
+    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikTok);
+    hid_tiktok_free(app->hid_tiktok);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
@@ -403,6 +404,8 @@ int32_t hid_usb_app(void* p) {
 
     bt_hid_connection_status_changed_callback(BtStatusConnected, app);
 
+    dolphin_deed(DolphinDeedPluginStart);
+
     view_dispatcher_run(app->view_dispatcher);
 
     furi_hal_usb_set_config(usb_mode_prev, NULL);
@@ -440,6 +443,8 @@ int32_t hid_ble_app(void* p) {
 
     furi_hal_bt_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
+
+    dolphin_deed(DolphinDeedPluginStart);
 
     view_dispatcher_run(app->view_dispatcher);
 

@@ -21,11 +21,11 @@
 #include "views/hid_numpad.h"
 #include "views/hid_media.h"
 #include "views/hid_mouse.h"
-#include "views/hid_mouse_jiggler.h"
-#include "views/hid_tikshorts.h"
 #include "views/hid_mouse_clicker.h"
+#include "views/hid_mouse_jiggler.h"
+#include "views/hid_tiktok.h"
 
-#include "hid_path.h"
+#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
 typedef enum {
     HidTransportUsb,
@@ -48,7 +48,7 @@ struct Hid {
     HidMouse* hid_mouse;
     HidMouseClicker* hid_mouse_clicker;
     HidMouseJiggler* hid_mouse_jiggler;
-    HidTikShorts* hid_tikshorts;
+    HidTikTok* hid_tiktok;
 
     HidTransport transport;
     uint32_t view_id;

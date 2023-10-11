@@ -3,6 +3,7 @@
 #include "../hid.h"
 
 #include "hid_icons.h"
+
 #include <assets_icons.h>
 
 #define TAG "HidKeynote"
@@ -117,16 +118,16 @@ static void hid_keynote_draw_vertical_callback(Canvas* canvas, void* context) {
     HidKeynoteModel* model = context;
 
     // Header
-    canvas_set_font(canvas, FontPrimary);
     if(model->transport == HidTransportBle) {
         if(model->connected) {
             canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
         }
-
+        canvas_set_font(canvas, FontPrimary);
         elements_multiline_text_aligned(canvas, 20, 3, AlignLeft, AlignTop, "Keynote");
     } else {
+        canvas_set_font(canvas, FontPrimary);
         elements_multiline_text_aligned(canvas, 12, 3, AlignLeft, AlignTop, "Keynote");
     }
 
