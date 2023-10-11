@@ -1,7 +1,7 @@
 
 //Docs:
 //https://www.raveon.com/pdfiles/AN142(POCSAG).pdf  , https://habr.com/en/articles/438906/
-// Thanks for @eS^ for the help!
+// Thanks for @eS^, @Sil333033 for the help!
 // Sender part by @HTotoo, Receiver is based on @Shmuma's work
 
 #include "pocsag2400.h"
