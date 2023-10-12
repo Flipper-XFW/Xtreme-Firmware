@@ -388,28 +388,23 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             break;
         }
         case MenuStyleTerminal: {
-            canvas_set_font(canvas, FontBatteryPercent);
-            canvas_set_color(canvas, ColorBlack);
-            canvas_clear(canvas);
-
             // Draw a border around the screen
             canvas_draw_frame(canvas, 0, 0, 128, 64);
 
-            char prefix[20]; // 20 char buffer to be safe
-            char title[20]; // name should be 18 + 1(null terminator)
-
-            snprintf(prefix, sizeof(prefix), "%s@fz:~$", furi_hal_version_get_name_ptr());
-            snprintf(title, sizeof(prefix), "%s@fz: ~/Home", furi_hal_version_get_name_ptr());
-
+            // current dir on the title bar
             canvas_set_font(canvas, FontSecondary);
-            canvas_draw_str(canvas, 20, 10, title); // current dir on the title bar
+            char title[20];
+            snprintf(title, sizeof(title), "%s@fz: ~/Home", furi_hal_version_get_name_ptr());
+            canvas_draw_str(canvas, 20, 10, title);
 
             canvas_draw_str(canvas, 118, 9, "x"); // "X" button on the top-right corner
             canvas_draw_frame(canvas, 116, 2, 8, 9);
             canvas_draw_frame(canvas, 0, 0, 128, 13);
-            canvas_set_font(canvas, FontBatteryPercent);
 
             // Display the user's name line at the bottom
+            canvas_set_font(canvas, FontBatteryPercent);
+            char prefix[15];
+            snprintf(prefix, sizeof(prefix), "%s@fz:~$", furi_hal_version_get_name_ptr());
             canvas_draw_str(canvas, 2, 56, prefix);
 
             size_t name_start_x = 2 + (strlen(prefix) - 1) * 6;
