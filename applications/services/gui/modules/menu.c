@@ -659,6 +659,7 @@ static void menu_process_up(Menu* menu) {
             switch(XTREME_SETTINGS()->menu_style) {
             case MenuStyleList:
             case MenuStyleEurocorp:
+            case MenuStyleTerminal:
                 if(position > 0) {
                     position--;
                     if(vertical_offset && vertical_offset == position) {
@@ -686,9 +687,6 @@ static void menu_process_up(Menu* menu) {
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
-            case MenuStyleTerminal:
-                position = (position + count - 1) % count;
-                break;
 
             default:
                 break;
@@ -713,6 +711,7 @@ static void menu_process_down(Menu* menu) {
             switch(XTREME_SETTINGS()->menu_style) {
             case MenuStyleList:
             case MenuStyleEurocorp:
+            case MenuStyleTerminal:
                 if(position < count - 1) {
                     position++;
                     if(vertical_offset < count - 8 && vertical_offset == position - 7) {
@@ -739,9 +738,6 @@ static void menu_process_down(Menu* menu) {
                     position = 0;
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
-                break;
-            case MenuStyleTerminal:
-                position = (position + 1) % count;
                 break;
 
             default:
@@ -806,7 +802,7 @@ static void menu_process_left(Menu* menu) {
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
-            case MenuStyleTerminal:
+
             default:
                 break;
             }
@@ -874,7 +870,7 @@ static void menu_process_right(Menu* menu) {
                 }
                 vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
-            case MenuStyleTerminal:
+
             default:
                 break;
             }
