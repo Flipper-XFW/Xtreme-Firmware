@@ -1,9 +1,11 @@
 #pragma once
 
 #include "continuity.h"
+#include "fastpair.h"
 
 union BleSpamMsg {
     ContinuityMsg continuity;
+    FastpairMsg fastpair;
 };
 
 extern const BleSpamProtocol* ble_spam_protocols[];
