@@ -36,13 +36,9 @@ void fastpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpam
         model_id = models[rand() % COUNT_OF(models)];
     }
 
-    uint8_t size = 17;
+    uint8_t size = 14;
     uint8_t* packet = malloc(size);
     uint8_t i = 0;
-
-    packet[i++] = 2; // Size
-    packet[i++] = 0x01; // AD Type (Flags)
-    packet[i++] = 0x02 + (0x04 * (rand() % 2)); // GENERAL_DISC_MODE + maybe BR_EDR_NOT_SUPPORTED
 
     packet[i++] = 3; // Size
     packet[i++] = 0x03; // AD Type (Service UUID List)
