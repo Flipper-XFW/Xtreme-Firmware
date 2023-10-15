@@ -418,7 +418,7 @@ static int32_t ducky_script_execute_next(BadKbScript* bad_kb, File* script_file)
             return delay_val;
         } else if(delay_val < 0) { // Script error
             bad_kb->st.error_line = bad_kb->st.line_cur - 1;
-            FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_kb->st.line_cur - 1U);
+            FURI_LOG_E(WORKER_TAG, "Unknown command at line %zu", bad_kb->st.line_cur - 1U);
             return SCRIPT_STATE_ERROR;
         } else {
             return (delay_val + bad_kb->defdelay);
@@ -457,7 +457,7 @@ static int32_t ducky_script_execute_next(BadKbScript* bad_kb, File* script_file)
                     return delay_val;
                 } else if(delay_val < 0) {
                     bad_kb->st.error_line = bad_kb->st.line_cur;
-                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_kb->st.line_cur);
+                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %zu", bad_kb->st.line_cur);
                     return SCRIPT_STATE_ERROR;
                 } else {
                     return (delay_val + bad_kb->defdelay);
