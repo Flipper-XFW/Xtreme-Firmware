@@ -115,8 +115,9 @@ static size_t xBlockAllocatedBit = 0;
 #include <m-dict.h>
 
 /* Allocation tracking types */
-DICT_DEF2(MemmgrHeapAllocDict, uint32_t, uint32_t)
-DICT_DEF2(
+DICT_DEF2(MemmgrHeapAllocDict, uint32_t, uint32_t) //-V1048
+
+DICT_DEF2( //-V1048
     MemmgrHeapThreadDict,
     uint32_t,
     M_DEFAULT_OPLIST,
@@ -481,7 +482,7 @@ void* pvPortMalloc(size_t xWantedSize) {
 
     configASSERT((((size_t)pvReturn) & (size_t)portBYTE_ALIGNMENT_MASK) == 0);
 
-    furi_check(pvReturn, "out of memory");
+    furi_check(pvReturn, xWantedSize ? "out of memory" : "malloc(0)");
     pvReturn = memset(pvReturn, 0, to_wipe);
     return pvReturn;
 }
