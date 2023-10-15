@@ -7,7 +7,7 @@
 // Hacked together by @Willy-JL
 // Custom adv API by @Willy-JL (idea by @xMasterX)
 // iOS 17 Crash by @ECTO-1A
-// Android Pairs by @Spooks4576 and @ECTO-1A
+// Android and Windows Pairs by @Spooks4576 and @ECTO-1A
 // Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
 // Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
 
@@ -95,6 +95,19 @@ static Attack attacks[] = {
                 .msg =
                     {
                         .fastpair = {},
+                    },
+            },
+    },
+    {
+        .title = "Windows Device Found",
+        .text = "Requires enabling SwiftPair",
+        .payload =
+            {
+                .random_mac = true,
+                .protocol = &ble_spam_protocol_swiftpair,
+                .msg =
+                    {
+                        .swiftpair = {},
                     },
             },
     },
@@ -256,7 +269,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             AlignTop,
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
-            "Android: \e#Spooks4576\e#\n"
+            "Android+Win: \e#Spooks4576\e#\n"
             "                                   Version \e#2.0\e#",
             false);
         break;
