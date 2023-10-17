@@ -84,6 +84,8 @@ const SubGhzProtocol subghz_protocol_nice_flor_s = {
 
     .decoder = &subghz_protocol_nice_flor_s_decoder,
     .encoder = &subghz_protocol_nice_flor_s_encoder,
+
+    .filter = SubGhzProtocolFilter_NiceFlorS,
 };
 
 static void subghz_protocol_nice_flor_s_remote_controller(

@@ -83,7 +83,7 @@ struct SubGhz {
     SubGhzLastSettings* last_settings;
 
     SubGhzProtocolFlag filter;
-    SubGhzProtocolFlag ignore_filter;
+    SubGhzProtocolFilter ignore_filter;
     FuriString* error_str;
     SubGhzLock lock;
 

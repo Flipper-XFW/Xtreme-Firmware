@@ -314,7 +314,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         TAG,
         "Frequency: %03ld.%02ld, FeedbackLevel: %ld, FATrigger: %.2f, External: %s, ExtPower: %s, TimestampNames: %s, ExtPowerAmp: %s,\n"
         "GPSBaudrate: %ld, Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
-        "Starline: %s, Cars: %s, Magellan: %s, BinRAW: %s",
+        "BinRAW: %s, Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, Weather: %s, TPMS: %s",
         instance->frequency / 1000000 % 1000,
         instance->frequency / 10000 % 100,
         instance->frequency_analyzer_feedback_level,
@@ -327,11 +327,17 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         bool_to_char(instance->enable_hopping),
         instance->preset_index,
         (double)instance->rssi,
+        subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW),
         subghz_last_settings_log_filter_get_index(
-            instance->ignore_filter, SubGhzProtocolFlag_StarLine),
+            instance->ignore_filter, SubGhzProtocolFilter_StarLine),
         subghz_last_settings_log_filter_get_index(
-            instance->ignore_filter, SubGhzProtocolFlag_AutoAlarms),
+            instance->ignore_filter, SubGhzProtocolFilter_AutoAlarms),
         subghz_last_settings_log_filter_get_index(
-            instance->ignore_filter, SubGhzProtocolFlag_Magellan),
-        subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW));
+            instance->ignore_filter, SubGhzProtocolFilter_Magellan),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_NiceFlorS),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_Weather),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_TPMS));
 }

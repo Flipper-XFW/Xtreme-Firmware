@@ -64,11 +64,12 @@ const SubGhzProtocol subghz_protocol_magellan = {
     .name = SUBGHZ_PROTOCOL_MAGELLAN_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send |
-            SubGhzProtocolFlag_Magellan,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_magellan_decoder,
     .encoder = &subghz_protocol_magellan_encoder,
+
+    .filter = SubGhzProtocolFilter_Magellan,
 };
 
 void* subghz_protocol_encoder_magellan_alloc(SubGhzEnvironment* environment) {
