@@ -136,10 +136,12 @@ FURI_NORETURN void __furi_crash() {
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "Fatal Error";
+#ifndef __FURI_TRACE
     } else if(__furi_check_message == (void*)__FURI_ASSERT_MESSAGE_FLAG) {
         __furi_check_message = "furi_assert failed";
     } else if(__furi_check_message == (void*)__FURI_CHECK_MESSAGE_FLAG) {
         __furi_check_message = "furi_check failed";
+#endif
     }
 
     furi_hal_console_puts("\r\n\033[0;31m[CRASH]");
