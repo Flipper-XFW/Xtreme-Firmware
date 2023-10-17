@@ -63,11 +63,12 @@ const SubGhzProtocolEncoder subghz_protocol_kia_encoder = {
 const SubGhzProtocol subghz_protocol_kia = {
     .name = SUBGHZ_PROTOCOL_KIA_NAME,
     .type = SubGhzProtocolTypeDynamic,
-    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_AutoAlarms,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_kia_decoder,
     .encoder = &subghz_protocol_kia_encoder,
+
+    .filter = SubGhzProtocolFilter_AutoAlarms,
 };
 
 void* subghz_protocol_decoder_kia_alloc(SubGhzEnvironment* environment) {

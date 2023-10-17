@@ -80,10 +80,12 @@ const SubGhzProtocol subghz_protocol_nice_flor_s = {
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
             SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save |
-            SubGhzProtocolFlag_Send | SubGhzProtocolFlag_NiceFlorS,
+            SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_nice_flor_s_decoder,
     .encoder = &subghz_protocol_nice_flor_s_encoder,
+
+    .filter = SubGhzProtocolFilter_NiceFlorS,
 };
 
 static void subghz_protocol_nice_flor_s_remote_controller(
