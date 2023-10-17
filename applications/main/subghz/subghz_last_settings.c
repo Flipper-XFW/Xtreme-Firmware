@@ -314,7 +314,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         TAG,
         "Frequency: %03ld.%02ld, FeedbackLevel: %ld, FATrigger: %.2f, External: %s, ExtPower: %s, TimestampNames: %s, ExtPowerAmp: %s,\n"
         "GPSBaudrate: %ld, Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
-        "Starline: %s, Cars: %s, Magellan: %s, BinRAW: %s",
+        "Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, BinRAW: %s",
         instance->frequency / 1000000 % 1000,
         instance->frequency / 10000 % 100,
         instance->frequency_analyzer_feedback_level,
@@ -333,5 +333,10 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
             instance->ignore_filter, SubGhzProtocolFlag_AutoAlarms),
         subghz_last_settings_log_filter_get_index(
             instance->ignore_filter, SubGhzProtocolFlag_Magellan),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFlag_NiceFlorS),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFlag_Weather),
+        subghz_last_settings_log_filter_get_index(instance->ignore_filter, SubGhzProtocolFlag_TPMS),
         subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW));
 }
