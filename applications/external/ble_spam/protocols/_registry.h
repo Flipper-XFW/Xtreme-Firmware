@@ -4,17 +4,17 @@
 #include "fastpair.h"
 #include "swiftpair.h"
 
-union BleSpamProtocolCfg {
+union ProtocolCfg {
     ContinuityCfg continuity;
     FastpairCfg fastpair;
     SwiftpairCfg swiftpair;
 };
 
-extern const BleSpamProtocol* ble_spam_protocols[];
+extern const Protocol* protocols[];
 
-extern const size_t ble_spam_protocols_count;
+extern const size_t protocols_count;
 
 typedef struct {
     bool random_mac;
-    BleSpamProtocolCfg cfg;
-} BleSpamPayload;
+    ProtocolCfg cfg;
+} Payload;
