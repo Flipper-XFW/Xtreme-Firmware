@@ -35,6 +35,7 @@ void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProtoc
             0xF38C02, // Boykisser
             0x1448C9, // BLM
             0xD5AB33, // Xtreme
+            0x0C0B67, // Xtreme Cta
             0x13B39D, // Talking Sasquach
             0xAA1FE1, // ClownMaster
         };
