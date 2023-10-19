@@ -50,7 +50,6 @@ static void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const Proto
 enum {
     ConfigDisplayName,
 };
-
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
     scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
@@ -61,7 +60,6 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-
 static uint8_t swiftpair_config_list(Ctx* ctx) {
     SwiftpairCfg* cfg = &ctx->attack->payload.cfg.swiftpair;
     VariableItemList* list = ctx->variable_item_list;
@@ -89,7 +87,6 @@ static void display_name_callback(void* _ctx) {
     Ctx* ctx = _ctx;
     scene_manager_previous_scene(ctx->scene_manager);
 }
-
 void scene_swiftpair_display_name_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
     SwiftpairCfg* cfg = &ctx->attack->payload.cfg.swiftpair;
@@ -105,13 +102,11 @@ void scene_swiftpair_display_name_on_enter(void* _ctx) {
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewTextInput);
 }
-
 bool scene_swiftpair_display_name_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-
 void scene_swiftpair_display_name_on_exit(void* _ctx) {
     UNUSED(_ctx);
 }

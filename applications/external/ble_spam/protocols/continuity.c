@@ -32,7 +32,6 @@ static uint8_t packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeNearbyInfo] = HEADER_LEN + 5,
     [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
-
 static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
 

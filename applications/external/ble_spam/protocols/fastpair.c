@@ -30,7 +30,6 @@ const struct {
     {0x13B39D, "Talking Sasquach"},
     {0xAA1FE1, "ClownMaster"},
 };
-
 const uint8_t models_count = COUNT_OF(models);
 
 static const char* fastpair_get_name(const ProtocolCfg* _cfg) {
@@ -77,7 +76,6 @@ static void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const Protoc
 enum {
     ConfigModelId,
 };
-
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
     scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
@@ -88,7 +86,6 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-
 static void model_id_changed(VariableItem* item) {
     FastpairCfg* cfg = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -101,7 +98,6 @@ static void model_id_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-
 static uint8_t fastpair_config_list(Ctx* ctx) {
     FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
     VariableItemList* list = ctx->variable_item_list;
@@ -162,7 +158,6 @@ static void model_id_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-
 void scene_fastpair_model_id_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
     FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
@@ -193,13 +188,11 @@ void scene_fastpair_model_id_on_enter(void* _ctx) {
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
-
 bool scene_fastpair_model_id_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-
 void scene_fastpair_model_id_on_exit(void* _ctx) {
     UNUSED(_ctx);
 }
@@ -209,7 +202,6 @@ static void model_id_custom_callback(void* _ctx) {
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
-
 void scene_fastpair_model_id_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
     FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
@@ -227,13 +219,11 @@ void scene_fastpair_model_id_custom_on_enter(void* _ctx) {
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
-
 bool scene_fastpair_model_id_custom_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-
 void scene_fastpair_model_id_custom_on_exit(void* _ctx) {
     UNUSED(_ctx);
 }
