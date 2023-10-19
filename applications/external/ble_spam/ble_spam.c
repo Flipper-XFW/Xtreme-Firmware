@@ -320,6 +320,7 @@ static bool input_callback(InputEvent* input, void* ctx) {
                 if(input->type == InputTypeLong) {
                     if(advertising) toggle_adv(state);
                     state->ctx.attack = &attacks[state->index];
+                    scene_manager_set_scene_state(state->ctx.scene_manager, SceneConfig, 0);
                     scene_manager_next_scene(state->ctx.scene_manager, SceneConfig);
                 } else if(input->type == InputTypeShort) {
                     toggle_adv(state);
