@@ -8,7 +8,7 @@
 // Hacked together by @Willy-JL
 // Custom adv API by @Willy-JL (idea by @xMasterX)
 // iOS 17 Crash by @ECTO-1A
-// Android and Windows Pairs by @Spooks4576 and @ECTO-1A
+// Android, Samsung and Windows Pairs by @Spooks4576 and @ECTO-1A
 // Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
 // Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
 
@@ -84,6 +84,19 @@ static Attack attacks[] = {
                 .cfg =
                     {
                         .fastpair = {},
+                    },
+            },
+    },
+    {
+        .title = "Samsung Earbuds Pair",
+        .text = "No cooldown, long range",
+        .protocol = &protocol_smartthings,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg =
+                    {
+                        .smartthings = {},
                     },
             },
     },
