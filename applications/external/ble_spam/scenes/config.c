@@ -1,6 +1,6 @@
 #include "../ble_spam.h"
 
-#include "protocols/_registry.h"
+#include "protocols/_protocols.h"
 
 static void random_mac_changed(VariableItem* item) {
     Ctx* ctx = variable_item_get_context(item);

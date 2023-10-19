@@ -1,5 +1,5 @@
 #include "continuity.h"
-#include "_registry.h"
+#include "_protocols.h"
 
 // Hacked together by @Willy-JL
 // iOS 17 Crash by @ECTO-1A

@@ -3,7 +3,7 @@
 #include <furi_hal_bt.h>
 #include <gui/elements.h>
 
-#include "protocols/_registry.h"
+#include "protocols/_protocols.h"
 
 // Hacked together by @Willy-JL
 // Custom adv API by @Willy-JL (idea by @xMasterX)

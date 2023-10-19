@@ -1,4 +1,4 @@
-#include "_registry.h"
+#include "_protocols.h"
 
 const Protocol* protocols[] = {
     &protocol_continuity,
