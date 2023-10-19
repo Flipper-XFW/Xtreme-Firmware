@@ -215,13 +215,12 @@ void scene_smartthings_data_custom_on_enter(void* _ctx) {
 
     byte_input_set_header_text(byte_input, "Enter custom Data");
 
+    ctx->byte_store[0] = (cfg->data >> 0x10) & 0xFF;
+    ctx->byte_store[1] = (cfg->data >> 0x08) & 0xFF;
+    ctx->byte_store[2] = (cfg->data >> 0x00) & 0xFF;
+
     byte_input_set_result_callback(
-        byte_input,
-        data_custom_callback,
-        NULL,
-        ctx,
-        ((void*)&cfg->data) + 1,
-        sizeof(cfg->data) - 1);
+        byte_input, data_custom_callback, NULL, ctx, (void*)ctx->byte_store, 3);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
@@ -231,5 +230,8 @@ bool scene_smartthings_data_custom_on_event(void* _ctx, SceneManagerEvent event)
     return false;
 }
 void scene_smartthings_data_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    cfg->data =
+        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
 }

@@ -209,13 +209,12 @@ void scene_fastpair_model_id_custom_on_enter(void* _ctx) {
 
     byte_input_set_header_text(byte_input, "Enter custom Model ID");
 
+    ctx->byte_store[0] = (cfg->model_id >> 0x10) & 0xFF;
+    ctx->byte_store[1] = (cfg->model_id >> 0x08) & 0xFF;
+    ctx->byte_store[2] = (cfg->model_id >> 0x00) & 0xFF;
+
     byte_input_set_result_callback(
-        byte_input,
-        model_id_custom_callback,
-        NULL,
-        ctx,
-        ((void*)&cfg->model_id) + 1,
-        sizeof(cfg->model_id) - 1);
+        byte_input, model_id_custom_callback, NULL, ctx, (void*)ctx->byte_store, 3);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
@@ -225,5 +224,8 @@ bool scene_fastpair_model_id_custom_on_event(void* _ctx, SceneManagerEvent event
     return false;
 }
 void scene_fastpair_model_id_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
+    cfg->model_id =
+        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
 }

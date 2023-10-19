@@ -545,13 +545,11 @@ void scene_continuity_pp_model_id_custom_on_enter(void* _ctx) {
 
     byte_input_set_header_text(byte_input, "Enter custom Model ID");
 
+    ctx->byte_store[0] = (cfg->data.proximity_pair.model_id >> 0x08) & 0xFF;
+    ctx->byte_store[1] = (cfg->data.proximity_pair.model_id >> 0x00) & 0xFF;
+
     byte_input_set_result_callback(
-        byte_input,
-        pp_model_id_custom_callback,
-        NULL,
-        ctx,
-        (void*)&cfg->data.proximity_pair.model_id,
-        sizeof(cfg->data.proximity_pair.model_id));
+        byte_input, pp_model_id_custom_callback, NULL, ctx, (void*)ctx->byte_store, 2);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
@@ -561,7 +559,10 @@ bool scene_continuity_pp_model_id_custom_on_event(void* _ctx, SceneManagerEvent 
     return false;
 }
 void scene_continuity_pp_model_id_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.proximity_pair.model_id =
+        (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
 }
 
 static void pp_prefix_callback(void* _ctx, uint32_t index) {
@@ -632,13 +633,10 @@ void scene_continuity_pp_prefix_custom_on_enter(void* _ctx) {
 
     byte_input_set_header_text(byte_input, "Enter custom Prefix");
 
+    ctx->byte_store[0] = (cfg->data.proximity_pair.prefix >> 0x00) & 0xFF;
+
     byte_input_set_result_callback(
-        byte_input,
-        pp_prefix_custom_callback,
-        NULL,
-        ctx,
-        (void*)&cfg->data.proximity_pair.prefix,
-        sizeof(cfg->data.proximity_pair.prefix));
+        byte_input, pp_prefix_custom_callback, NULL, ctx, (void*)ctx->byte_store, 1);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
@@ -648,7 +646,9 @@ bool scene_continuity_pp_prefix_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_pp_prefix_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.proximity_pair.prefix = (ctx->byte_store[0] << 0x00);
 }
 
 static void na_action_type_callback(void* _ctx, uint32_t index) {
@@ -719,13 +719,10 @@ void scene_continuity_na_action_type_custom_on_enter(void* _ctx) {
 
     byte_input_set_header_text(byte_input, "Enter custom Action Type");
 
+    ctx->byte_store[0] = (cfg->data.nearby_action.type >> 0x00) & 0xFF;
+
     byte_input_set_result_callback(
-        byte_input,
-        na_action_type_custom_callback,
-        NULL,
-        ctx,
-        (void*)&cfg->data.nearby_action.type,
-        sizeof(cfg->data.nearby_action.type));
+        byte_input, na_action_type_custom_callback, NULL, ctx, (void*)ctx->byte_store, 1);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
@@ -735,7 +732,9 @@ bool scene_continuity_na_action_type_custom_on_event(void* _ctx, SceneManagerEve
     return false;
 }
 void scene_continuity_na_action_type_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.nearby_action.type = (ctx->byte_store[0] << 0x00);
 }
 
 static void na_flags_callback(void* _ctx) {
@@ -749,24 +748,22 @@ void scene_continuity_na_flags_on_enter(void* _ctx) {
 
     byte_input_set_header_text(byte_input, "Press back for automatic");
 
+    ctx->byte_store[0] = (cfg->data.nearby_action.flags >> 0x00) & 0xFF;
+
     byte_input_set_result_callback(
-        byte_input,
-        na_flags_callback,
-        NULL,
-        ctx,
-        (void*)&cfg->data.nearby_action.flags,
-        sizeof(cfg->data.nearby_action.flags));
+        byte_input, na_flags_callback, NULL, ctx, (void*)ctx->byte_store, 1);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
 bool scene_continuity_na_flags_on_event(void* _ctx, SceneManagerEvent event) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
     if(event.type == SceneManagerEventTypeBack) {
-        cfg->data.nearby_action.flags = 0x00;
+        ctx->byte_store[0] = 0x00;
     }
     return false;
 }
 void scene_continuity_na_flags_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.nearby_action.flags = (ctx->byte_store[0] << 0x00);
 }

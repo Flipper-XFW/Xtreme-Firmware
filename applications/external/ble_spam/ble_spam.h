@@ -20,6 +20,7 @@ typedef struct Attack Attack;
 
 typedef struct {
     Attack* attack;
+    uint8_t byte_store[3];
 
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
