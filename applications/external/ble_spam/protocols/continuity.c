@@ -16,7 +16,7 @@ static const char* type_names[ContinuityTypeCount] = {
     [ContinuityTypeNearbyInfo] = "Nearby Info",
     [ContinuityTypeCustomCrash] = "Custom Packet",
 };
-const char* continuity_get_name(const ProtocolCfg* _cfg) {
+static const char* continuity_get_name(const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = &_cfg->continuity;
     return type_names[cfg->type];
 }
@@ -33,7 +33,7 @@ static uint8_t packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
 
-void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
+static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
 
     ContinuityType type;

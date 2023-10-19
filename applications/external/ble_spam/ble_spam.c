@@ -104,7 +104,7 @@ static Attack attacks[] = {
 
 #define ATTACKS_COUNT ((signed)COUNT_OF(attacks))
 
-uint16_t delays[] = {20, 50, 100, 200};
+static uint16_t delays[] = {20, 50, 100, 200};
 
 typedef struct {
     Ctx ctx;

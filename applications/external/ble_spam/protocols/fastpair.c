@@ -4,13 +4,13 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://developers.google.com/nearby/fast-pair/specifications/introduction
 
-const char* fastpair_get_name(const ProtocolCfg* _cfg) {
+static const char* fastpair_get_name(const ProtocolCfg* _cfg) {
     const FastpairCfg* cfg = &_cfg->fastpair;
     UNUSED(cfg);
     return "FastPair";
 }
 
-void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
+static void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const FastpairCfg* cfg = _cfg ? &_cfg->fastpair : NULL;
 
     uint32_t model_id;

@@ -4,13 +4,13 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/bluetooth-swift-pair
 
-const char* swiftpair_get_name(const ProtocolCfg* _cfg) {
+static const char* swiftpair_get_name(const ProtocolCfg* _cfg) {
     const SwiftpairCfg* cfg = &_cfg->swiftpair;
     UNUSED(cfg);
     return "SwiftPair";
 }
 
-void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
+static void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const SwiftpairCfg* cfg = _cfg ? &_cfg->swiftpair : NULL;
 
     const char* display_name;
