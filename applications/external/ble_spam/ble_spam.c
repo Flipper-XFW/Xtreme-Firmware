@@ -128,8 +128,8 @@ typedef struct {
     int8_t index;
 } State;
 
-static int32_t adv_thread(void* ctx) {
-    State* state = ctx;
+static int32_t adv_thread(void* _ctx) {
+    State* state = _ctx;
     uint8_t size;
     uint16_t delay;
     uint8_t* packet;
@@ -182,10 +182,14 @@ enum {
     PageAboutCredits = PAGE_MAX,
 };
 
-static void draw_callback(Canvas* canvas, void* ctx) {
-    State* state = *(State**)ctx;
+static void draw_callback(Canvas* canvas, void* _ctx) {
+    State* state = *(State**)_ctx;
     const char* back = "Back";
     const char* next = "Next";
+    if(state->index < 0) {
+        back = "Next";
+        next = "Back";
+    }
     switch(state->index) {
     case PageStart - 1:
         next = "Spam";
@@ -315,8 +319,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     }
 }
 
-static bool input_callback(InputEvent* input, void* ctx) {
-    View* view = ctx;
+static bool input_callback(InputEvent* input, void* _ctx) {
+    View* view = _ctx;
     State* state = *(State**)view_get_model(view);
     bool consumed = false;
 
