@@ -1,7 +1,7 @@
+#include "ble_spam.h"
 #include <gui/gui.h>
 #include <furi_hal_bt.h>
 #include <gui/elements.h>
-#include <gui/view_dispatcher.h>
 
 #include "protocols/_registry.h"
 
@@ -114,6 +114,7 @@ static Attack attacks[] = {
 uint16_t delays[] = {20, 50, 100, 200};
 
 typedef struct {
+    Ctx ctx;
     bool resume;
     bool advertising;
     uint8_t delay;
@@ -163,10 +164,6 @@ static void toggle_adv(State* state) {
         furi_thread_start(state->thread);
     }
 }
-
-enum {
-    ViewMain,
-};
 
 #define PAGE_MIN (-3)
 #define PAGE_MAX ATTACKS_COUNT
@@ -363,9 +360,9 @@ static bool input_callback(InputEvent* input, void* ctx) {
     return consumed;
 }
 
-static uint32_t exit_callback(void* ctx) {
-    UNUSED(ctx);
-    return VIEW_NONE;
+static bool back_event_callback(void* _ctx) {
+    Ctx* ctx = _ctx;
+    return scene_manager_handle_back_event(ctx->scene_manager);
 }
 
 int32_t ble_spam(void* p) {
@@ -377,27 +374,30 @@ int32_t ble_spam(void* p) {
     furi_thread_set_stack_size(state->thread, 4096);
 
     Gui* gui = furi_record_open(RECORD_GUI);
-    ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(view_dispatcher);
-    view_dispatcher_set_event_callback_context(view_dispatcher, state);
+    state->ctx.view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(state->ctx.view_dispatcher);
+    view_dispatcher_set_event_callback_context(state->ctx.view_dispatcher, &state->ctx);
+    view_dispatcher_set_navigation_event_callback(state->ctx.view_dispatcher, back_event_callback);
+    state->ctx.scene_manager = scene_manager_alloc(&scene_handlers, &state->ctx);
 
-    View* view = view_alloc();
-    view_allocate_model(view, ViewModelTypeLockFree, sizeof(State*));
+    View* view_main = view_alloc();
+    view_allocate_model(view_main, ViewModelTypeLockFree, sizeof(State*));
     with_view_model(
-        view, State * *model, { *model = state; }, false);
-    view_set_context(view, view);
-    view_set_draw_callback(view, draw_callback);
-    view_set_input_callback(view, input_callback);
-    view_set_previous_callback(view, exit_callback);
-    view_dispatcher_add_view(view_dispatcher, ViewMain, view);
+        view_main, State * *model, { *model = state; }, false);
+    view_set_context(view_main, view_main);
+    view_set_draw_callback(view_main, draw_callback);
+    view_set_input_callback(view_main, input_callback);
+    view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, view_main);
 
-    view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    view_dispatcher_switch_to_view(view_dispatcher, ViewMain);
-    view_dispatcher_run(view_dispatcher);
+    view_dispatcher_attach_to_gui(state->ctx.view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+    scene_manager_next_scene(state->ctx.scene_manager, SceneMain);
+    view_dispatcher_run(state->ctx.view_dispatcher);
 
-    view_dispatcher_remove_view(view_dispatcher, ViewMain);
-    view_free(view);
-    view_dispatcher_free(view_dispatcher);
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewMain);
+    view_free(view_main);
+
+    scene_manager_free(state->ctx.scene_manager);
+    view_dispatcher_free(state->ctx.view_dispatcher);
     furi_record_close(RECORD_GUI);
 
     furi_thread_free(state->thread);
