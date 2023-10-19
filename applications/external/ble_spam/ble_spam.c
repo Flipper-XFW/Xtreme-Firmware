@@ -391,6 +391,18 @@ int32_t ble_spam(void* p) {
     view_set_input_callback(view_main, input_callback);
     view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, view_main);
 
+    state->ctx.byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        state->ctx.view_dispatcher, ViewByteInput, byte_input_get_view(state->ctx.byte_input));
+
+    state->ctx.submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        state->ctx.view_dispatcher, ViewSubmenu, submenu_get_view(state->ctx.submenu));
+
+    state->ctx.text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        state->ctx.view_dispatcher, ViewTextInput, text_input_get_view(state->ctx.text_input));
+
     state->ctx.variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         state->ctx.view_dispatcher,
@@ -400,6 +412,15 @@ int32_t ble_spam(void* p) {
     view_dispatcher_attach_to_gui(state->ctx.view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(state->ctx.scene_manager, SceneMain);
     view_dispatcher_run(state->ctx.view_dispatcher);
+
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewByteInput);
+    byte_input_free(state->ctx.byte_input);
+
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewSubmenu);
+    submenu_free(state->ctx.submenu);
+
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewTextInput);
+    text_input_free(state->ctx.text_input);
 
     view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewVariableItemList);
     variable_item_list_free(state->ctx.variable_item_list);
