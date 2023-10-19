@@ -25,6 +25,7 @@ void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* 
             0x821F66, // JBL Flip 6
             0x92BBBD, // Pixel Buds
             0xD446A7, // Sony XM5
+            0x2D7A23, // Sony WF-1000XM4
 
             // Custom debug popups
             0xD99CA1, // Flipper Zero
