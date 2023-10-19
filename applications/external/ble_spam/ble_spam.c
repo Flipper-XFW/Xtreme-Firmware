@@ -12,13 +12,6 @@
 // Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
 // Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
 
-typedef struct {
-    const char* title;
-    const char* text;
-    const Protocol* protocol;
-    Payload payload;
-} Attack;
-
 static Attack attacks[] = {
     {
         .title = "+ Kitchen Sink",
@@ -323,7 +316,15 @@ static bool input_callback(InputEvent* input, void* ctx) {
 
         switch(input->key) {
         case InputKeyOk:
-            if(is_attack) toggle_adv(state);
+            if(is_attack) {
+                if(input->type == InputTypeLong) {
+                    if(advertising) toggle_adv(state);
+                    state->ctx.attack = &attacks[state->index];
+                    scene_manager_next_scene(state->ctx.scene_manager, SceneConfig);
+                } else if(input->type == InputTypeShort) {
+                    toggle_adv(state);
+                }
+            }
             break;
         case InputKeyUp:
             if(is_attack && state->delay < COUNT_OF(delays) - 1) {
@@ -389,9 +390,18 @@ int32_t ble_spam(void* p) {
     view_set_input_callback(view_main, input_callback);
     view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, view_main);
 
+    state->ctx.variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        state->ctx.view_dispatcher,
+        ViewVariableItemList,
+        variable_item_list_get_view(state->ctx.variable_item_list));
+
     view_dispatcher_attach_to_gui(state->ctx.view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(state->ctx.scene_manager, SceneMain);
     view_dispatcher_run(state->ctx.view_dispatcher);
+
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewVariableItemList);
+    variable_item_list_free(state->ctx.variable_item_list);
 
     view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewMain);
     view_free(view_main);

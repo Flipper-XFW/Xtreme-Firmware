@@ -18,3 +18,10 @@ typedef struct {
     bool random_mac;
     ProtocolCfg cfg;
 } Payload;
+
+struct Attack {
+    const char* title;
+    const char* text;
+    const Protocol* protocol;
+    Payload payload;
+};
