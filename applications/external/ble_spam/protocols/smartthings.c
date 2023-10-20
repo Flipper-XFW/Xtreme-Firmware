@@ -80,6 +80,7 @@ void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const Prot
 }
 
 enum {
+    _ConfigExtraStart = ConfigExtraStart,
     ConfigData,
 };
 static void config_callback(void* _ctx, uint32_t index) {
@@ -104,14 +105,12 @@ static void data_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static uint8_t smartthings_config_list(Ctx* ctx) {
+static void smartthings_extra_config(Ctx* ctx) {
     SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
     VariableItemList* list = ctx->variable_item_list;
-    uint8_t item_count = 0;
     VariableItem* item;
     size_t value_index;
 
-    item_count++;
     item = variable_item_list_add(list, "Data", datas_count + 1, data_changed, cfg);
     const char* data_name = NULL;
     char data_name_buf[9];
@@ -136,15 +135,13 @@ static uint8_t smartthings_config_list(Ctx* ctx) {
     variable_item_set_current_value_text(item, data_name);
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
-
-    return item_count;
 }
 
 const Protocol protocol_smartthings = {
     .icon = &I_android,
     .get_name = smartthings_get_name,
     .make_packet = smartthings_make_packet,
-    .config_list = smartthings_config_list,
+    .extra_config = smartthings_extra_config,
 };
 
 static void data_callback(void* _ctx, uint32_t index) {

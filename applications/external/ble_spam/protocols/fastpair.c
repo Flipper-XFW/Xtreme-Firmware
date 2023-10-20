@@ -74,6 +74,7 @@ static void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const Protoc
 }
 
 enum {
+    _ConfigExtraStart = ConfigExtraStart,
     ConfigModelId,
 };
 static void config_callback(void* _ctx, uint32_t index) {
@@ -98,14 +99,12 @@ static void model_id_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static uint8_t fastpair_config_list(Ctx* ctx) {
+static void fastpair_extra_config(Ctx* ctx) {
     FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
     VariableItemList* list = ctx->variable_item_list;
-    uint8_t item_count = 0;
     VariableItem* item;
     size_t value_index;
 
-    item_count++;
     item = variable_item_list_add(list, "Model ID", models_count + 1, model_id_changed, cfg);
     const char* model_name = NULL;
     char model_name_buf[9];
@@ -130,15 +129,13 @@ static uint8_t fastpair_config_list(Ctx* ctx) {
     variable_item_set_current_value_text(item, model_name);
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
-
-    return item_count;
 }
 
 const Protocol protocol_fastpair = {
     .icon = &I_android,
     .get_name = fastpair_get_name,
     .make_packet = fastpair_make_packet,
-    .config_list = fastpair_config_list,
+    .extra_config = fastpair_extra_config,
 };
 
 static void model_id_callback(void* _ctx, uint32_t index) {

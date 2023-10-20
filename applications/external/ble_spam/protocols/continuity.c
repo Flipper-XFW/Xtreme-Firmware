@@ -274,10 +274,12 @@ static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const Prot
 }
 
 enum {
+    _ConfigPpExtraStart = ConfigExtraStart,
     ConfigPpModelId,
     ConfigPpPrefix,
 };
 enum {
+    _ConfigNaExtraStart = ConfigExtraStart,
     ConfigNaActionType,
     ConfigNaFlags,
 };
@@ -352,16 +354,14 @@ static void na_action_type_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static uint8_t continuity_config_list(Ctx* ctx) {
+static void continuity_extra_config(Ctx* ctx) {
     ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
     VariableItemList* list = ctx->variable_item_list;
-    uint8_t item_count = 0;
     VariableItem* item;
     size_t value_index;
 
     switch(cfg->type) {
     case ContinuityTypeProximityPair: {
-        item_count++;
         item = variable_item_list_add(
             list, "Model ID", pp_models_count + 1, pp_model_id_changed, cfg);
         const char* model_name = NULL;
@@ -390,7 +390,6 @@ static uint8_t continuity_config_list(Ctx* ctx) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
 
-        item_count++;
         item =
             variable_item_list_add(list, "Prefix", pp_prefixes_count + 1, pp_prefix_changed, cfg);
         const char* prefix_name = NULL;
@@ -421,7 +420,6 @@ static uint8_t continuity_config_list(Ctx* ctx) {
         break;
     }
     case ContinuityTypeNearbyAction: {
-        item_count++;
         item = variable_item_list_add(
             list, "Action Type", na_actions_count + 1, na_action_type_changed, cfg);
         const char* action_name = NULL;
@@ -447,7 +445,6 @@ static uint8_t continuity_config_list(Ctx* ctx) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, action_name);
 
-        item_count++;
         item = variable_item_list_add(list, "Flags", 0, NULL, NULL);
         const char* flags_name = NULL;
         char flags_name_buf[3];
@@ -466,15 +463,13 @@ static uint8_t continuity_config_list(Ctx* ctx) {
     }
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
-
-    return item_count;
 }
 
 const Protocol protocol_continuity = {
     .icon = &I_apple,
     .get_name = continuity_get_name,
     .make_packet = continuity_make_packet,
-    .config_list = continuity_config_list,
+    .extra_config = continuity_extra_config,
 };
 
 static void pp_model_id_callback(void* _ctx, uint32_t index) {

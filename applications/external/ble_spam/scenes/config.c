@@ -15,15 +15,14 @@ void scene_config_on_enter(void* _ctx) {
     variable_item_list_reset(list);
 
     variable_item_list_set_header(list, ctx->attack->title);
-    uint8_t item_count = 0;
-    if(ctx->attack->protocol && ctx->attack->protocol->config_list) {
-        item_count = ctx->attack->protocol->config_list(ctx);
-    }
-    UNUSED(item_count);
 
     item = variable_item_list_add(list, "Random MAC", 2, random_mac_changed, ctx);
     variable_item_set_current_value_index(item, ctx->attack->payload.random_mac);
     variable_item_set_current_value_text(item, ctx->attack->payload.random_mac ? "ON" : "OFF");
+
+    if(ctx->attack->protocol && ctx->attack->protocol->extra_config) {
+        ctx->attack->protocol->extra_config(ctx);
+    }
 
     variable_item_list_set_selected_item(
         list, scene_manager_get_scene_state(ctx->scene_manager, SceneConfig));

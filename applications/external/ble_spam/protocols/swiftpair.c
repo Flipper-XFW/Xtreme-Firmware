@@ -48,6 +48,7 @@ static void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const Proto
 }
 
 enum {
+    _ConfigExtraStart = ConfigExtraStart,
     ConfigDisplayName,
 };
 static void config_callback(void* _ctx, uint32_t index) {
@@ -60,27 +61,23 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-static uint8_t swiftpair_config_list(Ctx* ctx) {
+static void swiftpair_extra_config(Ctx* ctx) {
     SwiftpairCfg* cfg = &ctx->attack->payload.cfg.swiftpair;
     VariableItemList* list = ctx->variable_item_list;
-    uint8_t item_count = 0;
     VariableItem* item;
 
-    item_count++;
     item = variable_item_list_add(list, "Display Name", 0, NULL, NULL);
     variable_item_set_current_value_text(
         item, cfg->display_name[0] != '\0' ? cfg->display_name : "Random");
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
-
-    return item_count;
 }
 
 const Protocol protocol_swiftpair = {
     .icon = &I_windows,
     .get_name = swiftpair_get_name,
     .make_packet = swiftpair_make_packet,
-    .config_list = swiftpair_config_list,
+    .extra_config = swiftpair_extra_config,
 };
 
 static void display_name_callback(void* _ctx) {

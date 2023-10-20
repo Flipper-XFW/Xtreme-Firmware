@@ -16,6 +16,11 @@ enum {
     ViewVariableItemList,
 };
 
+enum {
+    ConfigRandomMac,
+    ConfigExtraStart = ConfigRandomMac,
+};
+
 typedef struct Attack Attack;
 
 typedef struct {
