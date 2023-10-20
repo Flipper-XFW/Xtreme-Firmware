@@ -128,6 +128,8 @@ static void fastpair_extra_config(Ctx* ctx) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, model_name);
 
+    variable_item_list_add(list, "Requires Google services", 0, NULL, NULL);
+
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 

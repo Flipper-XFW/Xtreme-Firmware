@@ -70,6 +70,8 @@ static void swiftpair_extra_config(Ctx* ctx) {
     variable_item_set_current_value_text(
         item, cfg->display_name[0] != '\0' ? cfg->display_name : "Random");
 
+    variable_item_list_add(list, "Requires enabling SwiftPair", 0, NULL, NULL);
+
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 

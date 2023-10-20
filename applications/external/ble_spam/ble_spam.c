@@ -102,7 +102,7 @@ static Attack attacks[] = {
     },
     {
         .title = "Windows Device Found",
-        .text = "Requires enabling SwiftPair",
+        .text = "No cooldown, short range",
         .protocol = &protocol_swiftpair,
         .payload =
             {

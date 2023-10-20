@@ -20,7 +20,9 @@ void scene_config_on_enter(void* _ctx) {
     variable_item_set_current_value_index(item, ctx->attack->payload.random_mac);
     variable_item_set_current_value_text(item, ctx->attack->payload.random_mac ? "ON" : "OFF");
 
-    if(ctx->attack->protocol && ctx->attack->protocol->extra_config) {
+    if(!ctx->attack->protocol) {
+        variable_item_list_add(list, "None shall escape the S I N K", 0, NULL, NULL);
+    } else if(ctx->attack->protocol->extra_config) {
         ctx->attack->protocol->extra_config(ctx);
     }
 

@@ -458,6 +458,11 @@ static void continuity_extra_config(Ctx* ctx) {
         variable_item_set_current_value_text(item, flags_name);
         break;
     }
+    case ContinuityTypeCustomCrash: {
+        variable_item_list_add(list, "Lock+unlock helps to crash", 0, NULL, NULL);
+        variable_item_list_add(list, "Works on iPhone 12 and up", 0, NULL, NULL);
+        break;
+    }
     default:
         break;
     }
