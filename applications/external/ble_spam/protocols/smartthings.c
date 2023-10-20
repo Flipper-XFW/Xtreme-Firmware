@@ -7,7 +7,7 @@
 const struct {
     uint32_t value;
     const char* name;
-} datas[] = {
+} buds_models[] = {
     {0x39EA48, "Light Purple Buds"},    {0xA7C62C, "Bluish Silver Buds"},
     {0x850116, "Black Buds Live"},      {0x3D8F41, "Gray and Black Buds"},
     {0x3B6D02, "Bluish Chrome Buds"},   {0xAE063C, "Grey Beige Buds"},
@@ -19,89 +19,117 @@ const struct {
     {0xAE073A, "Black and White Buds"}, {0x011716, "Sleek Black Buds"},
     {0x9D1700, "Fallback Image"},       {0xEE7A0C, "Fallback Buds"},
 };
-const uint8_t datas_count = COUNT_OF(datas);
+const uint8_t buds_models_count = COUNT_OF(buds_models);
 
-const char* smartthings_get_name(const ProtocolCfg* _cfg) {
+static const char* type_names[SmartthingsTypeMAX] = {
+    [SmartthingsTypeBuds] = "SmartThings Buds",
+};
+static const char* smartthings_get_name(const ProtocolCfg* _cfg) {
     const SmartthingsCfg* cfg = &_cfg->smartthings;
-    UNUSED(cfg);
-    return "SmartThings";
+    return type_names[cfg->type];
 }
 
+static uint8_t packet_sizes[SmartthingsTypeMAX] = {
+    [SmartthingsTypeBuds] = 31,
+};
 void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const ProtocolCfg* _cfg) {
     const SmartthingsCfg* cfg = _cfg ? &_cfg->smartthings : NULL;
 
-    uint32_t data;
-    if(cfg && cfg->data != 0x000000) {
-        data = cfg->data;
+    SmartthingsType type;
+    if(cfg) {
+        type = cfg->type;
     } else {
-        data = datas[rand() % datas_count].value;
+        type = rand() % SmartthingsTypeMAX;
     }
 
-    uint8_t size = 31;
+    uint8_t size = packet_sizes[type];
     uint8_t* packet = malloc(size);
     uint8_t i = 0;
 
-    packet[i++] = 27; // Size
-    packet[i++] = 0xFF; // AD Type (Manufacturer Specific)
-    packet[i++] = 0x75; // Company ID (Samsung Electronics Co. Ltd.)
-    packet[i++] = 0x00; // ...
-    packet[i++] = 0x42;
-    packet[i++] = 0x09;
-    packet[i++] = 0x81;
-    packet[i++] = 0x02;
-    packet[i++] = 0x14;
-    packet[i++] = 0x15;
-    packet[i++] = 0x03;
-    packet[i++] = 0x21;
-    packet[i++] = 0x01;
-    packet[i++] = 0x00;
-    packet[i++] = (data >> 0x10) & 0xFF;
-    packet[i++] = (data >> 0x08) & 0xFF;
-    packet[i++] = 0x01;
-    packet[i++] = (data >> 0x00) & 0xFF;
-    packet[i++] = 0x06;
-    packet[i++] = 0x3C;
-    packet[i++] = 0x00;
-    packet[i++] = 0x00;
-    packet[i++] = 0x00;
-    packet[i++] = 0x00;
-    packet[i++] = 0x00;
-    packet[i++] = 0x00;
-    packet[i++] = 0x00;
-    packet[i++] = 0x00;
+    switch(type) {
+    case SmartthingsTypeBuds: {
+        uint32_t model;
+        if(cfg && cfg->data.buds.model != 0x000000) {
+            model = cfg->data.buds.model;
+        } else {
+            model = buds_models[rand() % buds_models_count].value;
+        }
 
-    packet[i++] = 16; // Size
-    packet[i++] = 0xFF; // AD Type (Manufacturer Specific)
-    packet[i++] = 0x75; // Company ID (Samsung Electronics Co. Ltd.)
-    // Truncated AD segment, Android seems to fill in the rest with zeros
+        packet[i++] = 27; // Size
+        packet[i++] = 0xFF; // AD Type (Manufacturer Specific)
+        packet[i++] = 0x75; // Company ID (Samsung Electronics Co. Ltd.)
+        packet[i++] = 0x00; // ...
+        packet[i++] = 0x42;
+        packet[i++] = 0x09;
+        packet[i++] = 0x81;
+        packet[i++] = 0x02;
+        packet[i++] = 0x14;
+        packet[i++] = 0x15;
+        packet[i++] = 0x03;
+        packet[i++] = 0x21;
+        packet[i++] = 0x01;
+        packet[i++] = 0x00;
+        packet[i++] = (model >> 0x10) & 0xFF;
+        packet[i++] = (model >> 0x08) & 0xFF;
+        packet[i++] = 0x01;
+        packet[i++] = (model >> 0x00) & 0xFF;
+        packet[i++] = 0x06;
+        packet[i++] = 0x3C;
+        packet[i++] = 0x00;
+        packet[i++] = 0x00;
+        packet[i++] = 0x00;
+        packet[i++] = 0x00;
+        packet[i++] = 0x00;
+        packet[i++] = 0x00;
+        packet[i++] = 0x00;
+        packet[i++] = 0x00;
+
+        packet[i++] = 16; // Size
+        packet[i++] = 0xFF; // AD Type (Manufacturer Specific)
+        packet[i++] = 0x75; // Company ID (Samsung Electronics Co. Ltd.)
+        // Truncated AD segment, Android seems to fill in the rest with zeros
+        break;
+    }
+    default:
+        break;
+    }
 
     *out_size = size;
     *out_packet = packet;
 }
 
 enum {
-    _ConfigExtraStart = ConfigExtraStart,
-    ConfigData,
+    _ConfigBudsExtraStart = ConfigExtraStart,
+    ConfigBudsModel,
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
+    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
     scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
-    switch(index) {
-    case ConfigData:
-        scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsData);
+    switch(cfg->type) {
+    case SmartthingsTypeBuds: {
+        switch(index) {
+        case ConfigBudsModel:
+            scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsBudsModel);
+            break;
+        default:
+            break;
+        }
+        break;
+    }
     default:
         break;
     }
 }
-static void data_changed(VariableItem* item) {
+static void buds_model_changed(VariableItem* item) {
     SmartthingsCfg* cfg = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
-        cfg->data = datas[index].value;
-        variable_item_set_current_value_text(item, datas[index].name);
+        cfg->data.buds.model = buds_models[index].value;
+        variable_item_set_current_value_text(item, buds_models[index].name);
     } else {
-        cfg->data = 0x000000;
+        cfg->data.buds.model = 0x000000;
         variable_item_set_current_value_text(item, "Random");
     }
 }
@@ -111,28 +139,36 @@ static void smartthings_extra_config(Ctx* ctx) {
     VariableItem* item;
     size_t value_index;
 
-    item = variable_item_list_add(list, "Data", datas_count + 1, data_changed, cfg);
-    const char* data_name = NULL;
-    char data_name_buf[9];
-    if(cfg->data == 0x000000) {
-        data_name = "Random";
-        value_index = 0;
-    } else {
-        for(uint8_t i = 0; i < datas_count; i++) {
-            if(cfg->data == datas[i].value) {
-                data_name = datas[i].name;
-                value_index = i + 1;
-                break;
+    switch(cfg->type) {
+    case SmartthingsTypeBuds: {
+        item =
+            variable_item_list_add(list, "Model", buds_models_count + 1, buds_model_changed, cfg);
+        const char* model_name = NULL;
+        char model_name_buf[9];
+        if(cfg->data.buds.model == 0x000000) {
+            model_name = "Random";
+            value_index = 0;
+        } else {
+            for(uint8_t i = 0; i < buds_models_count; i++) {
+                if(cfg->data.buds.model == buds_models[i].value) {
+                    model_name = buds_models[i].name;
+                    value_index = i + 1;
+                    break;
+                }
+            }
+            if(!model_name) {
+                snprintf(model_name_buf, sizeof(model_name_buf), "%06lX", cfg->data.buds.model);
+                model_name = model_name_buf;
+                value_index = buds_models_count + 1;
             }
         }
-        if(!data_name) {
-            snprintf(data_name_buf, sizeof(data_name_buf), "%06lX", cfg->data);
-            data_name = data_name_buf;
-            value_index = datas_count + 1;
-        }
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, model_name);
+        break;
     }
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, data_name);
+    default:
+        break;
+    }
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
@@ -144,24 +180,24 @@ const Protocol protocol_smartthings = {
     .extra_config = smartthings_extra_config,
 };
 
-static void data_callback(void* _ctx, uint32_t index) {
+static void buds_model_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
     SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
     switch(index) {
     case 0:
-        cfg->data = 0x000000;
+        cfg->data.buds.model = 0x000000;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
-    case datas_count + 1:
-        scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsDataCustom);
+    case buds_models_count + 1:
+        scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsBudsModelCustom);
         break;
     default:
-        cfg->data = datas[index - 1].value;
+        cfg->data.buds.model = buds_models[index - 1].value;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     }
 }
-void scene_smartthings_data_on_enter(void* _ctx) {
+void scene_smartthings_buds_model_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
     SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
     Submenu* submenu = ctx->submenu;
@@ -169,66 +205,66 @@ void scene_smartthings_data_on_enter(void* _ctx) {
     bool found = false;
     submenu_reset(submenu);
 
-    submenu_add_item(submenu, "Random", 0, data_callback, ctx);
-    if(cfg->data == 0x000000) {
+    submenu_add_item(submenu, "Random", 0, buds_model_callback, ctx);
+    if(cfg->data.buds.model == 0x000000) {
         found = true;
         selected = 0;
     }
-    for(uint8_t i = 0; i < datas_count; i++) {
-        submenu_add_item(submenu, datas[i].name, i + 1, data_callback, ctx);
-        if(!found && cfg->data == datas[i].value) {
+    for(uint8_t i = 0; i < buds_models_count; i++) {
+        submenu_add_item(submenu, buds_models[i].name, i + 1, buds_model_callback, ctx);
+        if(!found && cfg->data.buds.model == buds_models[i].value) {
             found = true;
             selected = i + 1;
         }
     }
-    submenu_add_item(submenu, "Custom", datas_count + 1, data_callback, ctx);
+    submenu_add_item(submenu, "Custom", buds_models_count + 1, buds_model_callback, ctx);
     if(!found) {
         found = true;
-        selected = datas_count + 1;
+        selected = buds_models_count + 1;
     }
 
     submenu_set_selected_item(submenu, selected);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
-bool scene_smartthings_data_on_event(void* _ctx, SceneManagerEvent event) {
+bool scene_smartthings_buds_model_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-void scene_smartthings_data_on_exit(void* _ctx) {
+void scene_smartthings_buds_model_on_exit(void* _ctx) {
     UNUSED(_ctx);
 }
 
-static void data_custom_callback(void* _ctx) {
+static void buds_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
-void scene_smartthings_data_custom_on_enter(void* _ctx) {
+void scene_smartthings_buds_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
     SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
     ByteInput* byte_input = ctx->byte_input;
 
-    byte_input_set_header_text(byte_input, "Enter custom Data");
+    byte_input_set_header_text(byte_input, "Enter custom Model");
 
-    ctx->byte_store[0] = (cfg->data >> 0x10) & 0xFF;
-    ctx->byte_store[1] = (cfg->data >> 0x08) & 0xFF;
-    ctx->byte_store[2] = (cfg->data >> 0x00) & 0xFF;
+    ctx->byte_store[0] = (cfg->data.buds.model >> 0x10) & 0xFF;
+    ctx->byte_store[1] = (cfg->data.buds.model >> 0x08) & 0xFF;
+    ctx->byte_store[2] = (cfg->data.buds.model >> 0x00) & 0xFF;
 
     byte_input_set_result_callback(
-        byte_input, data_custom_callback, NULL, ctx, (void*)ctx->byte_store, 3);
+        byte_input, buds_model_custom_callback, NULL, ctx, (void*)ctx->byte_store, 3);
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
-bool scene_smartthings_data_custom_on_event(void* _ctx, SceneManagerEvent event) {
+bool scene_smartthings_buds_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-void scene_smartthings_data_custom_on_exit(void* _ctx) {
+void scene_smartthings_buds_model_custom_on_exit(void* _ctx) {
     Ctx* ctx = _ctx;
     SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
-    cfg->data =
+    cfg->data.buds.model =
         (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
 }

@@ -88,7 +88,7 @@ static Attack attacks[] = {
             },
     },
     {
-        .title = "Samsung Earbuds Pair",
+        .title = "Samsung Buds Pair",
         .text = "No cooldown, long range",
         .protocol = &protocol_smartthings,
         .payload =

@@ -1,2 +1,2 @@
-ADD_SCENE(smartthings_data, SmartthingsData)
-ADD_SCENE(smartthings_data_custom, SmartthingsDataCustom)
+ADD_SCENE(smartthings_buds_model, SmartthingsBudsModel)
+ADD_SCENE(smartthings_buds_model_custom, SmartthingsBudsModelCustom)
