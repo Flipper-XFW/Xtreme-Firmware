@@ -8,6 +8,8 @@ const struct {
     uint32_t value;
     const char* name;
 } buds_models[] = {
+    {0xEE7A0C, "Fallback Buds"},
+    {0x9D1700, "Fallback Dots"},
     {0x39EA48, "Light Purple Buds2"},
     {0xA7C62C, "Bluish Silver Buds2"},
     {0x850116, "Black Buds Live"},
@@ -26,8 +28,6 @@ const struct {
     {0x42C519, "Red Buds Live"},
     {0xAE073A, "Black & White Buds2"},
     {0x011716, "Sleek Black Buds2"},
-    {0x9D1700, "Fallback Image"},
-    {0xEE7A0C, "Fallback Buds"},
 };
 const uint8_t buds_models_count = COUNT_OF(buds_models);
 
@@ -35,6 +35,7 @@ const struct {
     uint8_t value;
     const char* name;
 } watch_models[] = {
+    {0x1A, "Fallback Watch"},
     {0x01, "White Watch4 Classic 44"},
     {0x02, "Black Watch4 Classic 40"},
     {0x03, "White Watch4 Classic 40"},
@@ -59,8 +60,7 @@ const struct {
     {0x1C, "Gold Watch6 Gold 40mm"},
     {0x1D, "Silver Watch6 Cyan 44mm"},
     {0x1E, "Black Watch6 Classic 43mm"},
-    {0x20, "Green Goofy"},
-    {0x1A, "Fallback Watch"},
+    {0x20, "Green Watch6 Classic 43mm"},
 };
 const uint8_t watch_models_count = COUNT_OF(watch_models);
 
