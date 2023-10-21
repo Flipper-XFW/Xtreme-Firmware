@@ -149,6 +149,27 @@ typedef struct {
     int8_t index;
 } State;
 
+NotificationMessage blink_message = {
+    .type = NotificationMessageTypeLedBlinkStart,
+    .data.led_blink.color = LightBlue | LightGreen,
+    .data.led_blink.on_time = 10,
+    .data.led_blink.period = 100,
+};
+const NotificationSequence blink_sequence = {
+    &blink_message,
+    &message_do_not_reset,
+    NULL,
+};
+static void start_blink(State* state) {
+    uint16_t period = delays[state->delay];
+    if(period <= 100) period += 30;
+    blink_message.data.led_blink.period = period;
+    notification_message_block(state->ctx.notification, &blink_sequence);
+}
+static void stop_blink(State* state) {
+    notification_message_block(state->ctx.notification, &sequence_blink_stop);
+}
+
 static int32_t adv_thread(void* _ctx) {
     State* state = _ctx;
     uint8_t size;
@@ -158,6 +179,7 @@ static int32_t adv_thread(void* _ctx) {
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
     if(!payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
+    if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
         if(protocol) {
@@ -175,6 +197,7 @@ static int32_t adv_thread(void* _ctx) {
         furi_hal_bt_custom_adv_stop();
     }
 
+    if(state->ctx.led_indicator) stop_blink(state);
     return 0;
 }
 
@@ -315,7 +338,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#3.1\e#",
+            "                                   Version \e#3.2\e#",
             false);
         break;
     default: {
@@ -385,11 +408,13 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         case InputKeyUp:
             if(is_attack && state->delay < COUNT_OF(delays) - 1) {
                 state->delay++;
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyDown:
             if(is_attack && state->delay > 0) {
                 state->delay--;
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyLeft:
@@ -429,7 +454,9 @@ int32_t ble_spam(void* p) {
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
     furi_thread_set_stack_size(state->thread, 4096);
+    state->ctx.led_indicator = true;
 
+    state->ctx.notification = furi_record_open(RECORD_NOTIFICATION);
     Gui* gui = furi_record_open(RECORD_GUI);
     state->ctx.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(state->ctx.view_dispatcher);
@@ -486,6 +513,7 @@ int32_t ble_spam(void* p) {
     scene_manager_free(state->ctx.scene_manager);
     view_dispatcher_free(state->ctx.view_dispatcher);
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
 
     furi_thread_free(state->thread);
     free(state);

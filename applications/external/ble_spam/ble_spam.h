@@ -1,5 +1,6 @@
 #pragma once
 
+#include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/byte_input.h>
 #include <gui/modules/submenu.h>
@@ -19,6 +20,7 @@ enum {
 enum {
     ConfigRandomMac,
     ConfigExtraStart = ConfigRandomMac,
+    ConfigLedIndicator,
 };
 
 typedef struct Attack Attack;
@@ -27,7 +29,9 @@ typedef struct {
     Attack* attack;
     uint8_t byte_store[3];
     VariableItemListEnterCallback fallback_config_enter;
+    bool led_indicator;
 
+    NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
