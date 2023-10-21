@@ -1,2 +1,4 @@
 ADD_SCENE(smartthings_buds_model, SmartthingsBudsModel)
 ADD_SCENE(smartthings_buds_model_custom, SmartthingsBudsModelCustom)
+ADD_SCENE(smartthings_watch_model, SmartthingsWatchModel)
+ADD_SCENE(smartthings_watch_model_custom, SmartthingsWatchModelCustom)

@@ -6,6 +6,7 @@
 
 typedef enum {
     SmartthingsTypeBuds,
+    SmartthingsTypeWatch,
     SmartthingsTypeMAX,
 } SmartthingsType;
 
@@ -15,6 +16,9 @@ typedef struct {
         struct {
             uint32_t model;
         } buds;
+        struct {
+            uint8_t model;
+        } watch;
     } data;
 } SmartthingsCfg;
 

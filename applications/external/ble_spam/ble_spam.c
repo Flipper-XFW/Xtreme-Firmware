@@ -88,7 +88,7 @@ static Attack attacks[] = {
             },
     },
     {
-        .title = "Samsung Buds Pair",
+        .title = "Samsung Buds Popup",
         .text = "No cooldown, long range",
         .protocol = &protocol_smartthings,
         .payload =
@@ -96,7 +96,28 @@ static Attack attacks[] = {
                 .random_mac = true,
                 .cfg =
                     {
-                        .smartthings = {},
+                        .smartthings =
+                            {
+                                .type = SmartthingsTypeBuds,
+                                .data = {},
+                            },
+                    },
+            },
+    },
+    {
+        .title = "Samsung Watch Pair",
+        .text = "No cooldown, long range",
+        .protocol = &protocol_smartthings,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg =
+                    {
+                        .smartthings =
+                            {
+                                .type = SmartthingsTypeWatch,
+                                .data = {},
+                            },
                     },
             },
     },
