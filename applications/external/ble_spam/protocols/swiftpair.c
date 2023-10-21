@@ -49,6 +49,8 @@ static void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const Proto
 enum {
     _ConfigExtraStart = ConfigExtraStart,
     ConfigName,
+    ConfigInfoRequire,
+    ConfigCOUNT,
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
@@ -56,7 +58,11 @@ static void config_callback(void* _ctx, uint32_t index) {
     switch(index) {
     case ConfigName:
         scene_manager_next_scene(ctx->scene_manager, SceneSwiftpairName);
+        break;
+    case ConfigInfoRequire:
+        break;
     default:
+        ctx->fallback_config_enter(ctx, index);
         break;
     }
 }
@@ -73,11 +79,17 @@ static void swiftpair_extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
+static uint8_t swiftpair_config_count(const ProtocolCfg* _cfg) {
+    UNUSED(_cfg);
+    return ConfigCOUNT;
+}
+
 const Protocol protocol_swiftpair = {
     .icon = &I_windows,
     .get_name = swiftpair_get_name,
     .make_packet = swiftpair_make_packet,
     .extra_config = swiftpair_extra_config,
+    .config_count = swiftpair_config_count,
 };
 
 static void name_callback(void* _ctx) {

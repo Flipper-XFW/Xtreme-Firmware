@@ -26,6 +26,7 @@ typedef struct Attack Attack;
 typedef struct {
     Attack* attack;
     uint8_t byte_store[3];
+    VariableItemListEnterCallback fallback_config_enter;
 
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;

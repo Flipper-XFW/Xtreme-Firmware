@@ -8,6 +8,21 @@ static void random_mac_changed(VariableItem* item) {
     variable_item_set_current_value_text(item, ctx->attack->payload.random_mac ? "ON" : "OFF");
 }
 
+static void config_callback(void* _ctx, uint32_t index) {
+    Ctx* ctx = _ctx;
+    scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
+    if(ctx->attack->protocol && ctx->attack->protocol->config_count) {
+        uint8_t extra = ctx->attack->protocol->config_count(&ctx->attack->payload.cfg);
+        if(index > extra) index -= extra;
+    }
+
+    switch(index) {
+    case ConfigRandomMac:
+        break;
+    default:
+        break;
+    }
+}
 void scene_config_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
     VariableItem* item;
@@ -20,9 +35,11 @@ void scene_config_on_enter(void* _ctx) {
     variable_item_set_current_value_index(item, ctx->attack->payload.random_mac);
     variable_item_set_current_value_text(item, ctx->attack->payload.random_mac ? "ON" : "OFF");
 
+    variable_item_list_set_enter_callback(list, config_callback, ctx);
     if(!ctx->attack->protocol) {
         variable_item_list_add(list, "None shall escape the S I N K", 0, NULL, NULL);
     } else if(ctx->attack->protocol->extra_config) {
+        ctx->fallback_config_enter = config_callback;
         ctx->attack->protocol->extra_config(ctx);
     }
 
