@@ -16,6 +16,9 @@ const struct {
     {0x92BBBD, "Pixel Buds"},
     {0xD446A7, "Sony XM5"},
     {0x2D7A23, "Sony WF-1000XM4"},
+    {0x0E30C3, "Razer Hammerhead TWS"},
+    {0x72EF8D, "Razer Hammerhead TWS X"},
+    {0x72FB00, "Soundcore Spirit Pro GVA"},
 
     // Custom debug popups
     {0xD99CA1, "Flipper Zero"},
@@ -29,6 +32,10 @@ const struct {
     {0x0C0B67, "Xtreme Cta"},
     {0x13B39D, "Talking Sasquach"},
     {0xAA1FE1, "ClownMaster"},
+    {0x7C6CDB, "Obama"},
+    {0x005EF9, "Ryanair"},
+    {0xE2106F, "FBI"},
+    {0xB37A62, "Tesla"},
 };
 const uint8_t models_count = COUNT_OF(models);
 
