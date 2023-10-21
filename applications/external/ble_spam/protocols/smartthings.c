@@ -8,16 +8,26 @@ const struct {
     uint32_t value;
     const char* name;
 } buds_models[] = {
-    {0x39EA48, "Light Purple Buds"},    {0xA7C62C, "Bluish Silver Buds"},
-    {0x850116, "Black Buds Live"},      {0x3D8F41, "Gray and Black Buds"},
-    {0x3B6D02, "Bluish Chrome Buds"},   {0xAE063C, "Grey Beige Buds"},
-    {0xB8B905, "Pure White Buds V2"},   {0xEAAA17, "Pure White Buds"},
-    {0xD30704, "Black Buds V2"},        {0x101F1A, "Dark Purple Buds Live"},
-    {0x9DB006, "French Flag Buds V2"},  {0x859608, "Dark Blue Buds V2"},
-    {0x8E4503, "Pink Buds V2"},         {0x2C6740, "White and Black Buds"},
-    {0x3F6718, "Bronze Buds Live"},     {0x42C519, "Red Buds Live"},
-    {0xAE073A, "Black and White Buds"}, {0x011716, "Sleek Black Buds"},
-    {0x9D1700, "Fallback Image"},       {0xEE7A0C, "Fallback Buds"},
+    {0x39EA48, "Light Purple Buds2"},
+    {0xA7C62C, "Bluish Silver Buds2"},
+    {0x850116, "Black Buds Live"},
+    {0x3D8F41, "Gray & Black Buds2"},
+    {0x3B6D02, "Bluish Chrome Buds2"},
+    {0xAE063C, "Gray Beige Buds2"},
+    {0xB8B905, "Pure White Buds"},
+    {0xEAAA17, "Pure White Buds2"},
+    {0xD30704, "Black Buds"},
+    {0x9DB006, "French Flag Buds"},
+    {0x101F1A, "Dark Purple Buds Live"},
+    {0x859608, "Dark Blue Buds"},
+    {0x8E4503, "Pink Buds"},
+    {0x2C6740, "White & Black Buds2"},
+    {0x3F6718, "Bronze Buds Live"},
+    {0x42C519, "Red Buds Live"},
+    {0xAE073A, "Black & White Buds2"},
+    {0x011716, "Sleek Black Buds2"},
+    {0x9D1700, "Fallback Image"},
+    {0xEE7A0C, "Fallback Buds"},
 };
 const uint8_t buds_models_count = COUNT_OF(buds_models);
 
@@ -103,20 +113,20 @@ void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const Prot
         packet[i++] = 0x03;
         packet[i++] = 0x21;
         packet[i++] = 0x01;
-        packet[i++] = 0x00;
+        packet[i++] = 0x09;
         packet[i++] = (model >> 0x10) & 0xFF;
         packet[i++] = (model >> 0x08) & 0xFF;
         packet[i++] = 0x01;
         packet[i++] = (model >> 0x00) & 0xFF;
         packet[i++] = 0x06;
         packet[i++] = 0x3C;
+        packet[i++] = 0x94;
+        packet[i++] = 0x8e;
         packet[i++] = 0x00;
         packet[i++] = 0x00;
         packet[i++] = 0x00;
         packet[i++] = 0x00;
-        packet[i++] = 0x00;
-        packet[i++] = 0x00;
-        packet[i++] = 0x00;
+        packet[i++] = 0xc7;
         packet[i++] = 0x00;
 
         packet[i++] = 16; // Size
