@@ -5,13 +5,13 @@
 // Research by @Spooks4576
 
 typedef enum {
-    SmartthingsTypeBuds,
-    SmartthingsTypeWatch,
-    SmartthingsTypeCOUNT,
-} SmartthingsType;
+    EasysetupTypeBuds,
+    EasysetupTypeWatch,
+    EasysetupTypeCOUNT,
+} EasysetupType;
 
 typedef struct {
-    SmartthingsType type;
+    EasysetupType type;
     union {
         struct {
             uint32_t model;
@@ -20,6 +20,6 @@ typedef struct {
             uint8_t model;
         } watch;
     } data;
-} SmartthingsCfg;
+} EasysetupCfg;
 
-extern const Protocol protocol_smartthings;
+extern const Protocol protocol_easysetup;

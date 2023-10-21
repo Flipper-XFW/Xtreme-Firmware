@@ -1,4 +1,4 @@
-#include "smartthings.h"
+#include "easysetup.h"
 #include "_protocols.h"
 
 // Hacked together by @Willy-JL and @Spooks4576
@@ -64,27 +64,27 @@ const struct {
 };
 const uint8_t watch_models_count = COUNT_OF(watch_models);
 
-static const char* type_names[SmartthingsTypeCOUNT] = {
-    [SmartthingsTypeBuds] = "SmartThings Buds",
-    [SmartthingsTypeWatch] = "SmartThings Watch",
+static const char* type_names[EasysetupTypeCOUNT] = {
+    [EasysetupTypeBuds] = "EasySetup Buds",
+    [EasysetupTypeWatch] = "EasySetup Watch",
 };
-static const char* smartthings_get_name(const ProtocolCfg* _cfg) {
-    const SmartthingsCfg* cfg = &_cfg->smartthings;
+static const char* easysetup_get_name(const ProtocolCfg* _cfg) {
+    const EasysetupCfg* cfg = &_cfg->easysetup;
     return type_names[cfg->type];
 }
 
-static uint8_t packet_sizes[SmartthingsTypeCOUNT] = {
-    [SmartthingsTypeBuds] = 31,
-    [SmartthingsTypeWatch] = 15,
+static uint8_t packet_sizes[EasysetupTypeCOUNT] = {
+    [EasysetupTypeBuds] = 31,
+    [EasysetupTypeWatch] = 15,
 };
-void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const ProtocolCfg* _cfg) {
-    const SmartthingsCfg* cfg = _cfg ? &_cfg->smartthings : NULL;
+void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const ProtocolCfg* _cfg) {
+    const EasysetupCfg* cfg = _cfg ? &_cfg->easysetup : NULL;
 
-    SmartthingsType type;
+    EasysetupType type;
     if(cfg) {
         type = cfg->type;
     } else {
-        type = rand() % SmartthingsTypeCOUNT;
+        type = rand() % EasysetupTypeCOUNT;
     }
 
     uint8_t size = packet_sizes[type];
@@ -92,7 +92,7 @@ void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const Prot
     uint8_t i = 0;
 
     switch(type) {
-    case SmartthingsTypeBuds: {
+    case EasysetupTypeBuds: {
         uint32_t model;
         if(cfg && cfg->data.buds.model != 0x000000) {
             model = cfg->data.buds.model;
@@ -135,7 +135,7 @@ void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const Prot
         // Truncated AD segment, Android seems to fill in the rest with zeros
         break;
     }
-    case SmartthingsTypeWatch: {
+    case EasysetupTypeWatch: {
         uint8_t model;
         if(cfg && cfg->data.watch.model != 0x00) {
             model = cfg->data.watch.model;
@@ -178,23 +178,23 @@ enum {
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
     switch(cfg->type) {
-    case SmartthingsTypeBuds: {
+    case EasysetupTypeBuds: {
         switch(index) {
         case ConfigBudsModel:
-            scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsBudsModel);
+            scene_manager_next_scene(ctx->scene_manager, SceneEasysetupBudsModel);
             break;
         default:
             break;
         }
         break;
     }
-    case SmartthingsTypeWatch: {
+    case EasysetupTypeWatch: {
         switch(index) {
         case ConfigWatchModel:
-            scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsWatchModel);
+            scene_manager_next_scene(ctx->scene_manager, SceneEasysetupWatchModel);
             break;
         default:
             break;
@@ -206,7 +206,7 @@ static void config_callback(void* _ctx, uint32_t index) {
     }
 }
 static void buds_model_changed(VariableItem* item) {
-    SmartthingsCfg* cfg = variable_item_get_context(item);
+    EasysetupCfg* cfg = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
@@ -218,7 +218,7 @@ static void buds_model_changed(VariableItem* item) {
     }
 }
 static void watch_model_changed(VariableItem* item) {
-    SmartthingsCfg* cfg = variable_item_get_context(item);
+    EasysetupCfg* cfg = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
@@ -229,14 +229,14 @@ static void watch_model_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static void smartthings_extra_config(Ctx* ctx) {
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+static void easysetup_extra_config(Ctx* ctx) {
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
     size_t value_index;
 
     switch(cfg->type) {
-    case SmartthingsTypeBuds: {
+    case EasysetupTypeBuds: {
         item = variable_item_list_add(
             list, "Model Code", buds_models_count + 1, buds_model_changed, cfg);
         const char* model_name = NULL;
@@ -262,7 +262,7 @@ static void smartthings_extra_config(Ctx* ctx) {
         variable_item_set_current_value_text(item, model_name);
         break;
     }
-    case SmartthingsTypeWatch: {
+    case EasysetupTypeWatch: {
         item = variable_item_list_add(
             list, "Model Code", watch_models_count + 1, watch_model_changed, cfg);
         const char* model_name = NULL;
@@ -295,23 +295,23 @@ static void smartthings_extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
-const Protocol protocol_smartthings = {
+const Protocol protocol_easysetup = {
     .icon = &I_android,
-    .get_name = smartthings_get_name,
-    .make_packet = smartthings_make_packet,
-    .extra_config = smartthings_extra_config,
+    .get_name = easysetup_get_name,
+    .make_packet = easysetup_make_packet,
+    .extra_config = easysetup_extra_config,
 };
 
 static void buds_model_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     switch(index) {
     case 0:
         cfg->data.buds.model = 0x000000;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     case buds_models_count + 1:
-        scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsBudsModelCustom);
+        scene_manager_next_scene(ctx->scene_manager, SceneEasysetupBudsModelCustom);
         break;
     default:
         cfg->data.buds.model = buds_models[index - 1].value;
@@ -319,9 +319,9 @@ static void buds_model_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-void scene_smartthings_buds_model_on_enter(void* _ctx) {
+void scene_easysetup_buds_model_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
     bool found = false;
@@ -349,12 +349,12 @@ void scene_smartthings_buds_model_on_enter(void* _ctx) {
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
-bool scene_smartthings_buds_model_on_event(void* _ctx, SceneManagerEvent event) {
+bool scene_easysetup_buds_model_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-void scene_smartthings_buds_model_on_exit(void* _ctx) {
+void scene_easysetup_buds_model_on_exit(void* _ctx) {
     UNUSED(_ctx);
 }
 
@@ -363,9 +363,9 @@ static void buds_model_custom_callback(void* _ctx) {
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
-void scene_smartthings_buds_model_custom_on_enter(void* _ctx) {
+void scene_easysetup_buds_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Model Code");
@@ -379,28 +379,28 @@ void scene_smartthings_buds_model_custom_on_enter(void* _ctx) {
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
-bool scene_smartthings_buds_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
+bool scene_easysetup_buds_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-void scene_smartthings_buds_model_custom_on_exit(void* _ctx) {
+void scene_easysetup_buds_model_custom_on_exit(void* _ctx) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     cfg->data.buds.model =
         (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
 }
 
 static void watch_model_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     switch(index) {
     case 0:
         cfg->data.watch.model = 0x00;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     case watch_models_count + 1:
-        scene_manager_next_scene(ctx->scene_manager, SceneSmartthingsWatchModelCustom);
+        scene_manager_next_scene(ctx->scene_manager, SceneEasysetupWatchModelCustom);
         break;
     default:
         cfg->data.watch.model = watch_models[index - 1].value;
@@ -408,9 +408,9 @@ static void watch_model_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-void scene_smartthings_watch_model_on_enter(void* _ctx) {
+void scene_easysetup_watch_model_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
     bool found = false;
@@ -438,12 +438,12 @@ void scene_smartthings_watch_model_on_enter(void* _ctx) {
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
-bool scene_smartthings_watch_model_on_event(void* _ctx, SceneManagerEvent event) {
+bool scene_easysetup_watch_model_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-void scene_smartthings_watch_model_on_exit(void* _ctx) {
+void scene_easysetup_watch_model_on_exit(void* _ctx) {
     UNUSED(_ctx);
 }
 
@@ -452,9 +452,9 @@ static void watch_model_custom_callback(void* _ctx) {
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
-void scene_smartthings_watch_model_custom_on_enter(void* _ctx) {
+void scene_easysetup_watch_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Model Code");
@@ -466,13 +466,13 @@ void scene_smartthings_watch_model_custom_on_enter(void* _ctx) {
 
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
-bool scene_smartthings_watch_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
+bool scene_easysetup_watch_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
     UNUSED(_ctx);
     UNUSED(event);
     return false;
 }
-void scene_smartthings_watch_model_custom_on_exit(void* _ctx) {
+void scene_easysetup_watch_model_custom_on_exit(void* _ctx) {
     Ctx* ctx = _ctx;
-    SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     cfg->data.watch.model = (ctx->byte_store[0] << 0x00);
 }
