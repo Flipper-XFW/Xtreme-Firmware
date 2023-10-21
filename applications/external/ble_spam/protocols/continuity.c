@@ -63,13 +63,13 @@ const uint8_t na_actions_count = COUNT_OF(na_actions);
 
 static const char* type_names[ContinuityTypeCOUNT] = {
     [ContinuityTypeAirDrop] = "AirDrop",
-    [ContinuityTypeProximityPair] = "Proximity Pair",
+    [ContinuityTypeProximityPair] = "Continuity Pair",
     [ContinuityTypeAirplayTarget] = "Airplay Target",
     [ContinuityTypeHandoff] = "Handoff",
     [ContinuityTypeTetheringSource] = "Tethering Source",
-    [ContinuityTypeNearbyAction] = "Nearby Action",
+    [ContinuityTypeNearbyAction] = "Continuity Action",
     [ContinuityTypeNearbyInfo] = "Nearby Info",
-    [ContinuityTypeCustomCrash] = "Custom Packet",
+    [ContinuityTypeCustomCrash] = "Continuity Custom",
 };
 static const char* continuity_get_name(const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = &_cfg->continuity;

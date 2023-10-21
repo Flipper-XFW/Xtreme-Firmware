@@ -14,7 +14,7 @@
 
 static Attack attacks[] = {
     {
-        .title = "+ Kitchen Sink",
+        .title = "The Kitchen Sink",
         .text = "Flood all attacks at once",
         .protocol = NULL,
         .payload =
@@ -75,7 +75,7 @@ static Attack attacks[] = {
             },
     },
     {
-        .title = "Android Device Pair",
+        .title = "Android Device Connect",
         .text = "Reboot cooldown, long range",
         .protocol = &protocol_fastpair,
         .payload =
@@ -192,12 +192,13 @@ static void toggle_adv(State* state) {
     }
 }
 
-#define PAGE_MIN (-3)
+#define PAGE_MIN (-4)
 #define PAGE_MAX ATTACKS_COUNT
 enum {
     PageHelpApps = PAGE_MIN,
     PageHelpDelay,
     PageHelpDistance,
+    PageHelpInfoConfig,
     PageStart = 0,
     PageEnd = ATTACKS_COUNT - 1,
     PageAboutCredits = PAGE_MAX,
@@ -279,9 +280,25 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             48,
             AlignLeft,
             AlignTop,
-            "\e#Distance\e# is limited, attacks\n"
-            "work under 1 meter but a\n"
-            "few are marked 'long range'",
+            "\e#Distance\e# varies greatly:\n"
+            "some are long range (>30 m)\n"
+            "others are close range (<1 m)",
+            false);
+        break;
+    case PageHelpInfoConfig:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "See \e#more info\e# and change\n"
+            "\e#attack options\e# by holding\n"
+            "Ok on each attack page",
             false);
         break;
     case PageAboutCredits:
@@ -318,11 +335,11 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "%02i/%02i: %s",
             state->index + 1,
             ATTACKS_COUNT,
-            protocol ? protocol->get_name(&payload->cfg) : "Everything");
+            protocol ? protocol->get_name(&payload->cfg) : "Everything AND");
         canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 21, str);
 
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 4, 32, attack->title);
+        canvas_draw_str(canvas, 4, 33, attack->title);
 
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 4, 46, attack->text);
