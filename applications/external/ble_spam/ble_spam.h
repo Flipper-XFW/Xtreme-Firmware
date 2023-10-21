@@ -21,6 +21,7 @@ enum {
     ConfigRandomMac,
     ConfigExtraStart = ConfigRandomMac,
     ConfigLedIndicator,
+    ConfigLockKeyboard,
 };
 
 typedef struct Attack Attack;
@@ -30,6 +31,7 @@ typedef struct {
     uint8_t byte_store[3];
     VariableItemListEnterCallback fallback_config_enter;
     bool led_indicator;
+    bool lock_keyboard;
 
     NotificationApp* notification;
     ViewDispatcher* view_dispatcher;

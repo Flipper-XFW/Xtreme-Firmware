@@ -16,7 +16,9 @@ static void config_bool(VariableItemList* list, const char* name, bool* value) {
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
     scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
-    if(ctx->attack->protocol && ctx->attack->protocol->config_count) {
+    if(!ctx->attack->protocol) {
+        index--;
+    } else if(ctx->attack->protocol->config_count) {
         uint8_t extra = ctx->attack->protocol->config_count(&ctx->attack->payload.cfg);
         if(index > extra) index -= extra;
     }
@@ -25,6 +27,11 @@ static void config_callback(void* _ctx, uint32_t index) {
     case ConfigRandomMac:
         break;
     case ConfigLedIndicator:
+        break;
+    case ConfigLockKeyboard:
+        ctx->lock_keyboard = true;
+        scene_manager_previous_scene(ctx->scene_manager);
+        notification_message_block(ctx->notification, &sequence_display_backlight_off);
         break;
     default:
         break;
@@ -48,6 +55,8 @@ void scene_config_on_enter(void* _ctx) {
     }
 
     config_bool(list, "LED Indicator", &ctx->led_indicator);
+
+    variable_item_list_add(list, "Lock Keyboard", 0, NULL, NULL);
 
     variable_item_list_set_selected_item(
         list, scene_manager_get_scene_state(ctx->scene_manager, SceneConfig));
