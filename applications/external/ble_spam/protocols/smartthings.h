@@ -7,7 +7,7 @@
 typedef enum {
     SmartthingsTypeBuds,
     SmartthingsTypeWatch,
-    SmartthingsTypeMAX,
+    SmartthingsTypeCOUNT,
 } SmartthingsType;
 
 typedef struct {

@@ -44,9 +44,9 @@ const struct {
     {0x07, "Black Watch4 40mm"},
     {0x08, "White Watch4 40mm"},
     {0x09, "Gold Watch4 40mm"},
-    {0x0a, "French Watch4"},
-    {0x0b, "French Watch4 Classic"},
-    {0x0c, "Fox Watch5 44mm"},
+    {0x0A, "French Watch4"},
+    {0x0B, "French Watch4 Classic"},
+    {0x0C, "Fox Watch5 44mm"},
     {0x11, "Black Watch5 44mm"},
     {0x12, "Sapphire Watch5 44mm"},
     {0x13, "Purpleish Watch5 40mm"},
@@ -55,16 +55,16 @@ const struct {
     {0x16, "Gray Watch5 Pro 45mm"},
     {0x17, "White Watch5 44mm"},
     {0x18, "White & Black Watch5"},
-    {0x1b, "Black Watch6 Pink 40mm"},
-    {0x1c, "Gold Watch6 Gold 40mm"},
-    {0x1d, "Silver Watch6 Cyan 44mm"},
-    {0x1e, "Black Watch6 Classic 43mm"},
+    {0x1B, "Black Watch6 Pink 40mm"},
+    {0x1C, "Gold Watch6 Gold 40mm"},
+    {0x1D, "Silver Watch6 Cyan 44mm"},
+    {0x1E, "Black Watch6 Classic 43mm"},
     {0x20, "Green Goofy"},
-    {0x1a, "Fallback Watch"},
+    {0x1A, "Fallback Watch"},
 };
 const uint8_t watch_models_count = COUNT_OF(watch_models);
 
-static const char* type_names[SmartthingsTypeMAX] = {
+static const char* type_names[SmartthingsTypeCOUNT] = {
     [SmartthingsTypeBuds] = "SmartThings Buds",
     [SmartthingsTypeWatch] = "SmartThings Watch",
 };
@@ -73,7 +73,7 @@ static const char* smartthings_get_name(const ProtocolCfg* _cfg) {
     return type_names[cfg->type];
 }
 
-static uint8_t packet_sizes[SmartthingsTypeMAX] = {
+static uint8_t packet_sizes[SmartthingsTypeCOUNT] = {
     [SmartthingsTypeBuds] = 31,
     [SmartthingsTypeWatch] = 15,
 };
@@ -84,7 +84,7 @@ void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const Prot
     if(cfg) {
         type = cfg->type;
     } else {
-        type = rand() % SmartthingsTypeMAX;
+        type = rand() % SmartthingsTypeCOUNT;
     }
 
     uint8_t size = packet_sizes[type];
@@ -121,12 +121,12 @@ void smartthings_make_packet(uint8_t* out_size, uint8_t** out_packet, const Prot
         packet[i++] = 0x06;
         packet[i++] = 0x3C;
         packet[i++] = 0x94;
-        packet[i++] = 0x8e;
+        packet[i++] = 0x8E;
         packet[i++] = 0x00;
         packet[i++] = 0x00;
         packet[i++] = 0x00;
         packet[i++] = 0x00;
-        packet[i++] = 0xc7;
+        packet[i++] = 0xC7;
         packet[i++] = 0x00;
 
         packet[i++] = 16; // Size
@@ -237,8 +237,8 @@ static void smartthings_extra_config(Ctx* ctx) {
 
     switch(cfg->type) {
     case SmartthingsTypeBuds: {
-        item =
-            variable_item_list_add(list, "Model", buds_models_count + 1, buds_model_changed, cfg);
+        item = variable_item_list_add(
+            list, "Model Code", buds_models_count + 1, buds_model_changed, cfg);
         const char* model_name = NULL;
         char model_name_buf[9];
         if(cfg->data.buds.model == 0x000000) {
@@ -264,7 +264,7 @@ static void smartthings_extra_config(Ctx* ctx) {
     }
     case SmartthingsTypeWatch: {
         item = variable_item_list_add(
-            list, "Model", watch_models_count + 1, watch_model_changed, cfg);
+            list, "Model Code", watch_models_count + 1, watch_model_changed, cfg);
         const char* model_name = NULL;
         char model_name_buf[3];
         if(cfg->data.watch.model == 0x00) {
@@ -368,7 +368,7 @@ void scene_smartthings_buds_model_custom_on_enter(void* _ctx) {
     SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
     ByteInput* byte_input = ctx->byte_input;
 
-    byte_input_set_header_text(byte_input, "Enter custom Model");
+    byte_input_set_header_text(byte_input, "Enter custom Model Code");
 
     ctx->byte_store[0] = (cfg->data.buds.model >> 0x10) & 0xFF;
     ctx->byte_store[1] = (cfg->data.buds.model >> 0x08) & 0xFF;
@@ -457,7 +457,7 @@ void scene_smartthings_watch_model_custom_on_enter(void* _ctx) {
     SmartthingsCfg* cfg = &ctx->attack->payload.cfg.smartthings;
     ByteInput* byte_input = ctx->byte_input;
 
-    byte_input_set_header_text(byte_input, "Enter custom Model");
+    byte_input_set_header_text(byte_input, "Enter custom Model Code");
 
     ctx->byte_store[0] = (cfg->data.watch.model >> 0x00) & 0xFF;
 
