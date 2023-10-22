@@ -95,8 +95,8 @@ const SubGhzProtocol ws_protocol_oregon_v1 = {
     .name = WS_PROTOCOL_OREGON_V1_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_oregon_v1_decoder,
     .encoder = &ws_protocol_oregon_v1_encoder,
