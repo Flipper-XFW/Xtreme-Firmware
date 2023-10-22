@@ -79,11 +79,13 @@ const SubGhzProtocol ws_protocol_thermopro_tx4 = {
     .name = WS_PROTOCOL_THERMOPRO_TX4_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_thermopro_tx4_decoder,
     .encoder = &ws_protocol_thermopro_tx4_encoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };
 
 void* ws_protocol_decoder_thermopro_tx4_alloc(SubGhzEnvironment* environment) {

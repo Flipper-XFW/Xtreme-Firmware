@@ -360,7 +360,9 @@ const SubGhzProtocol ws_protocol_oregon3 = {
     .name = WS_PROTOCOL_OREGON3_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Weather | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_oregon3_decoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };

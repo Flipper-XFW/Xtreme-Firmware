@@ -69,11 +69,13 @@ const SubGhzProtocol ws_protocol_acurite_606tx = {
     .name = WS_PROTOCOL_ACURITE_606TX_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_acurite_606tx_decoder,
     .encoder = &ws_protocol_acurite_606tx_encoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };
 
 void* ws_protocol_decoder_acurite_606tx_alloc(SubGhzEnvironment* environment) {

@@ -98,10 +98,12 @@ const SubGhzProtocol ws_protocol_lacrosse_tx = {
     .name = WS_PROTOCOL_LACROSSE_TX_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &ws_protocol_lacrosse_tx_decoder,
     .encoder = &ws_protocol_lacrosse_tx_encoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };
 
 void* ws_protocol_decoder_lacrosse_tx_alloc(SubGhzEnvironment* environment) {

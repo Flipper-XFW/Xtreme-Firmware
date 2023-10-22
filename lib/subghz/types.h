@@ -112,6 +112,7 @@ typedef enum {
     SubGhzProtocolTypeStatic,
     SubGhzProtocolTypeDynamic,
     SubGhzProtocolTypeRAW,
+    SubGhzProtocolWeatherStation, // Unused, kept for compatibility
     SubGhzProtocolCustom,
     SubGhzProtocolTypeBinRAW,
 } SubGhzProtocolType;
@@ -128,13 +129,17 @@ typedef enum {
     SubGhzProtocolFlag_Load = (1 << 8),
     SubGhzProtocolFlag_Send = (1 << 9),
     SubGhzProtocolFlag_BinRAW = (1 << 10),
-    SubGhzProtocolFlag_StarLine = (1 << 11),
-    SubGhzProtocolFlag_AutoAlarms = (1 << 12),
-    SubGhzProtocolFlag_Magellan = (1 << 13),
-    SubGhzProtocolFlag_Princeton = (1 << 14),
-    SubGhzProtocolFlag_Weather = (1 << 15),
-    SubGhzProtocolFlag_TPMS = (1 << 16),
 } SubGhzProtocolFlag;
+
+typedef enum {
+    SubGhzProtocolFilter_StarLine = (1 << 0),
+    SubGhzProtocolFilter_AutoAlarms = (1 << 1),
+    SubGhzProtocolFilter_Magellan = (1 << 2),
+    SubGhzProtocolFilter_Princeton = (1 << 3),
+    SubGhzProtocolFilter_NiceFlorS = (1 << 4),
+    SubGhzProtocolFilter_Weather = (1 << 5),
+    SubGhzProtocolFilter_TPMS = (1 << 6),
+} SubGhzProtocolFilter;
 
 struct SubGhzProtocol {
     const char* name;
@@ -143,4 +148,6 @@ struct SubGhzProtocol {
 
     const SubGhzProtocolEncoder* encoder;
     const SubGhzProtocolDecoder* decoder;
+
+    SubGhzProtocolFilter filter;
 };

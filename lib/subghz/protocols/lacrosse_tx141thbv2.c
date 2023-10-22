@@ -76,11 +76,13 @@ const SubGhzProtocol ws_protocol_lacrosse_tx141thbv2 = {
     .name = WS_PROTOCOL_LACROSSE_TX141THBV2_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_lacrosse_tx141thbv2_decoder,
     .encoder = &ws_protocol_lacrosse_tx141thbv2_encoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };
 
 void* ws_protocol_decoder_lacrosse_tx141thbv2_alloc(SubGhzEnvironment* environment) {

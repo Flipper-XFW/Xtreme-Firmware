@@ -109,11 +109,13 @@ const SubGhzProtocol ws_protocol_gt_wt_03 = {
     .name = WS_PROTOCOL_GT_WT_03_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Weather |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_gt_wt_03_decoder,
     .encoder = &ws_protocol_gt_wt_03_encoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };
 
 void* ws_protocol_decoder_gt_wt_03_alloc(SubGhzEnvironment* environment) {
