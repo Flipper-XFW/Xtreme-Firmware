@@ -82,6 +82,8 @@ static void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const Protoc
 enum {
     _ConfigExtraStart = ConfigExtraStart,
     ConfigModel,
+    ConfigInfoRequire,
+    ConfigCOUNT,
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
@@ -89,7 +91,11 @@ static void config_callback(void* _ctx, uint32_t index) {
     switch(index) {
     case ConfigModel:
         scene_manager_next_scene(ctx->scene_manager, SceneFastpairModel);
+        break;
+    case ConfigInfoRequire:
+        break;
     default:
+        ctx->fallback_config_enter(ctx, index);
         break;
     }
 }
@@ -139,11 +145,17 @@ static void fastpair_extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
+static uint8_t fastpair_config_count(const ProtocolCfg* _cfg) {
+    UNUSED(_cfg);
+    return ConfigCOUNT - ConfigExtraStart - 1;
+}
+
 const Protocol protocol_fastpair = {
     .icon = &I_android,
     .get_name = fastpair_get_name,
     .make_packet = fastpair_make_packet,
     .extra_config = fastpair_extra_config,
+    .config_count = fastpair_config_count,
 };
 
 static void model_callback(void* _ctx, uint32_t index) {

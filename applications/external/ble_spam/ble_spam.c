@@ -142,12 +142,38 @@ static uint16_t delays[] = {20, 50, 100, 200};
 
 typedef struct {
     Ctx ctx;
+    View* main_view;
+    bool lock_warning;
+    uint8_t lock_count;
+    FuriTimer* lock_timer;
+
     bool resume;
     bool advertising;
     uint8_t delay;
     FuriThread* thread;
     int8_t index;
 } State;
+
+NotificationMessage blink_message = {
+    .type = NotificationMessageTypeLedBlinkStart,
+    .data.led_blink.color = LightBlue | LightGreen,
+    .data.led_blink.on_time = 10,
+    .data.led_blink.period = 100,
+};
+const NotificationSequence blink_sequence = {
+    &blink_message,
+    &message_do_not_reset,
+    NULL,
+};
+static void start_blink(State* state) {
+    uint16_t period = delays[state->delay];
+    if(period <= 100) period += 30;
+    blink_message.data.led_blink.period = period;
+    notification_message_block(state->ctx.notification, &blink_sequence);
+}
+static void stop_blink(State* state) {
+    notification_message_block(state->ctx.notification, &sequence_blink_stop);
+}
 
 static int32_t adv_thread(void* _ctx) {
     State* state = _ctx;
@@ -158,6 +184,7 @@ static int32_t adv_thread(void* _ctx) {
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
     if(!payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
+    if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
         if(protocol) {
@@ -175,6 +202,7 @@ static int32_t adv_thread(void* _ctx) {
         furi_hal_bt_custom_adv_stop();
     }
 
+    if(state->ctx.led_indicator) stop_blink(state);
     return 0;
 }
 
@@ -185,9 +213,9 @@ static void toggle_adv(State* state) {
         furi_thread_join(state->thread);
         if(state->resume) furi_hal_bt_start_advertising();
     } else {
+        state->advertising = true;
         state->resume = furi_hal_bt_is_active();
         furi_hal_bt_stop_advertising();
-        state->advertising = true;
         furi_thread_start(state->thread);
     }
 }
@@ -315,11 +343,15 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#3.1\e#",
+            "                                   Version \e#3.3\e#",
             false);
         break;
     default: {
         if(!attack) break;
+        if(state->ctx.lock_keyboard && !state->advertising) {
+            // Forgive me Lord for I have sinned by handling state in draw
+            toggle_adv(state);
+        }
         char str[32];
 
         canvas_set_font(canvas, FontBatteryPercent);
@@ -355,6 +387,17 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
     if(state->index < PAGE_MAX) {
         elements_button_right(canvas, next);
     }
+
+    if(state->lock_warning) {
+        canvas_set_font(canvas, FontSecondary);
+        elements_bold_rounded_frame(canvas, 14, 8, 99, 48);
+        elements_multiline_text(canvas, 65, 26, "To unlock\npress:");
+        canvas_draw_icon(canvas, 65, 42, &I_Pin_back_arrow_10x8);
+        canvas_draw_icon(canvas, 80, 42, &I_Pin_back_arrow_10x8);
+        canvas_draw_icon(canvas, 95, 42, &I_Pin_back_arrow_10x8);
+        canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42);
+        canvas_draw_dot(canvas, 17, 61);
+    }
 }
 
 static bool input_callback(InputEvent* input, void* _ctx) {
@@ -362,8 +405,22 @@ static bool input_callback(InputEvent* input, void* _ctx) {
     State* state = *(State**)view_get_model(view);
     bool consumed = false;
 
-    if(input->type == InputTypeShort || input->type == InputTypeLong ||
-       input->type == InputTypeRepeat) {
+    if(state->ctx.lock_keyboard) {
+        consumed = true;
+        with_view_model(
+            state->main_view, State * *model, { (*model)->lock_warning = true; }, true);
+        if(state->lock_count == 0) {
+            furi_timer_start(state->lock_timer, pdMS_TO_TICKS(1000));
+        }
+        if(input->type == InputTypeShort && input->key == InputKeyBack) {
+            state->lock_count++;
+        }
+        if(state->lock_count >= 3) {
+            furi_timer_start(state->lock_timer, 1);
+        }
+    } else if(
+        input->type == InputTypeShort || input->type == InputTypeLong ||
+        input->type == InputTypeRepeat) {
         consumed = true;
 
         bool is_attack = state->index >= 0 && state->index <= ATTACKS_COUNT - 1;
@@ -385,11 +442,13 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         case InputKeyUp:
             if(is_attack && state->delay < COUNT_OF(delays) - 1) {
                 state->delay++;
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyDown:
             if(is_attack && state->delay > 0) {
                 state->delay--;
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyLeft:
@@ -417,6 +476,18 @@ static bool input_callback(InputEvent* input, void* _ctx) {
     return consumed;
 }
 
+static void lock_timer_callback(void* _ctx) {
+    State* state = _ctx;
+    if(state->lock_count < 3) {
+        notification_message_block(state->ctx.notification, &sequence_display_backlight_off);
+    } else {
+        state->ctx.lock_keyboard = false;
+    }
+    with_view_model(
+        state->main_view, State * *model, { (*model)->lock_warning = false; }, true);
+    state->lock_count = 0;
+}
+
 static bool back_event_callback(void* _ctx) {
     Ctx* ctx = _ctx;
     return scene_manager_handle_back_event(ctx->scene_manager);
@@ -429,7 +500,10 @@ int32_t ble_spam(void* p) {
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
     furi_thread_set_stack_size(state->thread, 4096);
+    state->ctx.led_indicator = true;
+    state->lock_timer = furi_timer_alloc(lock_timer_callback, FuriTimerTypeOnce, state);
 
+    state->ctx.notification = furi_record_open(RECORD_NOTIFICATION);
     Gui* gui = furi_record_open(RECORD_GUI);
     state->ctx.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(state->ctx.view_dispatcher);
@@ -437,14 +511,14 @@ int32_t ble_spam(void* p) {
     view_dispatcher_set_navigation_event_callback(state->ctx.view_dispatcher, back_event_callback);
     state->ctx.scene_manager = scene_manager_alloc(&scene_handlers, &state->ctx);
 
-    View* view_main = view_alloc();
-    view_allocate_model(view_main, ViewModelTypeLockFree, sizeof(State*));
+    state->main_view = view_alloc();
+    view_allocate_model(state->main_view, ViewModelTypeLocking, sizeof(State*));
     with_view_model(
-        view_main, State * *model, { *model = state; }, false);
-    view_set_context(view_main, view_main);
-    view_set_draw_callback(view_main, draw_callback);
-    view_set_input_callback(view_main, input_callback);
-    view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, view_main);
+        state->main_view, State * *model, { *model = state; }, false);
+    view_set_context(state->main_view, state->main_view);
+    view_set_draw_callback(state->main_view, draw_callback);
+    view_set_input_callback(state->main_view, input_callback);
+    view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, state->main_view);
 
     state->ctx.byte_input = byte_input_alloc();
     view_dispatcher_add_view(
@@ -481,12 +555,14 @@ int32_t ble_spam(void* p) {
     variable_item_list_free(state->ctx.variable_item_list);
 
     view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewMain);
-    view_free(view_main);
+    view_free(state->main_view);
 
     scene_manager_free(state->ctx.scene_manager);
     view_dispatcher_free(state->ctx.view_dispatcher);
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
 
+    furi_timer_free(state->lock_timer);
     furi_thread_free(state->thread);
     free(state);
     return 0;

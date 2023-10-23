@@ -171,10 +171,13 @@ void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const Protoc
 enum {
     _ConfigBudsExtraStart = ConfigExtraStart,
     ConfigBudsModel,
+    ConfigBudsInfoVersion,
+    ConfigBudsCOUNT,
 };
 enum {
     _ConfigWatchExtraStart = ConfigExtraStart,
     ConfigWatchModel,
+    ConfigWatchCOUNT,
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
@@ -186,7 +189,10 @@ static void config_callback(void* _ctx, uint32_t index) {
         case ConfigBudsModel:
             scene_manager_next_scene(ctx->scene_manager, SceneEasysetupBudsModel);
             break;
+        case ConfigBudsInfoVersion:
+            break;
         default:
+            ctx->fallback_config_enter(ctx, index);
             break;
         }
         break;
@@ -197,11 +203,13 @@ static void config_callback(void* _ctx, uint32_t index) {
             scene_manager_next_scene(ctx->scene_manager, SceneEasysetupWatchModel);
             break;
         default:
+            ctx->fallback_config_enter(ctx, index);
             break;
         }
         break;
     }
     default:
+        ctx->fallback_config_enter(ctx, index);
         break;
     }
 }
@@ -297,11 +305,21 @@ static void easysetup_extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
+static uint8_t config_counts[EasysetupTypeCOUNT] = {
+    [EasysetupTypeBuds] = ConfigBudsCOUNT - ConfigExtraStart - 1,
+    [EasysetupTypeWatch] = ConfigWatchCOUNT - ConfigExtraStart - 1,
+};
+static uint8_t easysetup_config_count(const ProtocolCfg* _cfg) {
+    const EasysetupCfg* cfg = &_cfg->easysetup;
+    return config_counts[cfg->type];
+}
+
 const Protocol protocol_easysetup = {
     .icon = &I_android,
     .get_name = easysetup_get_name,
     .make_packet = easysetup_make_packet,
     .extra_config = easysetup_extra_config,
+    .config_count = easysetup_config_count,
 };
 
 static void buds_model_callback(void* _ctx, uint32_t index) {

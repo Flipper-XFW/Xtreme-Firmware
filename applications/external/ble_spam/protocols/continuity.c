@@ -277,11 +277,19 @@ enum {
     _ConfigPpExtraStart = ConfigExtraStart,
     ConfigPpModel,
     ConfigPpPrefix,
+    ConfigPpCOUNT,
 };
 enum {
     _ConfigNaExtraStart = ConfigExtraStart,
     ConfigNaAction,
     ConfigNaFlags,
+    ConfigNaCOUNT,
+};
+enum {
+    _ConfigCcExtraStart = ConfigExtraStart,
+    ConfigCcInfoLock,
+    ConfigCcInfoDevice,
+    ConfigCcCOUNT,
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
@@ -297,6 +305,7 @@ static void config_callback(void* _ctx, uint32_t index) {
             scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpPrefix);
             break;
         default:
+            ctx->fallback_config_enter(ctx, index);
             break;
         }
         break;
@@ -310,11 +319,24 @@ static void config_callback(void* _ctx, uint32_t index) {
             scene_manager_next_scene(ctx->scene_manager, SceneContinuityNaFlags);
             break;
         default:
+            ctx->fallback_config_enter(ctx, index);
+            break;
+        }
+        break;
+    }
+    case ContinuityTypeCustomCrash: {
+        switch(index) {
+        case ConfigCcInfoLock:
+        case ConfigCcInfoDevice:
+            break;
+        default:
+            ctx->fallback_config_enter(ctx, index);
             break;
         }
         break;
     }
     default:
+        ctx->fallback_config_enter(ctx, index);
         break;
     }
 }
@@ -470,11 +492,27 @@ static void continuity_extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
+static uint8_t config_counts[ContinuityTypeCOUNT] = {
+    [ContinuityTypeAirDrop] = 0,
+    [ContinuityTypeProximityPair] = ConfigPpCOUNT - ConfigExtraStart - 1,
+    [ContinuityTypeAirplayTarget] = 0,
+    [ContinuityTypeHandoff] = 0,
+    [ContinuityTypeTetheringSource] = 0,
+    [ContinuityTypeNearbyAction] = ConfigNaCOUNT - ConfigExtraStart - 1,
+    [ContinuityTypeNearbyInfo] = 0,
+    [ContinuityTypeCustomCrash] = ConfigCcCOUNT - ConfigExtraStart - 1,
+};
+static uint8_t continuity_config_count(const ProtocolCfg* _cfg) {
+    const ContinuityCfg* cfg = &_cfg->continuity;
+    return config_counts[cfg->type];
+}
+
 const Protocol protocol_continuity = {
     .icon = &I_apple,
     .get_name = continuity_get_name,
     .make_packet = continuity_make_packet,
     .extra_config = continuity_extra_config,
+    .config_count = continuity_config_count,
 };
 
 static void pp_model_callback(void* _ctx, uint32_t index) {
