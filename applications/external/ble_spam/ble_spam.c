@@ -30,13 +30,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg =
+                .cfg.specific.continuity =
                     {
-                        .continuity =
-                            {
-                                .type = ContinuityTypeCustomCrash,
-                                .data = {},
-                            },
+                        .type = ContinuityTypeCustomCrash,
+                        .data = {},
                     },
             },
     },
@@ -47,13 +44,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg =
+                .cfg.specific.continuity =
                     {
-                        .continuity =
-                            {
-                                .type = ContinuityTypeNearbyAction,
-                                .data = {},
-                            },
+                        .type = ContinuityTypeNearbyAction,
+                        .data = {},
                     },
             },
     },
@@ -64,13 +58,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg =
+                .cfg.specific.continuity =
                     {
-                        .continuity =
-                            {
-                                .type = ContinuityTypeProximityPair,
-                                .data = {},
-                            },
+                        .type = ContinuityTypeProximityPair,
+                        .data = {},
                     },
             },
     },
@@ -81,10 +72,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
-                    {
-                        .fastpair = {},
-                    },
+                .cfg.specific.fastpair = {},
             },
     },
     {
@@ -94,13 +82,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
+                .cfg.specific.easysetup =
                     {
-                        .easysetup =
-                            {
-                                .type = EasysetupTypeBuds,
-                                .data = {},
-                            },
+                        .type = EasysetupTypeBuds,
+                        .data = {},
                     },
             },
     },
@@ -111,13 +96,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
+                .cfg.specific.easysetup =
                     {
-                        .easysetup =
-                            {
-                                .type = EasysetupTypeWatch,
-                                .data = {},
-                            },
+                        .type = EasysetupTypeWatch,
+                        .data = {},
                     },
             },
     },
@@ -128,10 +110,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
-                    {
-                        .swiftpair = {},
-                    },
+                .cfg.specific.swiftpair = {},
             },
     },
 };
