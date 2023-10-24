@@ -8,6 +8,9 @@ const struct {
     uint32_t value;
     const char* name;
 } models[] = {
+    // Genuine actions
+    {0x00000C, "Set Up Device"},
+
     // Genuine devices
     {0xCD8256, "Bose NC 700"},
     {0xF52494, "JBL Buds Pro"},
