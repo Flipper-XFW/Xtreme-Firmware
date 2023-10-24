@@ -384,6 +384,9 @@ void scene_easysetup_buds_model_on_exit(void* _ctx) {
 
 static void buds_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    cfg->data.buds.model =
+        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
@@ -409,10 +412,7 @@ bool scene_easysetup_buds_model_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_easysetup_buds_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
-    cfg->data.buds.model =
-        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void watch_model_callback(void* _ctx, uint32_t index) {
@@ -473,6 +473,8 @@ void scene_easysetup_watch_model_on_exit(void* _ctx) {
 
 static void watch_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    cfg->data.watch.model = (ctx->byte_store[0] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
@@ -496,7 +498,5 @@ bool scene_easysetup_watch_model_custom_on_event(void* _ctx, SceneManagerEvent e
     return false;
 }
 void scene_easysetup_watch_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
-    cfg->data.watch.model = (ctx->byte_store[0] << 0x00);
+    UNUSED(_ctx);
 }

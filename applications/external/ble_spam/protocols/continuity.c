@@ -573,6 +573,8 @@ void scene_continuity_pp_model_on_exit(void* _ctx) {
 
 static void pp_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.proximity_pair.model = (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
@@ -597,9 +599,7 @@ bool scene_continuity_pp_model_custom_on_event(void* _ctx, SceneManagerEvent eve
     return false;
 }
 void scene_continuity_pp_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
-    cfg->data.proximity_pair.model = (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void pp_prefix_callback(void* _ctx, uint32_t index) {
@@ -660,6 +660,8 @@ void scene_continuity_pp_prefix_on_exit(void* _ctx) {
 
 static void pp_prefix_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.proximity_pair.prefix = (ctx->byte_store[0] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
@@ -683,9 +685,7 @@ bool scene_continuity_pp_prefix_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_pp_prefix_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
-    cfg->data.proximity_pair.prefix = (ctx->byte_store[0] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void na_action_callback(void* _ctx, uint32_t index) {
@@ -746,6 +746,8 @@ void scene_continuity_na_action_on_exit(void* _ctx) {
 
 static void na_action_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.nearby_action.action = (ctx->byte_store[0] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
@@ -769,9 +771,7 @@ bool scene_continuity_na_action_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_na_action_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
-    cfg->data.nearby_action.action = (ctx->byte_store[0] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void na_flags_callback(void* _ctx) {

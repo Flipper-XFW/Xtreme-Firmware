@@ -223,6 +223,9 @@ void scene_fastpair_model_on_exit(void* _ctx) {
 
 static void model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
+    cfg->model =
+        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
@@ -248,8 +251,5 @@ bool scene_fastpair_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_fastpair_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
-    cfg->model =
-        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
+    UNUSED(_ctx);
 }
