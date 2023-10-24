@@ -84,7 +84,11 @@ void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const Protoc
     if(cfg && cfg->type != 0x00) {
         type = cfg->type;
     } else {
-        type = rand() % EasysetupTypeCOUNT;
+        const EasysetupType types[] = {
+            EasysetupTypeBuds,
+            EasysetupTypeWatch,
+        };
+        type = types[rand() % COUNT_OF(types)];
     }
 
     uint8_t size = packet_sizes[type];
