@@ -151,7 +151,10 @@ static bool battery_info_input_callback(InputEvent* event, void* context) {
 
     BatteryInfo* battery_info = context;
 
-    if(event->type == InputTypeShort) {
+    bool about_battery;
+    with_view_model(
+        battery_info->view, BatteryInfoModel * model, { about_battery = model->alt; }, false);
+    if(about_battery && event->type == InputTypeShort) {
         if(event->key == InputKeyLeft) {
             event->key = InputKeyBack;
         } else if(event->key == InputKeyRight) {
