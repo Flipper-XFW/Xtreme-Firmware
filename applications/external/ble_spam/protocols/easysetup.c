@@ -68,7 +68,7 @@ static const char* type_names[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = "EasySetup Buds",
     [EasysetupTypeWatch] = "EasySetup Watch",
 };
-static const char* easysetup_get_name(const ProtocolCfg* _cfg) {
+static const char* get_name(const ProtocolCfg* _cfg) {
     const EasysetupCfg* cfg = &_cfg->easysetup;
     return type_names[cfg->type];
 }
@@ -77,7 +77,7 @@ static uint8_t packet_sizes[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = 31,
     [EasysetupTypeWatch] = 15,
 };
-void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const ProtocolCfg* _cfg) {
+void make_packet(uint8_t* out_size, uint8_t** out_packet, const ProtocolCfg* _cfg) {
     const EasysetupCfg* cfg = _cfg ? &_cfg->easysetup : NULL;
 
     EasysetupType type;
@@ -241,7 +241,7 @@ static void watch_model_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static void easysetup_extra_config(Ctx* ctx) {
+static void extra_config(Ctx* ctx) {
     EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
@@ -313,17 +313,17 @@ static uint8_t config_counts[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = ConfigBudsCOUNT - ConfigExtraStart - 1,
     [EasysetupTypeWatch] = ConfigWatchCOUNT - ConfigExtraStart - 1,
 };
-static uint8_t easysetup_config_count(const ProtocolCfg* _cfg) {
+static uint8_t config_count(const ProtocolCfg* _cfg) {
     const EasysetupCfg* cfg = &_cfg->easysetup;
     return config_counts[cfg->type];
 }
 
 const Protocol protocol_easysetup = {
     .icon = &I_android,
-    .get_name = easysetup_get_name,
-    .make_packet = easysetup_make_packet,
-    .extra_config = easysetup_extra_config,
-    .config_count = easysetup_config_count,
+    .get_name = get_name,
+    .make_packet = make_packet,
+    .extra_config = extra_config,
+    .config_count = config_count,
 };
 
 static void buds_model_callback(void* _ctx, uint32_t index) {

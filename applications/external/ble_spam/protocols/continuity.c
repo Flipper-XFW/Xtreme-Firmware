@@ -71,7 +71,7 @@ static const char* type_names[ContinuityTypeCOUNT] = {
     [ContinuityTypeNearbyInfo] = "Nearby Info",
     [ContinuityTypeCustomCrash] = "Continuity Custom",
 };
-static const char* continuity_get_name(const ProtocolCfg* _cfg) {
+static const char* get_name(const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = &_cfg->continuity;
     return type_names[cfg->type];
 }
@@ -87,7 +87,7 @@ static uint8_t packet_sizes[ContinuityTypeCOUNT] = {
     [ContinuityTypeNearbyInfo] = HEADER_LEN + 5,
     [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
-static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
+static void make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
 
     ContinuityType type;
@@ -376,7 +376,7 @@ static void na_action_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static void continuity_extra_config(Ctx* ctx) {
+static void extra_config(Ctx* ctx) {
     ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
@@ -502,17 +502,17 @@ static uint8_t config_counts[ContinuityTypeCOUNT] = {
     [ContinuityTypeNearbyInfo] = 0,
     [ContinuityTypeCustomCrash] = ConfigCcCOUNT - ConfigExtraStart - 1,
 };
-static uint8_t continuity_config_count(const ProtocolCfg* _cfg) {
+static uint8_t config_count(const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = &_cfg->continuity;
     return config_counts[cfg->type];
 }
 
 const Protocol protocol_continuity = {
     .icon = &I_apple,
-    .get_name = continuity_get_name,
-    .make_packet = continuity_make_packet,
-    .extra_config = continuity_extra_config,
-    .config_count = continuity_config_count,
+    .get_name = get_name,
+    .make_packet = make_packet,
+    .extra_config = extra_config,
+    .config_count = config_count,
 };
 
 static void pp_model_callback(void* _ctx, uint32_t index) {

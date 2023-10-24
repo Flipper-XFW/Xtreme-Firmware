@@ -4,12 +4,12 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/bluetooth-swift-pair
 
-static const char* swiftpair_get_name(const ProtocolCfg* _cfg) {
+static const char* get_name(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
     return "SwiftPair";
 }
 
-static void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
+static void make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const SwiftpairCfg* cfg = _cfg ? &_cfg->swiftpair : NULL;
 
     const char* name;
@@ -66,7 +66,7 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-static void swiftpair_extra_config(Ctx* ctx) {
+static void extra_config(Ctx* ctx) {
     SwiftpairCfg* cfg = &ctx->attack->payload.cfg.swiftpair;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
@@ -79,17 +79,17 @@ static void swiftpair_extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
-static uint8_t swiftpair_config_count(const ProtocolCfg* _cfg) {
+static uint8_t config_count(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
     return ConfigCOUNT - ConfigExtraStart - 1;
 }
 
 const Protocol protocol_swiftpair = {
     .icon = &I_windows,
-    .get_name = swiftpair_get_name,
-    .make_packet = swiftpair_make_packet,
-    .extra_config = swiftpair_extra_config,
-    .config_count = swiftpair_config_count,
+    .get_name = get_name,
+    .make_packet = make_packet,
+    .extra_config = extra_config,
+    .config_count = config_count,
 };
 
 static void name_callback(void* _ctx) {

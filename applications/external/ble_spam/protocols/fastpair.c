@@ -12,7 +12,7 @@ const struct {
     {0x00000C, "Set Up Device"},
 
     // Genuine devices
-    {0x00000a, "Anti-Spoofing Test (lmao)"},
+    {0x00000A, "Anti-Spoofing Test (lmao)"},
     {0x0001F0, "Bisto CSR8670 Dev Board"},
     {0x000047, "Arduino 101"},
     {0xCD8256, "Bose NC 700"},
@@ -46,12 +46,12 @@ const struct {
 };
 const uint8_t models_count = COUNT_OF(models);
 
-static const char* fastpair_get_name(const ProtocolCfg* _cfg) {
+static const char* get_name(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
     return "FastPair";
 }
 
-static void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
+static void make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const FastpairCfg* cfg = _cfg ? &_cfg->fastpair : NULL;
 
     uint32_t model;
@@ -118,7 +118,7 @@ static void model_changed(VariableItem* item) {
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static void fastpair_extra_config(Ctx* ctx) {
+static void extra_config(Ctx* ctx) {
     FastpairCfg* cfg = &ctx->attack->payload.cfg.fastpair;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
@@ -152,17 +152,17 @@ static void fastpair_extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
-static uint8_t fastpair_config_count(const ProtocolCfg* _cfg) {
+static uint8_t config_count(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
     return ConfigCOUNT - ConfigExtraStart - 1;
 }
 
 const Protocol protocol_fastpair = {
     .icon = &I_android,
-    .get_name = fastpair_get_name,
-    .make_packet = fastpair_make_packet,
-    .extra_config = fastpair_extra_config,
-    .config_count = fastpair_config_count,
+    .get_name = get_name,
+    .make_packet = make_packet,
+    .extra_config = extra_config,
+    .config_count = config_count,
 };
 
 static void model_callback(void* _ctx, uint32_t index) {
