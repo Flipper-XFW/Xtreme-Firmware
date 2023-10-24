@@ -488,9 +488,17 @@ static void lock_timer_callback(void* _ctx) {
     state->lock_count = 0;
 }
 
+static void tick_event_callback(void* _ctx) {
+    State* state = _ctx;
+    bool advertising;
+    with_view_model(
+        state->main_view, State * *model, { advertising = (*model)->advertising; }, advertising);
+    scene_manager_handle_tick_event(state->ctx.scene_manager);
+}
+
 static bool back_event_callback(void* _ctx) {
-    Ctx* ctx = _ctx;
-    return scene_manager_handle_back_event(ctx->scene_manager);
+    State* state = _ctx;
+    return scene_manager_handle_back_event(state->ctx.scene_manager);
 }
 
 int32_t ble_spam(void* p) {
@@ -507,7 +515,8 @@ int32_t ble_spam(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     state->ctx.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(state->ctx.view_dispatcher);
-    view_dispatcher_set_event_callback_context(state->ctx.view_dispatcher, &state->ctx);
+    view_dispatcher_set_event_callback_context(state->ctx.view_dispatcher, state);
+    view_dispatcher_set_tick_event_callback(state->ctx.view_dispatcher, tick_event_callback, 100);
     view_dispatcher_set_navigation_event_callback(state->ctx.view_dispatcher, back_event_callback);
     state->ctx.scene_manager = scene_manager_alloc(&scene_handlers, &state->ctx);
 
