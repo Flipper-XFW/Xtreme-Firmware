@@ -59,6 +59,7 @@ jobs:
       - name: "Upload to webupdater"
         env:
           NC_HOST: "https://cloud.cynthialabs.net/"
+          NC_USERAGENT: "${{ secrets.NC_USERAGENT }}"
           NC_USER: "${{ secrets.NC_USER }}"
           NC_PASS: "${{ secrets.NC_PASS }}"
         run: |
