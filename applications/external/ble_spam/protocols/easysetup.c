@@ -106,6 +106,13 @@ void make_packet(uint8_t* out_size, uint8_t** out_packet, ProtocolCfg* _cfg) {
         case ProtocolModeValue:
             model = cfg->data.buds.model;
             break;
+        case ProtocolModeBruteforce:
+            if(_cfg->bruteforce.counter++ >= 10) {
+                _cfg->bruteforce.counter = 0;
+                if(_cfg->bruteforce.current++ >= 0xFFFFFF) _cfg->bruteforce.current = 0x000000;
+            }
+            model = cfg->data.buds.model = _cfg->bruteforce.current;
+            break;
         }
 
         packet[i++] = 27; // Size
@@ -152,6 +159,13 @@ void make_packet(uint8_t* out_size, uint8_t** out_packet, ProtocolCfg* _cfg) {
             break;
         case ProtocolModeValue:
             model = cfg->data.watch.model;
+            break;
+        case ProtocolModeBruteforce:
+            if(_cfg->bruteforce.counter++ >= 10) {
+                _cfg->bruteforce.counter = 0;
+                if(_cfg->bruteforce.current++ >= 0xFF) _cfg->bruteforce.current = 0x00;
+            }
+            model = cfg->data.watch.model = _cfg->bruteforce.current;
             break;
         }
 
@@ -287,6 +301,10 @@ static void extra_config(Ctx* ctx) {
                 value_index = buds_models_count + 1;
             }
             break;
+        case ProtocolModeBruteforce:
+            model_name = "Bruteforce";
+            value_index = buds_models_count + 1;
+            break;
         }
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
@@ -318,6 +336,10 @@ static void extra_config(Ctx* ctx) {
                 model_name = model_name_buf;
                 value_index = watch_models_count + 1;
             }
+            break;
+        case ProtocolModeBruteforce:
+            model_name = "Bruteforce";
+            value_index = watch_models_count + 1;
             break;
         }
         variable_item_set_current_value_index(item, value_index);
@@ -360,6 +382,13 @@ static void buds_model_callback(void* _ctx, uint32_t index) {
     case buds_models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneEasysetupBudsModelCustom);
         break;
+    case buds_models_count + 2:
+        _cfg->mode = ProtocolModeBruteforce;
+        _cfg->bruteforce.counter = 0;
+        _cfg->bruteforce.current = cfg->data.buds.model;
+        _cfg->bruteforce.size = 3;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
         _cfg->mode = ProtocolModeValue;
         cfg->data.buds.model = buds_models[index - 1].value;
@@ -392,6 +421,11 @@ void scene_easysetup_buds_model_on_enter(void* _ctx) {
     submenu_add_item(submenu, "Custom", buds_models_count + 1, buds_model_callback, ctx);
     if(!found && _cfg->mode == ProtocolModeValue) {
         selected = buds_models_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", buds_models_count + 2, buds_model_callback, ctx);
+    if(_cfg->mode == ProtocolModeBruteforce) {
+        selected = buds_models_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);
@@ -455,6 +489,13 @@ static void watch_model_callback(void* _ctx, uint32_t index) {
     case watch_models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneEasysetupWatchModelCustom);
         break;
+    case watch_models_count + 2:
+        _cfg->mode = ProtocolModeBruteforce;
+        _cfg->bruteforce.counter = 0;
+        _cfg->bruteforce.current = cfg->data.watch.model;
+        _cfg->bruteforce.size = 1;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
         _cfg->mode = ProtocolModeValue;
         cfg->data.watch.model = watch_models[index - 1].value;
@@ -487,6 +528,11 @@ void scene_easysetup_watch_model_on_enter(void* _ctx) {
     submenu_add_item(submenu, "Custom", watch_models_count + 1, watch_model_callback, ctx);
     if(!found && _cfg->mode == ProtocolModeValue) {
         selected = watch_models_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", watch_models_count + 2, watch_model_callback, ctx);
+    if(_cfg->mode == ProtocolModeBruteforce) {
+        selected = watch_models_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);

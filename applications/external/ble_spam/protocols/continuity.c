@@ -147,6 +147,13 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
         case ProtocolModeValue:
             model = cfg->data.proximity_pair.model;
             break;
+        case ProtocolModeBruteforce:
+            if(_cfg->bruteforce.counter++ >= 10) {
+                _cfg->bruteforce.counter = 0;
+                if(_cfg->bruteforce.current++ >= 0xFFFF) _cfg->bruteforce.current = 0x0000;
+            }
+            model = cfg->data.proximity_pair.model = _cfg->bruteforce.current;
+            break;
         }
 
         uint8_t prefix;
@@ -220,6 +227,13 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
             break;
         case ProtocolModeValue:
             action = cfg->data.nearby_action.action;
+            break;
+        case ProtocolModeBruteforce:
+            if(_cfg->bruteforce.counter++ >= 10) {
+                _cfg->bruteforce.counter = 0;
+                if(_cfg->bruteforce.current++ >= 0xFF) _cfg->bruteforce.current = 0x00;
+            }
+            action = cfg->data.nearby_action.action = _cfg->bruteforce.current;
             break;
         }
 
@@ -424,6 +438,10 @@ static void extra_config(Ctx* ctx) {
                 value_index = pp_models_count + 1;
             }
             break;
+        case ProtocolModeBruteforce:
+            model_name = "Bruteforce";
+            value_index = pp_models_count + 1;
+            break;
         }
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
@@ -485,6 +503,10 @@ static void extra_config(Ctx* ctx) {
                 action_name = action_name_buf;
                 value_index = na_actions_count + 1;
             }
+            break;
+        case ProtocolModeBruteforce:
+            action_name = "Bruteforce";
+            value_index = na_actions_count + 1;
             break;
         }
         variable_item_set_current_value_index(item, value_index);
@@ -550,6 +572,13 @@ static void pp_model_callback(void* _ctx, uint32_t index) {
     case pp_models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpModelCustom);
         break;
+    case pp_models_count + 2:
+        _cfg->mode = ProtocolModeBruteforce;
+        _cfg->bruteforce.counter = 0;
+        _cfg->bruteforce.current = cfg->data.proximity_pair.model;
+        _cfg->bruteforce.size = 2;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
         _cfg->mode = ProtocolModeValue;
         cfg->data.proximity_pair.model = pp_models[index - 1].value;
@@ -582,6 +611,11 @@ void scene_continuity_pp_model_on_enter(void* _ctx) {
     submenu_add_item(submenu, "Custom", pp_models_count + 1, pp_model_callback, ctx);
     if(!found && _cfg->mode == ProtocolModeValue) {
         selected = pp_models_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", pp_models_count + 2, pp_model_callback, ctx);
+    if(_cfg->mode == ProtocolModeBruteforce) {
+        selected = pp_models_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);
@@ -733,6 +767,13 @@ static void na_action_callback(void* _ctx, uint32_t index) {
     case na_actions_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneContinuityNaActionCustom);
         break;
+    case na_actions_count + 2:
+        _cfg->mode = ProtocolModeBruteforce;
+        _cfg->bruteforce.counter = 0;
+        _cfg->bruteforce.current = cfg->data.nearby_action.action;
+        _cfg->bruteforce.size = 1;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
         _cfg->mode = ProtocolModeValue;
         cfg->data.nearby_action.action = na_actions[index - 1].value;
@@ -765,6 +806,11 @@ void scene_continuity_na_action_on_enter(void* _ctx) {
     submenu_add_item(submenu, "Custom", na_actions_count + 1, na_action_callback, ctx);
     if(!found && _cfg->mode == ProtocolModeValue) {
         selected = na_actions_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", na_actions_count + 2, na_action_callback, ctx);
+    if(_cfg->mode == ProtocolModeBruteforce) {
+        selected = na_actions_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);

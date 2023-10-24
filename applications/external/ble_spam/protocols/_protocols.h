@@ -8,10 +8,16 @@
 typedef enum {
     ProtocolModeRandom,
     ProtocolModeValue,
+    ProtocolModeBruteforce,
 } ProtocolMode;
 
 struct ProtocolCfg {
     ProtocolMode mode;
+    struct {
+        uint8_t counter;
+        uint32_t current;
+        uint8_t size;
+    } bruteforce;
     union {
         ContinuityCfg continuity;
         FastpairCfg fastpair;

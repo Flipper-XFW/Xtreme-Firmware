@@ -334,7 +334,16 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
         char str[32];
 
         canvas_set_font(canvas, FontBatteryPercent);
-        snprintf(str, sizeof(str), "%ims", delays[state->delay]);
+        if(payload->cfg.mode == ProtocolModeBruteforce) {
+            snprintf(
+                str,
+                sizeof(str),
+                "0x%0*lX",
+                payload->cfg.bruteforce.size * 2,
+                payload->cfg.bruteforce.current);
+        } else {
+            snprintf(str, sizeof(str), "%ims", delays[state->delay]);
+        }
         canvas_draw_str_aligned(canvas, 116, 12, AlignRight, AlignBottom, str);
         canvas_draw_icon(canvas, 119, 6, &I_SmallArrowUp_3x5);
         canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
@@ -419,15 +428,29 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             }
             break;
         case InputKeyUp:
-            if(is_attack && state->delay < COUNT_OF(delays) - 1) {
-                state->delay++;
-                if(advertising) start_blink(state);
+            if(is_attack) {
+                ProtocolCfg* _cfg = &attacks[state->index].payload.cfg;
+                if(_cfg->mode == ProtocolModeBruteforce) {
+                    _cfg->bruteforce.current =
+                        (_cfg->bruteforce.current + 1) % (1 << (_cfg->bruteforce.size * 8));
+                    _cfg->bruteforce.counter = 0;
+                } else if(state->delay < COUNT_OF(delays) - 1) {
+                    state->delay++;
+                    if(advertising) start_blink(state);
+                }
             }
             break;
         case InputKeyDown:
-            if(is_attack && state->delay > 0) {
-                state->delay--;
-                if(advertising) start_blink(state);
+            if(is_attack) {
+                ProtocolCfg* _cfg = &attacks[state->index].payload.cfg;
+                if(_cfg->mode == ProtocolModeBruteforce) {
+                    _cfg->bruteforce.current =
+                        (_cfg->bruteforce.current - 1) % (1 << (_cfg->bruteforce.size * 8));
+                    _cfg->bruteforce.counter = 0;
+                } else if(state->delay > 0) {
+                    state->delay--;
+                    if(advertising) start_blink(state);
+                }
             }
             break;
         case InputKeyLeft:

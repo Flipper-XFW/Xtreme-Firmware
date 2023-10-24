@@ -63,6 +63,13 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
     case ProtocolModeValue:
         model = cfg->model;
         break;
+    case ProtocolModeBruteforce:
+        if(_cfg->bruteforce.counter++ >= 10) {
+            _cfg->bruteforce.counter = 0;
+            if(_cfg->bruteforce.current++ >= 0xFFFFFF) _cfg->bruteforce.current = 0x000000;
+        }
+        model = cfg->model = _cfg->bruteforce.current;
+        break;
     }
 
     uint8_t size = 14;
@@ -154,6 +161,10 @@ static void extra_config(Ctx* ctx) {
             value_index = models_count + 1;
         }
         break;
+    case ProtocolModeBruteforce:
+        model_name = "Bruteforce";
+        value_index = models_count + 1;
+        break;
     }
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, model_name);
@@ -188,6 +199,13 @@ static void model_callback(void* _ctx, uint32_t index) {
     case models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneFastpairModelCustom);
         break;
+    case models_count + 2:
+        _cfg->mode = ProtocolModeBruteforce;
+        _cfg->bruteforce.counter = 0;
+        _cfg->bruteforce.current = cfg->model;
+        _cfg->bruteforce.size = 3;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
         _cfg->mode = ProtocolModeValue;
         cfg->model = models[index - 1].value;
@@ -219,6 +237,11 @@ void scene_fastpair_model_on_enter(void* _ctx) {
     submenu_add_item(submenu, "Custom", models_count + 1, model_callback, ctx);
     if(!found && _cfg->mode == ProtocolModeValue) {
         selected = models_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", models_count + 2, model_callback, ctx);
+    if(_cfg->mode == ProtocolModeBruteforce) {
+        selected = models_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);
