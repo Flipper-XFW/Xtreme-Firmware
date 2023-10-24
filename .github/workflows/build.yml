@@ -16,6 +16,7 @@ concurrency:
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
+  FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
   build:
