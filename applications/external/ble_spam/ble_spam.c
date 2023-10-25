@@ -355,7 +355,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#4.0\e#",
+            "                                   Version \e#4.1\e#",
             false);
         break;
     default: {
