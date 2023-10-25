@@ -214,10 +214,11 @@ static void toggle_adv(State* state) {
     }
 }
 
-#define PAGE_MIN (-4)
+#define PAGE_MIN (-5)
 #define PAGE_MAX ATTACKS_COUNT
 enum {
-    PageHelpApps = PAGE_MIN,
+    PageHelpBruteforce = PAGE_MIN,
+    PageHelpApps,
     PageHelpDelay,
     PageHelpDistance,
     PageHelpInfoConfig,
@@ -259,6 +260,23 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
     canvas_draw_str(canvas, 14, 12, "BLE Spam");
 
     switch(state->index) {
+    case PageHelpBruteforce:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "\e#Bruteforce\e# cycles codes\n"
+            "to find popups, hold left and\n"
+            "right to send manually and\n"
+            "change delay",
+            false);
+        break;
     case PageHelpApps:
         canvas_set_font(canvas, FontBatteryPercent);
         canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
