@@ -383,7 +383,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
 
         canvas_set_font(canvas, FontBatteryPercent);
         if(payload->cfg.mode == ProtocolModeBruteforce) {
-            canvas_draw_str_aligned(canvas, 62, 22, AlignCenter, AlignBottom, "Bruteforce");
+            canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignBottom, "Bruteforce");
             if(delays[state->delay] < 100) {
                 snprintf(str, sizeof(str), "%ims>", delays[state->delay]);
             } else {
