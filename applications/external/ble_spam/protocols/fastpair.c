@@ -11,21 +11,40 @@ const struct {
     // Genuine actions
     {0x00000C, "Set Up Device"},
 
-    // Genuine devices
-    {0x00000A, "Anti-Spoofing Test (lmao)"},
+    // Genuine non-production/forgotten (good job Google)
     {0x0001F0, "Bisto CSR8670 Dev Board"},
     {0x000047, "Arduino 101"},
+    {0x00000A, "Anti-Spoof Test"},
+    {0x0A0000, "Anti-Spoof Test 2"},
+    {0x00000B, "Google Gphones"},
+    {0x0B0000, "Google Gphones 2"},
+    {0x0C0000, "Google Gphones 3"},
+    {0x00000D, "Test 00000D"},
+    {0x000007, "Android Auto"},
+    {0x070000, "Android Auto 2"},
+    {0x000008, "Foocorp Foophones"},
+    {0x080000, "Foocorp Foophones 2"},
+    {0x000009, "Test Android TV"},
+    {0x090000, "Test Android TV 2"},
+    {0x000048, "Fast Pair Headphones"},
+    {0x000049, "Fast Pair Headphones 2"},
+
+    // Genuine devices
     {0xCD8256, "Bose NC 700"},
+    {0x0000F0, "Bose QuietComfort 35 II"},
+    {0x821F66, "JBL Flip 6"},
     {0xF52494, "JBL Buds Pro"},
     {0x718FA4, "JBL Live 300TWS"},
-    {0x821F66, "JBL Flip 6"},
+    {0x0002F0, "JBL Everest 110GA"},
     {0x92BBBD, "Pixel Buds"},
     {0x000006, "Google Pixel buds"},
+    {0x060000, "Google Pixel buds 2"},
     {0xD446A7, "Sony XM5"},
     {0x2D7A23, "Sony WF-1000XM4"},
     {0x0E30C3, "Razer Hammerhead TWS"},
     {0x72EF8D, "Razer Hammerhead TWS X"},
     {0x72FB00, "Soundcore Spirit Pro GVA"},
+    {0x0003F0, "LG HBS-835S"},
 
     // Custom debug popups
     {0xD99CA1, "Flipper Zero"},
