@@ -131,8 +131,17 @@ typedef struct {
     uint8_t delay;
     FuriThread* thread;
     int8_t index;
+    bool ignore_bruteforce;
 } State;
 
+const NotificationSequence solid_message = {
+    &message_red_0,
+    &message_green_255,
+    &message_blue_255,
+    &message_do_not_reset,
+    &message_delay_10,
+    NULL,
+};
 NotificationMessage blink_message = {
     .type = NotificationMessageTypeLedBlinkStart,
     .data.led_blink.color = LightBlue | LightGreen,
@@ -355,14 +364,30 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
         canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
 
         canvas_set_font(canvas, FontBatteryPercent);
-        snprintf(
-            str,
-            sizeof(str),
-            "%02i/%02i: %s",
-            state->index + 1,
-            ATTACKS_COUNT,
-            protocol ? protocol->get_name(&payload->cfg) : "Everything AND");
-        canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 21, str);
+        if(payload->cfg.mode == ProtocolModeBruteforce) {
+            canvas_draw_str_aligned(canvas, 62, 22, AlignCenter, AlignBottom, "Bruteforce");
+            if(delays[state->delay] < 100) {
+                snprintf(str, sizeof(str), "%ims>", delays[state->delay]);
+            } else {
+                snprintf(str, sizeof(str), "%.1fs>", (double)delays[state->delay] / 1000);
+            }
+            uint16_t w = canvas_string_width(canvas, str);
+            elements_slightly_rounded_box(canvas, 3, 14, 30, 10);
+            elements_slightly_rounded_box(canvas, 119 - w, 14, 6 + w, 10);
+            canvas_invert_color(canvas);
+            canvas_draw_str_aligned(canvas, 5, 22, AlignLeft, AlignBottom, "<Send");
+            canvas_draw_str_aligned(canvas, 122, 22, AlignRight, AlignBottom, str);
+            canvas_invert_color(canvas);
+        } else {
+            snprintf(
+                str,
+                sizeof(str),
+                "%02i/%02i: %s",
+                state->index + 1,
+                ATTACKS_COUNT,
+                protocol ? protocol->get_name(&payload->cfg) : "Everything AND");
+            canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 22, str);
+        }
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 4, 33, attack->title);
@@ -418,6 +443,7 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         consumed = true;
 
         bool is_attack = state->index >= 0 && state->index <= ATTACKS_COUNT - 1;
+        ProtocolCfg* _cfg = is_attack ? &attacks[state->index].payload.cfg : NULL;
         bool advertising = state->advertising;
 
         switch(input->key) {
@@ -435,7 +461,6 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             break;
         case InputKeyUp:
             if(is_attack) {
-                ProtocolCfg* _cfg = &attacks[state->index].payload.cfg;
                 if(_cfg->mode == ProtocolModeBruteforce) {
                     _cfg->bruteforce.counter = 0;
                     _cfg->bruteforce.value =
@@ -448,7 +473,6 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             break;
         case InputKeyDown:
             if(is_attack) {
-                ProtocolCfg* _cfg = &attacks[state->index].payload.cfg;
                 if(_cfg->mode == ProtocolModeBruteforce) {
                     _cfg->bruteforce.counter = 0;
                     _cfg->bruteforce.value =
@@ -460,15 +484,56 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             }
             break;
         case InputKeyLeft:
-            if(state->index > PAGE_MIN) {
-                if(advertising) toggle_adv(state);
-                state->index--;
+            if(input->type == InputTypeLong) {
+                state->ignore_bruteforce = _cfg ? (_cfg->mode != ProtocolModeBruteforce) : true;
+            }
+            if(input->type == InputTypeShort || !is_attack || state->ignore_bruteforce ||
+               _cfg->mode != ProtocolModeBruteforce) {
+                if(state->index > PAGE_MIN) {
+                    if(advertising) toggle_adv(state);
+                    state->index--;
+                }
+            } else {
+                if(!advertising) {
+                    bool resume = furi_hal_bt_is_active();
+                    furi_hal_bt_stop_advertising();
+                    Payload* payload = &attacks[state->index].payload;
+                    const Protocol* protocol = attacks[state->index].protocol;
+
+                    uint8_t size;
+                    uint8_t* packet;
+                    protocol->make_packet(&size, &packet, &payload->cfg);
+                    furi_hal_bt_custom_adv_set(packet, size);
+                    free(packet);
+
+                    uint8_t mac[GAP_MAC_ADDR_SIZE];
+                    furi_hal_random_fill_buf(mac, sizeof(mac));
+                    uint16_t delay = delays[state->delay];
+                    furi_hal_bt_custom_adv_start(delay, delay, 0x00, mac, 0x1F);
+                    if(state->ctx.led_indicator)
+                        notification_message(state->ctx.notification, &solid_message);
+                    furi_delay_ms(10);
+                    furi_hal_bt_custom_adv_stop();
+
+                    if(state->ctx.led_indicator)
+                        notification_message_block(state->ctx.notification, &sequence_reset_rgb);
+                    if(resume) furi_hal_bt_start_advertising();
+                }
             }
             break;
         case InputKeyRight:
-            if(state->index < PAGE_MAX) {
-                if(advertising) toggle_adv(state);
-                state->index++;
+            if(input->type == InputTypeLong) {
+                state->ignore_bruteforce = _cfg ? (_cfg->mode != ProtocolModeBruteforce) : true;
+            }
+            if(input->type == InputTypeShort || !is_attack || state->ignore_bruteforce ||
+               _cfg->mode != ProtocolModeBruteforce) {
+                if(state->index < PAGE_MAX) {
+                    if(advertising) toggle_adv(state);
+                    state->index++;
+                }
+            } else {
+                state->delay = (state->delay + 1) % COUNT_OF(delays);
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyBack:
