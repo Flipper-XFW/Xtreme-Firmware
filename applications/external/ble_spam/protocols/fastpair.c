@@ -65,25 +65,25 @@ const struct {
 };
 const uint8_t models_count = COUNT_OF(models);
 
-static const char* get_name(const ProtocolCfg* _cfg) {
-    UNUSED(_cfg);
+static const char* get_name(const Payload* payload) {
+    UNUSED(payload);
     return "FastPair";
 }
 
-static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
-    FastpairCfg* cfg = _cfg ? &_cfg->specific.fastpair : NULL;
+static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
+    FastpairCfg* cfg = payload ? &payload->cfg.fastpair : NULL;
 
     uint32_t model;
-    switch(cfg ? _cfg->mode : ProtocolModeRandom) {
-    case ProtocolModeRandom:
+    switch(cfg ? payload->mode : PayloadModeRandom) {
+    case PayloadModeRandom:
     default:
         model = models[rand() % models_count].value;
         break;
-    case ProtocolModeValue:
+    case PayloadModeValue:
         model = cfg->model;
         break;
-    case ProtocolModeBruteforce:
-        model = cfg->model = _cfg->bruteforce.value;
+    case PayloadModeBruteforce:
+        model = cfg->model = payload->bruteforce.value;
         break;
     }
 
@@ -133,36 +133,36 @@ static void config_callback(void* _ctx, uint32_t index) {
     }
 }
 static void model_changed(VariableItem* item) {
-    ProtocolCfg* _cfg = variable_item_get_context(item);
-    FastpairCfg* cfg = &_cfg->specific.fastpair;
+    Payload* payload = variable_item_get_context(item);
+    FastpairCfg* cfg = &payload->cfg.fastpair;
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
-        _cfg->mode = ProtocolModeValue;
+        payload->mode = PayloadModeValue;
         cfg->model = models[index].value;
         variable_item_set_current_value_text(item, models[index].name);
     } else {
-        _cfg->mode = ProtocolModeRandom;
+        payload->mode = PayloadModeRandom;
         variable_item_set_current_value_text(item, "Random");
     }
 }
 static void extra_config(Ctx* ctx) {
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    FastpairCfg* cfg = &_cfg->specific.fastpair;
+    Payload* payload = &ctx->attack->payload;
+    FastpairCfg* cfg = &payload->cfg.fastpair;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
     size_t value_index;
 
-    item = variable_item_list_add(list, "Model Code", models_count + 1, model_changed, _cfg);
+    item = variable_item_list_add(list, "Model Code", models_count + 1, model_changed, payload);
     const char* model_name = NULL;
     char model_name_buf[9];
-    switch(_cfg->mode) {
-    case ProtocolModeRandom:
+    switch(payload->mode) {
+    case PayloadModeRandom:
     default:
         model_name = "Random";
         value_index = 0;
         break;
-    case ProtocolModeValue:
+    case PayloadModeValue:
         for(uint8_t i = 0; i < models_count; i++) {
             if(cfg->model == models[i].value) {
                 model_name = models[i].name;
@@ -176,7 +176,7 @@ static void extra_config(Ctx* ctx) {
             value_index = models_count + 1;
         }
         break;
-    case ProtocolModeBruteforce:
+    case PayloadModeBruteforce:
         model_name = "Bruteforce";
         value_index = models_count + 1;
         break;
@@ -189,8 +189,8 @@ static void extra_config(Ctx* ctx) {
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
-static uint8_t config_count(const ProtocolCfg* _cfg) {
-    UNUSED(_cfg);
+static uint8_t config_count(const Payload* payload) {
+    UNUSED(payload);
     return ConfigCOUNT - ConfigExtraStart - 1;
 }
 
@@ -204,25 +204,25 @@ const Protocol protocol_fastpair = {
 
 static void model_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    FastpairCfg* cfg = &_cfg->specific.fastpair;
+    Payload* payload = &ctx->attack->payload;
+    FastpairCfg* cfg = &payload->cfg.fastpair;
     switch(index) {
     case 0:
-        _cfg->mode = ProtocolModeRandom;
+        payload->mode = PayloadModeRandom;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     case models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneFastpairModelCustom);
         break;
     case models_count + 2:
-        _cfg->mode = ProtocolModeBruteforce;
-        _cfg->bruteforce.counter = 0;
-        _cfg->bruteforce.value = cfg->model;
-        _cfg->bruteforce.size = 3;
+        payload->mode = PayloadModeBruteforce;
+        payload->bruteforce.counter = 0;
+        payload->bruteforce.value = cfg->model;
+        payload->bruteforce.size = 3;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     default:
-        _cfg->mode = ProtocolModeValue;
+        payload->mode = PayloadModeValue;
         cfg->model = models[index - 1].value;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -230,32 +230,32 @@ static void model_callback(void* _ctx, uint32_t index) {
 }
 void scene_fastpair_model_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    FastpairCfg* cfg = &_cfg->specific.fastpair;
+    Payload* payload = &ctx->attack->payload;
+    FastpairCfg* cfg = &payload->cfg.fastpair;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
     submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, model_callback, ctx);
-    if(_cfg->mode == ProtocolModeRandom) {
+    if(payload->mode == PayloadModeRandom) {
         selected = 0;
     }
 
     bool found = false;
     for(uint8_t i = 0; i < models_count; i++) {
         submenu_add_item(submenu, models[i].name, i + 1, model_callback, ctx);
-        if(!found && _cfg->mode == ProtocolModeValue && cfg->model == models[i].value) {
+        if(!found && payload->mode == PayloadModeValue && cfg->model == models[i].value) {
             found = true;
             selected = i + 1;
         }
     }
     submenu_add_item(submenu, "Custom", models_count + 1, model_callback, ctx);
-    if(!found && _cfg->mode == ProtocolModeValue) {
+    if(!found && payload->mode == PayloadModeValue) {
         selected = models_count + 1;
     }
 
     submenu_add_item(submenu, "Bruteforce", models_count + 2, model_callback, ctx);
-    if(_cfg->mode == ProtocolModeBruteforce) {
+    if(payload->mode == PayloadModeBruteforce) {
         selected = models_count + 2;
     }
 
@@ -274,9 +274,9 @@ void scene_fastpair_model_on_exit(void* _ctx) {
 
 static void model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    FastpairCfg* cfg = &_cfg->specific.fastpair;
-    _cfg->mode = ProtocolModeValue;
+    Payload* payload = &ctx->attack->payload;
+    FastpairCfg* cfg = &payload->cfg.fastpair;
+    payload->mode = PayloadModeValue;
     cfg->model =
         (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
@@ -284,8 +284,8 @@ static void model_custom_callback(void* _ctx) {
 }
 void scene_fastpair_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    FastpairCfg* cfg = &_cfg->specific.fastpair;
+    Payload* payload = &ctx->attack->payload;
+    FastpairCfg* cfg = &payload->cfg.fastpair;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Model Code");
