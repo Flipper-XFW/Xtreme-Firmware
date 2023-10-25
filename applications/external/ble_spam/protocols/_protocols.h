@@ -15,7 +15,7 @@ struct ProtocolCfg {
     ProtocolMode mode;
     struct {
         uint8_t counter;
-        uint32_t current;
+        uint32_t value;
         uint8_t size;
     } bruteforce;
     union {

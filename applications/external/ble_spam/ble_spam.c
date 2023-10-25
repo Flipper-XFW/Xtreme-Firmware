@@ -162,11 +162,17 @@ static int32_t adv_thread(void* _ctx) {
     uint8_t mac[GAP_MAC_ADDR_SIZE];
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
+    ProtocolCfg* _cfg = &payload->cfg;
     if(!payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
     if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
         if(protocol) {
+            if(_cfg->mode == ProtocolModeBruteforce && _cfg->bruteforce.counter++ >= 10) {
+                _cfg->bruteforce.counter = 0;
+                _cfg->bruteforce.value =
+                    (_cfg->bruteforce.value + 1) % (1 << (_cfg->bruteforce.size * 8));
+            }
             protocol->make_packet(&size, &packet, &payload->cfg);
         } else {
             protocols[rand() % protocols_count]->make_packet(&size, &packet, NULL);
@@ -340,7 +346,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
                 sizeof(str),
                 "0x%0*lX",
                 payload->cfg.bruteforce.size * 2,
-                payload->cfg.bruteforce.current);
+                payload->cfg.bruteforce.value);
         } else {
             snprintf(str, sizeof(str), "%ims", delays[state->delay]);
         }
@@ -431,9 +437,9 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             if(is_attack) {
                 ProtocolCfg* _cfg = &attacks[state->index].payload.cfg;
                 if(_cfg->mode == ProtocolModeBruteforce) {
-                    _cfg->bruteforce.current =
-                        (_cfg->bruteforce.current + 1) % (1 << (_cfg->bruteforce.size * 8));
                     _cfg->bruteforce.counter = 0;
+                    _cfg->bruteforce.value =
+                        (_cfg->bruteforce.value + 1) % (1 << (_cfg->bruteforce.size * 8));
                 } else if(state->delay < COUNT_OF(delays) - 1) {
                     state->delay++;
                     if(advertising) start_blink(state);
@@ -444,9 +450,9 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             if(is_attack) {
                 ProtocolCfg* _cfg = &attacks[state->index].payload.cfg;
                 if(_cfg->mode == ProtocolModeBruteforce) {
-                    _cfg->bruteforce.current =
-                        (_cfg->bruteforce.current - 1) % (1 << (_cfg->bruteforce.size * 8));
                     _cfg->bruteforce.counter = 0;
+                    _cfg->bruteforce.value =
+                        (_cfg->bruteforce.value - 1) % (1 << (_cfg->bruteforce.size * 8));
                 } else if(state->delay > 0) {
                     state->delay--;
                     if(advertising) start_blink(state);

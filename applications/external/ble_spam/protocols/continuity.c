@@ -148,11 +148,7 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
             model = cfg->data.proximity_pair.model;
             break;
         case ProtocolModeBruteforce:
-            if(_cfg->bruteforce.counter++ >= 10) {
-                _cfg->bruteforce.counter = 0;
-                if(_cfg->bruteforce.current++ >= 0xFFFF) _cfg->bruteforce.current = 0x0000;
-            }
-            model = cfg->data.proximity_pair.model = _cfg->bruteforce.current;
+            model = cfg->data.proximity_pair.model = _cfg->bruteforce.value;
             break;
         }
 
@@ -229,11 +225,7 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
             action = cfg->data.nearby_action.action;
             break;
         case ProtocolModeBruteforce:
-            if(_cfg->bruteforce.counter++ >= 10) {
-                _cfg->bruteforce.counter = 0;
-                if(_cfg->bruteforce.current++ >= 0xFF) _cfg->bruteforce.current = 0x00;
-            }
-            action = cfg->data.nearby_action.action = _cfg->bruteforce.current;
+            action = cfg->data.nearby_action.action = _cfg->bruteforce.value;
             break;
         }
 
@@ -575,7 +567,7 @@ static void pp_model_callback(void* _ctx, uint32_t index) {
     case pp_models_count + 2:
         _cfg->mode = ProtocolModeBruteforce;
         _cfg->bruteforce.counter = 0;
-        _cfg->bruteforce.current = cfg->data.proximity_pair.model;
+        _cfg->bruteforce.value = cfg->data.proximity_pair.model;
         _cfg->bruteforce.size = 2;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -770,7 +762,7 @@ static void na_action_callback(void* _ctx, uint32_t index) {
     case na_actions_count + 2:
         _cfg->mode = ProtocolModeBruteforce;
         _cfg->bruteforce.counter = 0;
-        _cfg->bruteforce.current = cfg->data.nearby_action.action;
+        _cfg->bruteforce.value = cfg->data.nearby_action.action;
         _cfg->bruteforce.size = 1;
         scene_manager_previous_scene(ctx->scene_manager);
         break;

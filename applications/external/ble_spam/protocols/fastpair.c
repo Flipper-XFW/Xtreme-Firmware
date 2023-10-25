@@ -83,11 +83,7 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
         model = cfg->model;
         break;
     case ProtocolModeBruteforce:
-        if(_cfg->bruteforce.counter++ >= 10) {
-            _cfg->bruteforce.counter = 0;
-            if(_cfg->bruteforce.current++ >= 0xFFFFFF) _cfg->bruteforce.current = 0x000000;
-        }
-        model = cfg->model = _cfg->bruteforce.current;
+        model = cfg->model = _cfg->bruteforce.value;
         break;
     }
 
@@ -221,7 +217,7 @@ static void model_callback(void* _ctx, uint32_t index) {
     case models_count + 2:
         _cfg->mode = ProtocolModeBruteforce;
         _cfg->bruteforce.counter = 0;
-        _cfg->bruteforce.current = cfg->model;
+        _cfg->bruteforce.value = cfg->model;
         _cfg->bruteforce.size = 3;
         scene_manager_previous_scene(ctx->scene_manager);
         break;

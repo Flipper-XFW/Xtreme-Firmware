@@ -107,11 +107,7 @@ void make_packet(uint8_t* out_size, uint8_t** out_packet, ProtocolCfg* _cfg) {
             model = cfg->data.buds.model;
             break;
         case ProtocolModeBruteforce:
-            if(_cfg->bruteforce.counter++ >= 10) {
-                _cfg->bruteforce.counter = 0;
-                if(_cfg->bruteforce.current++ >= 0xFFFFFF) _cfg->bruteforce.current = 0x000000;
-            }
-            model = cfg->data.buds.model = _cfg->bruteforce.current;
+            model = cfg->data.buds.model = _cfg->bruteforce.value;
             break;
         }
 
@@ -161,11 +157,7 @@ void make_packet(uint8_t* out_size, uint8_t** out_packet, ProtocolCfg* _cfg) {
             model = cfg->data.watch.model;
             break;
         case ProtocolModeBruteforce:
-            if(_cfg->bruteforce.counter++ >= 10) {
-                _cfg->bruteforce.counter = 0;
-                if(_cfg->bruteforce.current++ >= 0xFF) _cfg->bruteforce.current = 0x00;
-            }
-            model = cfg->data.watch.model = _cfg->bruteforce.current;
+            model = cfg->data.watch.model = _cfg->bruteforce.value;
             break;
         }
 
@@ -385,7 +377,7 @@ static void buds_model_callback(void* _ctx, uint32_t index) {
     case buds_models_count + 2:
         _cfg->mode = ProtocolModeBruteforce;
         _cfg->bruteforce.counter = 0;
-        _cfg->bruteforce.current = cfg->data.buds.model;
+        _cfg->bruteforce.value = cfg->data.buds.model;
         _cfg->bruteforce.size = 3;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -492,7 +484,7 @@ static void watch_model_callback(void* _ctx, uint32_t index) {
     case watch_models_count + 2:
         _cfg->mode = ProtocolModeBruteforce;
         _cfg->bruteforce.counter = 0;
-        _cfg->bruteforce.current = cfg->data.watch.model;
+        _cfg->bruteforce.value = cfg->data.watch.model;
         _cfg->bruteforce.size = 1;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
