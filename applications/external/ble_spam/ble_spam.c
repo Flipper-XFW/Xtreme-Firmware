@@ -549,7 +549,7 @@ static bool input_callback(InputEvent* input, void* _ctx) {
                     if(advertising) toggle_adv(state);
                     state->index++;
                 }
-            } else {
+            } else if(input->type == InputTypeLong) {
                 state->delay = (state->delay + 1) % COUNT_OF(delays);
                 if(advertising) start_blink(state);
             }
