@@ -148,7 +148,7 @@ void animation_manager_check_blocking_process(AnimationManager* animation_manage
             const StorageAnimationManifestInfo* manifest_info =
                 animation_storage_get_meta(animation_manager->current_animation);
             bool valid = animation_manager_is_valid_idle_animation(
-                manifest_info, &stats, XTREME_SETTINGS()->unlock_anims);
+                manifest_info, &stats, xtreme_settings.unlock_anims);
 
             if(!valid) {
                 animation_manager_start_new_idle(animation_manager);
@@ -203,9 +203,8 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-    int32_t duration = (xtreme_settings->cycle_anims == 0) ? (bubble_animation->duration) :
-                                                             (xtreme_settings->cycle_anims);
+    int32_t duration = (xtreme_settings.cycle_anims == 0) ? (bubble_animation->duration) :
+                                                            (xtreme_settings.cycle_anims);
     furi_timer_start(
         animation_manager->idle_animation_timer, (duration > 0) ? (duration * 1000) : 0);
 }
@@ -389,14 +388,14 @@ static StorageAnimation*
     furi_record_close(RECORD_DOLPHIN);
     uint32_t whole_weight = 0;
 
-    bool fallback = XTREME_SETTINGS()->fallback_anim;
+    bool fallback = xtreme_settings.fallback_anim;
     if(StorageAnimationList_size(animation_list) == dolphin_internal_size + 1 && !fallback) {
         // One ext anim and fallback disabled, dont skip current anim (current = only ext one)
         avoid_animation = NULL;
     }
 
     StorageAnimationList_it_t it;
-    bool unlock = XTREME_SETTINGS()->unlock_anims;
+    bool unlock = xtreme_settings.unlock_anims;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationManifestInfo* manifest_info =
@@ -531,7 +530,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                 const StorageAnimationManifestInfo* manifest_info =
                     animation_storage_get_meta(restore_animation);
                 bool valid = animation_manager_is_valid_idle_animation(
-                    manifest_info, &stats, XTREME_SETTINGS()->unlock_anims);
+                    manifest_info, &stats, xtreme_settings.unlock_anims);
                 if(valid) {
                     animation_manager_replace_current_animation(
                         animation_manager, restore_animation);
@@ -545,10 +544,9 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                         const BubbleAnimation* bubble_animation =
                             animation_storage_get_bubble_animation(
                                 animation_manager->current_animation);
-                        XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-                        int32_t duration = (xtreme_settings->cycle_anims == 0) ?
+                        int32_t duration = (xtreme_settings.cycle_anims == 0) ?
                                                (bubble_animation->duration) :
-                                               (xtreme_settings->cycle_anims);
+                                               (xtreme_settings.cycle_anims);
                         furi_timer_start(
                             animation_manager->idle_animation_timer,
                             (duration > 0) ? (duration * 1000) : 0);

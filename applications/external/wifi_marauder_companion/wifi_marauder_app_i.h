@@ -28,9 +28,8 @@
 #include <dialogs/dialogs.h>
 #include <xtreme.h>
 
-#define XTREME_UART_CH                                                          \
-    (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                          FuriHalUartIdLPUART1)
+#define XTREME_UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define US_ART_CH (FuriHalUartIdUSART1)
 #define LP_UART_CH (FuriHalUartIdLPUART1)
