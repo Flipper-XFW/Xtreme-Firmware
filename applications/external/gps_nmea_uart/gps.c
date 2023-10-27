@@ -126,6 +126,7 @@ int32_t gps_app(void* p) {
                     case InputKeyRight:
                     case InputKeyLeft:
                     case InputKeyBack:
+                        processing = false;
                         break;
                     case InputKeyOk:
                         if(!gps_uart->backlight_on) {
