@@ -101,7 +101,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             break;
         case DesktopLockMenuIndexDarkMode:
             icon = &I_CC_DarkMode_16x16;
-            enabled = XTREME_SETTINGS()->dark_mode;
+            enabled = xtreme_settings.dark_mode;
             break;
         case DesktopLockMenuIndexLock:
             icon = &I_CC_Lock_16x16;
@@ -287,7 +287,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 desktop_event = DesktopLockMenuEventSettings;
                 break;
             case DesktopLockMenuIndexDarkMode:
-                XTREME_SETTINGS()->dark_mode = !XTREME_SETTINGS()->dark_mode;
+                xtreme_settings.dark_mode = !xtreme_settings.dark_mode;
                 lock_menu->save_xtreme = true;
                 break;
             case DesktopLockMenuIndexBluetooth:

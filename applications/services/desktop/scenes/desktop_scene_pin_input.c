@@ -59,7 +59,7 @@ static void desktop_scene_pin_input_done_callback(const PinCode* pin_code, void*
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopPinInputEventUnlocked);
     } else {
         uint32_t pin_fails = furi_hal_rtc_get_pin_fails() + 1;
-        if(pin_fails >= 10 && XTREME_SETTINGS()->bad_pins_format) {
+        if(pin_fails >= 10 && xtreme_settings.bad_pins_format) {
             furi_hal_rtc_set_pin_fails(0);
             furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
             storage_sd_format(furi_record_open(RECORD_STORAGE));

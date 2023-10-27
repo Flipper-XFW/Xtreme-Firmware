@@ -687,11 +687,10 @@ void bad_kb_config_refresh(BadKbApp* app) {
     scene_manager_previous_scene(app->scene_manager);
 
     // Update settings
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-    if(xtreme_settings->bad_bt != app->is_bt ||
-       xtreme_settings->bad_bt_remember != app->bt_remember) {
-        xtreme_settings->bad_bt = app->is_bt;
-        xtreme_settings->bad_bt_remember = app->bt_remember;
+    if(xtreme_settings.bad_bt != app->is_bt ||
+       xtreme_settings.bad_bt_remember != app->bt_remember) {
+        xtreme_settings.bad_bt = app->is_bt;
+        xtreme_settings.bad_bt_remember = app->bt_remember;
         XTREME_SETTINGS_SAVE();
     }
 }

@@ -29,7 +29,7 @@ static void xtreme_app_scene_interface_mainmenu_menu_style_changed(VariableItem*
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, menu_style_names[index]);
-    XTREME_SETTINGS()->menu_style = index;
+    xtreme_settings.menu_style = index;
     app->save_settings = true;
 }
 
@@ -68,7 +68,6 @@ static void xtreme_app_scene_interface_mainmenu_move_app_changed(VariableItem* i
 
 void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
     XtremeApp* app = context;
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
@@ -78,8 +77,8 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
         MenuStyleCount,
         xtreme_app_scene_interface_mainmenu_menu_style_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->menu_style);
-    variable_item_set_current_value_text(item, menu_style_names[xtreme_settings->menu_style]);
+    variable_item_set_current_value_index(item, xtreme_settings.menu_style);
+    variable_item_set_current_value_text(item, menu_style_names[xtreme_settings.menu_style]);
 
     variable_item_list_add(var_item_list, "Reset Menu", 0, NULL, app);
 

@@ -16,7 +16,7 @@ static void xtreme_app_scene_interface_filebrowser_sort_dirs_first_changed(Varia
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->sort_dirs_first = value;
+    xtreme_settings.sort_dirs_first = value;
     app->save_settings = true;
 }
 
@@ -24,7 +24,7 @@ static void xtreme_app_scene_interface_filebrowser_show_hidden_files_changed(Var
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->show_hidden_files = value;
+    xtreme_settings.show_hidden_files = value;
     app->save_settings = true;
 }
 
@@ -32,7 +32,7 @@ static void xtreme_app_scene_interface_filebrowser_show_internal_tab_changed(Var
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->show_internal_tab = value;
+    xtreme_settings.show_internal_tab = value;
     app->save_settings = true;
 }
 
@@ -42,13 +42,12 @@ static void xtreme_app_scene_interface_filebrowser_favorite_timeout_changed(Vari
     char text[6];
     snprintf(text, sizeof(text), "%lu S", value);
     variable_item_set_current_value_text(item, value ? text : "OFF");
-    XTREME_SETTINGS()->favorite_timeout = value;
+    xtreme_settings.favorite_timeout = value;
     app->save_settings = true;
 }
 
 void xtreme_app_scene_interface_filebrowser_on_enter(void* context) {
     XtremeApp* app = context;
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
@@ -58,8 +57,8 @@ void xtreme_app_scene_interface_filebrowser_on_enter(void* context) {
         2,
         xtreme_app_scene_interface_filebrowser_sort_dirs_first_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->sort_dirs_first);
-    variable_item_set_current_value_text(item, xtreme_settings->sort_dirs_first ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings.sort_dirs_first);
+    variable_item_set_current_value_text(item, xtreme_settings.sort_dirs_first ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
@@ -67,8 +66,8 @@ void xtreme_app_scene_interface_filebrowser_on_enter(void* context) {
         2,
         xtreme_app_scene_interface_filebrowser_show_hidden_files_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->show_hidden_files);
-    variable_item_set_current_value_text(item, xtreme_settings->show_hidden_files ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings.show_hidden_files);
+    variable_item_set_current_value_text(item, xtreme_settings.show_hidden_files ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
@@ -76,8 +75,8 @@ void xtreme_app_scene_interface_filebrowser_on_enter(void* context) {
         2,
         xtreme_app_scene_interface_filebrowser_show_internal_tab_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->show_internal_tab);
-    variable_item_set_current_value_text(item, xtreme_settings->show_internal_tab ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings.show_internal_tab);
+    variable_item_set_current_value_text(item, xtreme_settings.show_internal_tab ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
@@ -85,10 +84,10 @@ void xtreme_app_scene_interface_filebrowser_on_enter(void* context) {
         61,
         xtreme_app_scene_interface_filebrowser_favorite_timeout_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->favorite_timeout);
+    variable_item_set_current_value_index(item, xtreme_settings.favorite_timeout);
     char text[4];
-    snprintf(text, sizeof(text), "%lu S", xtreme_settings->favorite_timeout);
-    variable_item_set_current_value_text(item, xtreme_settings->favorite_timeout ? text : "OFF");
+    snprintf(text, sizeof(text), "%lu S", xtreme_settings.favorite_timeout);
+    variable_item_set_current_value_text(item, xtreme_settings.favorite_timeout ? text : "OFF");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_interface_filebrowser_var_item_list_callback, app);
