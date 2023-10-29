@@ -10,7 +10,7 @@
 #include <lib/subghz/blocks/math.h>
 #include <lib/toolbox/manchester_decoder.h>
 
-#define SUBGHZ_PROTOCOL_HONEYWELL_NAME "Honeywell"
+#define SUBGHZ_PROTOCOL_HONEYWELL_NAME "Honeywell(Ad)"
 
 typedef struct SubGhzProtocolDecoderHoneywell SubGhzProtocolDecoderHoneywell;
 typedef struct SubGhzProtocolEncoderHoneywell SubGhzProtocolEncoderHoneywell;

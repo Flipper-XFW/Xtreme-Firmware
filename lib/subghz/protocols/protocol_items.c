@@ -31,6 +31,7 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_bett,
     &subghz_protocol_doitrand,
     &subghz_protocol_phoenix_v2,
+    &subghz_protocol_honeywell,
     &subghz_protocol_honeywell_wdb,
     &subghz_protocol_magellan,
     &subghz_protocol_intertechno_v3,
@@ -62,7 +63,6 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &ws_protocol_auriol_ahfl,
     &subghz_protocol_pocsag,
     &tpms_protocol_schrader_gg4,
-    &subghz_protocol_honeywell,
     &subghz_protocol_bin_raw,
 };
 

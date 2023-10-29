@@ -160,8 +160,8 @@ void subghz_protocol_decoder_honeywell_get_string(void* context, FuriString* out
 
     furi_string_cat_printf(
         output,
-        "%s\r\n%dbit\r\n"
-        "Sn:%07lu Ch:%u  Bat:%d  Hb: %d\r\n"
+        "%s\r\n%dbit  "
+        "Sn:%07lu\r\nCh:%u  Bat:%d  Hb: %d\r\n"
         "L1: %u, L2: %u, L3: %u, L4: %u\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
