@@ -62,6 +62,7 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &ws_protocol_auriol_ahfl,
     &subghz_protocol_pocsag,
     &tpms_protocol_schrader_gg4,
+    &subghz_protocol_honeywell,
     &subghz_protocol_bin_raw,
 };
 
