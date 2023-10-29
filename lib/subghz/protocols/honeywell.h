@@ -9,6 +9,7 @@
 #include "../blocks/generic.h"
 #include <lib/subghz/blocks/math.h>
 #include <lib/toolbox/manchester_decoder.h>
+#include <lib/toolbox/manchester_encoder.h>
 
 #define SUBGHZ_PROTOCOL_HONEYWELL_NAME "Honeywell(Ad)"
 
