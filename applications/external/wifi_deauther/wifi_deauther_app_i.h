@@ -14,9 +14,8 @@
 
 #include <xtreme.h>
 
-#define UART_CH                                                                 \
-    (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                          FuriHalUartIdLPUART1)
+#define UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define NUM_MENU_ITEMS (11)
 

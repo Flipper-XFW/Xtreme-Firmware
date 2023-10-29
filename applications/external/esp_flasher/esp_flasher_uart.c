@@ -2,9 +2,8 @@
 #include "esp_flasher_uart.h"
 #include <xtreme.h>
 
-#define UART_CH                                                                 \
-    (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                          FuriHalUartIdLPUART1)
+#define UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 #define BAUDRATE (115200)
 
 struct EspFlasherUart {
