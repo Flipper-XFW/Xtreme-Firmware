@@ -14,9 +14,8 @@
 
 #include "FlipperZeroWiFiDeauthModuleDefines.h"
 
-#define UART_CH                                                                 \
-    (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                          FuriHalUartIdLPUART1)
+#define UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define DEAUTH_APP_DEBUG 0
 

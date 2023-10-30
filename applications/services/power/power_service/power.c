@@ -16,7 +16,7 @@ void power_set_battery_icon_enabled(Power* power, bool is_enabled) {
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
-    BatteryIcon battery_icon = XTREME_SETTINGS()->battery_icon;
+    BatteryIcon battery_icon = xtreme_settings.battery_icon;
     if(battery_icon == BatteryIconOff) return;
 
     canvas_draw_icon(canvas, 0, 0, &I_Battery_25x8);
@@ -359,7 +359,7 @@ Power* power_alloc() {
 
     // Battery view port
     power->battery_view_port = power_battery_view_port_alloc(power);
-    power_set_battery_icon_enabled(power, XTREME_SETTINGS()->battery_icon != BatteryIconOff);
+    power_set_battery_icon_enabled(power, xtreme_settings.battery_icon != BatteryIconOff);
     power->show_low_bat_level_message = true;
 
     //Auto shutdown timer
@@ -478,7 +478,7 @@ static void power_check_battery_level_change(Power* power) {
 }
 
 static void power_check_charge_cap(Power* power) {
-    uint32_t cap = XTREME_SETTINGS()->charge_cap;
+    uint32_t cap = xtreme_settings.charge_cap;
     if(power->info.charge >= cap && cap < 100) {
         if(!power->info.is_charge_capped) { // Suppress charging if charge reaches custom cap
             power->info.is_charge_capped = true;
