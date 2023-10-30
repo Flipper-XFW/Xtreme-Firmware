@@ -148,14 +148,14 @@ SubGhzProtocolStatus subghz_protocol_decoder_honeywell_serialize(
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
-    SubGhzProtocolEncoderHoneywell* instance = context;
+    SubGhzProtocolDecoderHoneywell* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 SubGhzProtocolStatus
     subghz_protocol_decoder_honeywell_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
-    SubGhzProtocolEncoderHoneywell* instance = context;
+    SubGhzProtocolDecoderHoneywell* instance = context;
     return subghz_block_generic_deserialize_check_count_bit(
         &instance->generic,
         flipper_format,
@@ -164,7 +164,7 @@ SubGhzProtocolStatus
 
 void subghz_protocol_decoder_honeywell_get_string(void* context, FuriString* output) {
     furi_assert(context);
-    SubGhzProtocolEncoderHoneywell* instance = context;
+    SubGhzProtocolDecoderHoneywell* instance = context;
 
     uint8_t channel = (instance->generic.data >> 44) & 0xF;
     uint8_t contact = (instance->generic.btn & 0x80) >> 7;
@@ -193,7 +193,7 @@ void subghz_protocol_decoder_honeywell_get_string(void* context, FuriString* out
 
 void* subghz_protocol_decoder_honeywell_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
-    SubGhzProtocolEncoderHoneywell* instance = malloc(sizeof(SubGhzProtocolEncoderHoneywell));
+    SubGhzProtocolDecoderHoneywell* instance = malloc(sizeof(SubGhzProtocolDecoderHoneywell));
     instance->base.protocol = &subghz_protocol_honeywell;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
@@ -256,7 +256,7 @@ static void
     manchester_encoder_reset(&enc_state);
     ManchesterEncoderResult result;
 
-    for(uint8_t i = 0; i < 64; i++) {
+    for(uint8_t i = 63; i > 0; i--) {
         if(!manchester_encoder_advance(
                &enc_state, bit_read(instance->generic.data, i - 1), &result)) {
             instance->encoder.upload[index++] =
