@@ -74,7 +74,6 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     furi_hal_rtc_get_datetime(&datetime);
     LocaleTimeFormat time_format = locale_get_time_format();
     LocaleDateFormat date_format = locale_get_date_format();
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     bool pm;
     if(time_format == LocaleTimeFormat24h) {
@@ -94,14 +93,14 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         snprintf(date_str, 14, "%.2d-%.2d-%.4d", datetime.day, datetime.month, datetime.year);
     }
 
-    if(!xtreme_settings->lockscreen_transparent) {
+    if(!xtreme_settings.lockscreen_transparent) {
         canvas_draw_icon(canvas, 0, 0 + y, &I_Lockscreen);
     }
-    if(xtreme_settings->lockscreen_time) {
+    if(xtreme_settings.lockscreen_time) {
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str(canvas, 0, 64 + y, time_str);
         int offset = canvas_string_width(canvas, time_str) + 2;
-        if(xtreme_settings->lockscreen_seconds) {
+        if(xtreme_settings.lockscreen_seconds) {
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str(canvas, 0 + offset, 64 + y, second_str);
             offset += canvas_string_width(canvas, ":00") + 2;
@@ -111,12 +110,12 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
             canvas_draw_str(canvas, 0 + offset, 64 + y, meridian_str);
         }
     }
-    if(xtreme_settings->lockscreen_date) {
+    if(xtreme_settings.lockscreen_date) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings->lockscreen_time, date_str);
+        canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings.lockscreen_time, date_str);
     }
     if(model->view_state == DesktopViewLockedStateLockedHintShown &&
-       xtreme_settings->lockscreen_prompt) {
+       xtreme_settings.lockscreen_prompt) {
         canvas_set_font(canvas, FontSecondary);
         if(model->pin_locked) {
             elements_bubble_str(

@@ -15,52 +15,51 @@ void xtreme_app_scene_protocols_gpio_var_item_list_callback(void* context, uint3
 
 static void xtreme_app_scene_protocols_gpio_cc1101_handle_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    XTREME_SETTINGS()->spi_cc1101_handle =
+    xtreme_settings.spi_cc1101_handle =
         variable_item_get_current_value_index(item) == 0 ? SpiDefault : SpiExtra;
     variable_item_set_current_value_text(
-        item, XTREME_SETTINGS()->spi_cc1101_handle == SpiDefault ? "Default" : "Extra");
+        item, xtreme_settings.spi_cc1101_handle == SpiDefault ? "Default" : "Extra");
     app->save_settings = true;
 }
 
 static void xtreme_app_scene_protocols_gpio_nrf24_handle_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    XTREME_SETTINGS()->spi_nrf24_handle =
+    xtreme_settings.spi_nrf24_handle =
         variable_item_get_current_value_index(item) == 0 ? SpiDefault : SpiExtra;
     variable_item_set_current_value_text(
-        item, XTREME_SETTINGS()->spi_nrf24_handle == SpiDefault ? "Default" : "Extra");
+        item, xtreme_settings.spi_nrf24_handle == SpiDefault ? "Default" : "Extra");
     app->save_settings = true;
 }
 
 static void xtreme_app_scene_protocols_gpio_esp32_channel_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    XTREME_SETTINGS()->uart_esp_channel =
+    xtreme_settings.uart_esp_channel =
         variable_item_get_current_value_index(item) == 0 ? UARTDefault : UARTExtra;
     variable_item_set_current_value_text(
-        item, XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? "13,14" : "15,16");
+        item, xtreme_settings.uart_esp_channel == UARTDefault ? "13,14" : "15,16");
     app->save_settings = true;
 }
 
 static void xtreme_app_scene_protocols_gpio_nmea_channel_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    XTREME_SETTINGS()->uart_nmea_channel =
+    xtreme_settings.uart_nmea_channel =
         variable_item_get_current_value_index(item) == 0 ? UARTDefault : UARTExtra;
     variable_item_set_current_value_text(
-        item, XTREME_SETTINGS()->uart_nmea_channel == UARTDefault ? "13,14" : "15,16");
+        item, xtreme_settings.uart_nmea_channel == UARTDefault ? "13,14" : "15,16");
     app->save_settings = true;
 }
 
 static void xtreme_app_scene_protocols_gpio_general_channel_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
-    XTREME_SETTINGS()->uart_general_channel =
+    xtreme_settings.uart_general_channel =
         variable_item_get_current_value_index(item) == 0 ? UARTDefault : UARTExtra;
     variable_item_set_current_value_text(
-        item, XTREME_SETTINGS()->uart_general_channel == UARTDefault ? "13,14" : "15,16");
+        item, xtreme_settings.uart_general_channel == UARTDefault ? "13,14" : "15,16");
     app->save_settings = true;
 }
 
 void xtreme_app_scene_protocols_gpio_on_enter(void* context) {
     XtremeApp* app = context;
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
@@ -70,9 +69,9 @@ void xtreme_app_scene_protocols_gpio_on_enter(void* context) {
         2,
         xtreme_app_scene_protocols_gpio_cc1101_handle_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->spi_cc1101_handle);
+    variable_item_set_current_value_index(item, xtreme_settings.spi_cc1101_handle);
     variable_item_set_current_value_text(
-        item, xtreme_settings->spi_cc1101_handle == SpiDefault ? "Default" : "Extra");
+        item, xtreme_settings.spi_cc1101_handle == SpiDefault ? "Default" : "Extra");
 
     item = variable_item_list_add(
         var_item_list,
@@ -80,9 +79,9 @@ void xtreme_app_scene_protocols_gpio_on_enter(void* context) {
         2,
         xtreme_app_scene_protocols_gpio_nrf24_handle_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->spi_nrf24_handle);
+    variable_item_set_current_value_index(item, xtreme_settings.spi_nrf24_handle);
     variable_item_set_current_value_text(
-        item, xtreme_settings->spi_nrf24_handle == SpiDefault ? "Default" : "Extra");
+        item, xtreme_settings.spi_nrf24_handle == SpiDefault ? "Default" : "Extra");
 
     item = variable_item_list_add(
         var_item_list,
@@ -90,9 +89,9 @@ void xtreme_app_scene_protocols_gpio_on_enter(void* context) {
         2,
         xtreme_app_scene_protocols_gpio_esp32_channel_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->uart_esp_channel);
+    variable_item_set_current_value_index(item, xtreme_settings.uart_esp_channel);
     variable_item_set_current_value_text(
-        item, xtreme_settings->uart_esp_channel == UARTDefault ? "13,14" : "15,16");
+        item, xtreme_settings.uart_esp_channel == UARTDefault ? "13,14" : "15,16");
 
     item = variable_item_list_add(
         var_item_list,
@@ -100,9 +99,9 @@ void xtreme_app_scene_protocols_gpio_on_enter(void* context) {
         2,
         xtreme_app_scene_protocols_gpio_nmea_channel_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->uart_nmea_channel);
+    variable_item_set_current_value_index(item, xtreme_settings.uart_nmea_channel);
     variable_item_set_current_value_text(
-        item, xtreme_settings->uart_nmea_channel == UARTDefault ? "13,14" : "15,16");
+        item, xtreme_settings.uart_nmea_channel == UARTDefault ? "13,14" : "15,16");
 
     item = variable_item_list_add(
         var_item_list,
@@ -110,9 +109,9 @@ void xtreme_app_scene_protocols_gpio_on_enter(void* context) {
         2,
         xtreme_app_scene_protocols_gpio_general_channel_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->uart_general_channel);
+    variable_item_set_current_value_index(item, xtreme_settings.uart_general_channel);
     variable_item_set_current_value_text(
-        item, xtreme_settings->uart_general_channel == UARTDefault ? "13,14" : "15,16");
+        item, xtreme_settings.uart_general_channel == UARTDefault ? "13,14" : "15,16");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_protocols_gpio_var_item_list_callback, app);

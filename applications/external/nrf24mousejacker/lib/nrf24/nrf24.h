@@ -42,7 +42,7 @@ extern "C" {
 #define nrf24_TIMEOUT 500
 #define nrf24_CE_PIN &gpio_ext_pb2
 #define nrf24_HANDLE                                                                         \
-    (XTREME_SETTINGS()->spi_nrf24_handle == SpiDefault ? &furi_hal_spi_bus_handle_external : \
+    (xtreme_settings.spi_nrf24_handle == SpiDefault ? &furi_hal_spi_bus_handle_external : \
                                                          &furi_hal_spi_bus_handle_external_extra)
 
 /* Low level API */

@@ -10,7 +10,7 @@
 #define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 
 void load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
-    const char* pack = XTREME_SETTINGS()->asset_pack;
+    const char* pack = xtreme_settings.asset_pack;
     furi_string_printf(path, ICONS_FMT "/meta", pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         int32_t icon_width, icon_height, frame_rate, frame_count;
@@ -61,7 +61,7 @@ void load_icon_animated(const Icon* replace, const char* name, FuriString* path,
 }
 
 void load_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
-    furi_string_printf(path, ICONS_FMT ".bmx", XTREME_SETTINGS()->asset_pack, name);
+    furi_string_printf(path, ICONS_FMT ".bmx", xtreme_settings.asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
         uint8_t* frame = malloc(size);
@@ -102,8 +102,8 @@ void free_icon(const Icon* icon) {
 }
 
 void XTREME_ASSETS_LOAD() {
-    const char* pack = XTREME_SETTINGS()->asset_pack;
-    XTREME_SETTINGS()->is_nsfw = !strncmp(pack, "NSFW", strlen("NSFW"));
+    const char* pack = xtreme_settings.asset_pack;
+    xtreme_settings.is_nsfw = !strncmp(pack, "NSFW", strlen("NSFW"));
     if(pack[0] == '\0') return;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);

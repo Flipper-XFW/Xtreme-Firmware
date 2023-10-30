@@ -121,11 +121,8 @@ int32_t gps_app(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypeShort) {
                     switch(event.input.key) {
-                    case InputKeyUp:
-                    case InputKeyDown:
-                    case InputKeyRight:
-                    case InputKeyLeft:
                     case InputKeyBack:
+                        processing = false;
                         break;
                     case InputKeyOk:
                         if(!gps_uart->backlight_on) {

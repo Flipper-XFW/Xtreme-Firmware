@@ -81,7 +81,7 @@ void subghz_scene_transmitter_on_enter(void* context) {
         subghz->fav_timer = furi_timer_alloc(fav_timer_callback, FuriTimerTypeOnce, subghz);
         furi_timer_start(
             subghz->fav_timer,
-            XTREME_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency());
+            xtreme_settings.favorite_timeout * furi_kernel_get_tick_frequency());
         // subghz->state_notifications = SubGhzNotificationStateTx;
     }
 }
