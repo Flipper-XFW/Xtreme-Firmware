@@ -106,7 +106,7 @@ static void subghz_scene_add_to_history_callback(
     SubGhz* subghz = context;
 
     // The check can be moved to /lib/subghz/receiver.c, but may result in false positives
-    if((decoder_base->protocol->flag & subghz->ignore_filter) == 0) {
+    if((decoder_base->protocol->filter & subghz->ignore_filter) == 0) {
         SubGhzHistory* history = subghz->history;
         FuriString* item_name = furi_string_alloc();
         FuriString* item_time = furi_string_alloc();

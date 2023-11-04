@@ -63,4 +63,5 @@
 #include "auriol_ahfl.h"
 #include "pocsag.h"
 #include "schrader_gg4.h"
+#include "honeywell.h"
 #include "bin_raw.h"
