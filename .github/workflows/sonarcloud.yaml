@@ -2,8 +2,8 @@ name: 'SonarCloud'
 
 on:
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
 
 env:
   TARGETS: f7
