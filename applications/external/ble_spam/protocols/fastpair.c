@@ -8,7 +8,7 @@ const struct {
     uint32_t value;
     const char* name;
 } models[] = {
-	// Genuine non-production/forgotten (good job Google)
+    // Genuine non-production/forgotten (good job Google)
     {0x0001F0, "Bisto CSR8670 Dev Board"},
     {0x000047, "Arduino 101"},
     {0x470000, "Arduino 101 2"},
@@ -39,12 +39,12 @@ const struct {
     {0xF00400, "T10"},
     {0x1E89A7, "ATS2833_EVB"},
 
-	// Phone setup
+    // Phone setup
     {0x00000C, "Google Gphones Transfer"},
     {0x0577B1, "Galaxy S23 Ultra"},
     {0x05A9BC, "Galaxy S20+"},
 
-	// Genuine devices
+    // Genuine devices
     {0xCD8256, "Bose NC 700"},
     {0x0000F0, "Bose QuietComfort 35 II"},
     {0xF00000, "Bose QuietComfort 35 II 2"},
@@ -201,7 +201,7 @@ const struct {
     {0x060000, "Google Pixel Buds"},
     {0x070000, "Android Auto"},
     {0x0702F0, "JBL Everest 710GA"},
-    {0x0X071C74, "JBL Flip 6"},
+    {0x071C74, "JBL Flip 6"},
     {0x080000, "Foocorp Foophones"},
     {0x0802F0, "JBL Everest 710GA"},
     {0x090000, "Test Android TV"},
@@ -502,7 +502,8 @@ const struct {
     {0xE6E8B8, "POCO Pods"},
     {0xE750CE, "Jabra Evolve2 75"},
     {0xF52494, "JBL LIVE PRO+ TWS"},
-	// Custom debug popups
+
+    // Custom debug popups
     {0xD99CA1, "Flipper Zero"},
     {0x77FF67, "Free Robux"},
     {0xAA187F, "Free VBucks"},
