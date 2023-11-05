@@ -38,10 +38,12 @@ const struct {
     {0xF00002, "Goodyear"},
     {0xF00400, "T10"},
     {0x1E89A7, "ATS2833_EVB"},
+
 	// Phone setup
     {0x00000C, "Google Gphones Transfer"},
     {0x0577B1, "Galaxy S23 Ultra"},
     {0x05A9BC, "Galaxy S20+"},
+
 	// Genuine devices
     {0xCD8256, "Bose NC 700"},
     {0x0000F0, "Bose QuietComfort 35 II"},
