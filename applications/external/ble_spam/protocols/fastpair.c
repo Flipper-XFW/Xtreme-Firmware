@@ -520,7 +520,7 @@ const struct {
     {0xE2106F, "FBI"},
     {0xB37A62, "Tesla"},
 };
-const uint8_t models_count = COUNT_OF(models);
+const uint16_t models_count = COUNT_OF(models);
 
 static const char* get_name(const Payload* payload) {
     UNUSED(payload);
@@ -589,56 +589,36 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-static void model_changed(VariableItem* item) {
-    Payload* payload = variable_item_get_context(item);
-    FastpairCfg* cfg = &payload->cfg.fastpair;
-    uint8_t index = variable_item_get_current_value_index(item);
-    if(index) {
-        index--;
-        payload->mode = PayloadModeValue;
-        cfg->model = models[index].value;
-        variable_item_set_current_value_text(item, models[index].name);
-    } else {
-        payload->mode = PayloadModeRandom;
-        variable_item_set_current_value_text(item, "Random");
-    }
-}
 static void extra_config(Ctx* ctx) {
     Payload* payload = &ctx->attack->payload;
     FastpairCfg* cfg = &payload->cfg.fastpair;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
-    size_t value_index;
 
-    item = variable_item_list_add(list, "Model Code", models_count + 1, model_changed, payload);
+    item = variable_item_list_add(list, "Model Code", 0, NULL, NULL);
     const char* model_name = NULL;
     char model_name_buf[9];
     switch(payload->mode) {
     case PayloadModeRandom:
     default:
         model_name = "Random";
-        value_index = 0;
         break;
     case PayloadModeValue:
-        for(uint8_t i = 0; i < models_count; i++) {
+        for(uint16_t i = 0; i < models_count; i++) {
             if(cfg->model == models[i].value) {
                 model_name = models[i].name;
-                value_index = i + 1;
                 break;
             }
         }
         if(!model_name) {
             snprintf(model_name_buf, sizeof(model_name_buf), "%06lX", cfg->model);
             model_name = model_name_buf;
-            value_index = models_count + 1;
         }
         break;
     case PayloadModeBruteforce:
         model_name = "Bruteforce";
-        value_index = models_count + 1;
         break;
     }
-    variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, model_name);
 
     variable_item_list_add(list, "Requires Google services", 0, NULL, NULL);
@@ -699,7 +679,7 @@ void scene_fastpair_model_on_enter(void* _ctx) {
     }
 
     bool found = false;
-    for(uint8_t i = 0; i < models_count; i++) {
+    for(uint16_t i = 0; i < models_count; i++) {
         submenu_add_item(submenu, models[i].name, i + 1, model_callback, ctx);
         if(!found && payload->mode == PayloadModeValue && cfg->model == models[i].value) {
             found = true;
