@@ -2,9 +2,7 @@
 
 import os
 import shutil
-import pathlib
 
-import asset_packer
 from flipper.app import App
 from flipper.assets.icon import file2image
 
@@ -102,6 +100,17 @@ class Main(App):
             "output_directory", help="Dolphin output directory"
         )
         self.parser_dolphin.set_defaults(func=self.dolphin)
+
+        self.parser_packs = self.subparsers.add_parser(
+            "packs", help="Assemble asset packs"
+        )
+        self.parser_packs.add_argument(
+            "input_directory", help="Packs source directory"
+        )
+        self.parser_packs.add_argument(
+            "output_directory", help="Packs output directory"
+        )
+        self.parser_packs.set_defaults(func=self.packs)
 
     def _icon2header(self, file):
         image = file2image(file)
@@ -284,14 +293,6 @@ extern const size_t ICON_PATHS_COUNT;
         else:
             self.logger.info("Manifest is up-to-date!")
 
-        self.logger.info("Packing custom asset packs")
-        root_dir = pathlib.Path(__file__).absolute().parent.parent
-        asset_packer.pack(
-            root_dir / "assets/packs",
-            root_dir / f"assets/resources/asset_packs",
-            self.logger.info,
-        )
-
         self.logger.info("Complete")
 
         return 0
@@ -328,6 +329,19 @@ extern const size_t ICON_PATHS_COUNT;
         self.logger.info("Packing")
         dolphin.pack(self.args.output_directory, self.args.symbol_name)
         self.logger.info("Complete")
+
+        return 0
+
+    def packs(self):
+        import asset_packer
+
+        self.logger.info("Packing custom asset packs")
+        asset_packer.pack(
+            self.args.input_directory,
+            self.args.output_directory,
+            self.logger.info,
+        )
+        self.logger.info("Finished custom asset packs")
 
         return 0
 

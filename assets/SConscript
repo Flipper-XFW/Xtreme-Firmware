@@ -79,4 +79,17 @@ if assetsenv["IS_BASE_FIRMWARE"]:
 
     env.Replace(DOLPHIN_EXTERNAL_OUT_DIR=dolphin_external_out_dir)
 
+    asset_packs_out_dir = assetsenv["ASSETS_WORK_DIR"].Dir("asset_packs")
+    # Default asset packs
+    asset_packs = assetsenv.AssetPacksBuilder(
+        asset_packs_out_dir,
+        assetsenv["ASSETS_SRC_DIR"].Dir("packs"),
+    )
+    if assetsenv["FORCE"]:
+        assetsenv.AlwaysBuild(asset_packs)
+    assetsenv.Alias("asset_packs", asset_packs)
+    assetsenv.Clean(asset_packs, asset_packs_out_dir)
+
+    env.Replace(ASSET_PACKS_OUT_DIR=asset_packs_out_dir)
+
 Return("assetslib")
