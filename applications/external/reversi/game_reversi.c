@@ -12,7 +12,8 @@
 #define FRAME_TOP 3
 #define FRAME_CELL_SIZE 7
 
-#define SAVING_FILENAME APP_DATA_PATH("game_reversi.save")
+#define SAVING_DIRECTORY STORAGE_APP_DATA_PATH_PREFIX
+#define SAVING_FILENAME SAVING_DIRECTORY "/game_reversi.save"
 
 typedef enum { AppScreenGame, AppScreenMenu } AppScreen;
 
@@ -324,16 +325,18 @@ int32_t game_reversi_app() {
                 furi_mutex_acquire(app_state.mutex, FuriWaitForever);
                 app_state.selected_menu_item = 0;
                 app_state.screen = AppScreenMenu;
-                view_port_update(view_port);
+                
                 furi_mutex_release(app_state.mutex);
+                view_port_update(view_port);
                 continue;
             }
             if(input.type != InputTypePress) continue;
 
             furi_mutex_acquire(app_state.mutex, FuriWaitForever);
             is_finished = !handle_key(&app_state, input.key);
-            view_port_update(view_port);
+
             furi_mutex_release(app_state.mutex);
+            view_port_update(view_port);
         }
         view_port_update(view_port);
     }

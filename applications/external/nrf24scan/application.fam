@@ -6,6 +6,8 @@ App(
     cdefines=["APP_NRF24SCAN"],
     requires=["gui"],
     stack_size=2 * 1024,
+    order=60,
+    resources="resources",
     fap_icon="nrf24scan_10px.png",
     fap_category="GPIO",
     fap_private_libs=[

@@ -1,7 +1,6 @@
 #include <stdlib.h>
 
-#include "jetpack_joyride_icons.h"
-#include <assets_icons.h>
+#include <jetpack_game_icons.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/icon_animation.h>
@@ -18,7 +17,7 @@
 
 #include "includes/game_state.h"
 
-#define TAG "Jetpack Joyride"
+#define TAG "Jetpack Game"
 #define SAVING_FILENAME APP_DATA_PATH("jetpack.save")
 static GameState* global_state;
 
@@ -355,8 +354,8 @@ int32_t jetpack_game_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);

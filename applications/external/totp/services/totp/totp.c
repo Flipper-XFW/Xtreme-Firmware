@@ -6,14 +6,14 @@
 #include <timezone_utils.h>
 #include "../../config/wolfssl/config.h"
 #include <wolfssl/wolfcrypt/hmac.h>
+#ifdef NO_INLINE
+#include <wolfssl/wolfcrypt/misc.h>
+#else
+#define WOLFSSL_MISC_INCLUDED
+#include <wolfcrypt/src/misc.c>
+#endif
 
 #define HMAC_MAX_RESULT_SIZE WC_SHA512_DIGEST_SIZE
-
-static uint64_t swap_uint64(uint64_t val) {
-    val = ((val << 8) & 0xFF00FF00FF00FF00ULL) | ((val >> 8) & 0x00FF00FF00FF00FFULL);
-    val = ((val << 16) & 0xFFFF0000FFFF0000ULL) | ((val >> 16) & 0x0000FFFF0000FFFFULL);
-    return (val << 32) | (val >> 32);
-}
 
 /**
  * @brief Generates the timeblock for a time in seconds.
@@ -43,7 +43,7 @@ uint64_t otp_generate(
     uint64_t input) {
     uint8_t hmac[HMAC_MAX_RESULT_SIZE] = {0};
 
-    uint64_t input_swapped = swap_uint64(input);
+    uint64_t input_swapped = ByteReverseWord64(input);
 
     int hmac_len =
         (*algo)(plain_secret, plain_secret_length, (uint8_t*)&input_swapped, 8, &hmac[0]);
@@ -70,6 +70,14 @@ uint64_t totp_at(
         timezone_offset_apply(for_time, timezone_offset_from_hours(timezone));
     return otp_generate(
         algo, plain_secret, plain_secret_length, totp_timecode(interval, for_time_adjusted));
+}
+
+uint64_t hotp_at(
+    TOTP_ALGO algo,
+    const uint8_t* plain_secret,
+    size_t plain_secret_length,
+    uint64_t counter) {
+    return otp_generate(algo, plain_secret, plain_secret_length, counter);
 }
 
 static int totp_algo_common(

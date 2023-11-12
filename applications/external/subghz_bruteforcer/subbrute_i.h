@@ -18,6 +18,7 @@
 #include <gui/modules/variable_item_list.h>
 
 #include "subghz_bruteforcer_icons.h"
+
 #include <assets_icons.h>
 
 #include <dialogs/dialogs.h>

@@ -1,7 +1,8 @@
 #include "dap_main_view.h"
 #include "dap_link_icons.h"
-#include <assets_icons.h>
 #include <gui/elements.h>
+
+#include <assets_icons.h>
 
 // extern const Icon I_ArrowDownEmpty_12x18;
 // extern const Icon I_ArrowDownFilled_12x18;

@@ -20,7 +20,6 @@
 #include <lib/toolbox/value_index.h>
 #include <gui/modules/variable_item_list.h>
 #include "mifare_nested_icons.h"
-#include <assets_icons.h>
 
 #define NESTED_VERSION_APP "1.5.2"
 #define NESTED_GITHUB_LINK "https://github.com/AloneLiberty/FlipperNested"

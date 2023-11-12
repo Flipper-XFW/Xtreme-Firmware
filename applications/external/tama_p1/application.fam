@@ -6,6 +6,8 @@ App(
     cdefines=["APP_TAMA_P1"],
     requires=["gui", "storage"],
     stack_size=2 * 1024,
-    fap_icon="tamaIcon.png",
+    order=215,
+    fap_file_assets="files"
+    fap_icon="tamaIcon4.png",
     fap_category="Games",
 )

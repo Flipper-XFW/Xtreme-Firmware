@@ -7,7 +7,7 @@ enum VarItemListIndex {
     VarItemListIndexCreateImage,
 };
 
-void mass_storage_scene_create_image_var_item_list_callback(void* context, uint32_t index) {
+void mass_storage_scene_create_image_variable_item_list_callback(void* context, uint32_t index) {
     MassStorageApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
@@ -45,7 +45,7 @@ static void mass_storage_scene_create_image_image_size_changed(VariableItem* ite
 
 void mass_storage_scene_create_image_on_enter(void* context) {
     MassStorageApp* app = context;
-    VariableItemList* var_item_list = app->var_item_list;
+    VariableItemList* variable_item_list = app->variable_item_list;
     VariableItem* item;
 
     uint8_t size_count = COUNT_OF(image_sizes);
@@ -61,7 +61,7 @@ void mass_storage_scene_create_image_on_enter(void* context) {
         app->create_image_size = CLAMP(7, size_count - 2, 0); // 7 = 128MB
     }
     item = variable_item_list_add(
-        var_item_list,
+        variable_item_list,
         "Image Size",
         size_count,
         mass_storage_scene_create_image_image_size_changed,
@@ -69,21 +69,21 @@ void mass_storage_scene_create_image_on_enter(void* context) {
     variable_item_set_current_value_index(item, app->create_image_size);
     variable_item_set_current_value_text(item, image_sizes[app->create_image_size].name);
 
-    item = variable_item_list_add(var_item_list, "Image Name", 0, NULL, app);
+    item = variable_item_list_add(variable_item_list, "Image Name", 0, NULL, app);
     variable_item_set_current_value_text(item, app->create_image_name);
 
-    variable_item_list_add(var_item_list, "Create Image", 0, NULL, app);
+    variable_item_list_add(variable_item_list, "Create Image", 0, NULL, app);
 
     variable_item_list_set_enter_callback(
-        var_item_list, mass_storage_scene_create_image_var_item_list_callback, app);
+        variable_item_list, mass_storage_scene_create_image_variable_item_list_callback, app);
 
-    variable_item_list_set_header(var_item_list, "Create Disk Image");
+    variable_item_list_set_header(variable_item_list, "Create Disk Image");
 
     variable_item_list_set_selected_item(
-        var_item_list,
+        variable_item_list,
         scene_manager_get_scene_state(app->scene_manager, MassStorageSceneCreateImage));
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewVarItemList);
+    view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewStart);
 }
 
 static void popup_callback_ok(void* context) {
@@ -96,7 +96,7 @@ static void popup_callback_ok(void* context) {
 
 static void popup_callback_error(void* context) {
     MassStorageApp* app = context;
-    view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewVarItemList);
+    view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewStart);
 }
 
 bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent event) {
@@ -183,5 +183,5 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
 
 void mass_storage_scene_create_image_on_exit(void* context) {
     MassStorageApp* app = context;
-    variable_item_list_reset(app->var_item_list);
+    variable_item_list_reset(app->variable_item_list);
 }

@@ -25,6 +25,16 @@ static const uint8_t hid_azerty_keys_map[HID_KEYS_MAP_LENGTH] = {
     HID_KEYBOARD_U, HID_KEYBOARD_V, HID_KEYBOARD_Z,         HID_KEYBOARD_X, HID_KEYBOARD_Y,
     HID_KEYBOARD_W};
 
+static const uint8_t hid_qwertz_keys_map[HID_KEYS_MAP_LENGTH] = {
+    HID_KEYBOARD_0, HID_KEYBOARD_1, HID_KEYBOARD_2, HID_KEYBOARD_3, HID_KEYBOARD_4,
+    HID_KEYBOARD_5, HID_KEYBOARD_6, HID_KEYBOARD_7, HID_KEYBOARD_8, HID_KEYBOARD_9,
+    HID_KEYBOARD_A, HID_KEYBOARD_B, HID_KEYBOARD_C, HID_KEYBOARD_D, HID_KEYBOARD_E,
+    HID_KEYBOARD_F, HID_KEYBOARD_G, HID_KEYBOARD_H, HID_KEYBOARD_I, HID_KEYBOARD_J,
+    HID_KEYBOARD_K, HID_KEYBOARD_L, HID_KEYBOARD_M, HID_KEYBOARD_N, HID_KEYBOARD_O,
+    HID_KEYBOARD_P, HID_KEYBOARD_Q, HID_KEYBOARD_R, HID_KEYBOARD_S, HID_KEYBOARD_T,
+    HID_KEYBOARD_U, HID_KEYBOARD_V, HID_KEYBOARD_W, HID_KEYBOARD_X, HID_KEYBOARD_Z,
+    HID_KEYBOARD_Y};
+
 static uint32_t get_keystroke_delay(TokenAutomationFeature features) {
     if(features & TokenAutomationFeatureTypeSlower) {
         return 100;
@@ -70,10 +80,15 @@ void totp_type_code_worker_execute_automation(
     case AutomationKeyboardLayoutAZERTY:
         keyboard_layout_dict = &hid_azerty_keys_map[0];
         break;
+    case AutomationKeyboardLayoutQWERTZ:
+        keyboard_layout_dict = &hid_qwertz_keys_map[0];
+        break;
 
     default:
         return;
     }
+
+    uint32_t keystroke_delay = get_keystroke_delay(features);
 
     while(i < code_buffer_size && (cb_char = code_buffer[i]) != 0) {
         uint8_t char_index = CONVERT_CHAR_TO_DIGIT(cb_char);
@@ -92,18 +107,18 @@ void totp_type_code_worker_execute_automation(
         }
 
         totp_type_code_worker_press_key(hid_kb_key, key_press_fn, key_release_fn, features);
-        furi_delay_ms(get_keystroke_delay(features));
+        furi_delay_ms(keystroke_delay);
         i++;
     }
 
     if(features & TokenAutomationFeatureEnterAtTheEnd) {
-        furi_delay_ms(get_keystroke_delay(features));
+        furi_delay_ms(keystroke_delay);
         totp_type_code_worker_press_key(
             HID_KEYBOARD_RETURN, key_press_fn, key_release_fn, features);
     }
 
     if(features & TokenAutomationFeatureTabAtTheEnd) {
-        furi_delay_ms(get_keystroke_delay(features));
+        furi_delay_ms(keystroke_delay);
         totp_type_code_worker_press_key(HID_KEYBOARD_TAB, key_press_fn, key_release_fn, features);
     }
 }

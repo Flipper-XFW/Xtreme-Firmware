@@ -19,6 +19,7 @@
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/registry.h>
 #include "raw_samples.h"
+
 #include "helpers/radio_device_loader.h"
 
 #define TAG "ProtoView"

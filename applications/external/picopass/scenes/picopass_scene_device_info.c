@@ -25,32 +25,26 @@ void picopass_scene_device_info_on_enter(void* context) {
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
-    uint8_t csn[RFAL_PICOPASS_BLOCK_LEN] = {0};
-    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, RFAL_PICOPASS_BLOCK_LEN);
-    for(uint8_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
+    uint8_t csn[PICOPASS_BLOCK_LEN] = {0};
+    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
+    for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
         furi_string_cat_printf(csn_str, "%02X ", csn[i]);
     }
 
-    if(pacs->record.bitLength == 0 || pacs->record.bitLength == 255) {
+    if(pacs->bitLength == 0 || pacs->bitLength == 255) {
         // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
         furi_string_cat_printf(wiegand_str, "Invalid PACS");
     } else {
-        size_t bytesLength = pacs->record.bitLength / 8;
-        if(pacs->record.bitLength % 8 > 0) {
+        size_t bytesLength = pacs->bitLength / 8;
+        if(pacs->bitLength % 8 > 0) {
             // Add extra byte if there are bits remaining
             bytesLength++;
         }
         furi_string_set(credential_str, "");
-        for(uint8_t i = RFAL_PICOPASS_BLOCK_LEN - bytesLength; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
+        for(uint8_t i = PICOPASS_BLOCK_LEN - bytesLength; i < PICOPASS_BLOCK_LEN; i++) {
             furi_string_cat_printf(credential_str, "%02X", pacs->credential[i]);
         }
-
-        if(pacs->record.valid) {
-            furi_string_cat_printf(
-                wiegand_str, "FC: %u CN: %u", pacs->record.FacilityCode, pacs->record.CardNumber);
-        } else {
-            furi_string_cat_printf(wiegand_str, "%d bits", pacs->record.bitLength);
-        }
+        furi_string_cat_printf(wiegand_str, "%d bits", pacs->bitLength);
 
         if(pacs->sio) {
             furi_string_cat_printf(credential_str, " +SIO");

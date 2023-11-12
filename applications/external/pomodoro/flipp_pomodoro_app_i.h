@@ -29,4 +29,3 @@
 
 // Auto-compiled icons
 #include "flipp_pomodoro_icons.h"
-#include <assets_icons.h>

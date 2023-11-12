@@ -1,5 +1,6 @@
 #include "../picopass_i.h"
 #include <dolphin/dolphin.h>
+#include <picopass_keys.h>
 
 void picopass_scene_read_card_success_widget_callback(
     GuiButtonType result,
@@ -31,21 +32,26 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
-    uint8_t csn[RFAL_PICOPASS_BLOCK_LEN] = {0};
-    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, RFAL_PICOPASS_BLOCK_LEN);
-    for(uint8_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
+    uint8_t csn[PICOPASS_BLOCK_LEN] = {0};
+    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
+    for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
         furi_string_cat_printf(csn_str, "%02X", csn[i]);
     }
 
-    bool no_key = picopass_is_memset(pacs->key, 0x00, RFAL_PICOPASS_BLOCK_LEN);
+    // We can't test the pacs->key in case it is intentionally all 0's and we can't test the key block since it is populated with the diversified key before each key test, so we approximate with the PACS config block being blank.
+    bool no_key = picopass_is_memset(
+        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
     bool empty = picopass_is_memset(
-        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, RFAL_PICOPASS_BLOCK_LEN);
+        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
 
     if(no_key) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
+        bool hid_csn = picopass_device_hid_csn(picopass->dev);
 
         if(pacs->se_enabled) {
             furi_string_cat_printf(credential_str, "SE enabled");
+        } else if(!hid_csn) {
+            furi_string_cat_printf(credential_str, "Non-HID CSN");
         }
 
         widget_add_button_element(
@@ -62,7 +68,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             "Menu",
             picopass_scene_read_card_success_widget_callback,
             picopass);
-    } else if(pacs->record.bitLength == 0 || pacs->record.bitLength == 255) {
+    } else if(pacs->bitLength == 0 || pacs->bitLength == 255) {
         // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
         furi_string_cat_printf(wiegand_str, "Invalid PACS");
 
@@ -76,18 +82,12 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             picopass_scene_read_card_success_widget_callback,
             picopass);
     } else {
-        size_t bytesLength = 1 + pacs->record.bitLength / 8;
+        size_t bytesLength = 1 + pacs->bitLength / 8;
         furi_string_set(credential_str, "");
-        for(uint8_t i = RFAL_PICOPASS_BLOCK_LEN - bytesLength; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
+        for(uint8_t i = PICOPASS_BLOCK_LEN - bytesLength; i < PICOPASS_BLOCK_LEN; i++) {
             furi_string_cat_printf(credential_str, "%02X", pacs->credential[i]);
         }
-
-        if(pacs->record.valid) {
-            furi_string_cat_printf(
-                wiegand_str, "FC: %u CN: %u", pacs->record.FacilityCode, pacs->record.CardNumber);
-        } else {
-            furi_string_cat_printf(wiegand_str, "%d bits", pacs->record.bitLength);
-        }
+        furi_string_cat_printf(wiegand_str, "%d bits", pacs->bitLength);
 
         if(pacs->sio) {
             furi_string_cat_printf(credential_str, " +SIO");
@@ -95,11 +95,24 @@ void picopass_scene_read_card_success_on_enter(void* context) {
 
         if(pacs->key) {
             furi_string_cat_printf(key_str, "Key: ");
+            uint8_t key[PICOPASS_BLOCK_LEN];
+            memcpy(key, &pacs->key, PICOPASS_BLOCK_LEN);
 
-            uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
-            memcpy(key, &pacs->key, RFAL_PICOPASS_BLOCK_LEN);
-            for(uint8_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
-                furi_string_cat_printf(key_str, "%02X", key[i]);
+            bool standard_key = true;
+            // Handle DES key being 56bits with parity in LSB
+            for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+                if((key[i] & 0xFE) != (picopass_iclass_key[i] & 0xFE)) {
+                    standard_key = false;
+                    break;
+                }
+            }
+
+            if(standard_key) {
+                furi_string_cat_printf(key_str, "Standard");
+            } else {
+                for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+                    furi_string_cat_printf(key_str, "%02X", key[i]);
+                }
             }
         }
 

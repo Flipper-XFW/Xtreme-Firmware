@@ -7,6 +7,7 @@ App(
         "gui",
     ],
     stack_size=4 * 1024,
+    order=20,
     fap_icon="zero_tracker.png",
     fap_category="Media",
     fap_author="@DrZlo13",

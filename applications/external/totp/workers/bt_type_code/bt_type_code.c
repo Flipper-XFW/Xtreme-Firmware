@@ -19,6 +19,8 @@
 #define TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
 #endif
 
+#define HID_BT_KEYS_STORAGE_PATH CONFIG_FILE_DIRECTORY_PATH "/.bt_hid.keys"
+
 struct TotpBtTypeCodeWorkerContext {
     char* code_buffer;
     uint8_t code_buffer_size;
@@ -162,7 +164,7 @@ TotpBtTypeCodeWorkerContext* totp_bt_type_code_worker_init() {
     bt_disconnect(context->bt);
     furi_hal_bt_reinit();
     furi_delay_ms(200);
-    bt_keys_storage_set_storage_path(context->bt, TOTP_BT_KEYS_STORAGE_PATH);
+    bt_keys_storage_set_storage_path(context->bt, HID_BT_KEYS_STORAGE_PATH);
 
 #if TOTP_TARGET_FIRMWARE == TOTP_FIRMWARE_XTREME_UL
     memcpy(

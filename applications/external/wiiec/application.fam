@@ -16,6 +16,7 @@ App(
     # 	sdk_headers="",
     # --- Run-time info
     stack_size=2 * 1024,
+    order=20,
     # --- FAP details
     sources=["wii_*.c", "gfx/*.c"],
     # 	fap_weburl="https://github.com/csBlueChip/FlipperZero_plugin_WiiChuck/",

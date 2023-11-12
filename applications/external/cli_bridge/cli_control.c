@@ -12,6 +12,7 @@ volatile bool gotCallbackSet = false;
 FuriStreamBuffer* tx_stream;
 FuriStreamBuffer* rx_stream;
 static FuriThread* volatile cliThread = NULL;
+static FuriThread* prev_appthread = NULL;
 static void tx_handler_stdout(const char* buffer, size_t size) {
     furi_stream_buffer_send(tx_stream, buffer, size, FuriWaitForever);
 }
@@ -72,6 +73,11 @@ void latch_tx_handler() {
     session.is_connected = &session_connected;
     cli_session_close(global_cli);
     cli_session_open(global_cli, &session);
+    // Unlock loader-lock
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    prev_appthread = loader->app.thread;
+    loader->app.thread = NULL;
+    furi_record_close(RECORD_LOADER);
     furi_record_close(RECORD_CLI);
 }
 void unlatch_tx_handler(bool persist) {
@@ -101,4 +107,8 @@ void unlatch_tx_handler(bool persist) {
     // At this point, all cli_vcp functions should be back.
     furi_stream_buffer_free(rx_stream);
     furi_stream_buffer_free(tx_stream);
+    // Re-lock loader (to avoid crash on automatic unlock)
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    loader->app.thread = prev_appthread;
+    furi_record_close(RECORD_LOADER);
 }

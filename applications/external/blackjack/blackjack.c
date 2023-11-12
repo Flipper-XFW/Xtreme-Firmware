@@ -15,7 +15,6 @@
 #include "ui.h"
 
 #include "blackjack_icons.h"
-#include <assets_icons.h>
 
 #define DEALER_MAX 17
 
@@ -34,9 +33,12 @@ static void draw_ui(Canvas* const canvas, const GameState* game_state) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    furi_assert(ctx);
     const GameState* game_state = ctx;
-    furi_mutex_acquire(game_state->mutex, FuriWaitForever);
+    furi_mutex_acquire(game_state->mutex, 25);
+
+    if(game_state == NULL) {
+        return;
+    }
 
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -177,6 +179,7 @@ void lose(void* ctx) {
 }
 
 void win(void* ctx) {
+    dolphin_deed(DolphinDeedPluginGameWin);
     GameState* game_state = ctx;
     game_state->state = GameStatePlay;
     game_state->player_score += game_state->bet * 2;
@@ -277,7 +280,6 @@ void dealer_tick(GameState* game_state) {
 
     if(dealer_score >= DEALER_MAX) {
         if(dealer_score > 21 || dealer_score < player_score) {
-            dolphin_deed(DolphinDeedPluginGameWin);
             enqueue(
                 &(game_state->queue_state),
                 game_state,
@@ -540,7 +542,7 @@ int32_t blackjack_app(void* p) {
     int32_t return_code = 0;
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(AppEvent));
-
+    dolphin_deed(DolphinDeedPluginGameStart);
     GameState* game_state = malloc(sizeof(GameState));
     game_state->menu = malloc(sizeof(Menu));
     game_state->menu->menu_width = 40;
@@ -570,9 +572,6 @@ int32_t blackjack_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     AppEvent event;
-
-    // Call dolphin deed on game start
-    dolphin_deed(DolphinDeedPluginGameStart);
 
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
@@ -612,8 +611,9 @@ int32_t blackjack_app(void* p) {
                 processing = game_state->processing;
             }
         }
-        view_port_update(view_port);
+
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);

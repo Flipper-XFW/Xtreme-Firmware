@@ -19,6 +19,7 @@
 #include "scenes/esubghz_chat_scene.h"
 
 #include "esubghz_chat_icons.h"
+
 #include <assets_icons.h>
 
 #define APPLICATION_NAME "ESubGhzChat"
@@ -89,6 +90,9 @@ typedef struct {
     bool kbd_ok_input_ongoing;
     bool kbd_left_input_ongoing;
     bool kbd_right_input_ongoing;
+
+    // for background support
+    bool exit_for_real;
 } ESubGhzChatState;
 
 typedef enum {

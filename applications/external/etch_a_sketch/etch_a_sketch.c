@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "etch_icons.h"
-#include <assets_icons.h>
 
 #define WIDTH 64
 #define HEIGHT 32

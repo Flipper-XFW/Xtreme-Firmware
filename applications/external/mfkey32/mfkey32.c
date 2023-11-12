@@ -13,14 +13,13 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include "mfkey32_icons.h"
-#include <assets_icons.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <storage/storage.h>
-#include <lib/nfc/helpers/mf_classic_dict.h>
+#include <toolbox/stream/buffered_file_stream.h>
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <dolphin/dolphin.h>
@@ -124,10 +123,15 @@ typedef struct {
     size_t remaining_nonces;
 } MfClassicNonceArray;
 
-struct MfClassicDict {
+typedef enum {
+    MfClassicDictTypeSystem,
+    MfClassicDictTypeUser,
+} MfClassicDictType;
+
+typedef struct {
     Stream* stream;
     uint32_t total_keys;
-};
+} MfClassicDict;
 
 static const uint8_t table[256] = {
     0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3,
@@ -1333,8 +1337,8 @@ int32_t mfkey32_main() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(program_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_thread_free(program_state->mfkeythread);

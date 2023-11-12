@@ -16,11 +16,11 @@ void subbrute_scene_load_file_on_enter(void* context) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, SUBBRUTE_FILE_EXT, &I_sub1_10px);
 
-    SubBruteFileResult load_result = SubBruteFileResultUnknown;
+    SubBruteFileResult load_result;
     // TODO: DELETE IT
 #ifdef SUBBRUTE_FAST_TRACK
     bool res = true;
-    furi_string_printf(load_path, "%s", EXT_PATH("subghz/princeton.sub"));
+    furi_string_printf(load_path, "%s", "/ext/subghz/princeton.sub");
 #else
     bool res =
         dialog_file_browser_show(instance->dialogs, load_path, app_folder, &browser_options);
@@ -38,7 +38,7 @@ void subbrute_scene_load_file_on_enter(void* context) {
         if(load_result == SubBruteFileResultOk) {
             instance->settings->last_index = SubBruteAttackLoadFile;
             subbrute_settings_set_repeats(
-                instance->settings, subbrute_main_view_get_extra_repeats(instance->view_main));
+                instance->settings, subbrute_main_view_get_repeats(instance->view_main));
             uint8_t extra_repeats = subbrute_settings_get_current_repeats(instance->settings);
 
             load_result = subbrute_device_attack_set(

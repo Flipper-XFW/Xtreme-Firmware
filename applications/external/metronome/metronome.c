@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
+#include <core/string.h>
 #include <stdlib.h>
 
 #include <gui/gui.h>
@@ -269,6 +270,7 @@ static void metronome_state_init(MetronomeState* const metronome_state) {
     metronome_state->current_beat = 0;
     metronome_state->output_mode = Loud;
     metronome_state->notifications = furi_record_open(RECORD_NOTIFICATION);
+    metronome_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
 int32_t metronome_app() {
@@ -277,7 +279,6 @@ int32_t metronome_app() {
     MetronomeState* metronome_state = malloc(sizeof(MetronomeState));
     metronome_state_init(metronome_state);
 
-    metronome_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!metronome_state->mutex) {
         FURI_LOG_E("Metronome", "cannot create mutex\r\n");
         free(metronome_state);
@@ -380,8 +381,8 @@ int32_t metronome_app() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(metronome_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);
@@ -389,9 +390,9 @@ int32_t metronome_app() {
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    furi_mutex_free(metronome_state->mutex);
     furi_timer_free(metronome_state->timer);
     furi_record_close(RECORD_NOTIFICATION);
+    furi_mutex_free(metronome_state->mutex);
     free(metronome_state);
 
     return 0;

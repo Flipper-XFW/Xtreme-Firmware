@@ -4,6 +4,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include "flipchess_icons.h"
+
 #include <assets_icons.h>
 
 struct FlipChessStartscreen {

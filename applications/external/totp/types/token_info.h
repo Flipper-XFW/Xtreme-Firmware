@@ -15,12 +15,19 @@
 #define TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END_NAME "enter"
 #define TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME "tab"
 #define TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME "slower"
+#define TOKEN_TYPE_TOTP_NAME "totp"
+#define TOKEN_TYPE_HOTP_NAME "hotp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef uint8_t TokenHashAlgo;
 typedef uint8_t TokenDigitsCount;
 typedef uint8_t TokenDuration;
 typedef uint8_t TokenAutomationFeature;
 typedef uint8_t PlainTokenSecretEncoding;
+typedef uint8_t TokenType;
 
 /**
  * @brief Hashing algorithm to be used to generate token
@@ -144,6 +151,22 @@ enum PlainTokenSecretEncodings {
 };
 
 /**
+ * @brief Token types
+ */
+enum TokenTypes {
+
+    /**
+     * @brief Time-based One-time Password token type
+     */
+    TokenTypeTOTP = 0,
+
+    /**
+     * @brief HMAC-Based One-Time Password token type
+     */
+    TokenTypeHOTP = 1
+};
+
+/**
  * @brief TOTP token information
  */
 typedef struct {
@@ -181,6 +204,16 @@ typedef struct {
      * @brief Token input automation features
      */
     TokenAutomationFeature automation_features;
+
+    /**
+     * @brief Token type
+     */
+    TokenType type;
+
+    /**
+     * @brief HOTP counter
+     */
+    uint64_t counter;
 } TokenInfo;
 
 /**
@@ -244,8 +277,8 @@ bool token_info_set_algo_from_str(TokenInfo* token_info, const FuriString* str);
 bool token_info_set_algo_from_int(TokenInfo* token_info, uint8_t algo_code);
 
 /**
- * @brief Gets token hahsing algorithm name as C-string
- * @param token_info instance which token hahsing algorithm name should be returned
+ * @brief Gets token hashing algorithm name as C-string
+ * @param token_info instance which token hashing algorithm name should be returned
  * @return token hashing algorithm name as C-string
  */
 const char* token_info_get_algo_as_cstr(const TokenInfo* token_info);
@@ -259,6 +292,29 @@ const char* token_info_get_algo_as_cstr(const TokenInfo* token_info);
 bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const FuriString* str);
 
 /**
+ * @brief Sets token type from \c str value
+ * @param token_info instance whichs token type should be updated
+ * @param str desired token type
+ * @return \c true if token type has been set; \c false otherwise
+ */
+bool token_info_set_token_type_from_str(TokenInfo* token_info, const FuriString* str);
+
+/**
+ * @brief Gets token type as C-string
+ * @param token_info instance which token type should be returned
+ * @return token type as C-string
+ */
+const char* token_info_get_type_as_cstr(const TokenInfo* token_info);
+
+/**
+ * @brief Sets token counter from \c str value
+ * @param token_info instance whichs token counter should be updated
+ * @param str desired token counter
+ * @return \c true if token counter has been set; \c false otherwise
+ */
+bool token_info_set_token_counter_from_str(TokenInfo* token_info, const FuriString* str);
+
+/**
  * @brief Clones \c TokenInfo instance
  * @param src instance to clone
  * @return cloned instance
@@ -270,3 +326,7 @@ TokenInfo* token_info_clone(const TokenInfo* src);
  * @param token_info instance to set defaults to
  */
 void token_info_set_defaults(TokenInfo* token_info);
+
+#ifdef __cplusplus
+}
+#endif

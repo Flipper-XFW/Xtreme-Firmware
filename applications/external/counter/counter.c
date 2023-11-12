@@ -2,8 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include "counter_icons.h"
-#include <assets_icons.h>
+#include <counter_icons.h>
 
 #define MAX_COUNT 99
 #define BOXTIME 2

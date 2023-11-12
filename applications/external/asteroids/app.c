@@ -13,8 +13,7 @@
 #include <math.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include "asteroids_icons.h"
-#include <assets_icons.h>
+#include <asteroids_icons.h>
 
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 0
@@ -29,7 +28,8 @@
 #define MAXPOWERUPS 3 /* Max powerups allowed on screen */
 #define POWERUPSTTL 400 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
-#define SAVING_FILENAME APP_DATA_PATH("game_asteroids.save")
+#define SAVING_DIRECTORY STORAGE_APP_DATA_PATH_PREFIX
+#define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
 #ifndef PI
 #define PI 3.14159265358979f
 #endif

@@ -8,7 +8,6 @@
 #include <stdlib.h>
 
 #include "wire_tester_icons.h"
-#include <assets_icons.h>
 
 //#define TAG "wire_tester"
 
@@ -91,6 +90,7 @@ int32_t app_main(void* p) {
                 running = false;
             }
         }
+        view_port_update(view_port);
     }
 
     // return control of the LED, beeper, and backlight

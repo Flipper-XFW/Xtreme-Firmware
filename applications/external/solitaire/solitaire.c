@@ -5,7 +5,6 @@
 #include "defines.h"
 #include "common/ui.h"
 #include "solitaire_icons.h"
-#include <assets_icons.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 void init(GameState* game_state);
@@ -554,8 +553,8 @@ int32_t solitaire_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     notification_message_block(notification, &sequence_display_backlight_enforce_auto);

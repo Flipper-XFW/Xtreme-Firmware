@@ -78,7 +78,10 @@ bool esp_flasher_scene_start_on_event(void* context, SceneManagerEvent event) {
     EspFlasherApp* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexEspFlasherQuickFlash) {
+        if(event.event == SubmenuIndexEspFlasherAbout) {
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneAbout);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEspFlasherQuickFlash) {
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneQuick);
             consumed = true;
         } else if(event.event == SubmenuIndexEspFlasherSwitchA) {
@@ -103,9 +106,6 @@ bool esp_flasher_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexEspFlasherBootloader) {
             app->boot = true;
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
-            consumed = true;
-        } else if(event.event == SubmenuIndexEspFlasherAbout) {
-            scene_manager_next_scene(app->scene_manager, EspFlasherSceneAbout);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneStart, event.event);

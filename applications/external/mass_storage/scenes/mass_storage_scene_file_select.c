@@ -28,6 +28,7 @@ void mass_storage_scene_file_select_on_enter(void* context) {
 bool mass_storage_scene_file_select_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
+    // MassStorageApp* mass_storage = context;
     return false;
 }
 

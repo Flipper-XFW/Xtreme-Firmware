@@ -16,12 +16,13 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
 
-#include "esp_flasher_icons.h"
-#include <assets_icons.h>
+#include <esp_flasher_icons.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
+
+#include <assets_icons.h>
 
 #define ESP_FLASHER_TEXT_BOX_STORE_SIZE (4096)
 

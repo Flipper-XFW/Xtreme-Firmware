@@ -6,6 +6,7 @@ App(
     cdefines=["APP_ETCH_A_SKETCH"],
     requires=["gui"],
     stack_size=2 * 1024,
+    order=175,
     fap_icon="etch-a-sketch-icon.png",
     fap_category="Media",
     fap_icon_assets="assets",

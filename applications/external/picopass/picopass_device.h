@@ -12,6 +12,13 @@
 #include <optimized_cipher.h>
 #include "helpers/iclass_elite_dict.h"
 
+#define LOCLASS_NUM_CSNS 9
+#ifndef LOCLASS_NUM_PER_CSN
+// Collect 2 MACs per CSN to account for keyroll modes by default
+#define LOCLASS_NUM_PER_CSN 2
+#endif
+#define LOCLASS_MACS_TO_COLLECT (LOCLASS_NUM_CSNS * LOCLASS_NUM_PER_CSN)
+
 #define PICOPASS_DEV_NAME_MAX_LEN 22
 #define PICOPASS_READER_DATA_MAX_SIZE 64
 #define PICOPASS_MAX_APP_LIMIT 32
@@ -38,8 +45,9 @@
 // Read Access, 1 meanns anonymous read enabled, 0 means must auth to read applicaion
 #define PICOPASS_FUSE_RA 0x01
 
-#define PICOPASS_APP_FOLDER EXT_PATH("picopass")
+#define PICOPASS_APP_FOLDER ANY_PATH("picopass")
 #define PICOPASS_APP_EXTENSION ".picopass"
+#define PICOPASS_APP_FILE_PREFIX "Picopass"
 #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
 #define PICOPASS_DICT_KEY_BATCH_SIZE 10
@@ -69,14 +77,8 @@ typedef enum {
     PicopassEmulatorStateIdle,
     PicopassEmulatorStateActive,
     PicopassEmulatorStateSelected,
+    PicopassEmulatorStateStopEmulation,
 } PicopassEmulatorState;
-
-typedef struct {
-    bool valid;
-    uint8_t bitLength;
-    uint8_t FacilityCode;
-    uint16_t CardNumber;
-} PicopassWiegandRecord;
 
 typedef struct {
     bool legacy;
@@ -87,20 +89,19 @@ typedef struct {
     bool elite_kdf;
     uint8_t pin_length;
     PicopassEncryption encryption;
+    uint8_t bitLength;
     uint8_t credential[8];
     uint8_t pin0[8];
     uint8_t pin1[8];
-    PicopassWiegandRecord record;
 } PicopassPacs;
 
 typedef struct {
-    uint8_t data[RFAL_PICOPASS_BLOCK_LEN];
+    uint8_t data[PICOPASS_BLOCK_LEN];
 } PicopassBlock;
 
 typedef struct {
     PicopassBlock AA1[PICOPASS_MAX_APP_LIMIT];
     PicopassPacs pacs;
-    IclassEliteDictAttackData iclass_elite_dict_attack_data;
 } PicopassDeviceData;
 
 typedef struct {
@@ -109,6 +110,7 @@ typedef struct {
     uint8_t key_block_num; // in loclass mode used to store csn#
     bool loclass_mode;
     bool loclass_got_std_key;
+    uint8_t loclass_mac_buffer[8 * LOCLASS_NUM_PER_CSN];
     LoclassWriter* loclass_writer;
 } PicopassEmulatorCtx;
 
@@ -144,5 +146,6 @@ void picopass_device_set_loading_callback(
     PicopassLoadingCallback callback,
     void* context);
 
-ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs);
-ReturnCode picopass_device_parse_wiegand(uint8_t* data, PicopassWiegandRecord* record);
+void picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs);
+void picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs);
+bool picopass_device_hid_csn(PicopassDevice* dev);

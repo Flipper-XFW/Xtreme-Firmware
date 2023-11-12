@@ -1,10 +1,15 @@
 #include "token_info.h"
 #include <furi/core/check.h>
 #include <base32.h>
-#include <base64.h>
+#include "../../config/wolfssl/config.h"
+#include <wolfssl/wolfcrypt/coding.h>
 #include <memset_s.h>
+#include <inttypes.h>
 #include "common.h"
 #include "../services/crypto/crypto_facade.h"
+
+#define ESTIMATE_BASE32_PLAIN_LENGTH(base32_length) ((base32_length)*0.625f)
+#define ESTIMATE_BASE64_PLAIN_LENGTH(base64_length) ((base64_length)*0.75f)
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
@@ -32,19 +37,23 @@ bool token_info_set_secret(
     size_t plain_secret_length;
     size_t plain_secret_size;
     if(plain_token_secret_encoding == PlainTokenSecretEncodingBase32) {
-        plain_secret_size = token_secret_length;
+        plain_secret_size = ESTIMATE_BASE32_PLAIN_LENGTH(token_secret_length);
         plain_secret = malloc(plain_secret_size);
         furi_check(plain_secret != NULL);
         plain_secret_length =
             base32_decode((const uint8_t*)plain_token_secret, plain_secret, plain_secret_size);
     } else if(plain_token_secret_encoding == PlainTokenSecretEncodingBase64) {
-        plain_secret_length = 0;
-        plain_secret = base64_decode(
-            (const uint8_t*)plain_token_secret,
-            token_secret_length,
-            &plain_secret_length,
-            &plain_secret_size);
+        plain_secret_size = ESTIMATE_BASE64_PLAIN_LENGTH(token_secret_length);
+        plain_secret_length = plain_secret_size;
+        plain_secret = malloc(plain_secret_size);
         furi_check(plain_secret != NULL);
+        if(Base64_Decode(
+               (const uint8_t*)plain_token_secret,
+               token_secret_length,
+               plain_secret,
+               &plain_secret_length) != 0) {
+            plain_secret_length = 0;
+        }
     } else {
         return false;
     }
@@ -183,6 +192,37 @@ bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const Fur
     return false;
 }
 
+bool token_info_set_token_type_from_str(TokenInfo* token_info, const FuriString* str) {
+    if(furi_string_cmpi_str(str, TOKEN_TYPE_TOTP_NAME) == 0) {
+        token_info->type = TokenTypeTOTP;
+        return true;
+    }
+
+    if(furi_string_cmpi_str(str, TOKEN_TYPE_HOTP_NAME) == 0) {
+        token_info->type = TokenTypeHOTP;
+        return true;
+    }
+
+    return false;
+}
+
+const char* token_info_get_type_as_cstr(const TokenInfo* token_info) {
+    switch(token_info->type) {
+    case TokenTypeTOTP:
+        return TOKEN_TYPE_TOTP_NAME;
+    case TokenTypeHOTP:
+        return TOKEN_TYPE_HOTP_NAME;
+    default:
+        break;
+    }
+
+    return NULL;
+}
+
+bool token_info_set_token_counter_from_str(TokenInfo* token_info, const FuriString* str) {
+    return sscanf(furi_string_get_cstr(str), "%" PRIu64, &token_info->counter) == 1;
+}
+
 TokenInfo* token_info_clone(const TokenInfo* src) {
     TokenInfo* clone = token_info_alloc();
     memcpy(clone, src, sizeof(TokenInfo));
@@ -203,5 +243,7 @@ void token_info_set_defaults(TokenInfo* token_info) {
     token_info->digits = TokenDigitsCountDefault;
     token_info->duration = TokenDurationDefault;
     token_info->automation_features = TokenAutomationFeatureNone;
+    token_info->type = TokenTypeTOTP;
+    token_info->counter = 0;
     furi_string_reset(token_info->name);
 }

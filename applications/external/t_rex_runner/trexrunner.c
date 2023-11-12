@@ -9,7 +9,6 @@
 #include <stdio.h>
 
 #include "t_rex_runner_icons.h"
-#include <assets_icons.h>
 
 #define DINO_START_X 10
 #define DINO_START_Y 34 // 64 - 22 - BACKGROUND_H / 2 - 2
@@ -272,8 +271,9 @@ int32_t trexrunner_app() {
                 }
             }
         }
-        view_port_update(view_port);
+
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);

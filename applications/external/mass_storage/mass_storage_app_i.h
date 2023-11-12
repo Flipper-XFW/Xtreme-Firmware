@@ -8,15 +8,16 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/submenu.h>
 #include <dialogs/dialogs.h>
 #include <gui/modules/variable_item_list.h>
-#include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
-#include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
+#include <gui/modules/popup.h>
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
 #include <mass_storage_icons.h>
+
 #include <assets_icons.h>
 
 #define MASS_STORAGE_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
@@ -28,11 +29,10 @@ struct MassStorageApp {
     Storage* fs_api;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
-    DialogsApp* dialogs;
-    VariableItemList* var_item_list;
-    Submenu* submenu;
-    TextInput* text_input;
     Popup* popup;
+    DialogsApp* dialogs;
+    TextInput* text_input;
+    VariableItemList* variable_item_list;
     Loading* loading;
 
     FuriString* file_path;
@@ -50,12 +50,11 @@ struct MassStorageApp {
 };
 
 typedef enum {
-    MassStorageAppViewVarItemList,
-    MassStorageAppViewSubmenu,
+    MassStorageAppViewStart,
     MassStorageAppViewTextInput,
-    MassStorageAppViewPopup,
-    MassStorageAppViewLoading,
     MassStorageAppViewWork,
+    MassStorageAppViewLoading,
+    MassStorageAppViewPopup,
 } MassStorageAppView;
 
 enum MassStorageCustomEvent {

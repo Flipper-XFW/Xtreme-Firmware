@@ -84,27 +84,23 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         MassStorageAppViewWork,
         mass_storage_get_view(app->mass_storage_view));
 
-    app->var_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        MassStorageAppViewVarItemList,
-        variable_item_list_get_view(app->var_item_list));
-
-    app->submenu = submenu_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, MassStorageAppViewSubmenu, submenu_get_view(app->submenu));
-
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, MassStorageAppViewTextInput, text_input_get_view(app->text_input));
 
-    app->popup = popup_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, MassStorageAppViewPopup, popup_get_view(app->popup));
-
     app->loading = loading_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, MassStorageAppViewLoading, loading_get_view(app->loading));
+
+    app->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        MassStorageAppViewStart,
+        variable_item_list_get_view(app->variable_item_list));
+
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewPopup, popup_get_view(app->popup));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -124,18 +120,16 @@ void mass_storage_app_free(MassStorageApp* app) {
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewWork);
-    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewVarItemList);
-    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewSubmenu);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewTextInput);
-    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewPopup);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewStart);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewLoading);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewPopup);
 
     mass_storage_free(app->mass_storage_view);
-    variable_item_list_free(app->var_item_list);
-    submenu_free(app->submenu);
     text_input_free(app->text_input);
-    popup_free(app->popup);
+    variable_item_list_free(app->variable_item_list);
     loading_free(app->loading);
+    popup_free(app->popup);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

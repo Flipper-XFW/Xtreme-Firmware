@@ -7,6 +7,7 @@ App(
         "gui",
     ],
     stack_size=3 * 1024,
+    order=10,
     fap_icon="flipbip_10px.png",
     fap_private_libs=[
         Lib(

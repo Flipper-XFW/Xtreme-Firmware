@@ -117,7 +117,6 @@ void brainfuck_free(BFApp* brainfuck) {
 
 void brainfuck_show_loading_popup(void* context, bool show) {
     BFApp* brainfuck = context;
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
 
     if(show) {
         // Raise timer priority so that animations can play

@@ -5,7 +5,8 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <gui/icon_animation.h>
-#include "subghz_bruteforcer_icons.h"
+#include <subghz_bruteforcer_icons.h>
+
 #include <assets_icons.h>
 
 #define TAG "SubBruteAttackView"
@@ -145,7 +146,7 @@ SubBruteAttackView* subbrute_attack_view_alloc() {
             model->icon = icon_animation_alloc(&A_Sub1ghz_14);
             view_tie_icon_animation(instance->view, model->icon);
         },
-        true);
+        false);
 
     view_set_draw_callback(instance->view, (ViewDrawCallback)subbrute_attack_view_draw);
     view_set_input_callback(instance->view, subbrute_attack_view_input);
@@ -162,18 +163,20 @@ SubBruteAttackView* subbrute_attack_view_alloc() {
 
 void subbrute_attack_view_enter(void* context) {
     furi_assert(context);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_attack_view_enter");
-#endif
+    SubBruteAttackView* instance = context;
+    with_view_model(
+        instance->view,
+        SubBruteAttackViewModel * model,
+        {
+            if(model->is_attacking) {
+                icon_animation_start(model->icon);
+            }
+        },
+        true);
 }
 
 void subbrute_attack_view_free(SubBruteAttackView* instance) {
     furi_assert(instance);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_attack_view_free");
-#endif
 
     with_view_model(
         instance->view,
@@ -327,7 +330,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             canvas, x - icon_width_with_offset, y - icon_v_offset, model->icon);
         // Progress bar
         // Resolution: 128x64 px
-        float progress_value = (float)model->current_step / model->max_value;
+        float progress_value = (float)model->current_step / (float)model->max_value;
         elements_progress_bar(canvas, 8, 37, 110, progress_value > 1 ? 1 : progress_value);
 
         snprintf(

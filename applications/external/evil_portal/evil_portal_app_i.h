@@ -5,7 +5,6 @@
 #include "evil_portal_uart.h"
 #include "scenes/evil_portal_scene.h"
 #include "evil_portal_icons.h"
-#include <assets_icons.h>
 
 #include <gui/gui.h>
 #include <gui/modules/loading.h>

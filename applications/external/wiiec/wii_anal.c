@@ -473,14 +473,14 @@ int32_t wii_ec_anal(void) {
                 break;
             }
 
-            // *** Update the GUI screen via the viewport ***
-            view_port_update(vpp);
-
             // *** Try to release the plugin state variables ***
             if(furi_mutex_release(state->mutex) != FuriStatusOk) {
                 ERROR(wii_errs[(error = ERR_MUTEX_RELEASE)]);
                 goto bail;
             }
+
+            // *** Update the GUI screen via the viewport ***
+            view_port_update(vpp);
         } while(state->run);
 
     // ===== Game Over =====

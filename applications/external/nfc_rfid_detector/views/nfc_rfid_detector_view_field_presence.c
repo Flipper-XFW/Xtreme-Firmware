@@ -1,6 +1,7 @@
 #include "nfc_rfid_detector_view_field_presence.h"
 #include "../nfc_rfid_detector_app_i.h"
-#include "nfc_rfid_detector_icons.h"
+#include <nfc_rfid_detector_icons.h>
+
 #include <assets_icons.h>
 
 #include <input/input.h>
