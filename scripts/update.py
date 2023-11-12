@@ -139,10 +139,7 @@ class Main(App):
             SlideshowMain(no_exit=True)(
                 [
                     "-i",
-                    str(
-                        pathlib.Path(self.args.resources).parent
-                        / "slideshow/xfwfirstboot"
-                    ),
+                    str(pathlib.Path(self.args.resources) / "../../../assets/slideshow/xfwfirstboot"),
                     "-o",
                     str(pathlib.Path(self.args.resources) / "dolphin/xfwfirstboot.bin"),
                 ]
