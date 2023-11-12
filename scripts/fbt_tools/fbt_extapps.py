@@ -296,7 +296,16 @@ def _validate_app_imports(target, source, env):
             (
                 "totp_",
                 "app_api_accumulator_",
+                "token_info_",
+                "memset_s",
             )
+        )
+        and any(
+            prefix in source[0].path
+            for prefix in [
+                "advanced_plugin",
+                "totp_",
+            ]
         )
     ]
     for sym in ignore_syms:
