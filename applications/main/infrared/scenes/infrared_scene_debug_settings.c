@@ -1,4 +1,4 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 #include <furi_hal_infrared.h>
 
 uint8_t value_index_ir;
@@ -35,12 +35,12 @@ static void infrared_scene_debug_settings_power_changed(VariableItem* item) {
 }
 
 static void infrared_debug_settings_start_var_list_enter_callback(void* context, uint32_t index) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(infrared->view_dispatcher, index);
 }
 
 void infrared_scene_debug_settings_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
 
     VariableItemList* variable_item_list = infrared->variable_item_list;
 
@@ -72,7 +72,7 @@ void infrared_scene_debug_settings_on_enter(void* context) {
 }
 
 bool infrared_scene_debug_settings_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     UNUSED(infrared);
     UNUSED(event);
 
@@ -80,6 +80,6 @@ bool infrared_scene_debug_settings_on_event(void* context, SceneManagerEvent eve
 }
 
 void infrared_scene_debug_settings_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     variable_item_list_reset(infrared->variable_item_list);
 }

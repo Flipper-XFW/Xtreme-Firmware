@@ -189,7 +189,7 @@ static uint8_t get_row_size(const Keyboard* keyboard, uint8_t row_index) {
             row_size = COUNT_OF(symbol_keyboard_keys_row_3);
             break;
         default:
-            furi_crash(NULL);
+            furi_crash();
         }
     } else {
         switch(row_index + 1) {
@@ -203,7 +203,7 @@ static uint8_t get_row_size(const Keyboard* keyboard, uint8_t row_index) {
             row_size = COUNT_OF(keyboard_keys_row_3);
             break;
         default:
-            furi_crash(NULL);
+            furi_crash();
         }
     }
 
@@ -215,7 +215,7 @@ static const TextInputKey* get_row(const Keyboard* keyboard, uint8_t row_index) 
     if(row_index < 3) {
         row = keyboard->rows[row_index];
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 
     return row;

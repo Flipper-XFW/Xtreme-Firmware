@@ -13,7 +13,7 @@ struct DesktopMainView {
     View* view;
     DesktopMainViewCallback callback;
     void* context;
-    TimerHandle_t _poweroff_timer; // Unused, kept for compatibility
+    FuriTimer* _poweroff_timer; // Unused, kept for compatibility
     bool _dummy_mode; // Unused, kept for compatibility
 };
 
