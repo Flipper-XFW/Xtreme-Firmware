@@ -10,7 +10,7 @@ const char* const infrared_debug_cfg_variables_text[] = {
 };
 
 static void infrared_scene_debug_settings_changed(VariableItem* item) {
-    Infrared* infrared = variable_item_get_context(item);
+    InfraredApp* infrared = variable_item_get_context(item);
     value_index_ir = variable_item_get_current_value_index(item);
     UNUSED(infrared);
 
