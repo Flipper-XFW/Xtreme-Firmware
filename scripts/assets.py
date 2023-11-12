@@ -104,9 +104,7 @@ class Main(App):
         self.parser_packs = self.subparsers.add_parser(
             "packs", help="Assemble asset packs"
         )
-        self.parser_packs.add_argument(
-            "input_directory", help="Packs source directory"
-        )
+        self.parser_packs.add_argument("input_directory", help="Packs source directory")
         self.parser_packs.add_argument(
             "output_directory", help="Packs output directory"
         )
