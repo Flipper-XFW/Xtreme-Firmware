@@ -169,8 +169,7 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
         view_state == DesktopViewLockedStateCoverOpening &&
         !desktop_view_locked_cover_move(model, false)) {
         model->view_state = DesktopViewLockedStateUnlocked;
-        xTimerChangePeriod(
-            locked_view->timer, pdMS_TO_TICKS(UNLOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
+        furi_timer_start(locked_view->timer, LOCKED_HINT_TIMEOUT_MS);
     } else if(view_state == DesktopViewLockedStateLockedHintShown) {
         model->view_state = DesktopViewLockedStateLocked;
     } else if(view_state == DesktopViewLockedStateUnlockedHintShown) {
