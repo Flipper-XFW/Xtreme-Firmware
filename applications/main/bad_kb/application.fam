@@ -6,6 +6,7 @@ App(
     stack_size=2 * 1024,
     icon="A_BadKb_14",
     order=70,
+    resources="resources",
     fap_icon="icon.png",
     fap_category="Tools",
 )

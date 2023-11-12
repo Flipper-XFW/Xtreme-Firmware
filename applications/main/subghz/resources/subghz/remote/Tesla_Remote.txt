@@ -1,0 +1,10 @@
+Filetype: Flipper SubRem Map file
+Version: 1
+UP: /ext/subghz/Tesla/Tesla_EU_AM270.sub
+DOWN: /ext/subghz/Tesla/Tesla_EU_AM650.sub
+LEFT: /ext/subghz/Tesla/Tesla_US_AM270.sub
+RIGHT: /ext/subghz/Tesla/Tesla_US_AM650.sub
+ULABEL: EU AM270
+DLABEL: EU AM650
+LLABEL: US AM270
+RLABEL: US AM650

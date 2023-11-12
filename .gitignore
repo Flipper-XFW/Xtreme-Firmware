@@ -68,17 +68,3 @@ PVS-Studio.log
 .gdbinit
 
 /fbt_options_local.py
-
-# XFW-specific:
-
-# Automate files, etc
-automate.py
-deployments/
-commitnotes.md
-fbt_options.py
-
-# Asset packs
-assets/asset_packs/*
-!assets/asset_packs/WatchDogs/
-!assets/asset_packs/ReadMe.md
-assets/resources/asset_packs/

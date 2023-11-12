@@ -40,23 +40,23 @@ static void ibutton_make_app_folder(iButton* ibutton) {
     furi_record_close(RECORD_STORAGE);
 }
 
-// Callback function for handling RPC commands
-static void ibutton_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+static void ibutton_rpc_command_callback(const RpcAppSystemEvent* event, void* context) {
     furi_assert(context);
     iButton* ibutton = context;
 
-    if(event == RpcAppEventSessionClose) {
-        // Send a custom event and detach from RPC on session close, load, and exit
+    if(event->type == RpcAppEventTypeSessionClose) {
         view_dispatcher_send_custom_event(
             ibutton->view_dispatcher, iButtonCustomEventRpcSessionClose);
         rpc_system_app_set_callback(ibutton->rpc, NULL, NULL);
         ibutton->rpc = NULL;
-    } else if(event == RpcAppEventAppExit) {
+    } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(ibutton->view_dispatcher, iButtonCustomEventRpcExit);
-    } else if(event == RpcAppEventLoadFile) {
-        view_dispatcher_send_custom_event(ibutton->view_dispatcher, iButtonCustomEventRpcLoad);
+    } else if(event->type == RpcAppEventTypeLoadFile) {
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(ibutton->file_path, event->data.string);
+        view_dispatcher_send_custom_event(ibutton->view_dispatcher, iButtonCustomEventRpcLoadFile);
     } else {
-        rpc_system_app_confirm(ibutton->rpc, event, false);
+        rpc_system_app_confirm(ibutton->rpc, false);
     }
 }
 
@@ -79,7 +79,6 @@ void ibutton_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(ibutton->scene_manager);
 }
 
-// Allocate memory and initialize the iButton structure
 iButton* ibutton_alloc() {
     iButton* ibutton = malloc(sizeof(iButton));
 
@@ -137,7 +136,6 @@ iButton* ibutton_alloc() {
 void ibutton_free(iButton* ibutton) {
     furi_assert(ibutton);
 
-    // Remove and free views, then free the view dispatcher and scene manager
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewLoading);
     loading_free(ibutton->loading);
 
@@ -159,7 +157,6 @@ void ibutton_free(iButton* ibutton) {
     view_dispatcher_free(ibutton->view_dispatcher);
     scene_manager_free(ibutton->scene_manager);
 
-    // Close records and free worker and key
     furi_record_close(RECORD_NOTIFICATION);
     ibutton->notifications = NULL;
 
@@ -182,7 +179,6 @@ void ibutton_free(iButton* ibutton) {
 bool ibutton_load_key(iButton* ibutton) {
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewLoading);
 
-    // Attempt to load the key using protocols
     const bool success = ibutton_protocols_load(
         ibutton->protocols, ibutton->key, furi_string_get_cstr(ibutton->file_path));
 
@@ -190,7 +186,6 @@ bool ibutton_load_key(iButton* ibutton) {
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
 
     } else {
-        // Extract and store the key name
         FuriString* tmp = furi_string_alloc();
 
         path_extract_filename(ibutton->file_path, tmp, true);
@@ -202,7 +197,6 @@ bool ibutton_load_key(iButton* ibutton) {
     return success;
 }
 
-// Select and load a key for iButton using the file browser
 bool ibutton_select_and_load_key(iButton* ibutton) {
     DialogsFileBrowserOptions browser_options;
     bool success = false;
@@ -263,7 +257,6 @@ void ibutton_notification_message(iButton* ibutton, uint32_t message) {
     notification_message(ibutton->notifications, ibutton_notification_sequences[message]);
 }
 
-// Callback functions for submenu and widget actions
 void ibutton_submenu_callback(void* context, uint32_t index) {
     iButton* ibutton = context;
     view_dispatcher_send_custom_event(ibutton->view_dispatcher, index);
@@ -288,12 +281,10 @@ int32_t ibutton_app(char* arg) {
         if(sscanf(arg, "RPC %lX", (uint32_t*)&ibutton->rpc) == 1) {
             FURI_LOG_D(TAG, "Running in RPC mode");
 
-            // Attach to RPC and handle RPC events
             rpc_system_app_set_callback(ibutton->rpc, ibutton_rpc_command_callback, ibutton);
             rpc_system_app_send_started(ibutton->rpc);
 
         } else {
-            // Set the file_path and attempt to load the key
             furi_string_set(ibutton->file_path, (const char*)arg);
             key_loaded = ibutton_load_key(ibutton);
         }
@@ -306,7 +297,6 @@ int32_t ibutton_app(char* arg) {
         dolphin_deed(DolphinDeedIbuttonEmulate);
 
     } else {
-        // Attach to GUI (fullscreen) and set the initial scene based on key loading
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeFullscreen);
         if(key_loaded) { //-V547
@@ -324,7 +314,6 @@ int32_t ibutton_app(char* arg) {
     }
 
     if(ibutton->rpc) {
-        // Detach from RPC and handle RPC exit
         rpc_system_app_set_callback(ibutton->rpc, NULL, NULL);
         rpc_system_app_send_exited(ibutton->rpc);
     }
