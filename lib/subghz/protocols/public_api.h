@@ -31,7 +31,7 @@ bool subghz_protocol_secplus_v2_create_data(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param serial Serial number, 28 bit
  * @param btn Button number, 4 bit
- * @param cnt Container value, 16 bit
+ * @param cnt Counter value, 16 bit
  * @param manufacture_name Name of manufacturer's key
  * @param preset Modulation, SubGhzRadioPreset
  * @return true On success
@@ -108,6 +108,22 @@ bool subghz_protocol_alutech_at_4n_create_data(
     SubGhzRadioPreset* preset);
 
 /**
+ * Key generation from simple data.
+ * @param context Pointer to a SubGhzProtocolEncoderCameAtomo instance
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param serial Serial number, 24 bit
+ * @param cnt Counter value, 16 bit
+ * @param preset Modulation, SubGhzRadioPreset
+ * @return true On success
+ */
+bool subghz_protocol_came_atomo_create_data(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t serial,
+    uint16_t cnt,
+    SubGhzRadioPreset* preset);
+
+/**
  * New remote generation.
  * @param context Pointer to a SubGhzProtocolEncoderNiceFlorS instance
  * @param flipper_format Pointer to a FlipperFormat instance
@@ -129,18 +145,22 @@ bool subghz_protocol_nice_flor_s_create_data(
 
 /**
  * Key generation from simple data.
- * @param context Pointer to a SubGhzProtocolEncoderCameAtomo instance
+ * @param context Pointer to a SubGhzProtocolEncoderStarLine instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param serial Serial number, 24 bit
+ * @param btn Button number, 8 bit
  * @param cnt Counter value, 16 bit
+ * @param manufacture_name Name of manufacturer's key
  * @param preset Modulation, SubGhzRadioPreset
  * @return true On success
  */
-bool subghz_protocol_came_atomo_create_data(
+bool subghz_protocol_star_line_create_data(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t serial,
+    uint8_t btn,
     uint16_t cnt,
+    const char* manufacture_name,
     SubGhzRadioPreset* preset);
 
 /**
@@ -154,6 +174,24 @@ bool subghz_protocol_came_atomo_create_data(
  * @return true On success
  */
 bool subghz_protocol_somfy_telis_create_data(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t serial,
+    uint8_t btn,
+    uint16_t cnt,
+    SubGhzRadioPreset* preset);
+
+/**
+ * Key generation from simple data.
+ * @param context Pointer to a SubGhzProtocolEncoderSomfyKeytis instance
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param serial Serial number, 24 bit
+ * @param btn Button number, 8 bit
+ * @param cnt Counter value, 16 bit
+ * @param preset Modulation, SubGhzRadioPreset
+ * @return true On success
+ */
+bool subghz_protocol_somfy_keytis_create_data(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t serial,
