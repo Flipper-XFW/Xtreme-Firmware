@@ -33,7 +33,6 @@ static Attack attacks[] = {
                 .cfg.continuity =
                     {
                         .type = ContinuityTypeCustomCrash,
-                        .data = {},
                     },
             },
     },
@@ -47,7 +46,6 @@ static Attack attacks[] = {
                 .cfg.continuity =
                     {
                         .type = ContinuityTypeNearbyAction,
-                        .data = {},
                     },
             },
     },
@@ -61,7 +59,6 @@ static Attack attacks[] = {
                 .cfg.continuity =
                     {
                         .type = ContinuityTypeProximityPair,
-                        .data = {},
                     },
             },
     },
@@ -85,7 +82,6 @@ static Attack attacks[] = {
                 .cfg.easysetup =
                     {
                         .type = EasysetupTypeBuds,
-                        .data = {},
                     },
             },
     },
@@ -99,7 +95,6 @@ static Attack attacks[] = {
                 .cfg.easysetup =
                     {
                         .type = EasysetupTypeWatch,
-                        .data = {},
                     },
             },
     },

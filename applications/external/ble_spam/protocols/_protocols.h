@@ -1,8 +1,8 @@
 #pragma once
 
 #include "continuity.h"
-#include "fastpair.h"
 #include "easysetup.h"
+#include "fastpair.h"
 #include "swiftpair.h"
 
 typedef enum {
@@ -21,8 +21,8 @@ struct Payload {
     } bruteforce;
     union {
         ContinuityCfg continuity;
-        FastpairCfg fastpair;
         EasysetupCfg easysetup;
+        FastpairCfg fastpair;
         SwiftpairCfg swiftpair;
     } cfg;
 };
