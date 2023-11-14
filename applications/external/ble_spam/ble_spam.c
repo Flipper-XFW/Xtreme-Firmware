@@ -108,6 +108,32 @@ static Attack attacks[] = {
                 .cfg.swiftpair = {},
             },
     },
+    {
+        .title = "Vibrate 'em All",
+        .text = "Activate all LoveSpouse toys",
+        .protocol = &protocol_lovespouse,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg.lovespouse =
+                    {
+                        .state = LovespouseStatePlay,
+                    },
+            },
+    },
+    {
+        .title = "Denial of Pleasure",
+        .text = "Disable all LoveSpouse toys",
+        .protocol = &protocol_lovespouse,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg.lovespouse =
+                    {
+                        .state = LovespouseStateStop,
+                    },
+            },
+    },
 };
 
 #define ATTACKS_COUNT ((signed)COUNT_OF(attacks))
