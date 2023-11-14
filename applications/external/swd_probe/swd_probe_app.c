@@ -5,8 +5,6 @@
 #include "jep106.h"
 #include "adi.h"
 
-#include <toolbox/path.h>
-
 #include <assets_icons.h>
 
 #define SWD_PATH EXT_PATH("apps_data/swd")
@@ -947,16 +945,19 @@ static bool swd_scriptfunc_goto(ScriptContext* ctx) {
     return true;
 }
 
+#include <toolbox/path.h>
+
 static bool swd_scriptfunc_call(ScriptContext* ctx) {
     DBGS("call");
 
     swd_script_skip_whitespace(ctx);
 
     /* fetch previous file directory */
-    char filename[MAX_FILE_LENGTH];
     FuriString* filepath = furi_string_alloc();
     path_extract_dirname(ctx->filename, filepath);
+    // strncpy(filename, ctx->filename, sizeof(filename));
 
+    char filename[MAX_FILE_LENGTH] = {};
     bool success = false;
     do {
         /* append filename */
@@ -967,7 +968,6 @@ static bool swd_scriptfunc_call(ScriptContext* ctx) {
         furi_string_cat_printf(filepath, "/%s", filename);
 
         swd_script_seek_newline(ctx);
-
         /* append extension */
         furi_string_cat_str(filepath, ".swd");
 

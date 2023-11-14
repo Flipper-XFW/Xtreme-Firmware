@@ -173,6 +173,7 @@ int32_t nrf24channelscanner_main(void* p) {
 
     //turn on 5v for some modules
     uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
@@ -257,13 +258,14 @@ int32_t nrf24channelscanner_main(void* p) {
         }
     }
     nrf24_deinit();
+
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
+
     furi_message_queue_free(event_queue);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
-    //turn off 5v
-    if(furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_disable_otg();
-    }
     return 0;
 }

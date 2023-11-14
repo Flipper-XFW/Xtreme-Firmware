@@ -134,6 +134,7 @@ int32_t evil_portal_app(void* p) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
     }
+    furi_delay_ms(200);
 
     evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
 
