@@ -65,3 +65,4 @@
 #include "schrader_gg4.h"
 #include "honeywell.h"
 #include "bin_raw.h"
+#include "mastercode.h"
