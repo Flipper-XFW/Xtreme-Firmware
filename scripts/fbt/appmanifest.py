@@ -160,7 +160,7 @@ class AppManager:
 
         if apptype in AppBuildset.dist_app_types:
             # For distributing .fap's resources, there's "fap_file_assets"
-            for app_property in ("resources",):
+            for app_property in ():
                 if kw.get(app_property):
                     raise FlipperManifestException(
                         f"App {kw.get('appid')} of type {apptype} cannot have '{app_property}' in manifest"
