@@ -46,7 +46,7 @@ bool saved_struct_save(const char* path, void* data, size_t size, uint8_t magic,
         header.flags = 0;
         header.timestamp = 0;
 
-        uint16_t bytes_count = storage_file_write(file, &header, sizeof(header));
+        size_t bytes_count = storage_file_write(file, &header, sizeof(header));
         bytes_count += storage_file_write(file, data, size);
 
         if(bytes_count != (size + sizeof(header))) {
@@ -83,7 +83,7 @@ bool saved_struct_load(const char* path, void* data, size_t size, uint8_t magic,
         uint64_t bytes_file = storage_file_size(file);
         result = bytes_file == bytes_expected;
         if(result) {
-            uint16_t bytes_count = storage_file_read(file, &header, sizeof(SavedStructHeader));
+            size_t bytes_count = storage_file_read(file, &header, sizeof(SavedStructHeader));
             bytes_count += storage_file_read(file, data_read, size);
             result = bytes_count == bytes_expected;
         }
@@ -151,7 +151,7 @@ bool saved_struct_get_payload_size(
             break;
         }
 
-        uint16_t bytes_count = storage_file_read(file, &header, sizeof(SavedStructHeader));
+        size_t bytes_count = storage_file_read(file, &header, sizeof(SavedStructHeader));
         if(bytes_count != sizeof(SavedStructHeader)) {
             FURI_LOG_E(TAG, "Failed to read header");
             break;

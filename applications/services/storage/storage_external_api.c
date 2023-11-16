@@ -138,7 +138,7 @@ bool storage_file_close(File* file) {
     return S_RETURN_BOOL;
 }
 
-uint16_t storage_file_read(File* file, void* buff, uint16_t bytes_to_read) {
+static uint16_t storage_file_read_underlying(File* file, void* buff, uint16_t bytes_to_read) {
     if(bytes_to_read == 0) {
         return 0;
     }
@@ -158,7 +158,8 @@ uint16_t storage_file_read(File* file, void* buff, uint16_t bytes_to_read) {
     return S_RETURN_UINT16;
 }
 
-uint16_t storage_file_write(File* file, const void* buff, uint16_t bytes_to_write) {
+static uint16_t
+    storage_file_write_underlying(File* file, const void* buff, uint16_t bytes_to_write) {
     if(bytes_to_write == 0) {
         return 0;
     }
@@ -176,6 +177,40 @@ uint16_t storage_file_write(File* file, const void* buff, uint16_t bytes_to_writ
     S_API_MESSAGE(StorageCommandFileWrite);
     S_API_EPILOGUE;
     return S_RETURN_UINT16;
+}
+
+size_t storage_file_read(File* file, void* buff, size_t to_read) {
+    size_t total = 0;
+
+    const size_t max_chunk = UINT16_MAX;
+    do {
+        const size_t chunk = MIN((to_read - total), max_chunk);
+        size_t read = storage_file_read_underlying(file, buff + total, chunk);
+        total += read;
+
+        if(storage_file_get_error(file) != FSE_OK || read != chunk) {
+            break;
+        }
+    } while(total != to_read);
+
+    return total;
+}
+
+size_t storage_file_write(File* file, const void* buff, size_t to_write) {
+    size_t total = 0;
+
+    const size_t max_chunk = UINT16_MAX;
+    do {
+        const size_t chunk = MIN((to_write - total), max_chunk);
+        size_t written = storage_file_write_underlying(file, buff + total, chunk);
+        total += written;
+
+        if(storage_file_get_error(file) != FSE_OK || written != chunk) {
+            break;
+        }
+    } while(total != to_write);
+
+    return total;
 }
 
 bool storage_file_seek(File* file, uint32_t offset, bool from_start) {
@@ -266,7 +301,7 @@ bool storage_file_exists(Storage* storage, const char* path) {
     return exist;
 }
 
-bool storage_file_copy_to_file(File* source, File* destination, uint32_t size) {
+bool storage_file_copy_to_file(File* source, File* destination, size_t size) {
     uint8_t* buffer = malloc(FILE_BUFFER_SIZE);
 
     while(size) {
@@ -822,6 +857,27 @@ FS_Error storage_common_migrate(Storage* storage, const char* source, const char
 bool storage_common_exists(Storage* storage, const char* path) {
     FileInfo file_info;
     return storage_common_stat(storage, path, &file_info) == FSE_OK;
+}
+
+bool storage_common_equivalent_path(
+    Storage* storage,
+    const char* path1,
+    const char* path2,
+    bool truncate) {
+    S_API_PROLOGUE;
+
+    SAData data = {
+        .cequivpath = {
+            .path1 = path1,
+            .path2 = path2,
+            .truncate = truncate,
+            .thread_id = furi_thread_get_current_id(),
+        }};
+
+    S_API_MESSAGE(StorageCommandCommonEquivalentPath);
+    S_API_EPILOGUE;
+
+    return S_RETURN_BOOL;
 }
 
 /****************** ERROR ******************/
