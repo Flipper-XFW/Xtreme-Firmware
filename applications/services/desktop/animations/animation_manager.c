@@ -388,13 +388,28 @@ static StorageAnimation*
     uint32_t whole_weight = 0;
 
     bool fallback = xtreme_settings.fallback_anim;
+    bool unlock = xtreme_settings.unlock_anims;
+
+    uint32_t valid_animations = 0;
+    for
+        M_EACH(item, animation_list, StorageAnimationList_t) {
+            const StorageAnimationManifestInfo* manifest_info = animation_storage_get_meta(*item);
+            bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
+            if(valid) {
+                valid_animations += 1;
+            };
+        }
+
+    if(valid_animations <= 2 && !fallback) {
+        avoid_animation = NULL;
+    }
+
     if(StorageAnimationList_size(animation_list) == dolphin_internal_size + 1 && !fallback) {
         // One ext anim and fallback disabled, dont skip current anim (current = only ext one)
         avoid_animation = NULL;
     }
 
     StorageAnimationList_it_t it;
-    bool unlock = xtreme_settings.unlock_anims;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationManifestInfo* manifest_info =
