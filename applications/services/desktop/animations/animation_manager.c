@@ -387,28 +387,9 @@ static StorageAnimation*
     furi_record_close(RECORD_DOLPHIN);
     uint32_t whole_weight = 0;
 
+    // Filter valid animations
     bool fallback = xtreme_settings.fallback_anim;
     bool unlock = xtreme_settings.unlock_anims;
-
-    uint32_t valid_animations = 0;
-    for
-        M_EACH(item, animation_list, StorageAnimationList_t) {
-            const StorageAnimationManifestInfo* manifest_info = animation_storage_get_meta(*item);
-            bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
-            if(valid) {
-                valid_animations += 1;
-            };
-        }
-
-    if(valid_animations <= 2 && !fallback) {
-        avoid_animation = NULL;
-    }
-
-    if(StorageAnimationList_size(animation_list) == dolphin_internal_size + 1 && !fallback) {
-        // One ext anim and fallback disabled, dont skip current anim (current = only ext one)
-        avoid_animation = NULL;
-    }
-
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
@@ -416,22 +397,39 @@ static StorageAnimation*
             animation_storage_get_meta(storage_animation);
         bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
 
-        if(avoid_animation != NULL && strcmp(manifest_info->name, avoid_animation) == 0) {
-            // Avoid repeating same animation twice
-            valid = false;
-        }
         if(strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) == 0 && !fallback) {
             // Skip fallback animation
             valid = false;
         }
 
         if(valid) {
-            whole_weight += manifest_info->weight;
             StorageAnimationList_next(it);
         } else {
             animation_storage_free_storage_animation(&storage_animation);
             /* remove and increase iterator */
             StorageAnimationList_remove(animation_list, it);
+        }
+    }
+
+    if(StorageAnimationList_size(animation_list) == 1) {
+        // One valid anim, dont skip current anim (current = only ext one)
+        avoid_animation = NULL;
+    }
+
+    // Avoid repeating current animation and calculate weights
+    for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
+        StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
+        const StorageAnimationManifestInfo* manifest_info =
+            animation_storage_get_meta(storage_animation);
+
+        if(avoid_animation && strcmp(manifest_info->name, avoid_animation) == 0) {
+            // Avoid repeating same animation twice
+            animation_storage_free_storage_animation(&storage_animation);
+            /* remove and increase iterator */
+            StorageAnimationList_remove(animation_list, it);
+        } else {
+            whole_weight += manifest_info->weight;
+            StorageAnimationList_next(it);
         }
     }
 
