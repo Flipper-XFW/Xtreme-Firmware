@@ -1,0 +1,9 @@
+App(
+    appid="ble_matter",
+    name="BLEMatter",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="main",
+    stack_size=4 * 1024,
+    fap_category="Bluetooth",
+    fap_icon_assets_symbol="ble_matter",
+)
