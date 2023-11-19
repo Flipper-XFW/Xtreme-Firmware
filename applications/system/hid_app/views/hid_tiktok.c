@@ -4,8 +4,6 @@
 
 #include "hid_icons.h"
 
-#include <assets_icons.h>
-
 #define TAG "HidTikTok"
 
 struct HidTikTok {

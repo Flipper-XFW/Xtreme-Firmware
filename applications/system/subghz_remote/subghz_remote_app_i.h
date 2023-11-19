@@ -6,6 +6,8 @@
 
 #include "helpers/txrx/subghz_txrx.h"
 
+#include "subghz_remote_icons.h"
+
 #include <assets_icons.h>
 
 #include "views/remote.h"
@@ -50,7 +52,7 @@ typedef struct {
 
     bool map_not_saved;
 
-    uint8_t chusen_sub;
+    uint8_t chosen_sub;
 } SubGhzRemoteApp;
 
 SubRemLoadMapState subrem_load_from_file(SubGhzRemoteApp* app);
