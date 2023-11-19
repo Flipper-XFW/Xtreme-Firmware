@@ -6,7 +6,9 @@
 
 #include "helpers/txrx/subghz_txrx.h"
 
+#if __has_include("subghz_remote_icons.h")
 #include "subghz_remote_icons.h"
+#endif
 
 #include <assets_icons.h>
 
