@@ -25,12 +25,11 @@ static void evil_portal_app_tick_event_callback(void* context) {
 Evil_PortalApp* evil_portal_app_alloc() {
     Evil_PortalApp* app = malloc(sizeof(Evil_PortalApp));
 
-    app->sent_html = false;
-    app->sent_ap = false;
     app->sent_reset = false;
-    app->has_command_queue = false;
-    app->command_index = 0;
     app->portal_logs = furi_string_alloc();
+
+    app->capture_line = false;
+    app->captured_line = furi_string_alloc();
 
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
@@ -87,6 +86,8 @@ void evil_portal_app_free(Evil_PortalApp* app) {
         write_logs(app->portal_logs);
         furi_string_free(app->portal_logs);
     }
+
+    furi_string_free(app->captured_line);
 
     // Send reset event to dev board
     evil_portal_uart_tx((uint8_t*)(RESET_CMD), strlen(RESET_CMD));

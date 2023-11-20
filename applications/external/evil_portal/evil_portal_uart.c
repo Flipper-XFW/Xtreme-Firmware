@@ -48,34 +48,6 @@ static int32_t uart_worker(void* context) {
                 if(uart->handle_rx_data_cb) {
                     uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
-                    if(uart->app->has_command_queue) {
-                        if(uart->app->command_index < 1) {
-                            if(0 == strncmp(
-                                        SET_AP_CMD,
-                                        uart->app->command_queue[uart->app->command_index],
-                                        strlen(SET_AP_CMD))) {
-                                FuriString* out_data = furi_string_alloc();
-
-                                furi_string_cat(out_data, "setap=");
-                                furi_string_cat(out_data, (char*)uart->app->ap_name);
-
-                                evil_portal_uart_tx(
-                                    (uint8_t*)(furi_string_get_cstr(out_data)),
-                                    strlen(furi_string_get_cstr(out_data)));
-                                evil_portal_uart_tx((uint8_t*)("\n"), 1);
-
-                                uart->app->sent_ap = true;
-
-                                free(out_data);
-                                free(uart->app->ap_name);
-                            }
-
-                            uart->app->command_index = 0;
-                            uart->app->has_command_queue = false;
-                            uart->app->command_queue[0] = "";
-                        }
-                    }
-
                     if(uart->app->sent_reset == false) {
                         furi_string_cat(uart->app->portal_logs, (char*)uart->rx_buf);
                     }
