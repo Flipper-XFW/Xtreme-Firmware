@@ -34,6 +34,7 @@ struct Evil_PortalApp {
     SceneManager* scene_manager;
 
     FuriString* portal_logs;
+    FuriMutex* portal_logs_mutex;
 
     FuriString* text_box_store;
     size_t text_box_store_strlen;

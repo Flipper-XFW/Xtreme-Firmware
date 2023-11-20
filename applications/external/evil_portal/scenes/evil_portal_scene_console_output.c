@@ -62,8 +62,10 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             const char* help_msg = "Logs saved.\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
+            furi_mutex_acquire(app->portal_logs_mutex, FuriWaitForever);
             write_logs(app->portal_logs);
             furi_string_reset(app->portal_logs);
+            furi_mutex_release(app->portal_logs_mutex);
             if(app->show_stopscan_tip) {
                 const char* msg = "Press BACK to return\n";
                 furi_string_cat_str(app->text_box_store, msg);
@@ -151,6 +153,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
                     evil_portal_uart_tx((uint8_t*)("\n"), 1);
                     for(uint8_t t = 0; t < 15 && !captured(app, "html set"); t++)
                         furi_delay_ms(100);
+                    furi_delay_ms(100);
                     evil_portal_uart_tx(
                         (uint8_t*)("evilportal -c start\n"), strlen("evilportal -c start\n"));
                 }
