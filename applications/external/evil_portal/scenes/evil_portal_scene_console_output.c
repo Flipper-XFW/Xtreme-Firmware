@@ -119,8 +119,9 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             furi_string_printf(data, "setap=%s\n", (char*)app->ap_name);
             furi_string_reset(app->captured_line);
             evil_portal_uart_tx((uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
-            for(uint8_t t = 0; t < 5 && !captured(app, "ap set"); t++) furi_delay_ms(100);
-            bool icanhazmarauder = !captured(app, "ap set"); // Evil portal didn't respond
+            // For some reason evil portal messes up "ap set" with newlines and random letters, "p set" works
+            for(uint8_t t = 0; t < 20 && !captured(app, "p set"); t++) furi_delay_ms(100);
+            bool icanhazmarauder = !captured(app, "p set"); // Evil portal didn't respond
             // Not evil portal, set up marauder
             if(icanhazmarauder) {
                 furi_string_printf(data, "clearlist -s\nssid -a -n '%s'\n", app->ap_name);
@@ -128,7 +129,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
                 evil_portal_uart_tx(
                     (uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
                 // Marauder echoes the command, maybe still init so wait a while for echo
-                for(uint8_t t = 0; t < 69 && !captured(app, (char*)app->ap_name); t++)
+                for(uint8_t t = 0; t < 42 && !captured(app, (char*)app->ap_name); t++)
                     furi_delay_ms(100);
             }
             free(app->ap_name);
@@ -148,7 +149,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
                     furi_string_reset(app->captured_line);
                     evil_portal_uart_tx(app->index_html, strlen((char*)app->index_html));
                     evil_portal_uart_tx((uint8_t*)("\n"), 1);
-                    for(uint8_t t = 0; t < 10 && !captured(app, "html set"); t++)
+                    for(uint8_t t = 0; t < 15 && !captured(app, "html set"); t++)
                         furi_delay_ms(100);
                     evil_portal_uart_tx(
                         (uint8_t*)("evilportal -c start\n"), strlen("evilportal -c start\n"));
@@ -157,7 +158,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
                 furi_string_set(data, "sethtml=");
                 furi_string_cat(data, (char*)app->index_html);
                 evil_portal_uart_tx(
-                    (uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
+                    (uint8_t*)(furi_string_get_cstr(data)), strlen(furi_string_get_cstr(data)));
                 evil_portal_uart_tx((uint8_t*)("\n"), 1);
             }
 
