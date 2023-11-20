@@ -65,6 +65,7 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &tpms_protocol_schrader_gg4,
     &subghz_protocol_bin_raw,
     &subghz_protocol_mastercode,
+    &subghz_protocol_honeywell,
 };
 
 const SubGhzProtocolRegistry subghz_protocol_registry = {

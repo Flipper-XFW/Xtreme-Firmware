@@ -66,3 +66,4 @@
 #include "honeywell.h"
 #include "bin_raw.h"
 #include "mastercode.h"
+#include "honeywell.h"
