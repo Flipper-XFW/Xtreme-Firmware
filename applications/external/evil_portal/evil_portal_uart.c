@@ -48,24 +48,28 @@ static int32_t uart_worker(void* context) {
                 if(uart->handle_rx_data_cb) {
                     uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
+                    furi_mutex_acquire(uart->app->portal_logs_mutex, FuriWaitForever);
                     if(uart->app->sent_reset == false) {
                         furi_string_cat(uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
-                    if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
+                    if(furi_string_size(uart->app->portal_logs) > 4000) {
                         write_logs(uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
+                    furi_mutex_release(uart->app->portal_logs_mutex);
                 } else {
                     uart->rx_buf[len] = '\0';
+                    furi_mutex_acquire(uart->app->portal_logs_mutex, FuriWaitForever);
                     if(uart->app->sent_reset == false) {
                         furi_string_cat(uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
-                    if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
+                    if(furi_string_size(uart->app->portal_logs) > 4000) {
                         write_logs(uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
+                    furi_mutex_release(uart->app->portal_logs_mutex);
                 }
             }
         }
