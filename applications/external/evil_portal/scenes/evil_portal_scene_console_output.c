@@ -123,7 +123,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             bool icanhazmarauder = !captured(app, "ap set"); // Evil portal didn't respond
             // Not evil portal, set up marauder
             if(icanhazmarauder) {
-                furi_string_printf(data, "ssid -a -n '%s'\n", app->ap_name);
+                furi_string_printf(data, "clearlist -s\nssid -a -n '%s'\n", app->ap_name);
                 furi_string_reset(app->captured_line);
                 evil_portal_uart_tx(
                     (uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
