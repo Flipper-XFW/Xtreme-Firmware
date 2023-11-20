@@ -6,10 +6,6 @@ void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void
     furi_assert(context);
     Evil_PortalApp* app = context;
 
-    if(app->capture_line) {
-        furi_string_cat_printf(app->captured_line, "%s", buf);
-    }
-
     // If text box store gets too big, then truncate it
     app->text_box_store_strlen += len;
     if(app->text_box_store_strlen >= EVIL_PORTAL_TEXT_BOX_STORE_SIZE - 1) {
@@ -20,6 +16,10 @@ void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void
     // Null-terminate buf and append to text box store
     buf[len] = '\0';
     furi_string_cat_printf(app->text_box_store, "%s", buf);
+
+    if(app->capture_line) {
+        furi_string_cat_printf(app->captured_line, "%s", buf);
+    }
 
     text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
 }
