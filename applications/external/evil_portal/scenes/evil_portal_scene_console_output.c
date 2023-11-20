@@ -151,6 +151,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
                     evil_portal_uart_tx((uint8_t*)("\n"), 1);
                     for(uint8_t t = 0; t < 15 && !captured(app, "html set"); t++)
                         furi_delay_ms(100);
+                    furi_delay_ms(100);
                     evil_portal_uart_tx(
                         (uint8_t*)("evilportal -c start\n"), strlen("evilportal -c start\n"));
                 }
