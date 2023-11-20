@@ -100,7 +100,6 @@ Evil_PortalUart* evil_portal_uart_init(Evil_PortalApp* app) {
         furi_hal_uart_init(UART_CH, app->BAUDRATE);
     }
 
-    furi_hal_console_disable();
     if(app->BAUDRATE == 0) {
         app->BAUDRATE = 115200;
     }
