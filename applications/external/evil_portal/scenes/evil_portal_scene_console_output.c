@@ -128,7 +128,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
                                    captured(app, "\n>"); // Marauder did respond
             // Not evil portal, set up marauder
             if(icanhazmarauder) {
-                furi_string_printf(data, "clearlist -s\nssid -a -n '%s'\n", app->ap_name);
+                furi_string_printf(data, "clearlist -a -s -c\nssid -a -n '%s'\n", app->ap_name);
                 furi_string_reset(app->captured_line);
                 evil_portal_uart_tx(
                     (uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
@@ -173,8 +173,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
         } else if(0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
             evil_portal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            evil_portal_uart_tx((uint8_t*)("\n"), 1);
-            evil_portal_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+            evil_portal_uart_tx((uint8_t*)("\nstopscan\n"), strlen("\nstopscan\n"));
         } else if(1 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             evil_portal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
