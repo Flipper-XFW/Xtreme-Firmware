@@ -147,6 +147,7 @@ void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     }
 
     furi_thread_free(subghz_gps->thread);
+    furi_stream_buffer_free(subghz_gps->rx_stream);
 
     free(subghz_gps);
 }
