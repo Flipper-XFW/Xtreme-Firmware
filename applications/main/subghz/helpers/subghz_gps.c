@@ -138,9 +138,6 @@ SubGhzGPS* subghz_gps_init() {
 
 void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     furi_assert(subghz_gps);
-    furi_thread_free(subghz_gps->thread);
-
-    free(subghz_gps);
 
     furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
     if(UART_CH == FuriHalUartIdLPUART1) {
@@ -148,6 +145,10 @@ void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     } else {
         furi_hal_console_enable();
     }
+
+    furi_thread_free(subghz_gps->thread);
+
+    free(subghz_gps);
 }
 
 void subghz_gps_start(SubGhzGPS* subghz_gps) {
