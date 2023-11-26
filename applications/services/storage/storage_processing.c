@@ -757,6 +757,10 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         storage_path_trim_trailing_slashes(path2);
         storage_process_alias(app, path1, message->data->cequivpath.thread_id, false);
         storage_process_alias(app, path2, message->data->cequivpath.thread_id, false);
+        // Comparison is done on path name, same beginning of name != same file/folder
+        // Check with a / suffixed to ensure same file/folder name
+        furi_string_cat(path1, "/");
+        furi_string_cat(path2, "/");
         if(message->data->cequivpath.truncate) {
             furi_string_left(path2, furi_string_size(path1));
         }

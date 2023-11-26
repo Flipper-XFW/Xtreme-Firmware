@@ -56,6 +56,15 @@ App(
 )
 
 App(
+    appid="social_moscow_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="social_moscow_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/social_moscow.c"],
+)
+
+App(
     appid="plantain_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="plantain_plugin_ep",
@@ -71,6 +80,33 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/two_cities.c"],
+)
+
+App(
+    appid="umarsh_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="umarsh_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/umarsh.c"],
+)
+
+App(
+    appid="metromoney_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="metromoney_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/metromoney.c"],
+)
+
+App(
+    appid="kazan_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="kazan_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/kazan.c"],
 )
 
 App(
