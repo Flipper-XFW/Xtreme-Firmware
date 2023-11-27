@@ -38,3 +38,6 @@
 [submodule "lib/stm32wb_copro"]
 	path = lib/stm32wb_copro
 	url = https://github.com/flipperdevices/stm32wb_copro.git
+[submodule "applications/external"]
+	path = applications/external
+	url = https://github.com/Flipper-XFW/Xtreme-Apps.git
