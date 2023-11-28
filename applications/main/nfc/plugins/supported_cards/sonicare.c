@@ -23,7 +23,7 @@ static SonicareHead sonicare_get_head_type(const MfUltralightData* data) {
     // page 34 byte 0 is always 0x30 for the white brushes i have, so i guess thats white
     // TODO: Get a black brush and test this
 
-    if(data->page[34].data == 0x30) {
+    if(data->page[34].data[0] == 0x30) {
         return SonicareHeadWhite;
     } else {
         return SonicareHeadUnkown;
