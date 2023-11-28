@@ -13,6 +13,7 @@ extern "C" {
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/loading.h>
 #include "../views/bad_kb_view.h"
 #include "../bad_kb_paths.h"
 
@@ -137,6 +138,7 @@ struct BadKbApp {
     VariableItemList* var_item_list;
     TextInput* text_input;
     ByteInput* byte_input;
+    Loading* loading;
     char usb_name_buf[BAD_KB_USB_LEN];
     uint16_t usb_vidpid_buf[2];
     char bt_name_buf[BAD_KB_NAME_LEN];
