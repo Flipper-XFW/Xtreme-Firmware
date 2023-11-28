@@ -10,7 +10,6 @@ XtremeSettings xtreme_settings = {
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
-    .fallback_anim = true, // ON
     .menu_style = MenuStyleWii, // Wii
     .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
@@ -67,10 +66,6 @@ void XTREME_SETTINGS_LOAD() {
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "unlock_anims", &b, 1)) {
             x->unlock_anims = b;
-        }
-        flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "fallback_anim", &b, 1)) {
-            x->fallback_anim = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "menu_style", &u, 1)) {
@@ -209,7 +204,6 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_uint32(file, "anim_speed", &x->anim_speed, 1);
         flipper_format_write_int32(file, "cycle_anims", &x->cycle_anims, 1);
         flipper_format_write_bool(file, "unlock_anims", &x->unlock_anims, 1);
-        flipper_format_write_bool(file, "fallback_anim", &x->fallback_anim, 1);
         e = x->menu_style;
         flipper_format_write_uint32(file, "menu_style", &e, 1);
         flipper_format_write_bool(file, "bad_pins_format", &x->bad_pins_format, 1);

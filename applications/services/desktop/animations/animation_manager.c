@@ -17,7 +17,7 @@
 
 #define TAG "AnimationManager"
 
-#define HARDCODED_ANIMATION_NAME "thank_you_128x64"
+#define HARDCODED_ANIMATION_NAME "L1_AnimationError_128x64"
 #define NO_SD_ANIMATION_NAME "L1_NoSd_128x49"
 #define BAD_BATTERY_ANIMATION_NAME "L1_BadBattery_128x47"
 
@@ -388,21 +388,15 @@ static StorageAnimation*
     uint32_t whole_weight = 0;
 
     // Filter valid animations
-    bool fallback = xtreme_settings.fallback_anim;
     bool unlock = xtreme_settings.unlock_anims;
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationManifestInfo* manifest_info =
             animation_storage_get_meta(storage_animation);
-        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
 
-        if(strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) == 0 && !fallback) {
-            // Skip fallback animation
-            valid = false;
-        }
-
-        if(valid) {
+        if(animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock) &&
+           strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME)) { // Dont pick error anim randomly
             StorageAnimationList_next(it);
         } else {
             animation_storage_free_storage_animation(&storage_animation);
@@ -543,7 +537,8 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                     animation_storage_get_meta(restore_animation);
                 bool valid = animation_manager_is_valid_idle_animation(
                     manifest_info, &stats, xtreme_settings.unlock_anims);
-                if(valid) {
+                // Restore only if anim is valid and not the error anim
+                if(valid && strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) != 0) {
                     animation_manager_replace_current_animation(
                         animation_manager, restore_animation);
                     animation_manager->state = AnimationManagerStateIdle;
