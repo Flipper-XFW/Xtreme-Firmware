@@ -66,8 +66,10 @@ static void xtreme_app_scene_interface_graphics_anim_speed_changed(VariableItem*
 const char* const cycle_anims_names[] = {
     "OFF",
     "Meta.txt",
+    "15 S",
     "30 S",
     "1 M",
+    "2 M",
     "5 M",
     "10 M",
     "15 M",
@@ -81,8 +83,10 @@ const char* const cycle_anims_names[] = {
 const int32_t cycle_anims_values[COUNT_OF(cycle_anims_names)] = {
     -1,
     0,
+    15,
     30,
     60,
+    120,
     300,
     600,
     900,
