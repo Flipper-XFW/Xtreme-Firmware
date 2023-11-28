@@ -651,7 +651,7 @@ static void rpc_system_storage_rename_process(const PB_Main* request, void* cont
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
 
     if(path_contains_only_ascii(request->content.storage_rename_request.new_path)) {
-        FS_Error error = storage_common_rename(
+        FS_Error error = storage_common_rename_safe(
             fs_api,
             request->content.storage_rename_request.old_path,
             request->content.storage_rename_request.new_path);

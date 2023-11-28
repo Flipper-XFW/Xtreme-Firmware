@@ -120,7 +120,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     }
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_rename(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
+    storage_common_rename_safe(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
     storage_simply_mkdir(storage, BAD_KB_APP_BASE_FOLDER);
     furi_record_close(RECORD_STORAGE);
 

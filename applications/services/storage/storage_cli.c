@@ -454,7 +454,7 @@ static void storage_cli_rename(Cli* cli, FuriString* old_path, FuriString* args)
     if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
         storage_cli_print_usage();
     } else {
-        FS_Error error = storage_common_rename(
+        FS_Error error = storage_common_rename_safe(
             api, furi_string_get_cstr(old_path), furi_string_get_cstr(new_path));
 
         if(error != FSE_OK) {

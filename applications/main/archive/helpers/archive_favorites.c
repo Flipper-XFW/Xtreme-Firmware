@@ -104,9 +104,9 @@ static bool archive_favourites_rescan() {
     furi_string_free(buffer);
 
     storage_file_close(file);
-    if(storage_common_move(storage, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH) == FSE_NOT_EXIST) {
-        storage_common_remove(storage, ARCHIVE_FAV_PATH);
-    }
+    storage_common_remove(storage, ARCHIVE_FAV_PATH);
+    storage_common_rename(storage, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(storage, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
@@ -203,9 +203,9 @@ bool archive_favorites_delete(const char* format, ...) {
     furi_string_free(filename);
 
     storage_file_close(file);
-    if(storage_common_move(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH) == FSE_NOT_EXIST) {
-        storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
-    }
+    storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
+    storage_common_rename(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
@@ -282,9 +282,9 @@ bool archive_favorites_rename(const char* src, const char* dst) {
     furi_string_free(path);
 
     storage_file_close(file);
-    if(storage_common_move(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH) == FSE_NOT_EXIST) {
-        storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
-    }
+    storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
+    storage_common_rename(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
@@ -310,9 +310,9 @@ void archive_favorites_save(void* context) {
         archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", furi_string_get_cstr(item->path));
     }
 
-    if(storage_common_move(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH) == FSE_NOT_EXIST) {
-        storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
-    }
+    storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
+    storage_common_rename(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);

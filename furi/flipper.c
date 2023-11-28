@@ -49,7 +49,7 @@ void flipper_migrate_files() {
     storage_common_remove(storage, INT_PATH(".passport.settings"));
     storage_common_remove(storage, INT_PATH(".region_data"));
 
-    // Migrate files
+    // Migrate files (use copy+remove to not overwrite dst but still delete src)
     FURI_LOG_I(TAG, "Migrate: Renames on external");
     storage_common_copy(storage, ARCHIVE_FAV_OLD_PATH, ARCHIVE_FAV_PATH);
     storage_common_remove(storage, ARCHIVE_FAV_OLD_PATH);
@@ -65,7 +65,7 @@ void flipper_migrate_files() {
     storage_common_remove(storage, POWER_SETTINGS_OLD_PATH);
     storage_common_copy(storage, BT_KEYS_STORAGE_OLD_PATH, BT_KEYS_STORAGE_PATH);
     storage_common_remove(storage, BT_KEYS_STORAGE_OLD_PATH);
-    storage_common_copy(storage, NOTIFICATION_SETTINGS_OLD_PATH, NOTIFICATION_SETTINGS_PATH);
+    // storage_common_copy(storage, NOTIFICATION_SETTINGS_OLD_PATH, NOTIFICATION_SETTINGS_PATH); // Not compatible anyway
     storage_common_remove(storage, NOTIFICATION_SETTINGS_OLD_PATH);
     // Ext -> Int
     FURI_LOG_I(TAG, "Migrate: External to Internal");
@@ -77,7 +77,7 @@ void flipper_migrate_files() {
     FileInfo file_info;
     if(storage_common_stat(storage, U2F_CNT_OLD_FILE, &file_info) == FSE_OK &&
        file_info.size > 200) { // Is on Int and has content
-        storage_common_move(storage, U2F_CNT_OLD_FILE, U2F_CNT_FILE); // Int -> Ext
+        storage_common_rename(storage, U2F_CNT_OLD_FILE, U2F_CNT_FILE); // Int -> Ext
     }
     storage_common_copy(storage, U2F_KEY_OLD_FILE, U2F_KEY_FILE); // Ext -> Int
 
