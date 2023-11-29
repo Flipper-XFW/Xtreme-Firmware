@@ -139,14 +139,28 @@ bool xtreme_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEve
                 app->mainmenu_app_labels, app->mainmenu_app_index, app->mainmenu_app_index + 1);
             CharList_remove_v(
                 app->mainmenu_app_exes, app->mainmenu_app_index, app->mainmenu_app_index + 1);
-            if(app->mainmenu_app_index) app->mainmenu_app_index--;
             /* fall through */
-        case VarItemListIndexMoveApp:
+        case VarItemListIndexMoveApp: {
             app->save_mainmenu_apps = true;
             app->require_reboot = true;
-            scene_manager_previous_scene(app->scene_manager);
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenu);
+            size_t count = CharList_size(app->mainmenu_app_labels);
+            VariableItem* item = variable_item_list_get(app->var_item_list, VarItemListIndexApp);
+            if(count) {
+                app->mainmenu_app_index = CLAMP(app->mainmenu_app_index, count - 1, 0U);
+                char label[20];
+                snprintf(label, 20, "App  %u/%u", 1 + app->mainmenu_app_index, count);
+                variable_item_set_item_label(item, label);
+                variable_item_set_current_value_text(
+                    item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
+            } else {
+                app->mainmenu_app_index = 0;
+                variable_item_set_item_label(item, "App");
+                variable_item_set_current_value_text(item, "None");
+            }
+            variable_item_set_current_value_index(item, app->mainmenu_app_index);
+            variable_item_set_values_count(item, count);
             break;
+        }
         case VarItemListIndexAddApp:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenuAdd);
             break;
