@@ -406,7 +406,7 @@ static StorageAnimation*
             valid = false;
         }
 
-        if(valid) { // Dont pick error anim randomly
+        if(valid) {
             StorageAnimationList_next(it);
         } else {
             animation_storage_free_storage_animation(&storage_animation);
