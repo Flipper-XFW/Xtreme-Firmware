@@ -57,6 +57,7 @@ typedef struct {
     uint32_t anim_speed;
     int32_t cycle_anims;
     bool unlock_anims;
+    bool credits_anim;
     MenuStyle menu_style;
     bool lock_on_boot;
     bool bad_pins_format;

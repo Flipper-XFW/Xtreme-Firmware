@@ -5,7 +5,7 @@ enum VarItemListIndex {
     VarItemListIndexAnimSpeed,
     VarItemListIndexCycleAnims,
     VarItemListIndexUnlockAnims,
-    VarItemListIndexFallbackAnim,
+    VarItemListIndexCreditsAnim,
 };
 
 void xtreme_app_scene_interface_graphics_var_item_list_callback(void* context, uint32_t index) {
@@ -18,6 +18,10 @@ static void xtreme_app_scene_interface_graphics_asset_pack_changed(VariableItem*
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, index == 0 ? "Default" : *CharList_get(app->asset_pack_names, index - 1));
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexCreditsAnim),
+        index != 0,
+        "Credits\nare in\ndefault pack!");
     strlcpy(
         xtreme_settings.asset_pack,
         index == 0 ? "" : *CharList_get(app->asset_pack_names, index - 1),
@@ -113,6 +117,14 @@ static void xtreme_app_scene_interface_graphics_unlock_anims_changed(VariableIte
     app->save_settings = true;
 }
 
+static void xtreme_app_scene_interface_graphics_credits_anim_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    xtreme_settings.credits_anim = value;
+    app->save_settings = true;
+}
+
 void xtreme_app_scene_interface_graphics_on_enter(void* context) {
     XtremeApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
@@ -162,6 +174,16 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, xtreme_settings.unlock_anims);
     variable_item_set_current_value_text(item, xtreme_settings.unlock_anims ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Credits Anim",
+        2,
+        xtreme_app_scene_interface_graphics_credits_anim_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings.credits_anim);
+    variable_item_set_current_value_text(item, xtreme_settings.credits_anim ? "ON" : "OFF");
+    variable_item_set_locked(item, app->asset_pack_index != 0, "Credits\nare in\ndefault pack!");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_interface_graphics_var_item_list_callback, app);

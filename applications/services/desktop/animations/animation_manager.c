@@ -20,6 +20,7 @@
 #define HARDCODED_ANIMATION_NAME "L1_AnimationError_128x64"
 #define NO_SD_ANIMATION_NAME "L1_NoSd_128x49"
 #define BAD_BATTERY_ANIMATION_NAME "L1_BadBattery_128x47"
+#define CREDITS_ANIMATION_NAME "Credits_128x64"
 
 #define NO_DB_ANIMATION_NAME "L0_NoDb_128x51"
 #define BAD_SD_ANIMATION_NAME "L0_SdBad_128x51"
@@ -388,15 +389,24 @@ static StorageAnimation*
     uint32_t whole_weight = 0;
 
     // Filter valid animations
+    bool skip_credits = !xtreme_settings.credits_anim && xtreme_settings.asset_pack[0] == '\0';
     bool unlock = xtreme_settings.unlock_anims;
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationManifestInfo* manifest_info =
             animation_storage_get_meta(storage_animation);
+        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
 
-        if(animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock) &&
-           strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME)) { // Dont pick error anim randomly
+        if(strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) == 0) {
+            // Dont pick error anim randomly
+            valid = false;
+        } else if(skip_credits && strcmp(manifest_info->name, CREDITS_ANIMATION_NAME) == 0) {
+            // Dont pick credits anim if disabled
+            valid = false;
+        }
+
+        if(valid) { // Dont pick error anim randomly
             StorageAnimationList_next(it);
         } else {
             animation_storage_free_storage_animation(&storage_animation);
