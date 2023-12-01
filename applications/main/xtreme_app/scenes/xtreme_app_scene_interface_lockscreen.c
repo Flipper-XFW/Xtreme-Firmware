@@ -41,6 +41,14 @@ static void
     app->save_settings = true;
 }
 
+static void xtreme_app_scene_interface_lockscreen_lockscreen_poweroff_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    xtreme_settings.lockscreen_poweroff = value;
+    app->save_settings = true;
+}
+
 static void xtreme_app_scene_interface_lockscreen_lockscreen_time_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
@@ -123,6 +131,15 @@ void xtreme_app_scene_interface_lockscreen_on_enter(void* context) {
     variable_item_set_current_value_index(item, xtreme_settings.allow_locked_rpc_commands);
     variable_item_set_current_value_text(
         item, xtreme_settings.allow_locked_rpc_commands ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Allow Poweroff",
+        2,
+        xtreme_app_scene_interface_lockscreen_lockscreen_poweroff_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings.lockscreen_poweroff);
+    variable_item_set_current_value_text(item, xtreme_settings.lockscreen_poweroff ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,

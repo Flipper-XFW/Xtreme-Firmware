@@ -62,6 +62,7 @@ typedef struct {
     bool lock_on_boot;
     bool bad_pins_format;
     bool allow_locked_rpc_commands;
+    bool lockscreen_poweroff;
     bool lockscreen_time;
     bool lockscreen_seconds;
     bool lockscreen_date;

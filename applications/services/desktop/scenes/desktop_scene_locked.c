@@ -13,6 +13,7 @@
 #include "../views/desktop_view_locked.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
+#include <xtreme.h>
 
 #define TAG "DesktopSrv"
 
@@ -84,7 +85,9 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DesktopLockedEventOpenPowerOff: {
-            loader_start(desktop->loader, "Power", "off", NULL);
+            if(xtreme_settings.lockscreen_poweroff) {
+                loader_start(desktop->loader, "Power", "off", NULL);
+            }
             consumed = true;
             break;
         }

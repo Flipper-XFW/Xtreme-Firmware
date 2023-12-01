@@ -15,6 +15,7 @@ XtremeSettings xtreme_settings = {
     .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
     .allow_locked_rpc_commands = false, // OFF
+    .lockscreen_poweroff = true, // ON
     .lockscreen_time = true, // ON
     .lockscreen_seconds = false, // OFF
     .lockscreen_date = true, // ON
@@ -87,6 +88,10 @@ void XTREME_SETTINGS_LOAD() {
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "lock_on_boot", &b, 1)) {
             x->lock_on_boot = b;
+        }
+        flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "lockscreen_poweroff", &b, 1)) {
+            x->lockscreen_poweroff = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "lockscreen_time", &b, 1)) {
@@ -216,6 +221,7 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_bool(
             file, "allow_locked_rpc_commands", &x->allow_locked_rpc_commands, 1);
         flipper_format_write_bool(file, "lock_on_boot", &x->lock_on_boot, 1);
+        flipper_format_write_bool(file, "lockscreen_poweroff", &x->lockscreen_poweroff, 1);
         flipper_format_write_bool(file, "lockscreen_time", &x->lockscreen_time, 1);
         flipper_format_write_bool(file, "lockscreen_seconds", &x->lockscreen_seconds, 1);
         flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
