@@ -2814,9 +2814,9 @@ Function,+,storage_common_fs_info,FS_Error,"Storage*, const char*, uint64_t*, ui
 Function,+,storage_common_merge,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_migrate,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_mkdir,FS_Error,"Storage*, const char*"
-Function,+,storage_common_move,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_remove,FS_Error,"Storage*, const char*"
 Function,+,storage_common_rename,FS_Error,"Storage*, const char*, const char*"
+Function,+,storage_common_rename_safe,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_resolve_path_and_ensure_app_directory,void,"Storage*, FuriString*"
 Function,+,storage_common_stat,FS_Error,"Storage*, const char*, FileInfo*"
 Function,+,storage_common_timestamp,FS_Error,"Storage*, const char*, uint32_t*"
@@ -3239,6 +3239,7 @@ Function,+,variable_item_get_current_value_index,uint8_t,VariableItem*
 Function,+,variable_item_list_add,VariableItem*,"VariableItemList*, const char*, uint8_t, VariableItemChangeCallback, void*"
 Function,+,variable_item_list_alloc,VariableItemList*,
 Function,+,variable_item_list_free,void,VariableItemList*
+Function,+,variable_item_list_get,VariableItem*,"VariableItemList*, uint8_t"
 Function,+,variable_item_list_get_selected_item_index,uint8_t,VariableItemList*
 Function,+,variable_item_list_get_view,View*,VariableItemList*
 Function,+,variable_item_list_reset,void,VariableItemList*

@@ -2,7 +2,7 @@ Filetype: Flipper Animation Manifest
 Version: 1
 
 # Animation 1
-Name: thank_you_128x64
+Name: L1_AnimationError_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1

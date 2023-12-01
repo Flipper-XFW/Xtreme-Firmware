@@ -1,7 +1,7 @@
 #include "mykey.h"
 
 uint32_t encode_decode_block(uint32_t input) {
-        /*
+    /*
      * Swap all values using XOR
      * 32 bit: 1111222233334444
      */
@@ -14,13 +14,11 @@ uint32_t encode_decode_block(uint32_t input) {
     return input;
 }
 
-
-
-void endian_swap_uint8_array(uint8_t *array, size_t size) {
+void endian_swap_uint8_array(uint8_t* array, size_t size) {
     size_t i;
     uint8_t temp;
 
-    for (i = 0; i < size / 2; i++) {
+    for(i = 0; i < size / 2; i++) {
         temp = array[i];
         array[i] = array[size - 1 - i];
         array[size - 1 - i] = temp;
@@ -42,7 +40,7 @@ uint32_t get_block(uint32_t block) {
     return encode_decode_block(st25tb_get_block_value(block));
 }
 
-//decode for credit 
+//decode for credit
 uint32_t get_xored_block(uint32_t block, uint32_t key) {
     return encode_decode_block(st25tb_get_block_value(block) ^ key);
 }

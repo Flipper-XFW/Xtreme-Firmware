@@ -108,6 +108,17 @@ static void bad_kb_save_settings(BadKbApp* app) {
     furi_record_close(RECORD_STORAGE);
 }
 
+void bad_kb_app_show_loading_popup(BadKbApp* app, bool show) {
+    if(show) {
+        // Raise timer priority so that animations can play
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
+        view_dispatcher_switch_to_view(app->view_dispatcher, BadKbAppViewLoading);
+    } else {
+        // Restore default timer priority
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
+    }
+}
+
 BadKbApp* bad_kb_app_alloc(char* arg) {
     BadKbApp* app = malloc(sizeof(BadKbApp));
 
@@ -118,11 +129,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     if(arg && strlen(arg)) {
         furi_string_set(app->file_path, arg);
     }
-
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_rename(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
-    storage_simply_mkdir(storage, BAD_KB_APP_BASE_FOLDER);
-    furi_record_close(RECORD_STORAGE);
 
     bad_kb_load_settings(app);
 
@@ -184,6 +190,10 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     view_dispatcher_add_view(
         app->view_dispatcher, BadKbAppViewByteInput, byte_input_get_view(app->byte_input));
 
+    app->loading = loading_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BadKbAppViewLoading, loading_get_view(app->loading));
+
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     app->conn_mode = BadKbConnModeNone;
@@ -229,6 +239,10 @@ void bad_kb_app_free(BadKbApp* app) {
     // Byte Input
     view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewByteInput);
     byte_input_free(app->byte_input);
+
+    // Loading
+    view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewLoading);
+    loading_free(app->loading);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

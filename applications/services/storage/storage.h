@@ -312,6 +312,7 @@ FS_Error storage_common_remove(Storage* storage, const char* path);
  * @brief Rename a file or a directory.
  *
  * The file or the directory must NOT be open.
+ * Will overwrite the destination file if it already exists.
  *
  * Renaming a regular file to itself does nothing and always succeeds.
  * Renaming a directory to itself or to a subdirectory of itself always fails.
@@ -324,20 +325,20 @@ FS_Error storage_common_remove(Storage* storage, const char* path);
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path);
 
 /**
- * @brief Move a file or a directory.
+ * @brief Rename a file or a directory.
  *
  * The file or the directory must NOT be open.
- * Will overwrite the destination file if it already exists.
+ * Will error FSE_EXIST if the destination file already exists.
  *
- * Moving a regular file to itself does nothing and always succeeds.
- * Moving a directory to itself or to a subdirectory of itself always fails.
+ * Renaming a regular file to itself does nothing and always succeeds.
+ * Renaming a directory to itself or to a subdirectory of itself always fails.
  *
  * @param storage pointer to a storage API instance.
  * @param old_path pointer to a zero-terminated string containing the source path.
  * @param new_path pointer to a zero-terminated string containing the destination path.
- * @return FSE_OK if the file or directory has been successfully moved, any other error code on failure.
+ * @return FSE_OK if the file or directory has been successfully renamed, any other error code on failure.
  */
-FS_Error storage_common_move(Storage* storage, const char* old_path, const char* new_path);
+FS_Error storage_common_rename_safe(Storage* storage, const char* old_path, const char* new_path);
 
 /**
  * @brief Copy the file to a new location.

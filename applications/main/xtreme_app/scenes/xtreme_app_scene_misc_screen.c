@@ -48,6 +48,7 @@ static const struct {
     {"Fuchsia", {255, 0, 255}}, {"Pink", {173, 31, 173}},  {"Brown", {165, 42, 42}},
     {"White", {255, 192, 203}},
 };
+static const size_t lcd_sz = COUNT_OF(lcd_colors);
 static void xtreme_app_scene_misc_screen_lcd_color_changed(VariableItem* item, uint8_t led) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -64,6 +65,14 @@ static void xtreme_app_scene_misc_screen_lcd_color_1_changed(VariableItem* item)
 static void xtreme_app_scene_misc_screen_lcd_color_2_changed(VariableItem* item) {
     xtreme_app_scene_misc_screen_lcd_color_changed(item, 2);
 }
+static const struct {
+    uint8_t led;
+    VariableItemChangeCallback cb;
+} lcd_cols[] = {
+    {0, xtreme_app_scene_misc_screen_lcd_color_0_changed},
+    {1, xtreme_app_scene_misc_screen_lcd_color_1_changed},
+    {2, xtreme_app_scene_misc_screen_lcd_color_2_changed},
+};
 
 const char* const rainbow_lcd_names[RGBBacklightRainbowModeCount] = {
     "OFF",
@@ -157,16 +166,6 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
 
     item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
     variable_item_set_current_value_text(item, xtreme_settings.rgb_backlight ? "ON" : "OFF");
-
-    struct {
-        uint8_t led;
-        VariableItemChangeCallback cb;
-    } lcd_cols[] = {
-        {0, xtreme_app_scene_misc_screen_lcd_color_0_changed},
-        {1, xtreme_app_scene_misc_screen_lcd_color_1_changed},
-        {2, xtreme_app_scene_misc_screen_lcd_color_2_changed},
-    };
-    size_t lcd_sz = COUNT_OF(lcd_colors);
 
     RgbColor color;
     for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
@@ -285,8 +284,31 @@ bool xtreme_app_scene_misc_screen_on_event(void* context, SceneManagerEvent even
                 app->save_backlight = true;
                 notification_message(app->notification, &sequence_display_backlight_on);
                 rgb_backlight_reconfigure(xtreme_settings.rgb_backlight);
-                scene_manager_previous_scene(app->scene_manager);
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscScreen);
+                variable_item_set_current_value_text(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRgbBacklight),
+                    xtreme_settings.rgb_backlight ? "ON" : "OFF");
+                for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
+                    variable_item_set_locked(
+                        variable_item_list_get(app->var_item_list, VarItemListIndexLcdColor0 + i),
+                        !xtreme_settings.rgb_backlight,
+                        "Needs RGB\nBacklight!");
+                }
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowLcd),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowSpeed),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowInterval),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowSaturation),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
             }
             break;
         }

@@ -178,7 +178,7 @@ FS_Error archive_copy_rename_file_or_dir(
         if(copy) {
             error = storage_common_copy(fs_api, src_path, furi_string_get_cstr(dst_path));
         } else {
-            error = storage_common_rename(fs_api, src_path, furi_string_get_cstr(dst_path));
+            error = storage_common_rename_safe(fs_api, src_path, furi_string_get_cstr(dst_path));
         }
     }
     furi_record_close(RECORD_STORAGE);

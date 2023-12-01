@@ -175,3 +175,10 @@ Max butthurt: 14
 Min level: 22
 Max level: 30
 Weight: 4
+
+Name: Credits_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 6
+Max level: 30
+Weight: 1

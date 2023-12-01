@@ -479,12 +479,13 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
             break;
         }
 
-        if(storage_common_exists(storage, new_path)) {
-            error = FSE_EXIST;
-            break;
-        }
-
         if(storage_dir_exists(storage, old_path)) {
+            // Cannot overwrite a file with a directory
+            if(storage_file_exists(storage, new_path)) {
+                error = FSE_INVALID_NAME;
+                break;
+            }
+
             // Cannot rename a directory to itself or to a nested directory
             if(storage_common_equivalent_path(storage, old_path, new_path, true)) {
                 error = FSE_INVALID_NAME;
@@ -495,6 +496,10 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
         } else if(storage_common_equivalent_path(storage, old_path, new_path, false)) {
             error = FSE_OK;
             break;
+        }
+
+        if(storage_file_exists(storage, new_path)) {
+            storage_common_remove(storage, new_path);
         }
 
         S_API_PROLOGUE;
@@ -525,7 +530,7 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
     return error;
 }
 
-FS_Error storage_common_move(Storage* storage, const char* old_path, const char* new_path) {
+FS_Error storage_common_rename_safe(Storage* storage, const char* old_path, const char* new_path) {
     FS_Error error;
 
     do {
@@ -534,28 +539,22 @@ FS_Error storage_common_move(Storage* storage, const char* old_path, const char*
             break;
         }
 
-        if(storage_dir_exists(storage, old_path)) {
-            // Cannot overwrite a file with a directory
-            if(storage_file_exists(storage, new_path)) {
-                error = FSE_INVALID_NAME;
-                break;
-            }
+        if(storage_common_exists(storage, new_path)) {
+            error = FSE_EXIST;
+            break;
+        }
 
-            // Cannot move a directory to itself or to a nested directory
+        if(storage_dir_exists(storage, old_path)) {
+            // Cannot rename a directory to itself or to a nested directory
             if(storage_common_equivalent_path(storage, old_path, new_path, true)) {
                 error = FSE_INVALID_NAME;
                 break;
             }
 
-            // Moving a regular file to itself does nothing and always succeeds
+            // Renaming a regular file to itself does nothing and always succeeds
         } else if(storage_common_equivalent_path(storage, old_path, new_path, false)) {
             error = FSE_OK;
             break;
-        }
-
-        if(storage_common_exists(storage, new_path)) {
-            error = storage_simply_remove_recursive(storage, new_path);
-            if(error != FSE_OK) break;
         }
 
         S_API_PROLOGUE;
@@ -756,7 +755,7 @@ static FS_Error
     if(error == FSE_OK) {
         if(file_info_is_dir(&fileinfo)) {
             if(!copy) {
-                error = storage_common_rename(storage, old_path, new_path);
+                error = storage_common_rename_safe(storage, old_path, new_path);
             }
             if(copy || error != FSE_OK) {
                 error = storage_merge_recursive(storage, old_path, new_path, copy);
@@ -814,7 +813,7 @@ static FS_Error
                 stream_free(stream_from);
                 stream_free(stream_to);
             } else {
-                error = storage_common_rename(storage, old_path, new_path_tmp);
+                error = storage_common_rename_safe(storage, old_path, new_path_tmp);
             }
         }
     }
