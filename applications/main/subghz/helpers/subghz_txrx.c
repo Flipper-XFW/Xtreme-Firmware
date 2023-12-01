@@ -694,7 +694,7 @@ SubGhzReceiver* subghz_txrx_get_receiver(SubGhzTxRx* instance) {
 void subghz_txrx_set_default_preset(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance);
 
-    const char* default_modulation = "AM650";
+    const char* default_modulation = "AM_Q";
     if(frequency == 0) {
         frequency = subghz_setting_get_default_frequency(subghz_txrx_get_setting(instance));
     }
