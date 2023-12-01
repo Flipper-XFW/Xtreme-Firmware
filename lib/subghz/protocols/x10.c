@@ -40,7 +40,6 @@
 //
 // Actual protocol can be found at http://kbase.x10.com/wiki/CM17A_Protocol
 
-
 static const SubGhzBlockConst subghz_protocol_x10_const = {
     .te_short = 600,
     .te_long = 1800,
@@ -126,7 +125,7 @@ bool subghz_protocol_x10_validate(void* context) {
 
     return decoder->decode_count_bit >= subghz_protocol_x10_const.min_count_bit_for_found &&
            ((((data >> 24) ^ (data >> 16)) & 0xFF) == 0xFF) &&
-           ((((data >> 8) ^ (data )) & 0xFF) == 0xFF);
+           ((((data >> 8) ^ (data)) & 0xFF) == 0xFF);
 }
 
 void subghz_protocol_decoder_x10_feed(void* context, bool level, uint32_t duration) {
@@ -157,7 +156,7 @@ void subghz_protocol_decoder_x10_feed(void* context, bool level, uint32_t durati
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_x10_const.min_count_bit_for_found) {
                     instance->decoder.parser_step = X10DecoderStepReset;
-                    if (subghz_protocol_x10_validate(context)) {
+                    if(subghz_protocol_x10_validate(context)) {
                         FURI_LOG_E(TAG, "Decoded a signal!");
                         instance->generic.data = instance->decoder.decode_data;
                         instance->generic.data_count_bit = instance->decoder.decode_count_bit;
@@ -207,7 +206,7 @@ void subghz_protocol_decoder_x10_feed(void* context, bool level, uint32_t durati
  * @param instance Pointer to a SubGhzBlockGeneric* instance
  */
 static void subghz_protocol_x10_check_remote_controller(SubGhzBlockGeneric* instance) {
-    instance->serial = (instance->data & 0xF0000000) >> (24+4);
+    instance->serial = (instance->data & 0xF0000000) >> (24 + 4);
     instance->btn = (((instance->data & 0x07000000) >> 24) | ((instance->data & 0xF800) >> 8));
 }
 
@@ -236,8 +235,7 @@ SubGhzProtocolStatus
         if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             break;
         }
-        if(instance->generic.data_count_bit !=
-            subghz_protocol_x10_const.min_count_bit_for_found) {
+        if(instance->generic.data_count_bit != subghz_protocol_x10_const.min_count_bit_for_found) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
         }
@@ -254,17 +252,15 @@ void subghz_protocol_decoder_x10_get_string(void* context, FuriString* output) {
 
     char code_channel = CHANNEL_LETTERS[(instance->generic.serial & 0x0F)];
 
-    uint32_t code_button = 1 + (
-        ((instance->generic.btn&0x10) >> 4) |
-        ((instance->generic.btn&0x8) >> 2) |
-        ((instance->generic.btn&0x40)>>4) |
-        ((instance->generic.btn&4)<<1));
+    uint32_t code_button =
+        1 + (((instance->generic.btn & 0x10) >> 4) | ((instance->generic.btn & 0x8) >> 2) |
+             ((instance->generic.btn & 0x40) >> 4) | ((instance->generic.btn & 4) << 1));
 
     char* code_action = (instance->generic.btn & 0x20) == 0x20 ? "Off" : "On";
-    if (instance->generic.btn == 0x98) {
+    if(instance->generic.btn == 0x98) {
         code_button = 0;
         code_action = "Dim";
-    } else if (instance->generic.btn == 0x88) {
+    } else if(instance->generic.btn == 0x88) {
         code_button = 0;
         code_action = "Bright";
     }
