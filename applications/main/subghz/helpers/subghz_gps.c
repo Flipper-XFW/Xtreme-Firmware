@@ -1,4 +1,5 @@
 #include "subghz_gps.h"
+#include "minmea.h"
 
 static void subghz_gps_uart_parse_nmea(SubGhzGPS* subghz_gps, char* line) {
     switch(minmea_sentence_id(line, false)) {

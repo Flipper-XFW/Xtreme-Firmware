@@ -3,7 +3,7 @@
 #include "dolphin_deed.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

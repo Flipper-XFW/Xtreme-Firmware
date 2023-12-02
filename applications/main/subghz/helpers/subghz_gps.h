@@ -1,6 +1,5 @@
 #include <furi_hal.h>
 #include <xtreme.h>
-#include "minmea.h"
 
 #define UART_CH \
     (xtreme_settings.uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
