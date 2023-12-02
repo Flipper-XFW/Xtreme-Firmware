@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include "../desktop.h"
 #include "../desktop_i.h"

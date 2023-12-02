@@ -1,5 +1,5 @@
 #include "../power_settings_app.h"
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 void power_settings_scene_power_off_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);

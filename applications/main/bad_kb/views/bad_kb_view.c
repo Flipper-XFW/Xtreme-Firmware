@@ -4,7 +4,7 @@
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #define MAX_NAME_LEN 64
 

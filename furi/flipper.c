@@ -14,8 +14,8 @@
 #include <dolphin/helpers/dolphin_state.h>
 #include <applications/main/u2f/u2f_data.h>
 #include <applications/main/archive/helpers/archive_favorites.h>
-#include <namespoof.h>
-#include <xtreme.h>
+#include <xtreme/namespoof.h>
+#include <xtreme/xtreme.h>
 
 #include <FreeRTOS.h>
 

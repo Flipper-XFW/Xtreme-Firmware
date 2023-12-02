@@ -13,7 +13,7 @@
 #include "../views/desktop_view_locked.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #define TAG "DesktopSrv"
 

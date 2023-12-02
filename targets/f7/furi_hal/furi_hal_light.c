@@ -3,7 +3,7 @@
 #include <furi_hal_light.h>
 #include <lp5562.h>
 #include <stdint.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #include <rgb_backlight.h>
 
 #define LED_CURRENT_RED 50

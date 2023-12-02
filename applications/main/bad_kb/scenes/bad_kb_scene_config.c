@@ -2,7 +2,7 @@
 #include "../helpers/ducky_script.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 enum VarItemListIndex {
     VarItemListIndexKeyboardLayout,

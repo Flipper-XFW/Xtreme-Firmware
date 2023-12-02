@@ -11,7 +11,7 @@
 #include <cli/cli_vcp.h>
 #include <locale/locale.h>
 #include <applications/main/archive/helpers/archive_helpers_ext.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include "animations/animation_manager.h"
 #include "desktop/scenes/desktop_scene.h"

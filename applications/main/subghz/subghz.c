@@ -6,7 +6,7 @@
 #include <float_tools.h>
 #include "subghz_i.h"
 #include <applications/main/archive/helpers/archive_helpers_ext.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #define TAG "SubGhzApp"
 

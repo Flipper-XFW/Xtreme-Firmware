@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #include <furi_hal_rtc.h>
 
 #include "../desktop_i.h"

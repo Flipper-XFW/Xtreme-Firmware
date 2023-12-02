@@ -11,7 +11,7 @@
 #include "animation_storage_i.h"
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #define ANIMATION_META_FILE "meta.txt"
 #define TAG "AnimationStorage"
 char ANIMATION_DIR[23 /*"/ext/asset_packs//Anims"*/ + XTREME_ASSETS_PACK_NAME_LEN + 1];

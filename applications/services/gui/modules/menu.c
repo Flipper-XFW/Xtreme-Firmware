@@ -9,7 +9,7 @@
 #include <dolphin/helpers/dolphin_state.h>
 #include <furi.h>
 #include <m-array.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #include <m-string.h>
 
 struct Menu {

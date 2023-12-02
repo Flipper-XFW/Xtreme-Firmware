@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 #include "../views/transmitter.h"
 #include <dolphin/dolphin.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include <lib/subghz/blocks/custom_btn.h>
 

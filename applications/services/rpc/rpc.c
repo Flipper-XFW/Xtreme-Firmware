@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <m-dict.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include <bt/bt_service/bt.h>
 

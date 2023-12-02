@@ -4,7 +4,7 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>

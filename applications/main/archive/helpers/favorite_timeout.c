@@ -1,5 +1,5 @@
 #include "archive_helpers_ext.h"
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 bool process_favorite_launch(char** args) {
     if(*args && strlen(*args) > 4 && strncmp(*args, "fav/", 4) == 0) {

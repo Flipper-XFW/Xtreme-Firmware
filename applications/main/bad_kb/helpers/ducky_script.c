@@ -11,7 +11,7 @@
 #include "ducky_script_i.h"
 #include <dolphin/dolphin.h>
 #include <toolbox/hex.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #include "../scenes/bad_kb_scene.h"
 
 const uint8_t BAD_KB_EMPTY_MAC[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;

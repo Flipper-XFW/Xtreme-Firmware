@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #include <lib/flipper_format/flipper_format.h>
 
 #include <bt/bt_service/bt_i.h>
