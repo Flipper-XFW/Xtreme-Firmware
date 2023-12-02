@@ -34,9 +34,9 @@ def generate(env):
                             "${ROOT_DIR}",
                             "--suffix",
                             "${DIST_SUFFIX}",
-                            "${VERSIONCOMSTR}",
                         ]
-                    ]
+                    ],
+                    "${VERSIONCOMSTR}",
                 ),
                 emitter=_version_emitter,
             ),

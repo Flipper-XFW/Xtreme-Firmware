@@ -176,6 +176,13 @@ Min level: 22
 Max level: 30
 Weight: 4
 
+Name: L2_Secret_door_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 26
+Max level: 30
+Weight: 4
+
 Name: Credits_128x64
 Min butthurt: 0
 Max butthurt: 14
