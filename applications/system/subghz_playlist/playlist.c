@@ -162,6 +162,7 @@ static int playlist_worker_process(
             flipper_format_get_raw_stream(fff_file), flipper_format_get_raw_stream(fff_data));
     }
     flipper_format_file_close(fff_file);
+    flipper_format_free(fff_file);
 
     // (try to) send file
     SubGhzEnvironment* environment = subghz_environment_alloc();
@@ -219,6 +220,7 @@ static int playlist_worker_process(
     subghz_devices_idle(worker->radio_device);
 
     subghz_transmitter_free(transmitter);
+    subghz_environment_free(environment);
 
     return status;
 }
