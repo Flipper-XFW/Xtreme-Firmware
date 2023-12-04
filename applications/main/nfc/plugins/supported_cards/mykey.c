@@ -87,10 +87,13 @@ static bool mykey_parse(const NfcDevice* device, FuriString* parsed_data) {
         //Calc data
         uint32_t _uid = get_uid(data->uid);
         uint32_t _count_down_counter_new = new_get_count_down_counter(__bswap32(data->blocks[6]));
-        uint32_t _vendor_id = get_vendor(get_block(data->blocks[MYKEY_BLOCK_VENDOR_ID_1]), get_block(data->blocks[MYKEY_BLOCK_VENDOR_ID_2]));
+        uint32_t _vendor_id = get_vendor(
+            get_block(data->blocks[MYKEY_BLOCK_VENDOR_ID_1]),
+            get_block(data->blocks[MYKEY_BLOCK_VENDOR_ID_2]));
         uint32_t _master_key = get_master_key(_uid, _vendor_id);
         uint32_t _encryption_key = get_encryption_key(_master_key, _count_down_counter_new);
-        uint16_t credit = get_xored_block(data->blocks[MYKEY_BLOCK_CURRENT_CREDIT], _encryption_key);
+        uint16_t credit =
+            get_xored_block(data->blocks[MYKEY_BLOCK_CURRENT_CREDIT], _encryption_key);
         uint16_t _previous_credit = get_block(data->blocks[MYKEY_BLOCK_PREVIOUS_CREDIT]);
         bool _is_bound = get_is_bound(_vendor_id);
 
@@ -98,8 +101,13 @@ static bool mykey_parse(const NfcDevice* device, FuriString* parsed_data) {
         furi_string_cat_printf(parsed_data, "\e#MyKey Card\n");
         furi_string_cat_printf(parsed_data, "UID: %08lX\n", _uid);
         furi_string_cat_printf(parsed_data, "Vendor ID: %08lX\n", _vendor_id);
-        furi_string_cat_printf(parsed_data, "Current Credit: %d.%02d E \n", credit / 100, credit % 100);
-        furi_string_cat_printf(parsed_data, "Previus Credit: %d.%02d E \n", _previous_credit / 100, _previous_credit % 100);
+        furi_string_cat_printf(
+            parsed_data, "Current Credit: %d.%02d E \n", credit / 100, credit % 100);
+        furi_string_cat_printf(
+            parsed_data,
+            "Previus Credit: %d.%02d E \n",
+            _previous_credit / 100,
+            _previous_credit % 100);
         furi_string_cat_printf(parsed_data, "Is Bound: %s\n", _is_bound ? "yes" : "no");
 
         parsed = true;
