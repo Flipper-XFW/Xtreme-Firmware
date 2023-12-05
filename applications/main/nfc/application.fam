@@ -120,15 +120,6 @@ App(
 )
 
 App(
-    appid="sonicare_parser",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="sonicare_plugin_ep",
-    targets=["f7"],
-    requires=["nfc"],
-    sources=["plugins/supported_cards/sonicare.c"],
-)
-
-App(
     appid="saflok_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="saflok_plugin_ep",
@@ -144,6 +135,15 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/mykey.c"],
+)
+
+App(
+    appid="sonicare_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="sonicare_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/sonicare.c"],
 )
 
 App(
