@@ -5,6 +5,7 @@ App(
     entry_point="playlist_app",
     requires=["storage", "gui", "dialogs", "subghz"],
     stack_size=2 * 1024,
+    order=14,
     fap_icon="subplaylist_10px.png",
     fap_category="Sub-GHz",
     fap_icon_assets="images",

@@ -23,8 +23,9 @@
 #include "views/hid_mouse.h"
 #include "views/hid_mouse_clicker.h"
 #include "views/hid_mouse_jiggler.h"
-#include "views/hid_tiktok.h"
+#include "views/hid_tikshorts.h"
 #include "views/hid_ptt.h"
+#include "views/hid_ptt_menu.h"
 
 #include <assets_icons.h>
 
@@ -51,8 +52,9 @@ struct Hid {
     HidMouse* hid_mouse;
     HidMouseClicker* hid_mouse_clicker;
     HidMouseJiggler* hid_mouse_jiggler;
-    HidTikTok* hid_tiktok;
-    HidPtt* hid_ptt;
+    HidTikShorts* hid_tikshorts;
+    HidPushToTalk* hid_ptt;
+    HidPushToTalkMenu* hid_ptt_menu;
 
     HidTransport transport;
     uint32_t view_id;

@@ -61,13 +61,16 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
                 width,
                 0,
                 ROW_HEIGHT * HEX_VIEWER_LINES_ON_SCREEN,
-                first_line_on_screen, // TODO
+                first_line_on_screen,
                 line_count - (HEX_VIEWER_LINES_ON_SCREEN - 1));
         }
 
         char temp_buf[32];
         uint32_t row_iters = model->file_read_bytes / HEX_VIEWER_BYTES_PER_LINE;
         if(model->file_read_bytes % HEX_VIEWER_BYTES_PER_LINE != 0) row_iters += 1;
+
+        // For the rest of drawing.
+        canvas_set_font(canvas, FontKeyboard);
 
         for(uint32_t i = 0; i < row_iters; ++i) {
             uint32_t bytes_left_per_row = model->file_read_bytes - i * HEX_VIEWER_BYTES_PER_LINE;
@@ -79,13 +82,13 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
                 for(uint32_t j = 0; j < bytes_left_per_row; ++j)
                     if(!isprint((int)temp_buf[j])) temp_buf[j] = '.';
 
-                canvas_set_font(canvas, FontKeyboard);
+                //canvas_set_font(canvas, FontKeyboard);
                 canvas_draw_str(canvas, LEFT_OFFSET, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
             } else {
                 uint32_t addr = model->file_offset + i * HEX_VIEWER_BYTES_PER_LINE;
                 snprintf(temp_buf, 32, "%04lX", addr);
 
-                canvas_set_font(canvas, FontKeyboard);
+                //canvas_set_font(canvas, FontKeyboard);
                 canvas_draw_str(canvas, LEFT_OFFSET, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
             }
 
@@ -93,7 +96,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
             for(uint32_t j = 0; j < bytes_left_per_row; ++j)
                 p += snprintf(p, 32, "%02X ", model->file_bytes[i][j]);
 
-            canvas_set_font(canvas, FontKeyboard);
+            //canvas_set_font(canvas, FontKeyboard);
             canvas_draw_str(canvas, LEFT_OFFSET + 41, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
         }
 
@@ -125,7 +128,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context);
     HexViewerStartscreen* instance = context;
     HexViewer* app = instance->context; // TO so good, but works
-    // TODO InputTypeShort?
+
     if(event->type == InputTypeRelease || event->type == InputTypeRepeat) {
         switch(event->key) {
         case InputKeyBack:
