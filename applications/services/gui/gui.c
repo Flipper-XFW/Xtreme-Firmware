@@ -1,4 +1,4 @@
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #include "gui_i.h"
 #include <assets_icons.h>
 #include <storage/storage.h>
@@ -84,12 +84,10 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
 
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
-
     /* for support black theme - paint white area and
      * draw icon with transparent white color
      */
-    if(xtreme_settings->bar_background) {
+    if(xtreme_settings.bar_background) {
         canvas_set_color(gui->canvas, ColorWhite);
         canvas_draw_box(gui->canvas, 1, 1, 9, 7);
         canvas_draw_box(gui->canvas, 7, 3, 58, 6);
@@ -122,7 +120,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
                 width + 2,
                 GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
             // Hide battery background
-            if(xtreme_settings->bar_borders) {
+            if(xtreme_settings.bar_borders) {
                 canvas_set_color(gui->canvas, ColorWhite);
                 canvas_draw_box(
                     gui->canvas, -1, 0, canvas_width(gui->canvas) + 1, canvas_height(gui->canvas));
@@ -131,7 +129,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             // ViewPort draw
             canvas_frame_set(
                 gui->canvas,
-                x - xtreme_settings->bar_borders,
+                x - xtreme_settings.bar_borders,
                 GUI_STATUS_BAR_Y + 2,
                 width,
                 GUI_STATUS_BAR_WORKAREA_HEIGHT);
@@ -148,7 +146,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             right_used + 4,
             GUI_STATUS_BAR_HEIGHT);
         // Disable battery border
-        if(xtreme_settings->bar_borders) {
+        if(xtreme_settings.bar_borders) {
             canvas_set_color(gui->canvas, ColorBlack);
             canvas_draw_rframe(
                 gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
@@ -168,7 +166,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     }
 
     // Left side
-    if(xtreme_settings->status_icons) {
+    if(xtreme_settings.status_icons) {
         x = 2;
         ViewPortArray_it(it, gui->layers[GuiLayerStatusBarLeft]);
         while(!ViewPortArray_end_p(it) && (right_used + left_used) < GUI_STATUS_BAR_WIDTH) {
@@ -183,7 +181,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
                     GUI_STATUS_BAR_Y + 1,
                     width + 2,
                     GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
-                if(xtreme_settings->bar_borders) {
+                if(xtreme_settings.bar_borders) {
                     canvas_set_color(gui->canvas, ColorWhite);
                     canvas_draw_box(
                         gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas));
@@ -209,7 +207,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
                 GUI_STATUS_BAR_Y + 1,
                 width + 2,
                 GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
-            if(xtreme_settings->bar_borders) {
+            if(xtreme_settings.bar_borders) {
                 canvas_set_color(gui->canvas, ColorWhite);
                 canvas_draw_box(
                     gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas));
@@ -226,7 +224,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
         // Draw frame around icons on the left
         if(left_used) {
             canvas_frame_set(gui->canvas, 0, 0, left_used + 3, GUI_STATUS_BAR_HEIGHT);
-            if(xtreme_settings->bar_borders) {
+            if(xtreme_settings.bar_borders) {
                 canvas_draw_rframe(
                     gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
                 canvas_draw_line(
@@ -283,7 +281,7 @@ static void gui_redraw(Gui* gui) {
             bool need_attention =
                 (gui_view_port_find_enabled(gui->layers[GuiLayerWindow]) != 0 ||
                  gui_view_port_find_enabled(gui->layers[GuiLayerFullscreen]) != 0);
-            if(XTREME_SETTINGS()->lockscreen_statusbar) {
+            if(xtreme_settings.lockscreen_statusbar) {
                 gui_redraw_status_bar(gui, need_attention);
             }
         } else {
@@ -392,10 +390,11 @@ void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
     furi_assert(view_port);
     furi_check(layer < GuiLayerMAX);
     // Only fullscreen supports Vertical orientation for now
-    furi_assert(
+    ViewPortOrientation view_port_orientation = view_port_get_orientation(view_port);
+    furi_check(
         (layer == GuiLayerFullscreen) ||
-        ((view_port->orientation != ViewPortOrientationVertical) &&
-         (view_port->orientation != ViewPortOrientationVerticalFlip)));
+        ((view_port_orientation != ViewPortOrientationVertical) &&
+         (view_port_orientation != ViewPortOrientationVerticalFlip)));
 
     gui_lock(gui);
     // Verify that view port is not yet added

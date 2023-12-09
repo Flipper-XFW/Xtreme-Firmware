@@ -23,5 +23,8 @@ typedef enum {
     BadKbAppViewWork,
     BadKbAppViewVarItemList,
     BadKbAppViewByteInput,
-    BadKbAppViewTextInput
+    BadKbAppViewTextInput,
+    BadKbAppViewLoading,
 } BadKbAppView;
+
+void bad_kb_app_show_loading_popup(BadKbApp* app, bool show);

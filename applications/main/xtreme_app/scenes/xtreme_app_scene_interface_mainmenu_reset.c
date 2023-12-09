@@ -37,6 +37,9 @@ bool xtreme_app_scene_interface_mainmenu_reset_on_event(void* context, SceneMana
             app->require_reboot = true;
             xtreme_app_apply(app);
             break;
+        case DialogExResultLeft:
+            scene_manager_previous_scene(app->scene_manager);
+            break;
         default:
             break;
         }

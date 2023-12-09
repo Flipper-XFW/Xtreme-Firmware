@@ -5,7 +5,7 @@
 #include <furi_hal_random.h>
 #include <flipper_format/flipper_format.h>
 
-#define TAG "U2F"
+#define TAG "U2f"
 
 #define U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_FACTORY 2
 #define U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_UNIQUE FURI_HAL_CRYPTO_ENCLAVE_UNIQUE_KEY_SLOT
@@ -31,7 +31,7 @@ typedef struct {
     uint32_t counter;
     uint8_t random_salt[24];
     uint32_t control;
-} __attribute__((packed)) U2fCounterData;
+} FURI_PACKED U2fCounterData;
 
 bool u2f_data_check(bool cert_only) {
     bool state = false;

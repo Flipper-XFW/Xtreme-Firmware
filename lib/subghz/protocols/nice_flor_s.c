@@ -84,6 +84,8 @@ const SubGhzProtocol subghz_protocol_nice_flor_s = {
 
     .decoder = &subghz_protocol_nice_flor_s_decoder,
     .encoder = &subghz_protocol_nice_flor_s_encoder,
+
+    .filter = SubGhzProtocolFilter_NiceFlorS,
 };
 
 static void subghz_protocol_nice_flor_s_remote_controller(
@@ -688,7 +690,7 @@ static void subghz_protocol_nice_flor_s_remote_controller(
     if(subghz_custom_btn_get_original() == 0) {
         subghz_custom_btn_set_original(instance->btn);
     }
-    subghz_custom_btn_set_max(3);
+    subghz_custom_btn_set_max(4);
 }
 
 uint8_t subghz_protocol_decoder_nice_flor_s_get_hash_data(void* context) {
@@ -774,6 +776,9 @@ static uint8_t subghz_protocol_nice_flor_s_get_btn_code() {
         case 0x8:
             btn = 0x1;
             break;
+        case 0x3:
+            btn = 0x1;
+            break;
 
         default:
             break;
@@ -792,6 +797,9 @@ static uint8_t subghz_protocol_nice_flor_s_get_btn_code() {
         case 0x8:
             btn = 0x4;
             break;
+        case 0x3:
+            btn = 0x4;
+            break;
 
         default:
             break;
@@ -808,6 +816,30 @@ static uint8_t subghz_protocol_nice_flor_s_get_btn_code() {
             btn = 0x8;
             break;
         case 0x8:
+            btn = 0x2;
+            break;
+        case 0x3:
+            btn = 0x8;
+            break;
+
+        default:
+            break;
+        }
+    } else if(custom_btn_id == SUBGHZ_CUSTOM_BTN_RIGHT) {
+        switch(original_btn_code) {
+        case 0x1:
+            btn = 0x3;
+            break;
+        case 0x2:
+            btn = 0x3;
+            break;
+        case 0x4:
+            btn = 0x3;
+            break;
+        case 0x8:
+            btn = 0x3;
+            break;
+        case 0x3:
             btn = 0x2;
             break;
 

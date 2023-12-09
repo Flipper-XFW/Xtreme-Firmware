@@ -1,8 +1,4 @@
 #include "../subghz_i.h"
-#include "../views/receiver.h"
-#include <lib/subghz/protocols/raw.h>
-
-#include <lib/subghz/subghz_file_encoder_worker.h>
 
 #define TAG "SubGhzDecodeRaw"
 #define SAMPLES_TO_READ_PER_TICK 400
@@ -10,7 +6,8 @@
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
     FuriString* history_stat_str = furi_string_alloc();
-    if(!subghz_history_get_text_space_left(subghz->history, history_stat_str)) {
+    if(!subghz_history_get_text_space_left(
+           subghz->history, history_stat_str, subghz->gps->satellites)) {
         FuriString* frequency_str = furi_string_alloc();
         FuriString* modulation_str = furi_string_alloc();
 
@@ -21,13 +18,20 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
             subghz->subghz_receiver,
             furi_string_get_cstr(frequency_str),
             furi_string_get_cstr(modulation_str),
-            furi_string_get_cstr(history_stat_str));
+            furi_string_get_cstr(history_stat_str),
+            subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF,
+            READ_BIT(subghz->filter, SubGhzProtocolFlag_BinRAW) > 0);
 
         furi_string_free(frequency_str);
         furi_string_free(modulation_str);
     } else {
         subghz_view_receiver_add_data_statusbar(
-            subghz->subghz_receiver, furi_string_get_cstr(history_stat_str), "", "");
+            subghz->subghz_receiver,
+            furi_string_get_cstr(history_stat_str),
+            "",
+            "",
+            subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF,
+            READ_BIT(subghz->filter, SubGhzProtocolFlag_BinRAW) > 0);
     }
     furi_string_free(history_stat_str);
 }
@@ -48,6 +52,8 @@ static void subghz_scene_add_to_history_callback(
     FuriString* item_time = furi_string_alloc();
     uint16_t idx = subghz_history_get_item(subghz->history);
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
+    preset.latitude = subghz->gps->latitude;
+    preset.longitude = subghz->gps->longitude;
 
     if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
         furi_string_reset(item_name);
@@ -154,7 +160,7 @@ void subghz_scene_decode_raw_on_enter(void* context) {
     subghz_view_receiver_set_callback(
         subghz->subghz_receiver, subghz_scene_decode_raw_callback, subghz);
 
-    subghz_txrx_set_rx_calback(subghz->txrx, subghz_scene_add_to_history_callback, subghz);
+    subghz_txrx_set_rx_callback(subghz->txrx, subghz_scene_add_to_history_callback, subghz);
 
     subghz_txrx_receiver_set_filter(subghz->txrx, SubGhzProtocolFlag_Decodable);
 
@@ -170,7 +176,7 @@ void subghz_scene_decode_raw_on_enter(void* context) {
     } else {
         //Load history to receiver
         subghz_view_receiver_exit(subghz->subghz_receiver);
-        for(uint8_t i = 0; i < subghz_history_get_item(subghz->history); i++) {
+        for(uint16_t i = 0; i < subghz_history_get_item(subghz->history); i++) {
             furi_string_reset(item_name);
             furi_string_reset(item_time);
             subghz_history_get_text_item_menu(subghz->history, item_name, i);
@@ -202,7 +208,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneDecodeRAW, SubGhzDecodeRawStateStart);
             subghz->idx_menu_chosen = 0;
 
-            subghz_txrx_set_rx_calback(subghz->txrx, NULL, subghz);
+            subghz_txrx_set_rx_callback(subghz->txrx, NULL, subghz);
 
             if(subghz_file_encoder_worker_is_running(subghz->decode_raw_file_worker_encoder)) {
                 subghz_file_encoder_worker_stop(subghz->decode_raw_file_worker_encoder);

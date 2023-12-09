@@ -5,9 +5,8 @@
 #include <gui/icon.h>
 #include <gui/view.h>
 #include <assets_icons.h>
-#include <portmacro.h>
 #include <locale/locale.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include <desktop/desktop_settings.h>
 #include "../desktop_i.h"
@@ -28,7 +27,7 @@ struct DesktopViewLocked {
     DesktopViewLockedCallback callback;
     void* context;
 
-    TimerHandle_t timer;
+    FuriTimer* timer;
     uint8_t lock_count;
     uint32_t lock_lastpress;
 };
@@ -58,8 +57,8 @@ void desktop_view_locked_set_callback(
     locked_view->context = context;
 }
 
-static void locked_view_timer_callback(TimerHandle_t timer) {
-    DesktopViewLocked* locked_view = pvTimerGetTimerID(timer);
+static void locked_view_timer_callback(void* context) {
+    DesktopViewLocked* locked_view = context;
     locked_view->callback(DesktopLockedEventUpdate, locked_view->context);
 }
 
@@ -74,7 +73,6 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     furi_hal_rtc_get_datetime(&datetime);
     LocaleTimeFormat time_format = locale_get_time_format();
     LocaleDateFormat date_format = locale_get_date_format();
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
 
     bool pm;
     if(time_format == LocaleTimeFormat24h) {
@@ -94,14 +92,14 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
         snprintf(date_str, 14, "%.2d-%.2d-%.4d", datetime.day, datetime.month, datetime.year);
     }
 
-    if(!xtreme_settings->lockscreen_transparent) {
+    if(!xtreme_settings.lockscreen_transparent) {
         canvas_draw_icon(canvas, 0, 0 + y, &I_Lockscreen);
     }
-    if(xtreme_settings->lockscreen_time) {
+    if(xtreme_settings.lockscreen_time) {
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str(canvas, 0, 64 + y, time_str);
         int offset = canvas_string_width(canvas, time_str) + 2;
-        if(xtreme_settings->lockscreen_seconds) {
+        if(xtreme_settings.lockscreen_seconds) {
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str(canvas, 0 + offset, 64 + y, second_str);
             offset += canvas_string_width(canvas, ":00") + 2;
@@ -111,12 +109,12 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
             canvas_draw_str(canvas, 0 + offset, 64 + y, meridian_str);
         }
     }
-    if(xtreme_settings->lockscreen_date) {
+    if(xtreme_settings.lockscreen_date) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings->lockscreen_time, date_str);
+        canvas_draw_str(canvas, 0, 48 + y + 16 * !xtreme_settings.lockscreen_time, date_str);
     }
     if(model->view_state == DesktopViewLockedStateLockedHintShown &&
-       xtreme_settings->lockscreen_prompt) {
+       xtreme_settings.lockscreen_prompt) {
         canvas_set_font(canvas, FontSecondary);
         if(model->pin_locked) {
             elements_bubble_str(
@@ -156,7 +154,7 @@ static void desktop_view_locked_update_hint_icon_timeout(DesktopViewLocked* lock
         model->view_state = DesktopViewLockedStateLockedHintShown;
     }
     view_commit_model(locked_view->view, change_state);
-    xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(LOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
+    furi_timer_start(locked_view->timer, LOCKED_HINT_TIMEOUT_MS);
 }
 
 void desktop_view_locked_update(DesktopViewLocked* locked_view) {
@@ -171,8 +169,7 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
         view_state == DesktopViewLockedStateCoverOpening &&
         !desktop_view_locked_cover_move(model, false)) {
         model->view_state = DesktopViewLockedStateUnlocked;
-        xTimerChangePeriod(
-            locked_view->timer, pdMS_TO_TICKS(UNLOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
+        furi_timer_start(locked_view->timer, LOCKED_HINT_TIMEOUT_MS);
     } else if(view_state == DesktopViewLockedStateLockedHintShown) {
         model->view_state = DesktopViewLockedStateLocked;
     } else if(view_state == DesktopViewLockedStateUnlockedHintShown) {
@@ -183,7 +180,7 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
 
     if(view_state != DesktopViewLockedStateCoverClosing &&
        view_state != DesktopViewLockedStateCoverOpening) {
-        xTimerStop(locked_view->timer, portMAX_DELAY);
+        furi_timer_stop(locked_view->timer);
     }
 }
 
@@ -210,7 +207,7 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
     furi_assert(context);
 
     bool is_changed = false;
-    const uint32_t press_time = xTaskGetTickCount();
+    const uint32_t press_time = furi_get_tick();
     DesktopViewLocked* locked_view = context;
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     if(model->view_state == DesktopViewLockedStateUnlockedHintShown &&
@@ -270,7 +267,7 @@ DesktopViewLocked* desktop_view_locked_alloc() {
     DesktopViewLocked* locked_view = malloc(sizeof(DesktopViewLocked));
     locked_view->view = view_alloc();
     locked_view->timer =
-        xTimerCreate(NULL, 1000 / 16, pdTRUE, locked_view, locked_view_timer_callback);
+        furi_timer_alloc(locked_view_timer_callback, FuriTimerTypePeriodic, locked_view);
 
     view_allocate_model(locked_view->view, ViewModelTypeLocking, sizeof(DesktopViewLockedModel));
     view_set_context(locked_view->view, locked_view);
@@ -293,7 +290,7 @@ void desktop_view_locked_close_cover(DesktopViewLocked* locked_view) {
     model->view_state = DesktopViewLockedStateCoverClosing;
     model->cover_offset = COVER_OFFSET_START;
     view_commit_model(locked_view->view, true);
-    xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(COVER_MOVING_INTERVAL_MS), portMAX_DELAY);
+    furi_timer_start(locked_view->timer, COVER_MOVING_INTERVAL_MS);
 }
 
 void desktop_view_locked_lock(DesktopViewLocked* locked_view, bool pin_locked) {
@@ -311,7 +308,7 @@ void desktop_view_locked_unlock(DesktopViewLocked* locked_view) {
     model->cover_offset = COVER_OFFSET_END;
     model->pin_locked = false;
     view_commit_model(locked_view->view, true);
-    xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(COVER_MOVING_INTERVAL_MS), portMAX_DELAY);
+    furi_timer_start(locked_view->timer, COVER_MOVING_INTERVAL_MS);
 }
 
 bool desktop_view_locked_is_locked_hint_visible(DesktopViewLocked* locked_view) {

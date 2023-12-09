@@ -15,20 +15,32 @@ void subghz_scene_set_type_on_enter(void* context) {
 
     submenu_add_item(
         subghz->submenu,
-        "Faac SLH 868MHz",
-        SubmenuIndexFaacSLH_868,
+        "FAAC SLH [Man.] 868MHz",
+        SubmenuIndexFaacSLH_Manual_868,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Faac SLH 433MHz",
-        SubmenuIndexFaacSLH_433,
+        "FAAC SLH [Man.] 433MHz",
+        SubmenuIndexFaacSLH_Manual_433,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
         "BFT [Manual] 433MHz",
         SubmenuIndexBFTClone,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "FAAC SLH 868MHz",
+        SubmenuIndexFaacSLH_868,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "FAAC SLH 433MHz",
+        SubmenuIndexFaacSLH_433,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
@@ -53,6 +65,12 @@ void subghz_scene_set_type_on_enter(void* context) {
         subghz->submenu,
         "Alutech AT4N 433MHz",
         SubmenuIndexAlutechAT4N,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "KL: HCS101 433MHz",
+        SubmenuIndexHCS101_433_92,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
@@ -149,6 +167,24 @@ void subghz_scene_set_type_on_enter(void* context) {
         subghz->submenu,
         "KL: Elmes (PL) 433MHz",
         SubmenuIndexElmesElectronic,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "KL: Normstahl 433MHz",
+        SubmenuIndexNormstahl_433_92,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "KL: JCM Tech 433MHz",
+        SubmenuIndexJCM_433_92,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "KL: Nice Mhouse 433MHz",
+        SubmenuIndexNiceMHouse_433_92,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
@@ -266,19 +302,19 @@ void subghz_scene_set_type_on_enter(void* context) {
     submenu_add_item(
         subghz->submenu,
         "Security+1.0 315MHz",
-        SubmenuIndexLiftMaster_315_00,
+        SubmenuIndexSecPlus_v1_315_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
         "Security+1.0 390MHz",
-        SubmenuIndexLiftMaster_390_00,
+        SubmenuIndexSecPlus_v1_390_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
         "Security+1.0 433MHz",
-        SubmenuIndexLiftMaster_433_00,
+        SubmenuIndexSecPlus_v1_433_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
@@ -319,10 +355,10 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         uint32_t key = (uint32_t)rand();
         switch(event.event) {
-        case SubmenuIndexFaacSLH_868:
+        case SubmenuIndexFaacSLH_Manual_868:
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetFix);
             break;
-        case SubmenuIndexFaacSLH_433:
+        case SubmenuIndexFaacSLH_Manual_433:
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetFix);
             break;
         case SubmenuIndexBFTClone:
@@ -339,7 +375,7 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 subghz->txrx, "AM650", 315000000, SUBGHZ_PROTOCOL_PRINCETON_NAME, key, 24, 400);
             break;
         case SubmenuIndexNiceFlo12bit:
-            key = (key & 0x0000FFF0) | 0x1; //btn 0x1, 0x2, 0x4
+            key = (key & 0x00000FF0) | 0x1; //btn 0x1, 0x2, 0x4
             generated_protocol = subghz_txrx_gen_data_protocol(
                 subghz->txrx, "AM650", 433920000, SUBGHZ_PROTOCOL_NICE_FLO_NAME, key, 12);
             break;
@@ -349,7 +385,7 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 subghz->txrx, "AM650", 433920000, SUBGHZ_PROTOCOL_NICE_FLO_NAME, key, 24);
             break;
         case SubmenuIndexCAME12bit:
-            key = (key & 0x0000FFF0) | 0x1; //btn 0x1, 0x2, 0x4
+            key = (key & 0x00000FF0) | 0x1; //btn 0x1, 0x2, 0x4
             generated_protocol = subghz_txrx_gen_data_protocol(
                 subghz->txrx, "AM650", 433920000, SUBGHZ_PROTOCOL_CAME_NAME, key, 12);
             break;
@@ -359,7 +395,7 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 subghz->txrx, "AM650", 433920000, SUBGHZ_PROTOCOL_CAME_NAME, key, 24);
             break;
         case SubmenuIndexCAME12bit868:
-            key = (key & 0x0000FFF0) | 0x1; //btn 0x1, 0x2, 0x4
+            key = (key & 0x00000FF0) | 0x1; //btn 0x1, 0x2, 0x4
             generated_protocol = subghz_txrx_gen_data_protocol(
                 subghz->txrx, "AM650", 868350000, SUBGHZ_PROTOCOL_CAME_NAME, key, 12);
             break;
@@ -389,6 +425,38 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             uint64_t rev_key = subghz_protocol_blocks_reverse_key(key, 24);
             generated_protocol = subghz_txrx_gen_data_protocol(
                 subghz->txrx, "AM650", 433920000, SUBGHZ_PROTOCOL_GATE_TX_NAME, rev_key, 24);
+            break;
+        case SubmenuIndexFaacSLH_433:
+            generated_protocol = subghz_txrx_gen_faac_slh_protocol(
+                subghz->txrx,
+                "AM650",
+                433920000,
+                ((key & 0x00FFFFF0) | 0xA0000006) >> 4,
+                0x6,
+                0x00002,
+                key,
+                "FAAC_SLH");
+            if(!generated_protocol) {
+                furi_string_set(
+                    subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+            }
+            break;
+        case SubmenuIndexFaacSLH_868:
+            generated_protocol = subghz_txrx_gen_faac_slh_protocol(
+                subghz->txrx,
+                "AM650",
+                868350000,
+                ((key & 0x00FFFFF0) | 0xA0000006) >> 4,
+                0x6,
+                0x00002,
+                key,
+                "FAAC_SLH");
+            if(!generated_protocol) {
+                furi_string_set(
+                    subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+            }
             break;
         case SubmenuIndexBeninca433:
             generated_protocol = subghz_txrx_gen_keeloq_protocol(
@@ -658,31 +726,71 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
             }
             break;
-        case SubmenuIndexLiftMaster_315_00:
+        case SubmenuIndexNiceMHouse_433_92:
+            generated_protocol = subghz_txrx_gen_keeloq_protocol(
+                subghz->txrx, "AM650", 433920000, key & 0x00FFFFFF, 0x2, 0x0003, "NICE_MHOUSE");
+            if(!generated_protocol) {
+                furi_string_set(
+                    subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+            }
+            break;
+        case SubmenuIndexJCM_433_92:
+            generated_protocol = subghz_txrx_gen_keeloq_protocol(
+                subghz->txrx, "AM650", 433920000, key & 0x00FFFFFF, 0x2, 0x0003, "JCM_Tech");
+            if(!generated_protocol) {
+                furi_string_set(
+                    subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+            }
+            break;
+        case SubmenuIndexNormstahl_433_92:
+            generated_protocol = subghz_txrx_gen_keeloq_protocol(
+                subghz->txrx, "AM650", 433920000, key & 0x00FFFFFF, 0x2, 0x0003, "Normstahl");
+            if(!generated_protocol) {
+                furi_string_set(
+                    subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+            }
+            break;
+        case SubmenuIndexHCS101_433_92:
+            generated_protocol = subghz_txrx_gen_keeloq_protocol(
+                subghz->txrx, "AM650", 433920000, key & 0x000FFFFF, 0x2, 0x0003, "HCS101");
+            if(!generated_protocol) {
+                furi_string_set(
+                    subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+            }
+            break;
+        case SubmenuIndexSecPlus_v1_315_00:
             generated_protocol =
                 subghz_txrx_gen_secplus_v1_protocol(subghz->txrx, "AM650", 315000000);
             break;
-        case SubmenuIndexLiftMaster_390_00:
+        case SubmenuIndexSecPlus_v1_390_00:
             generated_protocol =
                 subghz_txrx_gen_secplus_v1_protocol(subghz->txrx, "AM650", 390000000);
             break;
-        case SubmenuIndexLiftMaster_433_00:
+        case SubmenuIndexSecPlus_v1_433_00:
             generated_protocol =
                 subghz_txrx_gen_secplus_v1_protocol(subghz->txrx, "AM650", 433920000);
             break;
         case SubmenuIndexSecPlus_v2_310_00:
+            key = (key & 0x7FFFF3FC); // 850LM pairing
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 310000000, key, 0x68, 0xE500000);
             break;
         case SubmenuIndexSecPlus_v2_315_00:
+            key = (key & 0x7FFFF3FC); // 850LM pairing
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 315000000, key, 0x68, 0xE500000);
             break;
         case SubmenuIndexSecPlus_v2_390_00:
+            key = (key & 0x7FFFF3FC); // 850LM pairing
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 390000000, key, 0x68, 0xE500000);
             break;
         case SubmenuIndexSecPlus_v2_433_00:
+            key = (key & 0x7FFFF3FC); // 850LM pairing
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 433920000, key, 0x68, 0xE500000);
             break;

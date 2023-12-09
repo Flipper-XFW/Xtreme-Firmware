@@ -4,7 +4,7 @@
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 #include <flipper_application/flipper_application.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 static bool keybinds_fap_selector_item_callback(
     FuriString* file_path,
@@ -47,7 +47,7 @@ static void
         const DialogsFileBrowserOptions browser_options = {
             .extension = extension,
             .icon = &I_unknown_10px,
-            .hide_dot_files = !XTREME_SETTINGS()->show_hidden_files,
+            .hide_dot_files = !xtreme_settings.show_hidden_files,
             .skip_assets = true,
             .hide_ext = hide_ext,
             .item_loader_callback = keybinds_fap_selector_item_callback,

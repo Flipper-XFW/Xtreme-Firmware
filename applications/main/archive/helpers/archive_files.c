@@ -1,9 +1,9 @@
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
-#include <applications/external/subghz_playlist/playlist_file.h>
-#include <applications/external/subghz_remote/subghz_remote_app_i.h>
-#include <applications/external/ir_remote/infrared_remote.h>
+#include <applications/system/subghz_playlist/playlist_file.h>
+#include <applications/system/subghz_remote/subghz_remote_app_i.h>
+#include <applications/system/ir_remote/infrared_remote.h>
 
 #define TAG "Archive"
 
@@ -135,11 +135,9 @@ FS_Error archive_copy_rename_file_or_dir(
     bool copy,
     bool find_name) {
     furi_assert(context);
-    const char* dst_cstr = furi_string_get_cstr(dst_path);
+    FURI_LOG_I(
+        TAG, "%s from %s to %s", copy ? "Copy" : "Move", src_path, furi_string_get_cstr(dst_path));
 
-    FURI_LOG_I(TAG, "%s from %s to %s", copy ? "Copy" : "Move", src_path, dst_cstr);
-
-    UNUSED(context);
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
 
     FileInfo fileinfo;
@@ -147,17 +145,17 @@ FS_Error archive_copy_rename_file_or_dir(
 
     FS_Error error = FSE_OK;
 
-    if(!path_contains_only_ascii(dst_cstr)) {
+    if(!path_contains_only_ascii(furi_string_get_cstr(dst_path))) {
         error = FSE_INVALID_NAME;
-    } else if(!copy && !strcmp(src_path, dst_cstr)) {
+    } else if(!copy && !strcmp(src_path, furi_string_get_cstr(dst_path))) {
         error = FSE_EXIST;
     } else {
-        if(find_name && storage_common_exists(fs_api, dst_cstr)) {
+        if(find_name && storage_common_exists(fs_api, furi_string_get_cstr(dst_path))) {
             FuriString* dir_path = furi_string_alloc();
             FuriString* filename = furi_string_alloc();
             FuriString* file_ext = furi_string_alloc();
 
-            path_extract_dirname(dst_cstr, dir_path);
+            path_extract_dirname(furi_string_get_cstr(dst_path), dir_path);
             path_extract_filename(dst_path, filename, true);
             path_extract_ext_str(dst_path, file_ext);
 
@@ -168,7 +166,8 @@ FS_Error archive_copy_rename_file_or_dir(
                 furi_string_get_cstr(file_ext),
                 dst_path,
                 255);
-            furi_string_cat_printf(dir_path, "/%s%s", dst_cstr, furi_string_get_cstr(file_ext));
+            furi_string_cat_printf(
+                dir_path, "/%s%s", furi_string_get_cstr(dst_path), furi_string_get_cstr(file_ext));
             furi_string_set(dst_path, dir_path);
 
             furi_string_free(dir_path);
@@ -177,24 +176,31 @@ FS_Error archive_copy_rename_file_or_dir(
         }
 
         if(copy) {
-            error = storage_common_copy(fs_api, src_path, dst_cstr);
+            error = storage_common_copy(fs_api, src_path, furi_string_get_cstr(dst_path));
         } else {
-            error = storage_common_rename(fs_api, src_path, dst_cstr);
+            error = storage_common_rename_safe(fs_api, src_path, furi_string_get_cstr(dst_path));
         }
     }
     furi_record_close(RECORD_STORAGE);
 
     if(!copy && archive_is_favorite("%s", src_path)) {
-        archive_favorites_rename(src_path, dst_cstr);
+        archive_favorites_rename(src_path, furi_string_get_cstr(dst_path));
     }
 
     if(error == FSE_OK) {
-        FURI_LOG_I(TAG, "%s from %s to %s is DONE", copy ? "Copy" : "Move", src_path, dst_cstr);
+        FURI_LOG_I(
+            TAG,
+            "%s from %s to %s is DONE",
+            copy ? "Copy" : "Move",
+            src_path,
+            furi_string_get_cstr(dst_path));
     } else {
         FURI_LOG_E(
             TAG,
-            "%s failed: %s, Code: %d",
+            "%s from %s to %s failed: %s, Code: %d",
             copy ? "Copy" : "Move",
+            src_path,
+            furi_string_get_cstr(dst_path),
             filesystem_api_error_get_desc(error),
             error);
     }

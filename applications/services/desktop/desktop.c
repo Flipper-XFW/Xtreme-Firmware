@@ -11,7 +11,7 @@
 #include <cli/cli_vcp.h>
 #include <locale/locale.h>
 #include <applications/main/archive/helpers/archive_helpers_ext.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include "animations/animation_manager.h"
 #include "desktop/scenes/desktop_scene.h"
@@ -66,13 +66,13 @@ static void desktop_clock_reconfigure(Desktop* desktop) {
 
     desktop_clock_update(desktop);
 
-    if(XTREME_SETTINGS()->statusbar_clock) {
+    if(xtreme_settings.statusbar_clock) {
         furi_timer_start(desktop->update_clock_timer, furi_ms_to_ticks(1000));
     } else {
         furi_timer_stop(desktop->update_clock_timer);
     }
 
-    view_port_enabled_set(desktop->clock_viewport, XTREME_SETTINGS()->statusbar_clock);
+    view_port_enabled_set(desktop->clock_viewport, xtreme_settings.statusbar_clock);
 }
 
 static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
@@ -96,7 +96,6 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
     char buffer[20];
     snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->time_minute);
 
-    // TODO FL-3515: never do that, may cause visual glitches
     view_port_set_width(
         desktop->clock_viewport,
         canvas_string_width(canvas, buffer) - 1 + (desktop->time_minute % 10 == 1));
@@ -210,7 +209,7 @@ void desktop_lock(Desktop* desktop, bool pin_lock) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
-        if(!XTREME_SETTINGS()->allow_locked_rpc_commands) {
+        if(!xtreme_settings.allow_locked_rpc_commands) {
             Bt* bt = furi_record_open(RECORD_BT);
             bt_close_rpc_connection(bt);
             furi_record_close(RECORD_BT);
@@ -485,7 +484,7 @@ int32_t desktop_srv(void* p) {
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    if(XTREME_SETTINGS()->lock_on_boot || furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+    if(xtreme_settings.lock_on_boot || furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         desktop_lock(desktop, true);
     } else {
         if(!loader_is_locked(desktop->loader)) {

@@ -36,56 +36,56 @@ if __name__ == "__main__":
             for i, commit in enumerate(event["commits"]):
                 msg = commit['message'].splitlines()[0].replace("`", "")
                 msg = msg[:50] + ("..." if len(msg) > 50 else "")
-                desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {msg} - [__{commit['author']['username']}__](https://github.com/{commit['author']['username']})"
+                desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {msg} - [__{commit['author'].get('username')}__](https://github.com/{commit['author'].get('username')})"
                 if len(desc) > 2020:
                     desc = desc.rsplit("\n", 1)[0] + f"\n+ {count - i} more commits"
                     break
             url = event["compare"]
             color = 16723712 if event["forced"] else 3669797
 
-        case "pull_request":
-            pr = event["pull_request"]
-            url = pr["html_url"]
-            branch = pr["base"]["ref"] + (
-                ""
-                if pr["base"]["repo"]["full_name"] != pr["head"]["repo"]["full_name"]
-                else f" <- {pr['head']['ref']}"
-            )
-            name = pr["title"][:50] + ("..." if len(pr["title"]) > 50 else "")
-            title = f"Pull Request {event['action'].title()} ({branch}): {name}"
-            match event["action"]:
-                case "opened":
-                    desc = (pr["body"][:2045] + "...") if len(pr["body"]) > 2048 else pr["body"]
-                    color = 3669797
+        # case "pull_request":
+        #     pr = event["pull_request"]
+        #     url = pr["html_url"]
+        #     branch = pr["base"]["ref"] + (
+        #         ""
+        #         if pr["base"]["repo"]["full_name"] != pr["head"]["repo"]["full_name"]
+        #         else f" <- {pr['head']['ref']}"
+        #     )
+        #     name = pr["title"][:50] + ("..." if len(pr["title"]) > 50 else "")
+        #     title = f"Pull Request {event['action'].title()} ({branch}): {name}"
+        #     match event["action"]:
+        #         case "opened":
+        #             desc = (pr["body"][:2045] + "...") if len(pr["body"]) > 2048 else pr["body"]
+        #             color = 3669797
 
-                    fields.append(
-                        {
-                            "name": "Changed Files:",
-                            "value": str(pr["changed_files"]),
-                            "inline": True,
-                        }
-                    )
-                    fields.append(
-                        {
-                            "name": "Added:",
-                            "value": "+" + str(pr["additions"]),
-                            "inline": True,
-                        }
-                    )
-                    fields.append(
-                        {
-                            "name": "Removed:",
-                            "value": "-" + str(pr["deletions"]),
-                            "inline": True,
-                        }
-                    )
+        #             fields.append(
+        #                 {
+        #                     "name": "Changed Files:",
+        #                     "value": str(pr["changed_files"]),
+        #                     "inline": True,
+        #                 }
+        #             )
+        #             fields.append(
+        #                 {
+        #                     "name": "Added:",
+        #                     "value": "+" + str(pr["additions"]),
+        #                     "inline": True,
+        #                 }
+        #             )
+        #             fields.append(
+        #                 {
+        #                     "name": "Removed:",
+        #                     "value": "-" + str(pr["deletions"]),
+        #                     "inline": True,
+        #                 }
+        #             )
 
-                case "closed":
-                    color = 16723712
-                case "reopened":
-                    color = 16751872
-                case _:
-                    sys.exit(1)
+        #         case "closed":
+        #             color = 16723712
+        #         case "reopened":
+        #             color = 16751872
+        #         case _:
+        #             sys.exit(1)
 
         case "release":
             match event["action"]:

@@ -1,0 +1,4 @@
+sub: /ext/subghz/Tesla/Tesla_EU_AM650.sub
+sub: /ext/subghz/Tesla/Tesla_US_AM650.sub
+sub: /ext/subghz/Tesla/Tesla_EU_AM270.sub
+sub: /ext/subghz/Tesla/Tesla_US_AM270.sub

@@ -13,6 +13,7 @@ extern "C" {
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/loading.h>
 #include "../views/bad_kb_view.h"
 #include "../bad_kb_paths.h"
 
@@ -51,11 +52,12 @@ struct BadKbState {
     BadKbWorkerState state;
     bool is_bt;
     uint32_t pin;
-    uint16_t line_cur;
-    uint16_t line_nb;
+    size_t line_cur;
+    size_t line_nb;
     uint32_t delay_remain;
-    uint16_t error_line;
+    size_t error_line;
     char error[64];
+    uint32_t elapsed;
 };
 
 typedef struct BadKbApp BadKbApp;
@@ -136,6 +138,7 @@ struct BadKbApp {
     VariableItemList* var_item_list;
     TextInput* text_input;
     ByteInput* byte_input;
+    Loading* loading;
     char usb_name_buf[BAD_KB_USB_LEN];
     uint16_t usb_vidpid_buf[2];
     char bt_name_buf[BAD_KB_NAME_LEN];

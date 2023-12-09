@@ -22,12 +22,14 @@ const char* const menu_style_names[MenuStyleCount] = {
     "Vertical",
     "C64",
     "Eurocorp",
+    "Compact",
+    "Terminal",
 };
 static void xtreme_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, menu_style_names[index]);
-    XTREME_SETTINGS()->menu_style = index;
+    xtreme_settings.menu_style = index;
     app->save_settings = true;
 }
 
@@ -66,7 +68,6 @@ static void xtreme_app_scene_interface_mainmenu_move_app_changed(VariableItem* i
 
 void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
     XtremeApp* app = context;
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
@@ -76,8 +77,8 @@ void xtreme_app_scene_interface_mainmenu_on_enter(void* context) {
         MenuStyleCount,
         xtreme_app_scene_interface_mainmenu_menu_style_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->menu_style);
-    variable_item_set_current_value_text(item, menu_style_names[xtreme_settings->menu_style]);
+    variable_item_set_current_value_index(item, xtreme_settings.menu_style);
+    variable_item_set_current_value_text(item, menu_style_names[xtreme_settings.menu_style]);
 
     variable_item_list_add(var_item_list, "Reset Menu", 0, NULL, app);
 
@@ -138,14 +139,28 @@ bool xtreme_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEve
                 app->mainmenu_app_labels, app->mainmenu_app_index, app->mainmenu_app_index + 1);
             CharList_remove_v(
                 app->mainmenu_app_exes, app->mainmenu_app_index, app->mainmenu_app_index + 1);
-            if(app->mainmenu_app_index) app->mainmenu_app_index--;
             /* fall through */
-        case VarItemListIndexMoveApp:
+        case VarItemListIndexMoveApp: {
             app->save_mainmenu_apps = true;
             app->require_reboot = true;
-            scene_manager_previous_scene(app->scene_manager);
-            scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenu);
+            size_t count = CharList_size(app->mainmenu_app_labels);
+            VariableItem* item = variable_item_list_get(app->var_item_list, VarItemListIndexApp);
+            if(count) {
+                app->mainmenu_app_index = CLAMP(app->mainmenu_app_index, count - 1, 0U);
+                char label[20];
+                snprintf(label, 20, "App  %u/%u", 1 + app->mainmenu_app_index, count);
+                variable_item_set_item_label(item, label);
+                variable_item_set_current_value_text(
+                    item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
+            } else {
+                app->mainmenu_app_index = 0;
+                variable_item_set_item_label(item, "App");
+                variable_item_set_current_value_text(item, "None");
+            }
+            variable_item_set_current_value_index(item, app->mainmenu_app_index);
+            variable_item_set_values_count(item, count);
             break;
+        }
         case VarItemListIndexAddApp:
             scene_manager_next_scene(app->scene_manager, XtremeAppSceneInterfaceMainmenuAdd);
             break;

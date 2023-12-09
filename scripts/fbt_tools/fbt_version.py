@@ -2,7 +2,7 @@ from SCons.Action import Action
 from SCons.Builder import Builder
 
 
-def version_emitter(target, source, env):
+def _version_emitter(target, source, env):
     target_dir = target[0]
     target = [
         target_dir.File("version.inc.h"),
@@ -19,12 +19,26 @@ def generate(env):
         BUILDERS={
             "VersionBuilder": Builder(
                 action=Action(
-                    '${PYTHON3} "${VERSION_SCRIPT}" generate '
-                    "-t ${TARGET_HW} -fw-origin ${FIRMWARE_ORIGIN} "
-                    '-o ${TARGET.dir.posix} --dir "${ROOT_DIR}" --suffix "${DIST_SUFFIX}"',
+                    [
+                        [
+                            "${PYTHON3}",
+                            "${VERSION_SCRIPT}",
+                            "generate",
+                            "-t",
+                            "${TARGET_HW}",
+                            "--fw-origin",
+                            "${FIRMWARE_ORIGIN}",
+                            "-o",
+                            "${TARGET.dir.posix}",
+                            "--dir",
+                            "${ROOT_DIR}",
+                            "--suffix",
+                            "${DIST_SUFFIX}",
+                        ]
+                    ],
                     "${VERSIONCOMSTR}",
                 ),
-                emitter=version_emitter,
+                emitter=_version_emitter,
             ),
         }
     )

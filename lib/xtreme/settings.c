@@ -10,11 +10,12 @@ XtremeSettings xtreme_settings = {
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
-    .fallback_anim = true, // ON
+    .credits_anim = true, // ON
     .menu_style = MenuStyleWii, // Wii
     .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
     .allow_locked_rpc_commands = false, // OFF
+    .lockscreen_poweroff = true, // ON
     .lockscreen_time = true, // ON
     .lockscreen_seconds = false, // OFF
     .lockscreen_date = true, // ON
@@ -69,8 +70,8 @@ void XTREME_SETTINGS_LOAD() {
             x->unlock_anims = b;
         }
         flipper_format_rewind(file);
-        if(flipper_format_read_bool(file, "fallback_anim", &b, 1)) {
-            x->fallback_anim = b;
+        if(flipper_format_read_bool(file, "credits_anim", &b, 1)) {
+            x->credits_anim = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "menu_style", &u, 1)) {
@@ -87,6 +88,10 @@ void XTREME_SETTINGS_LOAD() {
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "lock_on_boot", &b, 1)) {
             x->lock_on_boot = b;
+        }
+        flipper_format_rewind(file);
+        if(flipper_format_read_bool(file, "lockscreen_poweroff", &b, 1)) {
+            x->lockscreen_poweroff = b;
         }
         flipper_format_rewind(file);
         if(flipper_format_read_bool(file, "lockscreen_time", &b, 1)) {
@@ -196,7 +201,7 @@ void XTREME_SETTINGS_LOAD() {
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 
-    rgb_backlight_reconfigure(x->rgb_backlight);
+    rgb_backlight_load_settings(x->rgb_backlight);
 }
 
 void XTREME_SETTINGS_SAVE() {
@@ -209,13 +214,14 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_uint32(file, "anim_speed", &x->anim_speed, 1);
         flipper_format_write_int32(file, "cycle_anims", &x->cycle_anims, 1);
         flipper_format_write_bool(file, "unlock_anims", &x->unlock_anims, 1);
-        flipper_format_write_bool(file, "fallback_anim", &x->fallback_anim, 1);
+        flipper_format_write_bool(file, "credits_anim", &x->credits_anim, 1);
         e = x->menu_style;
         flipper_format_write_uint32(file, "menu_style", &e, 1);
         flipper_format_write_bool(file, "bad_pins_format", &x->bad_pins_format, 1);
         flipper_format_write_bool(
             file, "allow_locked_rpc_commands", &x->allow_locked_rpc_commands, 1);
         flipper_format_write_bool(file, "lock_on_boot", &x->lock_on_boot, 1);
+        flipper_format_write_bool(file, "lockscreen_poweroff", &x->lockscreen_poweroff, 1);
         flipper_format_write_bool(file, "lockscreen_time", &x->lockscreen_time, 1);
         flipper_format_write_bool(file, "lockscreen_seconds", &x->lockscreen_seconds, 1);
         flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
@@ -251,8 +257,4 @@ void XTREME_SETTINGS_SAVE() {
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
-}
-
-XtremeSettings* XTREME_SETTINGS() {
-    return &xtreme_settings;
 }

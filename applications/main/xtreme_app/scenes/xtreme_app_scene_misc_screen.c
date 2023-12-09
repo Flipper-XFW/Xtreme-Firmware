@@ -22,7 +22,7 @@ static void xtreme_app_scene_misc_screen_dark_mode_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->dark_mode = value;
+    xtreme_settings.dark_mode = value;
     app->save_settings = true;
 }
 
@@ -40,30 +40,20 @@ static const struct {
     char* name;
     RgbColor color;
 } lcd_colors[] = {
-    {"Orange", {255, 69, 0}},
-    {"Red", {255, 0, 0}},
-    {"Maroon", {128, 0, 0}},
-    {"Yellow", {255, 255, 0}},
-    {"Olive", {128, 128, 0}},
-    {"Lime", {0, 255, 0}},
-    {"Green", {0, 128, 0}},
-    {"Aqua", {0, 255, 127}},
-    {"Cyan", {0, 210, 210}},
-    {"Azure", {0, 127, 255}},
-    {"Teal", {0, 128, 128}},
-    {"Blue", {0, 0, 255}},
-    {"Navy", {0, 0, 128}},
-    {"Purple", {128, 0, 128}},
-    {"Fuchsia", {255, 0, 255}},
-    {"Pink", {173, 31, 173}},
-    {"Brown", {165, 42, 42}},
+    {"Off", {0, 0, 0}},         {"Orange", {255, 69, 0}},  {"Red", {255, 0, 0}},
+    {"Maroon", {128, 0, 0}},    {"Yellow", {255, 255, 0}}, {"Olive", {128, 128, 0}},
+    {"Lime", {0, 255, 0}},      {"Green", {0, 128, 0}},    {"Aqua", {0, 255, 127}},
+    {"Cyan", {0, 210, 210}},    {"Azure", {0, 127, 255}},  {"Teal", {0, 128, 128}},
+    {"Blue", {0, 0, 255}},      {"Navy", {0, 0, 128}},     {"Purple", {128, 0, 128}},
+    {"Fuchsia", {255, 0, 255}}, {"Pink", {173, 31, 173}},  {"Brown", {165, 42, 42}},
     {"White", {255, 192, 203}},
 };
+static const size_t lcd_sz = COUNT_OF(lcd_colors);
 static void xtreme_app_scene_misc_screen_lcd_color_changed(VariableItem* item, uint8_t led) {
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, lcd_colors[index].name);
-    rgb_backlight_set_color(led, lcd_colors[index].color);
+    rgb_backlight_set_color(led, &lcd_colors[index].color);
     app->save_backlight = true;
 }
 static void xtreme_app_scene_misc_screen_lcd_color_0_changed(VariableItem* item) {
@@ -75,6 +65,14 @@ static void xtreme_app_scene_misc_screen_lcd_color_1_changed(VariableItem* item)
 static void xtreme_app_scene_misc_screen_lcd_color_2_changed(VariableItem* item) {
     xtreme_app_scene_misc_screen_lcd_color_changed(item, 2);
 }
+static const struct {
+    uint8_t led;
+    VariableItemChangeCallback cb;
+} lcd_cols[] = {
+    {0, xtreme_app_scene_misc_screen_lcd_color_0_changed},
+    {1, xtreme_app_scene_misc_screen_lcd_color_1_changed},
+    {2, xtreme_app_scene_misc_screen_lcd_color_2_changed},
+};
 
 const char* const rainbow_lcd_names[RGBBacklightRainbowModeCount] = {
     "OFF",
@@ -151,15 +149,14 @@ static void xtreme_app_scene_misc_screen_rainbow_saturation_changed(VariableItem
 
 void xtreme_app_scene_misc_screen_on_enter(void* context) {
     XtremeApp* app = context;
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
     uint8_t value_index;
 
     item = variable_item_list_add(
         var_item_list, "Dark Mode", 2, xtreme_app_scene_misc_screen_dark_mode_changed, app);
-    variable_item_set_current_value_index(item, xtreme_settings->dark_mode);
-    variable_item_set_current_value_text(item, xtreme_settings->dark_mode ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings.dark_mode);
+    variable_item_set_current_value_text(item, xtreme_settings.dark_mode ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list, "Left Handed", 2, xtreme_app_scene_misc_screen_hand_orient_changed, app);
@@ -168,22 +165,14 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
 
     item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
-    variable_item_set_current_value_text(item, xtreme_settings->rgb_backlight ? "ON" : "OFF");
+    variable_item_set_current_value_text(item, xtreme_settings.rgb_backlight ? "ON" : "OFF");
 
-    struct {
-        uint8_t led;
-        const char* str;
-        VariableItemChangeCallback cb;
-    } lcd_cols[] = {
-        {2, "LCD Left", xtreme_app_scene_misc_screen_lcd_color_2_changed},
-        {1, "LCD Middle", xtreme_app_scene_misc_screen_lcd_color_1_changed},
-        {0, "LCD Right", xtreme_app_scene_misc_screen_lcd_color_0_changed},
-    };
-    size_t lcd_sz = COUNT_OF(lcd_colors);
-
+    RgbColor color;
     for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
-        item = variable_item_list_add(var_item_list, lcd_cols[i].str, lcd_sz, lcd_cols[i].cb, app);
-        RgbColor color = rgb_backlight_get_color(lcd_cols[i].led);
+        char name[12];
+        snprintf(name, sizeof(name), "LCD LED %u", lcd_cols[i].led + 1);
+        item = variable_item_list_add(var_item_list, name, lcd_sz, lcd_cols[i].cb, app);
+        rgb_backlight_get_color(lcd_cols[i].led, &color);
         bool found = false;
         for(size_t i = 0; i < lcd_sz; i++) {
             if(rgbcmp(&color, &lcd_colors[i].color) != 0) continue;
@@ -199,7 +188,7 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
             snprintf(str, sizeof(str), "%02X%02X%02X", color.r, color.g, color.b);
             variable_item_set_current_value_text(item, str);
         }
-        variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+        variable_item_set_locked(item, !xtreme_settings.rgb_backlight, "Needs RGB\nBacklight!");
     }
 
     item = variable_item_list_add(
@@ -211,7 +200,7 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
     value_index = rgb_backlight_get_rainbow_mode();
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rainbow_lcd_names[value_index]);
-    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+    variable_item_set_locked(item, !xtreme_settings.rgb_backlight, "Needs RGB\nBacklight!");
 
     item = variable_item_list_add(
         var_item_list,
@@ -224,7 +213,7 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
     char speed_str[4];
     snprintf(speed_str, sizeof(speed_str), "%d", value_index);
     variable_item_set_current_value_text(item, speed_str);
-    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+    variable_item_set_locked(item, !xtreme_settings.rgb_backlight, "Needs RGB\nBacklight!");
 
     item = variable_item_list_add(
         var_item_list,
@@ -238,7 +227,7 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
         COUNT_OF(rainbow_interval_values));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rainbow_interval_names[value_index]);
-    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+    variable_item_set_locked(item, !xtreme_settings.rgb_backlight, "Needs RGB\nBacklight!");
 
     item = variable_item_list_add(
         var_item_list,
@@ -251,7 +240,7 @@ void xtreme_app_scene_misc_screen_on_enter(void* context) {
     char saturation_str[4];
     snprintf(saturation_str, sizeof(saturation_str), "%d", value_index);
     variable_item_set_current_value_text(item, saturation_str);
-    variable_item_set_locked(item, !xtreme_settings->rgb_backlight, "Needs RGB\nBacklight!");
+    variable_item_set_locked(item, !xtreme_settings.rgb_backlight, "Needs RGB\nBacklight!");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_misc_screen_var_item_list_callback, app);
@@ -272,7 +261,7 @@ bool xtreme_app_scene_misc_screen_on_event(void* context, SceneManagerEvent even
         consumed = true;
         switch(event.event) {
         case VarItemListIndexRgbBacklight: {
-            bool change = XTREME_SETTINGS()->rgb_backlight;
+            bool change = xtreme_settings.rgb_backlight;
             if(!change) {
                 DialogMessage* msg = dialog_message_alloc();
                 dialog_message_set_header(msg, "RGB Backlight", 64, 0, AlignCenter, AlignTop);
@@ -290,13 +279,36 @@ bool xtreme_app_scene_misc_screen_on_event(void* context, SceneManagerEvent even
                 dialog_message_free(msg);
             }
             if(change) {
-                XTREME_SETTINGS()->rgb_backlight = !XTREME_SETTINGS()->rgb_backlight;
+                xtreme_settings.rgb_backlight = !xtreme_settings.rgb_backlight;
                 app->save_settings = true;
                 app->save_backlight = true;
                 notification_message(app->notification, &sequence_display_backlight_on);
-                rgb_backlight_reconfigure(XTREME_SETTINGS()->rgb_backlight);
-                scene_manager_previous_scene(app->scene_manager);
-                scene_manager_next_scene(app->scene_manager, XtremeAppSceneMiscScreen);
+                rgb_backlight_reconfigure(xtreme_settings.rgb_backlight);
+                variable_item_set_current_value_text(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRgbBacklight),
+                    xtreme_settings.rgb_backlight ? "ON" : "OFF");
+                for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
+                    variable_item_set_locked(
+                        variable_item_list_get(app->var_item_list, VarItemListIndexLcdColor0 + i),
+                        !xtreme_settings.rgb_backlight,
+                        "Needs RGB\nBacklight!");
+                }
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowLcd),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowSpeed),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowInterval),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
+                variable_item_set_locked(
+                    variable_item_list_get(app->var_item_list, VarItemListIndexRainbowSaturation),
+                    !xtreme_settings.rgb_backlight,
+                    "Needs RGB\nBacklight!");
             }
             break;
         }

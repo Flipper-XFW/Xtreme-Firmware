@@ -189,7 +189,7 @@ static uint8_t get_row_size(const Keyboard* keyboard, uint8_t row_index) {
             row_size = COUNT_OF(symbol_keyboard_keys_row_3);
             break;
         default:
-            furi_crash(NULL);
+            furi_crash();
         }
     } else {
         switch(row_index + 1) {
@@ -203,7 +203,7 @@ static uint8_t get_row_size(const Keyboard* keyboard, uint8_t row_index) {
             row_size = COUNT_OF(keyboard_keys_row_3);
             break;
         default:
-            furi_crash(NULL);
+            furi_crash();
         }
     }
 
@@ -215,7 +215,7 @@ static const TextInputKey* get_row(const Keyboard* keyboard, uint8_t row_index) 
     if(row_index < 3) {
         row = keyboard->rows[row_index];
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 
     return row;
@@ -420,6 +420,7 @@ static void text_input_handle_down(TextInput* text_input, TextInputModel* model)
 static void text_input_handle_left(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
     if(model->cursor_select) {
+        model->clear_default_text = false;
         if(model->cursor_pos > 0) {
             model->cursor_pos = CLAMP(model->cursor_pos - 1, strlen(model->text_buffer), 0u);
         }
@@ -434,6 +435,7 @@ static void text_input_handle_left(TextInput* text_input, TextInputModel* model)
 static void text_input_handle_right(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
     if(model->cursor_select) {
+        model->clear_default_text = false;
         model->cursor_pos = CLAMP(model->cursor_pos + 1, strlen(model->text_buffer), 0u);
     } else if(
         model->selected_column <
@@ -445,7 +447,10 @@ static void text_input_handle_right(TextInput* text_input, TextInputModel* model
 }
 
 static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, InputType type) {
-    if(model->cursor_select) return;
+    if(model->cursor_select) {
+        model->clear_default_text = !model->clear_default_text;
+        return;
+    }
     bool shift = type == InputTypeLong;
     bool repeat = type == InputTypeRepeat;
     char selected = get_selected_char(model);

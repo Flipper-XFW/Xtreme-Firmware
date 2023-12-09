@@ -4,29 +4,12 @@
 #include "subghz/types.h"
 #include <math.h>
 #include <furi.h>
-#include <furi_hal.h>
-#include <input/input.h>
-#include <gui/elements.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
-#include "views/receiver.h"
-
 #include <flipper_format/flipper_format_i.h>
-#include <lib/toolbox/stream/stream.h>
-#include <lib/subghz/protocols/raw.h>
 
 #define TAG "SubGhz"
-
-void subghz_set_default_preset(SubGhz* subghz) {
-    furi_assert(subghz);
-    subghz_txrx_set_preset(
-        subghz->txrx,
-        "AM650",
-        subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
-        NULL,
-        0);
-}
 
 void subghz_blink_start(SubGhz* subghz) {
     furi_assert(subghz);
@@ -60,7 +43,7 @@ void subghz_dialog_message_freq_error(SubGhz* subghz, bool only_rx) {
     DialogsApp* dialogs = subghz->dialogs;
     DialogMessage* message = dialog_message_alloc();
     const char* header_text = "Frequency not supported";
-    const char* message_text = "Frequency\nis outside of\nsuported range.";
+    const char* message_text = "Frequency\nis outside of\nsupported range.";
 
     if(only_rx) {
         header_text = "Transmission is blocked";
@@ -88,6 +71,8 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     SubGhzLoadKeyState load_key_state = SubGhzLoadKeyStateParseErr;
     FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
+    float temp_lat = NAN; // NAN or 0.0?? because 0.0 is valid value
+    float temp_lon = NAN;
 
     do {
         stream_clean(fff_data_stream);
@@ -124,6 +109,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         // TODO: use different frequency allowed lists for differnet modules (non cc1101)
         if(!furi_hal_subghz_is_tx_allowed(temp_data32)) {
             FURI_LOG_E(TAG, "This frequency can only be used for RX");
+
             load_key_state = SubGhzLoadKeyStateOnlyRx;
             break;
         }
@@ -152,12 +138,24 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
                 break;
             }
         }
+
+        //Load latitute and longitude if present, strict mode to avoid reading the whole file twice
+        flipper_format_set_strict_mode(fff_data_file, true);
+        if(!flipper_format_read_float(fff_data_file, "Latitute", (float*)&temp_lat, 1) ||
+           !flipper_format_read_float(fff_data_file, "Longitude", (float*)&temp_lon, 1)) {
+            FURI_LOG_W(TAG, "Missing Latitude and Longitude (optional)");
+            flipper_format_rewind(fff_data_file);
+        }
+        flipper_format_set_strict_mode(fff_data_file, false);
+
         size_t preset_index =
             subghz_setting_get_inx_preset_by_name(setting, furi_string_get_cstr(temp_str));
         subghz_txrx_set_preset(
             subghz->txrx,
             furi_string_get_cstr(temp_str),
             temp_data32,
+            temp_lat,
+            temp_lon,
             subghz_setting_get_preset_data(setting, preset_index),
             subghz_setting_get_preset_data_size(setting, preset_index));
 
@@ -258,7 +256,7 @@ bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
             storage,
             furi_string_get_cstr(file_path),
             furi_string_get_cstr(file_name),
-            SUBGHZ_APP_EXTENSION,
+            SUBGHZ_APP_FILENAME_EXTENSION,
             file_name,
             max_len);
 
@@ -267,7 +265,7 @@ bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
             "%s/%s%s",
             furi_string_get_cstr(file_path),
             furi_string_get_cstr(file_name),
-            SUBGHZ_APP_EXTENSION);
+            SUBGHZ_APP_FILENAME_EXTENSION);
         furi_string_set(subghz->file_path, temp_str);
         res = true;
     }
@@ -341,7 +339,8 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     FuriString* file_path = furi_string_alloc();
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_EXTENSION, &I_sub1_10px);
+    dialog_file_browser_set_basic_options(
+        &browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
     browser_options.base_path = SUBGHZ_APP_FOLDER;
 
     // Input events and views are managed by file_select
@@ -415,7 +414,7 @@ void subghz_file_name_clear(SubGhz* subghz) {
 }
 
 bool subghz_path_is_file(FuriString* path) {
-    return furi_string_end_with(path, SUBGHZ_APP_EXTENSION);
+    return furi_string_end_with(path, SUBGHZ_APP_FILENAME_EXTENSION);
 }
 
 void subghz_lock(SubGhz* subghz) {

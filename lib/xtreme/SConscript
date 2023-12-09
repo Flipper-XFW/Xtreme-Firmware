@@ -1,0 +1,20 @@
+Import("env")
+
+env.Append(
+    SDK_HEADERS=[
+        File("../../icons/assets_icons.h"),
+        File("xtreme.h"),
+    ],
+    LINT_SOURCES=[
+        Dir("."),
+    ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="xtreme")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

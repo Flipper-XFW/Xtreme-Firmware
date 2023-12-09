@@ -75,6 +75,13 @@ typedef struct {
 } SADataCResolvePath;
 
 typedef struct {
+    const char* path1;
+    const char* path2;
+    bool truncate;
+    FuriThreadId thread_id;
+} SADataCEquivPath;
+
+typedef struct {
     uint32_t id;
 } SADataError;
 
@@ -111,6 +118,7 @@ typedef union {
     SADataCStat cstat;
     SADataCFSInfo cfsinfo;
     SADataCResolvePath cresolvepath;
+    SADataCEquivPath cequivpath;
 
     SADataError error;
 
@@ -154,6 +162,8 @@ typedef enum {
     StorageCommandSDInfo,
     StorageCommandSDStatus,
     StorageCommandCommonResolvePath,
+    StorageCommandSDMount,
+    StorageCommandCommonEquivalentPath,
 
     StorageCommandFileExpand,
     StorageCommandCommonRename,

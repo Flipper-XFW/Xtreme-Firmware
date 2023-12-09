@@ -27,8 +27,8 @@
 #include <power/power_service/power.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
-#include <namespoof.h>
-#include <xtreme.h>
+#include <xtreme/namespoof.h>
+#include <xtreme/xtreme.h>
 
 #define XTREME_SUBGHZ_FREQ_BUFFER_SIZE 7
 

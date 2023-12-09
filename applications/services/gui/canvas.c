@@ -4,10 +4,9 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_rtc.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},
@@ -118,7 +117,7 @@ const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font fo
 
 void canvas_clear(Canvas* canvas) {
     furi_assert(canvas);
-    if(XTREME_SETTINGS()->dark_mode) {
+    if(xtreme_settings.dark_mode) {
         u8g2_FillBuffer(&canvas->fb);
     } else {
         u8g2_ClearBuffer(&canvas->fb);
@@ -127,7 +126,7 @@ void canvas_clear(Canvas* canvas) {
 
 void canvas_set_color(Canvas* canvas, Color color) {
     furi_assert(canvas);
-    if(XTREME_SETTINGS()->dark_mode) {
+    if(xtreme_settings.dark_mode) {
         if(color == ColorBlack) {
             color = ColorWhite;
         } else if(color == ColorWhite) {
@@ -175,7 +174,7 @@ void canvas_set_font(Canvas* canvas, Font font) {
         u8g2_SetFont(&canvas->fb, u8g2_font_eurocorp_tr);
         break;
     default:
-        furi_crash(NULL);
+        furi_crash();
         break;
     }
 }
@@ -216,7 +215,7 @@ void canvas_draw_str_aligned(
         x -= (u8g2_GetStrWidth(&canvas->fb, str) / 2);
         break;
     default:
-        furi_crash(NULL);
+        furi_crash();
         break;
     }
 
@@ -230,7 +229,7 @@ void canvas_draw_str_aligned(
         y += (u8g2_GetAscent(&canvas->fb) / 2);
         break;
     default:
-        furi_crash(NULL);
+        furi_crash();
         break;
     }
 
@@ -243,7 +242,7 @@ uint16_t canvas_string_width(Canvas* canvas, const char* str) {
     return u8g2_GetStrWidth(&canvas->fb, str);
 }
 
-uint8_t canvas_glyph_width(Canvas* canvas, char symbol) {
+uint8_t canvas_glyph_width(Canvas* canvas, uint16_t symbol) {
     furi_assert(canvas);
     return u8g2_GetGlyphWidth(&canvas->fb, symbol);
 }
@@ -588,7 +587,7 @@ void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation) {
             rotate_cb = U8G2_R1;
             break;
         default:
-            furi_assert(0);
+            furi_crash();
         }
 
         if(need_swap) FURI_SWAP(canvas->width, canvas->height);

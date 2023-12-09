@@ -13,7 +13,8 @@
 
 #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
 #define SUBGHZ_RAW_FOLDER EXT_PATH("subghz")
-#define SUBGHZ_APP_EXTENSION ".sub"
+#define SUBGHZ_APP_FILENAME_PREFIX "SubGHz"
+#define SUBGHZ_APP_FILENAME_EXTENSION ".sub"
 
 #define SUBGHZ_KEY_FILE_VERSION 1
 #define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
@@ -36,6 +37,8 @@ typedef struct {
     uint32_t frequency;
     uint8_t* data;
     size_t data_size;
+    float latitude;
+    float longitude;
 } SubGhzRadioPreset;
 
 typedef enum {
@@ -58,6 +61,8 @@ typedef enum {
     SubGhzProtocolStatusErrorEncoderGetUpload = (-12), ///< Payload encoder failure
     // Special Values
     SubGhzProtocolStatusErrorProtocolNotFound = (-13), ///< Protocol not found
+    SubGhzProtocolStatusErrorParserLatitude = (-14), ///< Missing `Latitude`
+    SubGhzProtocolStatusErrorParserLongitude = (-15), ///< Missing `Longitude`
     SubGhzProtocolStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
 } SubGhzProtocolStatus;
 
@@ -107,7 +112,7 @@ typedef enum {
     SubGhzProtocolTypeStatic,
     SubGhzProtocolTypeDynamic,
     SubGhzProtocolTypeRAW,
-    SubGhzProtocolWeatherStation,
+    SubGhzProtocolWeatherStation, // Unused, kept for compatibility
     SubGhzProtocolCustom,
     SubGhzProtocolTypeBinRAW,
 } SubGhzProtocolType;
@@ -124,10 +129,17 @@ typedef enum {
     SubGhzProtocolFlag_Load = (1 << 8),
     SubGhzProtocolFlag_Send = (1 << 9),
     SubGhzProtocolFlag_BinRAW = (1 << 10),
-    SubGhzProtocolFlag_StarLine = (1 << 11),
-    SubGhzProtocolFlag_AutoAlarms = (1 << 12),
-    SubGhzProtocolFlag_Magelan = (1 << 13),
 } SubGhzProtocolFlag;
+
+typedef enum {
+    SubGhzProtocolFilter_StarLine = (1 << 0),
+    SubGhzProtocolFilter_AutoAlarms = (1 << 1),
+    SubGhzProtocolFilter_Magellan = (1 << 2),
+    SubGhzProtocolFilter_Princeton = (1 << 3),
+    SubGhzProtocolFilter_NiceFlorS = (1 << 4),
+    SubGhzProtocolFilter_Weather = (1 << 5),
+    SubGhzProtocolFilter_TPMS = (1 << 6),
+} SubGhzProtocolFilter;
 
 struct SubGhzProtocol {
     const char* name;
@@ -136,4 +148,6 @@ struct SubGhzProtocol {
 
     const SubGhzProtocolEncoder* encoder;
     const SubGhzProtocolDecoder* decoder;
+
+    SubGhzProtocolFilter filter;
 };

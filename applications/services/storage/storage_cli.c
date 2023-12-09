@@ -200,15 +200,15 @@ static void storage_cli_read(Cli* cli, FuriString* path) {
     File* file = storage_file_alloc(api);
 
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        const uint16_t buffer_size = 128;
-        uint16_t read_size = 0;
+        const size_t buffer_size = 128;
+        size_t read_size = 0;
         uint8_t* data = malloc(buffer_size);
 
         printf("Size: %lu\r\n", (uint32_t)storage_file_size(file));
 
         do {
             read_size = storage_file_read(file, data, buffer_size);
-            for(uint16_t i = 0; i < read_size; i++) {
+            for(size_t i = 0; i < read_size; i++) {
                 printf("%c", data[i]);
             }
         } while(read_size > 0);
@@ -229,7 +229,7 @@ static void storage_cli_write(Cli* cli, FuriString* path) {
     Storage* api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(api);
 
-    const uint16_t buffer_size = 512;
+    const size_t buffer_size = 512;
     uint8_t* buffer = malloc(buffer_size);
 
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
@@ -241,10 +241,10 @@ static void storage_cli_write(Cli* cli, FuriString* path) {
             uint8_t symbol = cli_getc(cli);
 
             if(symbol == CliSymbolAsciiETX) {
-                uint16_t write_size = read_index % buffer_size;
+                size_t write_size = read_index % buffer_size;
 
                 if(write_size > 0) {
-                    uint16_t written_size = storage_file_write(file, buffer, write_size);
+                    size_t written_size = storage_file_write(file, buffer, write_size);
 
                     if(written_size != write_size) {
                         storage_cli_print_error(storage_file_get_error(file));
@@ -259,7 +259,7 @@ static void storage_cli_write(Cli* cli, FuriString* path) {
             read_index++;
 
             if(((read_index % buffer_size) == 0)) {
-                uint16_t written_size = storage_file_write(file, buffer, buffer_size);
+                size_t written_size = storage_file_write(file, buffer, buffer_size);
 
                 if(written_size != buffer_size) {
                     storage_cli_print_error(storage_file_get_error(file));
@@ -291,7 +291,7 @@ static void storage_cli_read_chunks(Cli* cli, FuriString* path, FuriString* args
     } else if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t file_size = storage_file_size(file);
 
-        printf("Size: %lu\r\n", (uint32_t)file_size);
+        printf("Size: %llu\r\n", file_size);
 
         if(buffer_size) {
             uint8_t* data = malloc(buffer_size);
@@ -299,8 +299,8 @@ static void storage_cli_read_chunks(Cli* cli, FuriString* path, FuriString* args
                 printf("\r\nReady?\r\n");
                 cli_getc(cli);
 
-                uint16_t read_size = storage_file_read(file, data, buffer_size);
-                for(uint16_t i = 0; i < read_size; i++) {
+                size_t read_size = storage_file_read(file, data, buffer_size);
+                for(size_t i = 0; i < read_size; i++) {
                     putchar(data[i]);
                 }
                 file_size -= read_size;
@@ -335,11 +335,9 @@ static void storage_cli_write_chunk(Cli* cli, FuriString* path, FuriString* args
             if(buffer_size) {
                 uint8_t* buffer = malloc(buffer_size);
 
-                for(uint32_t i = 0; i < buffer_size; i++) {
-                    buffer[i] = cli_getc(cli);
-                }
+                size_t read_bytes = cli_read(cli, buffer, buffer_size);
 
-                uint16_t written_size = storage_file_write(file, buffer, buffer_size);
+                size_t written_size = storage_file_write(file, buffer, read_bytes);
 
                 if(written_size != buffer_size) {
                     storage_cli_print_error(storage_file_get_error(file));
@@ -456,7 +454,7 @@ static void storage_cli_rename(Cli* cli, FuriString* old_path, FuriString* args)
     if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
         storage_cli_print_usage();
     } else {
-        FS_Error error = storage_common_rename(
+        FS_Error error = storage_common_rename_safe(
             api, furi_string_get_cstr(old_path), furi_string_get_cstr(new_path));
 
         if(error != FSE_OK) {

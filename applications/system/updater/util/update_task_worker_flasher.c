@@ -11,7 +11,7 @@
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
 
-#define TAG "UpdWorkerRAM"
+#define TAG "UpdWorkerRam"
 
 #define STM_DFU_VENDOR_ID 0x0483
 #define STM_DFU_PRODUCT_ID 0xDF11
@@ -104,7 +104,7 @@ static bool update_task_write_stack_data(UpdateTask* update_task) {
 
     update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 0);
     uint8_t* fw_block = malloc(FLASH_PAGE_SIZE);
-    uint16_t bytes_read = 0;
+    size_t bytes_read = 0;
     uint32_t element_offs = 0;
 
     while(element_offs < stack_size) {

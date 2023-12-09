@@ -1,8 +1,6 @@
 #include "../bt_settings_app.h"
 #include <furi_hal_bt.h>
 #include <applications/main/bad_kb/bad_kb_paths.h>
-#include <applications/external/hid_app/hid_path.h>
-#include <applications/external/totp/workers/bt_type_code/bt_type_code.h>
 
 void bt_settings_scene_forget_dev_confirm_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
@@ -35,12 +33,16 @@ bool bt_settings_scene_forget_dev_confirm_on_event(void* context, SceneManagerEv
             bt_keys_storage_set_default_path(app->bt);
             bt_forget_bonded_devices(app->bt);
 
-            // also remove keys of badkb and bt remote
+            // also remove keys for apps
+            const char* keys_paths[] = {
+                BAD_KB_KEYS_PATH,
+                EXT_PATH("apps_data/hid_ble/.bt_hid.keys"),
+                EXT_PATH("apps_data/totp/.bt_hid.keys"),
+            };
             Storage* storage = furi_record_open(RECORD_STORAGE);
-            storage_simply_remove(storage, BAD_KB_KEYS_PATH);
-            storage_simply_remove(
-                storage, EXT_PATH("apps_data/hid_ble/") HID_BT_KEYS_STORAGE_NAME);
-            storage_simply_remove(storage, TOTP_BT_KEYS_STORAGE_PATH);
+            for(size_t i = 0; i < COUNT_OF(keys_paths); i++) {
+                storage_simply_remove(storage, keys_paths[i]);
+            }
             furi_record_close(RECORD_STORAGE);
 
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevSuccess);

@@ -33,6 +33,8 @@ typedef enum {
     MenuStyleVertical,
     MenuStyleC64,
     MenuStyleEurocorp,
+    MenuStyleCompact,
+    MenuStyleTerminal,
     MenuStyleCount,
 } MenuStyle;
 
@@ -55,11 +57,12 @@ typedef struct {
     uint32_t anim_speed;
     int32_t cycle_anims;
     bool unlock_anims;
-    bool fallback_anim;
+    bool credits_anim;
     MenuStyle menu_style;
     bool lock_on_boot;
     bool bad_pins_format;
     bool allow_locked_rpc_commands;
+    bool lockscreen_poweroff;
     bool lockscreen_time;
     bool lockscreen_seconds;
     bool lockscreen_date;
@@ -90,7 +93,7 @@ typedef struct {
 
 void XTREME_SETTINGS_LOAD();
 void XTREME_SETTINGS_SAVE();
-XtremeSettings* XTREME_SETTINGS();
+extern XtremeSettings xtreme_settings;
 
 void XTREME_ASSETS_LOAD();
 void XTREME_ASSETS_FREE();

@@ -1,7 +1,7 @@
 #include <furi_hal.h>
 
 #include "../desktop_i.h"
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #define DesktopFaultEventExit 0x00FF00FF
 
@@ -15,7 +15,7 @@ void desktop_scene_fault_on_enter(void* context) {
 
     Popup* popup = desktop->hw_mismatch_popup;
     popup_set_context(popup, desktop);
-    if(XTREME_SETTINGS()->is_nsfw) {
+    if(xtreme_settings.is_nsfw) {
         popup_set_header(
             popup,
             "Slut passed out\n but is now back",

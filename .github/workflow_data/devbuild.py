@@ -12,6 +12,12 @@ if __name__ == "__main__":
         event = json.load(f)
 
     client = nextcloud_client.Client(os.environ["NC_HOST"])
+    _session = requests.session
+    def session(*args, **kwargs):
+        s = _session(*args, **kwargs)
+        s.headers["User-Agent"] = os.environ["NC_USERAGENT"]
+        return s
+    requests.session = session
     client.login(os.environ["NC_USER"], os.environ["NC_PASS"])
 
     for file in (

@@ -9,7 +9,7 @@
 
 #include <furi.h>
 
-#define TAG "libmgr"
+#define TAG "PluginManager"
 
 #define MAX_NAME_LEN 254
 
@@ -68,7 +68,8 @@ PluginManagerError plugin_manager_load_single(PluginManager* manager, const char
 
         FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(lib);
         if(load_status != FlipperApplicationLoadStatusSuccess) {
-            FURI_LOG_E(TAG, "Failed to load module_demo_plugin1.fal");
+            FURI_LOG_E(TAG, "Failed to load %s", path);
+            error = PluginManagerErrorLoaderError;
             break;
         }
 

@@ -13,6 +13,8 @@ typedef struct {
     uint8_t type;
     SubGhzRadioPreset* preset;
     FuriHalRtcDateTime datetime;
+    float latitude;
+    float longitude;
 } SubGhzHistoryItem;
 
 ARRAY_DEF(SubGhzHistoryItemArray, SubGhzHistoryItem, M_POD_OPLIST)
@@ -71,6 +73,18 @@ const char* subghz_history_get_preset(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     return furi_string_get_cstr(item->preset->name);
+}
+
+float subghz_history_get_latitude(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    return item->latitude;
+}
+
+float subghz_history_get_longitude(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    return item->longitude;
 }
 
 void subghz_history_reset(SubGhzHistory* instance) {
@@ -147,7 +161,7 @@ FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx
         return NULL;
     }
 }
-bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output) {
+bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output, uint8_t sats) {
     furi_assert(instance);
     if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) {
         if(output != NULL) furi_string_printf(output, "    Free heap LOW");
@@ -157,8 +171,23 @@ bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* out
         if(output != NULL) furi_string_printf(output, "   Memory is FULL");
         return true;
     }
-    if(output != NULL)
-        furi_string_printf(output, "%02u/%02u", instance->last_index_write, SUBGHZ_HISTORY_MAX);
+    if(output != NULL) {
+        if(sats == 0) {
+            furi_string_printf(
+                output, "%02u/%02u", instance->last_index_write, SUBGHZ_HISTORY_MAX);
+            return false;
+        } else {
+            FuriHalRtcDateTime datetime;
+            furi_hal_rtc_get_datetime(&datetime);
+
+            if(furi_hal_rtc_datetime_to_timestamp(&datetime) % 2) {
+                furi_string_printf(
+                    output, "%02u/%02u", instance->last_index_write, SUBGHZ_HISTORY_MAX);
+            } else {
+                furi_string_printf(output, "%d sats", sats);
+            }
+        }
+    }
     return false;
 }
 
@@ -207,6 +236,8 @@ bool subghz_history_add_to_history(
     item->preset->data = preset->data;
     item->preset->data_size = preset->data_size;
     furi_hal_rtc_get_datetime(&item->datetime);
+    item->latitude = preset->latitude;
+    item->longitude = preset->longitude;
 
     item->item_str = furi_string_alloc();
     item->flipper_string = flipper_format_string_alloc();

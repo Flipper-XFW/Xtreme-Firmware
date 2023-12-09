@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #include "math.h"
 
 typedef struct {
@@ -38,7 +38,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
 
-    if(XTREME_SETTINGS()->is_nsfw) {
+    if(xtreme_settings.is_nsfw) {
         if(stats->butthurt <= 4) {
             portrait = &I_passport_happy_46x49;
             mood_str = "Status: Wet";

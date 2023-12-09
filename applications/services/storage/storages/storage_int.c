@@ -701,6 +701,10 @@ static FS_Error storage_int_common_fs_info(
     return storage_int_parse_error(result);
 }
 
+static bool storage_int_common_equivalent_path(const char* path1, const char* path2) {
+    return strcmp(path1, path2) == 0;
+}
+
 /******************* Init Storage *******************/
 static const FS_Api fs_api = {
     .file =
@@ -731,6 +735,7 @@ static const FS_Api fs_api = {
             .remove = storage_int_common_remove,
             .rename = storage_int_common_rename,
             .fs_info = storage_int_common_fs_info,
+            .equivalent_path = storage_int_common_equivalent_path,
         },
 };
 

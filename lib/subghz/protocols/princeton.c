@@ -77,6 +77,8 @@ const SubGhzProtocol subghz_protocol_princeton = {
 
     .decoder = &subghz_protocol_princeton_decoder,
     .encoder = &subghz_protocol_princeton_encoder,
+
+    .filter = SubGhzProtocolFilter_Princeton,
 };
 
 void* subghz_protocol_encoder_princeton_alloc(SubGhzEnvironment* environment) {

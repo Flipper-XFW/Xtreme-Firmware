@@ -39,13 +39,16 @@
 #include "helpers/subghz_threshold_rssi.h"
 
 #include "helpers/subghz_txrx.h"
+#include "helpers/subghz_gps.h"
 
 #define SUBGHZ_MAX_LEN_NAME 64
 #define SUBGHZ_EXT_PRESET_NAME true
+#define SUBGHZ_RAW_THRESHOLD_MIN (-90.0f)
+#define SUBGHZ_MEASURE_LOADING false
 
 typedef struct {
     uint8_t fix[4];
-    uint8_t cnt[3];
+    uint8_t cnt[4];
     uint8_t seed[4];
 } SecureData;
 
@@ -80,7 +83,7 @@ struct SubGhz {
     SubGhzLastSettings* last_settings;
 
     SubGhzProtocolFlag filter;
-    SubGhzProtocolFlag ignore_filter;
+    SubGhzProtocolFilter ignore_filter;
     FuriString* error_str;
     SubGhzLock lock;
 
@@ -91,6 +94,7 @@ struct SubGhz {
     SubGhzThresholdRssi* threshold_rssi;
     SubGhzRxKeyState rx_key_state;
     SubGhzHistory* history;
+    SubGhzGPS* gps;
 
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
@@ -101,7 +105,6 @@ struct SubGhz {
     void* rpc_ctx;
 };
 
-void subghz_set_default_preset(SubGhz* subghz);
 void subghz_blink_start(SubGhz* subghz);
 void subghz_blink_stop(SubGhz* subghz);
 

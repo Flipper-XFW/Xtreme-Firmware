@@ -5,7 +5,7 @@ enum VarItemListIndex {
     VarItemListIndexAnimSpeed,
     VarItemListIndexCycleAnims,
     VarItemListIndexUnlockAnims,
-    VarItemListIndexFallbackAnim,
+    VarItemListIndexCreditsAnim,
 };
 
 void xtreme_app_scene_interface_graphics_var_item_list_callback(void* context, uint32_t index) {
@@ -18,8 +18,12 @@ static void xtreme_app_scene_interface_graphics_asset_pack_changed(VariableItem*
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, index == 0 ? "Default" : *CharList_get(app->asset_pack_names, index - 1));
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexCreditsAnim),
+        index != 0,
+        "Credits\nare in\ndefault pack!");
     strlcpy(
-        XTREME_SETTINGS()->asset_pack,
+        xtreme_settings.asset_pack,
         index == 0 ? "" : *CharList_get(app->asset_pack_names, index - 1),
         XTREME_ASSETS_PACK_NAME_LEN);
     app->asset_pack_index = index;
@@ -59,15 +63,17 @@ static void xtreme_app_scene_interface_graphics_anim_speed_changed(VariableItem*
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, anim_speed_names[index]);
-    XTREME_SETTINGS()->anim_speed = anim_speed_values[index];
+    xtreme_settings.anim_speed = anim_speed_values[index];
     app->save_settings = true;
 }
 
 const char* const cycle_anims_names[] = {
     "OFF",
     "Meta.txt",
+    "15 S",
     "30 S",
     "1 M",
+    "2 M",
     "5 M",
     "10 M",
     "15 M",
@@ -81,8 +87,10 @@ const char* const cycle_anims_names[] = {
 const int32_t cycle_anims_values[COUNT_OF(cycle_anims_names)] = {
     -1,
     0,
+    15,
     30,
     60,
+    120,
     300,
     600,
     900,
@@ -97,7 +105,7 @@ static void xtreme_app_scene_interface_graphics_cycle_anims_changed(VariableItem
     XtremeApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cycle_anims_names[index]);
-    XTREME_SETTINGS()->cycle_anims = cycle_anims_values[index];
+    xtreme_settings.cycle_anims = cycle_anims_values[index];
     app->save_settings = true;
 }
 
@@ -105,21 +113,20 @@ static void xtreme_app_scene_interface_graphics_unlock_anims_changed(VariableIte
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->unlock_anims = value;
+    xtreme_settings.unlock_anims = value;
     app->save_settings = true;
 }
 
-static void xtreme_app_scene_interface_graphics_fallback_anim_changed(VariableItem* item) {
+static void xtreme_app_scene_interface_graphics_credits_anim_changed(VariableItem* item) {
     XtremeApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    XTREME_SETTINGS()->fallback_anim = value;
+    xtreme_settings.credits_anim = value;
     app->save_settings = true;
 }
 
 void xtreme_app_scene_interface_graphics_on_enter(void* context) {
     XtremeApp* app = context;
-    XtremeSettings* xtreme_settings = XTREME_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
     uint8_t value_index;
@@ -144,7 +151,7 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
         xtreme_app_scene_interface_graphics_anim_speed_changed,
         app);
     value_index = value_index_uint32(
-        xtreme_settings->anim_speed, anim_speed_values, COUNT_OF(anim_speed_values));
+        xtreme_settings.anim_speed, anim_speed_values, COUNT_OF(anim_speed_values));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, anim_speed_names[value_index]);
 
@@ -155,7 +162,7 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
         xtreme_app_scene_interface_graphics_cycle_anims_changed,
         app);
     value_index = value_index_int32(
-        xtreme_settings->cycle_anims, cycle_anims_values, COUNT_OF(cycle_anims_values));
+        xtreme_settings.cycle_anims, cycle_anims_values, COUNT_OF(cycle_anims_values));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, cycle_anims_names[value_index]);
 
@@ -165,17 +172,18 @@ void xtreme_app_scene_interface_graphics_on_enter(void* context) {
         2,
         xtreme_app_scene_interface_graphics_unlock_anims_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->unlock_anims);
-    variable_item_set_current_value_text(item, xtreme_settings->unlock_anims ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings.unlock_anims);
+    variable_item_set_current_value_text(item, xtreme_settings.unlock_anims ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
         "Credits Anim",
         2,
-        xtreme_app_scene_interface_graphics_fallback_anim_changed,
+        xtreme_app_scene_interface_graphics_credits_anim_changed,
         app);
-    variable_item_set_current_value_index(item, xtreme_settings->fallback_anim);
-    variable_item_set_current_value_text(item, xtreme_settings->fallback_anim ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, xtreme_settings.credits_anim);
+    variable_item_set_current_value_text(item, xtreme_settings.credits_anim ? "ON" : "OFF");
+    variable_item_set_locked(item, app->asset_pack_index != 0, "Credits\nare in\ndefault pack!");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_interface_graphics_var_item_list_callback, app);
