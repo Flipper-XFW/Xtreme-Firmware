@@ -122,7 +122,7 @@ static void subghz_scene_add_to_history_callback(
 
             subghz->state_notifications = SubGhzNotificationStateRxDone;
 
-            if(subghz->ignore_duplicates) {
+            if(subghz->remove_duplicates) {
                 // Look in history for signal hash
                 uint8_t hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
                 uint16_t menu_idx = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);

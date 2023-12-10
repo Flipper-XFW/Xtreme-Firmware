@@ -28,7 +28,7 @@ typedef struct {
     bool timestamp_file_names;
     uint32_t gps_baudrate;
     bool enable_hopping;
-    bool ignore_duplicates;
+    bool remove_duplicates;
     uint32_t ignore_filter;
     uint32_t filter;
     float rssi;
