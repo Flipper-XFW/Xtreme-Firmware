@@ -134,6 +134,30 @@ static void subghz_scene_add_to_history_callback(
             if(subghz_history_get_text_space_left(subghz->history, NULL, 0)) {
                 notification_message(subghz->notifications, &sequence_error);
             }
+
+            if(subghz->ignore_duplicates) {
+                uint16_t history_count = subghz_history_get_last_index(subghz->history) - 1;
+                uint8_t hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
+                uint16_t menu_idx = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+                subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
+
+                for(uint16_t idx = history_count; idx > 0; idx--) {
+                    if(subghz_history_get_hash_data(subghz->history, idx - 1) == hash_data) {
+                        subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, idx - 1);
+                        subghz_history_delete_item(subghz->history, idx - 1);
+                        subghz_view_receiver_delete_element_callback(subghz->subghz_receiver);
+                        if(menu_idx > idx - 1) menu_idx--;
+                    }
+                }
+
+                subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, menu_idx);
+                subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+                subghz_view_receiver_enable_draw_callback(subghz->subghz_receiver);
+                subghz_scene_receiver_update_statusbar(subghz);
+                if(subghz_history_get_last_index(subghz->history) == 0) {
+                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
+                }
+            }
         }
         subghz_receiver_reset(receiver);
         furi_string_free(item_name);

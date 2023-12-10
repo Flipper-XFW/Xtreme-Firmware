@@ -29,6 +29,14 @@ void subghz_history_reset(SubGhzHistory* instance);
 
 void subghz_history_delete_item(SubGhzHistory* instance, uint16_t item_id);
 
+/** Get hash data to history[idx]
+ * 
+ * @param instance - SubGhzHistory instance
+ * @param idx      - record index
+ * @return hash    - hash data byte
+ */
+uint8_t subghz_history_get_hash_data(SubGhzHistory* instance, uint16_t idx);
+
 /** Get frequency to history[idx]
  * 
  * @param instance  - SubGhzHistory instance

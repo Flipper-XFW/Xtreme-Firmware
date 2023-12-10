@@ -13,6 +13,7 @@ typedef struct {
     uint8_t type;
     SubGhzRadioPreset* preset;
     FuriHalRtcDateTime datetime;
+    uint8_t hash_data;
     float latitude;
     float longitude;
 } SubGhzHistoryItem;
@@ -55,6 +56,12 @@ void subghz_history_free(SubGhzHistory* instance) {
     SubGhzHistoryItemArray_clear(instance->history->data);
     free(instance->history);
     free(instance);
+}
+
+uint8_t subghz_history_get_hash_data(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    return item->hash_data;
 }
 
 uint32_t subghz_history_get_frequency(SubGhzHistory* instance, uint16_t idx) {
@@ -216,14 +223,14 @@ bool subghz_history_add_to_history(
     if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return false;
 
     SubGhzProtocolDecoderBase* decoder_base = context;
-    if((instance->code_last_hash_data ==
-        subghz_protocol_decoder_base_get_hash_data(decoder_base)) &&
+    uint8_t hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
+    if((instance->code_last_hash_data == hash_data) &&
        ((furi_get_tick() - instance->last_update_timestamp) < 500)) {
         instance->last_update_timestamp = furi_get_tick();
         return false;
     }
 
-    instance->code_last_hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
+    instance->code_last_hash_data = hash_data;
     instance->last_update_timestamp = furi_get_tick();
 
     FuriString* text = furi_string_alloc();
@@ -236,6 +243,7 @@ bool subghz_history_add_to_history(
     item->preset->data = preset->data;
     item->preset->data_size = preset->data_size;
     furi_hal_rtc_get_datetime(&item->datetime);
+    item->hash_data = hash_data;
     item->latitude = preset->latitude;
     item->longitude = preset->longitude;
 

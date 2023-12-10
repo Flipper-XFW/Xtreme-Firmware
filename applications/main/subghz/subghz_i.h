@@ -84,6 +84,7 @@ struct SubGhz {
 
     SubGhzProtocolFlag filter;
     SubGhzProtocolFilter ignore_filter;
+    bool ignore_duplicates;
     FuriString* error_str;
     SubGhzLock lock;
 

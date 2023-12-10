@@ -223,11 +223,13 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     subghz->secure_data = malloc(sizeof(SecureData));
 
     if(!alloc_for_tx_only) {
+        subghz->ignore_duplicates = subghz->last_settings->ignore_duplicates;
         subghz->ignore_filter = subghz->last_settings->ignore_filter;
         subghz->filter = subghz->last_settings->filter;
     } else {
         subghz->filter = SubGhzProtocolFlag_Decodable;
         subghz->ignore_filter = 0x0;
+        subghz->ignore_duplicates = false;
     }
     subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
     subghz_txrx_set_need_save_callback(subghz->txrx, subghz_save_to_file, subghz);

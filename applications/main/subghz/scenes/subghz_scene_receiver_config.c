@@ -267,6 +267,15 @@ static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* it
     subghz->last_settings->rssi = raw_threshold_rssi_value[index];
 }
 
+static void subghz_scene_receiver_config_set_duplicates(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, combobox_text[index]);
+
+    subghz->last_settings->ignore_duplicates = subghz->ignore_duplicates = index;
+}
+
 static inline bool subghz_scene_receiver_config_ignore_filter_get_index(
     SubGhzProtocolFilter filter,
     SubGhzProtocolFilter flag) {
@@ -328,7 +337,9 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
         subghz_threshold_rssi_set(subghz->threshold_rssi, raw_threshold_rssi_value[default_index]);
         subghz->filter = bin_raw_value[0];
         subghz->ignore_filter = 0x00;
+        subghz->ignore_duplicates = false;
         subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+        subghz->last_settings->ignore_duplicates = subghz->ignore_duplicates;
         subghz->last_settings->ignore_filter = subghz->ignore_filter;
         subghz->last_settings->filter = subghz->filter;
 
@@ -419,6 +430,17 @@ void subghz_scene_receiver_config_on_enter(void* context) {
 
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
        SubGhzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Duplicates",
+            COMBO_BOX_COUNT,
+            subghz_scene_receiver_config_set_duplicates,
+            subghz);
+
+        value_index = subghz->ignore_duplicates;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, combobox_text[value_index]);
+
         item = variable_item_list_add(
             subghz->variable_item_list,
             "Ignore Starline",
