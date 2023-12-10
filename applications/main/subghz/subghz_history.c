@@ -133,6 +133,7 @@ void subghz_history_delete_item(SubGhzHistory* instance, uint16_t item_id) {
             flipper_format_free(item->flipper_string);
             item->type = 0;
             SubGhzHistoryItemArray_remove(instance->history->data, it);
+            break;
         }
         SubGhzHistoryItemArray_previous(it);
     }

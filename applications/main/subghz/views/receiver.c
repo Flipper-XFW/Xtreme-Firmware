@@ -568,6 +568,7 @@ void subghz_view_receiver_exit(void* context) {
                         furi_string_free(item_menu->item_str);
                         furi_string_free(item_menu->time);
                         item_menu->type = 0;
+                        item_menu->repeats = 0;
                     }
                 SubGhzReceiverMenuItemArray_reset(model->history->data);
                 model->idx = 0;
@@ -640,6 +641,7 @@ void subghz_view_receiver_free(SubGhzViewReceiver* subghz_receiver) {
                         furi_string_free(item_menu->item_str);
                         furi_string_free(item_menu->time);
                         item_menu->type = 0;
+                        item_menu->repeats = 0;
                     }
                 SubGhzReceiverMenuItemArray_clear(model->history->data);
                 free(model->history);
@@ -681,6 +683,7 @@ void subghz_view_receiver_delete_element_callback(SubGhzViewReceiver* subghz_rec
                     furi_string_free(item->item_str);
                     furi_string_free(item->time);
                     item->type = 0;
+                    item->repeats = 0;
                     SubGhzReceiverMenuItemArray_remove(model->history->data, it);
                 }
 
@@ -721,7 +724,7 @@ void subghz_view_receiver_set_idx_menu(SubGhzViewReceiver* subghz_receiver, uint
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {
-            model->idx = idx;
+            model->idx = CLAMP(idx, model->history_item ? model->history_item - 1 : 0, 0);
             if(model->idx > 2) model->list_offset = idx - 2;
         },
         true);
