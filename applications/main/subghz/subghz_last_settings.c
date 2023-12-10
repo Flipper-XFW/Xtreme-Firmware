@@ -284,7 +284,10 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
             break;
         }
         if(!flipper_format_insert_or_update_bool(
-               file, SUBGHZ_LAST_SETTING_FIELD_IGNORE_DUPLICATES, &instance->ignore_duplicates, 1)) {
+               file,
+               SUBGHZ_LAST_SETTING_FIELD_IGNORE_DUPLICATES,
+               &instance->ignore_duplicates,
+               1)) {
             break;
         }
         if(!flipper_format_insert_or_update_uint32(

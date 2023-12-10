@@ -151,7 +151,8 @@ static void subghz_scene_add_to_history_callback(
                 }
 
                 subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, menu_idx);
-                subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+                subghz->idx_menu_chosen =
+                    subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
                 subghz_view_receiver_enable_draw_callback(subghz->subghz_receiver);
                 subghz_scene_receiver_update_statusbar(subghz);
                 if(subghz_history_get_last_index(subghz->history) == 0) {
