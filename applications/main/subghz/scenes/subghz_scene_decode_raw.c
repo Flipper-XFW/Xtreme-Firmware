@@ -67,7 +67,8 @@ static void subghz_scene_add_to_history_callback(
             subghz->subghz_receiver,
             furi_string_get_cstr(item_name),
             furi_string_get_cstr(item_time),
-            subghz_history_get_type_protocol(subghz->history, idx));
+            subghz_history_get_type_protocol(subghz->history, idx),
+            subghz_history_get_repeats(subghz->history, idx));
 
         subghz_scene_receiver_update_statusbar(subghz);
     }
@@ -185,7 +186,8 @@ void subghz_scene_decode_raw_on_enter(void* context) {
                 subghz->subghz_receiver,
                 furi_string_get_cstr(item_name),
                 furi_string_get_cstr(item_time),
-                subghz_history_get_type_protocol(subghz->history, i));
+                subghz_history_get_type_protocol(subghz->history, i),
+                subghz_history_get_repeats(subghz->history, i));
         }
         subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->idx_menu_chosen);
     }

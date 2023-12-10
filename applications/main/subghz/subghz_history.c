@@ -14,6 +14,7 @@ typedef struct {
     SubGhzRadioPreset* preset;
     FuriHalRtcDateTime datetime;
     uint8_t hash_data;
+    uint16_t repeats;
     float latitude;
     float longitude;
 } SubGhzHistoryItem;
@@ -62,6 +63,12 @@ uint8_t subghz_history_get_hash_data(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     return item->hash_data;
+}
+
+uint16_t subghz_history_get_repeats(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    return item->repeats;
 }
 
 uint32_t subghz_history_get_frequency(SubGhzHistory* instance, uint16_t idx) {
@@ -230,6 +237,18 @@ bool subghz_history_add_to_history(
         return false;
     }
 
+    uint16_t repeats = 0;
+    SubGhzHistoryItemArray_it_t it;
+    SubGhzHistoryItemArray_it_last(it, instance->history->data);
+    while(!SubGhzHistoryItemArray_end_p(it)) {
+        SubGhzHistoryItem* search = SubGhzHistoryItemArray_ref(it);
+        if(search->hash_data == hash_data) {
+            repeats = search->repeats + 1;
+            break;
+        }
+        SubGhzHistoryItemArray_previous(it);
+    }
+
     instance->code_last_hash_data = hash_data;
     instance->last_update_timestamp = furi_get_tick();
 
@@ -244,6 +263,7 @@ bool subghz_history_add_to_history(
     item->preset->data_size = preset->data_size;
     furi_hal_rtc_get_datetime(&item->datetime);
     item->hash_data = hash_data;
+    item->repeats = repeats;
     item->latitude = preset->latitude;
     item->longitude = preset->longitude;
 
