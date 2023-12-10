@@ -275,6 +275,10 @@ static void subghz_scene_receiver_config_set_duplicates(VariableItem* item) {
     variable_item_set_current_value_text(item, combobox_text[index]);
 
     subghz->last_settings->remove_duplicates = subghz->remove_duplicates = index;
+    if(index) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneSettingRemoveDuplicates);
+    }
 }
 
 static inline bool subghz_scene_receiver_config_ignore_filter_get_index(
@@ -313,7 +317,10 @@ static void subghz_scene_receiver_config_set_tpms(VariableItem* item) {
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     SubGhz* subghz = context;
-    if(index == SubGhzSettingIndexLock) {
+    if(index == SubGhzSettingIndexRemoveDuplicates) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneSettingRemoveDuplicates);
+    } else if(index == SubGhzSettingIndexLock) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneSettingLock);
     } else if(index == SubGhzSettingIndexResetToDefault) {
@@ -582,7 +589,11 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubGhzCustomEventSceneSettingLock) {
+        if(event.event == SubGhzCustomEventSceneSettingRemoveDuplicates) {
+            subghz_history_remove_duplicates(subghz->history);
+            scene_manager_previous_scene(subghz->scene_manager);
+            consumed = true;
+        } else if(event.event == SubGhzCustomEventSceneSettingLock) {
             subghz_lock(subghz);
             scene_manager_previous_scene(subghz->scene_manager);
             consumed = true;

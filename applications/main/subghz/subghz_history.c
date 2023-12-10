@@ -332,3 +332,26 @@ bool subghz_history_add_to_history(
     instance->last_index_write++;
     return true;
 }
+
+void subghz_history_remove_duplicates(SubGhzHistory* instance) {
+    furi_assert(instance);
+
+    SubGhzHistoryItemArray_it_t it;
+    SubGhzHistoryItemArray_it_last(it, instance->history->data);
+    while(!SubGhzHistoryItemArray_end_p(it)) {
+        SubGhzHistoryItem* i = SubGhzHistoryItemArray_ref(it);
+
+        SubGhzHistoryItemArray_it_t jt;
+        SubGhzHistoryItemArray_it_set(jt, it);
+        SubGhzHistoryItemArray_previous(jt);
+        while(!SubGhzHistoryItemArray_end_p(jt)) {
+            SubGhzHistoryItem* j = SubGhzHistoryItemArray_ref(jt);
+
+            if(j->hash_data == i->hash_data) {
+                subghz_history_delete_item(instance, jt->index);
+            }
+            SubGhzHistoryItemArray_previous(jt);
+        }
+        SubGhzHistoryItemArray_previous(it);
+    }
+}

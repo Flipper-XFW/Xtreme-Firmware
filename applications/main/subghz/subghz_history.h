@@ -153,3 +153,6 @@ float subghz_history_get_latitude(SubGhzHistory* instance, uint16_t idx);
  * @return longitude - Float
 */
 float subghz_history_get_longitude(SubGhzHistory* instance, uint16_t idx);
+
+// Consolidate history removing existing duplicates
+void subghz_history_remove_duplicates(SubGhzHistory* instance);
