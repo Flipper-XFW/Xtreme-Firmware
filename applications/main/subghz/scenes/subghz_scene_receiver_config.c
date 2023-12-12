@@ -275,10 +275,7 @@ static void subghz_scene_receiver_config_set_duplicates(VariableItem* item) {
     variable_item_set_current_value_text(item, combobox_text[index]);
 
     subghz->last_settings->remove_duplicates = subghz->remove_duplicates = index;
-    if(index) {
-        view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubGhzCustomEventSceneSettingRemoveDuplicates);
-    }
+    if(index) subghz_history_remove_duplicates(subghz->history);
 }
 
 static inline bool subghz_scene_receiver_config_ignore_filter_get_index(
