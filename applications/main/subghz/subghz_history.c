@@ -3,7 +3,7 @@
 
 #include <furi.h>
 
-#define SUBGHZ_HISTORY_MAX 55
+#define SUBGHZ_HISTORY_MAX 65535 // uint16_t index max, ram limit below
 #define SUBGHZ_HISTORY_FREE_HEAP 20480
 #define TAG "SubGhzHistory"
 
@@ -179,25 +179,23 @@ FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx
 bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output, uint8_t sats) {
     furi_assert(instance);
     if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) {
-        if(output != NULL) furi_string_printf(output, "    Free heap LOW");
+        if(output != NULL) furi_string_printf(output, "    Memory is FULL");
         return true;
     }
     if(instance->last_index_write == SUBGHZ_HISTORY_MAX) {
-        if(output != NULL) furi_string_printf(output, "   Memory is FULL");
+        if(output != NULL) furi_string_printf(output, "     History is FULL");
         return true;
     }
     if(output != NULL) {
         if(sats == 0) {
-            furi_string_printf(
-                output, "%02u/%02u", instance->last_index_write, SUBGHZ_HISTORY_MAX);
+            furi_string_printf(output, "%02u", instance->last_index_write);
             return false;
         } else {
             FuriHalRtcDateTime datetime;
             furi_hal_rtc_get_datetime(&datetime);
 
             if(furi_hal_rtc_datetime_to_timestamp(&datetime) % 2) {
-                furi_string_printf(
-                    output, "%02u/%02u", instance->last_index_write, SUBGHZ_HISTORY_MAX);
+                furi_string_printf(output, "%02u", instance->last_index_write);
             } else {
                 furi_string_printf(output, "%d sats", sats);
             }
