@@ -53,6 +53,7 @@ typedef enum {
     SubGhzRxKeyStateExit,
     SubGhzRxKeyStateRAWLoad,
     SubGhzRxKeyStateRAWSave,
+    SubGhzRxKeyStateRepeating,
 } SubGhzRxKeyState;
 
 /** SubGhzLoadKeyState state */
@@ -102,3 +103,11 @@ typedef enum {
     SubGhzDecodeRawStateLoading,
     SubGhzDecodeRawStateLoaded,
 } SubGhzDecodeRawState;
+
+/** SubGhz Repeater */
+typedef enum {
+    SubGhzRepeaterStateOff,
+    SubGhzRepeaterStateOn,
+    SubGhzRepeaterStateOnLong,
+    SubGhzRepeaterStateOnShort,
+} SubGhzRepeaterState;

@@ -96,6 +96,8 @@ struct SubGhz {
     SubGhzRxKeyState rx_key_state;
     SubGhzHistory* history;
     SubGhzGPS* gps;
+    SubGhzRepeaterState repeater;
+    bool bin_raw_menu_changed;
 
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
