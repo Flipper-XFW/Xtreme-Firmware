@@ -550,18 +550,36 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
             },
             false);
         consumed = true;
-    } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        with_view_model(
-            subghz_receiver->view,
-            SubGhzViewReceiverModel * model,
-            {
-                if(model->history_item != 0) {
-                    subghz_receiver->callback(
-                        SubGhzCustomEventViewReceiverOK, subghz_receiver->context);
-                }
-            },
-            false);
-        consumed = true;
+    } else if(event->key == InputKeyOk) {
+        SubGhzCustomEvent new_event;
+
+        switch(event->type) {
+        case InputTypeShort:
+            new_event = SubGhzCustomEventViewReceiverOK;
+            break;
+        case InputTypeLong:
+            new_event = SubGhzCustomEventViewReceiverOKLong;
+            break;
+        case InputTypeRelease:
+            new_event = SubGhzCustomEventViewReceiverOKRelease;
+            break;
+        default:
+            new_event = 0;
+            break;
+        }
+
+        if(new_event) {
+            with_view_model(
+                subghz_receiver->view,
+                SubGhzViewReceiverModel * model,
+                {
+                    if(model->history_item != 0) {
+                        subghz_receiver->callback(new_event, subghz_receiver->context);
+                    }
+                },
+                false);
+            consumed = true;
+        }
     }
 
     if(consumed) {

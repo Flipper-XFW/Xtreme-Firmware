@@ -391,7 +391,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                                            repeatnormal * tmpTe;
                 furi_timer_start(subghz->fav_timer, repeat_time);
             }
-            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRepeating);
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateTX);
             break;
         case SubGhzCustomEventViewRepeaterStop:
             subghz_txrx_stop(subghz->txrx);
@@ -402,11 +402,37 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
             subghz->state_notifications = SubGhzNotificationStateRx;
             break;
+        case SubGhzCustomEventViewReceiverOKLong:
+            subghz_txrx_stop(subghz->txrx);
+            subghz_txrx_hopper_pause(subghz->txrx);
+            if(!subghz_tx_start(
+                   subghz,
+                   subghz_history_get_raw_data(
+                       subghz->history,
+                       subghz_view_receiver_get_idx_menu(subghz->subghz_receiver)))) {
+                view_dispatcher_send_custom_event(
+                    subghz->view_dispatcher, SubGhzCustomEventViewReceiverOKRelease);
+            } else {
+                subghz->state_notifications = SubGhzNotificationStateTx;
+                notification_message(subghz->notifications, &subghz_sequence_tx_beep);
+            }
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateTX);
+            break;
+        case SubGhzCustomEventViewReceiverOKRelease:
+            if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateTX) {
+                subghz_txrx_stop(subghz->txrx);
+                subghz_txrx_rx_start(subghz->txrx);
+                subghz_txrx_hopper_unpause(subghz->txrx);
+                subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
+                subghz->state_notifications = SubGhzNotificationStateRx;
+                break;
+            }
+            break;
         default:
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
-        if(subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateRepeating) {
+        if(subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateTX) {
             if(subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
                 subghz_txrx_hopper_update(subghz->txrx);
                 subghz_scene_receiver_update_statusbar(subghz);

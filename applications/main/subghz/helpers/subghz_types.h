@@ -53,7 +53,7 @@ typedef enum {
     SubGhzRxKeyStateExit,
     SubGhzRxKeyStateRAWLoad,
     SubGhzRxKeyStateRAWSave,
-    SubGhzRxKeyStateRepeating,
+    SubGhzRxKeyStateTX,
 } SubGhzRxKeyState;
 
 /** SubGhzLoadKeyState state */
