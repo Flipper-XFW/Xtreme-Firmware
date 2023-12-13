@@ -35,43 +35,46 @@ static MfClassicKeyPair microel_1k_keys[] = {
 
 const uint8_t verify_sector = 1;
 
-void calcolaSommaHex(const uint8_t *uid, size_t uidSize, uint8_t sommaHex[]) {
-  const uint8_t xorKey[] = { 0x01, 0x92, 0xA7, 0x75, 0x2B, 0xF9 };
-  int somma = 0;
+void calcolaSommaHex(const uint8_t* uid, size_t uidSize, uint8_t sommaHex[]) {
+    const uint8_t xorKey[] = {0x01, 0x92, 0xA7, 0x75, 0x2B, 0xF9};
+    int somma = 0;
 
-  for (size_t i = 0; i < uidSize; i++) {
-    somma += uid[i];
-  }
+    for(size_t i = 0; i < uidSize; i++) {
+        somma += uid[i];
+    }
 
-  int sommaDueNumeri = somma % 256;
+    int sommaDueNumeri = somma % 256;
 
-  for (size_t i = 0; i < sizeof(xorKey); i++) {
-    sommaHex[i] = sommaDueNumeri ^ xorKey[i];
-  }
+    for(size_t i = 0; i < sizeof(xorKey); i++) {
+        sommaHex[i] = sommaDueNumeri ^ xorKey[i];
+    }
 }
 
-void generateKeyA(const uint8_t *uid, uint8_t uidSize, uint8_t keyA[]) {
-  uint8_t sommaHex[6];
-  calcolaSommaHex(uid, uidSize, sommaHex);
-  uint8_t primoCarattere = (sommaHex[0] >> 4) & 0xF;
+void generateKeyA(const uint8_t* uid, uint8_t uidSize, uint8_t keyA[]) {
+    uint8_t sommaHex[6];
+    calcolaSommaHex(uid, uidSize, sommaHex);
+    uint8_t primoCarattere = (sommaHex[0] >> 4) & 0xF;
 
-  if (primoCarattere == 0x2 || primoCarattere == 0x3 || primoCarattere == 0xA || primoCarattere == 0xB) {
-    // XOR WITH 0x40
-    for (size_t i = 0; i < sizeof(sommaHex); i++) {
-      keyA[i] = 0x40 ^ sommaHex[i];
+    if(primoCarattere == 0x2 || primoCarattere == 0x3 || primoCarattere == 0xA ||
+       primoCarattere == 0xB) {
+        // XOR WITH 0x40
+        for(size_t i = 0; i < sizeof(sommaHex); i++) {
+            keyA[i] = 0x40 ^ sommaHex[i];
+        }
+    } else if(
+        primoCarattere == 0x6 || primoCarattere == 0x7 || primoCarattere == 0xE ||
+        primoCarattere == 0xF) {
+        // XOR WITH 0xC0
+        for(size_t i = 0; i < sizeof(sommaHex); i++) {
+            keyA[i] = 0xC0 ^ sommaHex[i];
+        }
     }
-  } else if (primoCarattere == 0x6 || primoCarattere == 0x7 || primoCarattere == 0xE || primoCarattere == 0xF) {
-    // XOR WITH 0xC0
-    for (size_t i = 0; i < sizeof(sommaHex); i++) {
-      keyA[i] = 0xC0 ^ sommaHex[i];
-    }
-  }
 }
 
 void generateKeyB(uint8_t keyA[], size_t keyASize, uint8_t keyB[]) {
-  for (size_t i = 0; i < keyASize; i++) {
-    keyB[i] = 0xFF ^ keyA[i];
-  }
+    for(size_t i = 0; i < keyASize; i++) {
+        keyB[i] = 0xFF ^ keyA[i];
+    }
 }
 
 /*static bool microel_verify(Nfc* nfc) {
@@ -182,7 +185,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     furi_assert(parsed_data);
 
-     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
+    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
 
     bool parsed = false;
 
@@ -197,7 +200,8 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
         generateKeyA(uid, UID_LENGTH, keyA);
 
         // Verify key
-        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, verify_sector);
+        MfClassicSectorTrailer* sec_tr =
+            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, 6);
         uint64_t key_for_check_from_array = nfc_util_bytes2num(keyA, KEY_LENGTH);
         if(key != key_for_check_from_array) return false;
@@ -211,9 +215,14 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
         for(size_t i = 0; i < UID_LENGTH; i++) {
             furi_string_cat_printf(parsed_data, " %02X", uid[i]);
         }
-        furi_string_cat_printf(parsed_data, "\nCurrent Credit: %d.%02d E \n", balance / 100, balance % 100);
-        furi_string_cat_printf(parsed_data, "Previus Credit: %d.%02d E \n", previus_balance / 100, previus_balance % 100);
-        
+        furi_string_cat_printf(
+            parsed_data, "\nCurrent Credit: %d.%02d E \n", balance / 100, balance % 100);
+        furi_string_cat_printf(
+            parsed_data,
+            "Previus Credit: %d.%02d E \n",
+            previus_balance / 100,
+            previus_balance % 100);
+
         parsed = true;
     } while(false);
 
@@ -223,7 +232,8 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin microel_plugin = {
     .protocol = NfcProtocolMfClassic,
-    .verify = NULL, // the verification I need is based on verifying the keys generated via uid and try to authenticate not like on mizip that there is default b0
+    .verify =
+        NULL, // the verification I need is based on verifying the keys generated via uid and try to authenticate not like on mizip that there is default b0
     .read = microel_read,
     .parse = microel_parse,
 };

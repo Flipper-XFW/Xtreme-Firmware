@@ -67,7 +67,8 @@ static bool mizip_verify(Nfc* nfc) {
         MfClassicError error =
             mf_classic_poller_sync_auth(nfc, block_num, &key, MfClassicKeyTypeB, &auth_context);
         if(error != MfClassicErrorNone) {
-            FURI_LOG_D(TAG, "Failed to read block %u: %d, this is not a MiZIP card", block_num, error);
+            FURI_LOG_D(
+                TAG, "Failed to read block %u: %d, this is not a MiZIP card", block_num, error);
             break;
         }
         FURI_LOG_D(TAG, "Found a MiZIP Card");
