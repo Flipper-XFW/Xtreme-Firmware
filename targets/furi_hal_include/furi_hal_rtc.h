@@ -26,7 +26,7 @@ typedef struct {
 
 typedef enum {
     FuriHalRtcFlagDebug = (1 << 0),
-    FuriHalRtcFlagFactoryReset = (1 << 1),
+    FuriHalRtcFlagStorageFormatInternal = (1 << 1),
     FuriHalRtcFlagLock = (1 << 2), // WITH PIN, on OFW also for keypad (removes option to do both)
     FuriHalRtcFlagC2Update = (1 << 3),
     FuriHalRtcFlagHandOrient = (1 << 4),
@@ -90,6 +90,9 @@ void furi_hal_rtc_init();
 
 /** Force sync shadow registers */
 void furi_hal_rtc_sync_shadow();
+
+/** Reset ALL RTC registers content */
+void furi_hal_rtc_reset_registers();
 
 /** Get RTC register content
  *
