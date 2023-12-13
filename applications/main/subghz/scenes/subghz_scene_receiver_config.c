@@ -13,6 +13,7 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexRAWSound = SubGhzSettingIndexHopping,
     SubGhzSettingIndexBinRAW,
     SubGhzSettingIndexRAWRSSIThreshold = SubGhzSettingIndexBinRAW,
+    SubGhzSettingIndexRepeater,
     SubGhzSettingIndexRemoveDuplicates,
     SubGhzSettingIndexIgnoreStarline,
     SubGhzSettingIndexIgnoreCars,
@@ -24,7 +25,6 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexSound,
     SubGhzSettingIndexResetToDefault,
     SubGhzSettingIndexLock,
-    SubGhzSettingIndexRepeater,
 };
 
 #define RAW_THRESHOLD_RSSI_COUNT 11
