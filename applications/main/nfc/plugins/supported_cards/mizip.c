@@ -147,7 +147,7 @@ static bool mizip_parse(const NfcDevice* device, FuriString* parsed_data) {
         MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_b.data, 6);
-        if(key != mizip_1k_keys[verify_sector].b) return false;
+        if(key != mizip_1k_keys[verify_sector].b) break;
 
         //Get UID
         uint8_t uid[UID_LENGTH];
