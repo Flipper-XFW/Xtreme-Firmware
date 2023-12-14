@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
-#include "ir_remote_icons.h"
+#include <ir_remote_icons.h>
 #include <assets_icons.h>
 
 #include <notification/notification.h>

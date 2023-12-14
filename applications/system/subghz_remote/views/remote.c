@@ -239,7 +239,6 @@ bool subrem_view_remote_input(InputEvent* event, void* context) {
 
         return true;
     }
-
     // BACK button processing end
 
     if(event->key == InputKeyUp && event->type == InputTypePress) {

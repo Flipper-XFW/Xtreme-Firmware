@@ -6,7 +6,7 @@
 #include <storage/storage.h>
 
 #include <lib/toolbox/path.h>
-#include "subghz_playlist_icons.h"
+#include <subghz_playlist_icons.h>
 #include <assets_icons.h>
 
 #include <lib/subghz/protocols/protocol_items.h>

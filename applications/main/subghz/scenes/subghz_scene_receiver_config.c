@@ -10,6 +10,8 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexRAWSound = SubGhzSettingIndexHopping,
     SubGhzSettingIndexBinRAW,
     SubGhzSettingIndexRAWRSSIThreshold = SubGhzSettingIndexBinRAW,
+    SubGhzSettingIndexRepeater,
+    SubGhzSettingIndexRemoveDuplicates,
     SubGhzSettingIndexIgnoreStarline,
     SubGhzSettingIndexIgnoreCars,
     SubGhzSettingIndexIgnoreMagellan,
@@ -73,6 +75,20 @@ const char* const combobox_text[COMBO_BOX_COUNT] = {
     "ON",
 };
 
+#define REPEATER_COUNT 4
+const char* const repeater_text[REPEATER_COUNT] = {
+    "OFF",
+    "Normal",
+    "Long",
+    "Short",
+};
+const uint32_t repeater_value[REPEATER_COUNT] = {
+    SubGhzRepeaterStateOff,
+    SubGhzRepeaterStateOn,
+    SubGhzRepeaterStateOnLong,
+    SubGhzRepeaterStateOnShort,
+};
+
 static void subghz_scene_receiver_config_set_ignore_filter(
     VariableItem* item,
     SubGhzProtocolFilter filter) {
@@ -132,8 +148,7 @@ SubGhzHopperState subghz_scene_receiver_config_hopper_value_index(void* context)
         return SubGhzHopperStateOFF;
     } else {
         variable_item_set_current_value_text(
-            (VariableItem*)scene_manager_get_scene_state(
-                subghz->scene_manager, SubGhzSceneReceiverConfig),
+            variable_item_list_get(subghz->variable_item_list, SubGhzSettingIndexFrequency),
             " -----");
         return SubGhzHopperStateRunning;
     }
@@ -199,8 +214,8 @@ static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item)
     SubGhz* subghz = variable_item_get_context(item);
     SubGhzHopperState index = variable_item_get_current_value_index(item);
     SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
-    VariableItem* frequency_item = (VariableItem*)scene_manager_get_scene_state(
-        subghz->scene_manager, SubGhzSceneReceiverConfig);
+    VariableItem* frequency_item =
+        variable_item_list_get(subghz->variable_item_list, SubGhzSettingIndexFrequency);
 
     variable_item_set_current_value_text(item, combobox_text[(uint8_t)index]);
 
@@ -243,6 +258,7 @@ static void subghz_scene_receiver_config_set_speaker(VariableItem* item) {
 
     variable_item_set_current_value_text(item, combobox_text[index]);
     subghz_txrx_speaker_set_state(subghz->txrx, speaker_value[index]);
+    subghz->last_settings->enable_sound = (speaker_value[index] == SubGhzSpeakerStateEnable);
 }
 
 static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {
@@ -255,6 +271,59 @@ static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {
 
     // We can set here, but during subghz_last_settings_save filter was changed to ignore BinRAW
     subghz->last_settings->filter = subghz->filter;
+
+    //If the user changed BinRAW menu, dont reset it with the repeater.
+    subghz->repeater_bin_raw_was_off = false;
+}
+
+static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    if(subghz->repeater == SubGhzRepeaterStateOff &&
+       (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey ||
+        subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
+        scene_manager_set_scene_state(
+            subghz->scene_manager, SubGhzSceneReceiverConfig, SubGhzSettingIndexRepeater);
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneSettingRepeater);
+        return;
+    }
+
+    //Set menu Text.
+    variable_item_set_current_value_text(item, repeater_text[index]);
+
+    //Save state and in last settings.
+    subghz->repeater = repeater_value[index];
+    subghz->last_settings->repeater_state = repeater_value[index];
+
+    //Get the BinRAW menu for state change.
+    VariableItem* bin_raw_menu =
+        variable_item_list_get(subghz->variable_item_list, SubGhzSettingIndexBinRAW);
+
+    //Change BinRAW to ON or OFF as required, and remember whether I changed it! (Put back for the user.)
+    if(repeater_value[index] != SubGhzRepeaterStateOff) {
+        if((subghz->filter & SubGhzProtocolFlag_BinRAW) == 0) {
+            //Repeater is on, Binraw is Off.
+            variable_item_set_current_value_index(
+                bin_raw_menu, 1 /*Index of ON in BIN_Raw menu!*/);
+            subghz_scene_receiver_config_set_bin_raw(bin_raw_menu);
+            subghz->repeater_bin_raw_was_off = true;
+        }
+
+        //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes every key send.
+        variable_item_set_locked(bin_raw_menu, true, NULL);
+    } else {
+        //Put BinRAW back how it was, if we changed it.
+        if(subghz->repeater_bin_raw_was_off) {
+            variable_item_set_current_value_index(
+                bin_raw_menu, 0 /*Index of OFF in BIN_Raw menu!*/);
+            subghz_scene_receiver_config_set_bin_raw(bin_raw_menu);
+        }
+
+        //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes very key send.
+        variable_item_set_locked(bin_raw_menu, false, NULL);
+    }
 }
 
 static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* item) {
@@ -265,6 +334,16 @@ static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* it
     subghz_threshold_rssi_set(subghz->threshold_rssi, raw_threshold_rssi_value[index]);
 
     subghz->last_settings->rssi = raw_threshold_rssi_value[index];
+}
+
+static void subghz_scene_receiver_config_set_duplicates(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, combobox_text[index]);
+
+    subghz->last_settings->remove_duplicates = subghz->remove_duplicates = index;
+    if(index) subghz_history_remove_duplicates(subghz->history);
 }
 
 static inline bool subghz_scene_receiver_config_ignore_filter_get_index(
@@ -303,7 +382,10 @@ static void subghz_scene_receiver_config_set_tpms(VariableItem* item) {
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     SubGhz* subghz = context;
-    if(index == SubGhzSettingIndexLock) {
+    if(index == SubGhzSettingIndexRemoveDuplicates) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneSettingRemoveDuplicates);
+    } else if(index == SubGhzSettingIndexLock) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneSettingLock);
     } else if(index == SubGhzSettingIndexResetToDefault) {
@@ -328,11 +410,16 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
         subghz_threshold_rssi_set(subghz->threshold_rssi, raw_threshold_rssi_value[default_index]);
         subghz->filter = bin_raw_value[0];
         subghz->ignore_filter = 0x00;
+        subghz->remove_duplicates = false;
         subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+        subghz->last_settings->remove_duplicates = subghz->remove_duplicates;
         subghz->last_settings->ignore_filter = subghz->ignore_filter;
         subghz->last_settings->filter = subghz->filter;
+        subghz->last_settings->repeater_state = SubGhzRepeaterStateOff;
+        subghz->repeater = SubGhzRepeaterStateOff;
 
         subghz_txrx_speaker_set_state(subghz->txrx, speaker_value[default_index]);
+        subghz->last_settings->enable_sound = false;
 
         subghz_txrx_hopper_set_state(subghz->txrx, hopping_value[default_index]);
         subghz->last_settings->enable_hopping = hopping_value[default_index];
@@ -363,8 +450,6 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         subghz_scene_receiver_config_set_frequency,
         subghz);
     value_index = subghz_scene_receiver_config_next_frequency(preset.frequency, subghz);
-    scene_manager_set_scene_state(
-        subghz->scene_manager, SubGhzSceneReceiverConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
     char text_buf[10] = {0};
     uint32_t frequency = subghz_setting_get_frequency(setting, value_index);
@@ -415,10 +500,31 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         value_index = value_index_uint32(subghz->filter, bin_raw_value, COMBO_BOX_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
-    }
+        variable_item_set_locked(
+            item, subghz->repeater != SubGhzRepeaterStateOff, "Turn off\nRepeater\nto do that!");
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Repeater",
+            REPEATER_COUNT,
+            subghz_scene_receiver_config_set_repeater,
+            subghz);
+
+        value_index = value_index_uint32(subghz->repeater, repeater_value, REPEATER_COUNT);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, repeater_text[value_index]);
+
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Remove Duplicates",
+            COMBO_BOX_COUNT,
+            subghz_scene_receiver_config_set_duplicates,
+            subghz);
+
+        value_index = subghz->remove_duplicates;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, combobox_text[value_index]);
+
         item = variable_item_list_add(
             subghz->variable_item_list,
             "Ignore Starline",
@@ -551,6 +657,12 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, raw_threshold_rssi_text[value_index]);
     }
+
+    variable_item_list_set_selected_item(
+        subghz->variable_item_list,
+        scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReceiverConfig));
+    scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneReceiverConfig, 0);
+
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
 }
 
@@ -559,7 +671,15 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubGhzCustomEventSceneSettingLock) {
+        if(event.event == SubGhzCustomEventSceneSettingRepeater) {
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateTX);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
+            consumed = true;
+        } else if(event.event == SubGhzCustomEventSceneSettingRemoveDuplicates) {
+            subghz_history_remove_duplicates(subghz->history);
+            scene_manager_previous_scene(subghz->scene_manager);
+            consumed = true;
+        } else if(event.event == SubGhzCustomEventSceneSettingLock) {
             subghz_lock(subghz);
             scene_manager_previous_scene(subghz->scene_manager);
             consumed = true;
@@ -573,6 +693,11 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
 
 void subghz_scene_receiver_config_on_exit(void* context) {
     SubGhz* subghz = context;
+
+    if(subghz->repeater_bin_raw_was_off) {
+        subghz->last_settings->filter = bin_raw_value[0 /*BinRAW Off*/];
+    }
+
     variable_item_list_set_selected_item(subghz->variable_item_list, 0);
     variable_item_list_reset(subghz->variable_item_list);
 #ifdef FURI_DEBUG

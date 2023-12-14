@@ -392,10 +392,10 @@ static void subghz_protocol_magellan_get_event_serialize(uint8_t event, FuriStri
         ((event >> 7) & 0x1 ? ", ?" : ""));
 }
 
-uint8_t subghz_protocol_decoder_magellan_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_magellan_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderMagellan* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
