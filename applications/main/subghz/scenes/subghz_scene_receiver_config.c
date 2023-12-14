@@ -495,9 +495,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
         variable_item_set_locked(
-            item,
-            subghz->repeater != SubGhzRepeaterStateOff,
-            "Turn off\n Repeater!\n to do\n that!");
+            item, subghz->repeater != SubGhzRepeaterStateOff, "Turn off\nRepeater\nto do that!");
 
         item = variable_item_list_add(
             subghz->variable_item_list,
