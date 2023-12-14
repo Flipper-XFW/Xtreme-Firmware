@@ -112,7 +112,6 @@ void subghz_scene_receiver_callback(SubGhzCustomEvent event, void* context) {
 
 void repeater_stop_callback(void* context) {
     SubGhz* subghz = context;
-    furi_timer_stop(subghz->fav_timer);
     scene_manager_handle_custom_event(subghz->scene_manager, SubGhzCustomEventViewRepeaterStop);
 }
 
@@ -265,7 +264,8 @@ void subghz_scene_receiver_on_enter(void* context) {
                                               SubGhzSpeakerStateShutdown);
 
     //Set up a timer for the repeater (recycled favorites timeout TX timer!).
-    subghz->fav_timer = furi_timer_alloc(repeater_stop_callback, FuriTimerTypePeriodic, subghz);
+    if(!subghz->timer)
+        subghz->timer = furi_timer_alloc(repeater_stop_callback, FuriTimerTypeOnce, subghz);
 
     //Remember if the repeater was loaded, and do cleanups we need.
     subghz->repeater = subghz->last_settings->repeater_state;
@@ -386,7 +386,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                                        ((subghz->repeater & SubGhzRepeaterStateOnShort) != 0) ?
                                            1 * tmpTe :
                                            repeatnormal * tmpTe;
-                furi_timer_start(subghz->fav_timer, repeat_time);
+                furi_timer_start(subghz->timer, repeat_time);
             }
             subghz_rx_key_state_set(subghz, SubGhzRxKeyStateTX);
             break;

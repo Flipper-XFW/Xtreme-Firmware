@@ -103,7 +103,7 @@ struct SubGhz {
     SubGhzLoadTypeFile load_type_file;
 
     bool fav_timeout;
-    FuriTimer* fav_timer;
+    FuriTimer* timer;
 
     void* rpc_ctx;
 };

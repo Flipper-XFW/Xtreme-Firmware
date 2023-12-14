@@ -429,9 +429,9 @@ int32_t subghz_app(char* p) {
 
     view_dispatcher_run(subghz->view_dispatcher);
 
-    if(subghz->fav_timer) {
-        furi_timer_stop(subghz->fav_timer);
-        furi_timer_free(subghz->fav_timer);
+    if(subghz->timer) {
+        furi_timer_stop(subghz->timer);
+        furi_timer_free(subghz->timer);
     }
 
     furi_hal_power_suppress_charge_exit();
