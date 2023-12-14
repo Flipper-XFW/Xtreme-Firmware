@@ -130,15 +130,6 @@ void subghz_scene_read_raw_on_enter(void* context) {
     if(subghz->fav_timeout) {
         scene_manager_handle_custom_event(
             subghz->scene_manager, SubGhzCustomEventViewReadRAWSendStart);
-        // with_view_model(
-        //     subghz->subghz_read_raw->view,
-        //     SubGhzReadRAWModel * model,
-        //     {
-        //         scene_manager_handle_custom_event(
-        //             subghz->scene_manager, SubGhzCustomEventViewReadRAWSendStart);
-        //         model->status = SubGhzReadRAWStatusTXRepeat;
-        //     },
-        //     true);
     }
 }
 
