@@ -274,7 +274,7 @@ static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {
     subghz->last_settings->filter = subghz->filter;
 
     //If the user changed BinRAW menu, dont reset it with the repeater.
-    subghz->bin_raw_menu_changed = false;
+    subghz->repeater_bin_raw_was_off = false;
 }
 
 static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
@@ -300,18 +300,17 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
             variable_item_set_current_value_index(
                 bin_raw_menu, 1 /*Index of ON in BIN_Raw menu!*/);
             subghz_scene_receiver_config_set_bin_raw(bin_raw_menu);
-            subghz->bin_raw_menu_changed = true;
+            subghz->repeater_bin_raw_was_off = true;
         }
 
         //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes every key send.
         variable_item_set_locked(bin_raw_menu, true, NULL);
     } else {
         //Put BinRAW back how it was, if we changed it.
-        if(subghz->bin_raw_menu_changed) {
+        if(subghz->repeater_bin_raw_was_off) {
             variable_item_set_current_value_index(
                 bin_raw_menu, 0 /*Index of OFF in BIN_Raw menu!*/);
             subghz_scene_receiver_config_set_bin_raw(bin_raw_menu);
-            subghz->bin_raw_menu_changed = false;
         }
 
         //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes very key send.
@@ -681,7 +680,7 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
 void subghz_scene_receiver_config_on_exit(void* context) {
     SubGhz* subghz = context;
 
-    if(subghz->bin_raw_menu_changed) {
+    if(subghz->repeater_bin_raw_was_off) {
         subghz->last_settings->filter = bin_raw_value[0 /*BinRAW Off*/];
     }
 

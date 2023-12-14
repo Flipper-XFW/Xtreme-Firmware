@@ -271,19 +271,16 @@ void subghz_scene_receiver_on_enter(void* context) {
     subghz->repeater = subghz->last_settings->repeater_state;
 
     //Did the user set BinRAW or me?
-    if(subghz->last_settings->repeater_state != SubGhzRepeaterStateOff) {
-        //Save the state, we are on.
-        subghz->repeater = subghz->last_settings->repeater_state;
-
+    if(subghz->repeater != SubGhzRepeaterStateOff) {
         //User had BinRAW on if the last settings had BinRAW on, if not, repeater is on, and BinRAW goes on, but State CHanged is false!
-        subghz->bin_raw_menu_changed =
-            (subghz->last_settings->filter !=
-             (SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW));
-        subghz->filter = SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW;
-        subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+        subghz->repeater_bin_raw_was_off =
+            (subghz->last_settings->filter & SubGhzProtocolFlag_BinRAW) == 0;
+        if((subghz->filter & SubGhzProtocolFlag_BinRAW) == 0) {
+            subghz->filter = SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW;
+            subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+        }
     } else {
-        subghz->repeater = SubGhzRepeaterStateOff;
-        subghz->bin_raw_menu_changed = false;
+        subghz->repeater_bin_raw_was_off = false;
     }
 
     subghz_txrx_rx_start(subghz->txrx);
