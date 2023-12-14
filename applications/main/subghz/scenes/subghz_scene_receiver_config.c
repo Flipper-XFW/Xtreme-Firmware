@@ -148,8 +148,7 @@ SubGhzHopperState subghz_scene_receiver_config_hopper_value_index(void* context)
         return SubGhzHopperStateOFF;
     } else {
         variable_item_set_current_value_text(
-            (VariableItem*)scene_manager_get_scene_state(
-                subghz->scene_manager, SubGhzSceneReceiverConfig),
+            variable_item_list_get(subghz->variable_item_list, SubGhzSettingIndexFrequency),
             " -----");
         return SubGhzHopperStateRunning;
     }
@@ -215,8 +214,8 @@ static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item)
     SubGhz* subghz = variable_item_get_context(item);
     SubGhzHopperState index = variable_item_get_current_value_index(item);
     SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
-    VariableItem* frequency_item = (VariableItem*)scene_manager_get_scene_state(
-        subghz->scene_manager, SubGhzSceneReceiverConfig);
+    VariableItem* frequency_item =
+        variable_item_list_get(subghz->variable_item_list, SubGhzSettingIndexFrequency);
 
     variable_item_set_current_value_text(item, combobox_text[(uint8_t)index]);
 
@@ -442,8 +441,6 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         subghz_scene_receiver_config_set_frequency,
         subghz);
     value_index = subghz_scene_receiver_config_next_frequency(preset.frequency, subghz);
-    scene_manager_set_scene_state(
-        subghz->scene_manager, SubGhzSceneReceiverConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
     char text_buf[10] = {0};
     uint32_t frequency = subghz_setting_get_frequency(setting, value_index);
