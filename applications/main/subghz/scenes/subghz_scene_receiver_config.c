@@ -3,9 +3,6 @@
 
 #define TAG "SubGhzSceneReceiverConfig"
 
-#define BIN_RAW_MENU_POS 3
-#define TURN_OFF_REPEATER_INFO "Turn off\n Repeater!\n to do\n that!"
-
 enum SubGhzSettingIndex {
     SubGhzSettingIndexFrequency,
     SubGhzSettingIndexModulation,
@@ -294,7 +291,7 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
 
     //Get the BinRAW menu for state change.
     VariableItem* bin_raw_menu =
-        variable_item_list_get(subghz->variable_item_list, BIN_RAW_MENU_POS);
+        variable_item_list_get(subghz->variable_item_list, SubGhzSettingIndexBinRAW);
 
     //Change BinRAW to ON or OFF as required, and remember whether I changed it! (Put back for the user.)
     if(repeater_value[index] != SubGhzRepeaterStateOff) {
@@ -309,8 +306,8 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
             subghz->bin_raw_menu_changed = true;
         }
 
-        //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes very key send.
-        variable_item_set_locked(bin_raw_menu, true, TURN_OFF_REPEATER_INFO);
+        //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes every key send.
+        variable_item_set_locked(bin_raw_menu, true, NULL);
     } else {
         //Put BinRAW back how it was, if we changed it.
         if(subghz->bin_raw_menu_changed) {
@@ -321,7 +318,7 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
         }
 
         //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes very key send.
-        variable_item_set_locked(bin_raw_menu, false, TURN_OFF_REPEATER_INFO);
+        variable_item_set_locked(bin_raw_menu, false, NULL);
     }
 }
 
@@ -500,7 +497,9 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
         variable_item_set_locked(
-            item, (subghz->repeater != SubGhzRepeaterStateOff), TURN_OFF_REPEATER_INFO);
+            item,
+            subghz->repeater != SubGhzRepeaterStateOff,
+            "Turn off\n Repeater!\n to do\n that!");
 
         item = variable_item_list_add(
             subghz->variable_item_list,
