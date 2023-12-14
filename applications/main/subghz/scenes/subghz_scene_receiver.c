@@ -147,7 +147,8 @@ static void subghz_scene_add_to_history_callback(
 
                 if(subghz->remove_duplicates) {
                     // Look in history for signal hash
-                    uint8_t hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
+                    uint32_t hash_data =
+                        subghz_protocol_decoder_base_get_hash_data_long(decoder_base);
                     subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
                     for(uint16_t i = idx; i > 0; i--) {
                         i--; // Iterating in reverse with off by one
