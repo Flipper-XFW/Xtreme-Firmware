@@ -1,10 +1,11 @@
 #include "subghz_history.h"
 #include <lib/subghz/receiver.h>
+#include <rpc/rpc.h>
 
 #include <furi.h>
 
 #define SUBGHZ_HISTORY_MAX 65535 // uint16_t index max, ram limit below
-#define SUBGHZ_HISTORY_FREE_HEAP 20480
+#define SUBGHZ_HISTORY_FREE_HEAP (10240 * (3 - MIN(rpc_get_sessions_count(instance->rpc), 2U)))
 #define TAG "SubGhzHistory"
 
 typedef struct {
@@ -33,6 +34,7 @@ struct SubGhzHistory {
     uint32_t code_last_hash_data;
     FuriString* tmp_string;
     SubGhzHistoryStruct* history;
+    Rpc* rpc;
 };
 
 SubGhzHistory* subghz_history_alloc(void) {
@@ -40,6 +42,7 @@ SubGhzHistory* subghz_history_alloc(void) {
     instance->tmp_string = furi_string_alloc();
     instance->history = malloc(sizeof(SubGhzHistoryStruct));
     SubGhzHistoryItemArray_init(instance->history->data);
+    instance->rpc = furi_record_open(RECORD_RPC);
     return instance;
 }
 
@@ -56,6 +59,7 @@ void subghz_history_free(SubGhzHistory* instance) {
         }
     SubGhzHistoryItemArray_clear(instance->history->data);
     free(instance->history);
+    furi_record_close(RECORD_RPC);
     free(instance);
 }
 
