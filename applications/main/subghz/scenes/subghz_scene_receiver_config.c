@@ -280,6 +280,16 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
+    if(subghz->repeater == SubGhzRepeaterStateOff &&
+       (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey ||
+        subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
+        scene_manager_set_scene_state(
+            subghz->scene_manager, SubGhzSceneReceiverConfig, SubGhzSettingIndexRepeater);
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneSettingRepeater);
+        return;
+    }
+
     //Set menu Text.
     variable_item_set_current_value_text(item, repeater_text[index]);
 
@@ -293,8 +303,7 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
 
     //Change BinRAW to ON or OFF as required, and remember whether I changed it! (Put back for the user.)
     if(repeater_value[index] != SubGhzRepeaterStateOff) {
-        if((bin_raw_value[variable_item_get_current_value_index(bin_raw_menu)] &
-            SubGhzProtocolFlag_BinRAW) == 0) {
+        if((subghz->filter & SubGhzProtocolFlag_BinRAW) == 0) {
             //Repeater is on, Binraw is Off.
             variable_item_set_current_value_index(
                 bin_raw_menu, 1 /*Index of ON in BIN_Raw menu!*/);
@@ -648,6 +657,12 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, raw_threshold_rssi_text[value_index]);
     }
+
+    variable_item_list_set_selected_item(
+        subghz->variable_item_list,
+        scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReceiverConfig));
+    scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneReceiverConfig, 0);
+
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
 }
 
@@ -656,7 +671,11 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubGhzCustomEventSceneSettingRemoveDuplicates) {
+        if(event.event == SubGhzCustomEventSceneSettingRepeater) {
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateTX);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
+            consumed = true;
+        } else if(event.event == SubGhzCustomEventSceneSettingRemoveDuplicates) {
             subghz_history_remove_duplicates(subghz->history);
             scene_manager_previous_scene(subghz->scene_manager);
             consumed = true;
