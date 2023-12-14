@@ -369,7 +369,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         (double)instance->rssi,
         subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW),
         instance->repeater_state,
-        instance->remove_duplicates ? LOG_ON : LOG_OFF,
+        bool_to_char(instance->remove_duplicates),
         subghz_last_settings_log_filter_get_index(
             instance->ignore_filter, SubGhzProtocolFilter_StarLine),
         subghz_last_settings_log_filter_get_index(

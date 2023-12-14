@@ -30,7 +30,6 @@ typedef struct {
     bool enable_hopping;
     uint32_t repeater_state;
     bool enable_sound;
-
     bool remove_duplicates;
     uint32_t ignore_filter;
     uint32_t filter;
