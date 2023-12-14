@@ -322,6 +322,7 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                file, SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND, &instance->enable_sound, 1)) {
             break;
         }
+        saved = true;
     } while(0);
 
     if(!saved) {

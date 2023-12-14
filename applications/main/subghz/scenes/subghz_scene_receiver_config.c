@@ -412,6 +412,7 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
         subghz->repeater = SubGhzRepeaterStateOff;
 
         subghz_txrx_speaker_set_state(subghz->txrx, speaker_value[default_index]);
+        subghz->last_settings->enable_sound = false;
 
         subghz_txrx_hopper_set_state(subghz->txrx, hopping_value[default_index]);
         subghz->last_settings->enable_hopping = hopping_value[default_index];
