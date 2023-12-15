@@ -39,6 +39,15 @@ App(
 )
 
 App(
+    appid="mykey_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="mykey_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/mykey.c"],
+)
+
+App(
     appid="myki_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="myki_plugin_ep",
@@ -54,15 +63,6 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/troika.c"],
-)
-
-App(
-    appid="social_moscow_parser",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="social_moscow_plugin_ep",
-    targets=["f7"],
-    requires=["nfc"],
-    sources=["plugins/supported_cards/social_moscow.c"],
 )
 
 App(
@@ -84,12 +84,30 @@ App(
 )
 
 App(
+    appid="aime_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="aime_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/aime.c"],
+)
+
+App(
     appid="umarsh_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="umarsh_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/umarsh.c"],
+)
+
+App(
+    appid="social_moscow_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="social_moscow_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/social_moscow.c"],
 )
 
 App(
@@ -111,30 +129,12 @@ App(
 )
 
 App(
-    appid="aime_parser",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="aime_plugin_ep",
-    targets=["f7"],
-    requires=["nfc"],
-    sources=["plugins/supported_cards/aime.c"],
-)
-
-App(
     appid="saflok_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="saflok_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/saflok.c"],
-)
-
-App(
-    appid="mykey_parser",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="mykey_plugin_ep",
-    targets=["f7"],
-    requires=["nfc"],
-    sources=["plugins/supported_cards/mykey.c"],
 )
 
 App(
