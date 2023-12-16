@@ -370,7 +370,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 FURI_LOG_E(TAG, "Missing TE");
             }
 
-            if(!subghz_tx_start(subghz, key_repeat_data)) {
+            if(subghz_txrx_tx_start(subghz->txrx, key_repeat_data) != SubGhzTxRxStartTxStateOk) {
                 view_dispatcher_send_custom_event(
                     subghz->view_dispatcher, SubGhzCustomEventViewRepeaterStop);
             } else {
@@ -399,11 +399,12 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         case SubGhzCustomEventViewReceiverOKLong:
             subghz_txrx_stop(subghz->txrx);
             subghz_txrx_hopper_pause(subghz->txrx);
-            if(!subghz_tx_start(
-                   subghz,
+            if(subghz_txrx_tx_start(
+                   subghz->txrx,
                    subghz_history_get_raw_data(
                        subghz->history,
-                       subghz_view_receiver_get_idx_menu(subghz->subghz_receiver)))) {
+                       subghz_view_receiver_get_idx_menu(subghz->subghz_receiver))) !=
+               SubGhzTxRxStartTxStateOk) {
                 view_dispatcher_send_custom_event(
                     subghz->view_dispatcher, SubGhzCustomEventViewReceiverOKRelease);
             } else {
