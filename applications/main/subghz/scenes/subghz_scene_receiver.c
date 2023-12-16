@@ -306,7 +306,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
             subghz_txrx_set_rx_callback(subghz->txrx, NULL, subghz);
 
-            if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) {
+            if(subghz_history_get_last_index(subghz->history)) {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateExit);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {

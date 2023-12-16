@@ -281,8 +281,7 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
 
     if(subghz->repeater == SubGhzRepeaterStateOff &&
-       (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey ||
-        subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
+       subghz_history_get_last_index(subghz->history)) {
         scene_manager_set_scene_state(
             subghz->scene_manager, SubGhzSceneReceiverConfig, SubGhzSettingIndexRepeater);
         view_dispatcher_send_custom_event(
