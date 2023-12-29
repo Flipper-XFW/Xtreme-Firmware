@@ -3,22 +3,6 @@
 #  Use the user_dict file for user keys
 # Last updated 17 December 2023
 ###########################
-# # Fix ASCII: https://pteo.paranoiaworks.mobi/diacriticsremover/
-# # Check dict and remove duplicates:
-# import pathlib
-# file = pathlib.Path("mf_classic_dict.nfc")
-# lines = file.read_text(encoding="ascii").splitlines()
-# for i, line in enumerate(lines):
-#     if line.startswith("#"):
-#         continue
-#     lines[i] = line = line.upper()
-#     if len(line) != 12 or any(char not in "0123456789ABCDEF" for char in line):
-#         print(f"line {i} is not correct: {line}")
-#     for j in reversed(range(i + 1, len(lines))):
-#         if lines[j].upper() == line:
-#             del lines[j]
-# file.write_text("\n".join(lines))
-###########################
 # +-----------------------------------------------------------------------------------------------------+
 # | https://github.com/RfidResearchGroup/proxmark3/blob/master/client/dictionaries/mfc_default_keys.dic |
 # +-----------------------------------------------------------------------------------------------------+
@@ -29,7 +13,7 @@
 FFFFFFFFFFFF
 # Blank key
 000000000000
-# NFC Forum MADkey
+# NFC Forum MADkey❤️
 A0A1A2A3A4A5
 # MAD access key A (reversed)
 A5A4A3A2A1A0
@@ -132,8 +116,6 @@ AC37E76385F5
 # Car wash system
 1EE38419EF39
 26578719DCD9
-#  EuroKEY (KeySECI)
-# 4B657953454349 (?)
 # more Keys from mfc_default_keys.lua
 000000000001
 000000000002
@@ -4364,38 +4346,3 @@ EB9D9C1B03F6
 544954CBB2C4
 4752533E1965
 17C06D19E92F
-
-# Bandai Namco Passport [fka Banapassport] / Sega Aime Card
-6090D00632F5
-019761AA8082
-574343467632
-A99164400748
-62742819AD7C
-CC5075E42BA1
-B9DF35A0814C
-8AF9C718F23D
-58CD5C3673CB
-FC80E88EB88C
-7A3CDAD7C023
-30424C029001
-024E4E44001F
-ECBBFA57C6AD
-4757698143BD
-1D30972E6485
-F8526D1A8D6D
-1300EC8C7E80
-F80A65A87FFA
-DEB06ED4AF8E
-4AD96BF28190
-000390014D41
-0800F9917CB0
-730050555253
-4146D4A956C4
-131157FBB126
-E69DD9015A43
-337237F254D5
-9A8389F32FBF
-7B8FB4A7100B
-C8382A233993
-7B304F2A12A6
-FC9418BF788B
