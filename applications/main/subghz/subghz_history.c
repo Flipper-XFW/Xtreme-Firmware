@@ -221,8 +221,7 @@ bool subghz_history_add_to_history(
     furi_assert(instance);
     furi_assert(context);
 
-    if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) return false;
-    if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return false;
+    if(subghz_history_full(instance)) return false;
 
     SubGhzProtocolDecoderBase* decoder_base = context;
     uint32_t hash_data = subghz_protocol_decoder_base_get_hash_data_long(decoder_base);
@@ -349,4 +348,10 @@ void subghz_history_remove_duplicates(SubGhzHistory* instance) {
         }
         SubGhzHistoryItemArray_previous(it);
     }
+}
+
+bool subghz_history_full(SubGhzHistory* instance) {
+    if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) return true;
+    if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return true;
+    return false;
 }

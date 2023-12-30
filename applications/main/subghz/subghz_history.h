@@ -156,3 +156,6 @@ float subghz_history_get_longitude(SubGhzHistory* instance, uint16_t idx);
 
 // Consolidate history removing existing duplicates
 void subghz_history_remove_duplicates(SubGhzHistory* instance);
+
+// Check if memory/history is full
+bool subghz_history_full(SubGhzHistory* instance);
