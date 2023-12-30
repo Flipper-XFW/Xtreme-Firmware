@@ -1,11 +1,16 @@
 import pathlib
 import string
 
-file = pathlib.Path(__file__) / "../../applications/main/nfc/resources/nfc/assets/mf_classic_dict.nfc"
+file = (
+    pathlib.Path(__file__)
+    / "../../applications/main/nfc/resources/nfc/assets/mf_classic_dict.nfc"
+)
 try:
     lines = file.read_text(encoding="ascii").splitlines()
 except UnicodeDecodeError:
-    print("Fix non-ASCII characters: https://pteo.paranoiaworks.mobi/diacriticsremover/")
+    print(
+        "Fix non-ASCII characters: https://pteo.paranoiaworks.mobi/diacriticsremover/"
+    )
     exit()
 
 for i, line in enumerate(lines):
