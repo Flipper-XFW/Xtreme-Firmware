@@ -302,6 +302,7 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz_txrx_load_decoder_by_name_protocol(subghz->txrx, SUBGHZ_PROTOCOL_BIN_RAW_NAME));
 
     subghz_scene_receiver_update_statusbar(subghz);
+
     subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz_is_locked(subghz));
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
