@@ -55,7 +55,6 @@ External applications deployed to SD Card
 Background services providing system APIs to applications.
 
 - `applications.h`      - Firmware application list header
-
 - `bt`                  - BLE service and application
 - `cli`                 - Console service and API
 - `crypto`              - Crypto cli tools
