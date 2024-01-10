@@ -145,19 +145,19 @@ static void parse_ndef_vcard(FuriString* str, const uint8_t* payload, uint32_t p
 }
 
 static void parse_ndef_wifi(FuriString* str, const uint8_t* payload, uint32_t payload_len) {
-    // https://android.googlesource.com/platform/packages/apps/Nfc/+/refs/heads/main/src/com/android/nfc/NfcWifiProtectedSetup.java
-    #define CREDENTIAL_FIELD_ID (0x100E)
-    #define SSID_FIELD_ID (0x1045)
-    #define NETWORK_KEY_FIELD_ID (0x1027)
-    #define AUTH_TYPE_FIELD_ID (0x1003)
-    #define AUTH_TYPE_EXPECTED_SIZE (2)
-    #define AUTH_TYPE_OPEN (0x0001)
-    #define AUTH_TYPE_WPA_PSK (0x0002)
-    #define AUTH_TYPE_WPA_EAP  (0x0008)
-    #define AUTH_TYPE_WPA2_EAP (0x0010)
-    #define AUTH_TYPE_WPA2_PSK (0x0020)
-    #define AUTH_TYPE_WPA_AND_WPA2_PSK (0x0022)
-    #define MAX_NETWORK_KEY_SIZE_BYTES (64)
+// https://android.googlesource.com/platform/packages/apps/Nfc/+/refs/heads/main/src/com/android/nfc/NfcWifiProtectedSetup.java
+#define CREDENTIAL_FIELD_ID (0x100E)
+#define SSID_FIELD_ID (0x1045)
+#define NETWORK_KEY_FIELD_ID (0x1027)
+#define AUTH_TYPE_FIELD_ID (0x1003)
+#define AUTH_TYPE_EXPECTED_SIZE (2)
+#define AUTH_TYPE_OPEN (0x0001)
+#define AUTH_TYPE_WPA_PSK (0x0002)
+#define AUTH_TYPE_WPA_EAP (0x0008)
+#define AUTH_TYPE_WPA2_EAP (0x0010)
+#define AUTH_TYPE_WPA2_PSK (0x0020)
+#define AUTH_TYPE_WPA_AND_WPA2_PSK (0x0022)
+#define MAX_NETWORK_KEY_SIZE_BYTES (64)
 
     size_t i = 0;
     while(i < payload_len) {
@@ -169,63 +169,63 @@ static void parse_ndef_wifi(FuriString* str, const uint8_t* payload, uint32_t pa
         if(field_id == CREDENTIAL_FIELD_ID) {
             furi_string_cat(str, "WiFi\n");
             size_t start_position = i;
-            while (i < start_position + field_len) {
+            while(i < start_position + field_len) {
                 uint16_t cfg_id = __REV16(*(uint16_t*)&payload[i]);
                 i += 2;
                 uint16_t cfg_len = __REV16(*(uint16_t*)&payload[i]);
                 i += 2;
 
-                if (i + cfg_len > start_position + field_len) {
+                if(i + cfg_len > start_position + field_len) {
                     return;
                 }
 
-                switch (cfg_id) {
-                    case SSID_FIELD_ID:
-                        print_data(str, "SSID", payload + i, cfg_len, false);
-                        i += cfg_len;
+                switch(cfg_id) {
+                case SSID_FIELD_ID:
+                    print_data(str, "SSID", payload + i, cfg_len, false);
+                    i += cfg_len;
+                    break;
+                case NETWORK_KEY_FIELD_ID:
+                    if(cfg_len > MAX_NETWORK_KEY_SIZE_BYTES) {
+                        return;
+                    }
+                    print_data(str, "PWD", payload + i, cfg_len, false);
+                    i += cfg_len;
+                    break;
+                case AUTH_TYPE_FIELD_ID:
+                    if(cfg_len != AUTH_TYPE_EXPECTED_SIZE) {
+                        return;
+                    }
+                    short auth_type = __REV16(*(uint16_t*)&payload[i]);
+                    i += 2;
+                    const char* auth;
+                    switch(auth_type) {
+                    case AUTH_TYPE_OPEN:
+                        auth = "Open";
                         break;
-                    case NETWORK_KEY_FIELD_ID:
-                        if (cfg_len > MAX_NETWORK_KEY_SIZE_BYTES) {
-                            return;
-                        }
-                        print_data(str, "PWD", payload + i, cfg_len, false);
-                        i += cfg_len;
+                    case AUTH_TYPE_WPA_PSK:
+                        auth = "WPA Personal";
                         break;
-                    case AUTH_TYPE_FIELD_ID:
-                        if (cfg_len != AUTH_TYPE_EXPECTED_SIZE) {
-                            return;
-                        }
-                        short auth_type = __REV16(*(uint16_t*)&payload[i]);
-                        i += 2;
-                        const char* auth;
-                        switch(auth_type) {
-                        case AUTH_TYPE_OPEN:
-                            auth = "Open";
-                            break;
-                        case AUTH_TYPE_WPA_PSK:
-                            auth = "WPA Personal";
-                            break;
-                        case AUTH_TYPE_WPA_EAP:
-                            auth = "WPA Enterprise";
-                            break;
-                        case AUTH_TYPE_WPA2_EAP:
-                            auth = "WPA2 Enterprise";
-                            break;
-                        case AUTH_TYPE_WPA2_PSK:
-                            auth = "WPA2 Personal";
-                            break;
-                        case AUTH_TYPE_WPA_AND_WPA2_PSK:
-                            auth = "WPA/WPA2 Personal";
-                            break;
-                        default:
-                            auth = "Unknown";
-                            break;
-                        }
-                        print_data(str, "AUTH", (uint8_t*)auth, strlen(auth), false);
+                    case AUTH_TYPE_WPA_EAP:
+                        auth = "WPA Enterprise";
+                        break;
+                    case AUTH_TYPE_WPA2_EAP:
+                        auth = "WPA2 Enterprise";
+                        break;
+                    case AUTH_TYPE_WPA2_PSK:
+                        auth = "WPA2 Personal";
+                        break;
+                    case AUTH_TYPE_WPA_AND_WPA2_PSK:
+                        auth = "WPA/WPA2 Personal";
                         break;
                     default:
-                        i += cfg_len;
+                        auth = "Unknown";
                         break;
+                    }
+                    print_data(str, "AUTH", (uint8_t*)auth, strlen(auth), false);
+                    break;
+                default:
+                    i += cfg_len;
+                    break;
                 }
             }
             return;
