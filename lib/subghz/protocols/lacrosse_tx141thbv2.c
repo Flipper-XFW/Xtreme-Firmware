@@ -270,10 +270,20 @@ SubGhzProtocolStatus ws_protocol_decoder_lacrosse_tx141thbv2_deserialize(
     FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderLaCrosse_TX141THBv2* instance = context;
-    return ws_block_generic_deserialize_check_count_bit(
-        &instance->generic,
-        flipper_format,
-        ws_protocol_lacrosse_tx141thbv2_const.min_count_bit_for_found);
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
+    do {
+        ret = ws_block_generic_deserialize(&instance->generic, flipper_format);
+        if(ret != SubGhzProtocolStatusOk) {
+            break;
+        }
+        if(instance->generic.data_count_bit != ws_protocol_lacrosse_tx141thbv2_const.min_count_bit_for_found &&
+           instance->generic.data_count_bit != LACROSSE_TX141TH_BV2_BIT_COUNT) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            ret = SubGhzProtocolStatusErrorValueBitCount;
+            break;
+        }
+    } while(false);
+    return ret;
 }
 
 void ws_protocol_decoder_lacrosse_tx141thbv2_get_string(void* context, FuriString* output) {
