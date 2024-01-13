@@ -276,7 +276,8 @@ SubGhzProtocolStatus ws_protocol_decoder_lacrosse_tx141thbv2_deserialize(
         if(ret != SubGhzProtocolStatusOk) {
             break;
         }
-        if(instance->generic.data_count_bit != ws_protocol_lacrosse_tx141thbv2_const.min_count_bit_for_found &&
+        if(instance->generic.data_count_bit !=
+               ws_protocol_lacrosse_tx141thbv2_const.min_count_bit_for_found &&
            instance->generic.data_count_bit != LACROSSE_TX141TH_BV2_BIT_COUNT) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             ret = SubGhzProtocolStatusErrorValueBitCount;
