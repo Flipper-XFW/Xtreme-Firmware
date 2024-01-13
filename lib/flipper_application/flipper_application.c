@@ -275,7 +275,7 @@ static const char* load_status_strings[] = {
     [FlipperApplicationLoadStatusUnspecifiedError] = "Unknown error",
     [FlipperApplicationLoadStatusNoFreeMemory] = "Out of memory",
     [FlipperApplicationLoadStatusMissingImports] =
-        "Update Firmware to use with this Application (MissingImports)",
+        "Update Application/Firmware to use this (MissingImports)",
 };
 
 const char* flipper_application_preload_status_to_string(FlipperApplicationPreloadStatus status) {
