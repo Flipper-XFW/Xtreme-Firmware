@@ -148,6 +148,10 @@ void canvas_invert_color(Canvas* canvas) {
 void canvas_set_font(Canvas* canvas, Font font) {
     furi_assert(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
+    if((FontSwap)font < FontSwapCount && xtreme_assets.fonts[font]) {
+        u8g2_SetFont(&canvas->fb, xtreme_assets.fonts[font]);
+        return;
+    }
     switch(font) {
     case FontPrimary:
         u8g2_SetFont(&canvas->fb, u8g2_font_helvB08_tr);
