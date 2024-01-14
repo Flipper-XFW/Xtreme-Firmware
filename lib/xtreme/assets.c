@@ -9,6 +9,10 @@
 
 #define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 
+XtremeAssets xtreme_assets = {
+    .is_nsfw = false,
+};
+
 void load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
     const char* pack = xtreme_settings.asset_pack;
     furi_string_printf(path, ICONS_FMT "/meta", pack, name);
@@ -103,7 +107,7 @@ void free_icon(const Icon* icon) {
 
 void XTREME_ASSETS_LOAD() {
     const char* pack = xtreme_settings.asset_pack;
-    xtreme_settings.is_nsfw = !strncmp(pack, "NSFW", strlen("NSFW"));
+    xtreme_assets.is_nsfw = !strncmp(pack, "NSFW", strlen("NSFW"));
     if(pack[0] == '\0') return;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);

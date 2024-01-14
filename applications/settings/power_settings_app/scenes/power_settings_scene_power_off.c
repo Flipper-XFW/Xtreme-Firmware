@@ -12,7 +12,7 @@ void power_settings_scene_power_off_on_enter(void* context) {
     DialogEx* dialog = app->dialog;
 
     dialog_ex_set_header(dialog, "Turn Off Device?", 64, 2, AlignCenter, AlignTop);
-    if(xtreme_settings.is_nsfw) {
+    if(xtreme_assets.is_nsfw) {
         dialog_ex_set_text(
             dialog, "   I will be\nwaiting for\n you master", 78, 16, AlignLeft, AlignTop);
     } else {

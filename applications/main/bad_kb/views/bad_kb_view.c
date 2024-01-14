@@ -48,7 +48,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
 
     if((state == BadKbStateIdle) || (state == BadKbStateDone) ||
        (state == BadKbStateNotConnected)) {
-        if(xtreme_settings.is_nsfw) {
+        if(xtreme_assets.is_nsfw) {
             elements_button_center(canvas, "Cum");
         } else {
             elements_button_center(canvas, "Run");
@@ -71,7 +71,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     if(state == BadKbStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if(xtreme_settings.is_nsfw) {
+        if(xtreme_assets.is_nsfw) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Plug me");
             canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "in, Daddy");
         } else {
@@ -81,7 +81,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     } else if(state == BadKbStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if(xtreme_settings.is_nsfw) {
+        if(xtreme_assets.is_nsfw) {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will cum");
         } else {
             canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
