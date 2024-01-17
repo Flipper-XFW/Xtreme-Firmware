@@ -54,23 +54,6 @@ const char* input_get_type_name(InputType type) {
     }
 }
 
-void input_fake_event(Input* input, InputKey key, InputType type) {
-    bool wrap = type == InputTypeShort || type == InputTypeLong;
-    InputEvent event;
-    event.key = key;
-
-    if(wrap) {
-        event.type = InputTypePress;
-        furi_pubsub_publish(input->event_pubsub, &event);
-    }
-    event.type = type;
-    furi_pubsub_publish(input->event_pubsub, &event);
-    if(wrap) {
-        event.type = InputTypeRelease;
-        furi_pubsub_publish(input->event_pubsub, &event);
-    }
-}
-
 int32_t input_srv(void* p) {
     UNUSED(p);
     input = malloc(sizeof(Input));

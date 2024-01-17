@@ -41,6 +41,23 @@ static void input_cli_dump(Cli* cli, FuriString* args, Input* input) {
     furi_message_queue_free(input_queue);
 }
 
+static void fake_input(Input* input, InputKey key, InputType type) {
+    bool wrap = type == InputTypeShort || type == InputTypeLong;
+    InputEvent event;
+    event.key = key;
+
+    if(wrap) {
+        event.type = InputTypePress;
+        furi_pubsub_publish(input->event_pubsub, &event);
+    }
+    event.type = type;
+    furi_pubsub_publish(input->event_pubsub, &event);
+    if(wrap) {
+        event.type = InputTypeRelease;
+        furi_pubsub_publish(input->event_pubsub, &event);
+    }
+}
+
 static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     UNUSED(args);
     FuriPubSub* ascii_events = furi_record_open(RECORD_ASCII_EVENTS);
@@ -108,7 +125,7 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
         }
 
         if(send_key != InputKeyMAX) {
-            input_fake_event(input, send_key, hold ? InputTypeLong : InputTypeShort);
+            fake_input(input, send_key, hold ? InputTypeLong : InputTypeShort);
             hold = false;
         }
         if(send_ascii != AsciiValueNUL) {
@@ -172,7 +189,7 @@ static void input_cli_send(Cli* cli, FuriString* args, Input* input) {
     } while(false);
 
     if(parsed) { //-V547
-        input_fake_event(input, key, type);
+        fake_input(input, key, type);
     } else {
         input_cli_send_print_usage();
     }
