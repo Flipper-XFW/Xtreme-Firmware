@@ -27,6 +27,11 @@ void view_set_input_callback(View* view, ViewInputCallback callback) {
     view->input_callback = callback;
 }
 
+void view_set_ascii_callback(View* view, ViewAsciiCallback callback) {
+    furi_assert(view);
+    view->ascii_callback = callback;
+}
+
 void view_set_custom_callback(View* view, ViewCustomCallback callback) {
     furi_assert(view);
     view->custom_callback = callback;
@@ -151,6 +156,15 @@ bool view_input(View* view, InputEvent* event) {
     furi_assert(view);
     if(view->input_callback) {
         return view->input_callback(event, view->context);
+    } else {
+        return false;
+    }
+}
+
+bool view_ascii(View* view, AsciiEvent* event) {
+    furi_assert(view);
+    if(view->ascii_callback) {
+        return view->ascii_callback(event, view->context);
     } else {
         return false;
     }

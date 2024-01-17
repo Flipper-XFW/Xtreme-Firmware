@@ -10,6 +10,8 @@ ViewDispatcher* view_dispatcher_alloc() {
         view_dispatcher->view_port, view_dispatcher_draw_callback, view_dispatcher);
     view_port_input_callback_set(
         view_dispatcher->view_port, view_dispatcher_input_callback, view_dispatcher);
+    view_port_ascii_callback_set(
+        view_dispatcher->view_port, view_dispatcher_ascii_callback, view_dispatcher);
     view_port_enabled_set(view_dispatcher->view_port, false);
 
     ViewDict_init(view_dispatcher->views);
@@ -89,6 +91,8 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
             break;
         } else if(message.type == ViewDispatcherMessageTypeInput) {
             view_dispatcher_handle_input(view_dispatcher, &message.input);
+        } else if(message.type == ViewDispatcherMessageTypeAscii) {
+            view_dispatcher_handle_ascii(view_dispatcher, &message.ascii);
         } else if(message.type == ViewDispatcherMessageTypeCustomEvent) {
             view_dispatcher_handle_custom_event(view_dispatcher, message.custom_event);
         }
@@ -233,6 +237,24 @@ void view_dispatcher_input_callback(InputEvent* event, void* context) {
     }
 }
 
+bool view_dispatcher_ascii_callback(AsciiEvent* event, void* context) {
+    // Due to queue we cannot know ahead of time if event is consumed
+    // So instead ViewDispatcher tells ViewPort that all events are consumed
+    // Then ViewDispatcher handles fallbacks the same way as ViewPort would have done
+    ViewDispatcher* view_dispatcher = context;
+    if(view_dispatcher->queue) {
+        ViewDispatcherMessage message;
+        message.type = ViewDispatcherMessageTypeAscii;
+        message.ascii = *event;
+        furi_check(
+            furi_message_queue_put(view_dispatcher->queue, &message, FuriWaitForever) ==
+            FuriStatusOk);
+    } else {
+        view_dispatcher_handle_ascii(view_dispatcher, event);
+    }
+    return true;
+}
+
 void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* event) {
     // Check input complementarity
     uint8_t key_bit = (1 << event->key);
@@ -287,6 +309,48 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
             input_get_type_name(event->type),
             (void*)event->sequence);
         view_input(view_dispatcher->ongoing_input_view, event);
+    }
+}
+
+void view_dispatcher_handle_ascii(ViewDispatcher* view_dispatcher, AsciiEvent* event) {
+    // Deliver event
+    if(view_dispatcher->current_view) {
+        // Dispatch ascii to current view
+        bool is_consumed = view_ascii(view_dispatcher->current_view, event);
+
+        // Navigate if ascii is not consumed
+        if(!is_consumed) {
+            InputKey fallback_key = InputKeyMAX;
+            switch(event->value) {
+            case AsciiValueBS: // Backspace
+            case AsciiValueESC: // Escape
+                fallback_key = InputKeyBack;
+                break;
+            case AsciiValueDC1: // Up
+            case AsciiValueDC2: // Down
+            case AsciiValueDC3: // Right
+            case AsciiValueDC4: // Left
+                fallback_key = InputKeyUp + (event->value - AsciiValueDC1);
+                break;
+            case AsciiValueCR: // Enter
+                fallback_key = InputKeyOk;
+                break;
+            default:
+                break;
+            }
+            if(fallback_key != InputKeyMAX) {
+                // Fallback to directional input, needs press-short-release complementarity
+                InputEvent fallback_event = {
+                    .key = fallback_key,
+                    .type = InputTypePress,
+                };
+                view_dispatcher_handle_input(view_dispatcher, &fallback_event);
+                fallback_event.type = InputTypeShort;
+                view_dispatcher_handle_input(view_dispatcher, &fallback_event);
+                fallback_event.type = InputTypeRelease;
+                view_dispatcher_handle_input(view_dispatcher, &fallback_event);
+            }
+        }
     }
 }
 

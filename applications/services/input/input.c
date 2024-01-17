@@ -77,6 +77,8 @@ int32_t input_srv(void* p) {
     input->thread_id = furi_thread_get_current_id();
     input->event_pubsub = furi_pubsub_alloc();
     furi_record_create(RECORD_INPUT_EVENTS, input->event_pubsub);
+    input->ascii_pubsub = furi_pubsub_alloc();
+    furi_record_create(RECORD_ASCII_EVENTS, input->ascii_pubsub);
 
 #if INPUT_DEBUG
     furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);

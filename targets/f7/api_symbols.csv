@@ -3415,6 +3415,7 @@ Function,+,view_free,void,View*
 Function,+,view_free_model,void,View*
 Function,+,view_get_model,void*,View*
 Function,+,view_port_alloc,ViewPort*,
+Function,+,view_port_ascii_callback_set,void,"ViewPort*, ViewPortAsciiCallback, void*"
 Function,+,view_port_draw_callback_set,void,"ViewPort*, ViewPortDrawCallback, void*"
 Function,+,view_port_enabled_set,void,"ViewPort*, _Bool"
 Function,+,view_port_free,void,ViewPort*
@@ -3427,6 +3428,7 @@ Function,+,view_port_set_height,void,"ViewPort*, uint8_t"
 Function,+,view_port_set_orientation,void,"ViewPort*, ViewPortOrientation"
 Function,+,view_port_set_width,void,"ViewPort*, uint8_t"
 Function,+,view_port_update,void,ViewPort*
+Function,+,view_set_ascii_callback,void,"View*, ViewAsciiCallback"
 Function,+,view_set_context,void,"View*, void*"
 Function,+,view_set_custom_callback,void,"View*, ViewCustomCallback"
 Function,+,view_set_draw_callback,void,"View*, ViewDrawCallback"

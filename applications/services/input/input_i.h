@@ -36,6 +36,8 @@ typedef struct {
     InputPinState* pin_states;
     Cli* cli;
     volatile uint32_t counter;
+
+    FuriPubSub* ascii_pubsub;
 } Input;
 
 /** Input press timer callback */

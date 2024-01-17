@@ -174,6 +174,17 @@ void view_port_input_callback_set(
     furi_check(furi_mutex_release(view_port->mutex) == FuriStatusOk);
 }
 
+void view_port_ascii_callback_set(
+    ViewPort* view_port,
+    ViewPortAsciiCallback callback,
+    void* context) {
+    furi_assert(view_port);
+    furi_check(furi_mutex_acquire(view_port->mutex, FuriWaitForever) == FuriStatusOk);
+    view_port->ascii_callback = callback;
+    view_port->ascii_callback_context = context;
+    furi_check(furi_mutex_release(view_port->mutex) == FuriStatusOk);
+}
+
 void view_port_update(ViewPort* view_port) {
     furi_assert(view_port);
 
@@ -225,6 +236,53 @@ void view_port_input(ViewPort* view_port, InputEvent* event) {
         view_port_map_input(event, orientation);
         view_port->input_callback(event, view_port->input_callback_context);
     }
+    furi_check(furi_mutex_release(view_port->mutex) == FuriStatusOk);
+}
+
+void view_port_ascii(ViewPort* view_port, AsciiEvent* event) {
+    furi_assert(view_port);
+    furi_assert(event);
+    furi_check(furi_mutex_acquire(view_port->mutex, FuriWaitForever) == FuriStatusOk);
+    furi_check(view_port->gui);
+
+    bool is_consumed = false;
+    if(view_port->ascii_callback) {
+        is_consumed = view_port->ascii_callback(event, view_port->ascii_callback_context);
+    }
+
+    if(!is_consumed) {
+        InputKey fallback_key = InputKeyMAX;
+        switch(event->value) {
+        case AsciiValueBS: // Backspace
+        case AsciiValueESC: // Escape
+            fallback_key = InputKeyBack;
+            break;
+        case AsciiValueDC1: // Up
+        case AsciiValueDC2: // Down
+        case AsciiValueDC3: // Right
+        case AsciiValueDC4: // Left
+            fallback_key = InputKeyUp + (event->value - AsciiValueDC1);
+            break;
+        case AsciiValueCR: // Enter
+            fallback_key = InputKeyOk;
+            break;
+        default:
+            break;
+        }
+        if(fallback_key != InputKeyMAX) {
+            // Fallback to directional input, needs press-short-release complementarity
+            InputEvent fallback_event = {
+                .key = fallback_key,
+                .type = InputTypePress,
+            };
+            view_port_input(view_port, &fallback_event);
+            fallback_event.type = InputTypeShort;
+            view_port_input(view_port, &fallback_event);
+            fallback_event.type = InputTypeRelease;
+            view_port_input(view_port, &fallback_event);
+        }
+    }
+
     furi_check(furi_mutex_release(view_port->mutex) == FuriStatusOk);
 }
 

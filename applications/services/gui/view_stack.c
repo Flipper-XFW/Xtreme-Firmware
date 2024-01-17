@@ -16,6 +16,7 @@ struct ViewStack {
 
 static void view_stack_draw(Canvas* canvas, void* model);
 static bool view_stack_input(InputEvent* event, void* context);
+static bool view_stack_ascii(AsciiEvent* event, void* context);
 
 static void view_stack_update_callback(View* view_top_or_bottom, void* context) {
     furi_assert(view_top_or_bottom);
@@ -69,6 +70,7 @@ ViewStack* view_stack_alloc(void) {
     view_allocate_model(view_stack->view, ViewModelTypeLocking, sizeof(ViewStackModel));
     view_set_draw_callback(view_stack->view, view_stack_draw);
     view_set_input_callback(view_stack->view, view_stack_input);
+    view_set_ascii_callback(view_stack->view, view_stack_ascii);
     view_set_context(view_stack->view, view_stack);
     view_set_enter_callback(view_stack->view, view_stack_enter);
     view_set_exit_callback(view_stack->view, view_stack_exit);
@@ -112,6 +114,25 @@ static bool view_stack_input(InputEvent* event, void* context) {
     ViewStackModel* model = view_get_model(view_stack->view);
     for(int i = MAX_VIEWS - 1; i >= 0; i--) {
         if(model->views[i] && view_input(model->views[i], event)) {
+            consumed = true;
+            break;
+        }
+    }
+    view_commit_model(view_stack->view, false);
+
+    return consumed;
+}
+
+static bool view_stack_ascii(AsciiEvent* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
+
+    ViewStack* view_stack = context;
+
+    bool consumed = false;
+    ViewStackModel* model = view_get_model(view_stack->view);
+    for(int i = MAX_VIEWS - 1; i >= 0; i--) {
+        if(model->views[i] && view_ascii(model->views[i], event)) {
             consumed = true;
             break;
         }

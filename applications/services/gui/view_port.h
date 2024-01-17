@@ -32,6 +32,12 @@ typedef void (*ViewPortDrawCallback)(Canvas* canvas, void* context);
  */
 typedef void (*ViewPortInputCallback)(InputEvent* event, void* context);
 
+/** ViewPort Ascii callback
+ * @return     true if event handled, false if event ignored
+ * @warning    called from GUI thread
+ */
+typedef bool (*ViewPortAsciiCallback)(AsciiEvent* event, void* context);
+
 /** ViewPort allocator
  *
  * always returns view_port or stops system if not enough memory.
@@ -87,6 +93,10 @@ void view_port_draw_callback_set(ViewPort* view_port, ViewPortDrawCallback callb
 void view_port_input_callback_set(
     ViewPort* view_port,
     ViewPortInputCallback callback,
+    void* context);
+void view_port_ascii_callback_set(
+    ViewPort* view_port,
+    ViewPortAsciiCallback callback,
     void* context);
 
 /** Emit update signal to GUI system.
