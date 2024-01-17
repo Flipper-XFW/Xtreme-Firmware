@@ -89,8 +89,6 @@ void* text_input_get_validator_callback_context(TextInput* text_input);
  */
 void text_input_set_header_text(TextInput* text_input, const char* text);
 
-bool text_input_insert_character(TextInput* text_input, char c);
-
 #ifdef __cplusplus
 }
 #endif

@@ -3319,7 +3319,6 @@ Function,+,text_input_free,void,TextInput*
 Function,+,text_input_get_validator_callback,TextInputValidatorCallback,TextInput*
 Function,+,text_input_get_validator_callback_context,void*,TextInput*
 Function,+,text_input_get_view,View*,TextInput*
-Function,+,text_input_insert_character,_Bool,"TextInput*, char"
 Function,+,text_input_reset,void,TextInput*
 Function,+,text_input_set_header_text,void,"TextInput*, const char*"
 Function,+,text_input_set_minimum_length,void,"TextInput*, size_t"
