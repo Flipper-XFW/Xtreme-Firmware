@@ -143,8 +143,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
                 cc1101_calibrate(spi_bus);
 
-                furi_check(cc1101_wait_status_state(
-                    spi_bus, CC1101StateIDLE, 10000));
+                furi_check(cc1101_wait_status_state(spi_bus, CC1101StateIDLE, 10000));
 
                 cc1101_switch_to_rx(spi_bus);
                 furi_hal_spi_release(spi_bus);
@@ -191,8 +190,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
                     cc1101_calibrate(spi_bus);
 
-                    furi_check(cc1101_wait_status_state(
-                        spi_bus, CC1101StateIDLE, 10000));
+                    furi_check(cc1101_wait_status_state(spi_bus, CC1101StateIDLE, 10000));
 
                     cc1101_switch_to_rx(spi_bus);
                     furi_hal_spi_release(spi_bus);
