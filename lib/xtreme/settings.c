@@ -39,9 +39,9 @@ XtremeSettings xtreme_settings = {
     .charge_cap = 100, // 100%
     .spi_cc1101_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
     .spi_nrf24_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
-    .uart_esp_channel = UARTDefault, // pin 13,14
-    .uart_nmea_channel = UARTDefault, // pin 13,14
-    .uart_general_channel = UARTDefault, // pin 13,14
+    .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
+    .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
+    .uart_general_channel = FuriHalSerialIdUsart, // pin 13,14
 };
 
 void XTREME_SETTINGS_LOAD() {
@@ -187,15 +187,15 @@ void XTREME_SETTINGS_LOAD() {
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "uart_esp_channel", &u, 1)) {
-            x->uart_esp_channel = CLAMP(u, UARTCount - 1U, 0U);
+            x->uart_esp_channel = CLAMP(u, FuriHalSerialIdMax - 1U, 0U);
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "uart_nmea_channel", &u, 1)) {
-            x->uart_nmea_channel = CLAMP(u, UARTCount - 1U, 0U);
+            x->uart_nmea_channel = CLAMP(u, FuriHalSerialIdMax - 1U, 0U);
         }
         flipper_format_rewind(file);
         if(flipper_format_read_uint32(file, "uart_general_channel", &u, 1)) {
-            x->uart_general_channel = CLAMP(u, UARTCount - 1U, 0U);
+            x->uart_general_channel = CLAMP(u, FuriHalSerialIdMax - 1U, 0U);
         }
     }
     flipper_format_free(file);
