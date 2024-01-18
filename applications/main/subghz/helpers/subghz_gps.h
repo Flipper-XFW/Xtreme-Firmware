@@ -16,6 +16,7 @@ typedef struct {
     FuriThread* thread;
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
+    FuriHalSerialHandle* serial_handle;
 
     FuriTimer* timer;
 
@@ -64,7 +65,7 @@ void subghz_gps_stop(SubGhzGPS* subghz_gps);
  * @param baudrate Baudrate
  * @return void
 */
-void subghz_gps_set_baudrate(uint32_t baudrate);
+void subghz_gps_set_baudrate(SubGhzGPS* subghz_gps, uint32_t baudrate);
 
 /**
  * Convert degree to radian
