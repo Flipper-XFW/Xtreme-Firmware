@@ -1,0 +1,67 @@
+name: 'Build'
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    tags:
+      - '*'
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+  FBT_GIT_SUBMODULE_SHALLOW: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: "Read version tag"
+        run: bash .github/workflow_data/commit.sh
+
+      - name: 'Build the firmware'
+        run: |
+          set -e
+          for TARGET in ${TARGETS}; do
+            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
+            ./fbt TARGET_HW=$TARGET_HW DIST_SUFFIX=$VERSION_TAG updater_package
+          done
+
+      - name: "Check for uncommitted changes"
+        run: |
+          git diff --exit-code
+
+      - name: 'Dist artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: |
+            dist/${{ env.DEFAULT_TARGET }}-*/
+
+      - name: "Make tgz, zip and sdk"
+        run: bash .github/workflow_data/package.sh
+
+      - name: Send devbuild webhook
+        if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
+        env:
+          NC_HOST: "https://cloud.cynthialabs.net/"
+          NC_USERAGENT: "${{ secrets.NC_USERAGENT }}"
+          NC_USER: "${{ secrets.NC_USER }}"
+          NC_PASS: "${{ secrets.NC_PASS }}"
+          BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
+        run: |
+          python -m pip install pyncclient
+          python .github/workflow_data/devbuild.py
