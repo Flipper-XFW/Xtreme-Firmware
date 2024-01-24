@@ -25,7 +25,7 @@ typedef struct {
     bool external_module_power_5v_disable;
     bool external_module_power_amp;
     // saved so as not to change the version
-    bool timestamp_file_names;
+    bool protocol_file_names;
     uint32_t gps_baudrate;
     bool enable_hopping;
     uint32_t repeater_state;

@@ -13,7 +13,7 @@
 #define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_TRIGGER "FATrigger"
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_ENABLED "External"
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER "ExtPower"
-#define SUBGHZ_LAST_SETTING_FIELD_TIMESTAMP_FILE_NAMES "TimestampNames"
+#define SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES "TimestampNames"
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER_AMP "ExtPowerAmp"
 #define SUBGHZ_LAST_SETTING_FIELD_GPS "Gps"
 #define SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE "Hopping"
@@ -47,7 +47,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool temp_external_module_enabled = false;
     bool temp_external_module_power_5v_disable = false;
     bool temp_external_module_power_amp = false;
-    bool temp_timestamp_file_names = false;
+    bool temp_protocol_file_names = false;
     bool temp_enable_hopping = false;
     bool temp_enable_sound = false;
     uint32_t temp_repeater_state;
@@ -98,8 +98,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             1);
         flipper_format_read_bool(
             fff_data_file,
-            SUBGHZ_LAST_SETTING_FIELD_TIMESTAMP_FILE_NAMES,
-            (bool*)&temp_timestamp_file_names,
+            SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES,
+            (bool*)&temp_protocol_file_names,
             1);
         flipper_format_read_bool(
             fff_data_file,
@@ -147,7 +147,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_FEEDBACK_LEVEL;
         instance->frequency_analyzer_trigger = SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_TRIGGER;
         instance->external_module_enabled = false;
-        instance->timestamp_file_names = false;
+        instance->protocol_file_names = false;
         instance->external_module_power_amp = false;
         instance->gps_baudrate = 0;
         instance->enable_hopping = false;
@@ -186,7 +186,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
 
         instance->external_module_power_5v_disable = temp_external_module_power_5v_disable;
 
-        instance->timestamp_file_names = temp_timestamp_file_names;
+        instance->protocol_file_names = temp_protocol_file_names;
 
         instance->delete_old_signals = temp_delete_old_sig;
 
@@ -281,8 +281,8 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
         }
         if(!flipper_format_insert_or_update_bool(
                file,
-               SUBGHZ_LAST_SETTING_FIELD_TIMESTAMP_FILE_NAMES,
-               &instance->timestamp_file_names,
+               SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES,
+               &instance->protocol_file_names,
                1)) {
             break;
         }
@@ -372,7 +372,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         (double)instance->frequency_analyzer_trigger,
         bool_to_char(instance->external_module_enabled),
         bool_to_char(instance->external_module_power_5v_disable),
-        bool_to_char(instance->timestamp_file_names),
+        bool_to_char(instance->protocol_file_names),
         bool_to_char(instance->external_module_power_amp),
         instance->gps_baudrate,
         bool_to_char(instance->enable_hopping),
