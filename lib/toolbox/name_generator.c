@@ -100,24 +100,26 @@ void name_generator_make_detailed(char* name, size_t max_name_size, const char* 
         snprintf(
             name,
             max_name_size,
-            "%.4d-%.2d-%.2d_%.2d,%.2d_%s",
+            "%.4d-%.2d-%.2d_%.2d,%.2d,%.2d_%s",
             dateTime.year,
             dateTime.month,
             dateTime.day,
             dateTime.hour,
             dateTime.minute,
+            dateTime.second,
             prefix);
     } else {
         snprintf(
             name,
             max_name_size,
-            "%s_%.4d-%.2d-%.2d_%.2d,%.2d",
+            "%s_%.4d-%.2d-%.2d_%.2d,%.2d,%.2d",
             prefix,
             dateTime.year,
             dateTime.month,
             dateTime.day,
             dateTime.hour,
-            dateTime.minute);
+            dateTime.minute,
+            dateTime.second);
     }
 
     // Set first symbol to upper case
