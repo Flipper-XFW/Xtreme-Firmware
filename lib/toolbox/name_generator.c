@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <furi.h>
+#include <xtreme/xtreme.h>
 
 const char* const name_generator_left[] = {
     "super",
@@ -59,14 +60,25 @@ void name_generator_make_random_prefixed(char* name, size_t max_name_size, const
     uint8_t name_generator_left_i = rand() % COUNT_OF(name_generator_left);
     uint8_t name_generator_right_i = rand() % COUNT_OF(name_generator_right);
 
-    snprintf(
-        name,
-        max_name_size,
-        "%s%s%s-%s",
-        prefix ? prefix : "",
-        prefix ? "_" : "",
-        name_generator_left[name_generator_left_i],
-        name_generator_right[name_generator_right_i]);
+    if(xtreme_settings.file_naming_prefix_after) {
+        snprintf(
+            name,
+            max_name_size,
+            "%s-%s%s%s",
+            name_generator_left[name_generator_left_i],
+            name_generator_right[name_generator_right_i],
+            prefix ? "_" : "",
+            prefix ? prefix : "");
+    } else {
+        snprintf(
+            name,
+            max_name_size,
+            "%s%s%s-%s",
+            prefix ? prefix : "",
+            prefix ? "_" : "",
+            name_generator_left[name_generator_left_i],
+            name_generator_right[name_generator_right_i]);
+    }
 
     // Set first symbol to upper case
     if(islower((int)name[0])) name[0] = name[0] - 0x20;
@@ -84,16 +96,29 @@ void name_generator_make_detailed(char* name, size_t max_name_size, const char* 
     FuriHalRtcDateTime dateTime;
     furi_hal_rtc_get_datetime(&dateTime);
 
-    snprintf(
-        name,
-        max_name_size,
-        "%s_%.4d-%.2d-%.2d_%.2d,%.2d",
-        prefix,
-        dateTime.year,
-        dateTime.month,
-        dateTime.day,
-        dateTime.hour,
-        dateTime.minute);
+    if(xtreme_settings.file_naming_prefix_after) {
+        snprintf(
+            name,
+            max_name_size,
+            "%.4d-%.2d-%.2d_%.2d,%.2d_%s",
+            dateTime.year,
+            dateTime.month,
+            dateTime.day,
+            dateTime.hour,
+            dateTime.minute,
+            prefix);
+    } else {
+        snprintf(
+            name,
+            max_name_size,
+            "%s_%.4d-%.2d-%.2d_%.2d,%.2d",
+            prefix,
+            dateTime.year,
+            dateTime.month,
+            dateTime.day,
+            dateTime.hour,
+            dateTime.minute);
+    }
 
     // Set first symbol to upper case
     if(islower((int)name[0])) name[0] = name[0] - 0x20;

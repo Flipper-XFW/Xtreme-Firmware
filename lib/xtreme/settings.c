@@ -42,6 +42,7 @@ XtremeSettings xtreme_settings = {
     .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
     .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
     .uart_general_channel = FuriHalSerialIdUsart, // pin 13,14
+    .file_naming_prefix_after = false, // Before
 };
 
 void XTREME_SETTINGS_LOAD() {
@@ -233,6 +234,11 @@ void XTREME_SETTINGS_LOAD() {
         } else {
             flipper_format_rewind(file);
         }
+        if(flipper_format_read_bool(file, "file_naming_prefix_after", &b, 1)) {
+            x->file_naming_prefix_after = b;
+        } else {
+            flipper_format_rewind(file);
+        }
         furi_string_free(s);
     }
     flipper_format_free(file);
@@ -291,6 +297,8 @@ void XTREME_SETTINGS_SAVE() {
         flipper_format_write_uint32(file, "uart_nmea_channel", &e, 1);
         e = x->uart_general_channel;
         flipper_format_write_uint32(file, "uart_general_channel", &e, 1);
+        flipper_format_write_bool(
+            file, "file_naming_prefix_after", &x->file_naming_prefix_after, 1);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);

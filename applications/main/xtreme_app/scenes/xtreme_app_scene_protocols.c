@@ -36,6 +36,14 @@ static void xtreme_app_scene_protocols_subghz_extend_changed(VariableItem* item)
     app->save_subghz = true;
 }
 
+static void xtreme_app_scene_protocols_file_naming_prefix_changed(VariableItem* item) {
+    XtremeApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "After" : "Before");
+    xtreme_settings.file_naming_prefix_after = value;
+    app->save_settings = true;
+}
+
 void xtreme_app_scene_protocols_on_enter(void* context) {
     XtremeApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
@@ -65,6 +73,16 @@ void xtreme_app_scene_protocols_on_enter(void* context) {
 
     item = variable_item_list_add(var_item_list, "GPIO Pins", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "File Naming Prefix",
+        2,
+        xtreme_app_scene_protocols_file_naming_prefix_changed,
+        app);
+    variable_item_set_current_value_index(item, xtreme_settings.file_naming_prefix_after);
+    variable_item_set_current_value_text(
+        item, xtreme_settings.file_naming_prefix_after ? "After" : "Before");
 
     variable_item_list_set_enter_callback(
         var_item_list, xtreme_app_scene_protocols_var_item_list_callback, app);
