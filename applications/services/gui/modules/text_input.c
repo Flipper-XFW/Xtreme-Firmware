@@ -606,8 +606,10 @@ static bool text_input_view_ascii_callback(AsciiEvent* event, void* context) {
                     model->cursor_pos =
                         CLAMP(model->cursor_pos + 1, strlen(model->text_buffer), 0u);
                 } else {
-                    model->cursor_pos =
-                        CLAMP(model->cursor_pos - 1, strlen(model->text_buffer), 0u);
+                    if(model->cursor_pos > 0) {
+                        model->cursor_pos =
+                            CLAMP(model->cursor_pos - 1, strlen(model->text_buffer), 0u);
+                    }
                 }
             },
             true);
