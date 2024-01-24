@@ -463,6 +463,14 @@ static void input_event_callback(const void* value, void* context) {
     }
 }
 
+static void ascii_event_callback(const void* value, void* context) {
+    furi_assert(value);
+    furi_assert(context);
+    UNUSED(value);
+    NotificationApp* app = context;
+    notification_message(app, &sequence_display_backlight_on);
+}
+
 // App alloc
 static NotificationApp* notification_app_alloc() {
     NotificationApp* app = malloc(sizeof(NotificationApp));
@@ -500,6 +508,8 @@ static NotificationApp* notification_app_alloc() {
     // display backlight control
     app->event_record = furi_record_open(RECORD_INPUT_EVENTS);
     furi_pubsub_subscribe(app->event_record, input_event_callback, app);
+    app->ascii_record = furi_record_open(RECORD_ASCII_EVENTS);
+    furi_pubsub_subscribe(app->ascii_record, ascii_event_callback, app);
     notification_message(app, &sequence_display_backlight_on);
 
     return app;

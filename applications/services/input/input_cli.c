@@ -60,8 +60,6 @@ static void fake_input(Input* input, InputKey key, InputType type) {
 
 static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     UNUSED(args);
-    FuriPubSub* ascii_events = furi_record_open(RECORD_ASCII_EVENTS);
-
     printf("Using console keyboard feedback for flipper input\r\n");
 
     printf("\r\nUsage:\r\n");
@@ -130,12 +128,10 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
         }
         if(send_ascii != AsciiValueNUL) {
             AsciiEvent event = {.value = send_ascii};
-            furi_pubsub_publish(ascii_events, &event);
+            furi_pubsub_publish(input->ascii_pubsub, &event);
             hold = false;
         }
     }
-
-    furi_record_close(RECORD_ASCII_EVENTS);
 }
 
 static void input_cli_send_print_usage() {
