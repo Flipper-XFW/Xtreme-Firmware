@@ -23,16 +23,18 @@ void subghz_scene_save_name_on_enter(void* context) {
     FuriString* dir_name = furi_string_alloc();
 
     char file_name_buf[SUBGHZ_MAX_LEN_NAME] = {0};
+    FuriHalRtcDateTime* datetime = subghz->save_datetime_set ? &subghz->save_datetime : NULL;
+    subghz->save_datetime_set = false;
     if(!subghz_path_is_file(subghz->file_path)) {
         SubGhzProtocolDecoderBase* decoder_result = subghz_txrx_get_decoder(subghz->txrx);
         if(subghz->last_settings->protocol_file_names && decoder_result != NULL &&
            strlen(decoder_result->protocol->name) != 0 &&
            !scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSetType)) {
-            name_generator_make_auto(
-                file_name_buf, SUBGHZ_MAX_LEN_NAME, decoder_result->protocol->name);
+            name_generator_make_auto_datetime(
+                file_name_buf, SUBGHZ_MAX_LEN_NAME, decoder_result->protocol->name, datetime);
         } else {
-            name_generator_make_auto(
-                file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX);
+            name_generator_make_auto_datetime(
+                file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX, datetime);
         }
         furi_string_set(file_name, file_name_buf);
         furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
@@ -49,10 +51,11 @@ void subghz_scene_save_name_on_enter(void* context) {
                SubGhzCustomEventManagerSetRAW) {
                 dev_name_empty = true;
                 if(subghz->last_settings->protocol_file_names) {
-                    name_generator_make_auto(file_name_buf, SUBGHZ_MAX_LEN_NAME, "RAW");
+                    name_generator_make_auto_datetime(
+                        file_name_buf, SUBGHZ_MAX_LEN_NAME, "RAW", datetime);
                 } else {
-                    name_generator_make_auto(
-                        file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX);
+                    name_generator_make_auto_datetime(
+                        file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX, datetime);
                 }
                 furi_string_set(file_name, file_name_buf);
             }

@@ -101,6 +101,8 @@ struct SubGhz {
 
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
+    bool save_datetime_set;
+    FuriHalRtcDateTime save_datetime;
 
     bool fav_timeout;
     FuriTimer* timer;
