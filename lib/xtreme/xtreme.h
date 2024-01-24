@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_hal_serial_types.h>
+#include <gui/canvas.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,6 +98,7 @@ typedef enum {
 typedef struct {
     bool is_nsfw; // TODO: replace with packs text support
     uint8_t* fonts[FontSwapCount];
+    CanvasFontParameters* font_params[FontSwapCount];
 } XtremeAssets;
 
 void XTREME_SETTINGS_LOAD();

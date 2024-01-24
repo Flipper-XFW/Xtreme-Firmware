@@ -13,6 +13,7 @@
 XtremeAssets xtreme_assets = {
     .is_nsfw = false,
     .fonts = {NULL},
+    .font_params = {NULL},
 };
 
 void load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
@@ -113,13 +114,26 @@ void load_font(FontSwap font, const char* name, FuriString* path, File* file) {
         uint64_t size = storage_file_size(file);
         uint8_t* swap = malloc(size);
 
-        if(storage_file_read(file, swap, size) == size) {
+        if(size > 20 && storage_file_read(file, swap, size) == size) {
             xtreme_assets.fonts[font] = swap;
+            CanvasFontParameters* params = malloc(sizeof(CanvasFontParameters));
+            params->leading_default = swap[10]; // max_char_height
+            params->leading_min = params->leading_default - 2; // good enough
+            params->height = swap[13]; // ascent_A
+            params->descender = swap[19]; // start_pos_lower_a
+            xtreme_assets.font_params[font] = params;
         } else {
             free(swap);
         }
     }
     storage_file_close(file);
+}
+
+void free_font(FontSwap font) {
+    free(xtreme_assets.fonts[font]);
+    xtreme_assets.fonts[font] = NULL;
+    free(xtreme_assets.font_params[font]);
+    xtreme_assets.font_params[font] = NULL;
 }
 
 static const char* font_names[] = {
@@ -172,8 +186,7 @@ void XTREME_ASSETS_FREE() {
 
     for(FontSwap font = 0; font < FontSwapCount; font++) {
         if(xtreme_assets.fonts[font] != NULL) {
-            free(xtreme_assets.fonts[font]);
-            xtreme_assets.fonts[font] = NULL;
+            free_font(font);
         }
     }
 }

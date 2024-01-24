@@ -112,6 +112,9 @@ uint8_t canvas_current_font_width(const Canvas* canvas) {
 const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_assert(canvas);
     furi_assert(font < FontTotalNumber);
+    if((FontSwap)font < FontSwapCount && xtreme_assets.font_params[font]) {
+        return xtreme_assets.font_params[font];
+    }
     return &canvas_font_params[font];
 }
 
