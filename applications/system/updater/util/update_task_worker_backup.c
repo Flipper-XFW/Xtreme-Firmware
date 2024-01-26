@@ -5,6 +5,7 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <desktop/views/desktop_view_slideshow.h>
+#include <expansion/expansion_settings_filename.h>
 #include <toolbox/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/lfs_backup.h>
@@ -164,6 +165,13 @@ static bool update_task_post_update(UpdateTask* update_task) {
         update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
 
         CHECK_RESULT(lfs_backup_unpack(update_task->storage, furi_string_get_cstr(file_path)));
+
+#ifdef FURI_NDEBUG
+        // Production
+        // Currently no expansion modules exist, disable listening on UART
+        storage_common_remove(update_task->storage, EXPANSION_SETTINGS_OLD_PATH);
+        storage_common_remove(update_task->storage, EXPANSION_SETTINGS_PATH);
+#endif
 
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
             TarUnpackProgress progress = {

@@ -66,8 +66,8 @@ void flipper_migrate_files() {
     storage_common_remove(storage, POWER_SETTINGS_OLD_PATH);
     storage_common_copy(storage, BT_KEYS_STORAGE_OLD_PATH, BT_KEYS_STORAGE_PATH);
     storage_common_remove(storage, BT_KEYS_STORAGE_OLD_PATH);
-    storage_common_copy(storage, EXPANSION_SETTINGS_OLD_PATH, EXPANSION_SETTINGS_PATH);
-    storage_common_remove(storage, EXPANSION_SETTINGS_OLD_PATH);
+    // storage_common_copy(storage, EXPANSION_SETTINGS_OLD_PATH, EXPANSION_SETTINGS_PATH); // Reset on install for now
+    // storage_common_remove(storage, EXPANSION_SETTINGS_OLD_PATH);
     // storage_common_copy(storage, NOTIFICATION_SETTINGS_OLD_PATH, NOTIFICATION_SETTINGS_PATH); // Not compatible anyway
     storage_common_remove(storage, NOTIFICATION_SETTINGS_OLD_PATH);
     // Ext -> Int
