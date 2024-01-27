@@ -24,6 +24,7 @@
 #define SUBGHZ_LAST_SETTING_FIELD_REPEATER "Repeater"
 #define SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND "Sound"
 #define SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD "DelOldSignals"
+#define SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE "Autosave"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {
     SubGhzLastSettings* instance = malloc(sizeof(SubGhzLastSettings));
@@ -53,6 +54,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     uint32_t temp_repeater_state;
     bool temp_remove_duplicates = false;
     bool temp_delete_old_sig = false;
+    bool temp_autosave = false;
     uint32_t temp_ignore_filter = 0;
     uint32_t temp_filter = 0;
     float temp_rssi = 0;
@@ -133,6 +135,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND, (bool*)&temp_enable_sound, 1);
         flipper_format_read_bool(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD, (bool*)&temp_delete_old_sig, 1);
+        flipper_format_read_bool(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE, (bool*)&temp_autosave, 1);
 
     } else {
         FURI_LOG_E(TAG, "Error open file %s", SUBGHZ_LAST_SETTINGS_PATH);
@@ -154,6 +158,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->remove_duplicates = false;
         instance->repeater_state = 0;
         instance->enable_sound = 0;
+        instance->autosave = false;
         instance->ignore_filter = 0x00;
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
         instance->filter = SubGhzProtocolFlag_Decodable;
@@ -189,6 +194,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->protocol_file_names = temp_protocol_file_names;
 
         instance->delete_old_signals = temp_delete_old_sig;
+
+        instance->autosave = temp_autosave;
 
         // External power amp CC1101
         instance->external_module_power_amp = temp_external_module_power_amp;
@@ -332,6 +339,10 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                file, SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD, &instance->delete_old_signals, 1)) {
             break;
         }
+        if(!flipper_format_insert_or_update_bool(
+               file, SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE, &instance->autosave, 1)) {
+            break;
+        }
         saved = true;
     } while(0);
 
@@ -365,7 +376,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         TAG,
         "Frequency: %03ld.%02ld, FeedbackLevel: %ld, FATrigger: %.2f, External: %s, ExtPower: %s, TimestampNames: %s, ExtPowerAmp: %s,\n"
         "GPSBaudrate: %ld, Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
-        "BinRAW: %s, Repeater: %lu, Duplicates: %s, Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, Weather: %s, TPMS: %s, Sound: %s",
+        "BinRAW: %s, Repeater: %lu, Duplicates: %s, Autosave: %s, Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, Weather: %s, TPMS: %s, Sound: %s",
         instance->frequency / 1000000 % 1000,
         instance->frequency / 10000 % 100,
         instance->frequency_analyzer_feedback_level,
@@ -381,6 +392,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW),
         instance->repeater_state,
         bool_to_char(instance->remove_duplicates),
+        bool_to_char(instance->autosave),
         subghz_last_settings_log_filter_get_index(
             instance->ignore_filter, SubGhzProtocolFilter_StarLine),
         subghz_last_settings_log_filter_get_index(

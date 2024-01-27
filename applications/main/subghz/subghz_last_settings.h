@@ -35,6 +35,7 @@ typedef struct {
     uint32_t filter;
     float rssi;
     bool delete_old_signals;
+    bool autosave;
 } SubGhzLastSettings;
 
 SubGhzLastSettings* subghz_last_settings_alloc(void);
