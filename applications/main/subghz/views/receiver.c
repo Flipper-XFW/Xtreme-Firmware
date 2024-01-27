@@ -736,6 +736,7 @@ void subghz_view_receiver_delete_item(SubGhzViewReceiver* subghz_receiver, uint1
             }
         },
         true);
+    subghz_view_receiver_update_offset(subghz_receiver);
 }
 
 void subghz_view_receiver_enable_draw_callback(SubGhzViewReceiver* subghz_receiver) {

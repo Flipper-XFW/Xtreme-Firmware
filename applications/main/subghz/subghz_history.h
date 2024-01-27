@@ -115,9 +115,14 @@ void subghz_history_get_time_item_menu(SubGhzHistory* instance, FuriString* outp
  * @param instance  - SubGhzHistory instance
  * @param output    - FuriString* output
  * @param sats      - Number of satellites
+ * @param ignore_full - Ignore if history is full
  * @return bool - is FULL
  */
-bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output, uint8_t sats);
+bool subghz_history_get_text_space_left(
+    SubGhzHistory* instance,
+    FuriString* output,
+    uint8_t sats,
+    bool ignore_full);
 
 /** Return last index
  *
