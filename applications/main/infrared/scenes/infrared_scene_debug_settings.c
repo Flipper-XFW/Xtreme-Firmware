@@ -21,13 +21,21 @@ static void infrared_scene_debug_settings_changed(VariableItem* item) {
         }
     } else {
         furi_hal_infrared_block_external_output(false);
+        if(furi_hal_infrared_is_external_connected() && !furi_hal_power_is_otg_enabled()) {
+            uint8_t attempts = 0;
+            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        }
     }
 }
 
 static void infrared_scene_debug_settings_power_changed(VariableItem* item) {
     bool value = variable_item_get_current_value_index(item);
     if(value) {
-        for(int i = 0; i < 5 && !furi_hal_power_is_otg_enabled(); i++) {
+        uint8_t attempts = 0;
+        while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
             furi_hal_power_enable_otg();
             furi_delay_ms(10);
         }
@@ -72,13 +80,15 @@ void infrared_scene_debug_settings_on_enter(void* context) {
         2,
         infrared_scene_debug_settings_power_changed,
         infrared);
-    bool enabled = furi_hal_power_is_otg_enabled() ||
-                   furi_hal_power_is_charging() || // 5v is enabled via hardware if charging
-                   furi_hal_infrared_is_external_connected();
+    bool enabled = (furi_hal_power_is_otg_enabled() ||
+                    furi_hal_power_is_charging()) && // 5v is enabled via hardware if charging
+                   furi_hal_infrared_is_external_connected() &&
+                   !furi_hal_infrared_is_external_output_blocked();
     variable_item_set_current_value_index(item, enabled);
     variable_item_set_current_value_text(item, enabled ? "ON" : "OFF");
 
-    if(furi_hal_infrared_is_external_connected() && !furi_hal_power_is_otg_enabled()) {
+    if(furi_hal_infrared_is_external_connected() && !furi_hal_power_is_otg_enabled() &&
+       !furi_hal_infrared_is_external_output_blocked()) {
         uint8_t attempts = 0;
         while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
             furi_hal_power_enable_otg();
