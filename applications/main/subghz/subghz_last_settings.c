@@ -158,6 +158,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->remove_duplicates = false;
         instance->repeater_state = 0;
         instance->enable_sound = 0;
+        instance->delete_old_signals = false;
         instance->autosave = false;
         instance->ignore_filter = 0x00;
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
