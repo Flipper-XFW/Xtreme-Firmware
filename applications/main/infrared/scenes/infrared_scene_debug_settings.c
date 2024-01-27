@@ -9,19 +9,22 @@ const char* const infrared_debug_cfg_variables_text[] = {
 };
 
 static void infrared_scene_debug_settings_changed(VariableItem* item) {
-    InfraredApp* infrared = variable_item_get_context(item);
     value_index_ir = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, infrared_debug_cfg_variables_text[value_index_ir]);
 
-    furi_hal_infrared_set_debug_out(value_index_ir);
-
-    infrared->last_settings->ext_out = value_index_ir == 1;
-    infrared_last_settings_save(infrared->last_settings);
+    if(value_index_ir == 0) {
+        furi_hal_infrared_set_debug_out(false);
+        furi_hal_infrared_block_external_output(true);
+        if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
+        }
+    } else {
+        furi_hal_infrared_block_external_output(false);
+    }
 }
 
 static void infrared_scene_debug_settings_power_changed(VariableItem* item) {
-    InfraredApp* infrared = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     if(value) {
         for(int i = 0; i < 5 && !furi_hal_power_is_otg_enabled(); i++) {
@@ -34,9 +37,6 @@ static void infrared_scene_debug_settings_power_changed(VariableItem* item) {
         }
     }
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-
-    infrared->last_settings->ext_5v = value;
-    infrared_last_settings_save(infrared->last_settings);
 }
 
 static void infrared_debug_settings_start_var_list_enter_callback(void* context, uint32_t index) {
@@ -49,7 +49,10 @@ void infrared_scene_debug_settings_on_enter(void* context) {
 
     VariableItemList* variable_item_list = infrared->variable_item_list;
 
-    value_index_ir = furi_hal_infrared_get_debug_out_status();
+    value_index_ir =
+        (furi_hal_infrared_is_external_connected() &&
+         !furi_hal_infrared_is_external_output_blocked());
+
     VariableItem* item = variable_item_list_add(
         variable_item_list,
         "Send signal to",
@@ -70,9 +73,18 @@ void infrared_scene_debug_settings_on_enter(void* context) {
         infrared_scene_debug_settings_power_changed,
         infrared);
     bool enabled = furi_hal_power_is_otg_enabled() ||
-                   furi_hal_power_is_charging(); // 5v is enabled via hardware if charging
+                   furi_hal_power_is_charging() || // 5v is enabled via hardware if charging
+                   furi_hal_infrared_is_external_connected();
     variable_item_set_current_value_index(item, enabled);
     variable_item_set_current_value_text(item, enabled ? "ON" : "OFF");
+
+    if(furi_hal_infrared_is_external_connected() && !furi_hal_power_is_otg_enabled()) {
+        uint8_t attempts = 0;
+        while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+            furi_hal_power_enable_otg();
+            furi_delay_ms(10);
+        }
+    }
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewVariableItemList);
 }

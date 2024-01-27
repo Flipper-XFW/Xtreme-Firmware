@@ -31,7 +31,7 @@
 #include "infrared_remote.h"
 #include "infrared_brute_force.h"
 #include "infrared_custom_event.h"
-#include "infrared_last_settings.h"
+// #include "infrared_last_settings.h"
 
 #include "scenes/infrared_scene.h"
 #include "views/infrared_progress_view.h"
@@ -129,7 +129,7 @@ struct InfraredApp {
     /** Arbitrary text storage for various inputs. */
     char text_store[INFRARED_TEXT_STORE_NUM][INFRARED_TEXT_STORE_SIZE + 1];
     InfraredAppState app_state; /**< Application state. */
-    InfraredLastSettings* last_settings; /**< Last settings. */
+    //InfraredLastSettings* last_settings; /**< Last settings. */
 
     void* rpc_ctx; /**< Pointer to the RPC context object. */
 };

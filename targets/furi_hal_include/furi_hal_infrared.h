@@ -149,6 +149,25 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
     FuriHalInfraredTxSignalSentISRCallback callback,
     void* context);
 
+/** Check if a module (like IR Blaster) is connected to PA7 
+ * 
+ * return true if a module is connected, false otherwise
+ */
+bool furi_hal_infrared_is_external_connected();
+
+/** Block external output on PA7
+ * 
+ * if blocked, its forced to internal IR. If unblocked, external IR is used if connected
+ * @param block true to block, false to unblock
+ */
+void furi_hal_infrared_block_external_output(bool block);
+
+/** Check if external output on PA7 is blocked
+ * 
+ * @return true if blocked, false otherwise
+ */
+bool furi_hal_infrared_is_external_output_blocked();
+
 #ifdef __cplusplus
 }
 #endif

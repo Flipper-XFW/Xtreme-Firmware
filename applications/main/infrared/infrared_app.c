@@ -204,10 +204,7 @@ static InfraredApp* infrared_alloc() {
     infrared->loading = loading_alloc();
     infrared->progress = infrared_progress_view_alloc();
 
-    infrared->last_settings = infrared_last_settings_alloc();
-    infrared_last_settings_load(infrared->last_settings);
-
-    if(infrared->last_settings->ext_5v) {
+    if(furi_hal_infrared_is_external_connected()) {
         uint8_t attempts = 0;
         while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
             furi_hal_power_enable_otg();
@@ -215,9 +212,7 @@ static InfraredApp* infrared_alloc() {
         }
     }
 
-    if(infrared->last_settings->ext_out && !furi_hal_infrared_get_debug_out_status()) {
-        furi_hal_infrared_set_debug_out(true);
-    }
+    furi_hal_infrared_block_external_output(false);
 
     return infrared;
 }
@@ -286,13 +281,11 @@ static void infrared_free(InfraredApp* infrared) {
     furi_string_free(infrared->file_path);
     furi_string_free(infrared->button_name);
 
-    if(infrared->last_settings->ext_5v) {
-        if(furi_hal_power_is_otg_enabled()) {
-            furi_hal_power_disable_otg();
-        }
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
     }
 
-    infrared_last_settings_free(infrared->last_settings);
+    furi_hal_infrared_block_external_output(false);
 
     free(infrared);
 }
