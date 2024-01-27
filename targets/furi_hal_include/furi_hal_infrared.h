@@ -155,18 +155,17 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
  */
 bool furi_hal_infrared_is_external_connected();
 
-/** Block external output on PA7
+/** Set auto detect
  * 
- * if blocked, its forced to internal IR. If unblocked, external IR is used if connected
- * @param block true to block, false to unblock
- */
-void furi_hal_infrared_block_external_output(bool block);
+ * if enabled, external IR is used automatic if connected, otherwise internal IR is used
+*/
+void furi_hal_infrared_set_auto_detect(bool enable);
 
-/** Check if external output on PA7 is blocked
+/** Check if auto detect is enabled
  * 
- * @return true if blocked, false otherwise
+ * @return true if enabled, false otherwise
  */
-bool furi_hal_infrared_is_external_output_blocked();
+bool furi_hal_infrared_is_auto_detect_enabled();
 
 #ifdef __cplusplus
 }

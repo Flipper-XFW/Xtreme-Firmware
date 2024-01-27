@@ -80,7 +80,7 @@ static volatile InfraredState furi_hal_infrared_state = InfraredStateIdle;
 static InfraredTimTx infrared_tim_tx;
 static InfraredTimRx infrared_tim_rx;
 static bool infrared_external_output;
-static bool block_external;
+static bool auto_detect;
 
 static void furi_hal_infrared_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift);
 static void furi_hal_infrared_async_tx_free_resources(void);
@@ -651,9 +651,7 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     LL_TIM_GenerateEvent_UPDATE(INFRARED_DMA_TIMER); /* DMA -> TIMx_RCR */
     furi_delay_us(5);
 
-    if(block_external) {
-        infrared_external_output = false;
-    } else {
+    if(auto_detect) {
         infrared_external_output = furi_hal_infrared_is_external_connected();
     }
 
@@ -736,10 +734,10 @@ bool furi_hal_infrared_is_external_connected() {
     return is_external_connected;
 }
 
-void furi_hal_infrared_block_external_output(bool block) {
-    block_external = block;
+void furi_hal_infrared_set_auto_detect(bool enable) {
+    auto_detect = enable;
 }
 
-bool furi_hal_infrared_is_external_output_blocked(void) {
-    return block_external;
+bool furi_hal_infrared_is_auto_detect_enabled(void) {
+    return auto_detect;
 }
