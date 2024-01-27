@@ -51,9 +51,11 @@ void name_generator_make_auto_datetime(
     const char* prefix,
     FuriHalRtcDateTime* custom_time) {
     if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagRandomFilename)) {
-        name_generator_make_detailed_datetime(name, max_name_size, prefix, custom_time);
+        name_generator_make_detailed_datetime(
+            name, max_name_size, prefix, custom_time, xtreme_settings.file_naming_prefix_after);
     } else {
-        name_generator_make_random_prefixed(name, max_name_size, prefix);
+        name_generator_make_random_prefixed(
+            name, max_name_size, prefix, xtreme_settings.file_naming_prefix_after);
     }
 }
 
@@ -61,14 +63,18 @@ void name_generator_make_auto(char* name, size_t max_name_size, const char* pref
     name_generator_make_auto_datetime(name, max_name_size, prefix, NULL);
 }
 
-void name_generator_make_random_prefixed(char* name, size_t max_name_size, const char* prefix) {
+void name_generator_make_random_prefixed(
+    char* name,
+    size_t max_name_size,
+    const char* prefix,
+    bool prefix_after) {
     furi_assert(name);
     furi_assert(max_name_size);
 
     uint8_t name_generator_left_i = rand() % COUNT_OF(name_generator_left);
     uint8_t name_generator_right_i = rand() % COUNT_OF(name_generator_right);
 
-    if(xtreme_settings.file_naming_prefix_after) {
+    if(prefix_after) {
         snprintf(
             name,
             max_name_size,
@@ -93,14 +99,16 @@ void name_generator_make_random_prefixed(char* name, size_t max_name_size, const
 }
 
 void name_generator_make_random(char* name, size_t max_name_size) {
-    name_generator_make_random_prefixed(name, max_name_size, NULL);
+    name_generator_make_random_prefixed(
+        name, max_name_size, NULL, xtreme_settings.file_naming_prefix_after);
 }
 
 void name_generator_make_detailed_datetime(
     char* name,
     size_t max_name_size,
     const char* prefix,
-    FuriHalRtcDateTime* custom_time) {
+    FuriHalRtcDateTime* custom_time,
+    bool prefix_after) {
     furi_assert(name);
     furi_assert(max_name_size);
     furi_assert(prefix);
@@ -112,7 +120,7 @@ void name_generator_make_detailed_datetime(
         furi_hal_rtc_get_datetime(&dateTime);
     }
 
-    if(xtreme_settings.file_naming_prefix_after) {
+    if(prefix_after) {
         snprintf(
             name,
             max_name_size,
@@ -143,5 +151,6 @@ void name_generator_make_detailed_datetime(
 }
 
 void name_generator_make_detailed(char* name, size_t max_name_size, const char* prefix) {
-    name_generator_make_detailed_datetime(name, max_name_size, prefix, NULL);
+    name_generator_make_detailed_datetime(
+        name, max_name_size, prefix, NULL, xtreme_settings.file_naming_prefix_after);
 }

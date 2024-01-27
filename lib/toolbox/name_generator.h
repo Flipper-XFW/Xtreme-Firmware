@@ -28,7 +28,11 @@ void name_generator_make_auto_datetime(
  * @param[in]  prefix         The prefix of the name
  */
 void name_generator_make_random(char* name, size_t max_name_size);
-void name_generator_make_random_prefixed(char* name, size_t max_name_size, const char* prefix);
+void name_generator_make_random_prefixed(
+    char* name,
+    size_t max_name_size,
+    const char* prefix,
+    bool prefix_after);
 
 /** Generates detailed name
  *
@@ -41,7 +45,8 @@ void name_generator_make_detailed_datetime(
     char* name,
     size_t max_name_size,
     const char* prefix,
-    FuriHalRtcDateTime* custom_time);
+    FuriHalRtcDateTime* custom_time,
+    bool prefix_after);
 
 #ifdef __cplusplus
 }
