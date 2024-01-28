@@ -37,6 +37,14 @@ void subghz_history_delete_item(SubGhzHistory* instance, uint16_t idx);
  */
 uint32_t subghz_history_get_hash_data(SubGhzHistory* instance, uint16_t idx);
 
+/** Get protocol pointer to history[idx]
+ * 
+ * @param instance - SubGhzHistory instance
+ * @param idx      - record index
+ * @return proto   - protocol pointer
+ */
+const SubGhzProtocol* subghz_history_get_protocol(SubGhzHistory* instance, uint16_t idx);
+
 /** Get repeat count to history[idx]
  * 
  * @param instance  - SubGhzHistory instance

@@ -15,6 +15,7 @@ typedef struct {
     SubGhzRadioPreset* preset;
     FuriHalRtcDateTime datetime;
     uint32_t hash_data;
+    const SubGhzProtocol* protocol;
     uint16_t repeats;
     float latitude;
     float longitude;
@@ -67,6 +68,12 @@ uint32_t subghz_history_get_hash_data(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     return item->hash_data;
+}
+
+const SubGhzProtocol* subghz_history_get_protocol(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    return item->protocol;
 }
 
 uint16_t subghz_history_get_repeats(SubGhzHistory* instance, uint16_t idx) {
@@ -252,7 +259,7 @@ bool subghz_history_add_to_history(
     SubGhzHistoryItemArray_it_last(it, instance->history->data);
     while(!SubGhzHistoryItemArray_end_p(it)) {
         SubGhzHistoryItem* search = SubGhzHistoryItemArray_ref(it);
-        if(search->hash_data == hash_data) {
+        if(search->hash_data == hash_data && search->protocol == decoder_base->protocol) {
             repeats = search->repeats + 1;
             break;
         }
@@ -273,6 +280,7 @@ bool subghz_history_add_to_history(
     item->preset->data_size = preset->data_size;
     furi_hal_rtc_get_datetime(&item->datetime);
     item->hash_data = hash_data;
+    item->protocol = decoder_base->protocol;
     item->repeats = repeats;
     item->latitude = preset->latitude;
     item->longitude = preset->longitude;
@@ -357,7 +365,7 @@ void subghz_history_remove_duplicates(SubGhzHistory* instance) {
         while(!SubGhzHistoryItemArray_end_p(jt)) {
             SubGhzHistoryItem* j = SubGhzHistoryItemArray_ref(jt);
 
-            if(j->hash_data == i->hash_data) {
+            if(j->hash_data == i->hash_data && j->protocol == i->protocol) {
                 subghz_history_delete_item(instance, jt->index);
             }
             SubGhzHistoryItemArray_previous(jt);

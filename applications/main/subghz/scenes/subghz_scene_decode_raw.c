@@ -86,7 +86,8 @@ static void subghz_scene_add_to_history_callback(
             subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
             for(uint16_t i = idx; i > 0; i--) {
                 i--; // Iterating in reverse with off by one
-                if(subghz_history_get_hash_data(subghz->history, i) == hash_data) {
+                if(subghz_history_get_hash_data(subghz->history, i) == hash_data &&
+                   subghz_history_get_protocol(subghz->history, i) == decoder_base->protocol) {
                     // Remove previous instance and update menu index
                     subghz_history_delete_item(subghz->history, i);
                     subghz_view_receiver_delete_item(subghz->subghz_receiver, i);
