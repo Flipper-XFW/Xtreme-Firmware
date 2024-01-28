@@ -207,20 +207,20 @@ static InfraredApp* infrared_alloc() {
     infrared->last_settings = infrared_last_settings_alloc();
     infrared_last_settings_load(infrared->last_settings);
 
-    if(infrared->last_settings->auto_detect) {
-        furi_hal_infrared_set_auto_detect(true);
-    }
-
-    if(infrared->last_settings->ext_out && !furi_hal_infrared_get_debug_out_status()) {
-        furi_hal_infrared_set_debug_out(true);
-    }
-
-    if(infrared->last_settings->ext_5v) {
-        uint8_t attempts = 0;
-        while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-            furi_hal_power_enable_otg();
-            furi_delay_ms(10);
+    furi_hal_infrared_set_auto_detect(infrared->last_settings->auto_detect);
+    if(!infrared->last_settings->auto_detect) {
+        furi_hal_infrared_set_debug_out(infrared->last_settings->ext_out);
+        if(infrared->last_settings->ext_5v) {
+            uint8_t attempts = 0;
+            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        } else if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
         }
+    } else if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
     }
 
     return infrared;
@@ -289,10 +289,6 @@ static void infrared_free(InfraredApp* infrared) {
 
     furi_string_free(infrared->file_path);
     furi_string_free(infrared->button_name);
-
-    if(furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_disable_otg();
-    }
 
     infrared_last_settings_free(infrared->last_settings);
 
@@ -495,6 +491,7 @@ void infrared_popup_closed_callback(void* context) {
 }
 
 int32_t infrared_app(char* p) {
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     InfraredApp* infrared = infrared_alloc();
 
     infrared_make_app_folder(infrared);
@@ -540,5 +537,16 @@ int32_t infrared_app(char* p) {
     view_dispatcher_run(infrared->view_dispatcher);
 
     infrared_free(infrared);
+    if(otg_was_enabled != furi_hal_power_is_otg_enabled()) {
+        if(otg_was_enabled) {
+            uint8_t attempts = 0;
+            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        } else {
+            furi_hal_power_disable_otg();
+        }
+    }
     return 0;
 }

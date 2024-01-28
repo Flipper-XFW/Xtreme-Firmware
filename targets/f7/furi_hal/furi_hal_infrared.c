@@ -653,24 +653,25 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
 
     if(auto_detect) {
         infrared_external_output = furi_hal_infrared_is_external_connected();
+        if(infrared_external_output) {
+            if(!furi_hal_power_is_otg_enabled()) {
+                uint8_t attempts = 0;
+                while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                    furi_hal_power_enable_otg();
+                    furi_delay_ms(10);
+                }
+            }
+        } else if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
+        }
     }
 
     if(infrared_external_output) {
-        if(!furi_hal_power_is_otg_enabled()) {
-            uint8_t attempts = 0;
-            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-                furi_hal_power_enable_otg();
-                furi_delay_ms(10);
-            }
-            furi_delay_ms(100);
-        }
-
         LL_GPIO_ResetOutputPin(
             gpio_ext_pa7.port, gpio_ext_pa7.pin); /* when disable it prevents false pulse */
         furi_hal_gpio_init_ex(
             &gpio_ext_pa7, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
     } else {
-        furi_hal_power_disable_otg();
         LL_GPIO_ResetOutputPin(
             gpio_infrared_tx.port,
             gpio_infrared_tx.pin); /* when disable it prevents false pulse */
