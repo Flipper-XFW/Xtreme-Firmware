@@ -223,17 +223,18 @@ static bool subghz_protocol_keeloq_gen_data(
                 (strcmp(instance->manufacture_name, "DTM_Neo") == 0) ||
                 (strcmp(instance->manufacture_name, "FAAC_RC,XT") == 0) ||
                 (strcmp(instance->manufacture_name, "Mutanco_Mutancode") == 0) ||
-                (strcmp(instance->manufacture_name, "Came_Space") == 0)) {
+                (strcmp(instance->manufacture_name, "Came_Space") == 0) ||
+                (strcmp(instance->manufacture_name, "Genius_Bravo") == 0) ||
+                (strcmp(instance->manufacture_name, "GSN") == 0)) {
                 // DTM Neo, Came_Space uses 12bit serial -> simple learning
-                // FAAC_RC,XT , Mutanco_Mutancode 12bit serial -> normal learning
+                // FAAC_RC,XT , Mutanco_Mutancode, Genius_Bravo, GSN 12bit serial -> normal learning
                 decrypt = btn << 28 | (instance->generic.serial & 0xFFF) << 16 |
                           instance->generic.cnt;
             } else if(
                 (strcmp(instance->manufacture_name, "NICE_Smilo") == 0) ||
                 (strcmp(instance->manufacture_name, "NICE_MHOUSE") == 0) ||
-                (strcmp(instance->manufacture_name, "JCM_Tech") == 0) ||
-                (strcmp(instance->manufacture_name, "Normstahl") == 0)) {
-                // Nice Smilo, MHouse, JCM, Normstahl -> 8bit serial - simple learning
+                (strcmp(instance->manufacture_name, "JCM_Tech") == 0)) {
+                // Nice Smilo, MHouse, JCM -> 8bit serial - simple learning
                 decrypt = btn << 28 | (instance->generic.serial & 0xFF) << 16 |
                           instance->generic.cnt;
             } else if(strcmp(instance->manufacture_name, "Beninca") == 0) {
@@ -242,6 +243,10 @@ static bool subghz_protocol_keeloq_gen_data(
             } else if(strcmp(instance->manufacture_name, "Centurion") == 0) {
                 decrypt = btn << 28 | (0x1CE) << 16 | instance->generic.cnt;
                 // Centurion -> no serial in hop, uses fixed value 0x1CE - normal learning
+            } else if(strcmp(instance->manufacture_name, "Dea_Mio") == 0) {
+                uint32_t dea_serial = (instance->generic.serial & 0xFFF) + 0x800;
+                decrypt = btn << 28 | (dea_serial & 0xFFF) << 16 | instance->generic.cnt;
+                // Dea_Mio -> modified serial in hop, uses last 3 digits adding +8 to first one (example - 419 -> C19) - simple learning
             }
             // Old type selector fixage for compatibilitiy with old signal files
             uint8_t kl_type_en = instance->keystore->kl_type;

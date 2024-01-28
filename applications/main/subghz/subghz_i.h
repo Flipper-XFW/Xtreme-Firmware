@@ -80,6 +80,9 @@ struct SubGhz {
     SubGhzReadRAW* subghz_read_raw;
     bool raw_send_only;
 
+    bool save_datetime_set;
+    FuriHalRtcDateTime save_datetime;
+
     SubGhzLastSettings* last_settings;
 
     SubGhzProtocolFlag filter;
@@ -101,8 +104,6 @@ struct SubGhz {
 
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
-    bool save_datetime_set;
-    FuriHalRtcDateTime save_datetime;
 
     bool fav_timeout;
     FuriTimer* timer;
