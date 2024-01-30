@@ -398,9 +398,7 @@ void expansion_on_system_start(void* arg) {
     furi_record_create(RECORD_EXPANSION, instance);
 
     expansion_settings_load(&instance->settings);
-    if(instance->settings.uart_index < FuriHalSerialIdMax) {
-        expansion_enable(instance, instance->settings.uart_index);
-    }
+    expansion_resume(instance);
 }
 
 // Public API functions
@@ -435,6 +433,12 @@ void expansion_disable(Expansion* instance) {
     instance->state = ExpansionStateDisabled;
 
     furi_mutex_release(instance->state_mutex);
+}
+
+void expansion_resume(Expansion* instance) {
+    if(instance->settings.uart_index < FuriHalSerialIdMax) {
+        expansion_enable(instance, instance->settings.uart_index);
+    }
 }
 
 ExpansionSettings* expansion_get_settings(Expansion* instance) {

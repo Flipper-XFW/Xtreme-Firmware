@@ -927,6 +927,7 @@ Function,-,exp2f,float,float
 Function,-,exp2l,long double,long double
 Function,+,expansion_disable,void,Expansion*
 Function,+,expansion_enable,void,"Expansion*, FuriHalSerialId"
+Function,+,expansion_resume,void,Expansion*
 Function,-,expf,float,float
 Function,-,expl,long double,long double
 Function,-,explicit_bzero,void,"void*, size_t"

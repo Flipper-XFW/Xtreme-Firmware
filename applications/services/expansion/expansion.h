@@ -45,6 +45,16 @@ void expansion_enable(Expansion* instance, FuriHalSerialId serial_id);
  */
 void expansion_disable(Expansion* instance);
 
+/**
+ * @brief Resume support for expansion modules as configured in settings.
+ *
+ * Calling this function when expansion module support is already enabled
+ * will first disable the previous setting, then enable the current one.
+ *
+ * @param[in,out] instance pointer to the Expansion instance.
+ */
+void expansion_resume(Expansion* instance);
+
 #ifdef __cplusplus
 }
 #endif
