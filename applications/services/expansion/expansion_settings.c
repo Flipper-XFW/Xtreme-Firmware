@@ -2,7 +2,6 @@
 
 #include <storage/storage.h>
 #include <toolbox/saved_struct.h>
-#include <furi_hal_serial.h>
 
 #include "expansion_settings_filename.h"
 
@@ -11,15 +10,12 @@
 
 bool expansion_settings_load(ExpansionSettings* settings) {
     furi_assert(settings);
-    if(!saved_struct_load(
-           EXPANSION_SETTINGS_PATH,
-           settings,
-           sizeof(ExpansionSettings),
-           EXPANSION_SETTINGS_MAGIC,
-           EXPANSION_SETTINGS_VERSION)) {
-        settings->uart_index = FuriHalSerialIdMax;
-    }
-    return true;
+    return saved_struct_load(
+        EXPANSION_SETTINGS_PATH,
+        settings,
+        sizeof(ExpansionSettings),
+        EXPANSION_SETTINGS_MAGIC,
+        EXPANSION_SETTINGS_VERSION);
 }
 
 bool expansion_settings_save(ExpansionSettings* settings) {
