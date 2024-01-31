@@ -112,6 +112,8 @@ struct LfRfid {
 
     // Custom views
     LfRfidReadView* read_view;
+
+    bool fav_timeout;
 };
 
 typedef enum {

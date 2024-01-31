@@ -506,6 +506,7 @@ int32_t nfc_app(void* p) {
 
             furi_string_set(nfc->file_path, args);
             if(nfc_load_file(nfc, nfc->file_path, false)) {
+                nfc->fav_timeout = is_favorite;
                 nfc_show_initial_scene_for_device(nfc);
             } else {
                 view_dispatcher_stop(nfc->view_dispatcher);
@@ -517,11 +518,7 @@ int32_t nfc_app(void* p) {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 
-    if(is_favorite) {
-        favorite_timeout_run(nfc->view_dispatcher, nfc->scene_manager);
-    } else {
-        view_dispatcher_run(nfc->view_dispatcher);
-    }
+    view_dispatcher_run(nfc->view_dispatcher);
 
     nfc_app_free(nfc);
 

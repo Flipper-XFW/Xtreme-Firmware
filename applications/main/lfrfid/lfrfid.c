@@ -216,6 +216,7 @@ int32_t lfrfid_app(char* args) {
             if(lfrfid_load_key_data(app, app->file_path, true)) {
                 view_dispatcher_attach_to_gui(
                     app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+                app->fav_timeout = is_favorite;
                 scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
                 dolphin_deed(DolphinDeedRfidEmulate);
             } else {
@@ -228,11 +229,7 @@ int32_t lfrfid_app(char* args) {
         scene_manager_next_scene(app->scene_manager, LfRfidSceneStart);
     }
 
-    if(is_favorite) {
-        favorite_timeout_run(app->view_dispatcher, app->scene_manager);
-    } else {
-        view_dispatcher_run(app->view_dispatcher);
-    }
+    view_dispatcher_run(app->view_dispatcher);
 
     lfrfid_free(app);
 

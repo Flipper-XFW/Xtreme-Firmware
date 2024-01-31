@@ -141,6 +141,8 @@ struct NfcApp {
     FuriString* file_path;
     FuriString* file_name;
     FuriTimer* timer;
+
+    bool fav_timeout;
 };
 
 typedef enum {
