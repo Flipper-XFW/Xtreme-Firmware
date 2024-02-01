@@ -131,6 +131,9 @@ SubGhzGPS* subghz_gps_init() {
     furi_thread_set_context(subghz_gps->thread, subghz_gps);
     furi_thread_set_callback(subghz_gps->thread, subghz_gps_uart_worker);
 
+    subghz_gps->expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(subghz_gps->expansion);
+
     subghz_gps->serial_handle = furi_hal_serial_control_acquire(UART_CH);
     furi_check(subghz_gps->serial_handle);
     furi_hal_serial_init(subghz_gps->serial_handle, 9600);
@@ -146,6 +149,9 @@ void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
 
     furi_hal_serial_deinit(subghz_gps->serial_handle);
     furi_hal_serial_control_release(subghz_gps->serial_handle);
+
+    expansion_enable(subghz_gps->expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     furi_thread_free(subghz_gps->thread);
     furi_stream_buffer_free(subghz_gps->rx_stream);
