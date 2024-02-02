@@ -24,7 +24,7 @@ The goal of this Firmware is to regularly bring out amazing updates based on wha
 
 - <h4>Customizable: Dont like the Animations, want to turn on/off the Home screen icons (battery, SD card etc), change the flippers name or anything like that? You absolutely can. No need to mess with code or deal with weird manifest files. Its all done with an App.</h4>
 <br><br>
-Note, the below mentioned changes are only a few things we did. For a full list click [here](https://github.com/Flipper-XFW/Xtreme-Firmware#Changes)
+Note, the below mentioned changes are only a few things we did. For a full list check [down here](https://github.com/Flipper-XFW/Xtreme-Firmware#List-of-Changes)
 
 -----
 <br>
@@ -59,14 +59,14 @@ Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it f
 
 We created our own improved Animation / Asset system that lets you create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations, Icons and Fonts like never before.
 
-<img src="https://user-images.githubusercontent.com/55334727/214010675-9eddb8f5-1dd6-4cf4-a0ee-e37af8b6c933.PNG" align="left" width="200px"/>
+<img src="https://github.com/Flipper-XFW/Xtreme-Firmware/assets/49810075/7c040ca1-3d59-478e-8a35-21abe5c26ab1" align="left" width="200px"/>
 You can easily create your own pack, or find some user made ones on our website or on discord. Check <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/wiki/Asset-Packs">here</a> for a tutorial on creating your own. Essentially, each <code>Asset Pack</code> can configure its own <code>Anims</code>, <code>Icons</code> & <code>Fonts</code>.
 
 <br clear="left"/>
 
 <br>
 
-<img src="https://user-images.githubusercontent.com/55334727/214016338-95a619c7-88d2-4db5-bb7a-75282d9082b8.png" align="left" width="200px"/>
+<img src="https://github.com/Flipper-XFW/Xtreme-Firmware/assets/49810075/dbeed26b-45be-4cb4-983e-69d6d7ef5850" align="left" width="200px"/>
 Once you have some packs, upload them to your Flipper in <code>SD/asset_packs</code> (if you did this right you should see <code>SD/asset_packs/PackName/Anims</code> and/or <code>SD/asset_packs/PackName/Icons</code>).
 
 
@@ -101,53 +101,46 @@ With this new system in place, it allows for some cool stuff like locking animat
 <br>
 <h2 align="center">List of changes:</h2>
 
-Note: This repo is always updated with OFW & Unleashed. No need to mention all those here. We will only mention **our** changes that we can actually be credited for.
+There are too many to name them all, this is a **non-comprehensive** list of the **most notable from a end-user perspective**. For a more detailed list, read through the [**changelogs**](https://github.com/Flipper-XFW/Xtreme-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://flipper-xtre.me/#features).
+
+Note that this repo is always updated with the great work from our friends at [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and the latest changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware). Below are mentioned only **our** changes that we can actually be credited for, so make sure to check their fantastic additions aswell. And a huge thank you to both teams! 
 
 ```txt
 [Added]
 
-- Xtreme App
-- Asset Packs
-- More UI options
+- Xtreme App (Easy configuration of most features exclusive to Xtreme)
+- Asset Packs (Unparalleled theming and customization)
+- More UI customization, redesigns and optimizations
 - Bad-Keyboard App
-- A new battery display-type
-- Scrolling view for long file names in browser
-- Advanced and optimized level system. Read more above
-- Folder handling for empty ones (Now indicate they are empty)
-
-- Custom subghz presets
-- Multiple NFC protocols
-- Multiple Sub-Ghz protocols | Merged from Unleashed, thanks @xMasterX
-- Subghz and IR signal replication via gpio | Credits to @xMasterX
-
-- New API Routes for Locale settings
+- BLE Spam App
+- Wardriver App
+- File Search across SD Card
+- Easy spoofing (Name, Mac, Serial)
+- Additional NFC parsers and protocols
+- Subdriving (saving GPS coordinates for Sub-GHz)
+- Enhanced RGB Backlight modes (Full customization & Rainbow mode)
+- File management on device (Cut, Copy, Paste, Show, New Dir, etc.)
+- Advanced Security measures (Lock on Boot, reset on false pins, etc.)
+- Remember Infrared GPIO and IR Blaster auto-detection + support in apps
 ```
 ```txt
 [Updated]
 
-- All Assets
-
-- Tons of apps
-- File browser
-- Massive compiler re-do
-- About 4k files to speed things up a lot
-- Applications to now use the new Locale setting
+- Enhanced WiFi support for easiest setup ever
+- Extended keyboard with cursor movevent and symbols
+- File Browser with Sorting, More supported File Types
+- Advanced and optimized Level System (Read more above)
+- Storage backend with instant rename and more optimizations
+- Desktop Keybind system for full key and press/hold remapping
+- Weather Station, POCSAG, TPMS protocols and more integrated into Sub-GHz
+- Expanded Sub-GHz App (Duplicate detection & Ignore, Autosave, History improvements)
+- Improved Error Messages (Showing actual root)
 ```
 ```txt
-[Fixed]
-
-- Keyboard issues on first char
-- Passport crash on high level
-- SFW / Dummy_mode getting you XP
-- Leveling system
-- Mood system
-```
-```txt
-[REMOVED]
+[Removed]
 
 - Unused Dummy Mode
-- Broken apps (bad apple, chess, etc.)
-- Tons of unused code from FAPs and system calls
+- Broken or Superfluous apps
 ```
 
 ----
