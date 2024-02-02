@@ -206,7 +206,8 @@ $ ./fbt launch APPSRC=your_appid
 ----
 <h2 align="center">Contributors</h2>
 
-[![Contributors](https://user-images.githubusercontent.com/49810075/228231815-8f0a267d-ac1a-494c-9cd0-1cd57568fc79.svg)](https://github.com/Flipper-XFW/Xtreme-Firmware/graphs/contributors)
+[![Contributors](https://github.com/Flipper-XFW/Xtreme-Firmware/assets/49810075/b6653d57-5e70-4398-af31-3f3dc7065bff)](https://github.com/Flipper-XFW/Xtreme-Firmware/graphs/contributors)
+
 
 
 ## ❤️ Support
