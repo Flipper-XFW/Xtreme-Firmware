@@ -19,8 +19,10 @@
 #include "views/gpio_i2c_scanner.h"
 #include "views/gpio_i2c_sfp.h"
 #include <assets_icons.h>
+#include <expansion/expansion.h>
 
 struct GpioApp {
+    Expansion* expansion;
     Gui* gui;
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;

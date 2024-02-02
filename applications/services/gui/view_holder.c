@@ -19,6 +19,7 @@ struct ViewHolder {
 
 static void view_holder_draw_callback(Canvas* canvas, void* context);
 static void view_holder_input_callback(InputEvent* event, void* context);
+static bool view_holder_ascii_callback(AsciiEvent* event, void* context);
 
 ViewHolder* view_holder_alloc() {
     ViewHolder* view_holder = malloc(sizeof(ViewHolder));
@@ -26,6 +27,7 @@ ViewHolder* view_holder_alloc() {
     view_holder->view_port = view_port_alloc();
     view_port_draw_callback_set(view_holder->view_port, view_holder_draw_callback, view_holder);
     view_port_input_callback_set(view_holder->view_port, view_holder_input_callback, view_holder);
+    view_port_ascii_callback_set(view_holder->view_port, view_holder_ascii_callback, view_holder);
     view_port_enabled_set(view_holder->view_port, false);
 
     return view_holder;
@@ -155,4 +157,16 @@ static void view_holder_input_callback(InputEvent* event, void* context) {
             }
         }
     }
+}
+
+static bool view_holder_ascii_callback(AsciiEvent* event, void* context) {
+    ViewHolder* view_holder = context;
+
+    bool is_consumed = false;
+
+    if(view_holder->view) {
+        is_consumed = view_ascii(view_holder->view, event);
+    }
+
+    return is_consumed;
 }

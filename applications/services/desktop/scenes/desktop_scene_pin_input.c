@@ -58,8 +58,8 @@ static void desktop_scene_pin_input_done_callback(const PinCode* pin_code, void*
     } else {
         uint32_t pin_fails = furi_hal_rtc_get_pin_fails() + 1;
         if(pin_fails >= 10 && xtreme_settings.bad_pins_format) {
-            furi_hal_rtc_set_pin_fails(0);
-            furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
+            furi_hal_rtc_reset_registers();
+            furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
             storage_sd_format(furi_record_open(RECORD_STORAGE));
             furi_record_close(RECORD_STORAGE);
             power_reboot(PowerBootModeNormal);
@@ -134,6 +134,7 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopPinInputEventUnlocked:
+        case DesktopGlobalApiUnlock:
             desktop_unlock(desktop);
             consumed = true;
             break;

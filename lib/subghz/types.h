@@ -78,7 +78,7 @@ typedef SubGhzProtocolStatus (*SubGhzDeserialize)(void* context, FlipperFormat* 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
 typedef void (*SubGhzDecoderReset)(void* decoder);
-typedef uint8_t (*SubGhzGetHashData)(void* decoder);
+typedef uint32_t (*SubGhzGetHashData)(void* decoder);
 typedef void (*SubGhzGetString)(void* decoder, FuriString* output);
 
 // Encoder specific

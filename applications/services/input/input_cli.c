@@ -3,19 +3,14 @@
 #include <furi.h>
 #include <cli/cli.h>
 #include <toolbox/args.h>
-#include <gui/view_i.h>
-#include <gui/view_port_i.h>
-#include <gui/view_dispatcher_i.h>
-#include <gui/modules/text_input_i.h>
-#include <notification/notification_messages.h>
 
 static void input_cli_usage() {
     printf("Usage:\r\n");
     printf("input <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
     printf("\tdump\t\t\t - dump input events\r\n");
+    printf("\tkeyboard\t\t - use keyboard feedback to control flipper\r\n");
     printf("\tsend <key> <type>\t - send input event\r\n");
-    printf("\tkeyboard\t\t - read keyboard input and control flipper with it\r\n");
 }
 
 static void input_cli_dump_events_callback(const void* value, void* ctx) {
@@ -46,25 +41,32 @@ static void input_cli_dump(Cli* cli, FuriString* args, Input* input) {
     furi_message_queue_free(input_queue);
 }
 
+static void fake_input(Input* input, InputKey key, InputType type) {
+    bool wrap = type == InputTypeShort || type == InputTypeLong;
+    InputEvent event;
+    event.key = key;
+
+    if(wrap) {
+        event.type = InputTypePress;
+        furi_pubsub_publish(input->event_pubsub, &event);
+    }
+    event.type = type;
+    furi_pubsub_publish(input->event_pubsub, &event);
+    if(wrap) {
+        event.type = InputTypeRelease;
+        furi_pubsub_publish(input->event_pubsub, &event);
+    }
+}
+
 static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     UNUSED(args);
-    Gui* gui = furi_record_open(RECORD_GUI);
-    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-
     printf("Using console keyboard feedback for flipper input\r\n");
 
     printf("\r\nUsage:\r\n");
     printf("\tMove = Arrows\r\n");
     printf("\tOk = Enter\r\n");
-    printf("\tBack = Backspace\r\n");
-    printf("\tToggle hold for next key = Space\r\n");
-
-    printf("\r\nIn Keyboard:\r\n");
-    printf("\tType normally on PC Keyboard\r\n");
-    printf("\tQuit = Ctrl + Q\r\n");
-    printf("\tSelect All = Ctrl + A\r\n");
-    printf("\tMove Cursor = Arrows\r\n");
-    printf("\tSave Text = Enter\r\n");
+    printf("\tBack = Backspace/Ctrl + Q\r\n");
+    printf("\tEnable hold for next key = Space (press twice to send space key)\r\n");
 
     printf("\r\nPress CTRL+C to stop\r\n");
     bool hold = false;
@@ -72,60 +74,64 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
         char in_chr = cli_getc(cli);
         if(in_chr == CliSymbolAsciiETX) break;
         InputKey send_key = InputKeyMAX;
+        uint8_t send_ascii = AsciiValueNUL;
 
-        ViewPort* view_port = gui->ongoing_input_view_port;
-        if(view_port && view_port->input_callback == view_dispatcher_input_callback) {
-            ViewDispatcher* view_dispatcher = view_port->input_callback_context;
-            if(view_dispatcher) {
-                View* view = view_dispatcher->current_view;
-                if(view && view->input_callback == text_input_view_input_callback) {
-                    TextInput* text_input = view->context;
-                    if(text_input) {
-                        if(in_chr == 0x11) { // Ctrl Q = Close text input
-                            send_key = InputKeyBack;
-                        } else if(text_input_insert_character(text_input, in_chr)) {
-                            notification_message(notification, &sequence_display_backlight_on);
-                            continue;
-                        }
-                    }
+        switch(in_chr) {
+        case CliSymbolAsciiEsc: // Escape code for arrows
+            if(!cli_read(cli, (uint8_t*)&in_chr, 1) || in_chr != '[') break;
+            if(!cli_read(cli, (uint8_t*)&in_chr, 1)) break;
+            if(in_chr >= 'A' && in_chr <= 'D') { // Arrows = Dpad
+                if(hold) {
+                    send_key = InputKeyUp + (in_chr - 'A'); // Same order as InputKey
+                } else {
+                    send_ascii = AsciiValueDC1 + (in_chr - 'A'); // Same order as DC
                 }
             }
-        }
-
-        if(send_key == InputKeyMAX) {
-            switch(in_chr) {
-            case CliSymbolAsciiEsc: // Escape code for arrows
-                if(!cli_read(cli, (uint8_t*)&in_chr, 1) || in_chr != '[') break;
-                if(!cli_read(cli, (uint8_t*)&in_chr, 1)) break;
-                if(in_chr >= 'A' && in_chr <= 'D') { // Arrows = Dpad
-                    send_key = in_chr - 'A'; // Arrows in same order as InputKey
-                }
-                break;
-            case CliSymbolAsciiBackspace: // (minicom) Backspace = Back
-            case CliSymbolAsciiDel: // (putty/picocom) Backspace = Back
+            break;
+        case CliSymbolAsciiBackspace: // (minicom) Backspace = Back
+        case CliSymbolAsciiDel: // (putty/picocom) Backspace = Back
+            if(hold) {
                 send_key = InputKeyBack;
-                break;
-            case CliSymbolAsciiSpace: // Space = Toggle hold next key
-                hold = !hold;
-                break;
-            case CliSymbolAsciiCR: // Enter = Ok
-                send_key = InputKeyOk;
-                break;
-            default:
-                printf("ignoring key: %u\r\n", in_chr);
-                break;
+            } else {
+                send_ascii = AsciiValueBS;
             }
+            break;
+        case 0x11: // Ctrl Q = Escape (no Esc key over CLI)
+            if(hold) {
+                send_key = InputKeyBack;
+            } else {
+                send_ascii = AsciiValueESC;
+            }
+            break;
+        case CliSymbolAsciiCR: // Enter = Ok
+            if(hold) {
+                send_key = InputKeyOk;
+            } else {
+                send_ascii = AsciiValueCR;
+            }
+            break;
+        case CliSymbolAsciiSpace: // Space = Toggle hold next key
+            if(hold) {
+                send_ascii = ' ';
+            } else {
+                hold = true;
+            }
+            break;
+        default:
+            send_ascii = in_chr;
+            break;
         }
 
         if(send_key != InputKeyMAX) {
-            notification_message(notification, &sequence_display_backlight_on);
-            input_fake_event(input, send_key, hold ? InputTypeLong : InputTypeShort);
+            fake_input(input, send_key, hold ? InputTypeLong : InputTypeShort);
+            hold = false;
+        }
+        if(send_ascii != AsciiValueNUL) {
+            AsciiEvent event = {.value = send_ascii};
+            furi_pubsub_publish(input->ascii_pubsub, &event);
             hold = false;
         }
     }
-
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_NOTIFICATION);
 }
 
 static void input_cli_send_print_usage() {
@@ -179,7 +185,7 @@ static void input_cli_send(Cli* cli, FuriString* args, Input* input) {
     } while(false);
 
     if(parsed) { //-V547
-        input_fake_event(input, key, type);
+        fake_input(input, key, type);
     } else {
         input_cli_send_print_usage();
     }

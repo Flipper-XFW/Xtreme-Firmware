@@ -70,19 +70,12 @@ void subghz_scene_transmitter_on_enter(void* context) {
 
     // Auto send and exit with favorites
     if(subghz->fav_timeout) {
-        // subghz_custom_btn_set(0);
+        furi_check(!subghz->timer, "SubGhz fav timer exists");
+        subghz->timer = furi_timer_alloc(fav_timer_callback, FuriTimerTypeOnce, subghz);
         scene_manager_handle_custom_event(
             subghz->scene_manager, SubGhzCustomEventViewTransmitterSendStart);
-        // with_view_model(
-        //     subghz->subghz_transmitter->view,
-        //     SubGhzViewTransmitterModel * model,
-        //     { model->show_button = false; },
-        //     true);
-        subghz->fav_timer = furi_timer_alloc(fav_timer_callback, FuriTimerTypeOnce, subghz);
         furi_timer_start(
-            subghz->fav_timer,
-            xtreme_settings.favorite_timeout * furi_kernel_get_tick_frequency());
-        // subghz->state_notifications = SubGhzNotificationStateTx;
+            subghz->timer, xtreme_settings.favorite_timeout * furi_kernel_get_tick_frequency());
     }
 }
 

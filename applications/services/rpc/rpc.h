@@ -35,6 +35,7 @@ typedef enum {
     RpcOwnerUnknown = 0,
     RpcOwnerBle,
     RpcOwnerUsb,
+    RpcOwnerUart,
     RpcOwnerCount,
 } RpcOwner;
 
@@ -124,7 +125,7 @@ void rpc_session_set_terminated_callback(
  *
  * @return              actually consumed bytes
  */
-size_t rpc_session_feed(RpcSession* session, uint8_t* buffer, size_t size, uint32_t timeout);
+size_t rpc_session_feed(RpcSession* session, const uint8_t* buffer, size_t size, uint32_t timeout);
 
 /** Get available size of RPC buffer
  *
@@ -133,6 +134,13 @@ size_t rpc_session_feed(RpcSession* session, uint8_t* buffer, size_t size, uint3
  * @return              bytes available in buffer
  */
 size_t rpc_session_get_available_size(RpcSession* session);
+
+/** Get number of open RPC sessions
+ *
+ * @param   rpc     instance
+ * @return          sessions count
+ */
+size_t rpc_get_sessions_count(Rpc* rpc);
 
 #ifdef __cplusplus
 }

@@ -2,6 +2,7 @@
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_bus.h>
+#include <furi_hal_power.h>
 
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_dma.h>
@@ -79,6 +80,7 @@ static volatile InfraredState furi_hal_infrared_state = InfraredStateIdle;
 static InfraredTimTx infrared_tim_tx;
 static InfraredTimRx infrared_tim_rx;
 static bool infrared_external_output;
+static bool auto_detect;
 
 static void furi_hal_infrared_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift);
 static void furi_hal_infrared_async_tx_free_resources(void);
@@ -411,7 +413,10 @@ static void furi_hal_infrared_configure_tim_cmgr2_dma_tx(void) {
     LL_DMA_EnableIT_TC(INFRARED_DMA_CH1_DEF);
 
     furi_hal_interrupt_set_isr_ex(
-        INFRARED_DMA_CH1_IRQ, 4, furi_hal_infrared_tx_dma_polarity_isr, NULL);
+        INFRARED_DMA_CH1_IRQ,
+        FuriHalInterruptPriorityKamiSama,
+        furi_hal_infrared_tx_dma_polarity_isr,
+        NULL);
 }
 
 static void furi_hal_infrared_configure_tim_rcr_dma_tx(void) {
@@ -441,7 +446,7 @@ static void furi_hal_infrared_configure_tim_rcr_dma_tx(void) {
     LL_DMA_EnableIT_HT(INFRARED_DMA_CH2_DEF);
     LL_DMA_EnableIT_TE(INFRARED_DMA_CH2_DEF);
 
-    furi_hal_interrupt_set_isr_ex(INFRARED_DMA_CH2_IRQ, 5, furi_hal_infrared_tx_dma_isr, NULL);
+    furi_hal_interrupt_set_isr(INFRARED_DMA_CH2_IRQ, furi_hal_infrared_tx_dma_isr, NULL);
 }
 
 static void furi_hal_infrared_tx_fill_buffer_last(uint8_t buf_num) {
@@ -645,6 +650,22 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     furi_delay_us(5);
     LL_TIM_GenerateEvent_UPDATE(INFRARED_DMA_TIMER); /* DMA -> TIMx_RCR */
     furi_delay_us(5);
+
+    if(auto_detect) {
+        infrared_external_output = furi_hal_infrared_is_external_connected();
+        if(infrared_external_output) {
+            if(!furi_hal_power_is_otg_enabled()) {
+                uint8_t attempts = 0;
+                while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                    furi_hal_power_enable_otg();
+                    furi_delay_ms(10);
+                }
+            }
+        } else if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
+        }
+    }
+
     if(infrared_external_output) {
         LL_GPIO_ResetOutputPin(
             gpio_ext_pa7.port, gpio_ext_pa7.pin); /* when disable it prevents false pulse */
@@ -704,4 +725,20 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
     void* context) {
     infrared_tim_tx.signal_sent_callback = callback;
     infrared_tim_tx.signal_sent_context = context;
+}
+
+bool furi_hal_infrared_is_external_connected() {
+    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInput, GpioPullUp, GpioSpeedHigh);
+    furi_delay_ms(1);
+    bool is_external_connected = !furi_hal_gpio_read(&gpio_ext_pa7);
+    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
+    return is_external_connected;
+}
+
+void furi_hal_infrared_set_auto_detect(bool enable) {
+    auto_detect = enable;
+}
+
+bool furi_hal_infrared_is_auto_detect_enabled(void) {
+    return auto_detect;
 }

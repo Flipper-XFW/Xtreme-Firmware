@@ -138,12 +138,84 @@ App(
 )
 
 App(
+    appid="zolotaya_korona_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="zolotaya_korona_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/zolotaya_korona.c"],
+)
+
+App(
+    appid="zolotaya_korona_online_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="zolotaya_korona_online_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/zolotaya_korona_online.c"],
+)
+
+App(
+    appid="hid_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="hid_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/hid.c"],
+)
+
+App(
+    appid="washcity_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="washcity_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/washcity.c"],
+)
+
+App(
+    appid="emv_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="emv_plugin_ep",
+    targets=["f7"],
+    requires=["nfc", "storage"],
+    sources=["plugins/supported_cards/emv.c", "helpers/nfc_emv_parser.c"],
+)
+
+App(
+    appid="ndef_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="ndef_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/ndef.c"],
+)
+
+App(
     appid="sonicare_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="sonicare_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/sonicare.c"],
+)
+
+App(
+    appid="mizip_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="mizip_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/mizip.c"],
+)
+
+App(
+    appid="microel_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="microel_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/microel.c"],
 )
 
 App(

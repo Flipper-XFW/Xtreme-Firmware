@@ -48,6 +48,14 @@ typedef void (*ViewDrawCallback)(Canvas* canvas, void* model);
  */
 typedef bool (*ViewInputCallback)(InputEvent* event, void* context);
 
+/** View Ascii callback
+ * @param      event,    pointer to ascii event data
+ * @param      context,  pointer to context
+ * @return     true if event handled, false if event ignored
+ * @warning    called from GUI thread
+ */
+typedef bool (*ViewAsciiCallback)(AsciiEvent* event, void* context);
+
 /** View Custom callback
  * @param      event,    number of custom event
  * @param      context,  pointer to context
@@ -121,6 +129,13 @@ void view_set_draw_callback(View* view, ViewDrawCallback callback);
  * @param      callback  input callback
  */
 void view_set_input_callback(View* view, ViewInputCallback callback);
+
+/** Set View Ascii callback
+ *
+ * @param      view      View instance
+ * @param      callback  ascii callback
+ */
+void view_set_ascii_callback(View* view, ViewAsciiCallback callback);
 
 /** Set View Custom callback
  *

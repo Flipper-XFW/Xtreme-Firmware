@@ -82,6 +82,9 @@ struct Desktop {
     bool in_transition : 1;
 
     Keybind keybinds[KeybindTypeCount][KeybindKeyCount];
+
+    FuriPubSub* ascii_events_pubsub;
+    FuriPubSubSubscription* ascii_events_subscription;
 };
 
 Desktop* desktop_alloc();

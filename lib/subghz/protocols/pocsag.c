@@ -326,13 +326,17 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
     }
 }
 
-uint8_t subghz_protocol_decoder_pocsag_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_pocsag_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
-    uint8_t hash = 0;
-    for(size_t i = 0; i < furi_string_size(instance->done_msg); i++)
-        hash ^= furi_string_get_char(instance->done_msg, i);
-    return hash;
+    union {
+        uint32_t full;
+        uint8_t split[4];
+    } hash = {0};
+    size_t len = furi_string_size(instance->done_msg);
+    for(size_t i = 0; i < len; i++)
+        hash.split[i % sizeof(hash)] ^= furi_string_get_char(instance->done_msg, i);
+    return hash.full;
 }
 
 SubGhzProtocolStatus subghz_protocol_decoder_pocsag_serialize(

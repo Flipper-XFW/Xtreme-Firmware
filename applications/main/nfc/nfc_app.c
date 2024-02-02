@@ -1,4 +1,5 @@
 #include "nfc_app_i.h"
+#include "helpers/protocol_support/nfc_protocol_support.h"
 
 #include <dolphin/dolphin.h>
 #include <applications/main/archive/helpers/archive_helpers_ext.h>
@@ -52,6 +53,7 @@ NfcApp* nfc_app_alloc() {
 
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
     instance->mfc_key_cache = mf_classic_key_cache_alloc();
+    instance->nfc_supported_cards = nfc_supported_cards_alloc();
 
     // Nfc device
     instance->nfc_device = nfc_device_alloc();
@@ -111,7 +113,6 @@ NfcApp* nfc_app_alloc() {
         instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
 
     // Dict attack
-
     instance->dict_attack = dict_attack_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewDictAttack, dict_attack_get_view(instance->dict_attack));
@@ -142,6 +143,7 @@ void nfc_app_free(NfcApp* instance) {
 
     mf_ultralight_auth_free(instance->mf_ul_auth);
     mf_classic_key_cache_free(instance->mfc_key_cache);
+    nfc_supported_cards_free(instance->nfc_supported_cards);
 
     // Nfc device
     nfc_device_free(instance->nfc_device);
@@ -223,7 +225,7 @@ void nfc_text_store_clear(NfcApp* nfc) {
 }
 
 void nfc_blink_read_start(NfcApp* nfc) {
-    notification_message(nfc->notifications, &sequence_blink_start_cyan);
+    notification_message(nfc->notifications, &sequence_blink_start_yellow);
 }
 
 void nfc_blink_emulate_start(NfcApp* nfc) {
@@ -231,7 +233,7 @@ void nfc_blink_emulate_start(NfcApp* nfc) {
 }
 
 void nfc_blink_detect_start(NfcApp* nfc) {
-    notification_message(nfc->notifications, &sequence_blink_start_yellow);
+    notification_message(nfc->notifications, &sequence_blink_start_cyan);
 }
 
 void nfc_blink_stop(NfcApp* nfc) {
@@ -340,8 +342,10 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
     furi_assert(path);
     bool result = false;
 
+    nfc_supported_cards_load_cache(instance->nfc_supported_cards);
+
     FuriString* load_path = furi_string_alloc();
-    if(nfc_has_shadow_file_internal(instance, path)) {
+    if(nfc_has_shadow_file_internal(instance, path)) { //-V1051
         nfc_set_shadow_file_path(path, load_path);
     } else if(furi_string_end_with(path, NFC_APP_SHADOW_EXTENSION)) {
         size_t path_len = furi_string_size(path);
@@ -443,6 +447,15 @@ void nfc_app_reset_detected_protocols(NfcApp* instance) {
     instance->protocols_detected_num = 0;
 }
 
+void nfc_append_filename_string_when_present(NfcApp* instance, FuriString* string) {
+    furi_assert(instance);
+    furi_assert(string);
+
+    if(!furi_string_empty(instance->file_name)) {
+        furi_string_cat_printf(string, "Name:%s\n", furi_string_get_cstr(instance->file_name));
+    }
+}
+
 static bool nfc_is_hal_ready() {
     if(furi_hal_nfc_is_hal_ready() != FuriHalNfcErrorNone) {
         // No connection to the chip, show an error screen
@@ -462,6 +475,15 @@ static bool nfc_is_hal_ready() {
     } else {
         return true;
     }
+}
+
+static void nfc_show_initial_scene_for_device(NfcApp* nfc) {
+    NfcProtocol prot = nfc_device_get_protocol(nfc->nfc_device);
+    uint32_t scene = nfc_protocol_support_has_feature(
+                         prot, NfcProtocolFeatureEmulateFull | NfcProtocolFeatureEmulateUid) ?
+                         NfcSceneEmulate :
+                         NfcSceneSavedMenu;
+    scene_manager_next_scene(nfc->scene_manager, scene);
 }
 
 int32_t nfc_app(void* p) {
@@ -484,7 +506,8 @@ int32_t nfc_app(void* p) {
 
             furi_string_set(nfc->file_path, args);
             if(nfc_load_file(nfc, nfc->file_path, false)) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulate);
+                nfc->fav_timeout = is_favorite;
+                nfc_show_initial_scene_for_device(nfc);
             } else {
                 view_dispatcher_stop(nfc->view_dispatcher);
             }
@@ -495,11 +518,7 @@ int32_t nfc_app(void* p) {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 
-    if(is_favorite) {
-        favorite_timeout_run(nfc->view_dispatcher, nfc->scene_manager);
-    } else {
-        view_dispatcher_run(nfc->view_dispatcher);
-    }
+    view_dispatcher_run(nfc->view_dispatcher);
 
     nfc_app_free(nfc);
 

@@ -47,6 +47,8 @@ struct Power {
     FuriPubSub* settings_events;
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
+    FuriPubSub* ascii_events_pubsub;
+    FuriPubSubSubscription* ascii_events_subscription;
     FuriPubSubSubscription* app_start_stop_subscription;
     FuriPubSubSubscription* settings_events_subscription;
     uint32_t shutdown_idle_delay_ms;

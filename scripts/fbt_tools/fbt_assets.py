@@ -85,6 +85,10 @@ def _packs_emitter(target, source, env):
         target_dir.File(source_dir.rel_path(node).removesuffix(".png") + ".bmx")
         for node in env.GlobRecursive("*/Icons/**/*.png", source_dir.srcnode())
     )
+    target.extend(
+        target_dir.File(source_dir.rel_path(node).removesuffix(".c") + ".u8f")
+        for node in env.GlobRecursive("*/Fonts/*.c", source_dir.srcnode())
+    )
 
     return target, source
 

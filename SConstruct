@@ -71,12 +71,12 @@ if GetOption("fullenv") or any(
     ]
     dist_radio_arguments = [
         "--radio",
-        "${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}",
+        '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
         "--radiotype",
         "${COPRO_STACK_TYPE}",
         "${COPRO_DISCLAIMER}",
         "--obdata",
-        "${ROOT_DIR.abspath}/${COPRO_OB_DATA}",
+        '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
         "--stackversion",
         "${COPRO_CUBE_VERSION}",
     ]
@@ -369,7 +369,7 @@ vscode_dist = distenv.Install(
 )
 distenv.Precious(vscode_dist)
 distenv.NoClean(vscode_dist)
-distenv.Alias("vscode_dist", vscode_dist)
+distenv.Alias("vscode_dist", (vscode_dist, firmware_env["FW_CDB"]))
 
 # Configure shell with build tools
 distenv.PhonyTarget(

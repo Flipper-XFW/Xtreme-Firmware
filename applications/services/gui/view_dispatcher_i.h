@@ -34,6 +34,7 @@ struct ViewDispatcher {
 
 typedef enum {
     ViewDispatcherMessageTypeInput,
+    ViewDispatcherMessageTypeAscii,
     ViewDispatcherMessageTypeCustomEvent,
     ViewDispatcherMessageTypeStop,
 } ViewDispatcherMessageType;
@@ -42,6 +43,7 @@ typedef struct {
     ViewDispatcherMessageType type;
     union {
         InputEvent input;
+        AsciiEvent ascii;
         uint32_t custom_event;
     };
 } ViewDispatcherMessage;
@@ -52,8 +54,14 @@ void view_dispatcher_draw_callback(Canvas* canvas, void* context);
 /** ViewPort Input Callback */
 void view_dispatcher_input_callback(InputEvent* event, void* context);
 
+/** ViewPort Ascii Callback */
+bool view_dispatcher_ascii_callback(AsciiEvent* event, void* context);
+
 /** Input handler */
 void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* event);
+
+/** Ascii handler */
+void view_dispatcher_handle_ascii(ViewDispatcher* view_dispatcher, AsciiEvent* event);
 
 /** Tick handler */
 void view_dispatcher_handle_tick_event(ViewDispatcher* view_dispatcher);

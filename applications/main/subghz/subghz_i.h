@@ -80,10 +80,14 @@ struct SubGhz {
     SubGhzReadRAW* subghz_read_raw;
     bool raw_send_only;
 
+    bool save_datetime_set;
+    FuriHalRtcDateTime save_datetime;
+
     SubGhzLastSettings* last_settings;
 
     SubGhzProtocolFlag filter;
     SubGhzProtocolFilter ignore_filter;
+    bool remove_duplicates;
     FuriString* error_str;
     SubGhzLock lock;
 
@@ -95,12 +99,14 @@ struct SubGhz {
     SubGhzRxKeyState rx_key_state;
     SubGhzHistory* history;
     SubGhzGPS* gps;
+    SubGhzRepeaterState repeater;
+    bool repeater_bin_raw_was_off;
 
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
 
     bool fav_timeout;
-    FuriTimer* fav_timer;
+    FuriTimer* timer;
 
     void* rpc_ctx;
 };

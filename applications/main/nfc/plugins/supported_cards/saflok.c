@@ -62,8 +62,8 @@ void generate_saflok_key(const uint8_t* uid, uint8_t* key) {
     uint8_t carry_sum = 0;
 
     for(int i = KEY_LENGTH - 1; i >= 0; i--, magickal_index--) {
-        uint16_t keysum = temp_key[i] + magic_table[magickal_index];
-        temp_key[i] = (keysum & 0xFF) + carry_sum;
+        uint16_t keysum = temp_key[i] + magic_table[magickal_index] + carry_sum;
+        temp_key[i] = (keysum & 0xFF);
         carry_sum = keysum >> 8;
     }
 
@@ -144,7 +144,7 @@ static bool saflok_read(Nfc* nfc, NfcDevice* device) {
 
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
 
-        is_read = true;
+        is_read = mf_classic_is_card_read(data);
     } while(false);
 
     mf_classic_free(data);

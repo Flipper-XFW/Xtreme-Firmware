@@ -8,6 +8,7 @@
 #include <dialogs/dialogs.h>
 #include <ir_remote_icons.h>
 #include <assets_icons.h>
+#include "infrared_last_settings.h"
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -400,6 +401,10 @@ int32_t infrared_remote_app(char* p) {
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
+    InfraredLastSettings* last_settings = infrared_last_settings_alloc();
+    infrared_last_settings_load(last_settings);
+    infrared_last_settings_apply(last_settings);
+
     bool running = true;
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
@@ -540,6 +545,9 @@ int32_t infrared_remote_app(char* p) {
             view_port_update(app->view_port);
         }
     }
+
+    infrared_last_settings_reset(last_settings);
+    infrared_last_settings_free(last_settings);
 
     // Free all things
     furi_string_free(app->up_button);

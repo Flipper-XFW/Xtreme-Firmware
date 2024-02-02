@@ -112,6 +112,9 @@ uint8_t canvas_current_font_width(const Canvas* canvas) {
 const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_assert(canvas);
     furi_assert(font < FontTotalNumber);
+    if((FontSwap)font < FontSwapCount && xtreme_assets.font_params[font]) {
+        return xtreme_assets.font_params[font];
+    }
     return &canvas_font_params[font];
 }
 
@@ -148,6 +151,10 @@ void canvas_invert_color(Canvas* canvas) {
 void canvas_set_font(Canvas* canvas, Font font) {
     furi_assert(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
+    if((FontSwap)font < FontSwapCount && xtreme_assets.fonts[font]) {
+        u8g2_SetFont(&canvas->fb, xtreme_assets.fonts[font]);
+        return;
+    }
     switch(font) {
     case FontPrimary:
         u8g2_SetFont(&canvas->fb, u8g2_font_helvB08_tr);

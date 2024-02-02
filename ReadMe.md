@@ -8,7 +8,7 @@
   <a href="https://flipper-xtre.me">Website</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#What-makes-it-special">Intro</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#Install">Install</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#list-of-changes">Changelog</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/wiki">Wiki</a> | <a href="https://discord.gg/flipper-xtreme">Discord</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#%EF%B8%8F-support">Donate</a>
 </h2>
 
-This firmware is a complete overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and also features lots of awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
+This firmware is an extensive overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and also features most of the awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
 
 -----
 <br>
@@ -16,21 +16,21 @@ This firmware is a complete overhaul of the [Official Firmware](https://github.c
 
 We have spent many hours perfecting this code even further, and getting the most out of it.
 
-The goal of this Firmware is to regularly bring out amazing updates based on what the community wants, with an actual understanding of whats going on. Fixing bugs that are regularly talked about, removing unstable / broken applications (.FAP) and actually using the level system that just sits abandoned everywhere else.
+The goal of this Firmware is to regularly bring out amazing updates based on what the community wants, with an actual understanding of whats going on. Fixing bugs that are regularly talked about, broadening the capabilities of the Flipper with new exciting functionality, and most importantly, ensuring the easiest user experience possible.
 <br><br>
 - <h4>Feature-rich: We include all commonly found apps in the firmware, as long as they work.</h4>
 
-- <h4>Stable: Many hours have been spent rewriting core parts of the Flippers firmware as well as some of its apps to ensure stability. A task that was long needed on all Firmware, so we tackled it right away.</h4>
+- <h4>Stable: Many hours have been spent rewriting core parts of the Flipper's firmware as well as some of its apps to ensure stability. A task that was long needed on all Firmware, so we tackled it right away.</h4>
 
 - <h4>Customizable: Dont like the Animations, want to turn on/off the Home screen icons (battery, SD card etc), change the flippers name or anything like that? You absolutely can. No need to mess with code or deal with weird manifest files. Its all done with an App.</h4>
 <br><br>
-Note, the below mentioned changes are only a few things we did. For a full list click [here](https://github.com/Flipper-XFW/Xtreme-Firmware/wiki/Customization)
+Note, the below mentioned changes are only a few things we did. For a full list check [down here](https://github.com/Flipper-XFW/Xtreme-Firmware#List-of-Changes)
 
 -----
 <br>
 <h2 align="center">Xtreme Settings:</h2>
 
-We wrote a powerful yet easy-to-use application specifically for our Firmware, that gives you easy-access to all the fancy things we implemented:
+We wrote a powerful yet easy-to-use application specifically for our Firmware, that gives you easy-access to most of the fancy things we implemented:
 
 <!--
 
@@ -44,7 +44,7 @@ Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it f
 
 - <ins><b>Interface:</b></ins> Customize every bit of your Flipper, from the desktop animations, to the main menu apps, lockscreen style etc.
 
-- <ins><b>Protocols:</b></ins> Here you can toggle between USB & Bluetooth mode for <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/wiki/Generic-Guides#badbt--kb">BadKB</a>, and manage custom Subghz frequencies.
+- <ins><b>Protocols:</b></ins> Here you can configure <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/wiki/Generic-Guides#badbt--kb">BadKB</a>, manage custom Subghz frequencies, and setup the GPIO pins mappings.
 
 - <ins><b>Misc:</b></ins> All the other options that don't fit elsewhere. Change your Flipper's name, xp level, and configure the <a href="https://github.com/Z3BRO/Flipper-Zero-RGB-Backlight">RGB backlight</a>.
 
@@ -57,16 +57,16 @@ Also, perhaps a bigger height, with set width (yes distrotion issues ik) so it f
   </h3>
 </h2>
 
-We created our own, new & improved Animation / Asset system, that we can finally reveal. It lets you to create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations and Icons like never before.
+We created our own improved Animation / Asset system that lets you create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations, Icons and Fonts like never before.
 
-<img src="https://user-images.githubusercontent.com/55334727/214010675-9eddb8f5-1dd6-4cf4-a0ee-e37af8b6c933.PNG" align="left" width="200px"/>
-You can easily create your own pack, or find some user made ones in the discord channel. Check <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/wiki/Asset-Packs">here</a> for a tutorial on creating your own. Essentially, we got our own <code>Anims</code> & <code>Icons</code> folders, inside each <code>Asset Pack</code>.
+<img src="https://github.com/Flipper-XFW/Xtreme-Firmware/assets/49810075/7c040ca1-3d59-478e-8a35-21abe5c26ab1" align="left" width="200px"/>
+You can easily create your own pack, or find some user made ones on our website or on discord. Check <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/wiki/Asset-Packs">here</a> for a tutorial on creating your own. Essentially, each <code>Asset Pack</code> can configure its own <code>Anims</code>, <code>Icons</code> & <code>Fonts</code>.
 
 <br clear="left"/>
 
 <br>
 
-<img src="https://user-images.githubusercontent.com/55334727/214016338-95a619c7-88d2-4db5-bb7a-75282d9082b8.png" align="left" width="200px"/>
+<img src="https://github.com/Flipper-XFW/Xtreme-Firmware/assets/49810075/dbeed26b-45be-4cb4-983e-69d6d7ef5850" align="left" width="200px"/>
 Once you have some packs, upload them to your Flipper in <code>SD/asset_packs</code> (if you did this right you should see <code>SD/asset_packs/PackName/Anims</code> and/or <code>SD/asset_packs/PackName/Icons</code>).
 
 
@@ -75,7 +75,7 @@ Once you have some packs, upload them to your Flipper in <code>SD/asset_packs</c
 <br>
 
 <img src="https://user-images.githubusercontent.com/55334727/214013624-25dad48e-72ea-4a90-9060-66e137e0d61a.png" align="left" width="200px"/>
-After installing the packs to Flipper, hit the <code>Arrow UP</code> button on the main menu and go to <code>Xtreme Settings</code>. Here choose which pack you want and tweak the other settings how you prefer, then press back to reboot and enjoy your new assets for all apps (e.g. Subghz scanning asset) & animations!
+After installing the packs to Flipper, hit the <code>Arrow UP</code> button on the main menu and go to <code>Xtreme Settings</code>. Here choose which pack you want and tweak the other settings how you prefer, then press back to reboot and enjoy your newly fully customized Flipper!
 
 <br clear="left"/>
 
@@ -101,53 +101,46 @@ With this new system in place, it allows for some cool stuff like locking animat
 <br>
 <h2 align="center">List of changes:</h2>
 
-Note: This repo is always updated with OFW & Unleashed. No need to mention all those here. We will only mention **our** changes that we can actually be credited for.
+There are too many to name them all, this is a **non-comprehensive** list of the **most notable from a end-user perspective**. For a more detailed list, read through the [**changelogs**](https://github.com/Flipper-XFW/Xtreme-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://flipper-xtre.me/#features).
+
+Note that this repo is always updated with the great work from our friends at [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and the latest changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware). Below are mentioned only **our** changes that we can actually be credited for, so make sure to check their fantastic additions aswell. And a huge thank you to both teams! 
 
 ```txt
 [Added]
 
-- Xtreme App
-- Asset Packs
-- More UI options
+- Xtreme App (Easy configuration of most features exclusive to Xtreme)
+- Asset Packs (Unparalleled theming and customization)
+- More UI customization, redesigns and optimizations
 - Bad-Keyboard App
-- A new battery display-type
-- Scrolling view for long file names in browser
-- Advanced and optimized level system. Read more above
-- Folder handling for empty ones (Now indicate they are empty)
-
-- Custom subghz presets
-- Multiple NFC protocols
-- Multiple Sub-Ghz protocols | Merged from Unleashed, thanks @xMasterX
-- Subghz and IR signal replication via gpio | Credits to @xMasterX
-
-- New API Routes for Locale settings
+- BLE Spam App
+- Wardriver App
+- File Search across SD Card
+- Easy spoofing (Name, Mac, Serial)
+- Additional NFC parsers and protocols
+- Subdriving (saving GPS coordinates for Sub-GHz)
+- Enhanced RGB Backlight modes (Full customization & Rainbow mode)
+- File management on device (Cut, Copy, Paste, Show, New Dir, etc.)
+- Advanced Security measures (Lock on Boot, reset on false pins, etc.)
+- Remember Infrared GPIO and IR Blaster auto-detection + support in apps
 ```
 ```txt
 [Updated]
 
-- All Assets
-
-- Tons of apps
-- File browser
-- Massive compiler re-do
-- About 4k files to speed things up a lot
-- Applications to now use the new Locale setting
+- Enhanced WiFi support for easiest setup ever
+- Extended keyboard with cursor movevent and symbols
+- File Browser with Sorting, More supported File Types
+- Advanced and optimized Level System (Read more above)
+- Storage backend with instant rename and more optimizations
+- Desktop Keybind system for full key and press/hold remapping
+- Weather Station, POCSAG, TPMS protocols and more integrated into Sub-GHz
+- Expanded Sub-GHz App (Duplicate detection & Ignore, Autosave, History improvements)
+- Improved Error Messages (Showing actual root)
 ```
 ```txt
-[Fixed]
-
-- Keyboard issues on first char
-- Passport crash on high level
-- SFW / Dummy_mode getting you XP
-- Leveling system
-- Mood system
-```
-```txt
-[REMOVED]
+[Removed]
 
 - Unused Dummy Mode
-- Broken apps (bad apple, chess, etc.)
-- Tons of unused code from FAPs and system calls
+- Broken or Superfluous apps
 ```
 
 ----
@@ -176,7 +169,7 @@ There are 3 methods to install Xtreme, we recommend you use the **Web Updater**,
 > <details><summary><code>Zipped Archive (.zip)</code></summary><ul>
 >   <li>Download the zipped archive (.zip) from the <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/releases/latest">latest release page</a></li>
 >   <li>Extract the archive. This is now your new Firmware folder</li>
->   <li>Open <a href="https://flipperzero.one/update">qFlipper</a>, head to <code>SD/Update</code> and simply move the firmware folder there</li>
+>   <li>Open <a href="https://flipperzero.one/update">qFlipper</a>, head to <code>SD/update</code> and simply move the firmware folder there</li>
 >   <li>On the Flipper, hit the <code>Arrow Down</code> button, this will get you to the file menu. In there simply search for your updates folder</li>
 >   <li>Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called <code>Update</code></li>
 > </ul></details>
@@ -202,7 +195,7 @@ To compile a TGZ package
 $ ./fbt updater_package
 
 To build and launch a single app:
-$ ./fbt launch APPSRC=some_appid
+$ ./fbt launch APPSRC=your_appid
 ```
 
 ----
@@ -213,7 +206,8 @@ $ ./fbt launch APPSRC=some_appid
 ----
 <h2 align="center">Contributors</h2>
 
-[![Contributors](https://user-images.githubusercontent.com/49810075/228231815-8f0a267d-ac1a-494c-9cd0-1cd57568fc79.svg)](https://github.com/Flipper-XFW/Xtreme-Firmware/graphs/contributors)
+[![Contributors](https://github.com/Flipper-XFW/Xtreme-Firmware/assets/49810075/b6653d57-5e70-4398-af31-3f3dc7065bff)](https://github.com/Flipper-XFW/Xtreme-Firmware/graphs/contributors)
+
 
 
 ## ❤️ Support

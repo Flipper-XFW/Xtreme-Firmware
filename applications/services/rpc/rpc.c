@@ -89,6 +89,7 @@ struct RpcSession {
 
 struct Rpc {
     FuriMutex* busy_mutex;
+    size_t sessions_count;
 };
 
 RpcOwner rpc_session_get_owner(RpcSession* session) {
@@ -162,8 +163,11 @@ void rpc_session_set_terminated_callback(
  * command is gets processed - it's safe either way. But case of it is quite
  * odd: client sends close request and sends command after.
  */
-size_t
-    rpc_session_feed(RpcSession* session, uint8_t* encoded_bytes, size_t size, uint32_t timeout) {
+size_t rpc_session_feed(
+    RpcSession* session,
+    const uint8_t* encoded_bytes,
+    size_t size,
+    uint32_t timeout) {
     furi_assert(session);
     furi_assert(encoded_bytes);
 
@@ -412,12 +416,16 @@ RpcSession* rpc_session_open(Rpc* rpc, RpcOwner owner) {
 
     furi_thread_start(session->thread);
 
+    rpc->sessions_count++;
+
     return session;
 }
 
 void rpc_session_close(RpcSession* session) {
     furi_assert(session);
     furi_assert(session->rpc);
+
+    session->rpc->sessions_count--;
 
     rpc_session_set_send_bytes_callback(session, NULL);
     rpc_session_set_close_callback(session, NULL);
@@ -493,4 +501,8 @@ void rpc_send_and_release_empty(RpcSession* session, uint32_t command_id, PB_Com
 
     rpc_send_and_release(session, &message);
     pb_release(&PB_Main_msg, &message);
+}
+
+size_t rpc_get_sessions_count(Rpc* rpc) {
+    return rpc->sessions_count;
 }

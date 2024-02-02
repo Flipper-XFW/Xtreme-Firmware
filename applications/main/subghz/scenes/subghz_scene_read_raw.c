@@ -130,15 +130,6 @@ void subghz_scene_read_raw_on_enter(void* context) {
     if(subghz->fav_timeout) {
         scene_manager_handle_custom_event(
             subghz->scene_manager, SubGhzCustomEventViewReadRAWSendStart);
-        // with_view_model(
-        //     subghz->subghz_read_raw->view,
-        //     SubGhzReadRAWModel * model,
-        //     {
-        //         scene_manager_handle_custom_event(
-        //             subghz->scene_manager, SubGhzCustomEventViewReadRAWSendStart);
-        //         model->status = SubGhzReadRAWStatusTXRepeat;
-        //     },
-        //     true);
     }
 }
 
@@ -159,6 +150,11 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
                (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateExit);
+                if(subghz_scene_read_raw_update_filename(subghz)) {
+                    furi_string_set(subghz->file_path_tmp, subghz->file_path);
+                } else {
+                    furi_string_reset(subghz->file_path_tmp);
+                }
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
@@ -193,7 +189,8 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case SubGhzCustomEventViewReadRAWErase:
-            if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) {
+            if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
+               (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
                 if(subghz_scene_read_raw_update_filename(subghz)) {
                     furi_string_set(subghz->file_path_tmp, subghz->file_path);
                     subghz_delete_file(subghz);

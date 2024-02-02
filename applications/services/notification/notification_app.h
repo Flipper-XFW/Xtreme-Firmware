@@ -49,6 +49,7 @@ typedef struct {
 struct NotificationApp {
     FuriMessageQueue* queue;
     FuriPubSub* event_record;
+    FuriPubSub* ascii_record;
     FuriTimer* display_timer;
 
     NotificationLedLayer display;

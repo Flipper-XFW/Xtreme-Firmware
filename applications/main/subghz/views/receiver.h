@@ -33,7 +33,8 @@ void subghz_view_receiver_add_data_statusbar(
     const char* preset_str,
     const char* history_stat_str,
     bool hopping_enabled,
-    bool bin_raw_enabled);
+    bool bin_raw_enabled,
+    SubGhzRepeaterState repeater_enabled);
 
 void subghz_view_receiver_set_radio_device_type(
     SubGhzViewReceiver* subghz_receiver,
@@ -47,13 +48,14 @@ void subghz_view_receiver_add_item_to_menu(
     SubGhzViewReceiver* subghz_receiver,
     const char* name,
     const char* time,
-    uint8_t type);
+    uint8_t type,
+    uint16_t repeats);
 
 uint16_t subghz_view_receiver_get_idx_menu(SubGhzViewReceiver* subghz_receiver);
 
 void subghz_view_receiver_set_idx_menu(SubGhzViewReceiver* subghz_receiver, uint16_t idx);
 
-void subghz_view_receiver_delete_element_callback(SubGhzViewReceiver* subghz_receiver);
+void subghz_view_receiver_delete_item(SubGhzViewReceiver* subghz_receiver, uint16_t idx);
 
 void subghz_view_receiver_enable_draw_callback(SubGhzViewReceiver* subghz_receiver);
 

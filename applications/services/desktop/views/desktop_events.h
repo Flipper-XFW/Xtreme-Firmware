@@ -51,6 +51,7 @@ typedef enum {
     DesktopGlobalBeforeAppStarted,
     DesktopGlobalAfterAppFinished,
     DesktopGlobalAutoLock,
+    DesktopGlobalApiUnlock,
 
     DesktopMainEventLockKeypad,
     DesktopLockedEventOpenPowerOff,

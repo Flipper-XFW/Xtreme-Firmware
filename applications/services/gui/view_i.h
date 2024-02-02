@@ -29,6 +29,8 @@ struct View {
 
     void* model;
     void* context;
+
+    ViewAsciiCallback ascii_callback;
 };
 
 /** IconAnimation tie callback */
@@ -42,6 +44,9 @@ void view_draw(View* view, Canvas* canvas);
 
 /** Input Callback for View dispatcher */
 bool view_input(View* view, InputEvent* event);
+
+/** Ascii Callback for View dispatcher */
+bool view_ascii(View* view, AsciiEvent* event);
 
 /** Custom Callback for View dispatcher */
 bool view_custom(View* view, uint32_t event);

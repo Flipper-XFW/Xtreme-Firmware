@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,49.1,,
+Version,+,54.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/services/applications.h,,
@@ -9,6 +9,7 @@ Header,+,applications/services/cli/cli_vcp.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
 Header,+,applications/services/dolphin/helpers/dolphin_state.h,,
+Header,+,applications/services/expansion/expansion.h,,
 Header,+,applications/services/gui/elements.h,,
 Header,+,applications/services/gui/gui.h,,
 Header,+,applications/services/gui/icon_i.h,,
@@ -119,13 +120,14 @@ Header,+,lib/nanopb/pb_encode.h,,
 Header,+,lib/nfc/helpers/iso13239_crc.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
-Header,+,lib/nfc/helpers/nfc_dict.h,,
 Header,+,lib/nfc/helpers/nfc_util.h,,
 Header,+,lib/nfc/nfc.h,,
 Header,+,lib/nfc/nfc_device.h,,
 Header,+,lib/nfc/nfc_listener.h,,
 Header,+,lib/nfc/nfc_poller.h,,
 Header,+,lib/nfc/nfc_scanner.h,,
+Header,+,lib/nfc/protocols/emv/emv.h,,
+Header,+,lib/nfc/protocols/emv/emv_poller.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h,,
@@ -211,6 +213,7 @@ Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
 Header,+,lib/toolbox/float_tools.h,,
 Header,+,lib/toolbox/hex.h,,
+Header,+,lib/toolbox/keys_dict.h,,
 Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
 Header,+,lib/toolbox/name_generator.h,,
@@ -229,7 +232,6 @@ Header,+,lib/toolbox/version.h,,
 Header,+,lib/xtreme/xtreme.h,,
 Header,+,targets/f7/furi_hal/furi_hal_bus.h,,
 Header,+,targets/f7/furi_hal/furi_hal_clock.h,,
-Header,+,targets/f7/furi_hal/furi_hal_console.h,,
 Header,+,targets/f7/furi_hal/furi_hal_dma.h,,
 Header,+,targets/f7/furi_hal/furi_hal_flash.h,,
 Header,+,targets/f7/furi_hal/furi_hal_gpio.h,,
@@ -242,11 +244,14 @@ Header,+,targets/f7/furi_hal/furi_hal_os.h,,
 Header,+,targets/f7/furi_hal/furi_hal_pwm.h,,
 Header,+,targets/f7/furi_hal/furi_hal_resources.h,,
 Header,+,targets/f7/furi_hal/furi_hal_rfid.h,,
+Header,+,targets/f7/furi_hal/furi_hal_rtc.h,,
+Header,+,targets/f7/furi_hal/furi_hal_serial.h,,
+Header,+,targets/f7/furi_hal/furi_hal_serial_control.h,,
+Header,+,targets/f7/furi_hal/furi_hal_serial_types.h,,
 Header,+,targets/f7/furi_hal/furi_hal_spi_config.h,,
 Header,+,targets/f7/furi_hal/furi_hal_spi_types.h,,
 Header,+,targets/f7/furi_hal/furi_hal_subghz.h,,
 Header,+,targets/f7/furi_hal/furi_hal_target_hw.h,,
-Header,+,targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,targets/f7/furi_hal/furi_hal_usb_cdc.h,,
 Header,+,targets/f7/platform_specific/intrinsic_export.h,,
 Header,+,targets/f7/platform_specific/math_wrapper.h,,
@@ -267,7 +272,6 @@ Header,+,targets/furi_hal_include/furi_hal_nfc.h,,
 Header,+,targets/furi_hal_include/furi_hal_power.h,,
 Header,+,targets/furi_hal_include/furi_hal_random.h,,
 Header,+,targets/furi_hal_include/furi_hal_region.h,,
-Header,+,targets/furi_hal_include/furi_hal_rtc.h,,
 Header,+,targets/furi_hal_include/furi_hal_sd.h,,
 Header,+,targets/furi_hal_include/furi_hal_speaker.h,,
 Header,+,targets/furi_hal_include/furi_hal_spi.h,,
@@ -909,6 +913,26 @@ Function,+,elf_symbolname_hash,uint32_t,const char*
 Function,+,empty_screen_alloc,EmptyScreen*,
 Function,+,empty_screen_free,void,EmptyScreen*
 Function,+,empty_screen_get_view,View*,EmptyScreen*
+Function,+,emv_alloc,EmvData*,
+Function,+,emv_copy,void,"EmvData*, const EmvData*"
+Function,+,emv_free,void,EmvData*
+Function,+,emv_get_base_data,Iso14443_4aData*,const EmvData*
+Function,+,emv_get_device_name,const char*,"const EmvData*, NfcDeviceNameType"
+Function,+,emv_get_uid,const uint8_t*,"const EmvData*, size_t*"
+Function,+,emv_is_equal,_Bool,"const EmvData*, const EmvData*"
+Function,+,emv_load,_Bool,"EmvData*, FlipperFormat*, uint32_t"
+Function,+,emv_poller_get_last_online_atc,EmvError,EmvPoller*
+Function,+,emv_poller_get_pin_try_counter,EmvError,EmvPoller*
+Function,+,emv_poller_get_processing_options,EmvError,EmvPoller*
+Function,+,emv_poller_read_afl,EmvError,EmvPoller*
+Function,+,emv_poller_read_log_entry,EmvError,EmvPoller*
+Function,+,emv_poller_read_sfi_record,EmvError,"EmvPoller*, uint8_t, uint8_t"
+Function,+,emv_poller_select_application,EmvError,EmvPoller*
+Function,+,emv_poller_select_ppse,EmvError,EmvPoller*
+Function,+,emv_reset,void,EmvData*
+Function,+,emv_save,_Bool,"const EmvData*, FlipperFormat*"
+Function,+,emv_set_uid,_Bool,"EmvData*, const uint8_t*, size_t"
+Function,+,emv_verify,_Bool,"EmvData*, const FuriString*"
 Function,-,erand48,double,unsigned short[3]
 Function,-,erf,double,double
 Function,-,erfc,double,double
@@ -923,6 +947,9 @@ Function,-,exp10f,float,float
 Function,-,exp2,double,double
 Function,-,exp2f,float,float
 Function,-,exp2l,long double,long double
+Function,+,expansion_disable,void,Expansion*
+Function,+,expansion_enable,void,Expansion*
+Function,+,expansion_set_listen_serial,void,"Expansion*, FuriHalSerialId"
 Function,-,expf,float,float
 Function,-,expl,long double,long double
 Function,-,explicit_bzero,void,"void*, size_t"
@@ -1211,14 +1238,6 @@ Function,-,furi_hal_clock_switch_hse2hsi,void,
 Function,-,furi_hal_clock_switch_hse2pll,_Bool,
 Function,-,furi_hal_clock_switch_hsi2hse,void,
 Function,-,furi_hal_clock_switch_pll2hse,_Bool,
-Function,+,furi_hal_console_disable,void,
-Function,+,furi_hal_console_enable,void,
-Function,+,furi_hal_console_init,void,
-Function,+,furi_hal_console_printf,void,"const char[], ..."
-Function,+,furi_hal_console_puts,void,const char*
-Function,+,furi_hal_console_set_tx_callback,void,"FuriHalConsoleTxCallback, void*"
-Function,+,furi_hal_console_tx,void,"const uint8_t*, size_t"
-Function,+,furi_hal_console_tx_with_new_line,void,"const uint8_t*, size_t"
 Function,+,furi_hal_cortex_comp_enable,void,"FuriHalCortexComp, FuriHalCortexCompFunction, uint32_t, uint32_t, FuriHalCortexCompSize"
 Function,+,furi_hal_cortex_comp_reset,void,FuriHalCortexComp
 Function,+,furi_hal_cortex_delay_us,void,uint32_t
@@ -1324,13 +1343,16 @@ Function,+,furi_hal_infrared_async_tx_start,void,"uint32_t, float"
 Function,+,furi_hal_infrared_async_tx_stop,void,
 Function,+,furi_hal_infrared_async_tx_wait_termination,void,
 Function,+,furi_hal_infrared_get_debug_out_status,_Bool,
+Function,+,furi_hal_infrared_is_auto_detect_enabled,_Bool,
 Function,+,furi_hal_infrared_is_busy,_Bool,
+Function,+,furi_hal_infrared_is_external_connected,_Bool,
+Function,+,furi_hal_infrared_set_auto_detect,void,_Bool
 Function,+,furi_hal_infrared_set_debug_out,void,_Bool
 Function,-,furi_hal_init,void,
 Function,-,furi_hal_init_early,void,
 Function,-,furi_hal_interrupt_init,void,
 Function,+,furi_hal_interrupt_set_isr,void,"FuriHalInterruptId, FuriHalInterruptISR, void*"
-Function,+,furi_hal_interrupt_set_isr_ex,void,"FuriHalInterruptId, uint16_t, FuriHalInterruptISR, void*"
+Function,+,furi_hal_interrupt_set_isr_ex,void,"FuriHalInterruptId, FuriHalInterruptPriority, FuriHalInterruptISR, void*"
 Function,-,furi_hal_is_normal_boot,_Bool,
 Function,+,furi_hal_light_blink_set_color,void,Light
 Function,+,furi_hal_light_blink_start,void,"Light, uint8_t, uint16_t, uint16_t"
@@ -1472,6 +1494,8 @@ Function,+,furi_hal_rtc_get_heap_track_mode,FuriHalRtcHeapTrackMode,
 Function,+,furi_hal_rtc_get_locale_dateformat,FuriHalRtcLocaleDateFormat,
 Function,+,furi_hal_rtc_get_locale_timeformat,FuriHalRtcLocaleTimeFormat,
 Function,+,furi_hal_rtc_get_locale_units,FuriHalRtcLocaleUnits,
+Function,+,furi_hal_rtc_get_log_baud_rate,FuriHalRtcLogBaudRate,
+Function,+,furi_hal_rtc_get_log_device,FuriHalRtcLogDevice,
 Function,+,furi_hal_rtc_get_log_level,uint8_t,
 Function,+,furi_hal_rtc_get_pin_fails,uint32_t,
 Function,+,furi_hal_rtc_get_register,uint32_t,FuriHalRtcRegister
@@ -1481,6 +1505,7 @@ Function,-,furi_hal_rtc_init_early,void,
 Function,+,furi_hal_rtc_is_flag_set,_Bool,FuriHalRtcFlag
 Function,+,furi_hal_rtc_is_leap_year,_Bool,uint16_t
 Function,+,furi_hal_rtc_reset_flag,void,FuriHalRtcFlag
+Function,+,furi_hal_rtc_reset_registers,void,
 Function,+,furi_hal_rtc_set_boot_mode,void,FuriHalRtcBootMode
 Function,+,furi_hal_rtc_set_datetime,void,FuriHalRtcDateTime*
 Function,+,furi_hal_rtc_set_fault_data,void,uint32_t
@@ -1489,10 +1514,13 @@ Function,+,furi_hal_rtc_set_heap_track_mode,void,FuriHalRtcHeapTrackMode
 Function,+,furi_hal_rtc_set_locale_dateformat,void,FuriHalRtcLocaleDateFormat
 Function,+,furi_hal_rtc_set_locale_timeformat,void,FuriHalRtcLocaleTimeFormat
 Function,+,furi_hal_rtc_set_locale_units,void,FuriHalRtcLocaleUnits
+Function,+,furi_hal_rtc_set_log_baud_rate,void,FuriHalRtcLogBaudRate
+Function,+,furi_hal_rtc_set_log_device,void,FuriHalRtcLogDevice
 Function,+,furi_hal_rtc_set_log_level,void,uint8_t
 Function,+,furi_hal_rtc_set_pin_fails,void,uint32_t
 Function,+,furi_hal_rtc_set_register,void,"FuriHalRtcRegister, uint32_t"
 Function,+,furi_hal_rtc_sync_shadow,void,
+Function,+,furi_hal_rtc_timestamp_to_datetime,void,"uint32_t, FuriHalRtcDateTime*"
 Function,+,furi_hal_rtc_validate_datetime,_Bool,FuriHalRtcDateTime*
 Function,+,furi_hal_sd_get_card_state,FuriStatus,
 Function,+,furi_hal_sd_info,FuriStatus,FuriHalSdInfo*
@@ -1502,6 +1530,32 @@ Function,+,furi_hal_sd_max_mount_retry_count,uint8_t,
 Function,+,furi_hal_sd_presence_init,void,
 Function,+,furi_hal_sd_read_blocks,FuriStatus,"uint32_t*, uint32_t, uint32_t"
 Function,+,furi_hal_sd_write_blocks,FuriStatus,"const uint32_t*, uint32_t, uint32_t"
+Function,+,furi_hal_serial_async_rx,uint8_t,FuriHalSerialHandle*
+Function,+,furi_hal_serial_async_rx_start,void,"FuriHalSerialHandle*, FuriHalSerialAsyncRxCallback, void*, _Bool"
+Function,+,furi_hal_serial_async_rx_stop,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_control_acquire,FuriHalSerialHandle*,FuriHalSerialId
+Function,+,furi_hal_serial_control_deinit,void,
+Function,+,furi_hal_serial_control_init,void,
+Function,+,furi_hal_serial_control_is_busy,_Bool,FuriHalSerialId
+Function,+,furi_hal_serial_control_release,void,FuriHalSerialHandle*
+Function,-,furi_hal_serial_control_resume,void,
+Function,+,furi_hal_serial_control_set_expansion_callback,void,"FuriHalSerialId, FuriHalSerialControlExpansionCallback, void*"
+Function,+,furi_hal_serial_control_set_logging_config,void,"FuriHalSerialId, uint32_t"
+Function,-,furi_hal_serial_control_suspend,void,
+Function,+,furi_hal_serial_deinit,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_disable_direction,void,"FuriHalSerialHandle*, FuriHalSerialDirection"
+Function,+,furi_hal_serial_dma_rx,size_t,"FuriHalSerialHandle*, uint8_t*, size_t"
+Function,+,furi_hal_serial_dma_rx_start,void,"FuriHalSerialHandle*, FuriHalSerialDmaRxCallback, void*, _Bool"
+Function,+,furi_hal_serial_dma_rx_stop,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_enable_direction,void,"FuriHalSerialHandle*, FuriHalSerialDirection"
+Function,+,furi_hal_serial_get_gpio_pin,const GpioPin*,"FuriHalSerialHandle*, FuriHalSerialDirection"
+Function,+,furi_hal_serial_init,void,"FuriHalSerialHandle*, uint32_t"
+Function,+,furi_hal_serial_is_baud_rate_supported,_Bool,"FuriHalSerialHandle*, uint32_t"
+Function,+,furi_hal_serial_resume,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_set_br,void,"FuriHalSerialHandle*, uint32_t"
+Function,+,furi_hal_serial_suspend,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_tx,void,"FuriHalSerialHandle*, const uint8_t*, size_t"
+Function,+,furi_hal_serial_tx_wait_complete,void,FuriHalSerialHandle*
 Function,-,furi_hal_set_is_normal_boot,void,_Bool
 Function,+,furi_hal_speaker_acquire,_Bool,uint32_t
 Function,-,furi_hal_speaker_deinit,void,
@@ -1561,13 +1615,6 @@ Function,+,furi_hal_subghz_stop_async_tx,void,
 Function,+,furi_hal_subghz_tx,_Bool,
 Function,+,furi_hal_subghz_write_packet,void,"const uint8_t*, uint8_t"
 Function,+,furi_hal_switch,void,void*
-Function,+,furi_hal_uart_deinit,void,FuriHalUartId
-Function,+,furi_hal_uart_init,void,"FuriHalUartId, uint32_t"
-Function,+,furi_hal_uart_resume,void,FuriHalUartId
-Function,+,furi_hal_uart_set_br,void,"FuriHalUartId, uint32_t"
-Function,+,furi_hal_uart_set_irq_cb,void,"FuriHalUartId, void (*)(UartIrqEvent, uint8_t, void*), void*"
-Function,+,furi_hal_uart_suspend,void,FuriHalUartId
-Function,+,furi_hal_uart_tx,void,"FuriHalUartId, uint8_t*, size_t"
 Function,+,furi_hal_usb_disable,void,
 Function,+,furi_hal_usb_enable,void,
 Function,+,furi_hal_usb_get_config,FuriHalUsbInterface*,
@@ -1601,7 +1648,9 @@ Function,+,furi_hal_version_get_mic_id,const char*,
 Function,+,furi_hal_version_get_model_code,const char*,
 Function,+,furi_hal_version_get_model_name,const char*,
 Function,+,furi_hal_version_get_name_ptr,const char*,
+Function,+,furi_hal_version_get_ncc_id,const char*,
 Function,+,furi_hal_version_get_otp_version,FuriHalVersionOtpVersion,
+Function,+,furi_hal_version_get_srrc_id,const char*,
 Function,-,furi_hal_version_init,void,
 Function,-,furi_hal_version_set_name,void,const char*
 Function,+,furi_hal_version_uid,const uint8_t*,
@@ -1616,15 +1665,17 @@ Function,+,furi_kernel_is_running,_Bool,
 Function,+,furi_kernel_lock,int32_t,
 Function,+,furi_kernel_restore_lock,int32_t,int32_t
 Function,+,furi_kernel_unlock,int32_t,
+Function,+,furi_log_add_handler,_Bool,FuriLogHandler
 Function,+,furi_log_get_level,FuriLogLevel,
 Function,-,furi_log_init,void,
 Function,+,furi_log_level_from_string,_Bool,"const char*, FuriLogLevel*"
 Function,+,furi_log_level_to_string,_Bool,"FuriLogLevel, const char**"
 Function,+,furi_log_print_format,void,"FuriLogLevel, const char*, const char*, ..."
 Function,+,furi_log_print_raw_format,void,"FuriLogLevel, const char*, ..."
+Function,+,furi_log_puts,void,const char*
+Function,+,furi_log_remove_handler,_Bool,FuriLogHandler
 Function,+,furi_log_set_level,void,FuriLogLevel
-Function,-,furi_log_set_puts,void,FuriLogPuts
-Function,-,furi_log_set_timestamp,void,FuriLogTimestamp
+Function,+,furi_log_tx,void,"const uint8_t*, size_t"
 Function,+,furi_message_queue_alloc,FuriMessageQueue*,"uint32_t, uint32_t"
 Function,+,furi_message_queue_free,void,FuriMessageQueue*
 Function,+,furi_message_queue_get,FuriStatus,"FuriMessageQueue*, void*, uint32_t"
@@ -1991,6 +2042,7 @@ Function,+,iso14443_4a_load,_Bool,"Iso14443_4aData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_4a_poller_halt,Iso14443_4aError,Iso14443_4aPoller*
 Function,+,iso14443_4a_poller_read_ats,Iso14443_4aError,"Iso14443_4aPoller*, Iso14443_4aAtsData*"
 Function,+,iso14443_4a_poller_send_block,Iso14443_4aError,"Iso14443_4aPoller*, const BitBuffer*, BitBuffer*"
+Function,+,iso14443_4a_poller_send_block_pwt_ext,Iso14443_4aError,"Iso14443_4aPoller*, const BitBuffer*, BitBuffer*"
 Function,+,iso14443_4a_reset,void,Iso14443_4aData*
 Function,+,iso14443_4a_save,_Bool,"const Iso14443_4aData*, FlipperFormat*"
 Function,+,iso14443_4a_set_uid,_Bool,"Iso14443_4aData*, const uint8_t*, size_t"
@@ -2049,6 +2101,15 @@ Function,-,j1f,float,float
 Function,-,jn,double,"int, double"
 Function,-,jnf,float,"int, float"
 Function,-,jrand48,long,unsigned short[3]
+Function,+,keys_dict_add_key,_Bool,"KeysDict*, const uint8_t*, size_t"
+Function,+,keys_dict_alloc,KeysDict*,"const char*, KeysDictMode, size_t"
+Function,+,keys_dict_check_presence,_Bool,const char*
+Function,+,keys_dict_delete_key,_Bool,"KeysDict*, const uint8_t*, size_t"
+Function,+,keys_dict_free,void,KeysDict*
+Function,+,keys_dict_get_next_key,_Bool,"KeysDict*, uint8_t*, size_t"
+Function,+,keys_dict_get_total_keys,size_t,KeysDict*
+Function,+,keys_dict_is_key_present,_Bool,"KeysDict*, const uint8_t*, size_t"
+Function,+,keys_dict_rewind,_Bool,KeysDict*
 Function,-,l64a,char*,long
 Function,-,labs,long,long
 Function,-,lcong48,void,unsigned short[7]
@@ -2080,6 +2141,7 @@ Function,+,lfrfid_worker_read_start,void,"LFRFIDWorker*, LFRFIDWorkerReadType, L
 Function,+,lfrfid_worker_start_thread,void,LFRFIDWorker*
 Function,+,lfrfid_worker_stop,void,LFRFIDWorker*
 Function,+,lfrfid_worker_stop_thread,void,LFRFIDWorker*
+Function,+,lfrfid_worker_write_and_set_pass_start,void,"LFRFIDWorker*, LFRFIDProtocol, LFRFIDWorkerWriteCallback, void*"
 Function,+,lfrfid_worker_write_start,void,"LFRFIDWorker*, LFRFIDProtocol, LFRFIDWorkerWriteCallback, void*"
 Function,-,lgamma,double,double
 Function,-,lgamma_r,double,"double, int*"
@@ -2374,8 +2436,8 @@ Function,+,mf_classic_is_value_block,_Bool,"MfClassicSectorTrailer*, uint8_t"
 Function,+,mf_classic_load,_Bool,"MfClassicData*, FlipperFormat*, uint32_t"
 Function,+,mf_classic_poller_auth,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,+,mf_classic_poller_auth_nested,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
-Function,+,mf_classic_poller_get_nt_nested,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKeyType, MfClassicNt*"
 Function,+,mf_classic_poller_get_nt,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKeyType, MfClassicNt*"
+Function,+,mf_classic_poller_get_nt_nested,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKeyType, MfClassicNt*"
 Function,+,mf_classic_poller_halt,MfClassicError,MfClassicPoller*
 Function,+,mf_classic_poller_read_block,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicBlock*"
 Function,+,mf_classic_poller_sync_auth,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
@@ -2490,9 +2552,11 @@ Function,-,music_worker_set_volume,void,"MusicWorker*, float"
 Function,-,music_worker_start,void,MusicWorker*
 Function,-,music_worker_stop,void,MusicWorker*
 Function,+,name_generator_make_auto,void,"char*, size_t, const char*"
+Function,+,name_generator_make_auto_datetime,void,"char*, size_t, const char*, FuriHalRtcDateTime*"
 Function,+,name_generator_make_detailed,void,"char*, size_t, const char*"
+Function,+,name_generator_make_detailed_datetime,void,"char*, size_t, const char*, FuriHalRtcDateTime*, _Bool"
 Function,+,name_generator_make_random,void,"char*, size_t"
-Function,+,name_generator_make_random_prefixed,void,"char*, size_t, const char*"
+Function,+,name_generator_make_random_prefixed,void,"char*, size_t, const char*, _Bool"
 Function,-,nan,double,const char*
 Function,-,nanf,float,const char*
 Function,-,nanl,long double,const char*
@@ -2526,15 +2590,6 @@ Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
-Function,+,nfc_dict_add_key,_Bool,"NfcDict*, const uint8_t*, size_t"
-Function,+,nfc_dict_alloc,NfcDict*,"const char*, NfcDictMode, size_t"
-Function,+,nfc_dict_check_presence,_Bool,const char*
-Function,+,nfc_dict_delete_key,_Bool,"NfcDict*, const uint8_t*, size_t"
-Function,+,nfc_dict_free,void,NfcDict*
-Function,+,nfc_dict_get_next_key,_Bool,"NfcDict*, uint8_t*, size_t"
-Function,+,nfc_dict_get_total_keys,uint32_t,NfcDict*
-Function,+,nfc_dict_is_key_present,_Bool,"NfcDict*, const uint8_t*, size_t"
-Function,+,nfc_dict_rewind,_Bool,NfcDict*
 Function,+,nfc_felica_listener_set_sensf_res_data,NfcError,"Nfc*, const uint8_t*, const uint8_t, const uint8_t*, const uint8_t"
 Function,+,nfc_free,void,Nfc*
 Function,+,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
@@ -2573,6 +2628,7 @@ Function,+,nfc_set_mask_receive_time_fc,void,"Nfc*, uint32_t"
 Function,+,nfc_start,void,"Nfc*, NfcEventCallback, void*"
 Function,+,nfc_stop,void,Nfc*
 Function,+,nfc_util_bytes2num,uint64_t,"const uint8_t*, uint8_t"
+Function,+,nfc_util_bytes2num_little_endian,uint64_t,"const uint8_t*, uint8_t"
 Function,+,nfc_util_even_parity32,uint8_t,uint32_t
 Function,+,nfc_util_num2bytes,void,"uint64_t, uint8_t, uint8_t*"
 Function,+,nfc_util_odd_parity,void,"const uint8_t*, uint8_t*, uint8_t"
@@ -2771,8 +2827,9 @@ Function,-,rintl,long double,long double
 Function,-,round,double,double
 Function,+,roundf,float,float
 Function,-,roundl,long double,long double
+Function,+,rpc_get_sessions_count,size_t,Rpc*
 Function,+,rpc_session_close,void,RpcSession*
-Function,+,rpc_session_feed,size_t,"RpcSession*, uint8_t*, size_t, uint32_t"
+Function,+,rpc_session_feed,size_t,"RpcSession*, const uint8_t*, size_t, uint32_t"
 Function,+,rpc_session_get_available_size,size_t,RpcSession*
 Function,+,rpc_session_get_owner,RpcOwner,RpcSession*
 Function,+,rpc_session_open,RpcSession*,"Rpc*, RpcOwner"
@@ -3067,7 +3124,7 @@ Function,-,strtod_l,double,"const char*, char**, locale_t"
 Function,+,strtof,float,"const char*, char**"
 Function,-,strtof_l,float,"const char*, char**, locale_t"
 Function,+,strtok,char*,"char*, const char*"
-Function,-,strtok_r,char*,"char*, const char*, char**"
+Function,+,strtok_r,char*,"char*, const char*, char**"
 Function,+,strtol,long,"const char*, char**, int"
 Function,-,strtol_l,long,"const char*, char**, int, locale_t"
 Function,-,strtold,long double,"const char*, char**"
@@ -3164,6 +3221,7 @@ Function,+,subghz_protocol_blocks_crc8,uint8_t,"const uint8_t[], size_t, uint8_t
 Function,+,subghz_protocol_blocks_crc8le,uint8_t,"const uint8_t[], size_t, uint8_t, uint8_t"
 Function,+,subghz_protocol_blocks_get_bit_array,_Bool,"uint8_t[], size_t"
 Function,+,subghz_protocol_blocks_get_hash_data,uint8_t,"SubGhzBlockDecoder*, size_t"
+Function,+,subghz_protocol_blocks_get_hash_data_long,uint32_t,"SubGhzBlockDecoder*, size_t"
 Function,+,subghz_protocol_blocks_get_parity,uint8_t,"uint64_t, uint8_t"
 Function,+,subghz_protocol_blocks_get_upload_from_bit_array,size_t,"uint8_t[], size_t, LevelDuration*, size_t, uint32_t, SubGhzProtocolBlockAlignBit"
 Function,+,subghz_protocol_blocks_lfsr_digest16,uint16_t,"const uint8_t[], size_t, uint16_t, uint16_t"
@@ -3177,6 +3235,7 @@ Function,+,subghz_protocol_blocks_xor_bytes,uint8_t,"const uint8_t[], size_t"
 Function,+,subghz_protocol_came_atomo_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint16_t, SubGhzRadioPreset*"
 Function,+,subghz_protocol_decoder_base_deserialize,SubGhzProtocolStatus,"SubGhzProtocolDecoderBase*, FlipperFormat*"
 Function,+,subghz_protocol_decoder_base_get_hash_data,uint8_t,SubGhzProtocolDecoderBase*
+Function,+,subghz_protocol_decoder_base_get_hash_data_long,uint32_t,SubGhzProtocolDecoderBase*
 Function,+,subghz_protocol_decoder_base_get_string,_Bool,"SubGhzProtocolDecoderBase*, FuriString*"
 Function,+,subghz_protocol_decoder_base_serialize,SubGhzProtocolStatus,"SubGhzProtocolDecoderBase*, FlipperFormat*, SubGhzRadioPreset*"
 Function,-,subghz_protocol_decoder_base_set_decoder_callback,void,"SubGhzProtocolDecoderBase*, SubGhzProtocolDecoderBaseRxCallback, void*"
@@ -3272,6 +3331,7 @@ Function,+,submenu_set_orientation,void,"Submenu*, ViewOrientation"
 Function,+,submenu_set_selected_item,void,"Submenu*, uint32_t"
 Function,-,system,int,const char*
 Function,+,t5577_write,void,LFRFIDT5577*
+Function,+,t5577_write_with_mask,void,"LFRFIDT5577*, uint8_t, _Bool, uint32_t"
 Function,+,t5577_write_with_pass,void,"LFRFIDT5577*, uint32_t"
 Function,-,tan,double,double
 Function,-,tanf,float,float
@@ -3309,7 +3369,6 @@ Function,+,text_input_free,void,TextInput*
 Function,+,text_input_get_validator_callback,TextInputValidatorCallback,TextInput*
 Function,+,text_input_get_validator_callback_context,void*,TextInput*
 Function,+,text_input_get_view,View*,TextInput*
-Function,+,text_input_insert_character,_Bool,"TextInput*, char"
 Function,+,text_input_reset,void,TextInput*
 Function,+,text_input_set_header_text,void,"TextInput*, const char*"
 Function,+,text_input_set_minimum_length,void,"TextInput*, size_t"
@@ -3339,10 +3398,10 @@ Function,-,utoa,char*,"unsigned, char*, int"
 Function,+,validator_is_file_alloc_init,ValidatorIsFile*,"const char*, const char*, const char*"
 Function,+,validator_is_file_callback,_Bool,"const char*, FuriString*, void*"
 Function,+,validator_is_file_free,void,ValidatorIsFile*
-Function,+,value_index_bool,uint8_t,"const _Bool, const _Bool[], uint8_t"
-Function,+,value_index_float,uint8_t,"const float, const float[], uint8_t"
-Function,+,value_index_int32,uint8_t,"const int32_t, const int32_t[], uint8_t"
-Function,+,value_index_uint32,uint8_t,"const uint32_t, const uint32_t[], uint8_t"
+Function,+,value_index_bool,size_t,"const _Bool, const _Bool[], size_t"
+Function,+,value_index_float,size_t,"const float, const float[], size_t"
+Function,+,value_index_int32,size_t,"const int32_t, const int32_t[], size_t"
+Function,+,value_index_uint32,size_t,"const uint32_t, const uint32_t[], size_t"
 Function,+,variable_item_get_context,void*,VariableItem*
 Function,+,variable_item_get_current_value_index,uint8_t,VariableItem*
 Function,+,variable_item_list_add,VariableItem*,"VariableItemList*, const char*, uint8_t, VariableItemChangeCallback, void*"
@@ -3405,6 +3464,7 @@ Function,+,view_free,void,View*
 Function,+,view_free_model,void,View*
 Function,+,view_get_model,void*,View*
 Function,+,view_port_alloc,ViewPort*,
+Function,+,view_port_ascii_callback_set,void,"ViewPort*, ViewPortAsciiCallback, void*"
 Function,+,view_port_draw_callback_set,void,"ViewPort*, ViewPortDrawCallback, void*"
 Function,+,view_port_enabled_set,void,"ViewPort*, _Bool"
 Function,+,view_port_free,void,ViewPort*
@@ -3417,6 +3477,7 @@ Function,+,view_port_set_height,void,"ViewPort*, uint8_t"
 Function,+,view_port_set_orientation,void,"ViewPort*, ViewPortOrientation"
 Function,+,view_port_set_width,void,"ViewPort*, uint8_t"
 Function,+,view_port_update,void,ViewPort*
+Function,+,view_set_ascii_callback,void,"View*, ViewAsciiCallback"
 Function,+,view_set_context,void,"View*, void*"
 Function,+,view_set_custom_callback,void,"View*, ViewCustomCallback"
 Function,+,view_set_draw_callback,void,"View*, ViewDrawCallback"
@@ -3531,6 +3592,10 @@ Variable,+,I_CC_Settings_16x16,Icon,
 Variable,+,I_CC_Xtreme_16x16,Icon,
 Variable,+,I_Certification1_103x56,Icon,
 Variable,+,I_Certification2_46x33,Icon,
+Variable,+,I_CertificationChina0_121x41,Icon,
+Variable,+,I_CertificationChina1_122x47,Icon,
+Variable,+,I_CertificationMexico_98x41,Icon,
+Variable,+,I_CertificationTaiwan_33x32,Icon,
 Variable,+,I_Charging_lightning_9x10,Icon,
 Variable,+,I_Charging_lightning_mask_9x10,Icon,
 Variable,+,I_Circles_47x47,Icon,
@@ -3540,10 +3605,11 @@ Variable,+,I_Connected_62x31,Icon,
 Variable,+,I_Cos_9x7,Icon,
 Variable,+,I_Cry_dolph_55x52,Icon,
 Variable,+,I_DFU_128x50,Icon,
-Variable,+,I_DolphinCommon_56x48,Icon,
-Variable,+,I_DolphinMafia_115x62,Icon,
-Variable,+,I_DolphinNice_96x59,Icon,
+Variable,+,I_DolphinDone_80x58,Icon,
+Variable,+,I_DolphinMafia_119x62,Icon,
 Variable,+,I_DolphinReadingSuccess_59x63,Icon,
+Variable,+,I_DolphinSaved_92x58,Icon,
+Variable,+,I_DolphinSuccess_91x55,Icon,
 Variable,+,I_DolphinWait_61x59,Icon,
 Variable,+,I_Drive_112x35,Icon,
 Variable,+,I_Dynamic_9x7,Icon,
@@ -3575,12 +3641,13 @@ Variable,+,I_Keychain_39x36,Icon,
 Variable,+,I_Left_mouse_icon_9x9,Icon,
 Variable,+,I_Lock_7x8,Icon,
 Variable,+,I_Lockscreen,Icon,
+Variable,+,I_MFKey_qr_25x25,Icon,
 Variable,+,I_MHz_25x11,Icon,
 Variable,+,I_Modern_reader_18x34,Icon,
 Variable,+,I_More_data_placeholder_5x7,Icon,
 Variable,+,I_Move_flipper_26x39,Icon,
 Variable,+,I_Muted_8x8,Icon,
-Variable,+,I_NFC_dolphin_emulation_47x61,Icon,
+Variable,+,I_NFC_dolphin_emulation_51x64,Icon,
 Variable,+,I_NFC_manual_60x50,Icon,
 Variable,+,I_Nfc_10px,Icon,
 Variable,+,I_Ok_btn_9x9,Icon,
@@ -3598,7 +3665,6 @@ Variable,+,I_Pressed_Button_13x13,Icon,
 Variable,+,I_Quest_7x8,Icon,
 Variable,+,I_RFIDDolphinReceive_97x61,Icon,
 Variable,+,I_RFIDDolphinSend_97x61,Icon,
-Variable,+,I_RFIDDolphinSuccess_108x57,Icon,
 Variable,+,I_RFIDSmallChip_14x14,Icon,
 Variable,+,I_Raw_9x7,Icon,
 Variable,+,I_Release_arrow_18x15,Icon,
@@ -3622,6 +3688,7 @@ Variable,+,I_UsbTree_48x22,Icon,
 Variable,+,I_Voldwn_6x6,Icon,
 Variable,+,I_Voltage_16x16,Icon,
 Variable,+,I_Volup_8x6,Icon,
+Variable,+,I_WarningDolphinFlip_45x42,Icon,
 Variable,+,I_WarningDolphin_45x42,Icon,
 Variable,+,I_Warning_30x23,Icon,
 Variable,+,I_arrow_nano_down,Icon,
@@ -3636,6 +3703,7 @@ Variable,+,I_ch_down_hover_24x21,Icon,
 Variable,+,I_ch_text_31x34,Icon,
 Variable,+,I_ch_up_24x21,Icon,
 Variable,+,I_ch_up_hover_24x21,Icon,
+Variable,+,I_check_big_20x17,Icon,
 Variable,+,I_cool_30x51,Icon,
 Variable,+,I_dir_10px,Icon,
 Variable,+,I_dry_19x20,Icon,
@@ -3657,7 +3725,7 @@ Variable,+,I_hourglass3_24x24,Icon,
 Variable,+,I_hourglass4_24x24,Icon,
 Variable,+,I_hourglass5_24x24,Icon,
 Variable,+,I_hourglass6_24x24,Icon,
-Variable,+,I_iButtonDolphinVerySuccess_108x52,Icon,
+Variable,+,I_iButtonDolphinVerySuccess_92x55,Icon,
 Variable,+,I_iButtonKey_49x44,Icon,
 Variable,+,I_ibutt_10px,Icon,
 Variable,+,I_input_19x20,Icon,
@@ -3948,6 +4016,7 @@ Variable,+,message_red_255,const NotificationMessage,
 Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
+Variable,-,nfc_device_emv,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
 Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,
 Variable,-,nfc_device_mf_ultralight,const NfcDeviceBase,
@@ -3991,6 +4060,7 @@ Variable,+,sequence_reset_red,const NotificationSequence,
 Variable,+,sequence_reset_rgb,const NotificationSequence,
 Variable,+,sequence_reset_sound,const NotificationSequence,
 Variable,+,sequence_reset_vibro,const NotificationSequence,
+Variable,+,sequence_semi_success,const NotificationSequence,
 Variable,+,sequence_set_blue_255,const NotificationSequence,
 Variable,+,sequence_set_green_255,const NotificationSequence,
 Variable,+,sequence_set_only_blue_255,const NotificationSequence,
@@ -4020,4 +4090,5 @@ Variable,+,usb_cdc_single,FuriHalUsbInterface,
 Variable,+,usb_hid,FuriHalUsbInterface,
 Variable,+,usb_hid_u2f,FuriHalUsbInterface,
 Variable,+,usbd_devfs,const usbd_driver,
+Variable,+,xtreme_assets,XtremeAssets,
 Variable,+,xtreme_settings,XtremeSettings,

@@ -24,10 +24,14 @@ typedef enum {
     SubmenuIndexSommer_FM_868,
     SubmenuIndexStilmatic,
     SubmenuIndexDTMNeo433,
+    SubmenuIndexDeaMio433,
     SubmenuIndexGibidi433,
     SubmenuIndexNiceMHouse_433_92,
     SubmenuIndexJCM_433_92,
+    SubmenuIndexFAACRCXT_433_92,
+    SubmenuIndexFAACRCXT_868,
     SubmenuIndexNormstahl_433_92,
+    SubmenuIndexGeniusBravo433,
     SubmenuIndexGSN,
     SubmenuIndexAprimatic,
     SubmenuIndexHCS101_433_92,
@@ -82,6 +86,8 @@ typedef enum {
     SubGhzCustomEventSceneShowOnlyRX,
     SubGhzCustomEventSceneAnalyzerLock,
     SubGhzCustomEventSceneAnalyzerUnlock,
+    SubGhzCustomEventSceneSettingRepeater,
+    SubGhzCustomEventSceneSettingRemoveDuplicates,
     SubGhzCustomEventSceneSettingLock,
     SubGhzCustomEventSceneSettingResetToDefault,
 
@@ -94,6 +100,8 @@ typedef enum {
     SubGhzCustomEventSceneRpcSessionClose,
 
     SubGhzCustomEventViewReceiverOK,
+    SubGhzCustomEventViewReceiverOKLong,
+    SubGhzCustomEventViewReceiverOKRelease,
     SubGhzCustomEventViewReceiverConfig,
     SubGhzCustomEventViewReceiverBack,
     SubGhzCustomEventViewReceiverOffDisplay,
@@ -118,6 +126,9 @@ typedef enum {
 
     SubGhzCustomEventViewFreqAnalOkShort,
     SubGhzCustomEventViewFreqAnalOkLong,
+
+    SubGhzCustomEventViewRepeaterStart,
+    SubGhzCustomEventViewRepeaterStop,
 
     SubGhzCustomEventByteInputDone,
 } SubGhzCustomEvent;

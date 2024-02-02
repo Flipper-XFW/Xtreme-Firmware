@@ -155,20 +155,20 @@ static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
 
     if(subghz->last_settings->gps_baudrate != 0) {
         subghz_gps_stop(subghz->gps);
-        subghz_gps_set_baudrate(subghz->last_settings->gps_baudrate);
+        subghz_gps_set_baudrate(subghz->gps, subghz->last_settings->gps_baudrate);
         subghz_gps_start(subghz->gps);
     } else {
         subghz_gps_stop(subghz->gps);
     }
 }
 
-static void subghz_scene_receiver_config_set_timestamp_file_names(VariableItem* item) {
+static void subghz_scene_receiver_config_set_protocol_file_names(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, timestamp_names_text[index]);
 
-    subghz->last_settings->timestamp_file_names = (index == 1);
+    subghz->last_settings->protocol_file_names = (index == 1);
     subghz_last_settings_save(subghz->last_settings);
 }
 
@@ -221,9 +221,9 @@ void subghz_scene_radio_settings_on_enter(void* context) {
         variable_item_list,
         "Protocol Names",
         TIMESTAMP_NAMES_COUNT,
-        subghz_scene_receiver_config_set_timestamp_file_names,
+        subghz_scene_receiver_config_set_protocol_file_names,
         subghz);
-    value_index = subghz->last_settings->timestamp_file_names;
+    value_index = subghz->last_settings->protocol_file_names;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, timestamp_names_text[value_index]);
 

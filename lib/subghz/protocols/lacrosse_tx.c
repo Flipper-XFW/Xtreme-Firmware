@@ -98,7 +98,8 @@ const SubGhzProtocol ws_protocol_lacrosse_tx = {
     .name = WS_PROTOCOL_LACROSSE_TX_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_lacrosse_tx_decoder,
     .encoder = &ws_protocol_lacrosse_tx_encoder,
@@ -276,10 +277,10 @@ void ws_protocol_decoder_lacrosse_tx_feed(void* context, bool level, uint32_t du
     }
 }
 
-uint8_t ws_protocol_decoder_lacrosse_tx_get_hash_data(void* context) {
+uint32_t ws_protocol_decoder_lacrosse_tx_get_hash_data(void* context) {
     furi_assert(context);
     WSProtocolDecoderLaCrosse_TX* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
