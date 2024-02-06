@@ -18,7 +18,20 @@ App(
     fap_libs=["hwdrivers"],
     fap_icon="icon.png",
     fap_category="Sub-GHz",
+    sdk_headers=["subghz_fap.h"],
 )
+
+App(
+    appid="subghz_fap",
+    name="SubGHz",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="subghz_fap",
+    stack_size=3 * 1024,
+    sources=["subghz_fap.c"],
+    fap_icon="icon.png",
+    fap_category="Sub-GHz",
+)
+
 
 App(
     appid="subghz_start",

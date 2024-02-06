@@ -8,6 +8,8 @@
 #include <applications/main/archive/helpers/archive_helpers_ext.h>
 #include <xtreme/xtreme.h>
 
+#include "subghz_fap.h"
+
 #define TAG "SubGhzApp"
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
