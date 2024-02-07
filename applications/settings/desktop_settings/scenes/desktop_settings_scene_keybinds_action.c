@@ -5,19 +5,17 @@
 static void
     desktop_settings_scene_keybinds_action_submenu_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
-    char* keybind = desktop_settings_app_get_keybind(app);
 
-    strncpy(keybind, (const char*)index, MAX_KEYBIND_LENGTH);
-
-    DESKTOP_KEYBINDS_SAVE(&app->desktop->keybinds, sizeof(app->desktop->keybinds));
-    scene_manager_search_and_switch_to_previous_scene(
-        app->scene_manager, DesktopSettingsAppSceneStart);
+    if(desktop_settings_app_set_keybind(app, (const char*)index)) {
+        scene_manager_search_and_switch_to_previous_scene(
+            app->scene_manager, DesktopSettingsAppSceneStart);
+    }
 }
 
 void desktop_settings_scene_keybinds_action_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     Submenu* submenu = app->submenu;
-    char* keybind = desktop_settings_app_get_keybind(app);
+    const char* keybind = desktop_settings_app_get_keybind(app);
     submenu_reset(submenu);
 
     uint32_t pre_select_item = 0;
