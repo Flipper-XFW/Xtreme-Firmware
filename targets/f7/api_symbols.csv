@@ -2578,6 +2578,7 @@ Function,+,nfc_device_alloc,NfcDevice*,
 Function,+,nfc_device_clear,void,NfcDevice*
 Function,+,nfc_device_copy_data,void,"const NfcDevice*, NfcProtocol, NfcDeviceData*"
 Function,+,nfc_device_free,void,NfcDevice*
+Function,+,nfc_device_get_abbreviated_name,void,"const NfcDevice*, FuriString*"
 Function,+,nfc_device_get_data,const NfcDeviceData*,"const NfcDevice*, NfcProtocol"
 Function,+,nfc_device_get_name,const char*,"const NfcDevice*, NfcDeviceNameType"
 Function,+,nfc_device_get_protocol,NfcProtocol,const NfcDevice*

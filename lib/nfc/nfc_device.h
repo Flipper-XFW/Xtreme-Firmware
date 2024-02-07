@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <core/string.h>
 
 #include "protocols/nfc_device_base.h"
 #include "protocols/nfc_protocol.h"
@@ -136,6 +137,16 @@ const char* nfc_device_get_protocol_name(NfcProtocol protocol);
  * @returns pointer to a statically allocated string containing the device name.
  */
 const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType name_type);
+
+/**
+ * @brief Get the abbreviated name of an NfcDevice instance.
+ *
+ * The return value may change depending on the instance's internal state.
+ *
+ * @param[in] instance pointer to the instance to be queried.
+ * @param[out] name FuriString to save the abbreviated device name to.
+ */
+void nfc_device_get_abbreviated_name(const NfcDevice* instance, FuriString* name);
 
 /**
  * @brief Get the unique identifier (UID) of an NfcDevice instance.

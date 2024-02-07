@@ -73,6 +73,19 @@ const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType nam
     return nfc_devices[instance->protocol]->get_name(instance->protocol_data, name_type);
 }
 
+void nfc_device_get_abbreviated_name(const NfcDevice* instance, FuriString* name) {
+    furi_assert(instance);
+    furi_assert(instance->protocol < NfcProtocolNum);
+
+    furi_string_set(name, nfc_device_get_name(instance, NfcDeviceNameTypeFull));
+    furi_string_replace(name, "Mifare", "MF");
+    furi_string_replace(name, " Classic", "C"); // MFC
+    furi_string_replace(name, "Desfire", "Des"); // MF Des
+    furi_string_replace(name, "Ultralight", "UL"); // MF UL
+    furi_string_replace(name, " Plus", "+"); // NTAG I2C+
+    furi_string_replace(name, " (Unknown)", "");
+}
+
 const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len) {
     furi_assert(instance);
     furi_assert(instance->protocol < NfcProtocolNum);
