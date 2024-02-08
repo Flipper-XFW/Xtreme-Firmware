@@ -174,15 +174,6 @@ App(
 )
 
 App(
-    appid="itso_parser",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="itso_plugin_ep",
-    targets=["f7"],
-    requires=["nfc"],
-    sources=["plugins/supported_cards/itso.c"],
-)
-
-App(
     appid="washcity_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="washcity_plugin_ep",
@@ -207,6 +198,15 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/ndef.c"],
+)
+
+App(
+    appid="itso_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="itso_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/itso.c"],
 )
 
 App(
