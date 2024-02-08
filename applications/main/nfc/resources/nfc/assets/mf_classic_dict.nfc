@@ -13,7 +13,7 @@
 FFFFFFFFFFFF
 # Blank key
 000000000000
-# NFC Forum MADkey❤️
+# NFC Forum MADkey
 A0A1A2A3A4A5
 # MAD access key A (reversed)
 A5A4A3A2A1A0
@@ -69,6 +69,9 @@ D2ECE8B9395E
 B5FF67CBA951
 EFF603E1EFE9
 F14EE7CAE863
+# ICT S14 A/B
+9C28A60F7249
+C9826AF02794
 # RKF
 # Vasttrafiken KeyA, RKF OstgotaTrafiken KeyA
 FC00018778F7
@@ -561,6 +564,12 @@ A56C2DF9A26D
 68D3F7307C89
 # Smart Rider. Western Australian Public Transport Cards
 568C9083F71C
+117E5C165B10
+24BB421C7973
+3E3A546650EA
+41F262D3AB66
+514956AB3142
+863933AE8388
 # Bangkok metro key
 97F5DA640B18
 # Metro Valencia key
@@ -838,6 +847,7 @@ AE8587108640
 # SafLock standalone door locks
 135B88A94B8B
 # Russian Troika card
+EC29806D9738
 08B386463229
 0E8F64340BA4
 0F1C63013DBA
@@ -2067,6 +2077,40 @@ EA0CA627FD06
 661ABF99AFAD
 # Key from evo Montreal (probably diversified)
 1064BA5D6DF8
+# Hotel key
+CE0F4F15E909
+D60DE9436219
+# ATM Area de Girona, spanish transport card
+A01000000000
+A02000000000
+A03000000000
+A04000000000
+A05000000000
+A06000000000
+A07000000000
+A08000000000
+A09000000000
+A10000000000
+A11000000000
+A12000000000
+A13000000000
+A14000000000
+A15000000000
+B01000000000
+B02000000000
+B03000000000
+B04000000000
+B05000000000
+B06000000000
+B07000000000
+B08000000000
+B09000000000
+B10000000000
+B11000000000
+B12000000000
+B13000000000
+B14000000000
+B15000000000
 # +--------------------------------------------------------------------------------------------------------+
 # | https://github.com/RfidResearchGroup/proxmark3/blob/master/client/dictionaries/mfc_keys_bmp_sorted.dic |
 # +--------------------------------------------------------------------------------------------------------+
