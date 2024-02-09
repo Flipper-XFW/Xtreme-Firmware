@@ -223,7 +223,7 @@ class Main(App):
             icons_c.write(
                 """
 const IconPath ICON_PATHS[] = {
-#ifndef FURI_RAM_EXEC
+#if !defined(FURI_RAM_EXEC) && !defined(FURI_DEBUG)
 """
             )
             for animated, name, path in paths:

@@ -23,7 +23,7 @@ extern "C" {
 #define FURI_NORETURN noreturn
 #endif
 
-#ifndef FURI_RAM_EXEC
+#if !defined(FURI_RAM_EXEC) && !defined(FURI_DEBUG)
 #define __FURI_TRACE
 #endif
 
