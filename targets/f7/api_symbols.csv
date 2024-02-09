@@ -690,7 +690,7 @@ Function,+,ble_glue_start,_Bool,
 Function,+,ble_glue_thread_stop,void,
 Function,+,ble_glue_wait_for_c2_start,_Bool,int32_t
 Function,-,bsearch,void*,"const void*, const void*, size_t, size_t, __compar_fn_t"
-Function,+,bt_close_rpc_connection,void,Bt*
+Function,-,bt_close_rpc_connection,void,Bt*
 Function,+,bt_disable_peer_key_update,void,Bt*
 Function,+,bt_disconnect,void,Bt*
 Function,+,bt_enable_peer_key_update,void,Bt*
@@ -700,7 +700,7 @@ Function,+,bt_get_profile_mac_address,const uint8_t*,Bt*
 Function,+,bt_get_profile_pairing_method,GapPairing,Bt*
 Function,+,bt_keys_storage_set_default_path,void,Bt*
 Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
-Function,+,bt_open_rpc_connection,void,Bt*
+Function,-,bt_open_rpc_connection,void,Bt*
 Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
 Function,+,bt_set_profile,_Bool,"Bt*, BtProfile"
 Function,+,bt_set_profile_adv_name,void,"Bt*, const char*, ..."
@@ -727,7 +727,6 @@ Function,+,button_panel_free,void,ButtonPanel*
 Function,+,button_panel_get_view,View*,ButtonPanel*
 Function,+,button_panel_reserve,void,"ButtonPanel*, size_t, size_t"
 Function,+,button_panel_reset,void,ButtonPanel*
-Function,+,button_panel_reset_selection,void,ButtonPanel*
 Function,+,byte_input_alloc,ByteInput*,
 Function,+,byte_input_free,void,ByteInput*
 Function,+,byte_input_get_view,View*,ByteInput*
@@ -748,7 +747,6 @@ Function,+,canvas_draw_frame,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,canvas_draw_glyph,void,"Canvas*, uint8_t, uint8_t, uint16_t"
 Function,+,canvas_draw_icon,void,"Canvas*, uint8_t, uint8_t, const Icon*"
 Function,+,canvas_draw_icon_animation,void,"Canvas*, uint8_t, uint8_t, IconAnimation*"
-Function,+,canvas_draw_icon_bitmap,void,"Canvas*, uint8_t, uint8_t, int16_t, int16_t, const Icon*"
 Function,+,canvas_draw_icon_ex,void,"Canvas*, uint8_t, uint8_t, const Icon*, IconRotation"
 Function,+,canvas_draw_line,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,canvas_draw_rbox,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
@@ -3431,7 +3429,7 @@ Function,-,vdiprintf,int,"int, const char*, __gnuc_va_list"
 Function,-,vdprintf,int,"int, const char*, __gnuc_va_list"
 Function,+,version_get,const Version*,
 Function,+,version_get_builddate,const char*,const Version*
-Function,+,version_get_custom_name,const char*,const Version*
+Function,-,version_get_custom_name,const char*,const Version*
 Function,+,version_get_dirty_flag,_Bool,const Version*
 Function,+,version_get_firmware_origin,const char*,const Version*
 Function,+,version_get_git_origin,const char*,const Version*
