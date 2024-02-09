@@ -5,10 +5,10 @@
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 #include <stdint.h>
 
-#define TAG "MiZIP"
+#define TAG "HI!"
 #define KEY_LENGTH 6
-#define MIZIP_KEY_TO_GEN 5
-#define UID_LENGTH 4
+#define HI_KEY_TO_GEN 5
+#define UID_LENGTH 7
 
 typedef struct {
     uint64_t a;
@@ -18,53 +18,45 @@ typedef struct {
 typedef struct {
     MfClassicKeyPair* keys;
     uint32_t verify_sector;
-} MizipCardConfig;
+} HiCardConfig;
 
-static MfClassicKeyPair mizip_1k_keys[] = {
-    {.a = 0xa0a1a2a3a4a5, .b = 0xb4c132439eef}, // 000
+static MfClassicKeyPair hi_1k_keys[] = {
+    {.a = 0xa0a1a2a3a4a5, .b = 0x30871CF60CF1}, // 000
     {.a = 0x000000000000, .b = 0x000000000000}, // 001
     {.a = 0x000000000000, .b = 0x000000000000}, // 002
     {.a = 0x000000000000, .b = 0x000000000000}, // 003
     {.a = 0x000000000000, .b = 0x000000000000}, // 004
-    {.a = 0x0222179AB995, .b = 0x13321774F9B5}, // 005
-    {.a = 0xB25CBD76A7B4, .b = 0x7571359B4274}, // 006
-    {.a = 0xDA857B4907CC, .b = 0xD26B856175F7}, // 007
-    {.a = 0x16D85830C443, .b = 0x8F790871A21E}, // 008
-    {.a = 0x88BD5098FC82, .b = 0xFCD0D77745E4}, // 009
-    {.a = 0x983349449D78, .b = 0xEA2631FBDEDD}, // 010
-    {.a = 0xC599F962F3D9, .b = 0x949B70C14845}, // 011
-    {.a = 0x72E668846BE8, .b = 0x45490B5AD707}, // 012
-    {.a = 0xBCA105E5685E, .b = 0x248DAF9D674D}, // 013
-    {.a = 0x4F6FE072D1FD, .b = 0x4250A05575FA}, // 014
-    {.a = 0x56438ABE8152, .b = 0x59A45912B311}, // 015
-};
-
-static MfClassicKeyPair mizip_mini_keys[] = {
-    {.a = 0xa0a1a2a3a4a5, .b = 0xb4c132439eef}, // 000
-    {.a = 0x000000000000, .b = 0x000000000000}, // 001
-    {.a = 0x000000000000, .b = 0x000000000000}, // 002
-    {.a = 0x000000000000, .b = 0x000000000000}, // 003
-    {.a = 0x000000000000, .b = 0x000000000000}, // 004
+    {.a = 0x42FFE4C76209, .b = 0x7B30CFD04CBD}, // 005
+    {.a = 0x01ED8145BDF8, .b = 0x92257F472FCE}, // 006
+    {.a = 0x7583A07D21A6, .b = 0x51CA6EA8EE26}, // 007
+    {.a = 0x1E10BF5D6A1D, .b = 0x87B9B9BFABA6}, // 008
+    {.a = 0xF9DB1B2B21BA, .b = 0x80A781F4134C}, // 009
+    {.a = 0x7F5283FACB72, .b = 0x73250009D75A}, // 010
+    {.a = 0xE48E86A03078, .b = 0xCFFBBF08A254}, // 011
+    {.a = 0x39AB26301F60, .b = 0xC71A6E532C83}, // 012
+    {.a = 0xAD656C6C639F, .b = 0xFD9819CBD20A}, // 013
+    {.a = 0xF0E15160DB3E, .b = 0x3F622D515ADD}, // 014
+    {.a = 0x03F44E033C42, .b = 0x61E897875F46}, // 015
 };
 
 //KDF
-void mizip_generate_key(uint8_t* uid, uint8_t keyA[5][KEY_LENGTH], uint8_t keyB[5][KEY_LENGTH]) {
+void hi_generate_key(uint8_t* uid, uint8_t keyA[5][KEY_LENGTH], uint8_t keyB[5][KEY_LENGTH]) {
     // Static XOR table for key generation
-    static const uint8_t xor_table_keyA[4][6] = {
-        {0x09, 0x12, 0x5A, 0x25, 0x89, 0xE5},
-        {0xAB, 0x75, 0xC9, 0x37, 0x92, 0x2F},
-        {0xE2, 0x72, 0x41, 0xAF, 0x2C, 0x09},
-        {0x31, 0x7A, 0xB7, 0x2F, 0x44, 0x90}};
-
     static const uint8_t xor_table_keyB[4][6] = {
-        {0xF1, 0x2C, 0x84, 0x53, 0xD8, 0x21},
-        {0x73, 0xE7, 0x99, 0xFE, 0x32, 0x41},
-        {0xAA, 0x4D, 0x13, 0x76, 0x56, 0xAE},
-        {0xB0, 0x13, 0x27, 0x27, 0x2D, 0xFD}};
+        {0x1F, 0xC4, 0x4D, 0x94, 0x6A, 0x31},
+        {0x12, 0xC1, 0x5C, 0x70, 0xDF, 0x31},
+        {0x56, 0xF0, 0x13, 0x1B, 0x63, 0xF2},
+        {0x4E, 0xFA, 0xC2, 0xF8, 0xC9, 0xCC}};
+
+    static const uint8_t xor_table_keyA[4][6] = {
+        {0xB6, 0xE6, 0xAE, 0x72, 0x91, 0x0D},
+        {0x6D, 0x38, 0x50, 0xFB, 0x42, 0x89},
+        {0x1E, 0x5F, 0xC7, 0xED, 0xAA, 0x02},
+        {0x7E, 0xB9, 0xCA, 0xF1, 0x9C, 0x59}};
 
     // Permutation table for rearranging elements in uid
-    static const uint8_t xorOrderA[6] = {0, 1, 2, 3, 0, 1};
-    static const uint8_t xorOrderB[6] = {2, 3, 0, 1, 2, 3};
+    static const uint8_t xorOrderA[6] = {0, 1, 2, 3, 0, 2};
+    static const uint8_t xorOrderB[6] = {1, 3, 3, 2, 1, 0};
 
     // Generate key based on uid and XOR table
     for(uint8_t j = 1; j < 5; j++) {
@@ -75,15 +67,12 @@ void mizip_generate_key(uint8_t* uid, uint8_t keyA[5][KEY_LENGTH], uint8_t keyB[
     }
 }
 
-static bool mizip_get_card_config(MizipCardConfig* config, MfClassicType type) {
+static bool hi_get_card_config(HiCardConfig* config, MfClassicType type) {
     bool success = true;
 
     if(type == MfClassicType1k) {
         config->verify_sector = 0;
-        config->keys = mizip_1k_keys;
-    } else if(type == MfClassicTypeMini) {
-        config->verify_sector = 0;
-        config->keys = mizip_mini_keys;
+        config->keys = hi_1k_keys;
     } else {
         success = false;
     }
@@ -91,12 +80,12 @@ static bool mizip_get_card_config(MizipCardConfig* config, MfClassicType type) {
     return success;
 }
 
-static bool mizip_verify_type(Nfc* nfc, MfClassicType type) {
+static bool hi_verify_type(Nfc* nfc, MfClassicType type) {
     bool verified = false;
 
     do {
-        MizipCardConfig cfg = {};
-        if(!mizip_get_card_config(&cfg, type)) break;
+        HiCardConfig cfg = {};
+        if(!hi_get_card_config(&cfg, type)) break;
 
         const uint8_t block_num = mf_classic_get_first_block_num_of_sector(cfg.verify_sector);
         FURI_LOG_D(TAG, "Verifying sector %lu", cfg.verify_sector);
@@ -109,22 +98,22 @@ static bool mizip_verify_type(Nfc* nfc, MfClassicType type) {
             mf_classic_poller_sync_auth(nfc, block_num, &key, MfClassicKeyTypeB, &auth_context);
         if(error != MfClassicErrorNone) {
             FURI_LOG_D(
-                TAG, "Failed to read block %u: %d, this is not a MiZIP card", block_num, error);
+                TAG, "Failed to read block %u: %d, this is not a HI card", block_num, error);
             break;
         }
-        FURI_LOG_D(TAG, "Found a MiZIP Card");
+        FURI_LOG_D(TAG, "Found a HI Card");
         verified = true;
     } while(false);
 
     return verified;
 }
 
-static bool mizip_verify(Nfc* nfc) {
-    return mizip_verify_type(nfc, MfClassicType1k) || mizip_verify_type(nfc, MfClassicTypeMini);
+static bool hi_verify(Nfc* nfc) {
+    return hi_verify_type(nfc, MfClassicType1k);
 }
 
-static bool mizip_read(Nfc* nfc, NfcDevice* device) {
-    FURI_LOG_D(TAG, "Entering MiZIP KDF");
+static bool hi_read(Nfc* nfc, NfcDevice* device) {
+    FURI_LOG_D(TAG, "Entering HI KDF");
     furi_assert(nfc);
     furi_assert(device);
 
@@ -134,21 +123,19 @@ static bool mizip_read(Nfc* nfc, NfcDevice* device) {
     nfc_device_copy_data(device, NfcProtocolMfClassic, data);
 
     do {
-        MfClassicType type = MfClassicTypeMini;
+        MfClassicType type = MfClassicType1k;
         MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
         if(error != MfClassicErrorNone) break;
 
-        //temp fix but fix mf_classic_poller_sync_detect_type because view type mfclassic1k and not verify mfmini
-        data->type = MfClassicTypeMini;
-        MizipCardConfig cfg = {};
-        if(!mizip_get_card_config(&cfg, data->type)) break;
+        HiCardConfig cfg = {};
+        if(!hi_get_card_config(&cfg, data->type)) break;
 
         uint8_t uid[UID_LENGTH];
         memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
 
-        uint8_t keyA[MIZIP_KEY_TO_GEN][KEY_LENGTH];
-        uint8_t keyB[MIZIP_KEY_TO_GEN][KEY_LENGTH];
-        mizip_generate_key(uid, keyA, keyB);
+        uint8_t keyA[HI_KEY_TO_GEN][KEY_LENGTH];
+        uint8_t keyB[HI_KEY_TO_GEN][KEY_LENGTH];
+        hi_generate_key(uid, keyA, keyB);
 
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
             if(cfg.keys[i].a == 0x000000000000 && cfg.keys[i].b == 0x000000000000) {
@@ -181,7 +168,7 @@ static bool mizip_read(Nfc* nfc, NfcDevice* device) {
     return is_read;
 }
 
-static bool mizip_parse(const NfcDevice* device, FuriString* parsed_data) {
+static bool hi_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     furi_assert(parsed_data);
 
@@ -191,44 +178,26 @@ static bool mizip_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     do {
         // Verify card type
-        MizipCardConfig cfg = {};
-        if(!mizip_get_card_config(&cfg, data->type)) break;
+        HiCardConfig cfg = {};
+        if(!hi_get_card_config(&cfg, data->type)) break;
 
         // Verify key
         MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(data, cfg.verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_b.data, 6);
-        if(key != cfg.keys[cfg.verify_sector].b) break;
+        if(key != cfg.keys[cfg.verify_sector].b) return false;
 
         //Get UID
         uint8_t uid[UID_LENGTH];
         memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
 
-        //Get credit
-        uint8_t credit_pointer = 0x08;
-        uint8_t previus_credit_pointer = 0x09;
-        if(data->block[10].data[0] == 0x55) {
-            credit_pointer = 0x09;
-            previus_credit_pointer = 0x08;
-        }
-        uint16_t balance = (data->block[credit_pointer].data[2] << 8) |
-                           (data->block[credit_pointer].data[1]);
-        uint16_t previus_balance = (data->block[previus_credit_pointer].data[2] << 8) |
-                                   (data->block[previus_credit_pointer].data[1]);
-
         //parse data
-        furi_string_cat_printf(parsed_data, "\e#MiZIP Card\n");
+        furi_string_cat_printf(parsed_data, "\e#HI! Card\n");
         furi_string_cat_printf(parsed_data, "UID:");
         for(size_t i = 0; i < UID_LENGTH; i++) {
             furi_string_cat_printf(parsed_data, " %02X", uid[i]);
         }
-        furi_string_cat_printf(
-            parsed_data, "\nCurrent Credit: %d.%02d E \n", balance / 100, balance % 100);
-        furi_string_cat_printf(
-            parsed_data,
-            "Previus Credit: %d.%02d E \n",
-            previus_balance / 100,
-            previus_balance % 100);
+        furi_string_cat_printf(parsed_data, "\n");
 
         parsed = true;
     } while(false);
@@ -237,21 +206,21 @@ static bool mizip_parse(const NfcDevice* device, FuriString* parsed_data) {
 }
 
 /* Actual implementation of app<>plugin interface */
-static const NfcSupportedCardsPlugin mizip_plugin = {
+static const NfcSupportedCardsPlugin hi_plugin = {
     .protocol = NfcProtocolMfClassic,
-    .verify = mizip_verify,
-    .read = mizip_read,
-    .parse = mizip_parse,
+    .verify = hi_verify,
+    .read = hi_read,
+    .parse = hi_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */
-static const FlipperAppPluginDescriptor mizip_plugin_descriptor = {
+static const FlipperAppPluginDescriptor hi_plugin_descriptor = {
     .appid = NFC_SUPPORTED_CARD_PLUGIN_APP_ID,
     .ep_api_version = NFC_SUPPORTED_CARD_PLUGIN_API_VERSION,
-    .entry_point = &mizip_plugin,
+    .entry_point = &hi_plugin,
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* mizip_plugin_ep() {
-    return &mizip_plugin_descriptor;
+const FlipperAppPluginDescriptor* hi_plugin_ep() {
+    return &hi_plugin_descriptor;
 }
