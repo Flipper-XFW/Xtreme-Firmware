@@ -3,20 +3,10 @@
 #include <furi.h>
 #include <furi_hal_version.h>
 #include <furi_hal_memory.h>
+#include <furi_hal_light.h>
 #include <furi_hal_rtc.h>
 #include <storage/storage.h>
 #include <gui/canvas_i.h>
-#include <bt/bt_settings.h>
-#include <bt/bt_service/bt_i.h>
-#include <power/power_settings.h>
-#include <desktop/desktop_settings.h>
-#include <notification/notification_app.h>
-#include <dolphin/helpers/dolphin_state.h>
-#include <applications/main/u2f/u2f_data.h>
-#include <expansion/expansion_settings_filename.h>
-#include <applications/main/archive/helpers/archive_favorites.h>
-#include <xtreme/namespoof.h>
-#include <xtreme/xtreme.h>
 
 #include <FreeRTOS.h>
 
@@ -41,6 +31,19 @@ static void flipper_print_version(const char* target, const Version* version) {
         FURI_LOG_I(TAG, "No build info for %s", target);
     }
 }
+
+#ifndef FURI_RAM_EXEC
+#include <bt/bt_settings.h>
+#include <bt/bt_service/bt_i.h>
+#include <power/power_settings.h>
+#include <desktop/desktop_settings.h>
+#include <notification/notification_app.h>
+#include <dolphin/helpers/dolphin_state.h>
+#include <applications/main/u2f/u2f_data.h>
+#include <expansion/expansion_settings_filename.h>
+#include <applications/main/archive/helpers/archive_favorites.h>
+#include <xtreme/namespoof.h>
+#include <xtreme/xtreme.h>
 
 void flipper_migrate_files() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -90,6 +93,16 @@ void flipper_migrate_files() {
     furi_record_close(RECORD_STORAGE);
 }
 
+static void flipper_boot_status(Canvas* canvas, const char* text) {
+    FURI_LOG_I(TAG, text);
+    canvas_reset(canvas);
+    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, text);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Xtreme is Booting");
+    canvas_commit(canvas);
+}
+#endif
+
 void flipper_start_service(const FlipperInternalApplication* service) {
     FURI_LOG_D(TAG, "Starting service %s", service->name);
 
@@ -101,25 +114,19 @@ void flipper_start_service(const FlipperInternalApplication* service) {
     furi_thread_start(thread);
 }
 
-static void flipper_boot_status(Canvas* canvas, const char* text) {
-    FURI_LOG_I(TAG, text);
-    canvas_reset(canvas);
-    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, text);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Xtreme is Booting");
-    canvas_commit(canvas);
-}
-
 void flipper_init() {
     furi_hal_light_sequence("rgb WB");
     flipper_print_version("Firmware", furi_hal_version_get_firmware_version());
     FURI_LOG_I(TAG, "Boot mode %d", furi_hal_rtc_get_boot_mode());
+#ifndef FURI_RAM_EXEC
     Canvas* canvas = canvas_init();
 
     // Start storage service first, thanks OFW :/
     flipper_boot_status(canvas, "Initializing Storage");
+#endif
     flipper_start_service(&FLIPPER_SERVICES[0]);
 
+#ifndef FURI_RAM_EXEC
     if(furi_hal_is_normal_boot()) {
         furi_record_open(RECORD_STORAGE);
         furi_record_close(RECORD_STORAGE);
@@ -135,13 +142,16 @@ void flipper_init() {
     } else {
         FURI_LOG_I(TAG, "Special boot, skipping optional components");
     }
+    flipper_boot_status(canvas, "Initializing Services");
+#endif
 
     // Everything else
-    flipper_boot_status(canvas, "Initializing Services");
     for(size_t i = 1; i < FLIPPER_SERVICES_COUNT; i++) {
         flipper_start_service(&FLIPPER_SERVICES[i]);
     }
+#ifndef FURI_RAM_EXEC
     canvas_free(canvas);
+#endif
 
     FURI_LOG_I(TAG, "Startup complete");
 }
