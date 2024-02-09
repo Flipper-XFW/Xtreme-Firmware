@@ -159,7 +159,7 @@ void XTREME_ASSETS_LOAD() {
 
         for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
             if(ICON_PATHS[i].icon->original == NULL) {
-                if(ICON_PATHS[i].animated) {
+                if(ICON_PATHS[i].icon->frame_count > 1) {
                     load_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
                 } else {
                     load_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);

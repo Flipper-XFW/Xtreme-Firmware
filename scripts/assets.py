@@ -182,7 +182,7 @@ class Main(App):
                 icons_c.write("\n")
                 icons.append((icon_name, width, height, frame_rate, frame_count))
                 p = dirpath.removeprefix(self.args.input_directory)[1:]
-                paths.append((1, icon_name, p.replace("\\", "/")))
+                paths.append((icon_name, p.replace("\\", "/")))
             else:
                 # process icons
                 for filename in filenames:
@@ -206,7 +206,7 @@ class Main(App):
                     icons_c.write("\n")
                     icons.append((icon_name, width, height, 0, 1))
                     p = fullfilename.removeprefix(self.args.input_directory)[1:]
-                    paths.append((0, icon_name, p.replace("\\", "/").rsplit(".", 1)[0]))
+                    paths.append((icon_name, p.replace("\\", "/").rsplit(".", 1)[0]))
         # Create array of images:
         self.logger.debug("Finalizing source file")
         for name, width, height, frame_rate, frame_count in icons:
@@ -226,8 +226,8 @@ const IconPath ICON_PATHS[] = {
 #if !defined(FURI_RAM_EXEC) && !defined(FURI_DEBUG)
 """
             )
-            for animated, name, path in paths:
-                icons_c.write(f'    {{{animated}, &{name}, "{path}"}},\n')
+            for name, path in paths:
+                icons_c.write(f'    {{&{name}, "{path}"}},\n')
             icons_c.write(
                 """#endif
 };
@@ -250,7 +250,6 @@ const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
             icons_h.write(
                 """
 typedef struct {
-    bool animated;
     const Icon* icon;
     const char* path;
 } IconPath;
