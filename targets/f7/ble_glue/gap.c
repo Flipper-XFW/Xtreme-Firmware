@@ -445,8 +445,6 @@ static void gap_advertise_start(GapState new_state) {
         0);
     if(status) {
         FURI_LOG_E(TAG, "set_discoverable failed %d", status);
-    } else {
-        FURI_LOG_D(TAG, "set_discoverable success");
     }
     gap->state = new_state;
     GapEvent event = {.type = GapEventTypeStartAdvertising};
