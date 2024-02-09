@@ -196,7 +196,7 @@ void canvas_set_font(Canvas* canvas, Font font) {
         u8g2_SetFont(&canvas->fb, u8g2_font_profont22_tn);
         break;
     case FontBatteryPercent:
-        u8g2_SetFont(&canvas->fb, u8g2_font_5x7_tf); //u8g2_font_micro_tr);
+        u8g2_SetFont(&canvas->fb, u8g2_font_5x7_tr); //u8g2_font_micro_tr);
         break;
     case FontEurocorp:
         u8g2_SetFont(&canvas->fb, u8g2_font_eurocorp_tr);
