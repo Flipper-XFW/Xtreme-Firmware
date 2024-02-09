@@ -223,7 +223,7 @@ class Main(App):
             icons_c.write(
                 """
 const IconPath ICON_PATHS[] = {
-#if !defined(FURI_RAM_EXEC) && !defined(FURI_DEBUG)
+#ifndef FURI_RAM_EXEC
 """
             )
             for name, path in paths:

@@ -10,6 +10,9 @@
 #define ICONS_FMT XTREME_ASSETS_PATH "/%s/Icons/%s"
 #define FONTS_FMT XTREME_ASSETS_PATH "/%s/Fonts/%s.u8f"
 
+// See lib/u8g2/u8g2_font.c
+#define U8G2_FONT_DATA_STRUCT_SIZE 23
+
 XtremeAssets xtreme_assets = {
     .is_nsfw = false,
     .fonts = {NULL},
@@ -114,13 +117,14 @@ void load_font(FontSwap font, const char* name, FuriString* path, File* file) {
         uint64_t size = storage_file_size(file);
         uint8_t* swap = malloc(size);
 
-        if(size > 20 && storage_file_read(file, swap, size) == size) {
+        if(size > U8G2_FONT_DATA_STRUCT_SIZE && storage_file_read(file, swap, size) == size) {
             xtreme_assets.fonts[font] = swap;
             CanvasFontParameters* params = malloc(sizeof(CanvasFontParameters));
+            // See lib/u8g2/u8g2_font.c
             params->leading_default = swap[10]; // max_char_height
             params->leading_min = params->leading_default - 2; // good enough
             params->height = swap[13]; // ascent_A
-            params->descender = swap[19]; // start_pos_lower_a
+            params->descender = swap[14]; // descent_g
             xtreme_assets.font_params[font] = params;
         } else {
             free(swap);
