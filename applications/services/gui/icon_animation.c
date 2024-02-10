@@ -62,7 +62,7 @@ uint8_t icon_animation_get_height(const IconAnimation* instance) {
 
 void icon_animation_start(IconAnimation* instance) {
     furi_assert(instance);
-    if(!instance->animating) {
+    if(!instance->animating && instance->icon->frame_rate && instance->icon->frame_count > 1) {
         instance->animating = true;
         furi_assert(instance->icon->frame_rate);
         furi_check(
