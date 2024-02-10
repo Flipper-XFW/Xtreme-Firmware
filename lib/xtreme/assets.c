@@ -123,8 +123,8 @@ void load_font(FontSwap font, const char* name, FuriString* path, File* file) {
             // See lib/u8g2/u8g2_font.c
             params->leading_default = swap[10]; // max_char_height
             params->leading_min = params->leading_default - 2; // good enough
-            params->height = swap[13]; // ascent_A
-            params->descender = swap[14]; // descent_g
+            params->height = MAX((int8_t)swap[15], 0); // ascent_para
+            params->descender = MAX((int8_t)swap[16], 0); // descent_para
             xtreme_assets.font_params[font] = params;
         } else {
             free(swap);
