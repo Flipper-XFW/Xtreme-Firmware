@@ -71,7 +71,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
     int x, y, w, h;
     bool selected, toggle;
     bool enabled = false;
-    uint value = 0;
+    int value = 0;
     int total = 58;
     const Icon* icon = NULL;
     for(size_t i = 0; i < DesktopLockMenuIndexTotalCount; ++i) {
