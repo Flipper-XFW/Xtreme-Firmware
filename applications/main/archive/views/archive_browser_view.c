@@ -35,6 +35,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeBadKb] = &I_badkb_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
     [ArchiveFileTypeApplication] = &I_Apps_10px,
+    [ArchiveFileTypeJS] = &I_js_script_10px,
     [ArchiveFileTypeSearch] = &I_search_10px,
     [ArchiveFileTypeUpdateManifest] = &I_update_10px,
     [ArchiveFileTypeFolder] = &I_dir_10px,
