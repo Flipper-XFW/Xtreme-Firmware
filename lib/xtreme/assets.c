@@ -111,7 +111,7 @@ void free_icon(const Icon* icon) {
     free(frames);
 }
 
-void load_font(FontSwap font, const char* name, FuriString* path, File* file) {
+void load_font(Font font, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, FONTS_FMT, xtreme_settings.asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file);
@@ -133,7 +133,7 @@ void load_font(FontSwap font, const char* name, FuriString* path, File* file) {
     storage_file_close(file);
 }
 
-void free_font(FontSwap font) {
+void free_font(Font font) {
     free(xtreme_assets.fonts[font]);
     xtreme_assets.fonts[font] = NULL;
     free(xtreme_assets.font_params[font]);
@@ -141,11 +141,11 @@ void free_font(FontSwap font) {
 }
 
 static const char* font_names[] = {
-    [FontSwapPrimary] = "Primary",
-    [FontSwapSecondary] = "Secondary",
-    [FontSwapKeyboard] = "Keyboard",
-    [FontSwapBigNumbers] = "BigNumbers",
-    [FontSwapBatteryPercent] = "BatteryPercent",
+    [FontPrimary] = "Primary",
+    [FontSecondary] = "Secondary",
+    [FontKeyboard] = "Keyboard",
+    [FontBigNumbers] = "BigNumbers",
+    [FontBatteryPercent] = "BatteryPercent",
 };
 
 void XTREME_ASSETS_LOAD() {
@@ -171,7 +171,7 @@ void XTREME_ASSETS_LOAD() {
             }
         }
 
-        for(FontSwap font = 0; font < FontSwapCount; font++) {
+        for(Font font = 0; font < FontTotalNumber; font++) {
             load_font(font, font_names[font], p, f);
         }
 
@@ -188,7 +188,7 @@ void XTREME_ASSETS_FREE() {
         }
     }
 
-    for(FontSwap font = 0; font < FontSwapCount; font++) {
+    for(Font font = 0; font < FontTotalNumber; font++) {
         if(xtreme_assets.fonts[font] != NULL) {
             free_font(font);
         }

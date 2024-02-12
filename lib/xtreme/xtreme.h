@@ -85,19 +85,10 @@ typedef struct {
     bool file_naming_prefix_after;
 } XtremeSettings;
 
-typedef enum {
-    FontSwapPrimary,
-    FontSwapSecondary,
-    FontSwapKeyboard,
-    FontSwapBigNumbers,
-    FontSwapBatteryPercent,
-    FontSwapCount,
-} FontSwap;
-
 typedef struct {
     bool is_nsfw; // TODO: replace with packs text support
-    uint8_t* fonts[FontSwapCount];
-    CanvasFontParameters* font_params[FontSwapCount];
+    uint8_t* fonts[FontTotalNumber];
+    CanvasFontParameters* font_params[FontTotalNumber];
 } XtremeAssets;
 
 void XTREME_SETTINGS_LOAD();
