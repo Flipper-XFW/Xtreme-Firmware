@@ -34,7 +34,6 @@ typedef enum {
     MenuStylePs4,
     MenuStyleVertical,
     MenuStyleC64,
-    MenuStyleEurocorp,
     MenuStyleCompact,
     MenuStyleTerminal,
     MenuStyleCount,
