@@ -28,7 +28,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
         double total_v = (double)sd_info.kb_total;
         double free_v = (double)sd_info.kb_free;
         char* units[] = {"KiB", "MiB", "GiB", "TiB"};
-        uint total_i, free_i;
+        uint8_t total_i, free_i;
         for(total_i = 0; total_i < COUNT_OF(units); total_i++) {
             if(total_v < 1024) break;
             total_v /= 1024;

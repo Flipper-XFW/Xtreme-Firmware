@@ -252,7 +252,6 @@ void subghz_device_cc1101_ext_free() {
     furi_assert(subghz_device_cc1101_ext != NULL);
 
     furi_hal_spi_bus_handle_deinit(subghz_device_cc1101_ext->spi_bus_handle);
-    free(subghz_device_cc1101_ext);
 
     // resetting the CS pins to floating
     if(xtreme_settings.spi_nrf24_handle == SpiDefault || subghz_device_cc1101_ext->power_amp) {
@@ -261,6 +260,7 @@ void subghz_device_cc1101_ext_free() {
         furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeAnalog);
     }
 
+    free(subghz_device_cc1101_ext);
     subghz_device_cc1101_ext = NULL;
 }
 

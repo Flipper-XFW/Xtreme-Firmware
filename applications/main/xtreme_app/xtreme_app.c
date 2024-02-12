@@ -48,7 +48,7 @@ bool xtreme_app_apply(XtremeApp* app) {
             while(flipper_format_delete_key(file, "Frequency"))
                 ;
             FrequencyList_it(it, app->subghz_static_freqs);
-            for(uint i = 0; i < FrequencyList_size(app->subghz_static_freqs); i++) {
+            for(size_t i = 0; i < FrequencyList_size(app->subghz_static_freqs); i++) {
                 flipper_format_write_uint32(
                     file, "Frequency", FrequencyList_get(app->subghz_static_freqs, i), 1);
             }
@@ -56,7 +56,7 @@ bool xtreme_app_apply(XtremeApp* app) {
             if(!flipper_format_rewind(file)) break;
             while(flipper_format_delete_key(file, "Hopper_frequency"))
                 ;
-            for(uint i = 0; i < FrequencyList_size(app->subghz_hopper_freqs); i++) {
+            for(size_t i = 0; i < FrequencyList_size(app->subghz_hopper_freqs); i++) {
                 flipper_format_write_uint32(
                     file, "Hopper_frequency", FrequencyList_get(app->subghz_hopper_freqs, i), 1);
             }
