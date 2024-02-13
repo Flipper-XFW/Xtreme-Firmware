@@ -503,9 +503,9 @@ BrowserWorker* file_browser_worker_alloc(
     ExtFilterArray_init(browser->ext_filter);
 
     browser_parse_ext_filter(browser->ext_filter, ext_filter);
+    browser->passed_ext_filter = furi_string_alloc_set(ext_filter);
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
-    browser->passed_ext_filter = furi_string_alloc_set(ext_filter);
 
     browser->path_current = furi_string_alloc_set(path);
     browser->path_next = furi_string_alloc_set(path);
@@ -581,6 +581,7 @@ void file_browser_worker_set_config(
     furi_string_set(browser->path_next, path);
     browser->keep_selection = false;
     browser_parse_ext_filter(browser->ext_filter, ext_filter);
+    furi_string_set(browser->passed_ext_filter, ext_filter);
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
@@ -594,11 +595,12 @@ const char* file_browser_worker_get_filter_ext(BrowserWorker* browser) {
 void file_browser_worker_set_filter_ext(
     BrowserWorker* browser,
     FuriString* path,
-    const char* filter_ext) {
+    const char* ext_filter) {
     furi_assert(browser);
     furi_string_set(browser->path_next, path);
     browser->keep_selection = true;
-    furi_string_set(browser->passed_ext_filter, filter_ext);
+    browser_parse_ext_filter(browser->ext_filter, ext_filter);
+    furi_string_set(browser->passed_ext_filter, ext_filter);
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
 }
 
