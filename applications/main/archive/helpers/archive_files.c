@@ -18,7 +18,7 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
     } else {
         for(size_t i = 0; i < COUNT_OF(known_ext); i++) {
             if((known_ext[i][0] == '?') || (known_ext[i][0] == '*')) continue;
-            if(furi_string_end_with_str(file->path, known_ext[i])) {
+            if(furi_string_end_with(file->path, known_ext[i])) {
                 // Check for .txt containing folder
                 if(strcmp(known_ext[i], ".txt") == 0) {
                     const char* txt_path = NULL;
