@@ -295,8 +295,17 @@ def _validate_app_imports(target, source, env):
         for sym in unresolved_syms
         if sym.startswith(
             (
-                "totp_",
+                # advanced_plugin
                 "app_api_accumulator_",
+                # gallagher
+                "GALLAGHER_CARDAX_ASCII",
+                "gallagher_deobfuscate_and_parse_credential",
+                # js_
+                "js_delay_with_flags",
+                "js_flags_wait",
+                "js_flags_set",
+                # totp_
+                "totp_",
                 "token_info_",
                 "memset_s",
             )
@@ -305,6 +314,8 @@ def _validate_app_imports(target, source, env):
             prefix in source[0].path
             for prefix in [
                 "advanced_plugin",
+                "gallagher",
+                "js_",
                 "totp_",
             ]
         )
