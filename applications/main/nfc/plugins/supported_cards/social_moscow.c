@@ -1,14 +1,10 @@
 #include "nfc_supported_card_plugin.h"
-#include <core/check.h>
+#include <flipper_application.h>
 
-#include <flipper_application/flipper_application.h>
-
-#include <nfc/nfc_device.h>
-#include <core/string.h>
-#include <lib/bit_lib/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
+
+#include <bit_lib.h>
 #include <furi_hal_rtc.h>
-#include <core/check.h>
 
 #define TAG "Social_Moscow"
 
@@ -63,39 +59,6 @@ static const MfClassicKeyPair social_moscow_4k_keys[] = {
     {.a = 0xa229e68ad9e5, .b = 0x49c2b5296ef4}, {.a = 0xa229e68ad9e5, .b = 0x49c2b5296ef4},
 };
 
-#define FURI_HAL_RTC_SECONDS_PER_MINUTE 60
-#define FURI_HAL_RTC_SECONDS_PER_HOUR (FURI_HAL_RTC_SECONDS_PER_MINUTE * 60)
-#define FURI_HAL_RTC_SECONDS_PER_DAY (FURI_HAL_RTC_SECONDS_PER_HOUR * 24)
-#define FURI_HAL_RTC_EPOCH_START_YEAR 1970
-#define FURI_HAL_RTC_IS_LEAP_YEAR(year) \
-    ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
-
-void timestamp_to_datetime(uint32_t timestamp, FuriHalRtcDateTime* datetime) {
-    uint32_t days = timestamp / FURI_HAL_RTC_SECONDS_PER_DAY;
-    uint32_t seconds_in_day = timestamp % FURI_HAL_RTC_SECONDS_PER_DAY;
-
-    datetime->year = FURI_HAL_RTC_EPOCH_START_YEAR;
-
-    while(days >= furi_hal_rtc_get_days_per_year(datetime->year)) {
-        days -= furi_hal_rtc_get_days_per_year(datetime->year);
-        (datetime->year)++;
-    }
-
-    datetime->month = 1;
-    while(days >= furi_hal_rtc_get_days_per_month(
-                      FURI_HAL_RTC_IS_LEAP_YEAR(datetime->year), datetime->month)) {
-        days -= furi_hal_rtc_get_days_per_month(
-            FURI_HAL_RTC_IS_LEAP_YEAR(datetime->year), datetime->month);
-        (datetime->month)++;
-    }
-
-    datetime->day = days + 1;
-    datetime->hour = seconds_in_day / FURI_HAL_RTC_SECONDS_PER_HOUR;
-    datetime->minute =
-        (seconds_in_day % FURI_HAL_RTC_SECONDS_PER_HOUR) / FURI_HAL_RTC_SECONDS_PER_MINUTE;
-    datetime->second = seconds_in_day % FURI_HAL_RTC_SECONDS_PER_MINUTE;
-}
-
 void from_days_to_datetime(uint16_t days, FuriHalRtcDateTime* datetime, uint16_t start_year) {
     uint32_t timestamp = days * 24 * 60 * 60;
     FuriHalRtcDateTime start_datetime = {0};
@@ -103,7 +66,7 @@ void from_days_to_datetime(uint16_t days, FuriHalRtcDateTime* datetime, uint16_t
     start_datetime.month = 12;
     start_datetime.day = 31;
     timestamp += furi_hal_rtc_datetime_to_timestamp(&start_datetime);
-    timestamp_to_datetime(timestamp, datetime);
+    furi_hal_rtc_timestamp_to_datetime(timestamp, datetime);
 }
 
 void from_minutes_to_datetime(uint32_t minutes, FuriHalRtcDateTime* datetime, uint16_t start_year) {
@@ -113,7 +76,7 @@ void from_minutes_to_datetime(uint32_t minutes, FuriHalRtcDateTime* datetime, ui
     start_datetime.month = 12;
     start_datetime.day = 31;
     timestamp += furi_hal_rtc_datetime_to_timestamp(&start_datetime);
-    timestamp_to_datetime(timestamp, datetime);
+    furi_hal_rtc_timestamp_to_datetime(timestamp, datetime);
 }
 
 bool parse_transport_block(const MfClassicBlock* block, FuriString* result) {

@@ -17,40 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "furi_hal_rtc.h"
 #include "nfc_supported_card_plugin.h"
+#include <flipper_application.h>
 
 #include "protocols/mf_classic/mf_classic.h"
-#include <flipper_application/flipper_application.h>
 
-#include <nfc/nfc_device.h>
-#include <lib/bit_lib/bit_lib.h>
-#include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
+#include <bit_lib.h>
+#include <furi_hal_rtc.h>
 
 #define TAG "Zolotaya Korona Online"
 
 #define TRIP_SECTOR_NUM (4)
 #define INFO_SECTOR_NUM (15)
-
-uint64_t bytes2num_bcd(const uint8_t* src, uint8_t len_bytes, bool* is_bcd) {
-    furi_assert(src);
-    furi_assert(len_bytes <= 9);
-
-    uint64_t result = 0;
-    *is_bcd = true;
-
-    for(uint8_t i = 0; i < len_bytes; i++) {
-        if(((src[i] / 16) > 9) || ((src[i] % 16) > 9)) *is_bcd = false;
-
-        result *= 10;
-        result += src[i] / 16;
-
-        result *= 10;
-        result += src[i] % 16;
-    }
-
-    return result;
-}
 
 bool parse_online_card_tariff(uint16_t tariff_num, FuriString* tariff_name) {
     bool tariff_parsed = false;
@@ -111,10 +89,11 @@ static bool zolotaya_korona_online_parse(const NfcDevice* device, FuriString* pa
 
         // Validate card number
         bool is_bcd;
-        const uint16_t card_number_prefix = bytes2num_bcd(block_start_ptr, 2, &is_bcd);
+        const uint16_t card_number_prefix = bit_lib_bytes_to_num_bcd(block_start_ptr, 2, &is_bcd);
         if(!is_bcd) break;
         if(card_number_prefix != 9643) break;
-        const uint64_t card_number_postfix = bytes2num_bcd(block_start_ptr + 2, 8, &is_bcd) / 10;
+        const uint64_t card_number_postfix =
+            bit_lib_bytes_to_num_bcd(block_start_ptr + 2, 8, &is_bcd) / 10;
         if(!is_bcd) break;
 
         // Parse data

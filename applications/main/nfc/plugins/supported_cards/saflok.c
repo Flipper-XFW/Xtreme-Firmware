@@ -3,11 +3,11 @@
 // FZ plugin by @noproto
 
 #include "nfc_supported_card_plugin.h"
-#include <flipper_application/flipper_application.h>
-#include <nfc/nfc_device.h>
-#include <lib/bit_lib/bit_lib.h>
+#include <flipper_application.h>
+
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
-#include <stdint.h>
+
+#include <bit_lib.h>
 
 #define TAG "Saflok"
 #define MAGIC_TABLE_SIZE 192

@@ -5,10 +5,11 @@
 // Made by @Willy-JL
 
 #include "nfc_supported_card_plugin.h"
+#include <flipper_application.h>
 
-#include <lib/bit_lib/bit_lib.h>
-#include <flipper_application/flipper_application.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
+
+#include <bit_lib.h>
 
 #define TAG "NDEF"
 
