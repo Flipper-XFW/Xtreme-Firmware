@@ -80,7 +80,7 @@ struct Desktop {
 
     bool in_transition : 1;
 
-    Keybind keybinds[KeybindTypeCount][KeybindKeyCount];
+    Keybinds keybinds;
 
     FuriPubSub* ascii_events_pubsub;
     FuriPubSubSubscription* ascii_events_subscription;

@@ -18,12 +18,12 @@ bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x) {
         DESKTOP_SETTINGS_VER);
 }
 
-bool DESKTOP_KEYBINDS_SAVE(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size) {
+bool DESKTOP_KEYBINDS_SAVE(Keybinds* x, size_t size) {
     return saved_struct_save(
         DESKTOP_KEYBINDS_PATH, x, size, DESKTOP_KEYBINDS_MAGIC, DESKTOP_KEYBINDS_VER);
 }
 
-bool DESKTOP_KEYBINDS_LOAD(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size) {
+bool DESKTOP_KEYBINDS_LOAD(Keybinds* x, size_t size) {
     bool ok = saved_struct_load(
         DESKTOP_KEYBINDS_PATH, x, size, DESKTOP_KEYBINDS_MAGIC, DESKTOP_KEYBINDS_VER);
     if(ok) {

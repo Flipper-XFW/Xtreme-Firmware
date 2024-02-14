@@ -62,8 +62,6 @@ class ApplicationsCGenerator:
         app_path = "/ext/apps"
         if app.fap_category:
             app_path += f"/{app.fap_category}"
-        else:
-            app_path += "/assets"
         app_path += f"/{app.appid}.fap"
         return f"""
     {{

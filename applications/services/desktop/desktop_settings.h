@@ -51,10 +51,12 @@ typedef struct {
     bool auto_lock_with_pin;
 } DesktopSettings;
 
+typedef Keybind Keybinds[KeybindTypeCount][KeybindKeyCount];
+
 bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);
 
 bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x);
 
-bool DESKTOP_KEYBINDS_SAVE(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size);
+bool DESKTOP_KEYBINDS_SAVE(Keybinds* x, size_t size);
 
-bool DESKTOP_KEYBINDS_LOAD(Keybind (*x)[KeybindTypeCount][KeybindKeyCount], size_t size);
+bool DESKTOP_KEYBINDS_LOAD(Keybinds* x, size_t size);

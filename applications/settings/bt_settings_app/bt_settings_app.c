@@ -18,7 +18,6 @@ BtSettingsApp* bt_settings_app_alloc() {
     // Load settings
     app->gui = furi_record_open(RECORD_GUI);
     app->bt = furi_record_open(RECORD_BT);
-    bt_settings_load(&app->bt->bt_settings);
 
     // View Dispatcher and Scene Manager
     app->view_dispatcher = view_dispatcher_alloc();
