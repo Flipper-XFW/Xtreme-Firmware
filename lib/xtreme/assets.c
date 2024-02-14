@@ -19,7 +19,8 @@ XtremeAssets xtreme_assets = {
     .font_params = {NULL},
 };
 
-void load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
+static void
+    load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
     const char* pack = xtreme_settings.asset_pack;
     furi_string_printf(path, ICONS_FMT "/meta", pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -70,7 +71,7 @@ void load_icon_animated(const Icon* replace, const char* name, FuriString* path,
     storage_file_close(file);
 }
 
-void load_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
+static void load_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, ICONS_FMT ".bmx", xtreme_settings.asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file) - 8;
@@ -97,7 +98,7 @@ void load_icon_static(const Icon* replace, const char* name, FuriString* path, F
     storage_file_close(file);
 }
 
-void free_icon(const Icon* icon) {
+static void free_icon(const Icon* icon) {
     uint8_t** frames = (void*)icon->frames;
     int32_t frame_count = icon->frame_count;
 
@@ -111,7 +112,7 @@ void free_icon(const Icon* icon) {
     free(frames);
 }
 
-void load_font(Font font, const char* name, FuriString* path, File* file) {
+static void load_font(Font font, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, FONTS_FMT, xtreme_settings.asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t size = storage_file_size(file);
@@ -133,7 +134,7 @@ void load_font(Font font, const char* name, FuriString* path, File* file) {
     storage_file_close(file);
 }
 
-void free_font(Font font) {
+static void free_font(Font font) {
     free(xtreme_assets.fonts[font]);
     xtreme_assets.fonts[font] = NULL;
     free(xtreme_assets.font_params[font]);
@@ -148,7 +149,7 @@ static const char* font_names[] = {
     [FontBatteryPercent] = "BatteryPercent",
 };
 
-void XTREME_ASSETS_LOAD() {
+void xtreme_assets_init() {
     const char* pack = xtreme_settings.asset_pack;
     xtreme_assets.is_nsfw = !strncmp(pack, "NSFW", strlen("NSFW"));
     if(pack[0] == '\0') return;
@@ -181,7 +182,7 @@ void XTREME_ASSETS_LOAD() {
     furi_record_close(RECORD_STORAGE);
 }
 
-void XTREME_ASSETS_FREE() {
+void xtreme_assets_free() {
     for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
         if(ICON_PATHS[i].icon->original != NULL) {
             free_icon(ICON_PATHS[i].icon);

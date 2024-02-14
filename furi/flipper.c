@@ -128,17 +128,22 @@ void flipper_init() {
 
 #ifndef FURI_RAM_EXEC
     if(furi_hal_is_normal_boot()) {
+        // Wait for storage record
         furi_record_open(RECORD_STORAGE);
         furi_record_close(RECORD_STORAGE);
+
         flipper_boot_status(canvas, "Migrating Files");
         flipper_migrate_files();
+
         flipper_boot_status(canvas, "Starting Namespoof");
-        NAMESPOOF_INIT();
+        namespoof_init();
+
         flipper_boot_status(canvas, "Loading Xtreme Settings");
-        XTREME_SETTINGS_LOAD();
+        xtreme_settings_load();
         furi_hal_light_sequence("rgb RB");
+
         flipper_boot_status(canvas, "Loading Xtreme Assets");
-        XTREME_ASSETS_LOAD();
+        xtreme_assets_init();
     } else {
         FURI_LOG_I(TAG, "Special boot, skipping optional components");
     }

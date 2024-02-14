@@ -691,7 +691,7 @@ void bad_kb_config_refresh(BadKbApp* app) {
        xtreme_settings.bad_bt_remember != app->bt_remember) {
         xtreme_settings.bad_bt = app->is_bt;
         xtreme_settings.bad_bt_remember = app->bt_remember;
-        XTREME_SETTINGS_SAVE();
+        xtreme_settings_save();
     }
 }
 

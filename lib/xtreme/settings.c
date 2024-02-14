@@ -45,261 +45,155 @@ XtremeSettings xtreme_settings = {
     .file_naming_prefix_after = false, // Before
 };
 
-void XTREME_SETTINGS_LOAD() {
-    XtremeSettings* x = &xtreme_settings;
+typedef enum {
+    xtreme_settings_type_str,
+    xtreme_settings_type_int,
+    xtreme_settings_type_uint,
+    xtreme_settings_type_enum,
+    xtreme_settings_type_bool,
+} xtreme_settings_type;
+
+static const struct {
+    xtreme_settings_type type;
+    const char* key;
+    void* val;
+    union {
+        size_t str_len;
+        struct {
+            int32_t i_min;
+            int32_t i_max;
+        };
+        struct {
+            uint32_t u_min;
+            uint32_t u_max;
+        };
+        uint8_t e_cnt;
+    };
+#define clamp(t, min, max) .t##_min = min, .t##_max = max
+#define setting(t, n) .type = xtreme_settings_type##t, .key = #n, .val = &xtreme_settings.n
+#define setting_str(n) setting(_str, n), .str_len = sizeof(xtreme_settings.n)
+#define setting_int(n, min, max) setting(_int, n), clamp(i, min, max)
+#define setting_uint(n, min, max) setting(_uint, n), clamp(u, min, max)
+#define setting_enum(n, cnt) setting(_enum, n), .e_cnt = cnt
+#define setting_bool(n) setting(_bool, n)
+} xtreme_settings_entries[] = {
+    {setting_str(asset_pack)},
+    {setting_uint(anim_speed, 25, 300)},
+    {setting_int(cycle_anims, -1, 86400)},
+    {setting_bool(unlock_anims)},
+    {setting_bool(credits_anim)},
+    {setting_enum(menu_style, MenuStyleCount)},
+    {setting_bool(bad_pins_format)},
+    {setting_bool(allow_locked_rpc_commands)},
+    {setting_bool(lock_on_boot)},
+    {setting_bool(lockscreen_poweroff)},
+    {setting_bool(lockscreen_time)},
+    {setting_bool(lockscreen_seconds)},
+    {setting_bool(lockscreen_date)},
+    {setting_bool(lockscreen_statusbar)},
+    {setting_bool(lockscreen_prompt)},
+    {setting_bool(lockscreen_transparent)},
+    {setting_enum(battery_icon, BatteryIconCount)},
+    {setting_bool(statusbar_clock)},
+    {setting_bool(status_icons)},
+    {setting_bool(bar_borders)},
+    {setting_bool(bar_background)},
+    {setting_bool(sort_dirs_first)},
+    {setting_bool(show_hidden_files)},
+    {setting_bool(show_internal_tab)},
+    {setting_uint(favorite_timeout, 0, 60)},
+    {setting_bool(bad_bt)},
+    {setting_bool(bad_bt_remember)},
+    {setting_bool(dark_mode)},
+    {setting_bool(rgb_backlight)},
+    {setting_uint(butthurt_timer, 0, 172800)},
+    {setting_uint(charge_cap, 5, 100)},
+    {setting_enum(spi_cc1101_handle, SpiCount)},
+    {setting_enum(spi_nrf24_handle, SpiCount)},
+    {setting_enum(uart_esp_channel, FuriHalSerialIdMax)},
+    {setting_enum(uart_nmea_channel, FuriHalSerialIdMax)},
+    {setting_enum(uart_general_channel, FuriHalSerialIdMax)},
+    {setting_bool(file_naming_prefix_after)},
+};
+
+void xtreme_settings_load() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, XTREME_SETTINGS_PATH)) {
-        FuriString* s = furi_string_alloc();
-        uint32_t u;
-        int32_t i;
-        bool b;
-        if(flipper_format_read_string(file, "asset_pack", s)) {
-            strlcpy(x->asset_pack, furi_string_get_cstr(s), sizeof(x->asset_pack));
-        } else {
-            flipper_format_rewind(file);
+        FuriString* val_str = furi_string_alloc();
+        int32_t val_int;
+        uint32_t val_uint;
+        bool val_bool;
+
+        bool ok;
+        for(size_t entry_i = 0; entry_i < COUNT_OF(xtreme_settings_entries); entry_i++) {
+#define entry xtreme_settings_entries[entry_i]
+            switch(entry.type) {
+            case xtreme_settings_type_str:
+                ok = flipper_format_read_string(file, entry.key, val_str);
+                if(ok) strlcpy((char*)entry.val, furi_string_get_cstr(val_str), entry.str_len);
+                break;
+            case xtreme_settings_type_int:
+                ok = flipper_format_read_int32(file, entry.key, &val_int, 1);
+                if(ok) *(int32_t*)entry.val = CLAMP(val_int, entry.i_max, entry.i_min);
+                break;
+            case xtreme_settings_type_uint:
+                ok = flipper_format_read_uint32(file, entry.key, &val_uint, 1);
+                if(ok) *(uint32_t*)entry.val = CLAMP(val_uint, entry.u_max, entry.u_min);
+                break;
+            case xtreme_settings_type_enum:
+                ok = flipper_format_read_uint32(file, entry.key, &val_uint, 1);
+                if(ok) *(uint8_t*)entry.val = CLAMP(val_uint, entry.e_cnt - 1U, 0U);
+                break;
+            case xtreme_settings_type_bool:
+                ok = flipper_format_read_bool(file, entry.key, &val_bool, 1);
+                if(ok) *(bool*)entry.val = val_bool;
+                break;
+            default:
+                continue;
+            }
+            if(!ok) flipper_format_rewind(file);
         }
-        if(flipper_format_read_uint32(file, "anim_speed", &u, 1)) {
-            x->anim_speed = CLAMP(u, 300U, 25U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_int32(file, "cycle_anims", &i, 1)) {
-            x->cycle_anims = CLAMP(i, 86400, -1);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "unlock_anims", &b, 1)) {
-            x->unlock_anims = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "credits_anim", &b, 1)) {
-            x->credits_anim = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "menu_style", &u, 1)) {
-            x->menu_style = CLAMP(u, MenuStyleCount - 1U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "bad_pins_format", &b, 1)) {
-            x->bad_pins_format = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "allow_locked_rpc_commands", &b, 1)) {
-            x->allow_locked_rpc_commands = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lock_on_boot", &b, 1)) {
-            x->lock_on_boot = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lockscreen_poweroff", &b, 1)) {
-            x->lockscreen_poweroff = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lockscreen_time", &b, 1)) {
-            x->lockscreen_time = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lockscreen_seconds", &b, 1)) {
-            x->lockscreen_seconds = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lockscreen_date", &b, 1)) {
-            x->lockscreen_date = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lockscreen_statusbar", &b, 1)) {
-            x->lockscreen_statusbar = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lockscreen_prompt", &b, 1)) {
-            x->lockscreen_prompt = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "lockscreen_transparent", &b, 1)) {
-            x->lockscreen_transparent = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "battery_icon", &u, 1)) {
-            x->battery_icon = CLAMP(u, BatteryIconCount - 1U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "statusbar_clock", &b, 1)) {
-            x->statusbar_clock = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "status_icons", &b, 1)) {
-            x->status_icons = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "bar_borders", &b, 1)) {
-            x->bar_borders = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "bar_background", &b, 1)) {
-            x->bar_background = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "sort_dirs_first", &b, 1)) {
-            x->sort_dirs_first = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "show_hidden_files", &b, 1)) {
-            x->show_hidden_files = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "show_internal_tab", &b, 1)) {
-            x->show_internal_tab = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "favorite_timeout", &u, 1)) {
-            x->favorite_timeout = CLAMP(u, 60U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "bad_bt", &b, 1)) {
-            x->bad_bt = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "bad_bt_remember", &b, 1)) {
-            x->bad_bt_remember = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "dark_mode", &b, 1)) {
-            x->dark_mode = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "rgb_backlight", &b, 1)) {
-            x->rgb_backlight = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "butthurt_timer", &u, 1)) {
-            x->butthurt_timer = CLAMP(u, 172800U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "charge_cap", &u, 1)) {
-            x->charge_cap = CLAMP(u, 100U, 5U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "spi_cc1101_handle", &u, 1)) {
-            x->spi_cc1101_handle = CLAMP(u, SpiCount - 1U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "spi_nrf24_handle", &u, 1)) {
-            x->spi_nrf24_handle = CLAMP(u, SpiCount - 1U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "uart_esp_channel", &u, 1)) {
-            x->uart_esp_channel = CLAMP(u, FuriHalSerialIdMax - 1U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "uart_nmea_channel", &u, 1)) {
-            x->uart_nmea_channel = CLAMP(u, FuriHalSerialIdMax - 1U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_uint32(file, "uart_general_channel", &u, 1)) {
-            x->uart_general_channel = CLAMP(u, FuriHalSerialIdMax - 1U, 0U);
-        } else {
-            flipper_format_rewind(file);
-        }
-        if(flipper_format_read_bool(file, "file_naming_prefix_after", &b, 1)) {
-            x->file_naming_prefix_after = b;
-        } else {
-            flipper_format_rewind(file);
-        }
-        furi_string_free(s);
+
+        furi_string_free(val_str);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 
-    rgb_backlight_load_settings(x->rgb_backlight);
+    rgb_backlight_load_settings(xtreme_settings.rgb_backlight);
 }
 
-void XTREME_SETTINGS_SAVE() {
-    XtremeSettings* x = &xtreme_settings;
+void xtreme_settings_save() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
+
     if(flipper_format_file_open_always(file, XTREME_SETTINGS_PATH)) {
-        uint32_t e;
-        flipper_format_write_string_cstr(file, "asset_pack", x->asset_pack);
-        flipper_format_write_uint32(file, "anim_speed", &x->anim_speed, 1);
-        flipper_format_write_int32(file, "cycle_anims", &x->cycle_anims, 1);
-        flipper_format_write_bool(file, "unlock_anims", &x->unlock_anims, 1);
-        flipper_format_write_bool(file, "credits_anim", &x->credits_anim, 1);
-        e = x->menu_style;
-        flipper_format_write_uint32(file, "menu_style", &e, 1);
-        flipper_format_write_bool(file, "bad_pins_format", &x->bad_pins_format, 1);
-        flipper_format_write_bool(
-            file, "allow_locked_rpc_commands", &x->allow_locked_rpc_commands, 1);
-        flipper_format_write_bool(file, "lock_on_boot", &x->lock_on_boot, 1);
-        flipper_format_write_bool(file, "lockscreen_poweroff", &x->lockscreen_poweroff, 1);
-        flipper_format_write_bool(file, "lockscreen_time", &x->lockscreen_time, 1);
-        flipper_format_write_bool(file, "lockscreen_seconds", &x->lockscreen_seconds, 1);
-        flipper_format_write_bool(file, "lockscreen_date", &x->lockscreen_date, 1);
-        flipper_format_write_bool(file, "lockscreen_statusbar", &x->lockscreen_statusbar, 1);
-        flipper_format_write_bool(file, "lockscreen_prompt", &x->lockscreen_prompt, 1);
-        flipper_format_write_bool(file, "lockscreen_transparent", &x->lockscreen_transparent, 1);
-        e = x->battery_icon;
-        flipper_format_write_uint32(file, "battery_icon", &e, 1);
-        flipper_format_write_bool(file, "statusbar_clock", &x->statusbar_clock, 1);
-        flipper_format_write_bool(file, "status_icons", &x->status_icons, 1);
-        flipper_format_write_bool(file, "bar_borders", &x->bar_borders, 1);
-        flipper_format_write_bool(file, "bar_background", &x->bar_background, 1);
-        flipper_format_write_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
-        flipper_format_write_bool(file, "show_hidden_files", &x->show_hidden_files, 1);
-        flipper_format_write_bool(file, "show_internal_tab", &x->show_internal_tab, 1);
-        flipper_format_write_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
-        flipper_format_write_bool(file, "bad_bt", &x->bad_bt, 1);
-        flipper_format_write_bool(file, "bad_bt_remember", &x->bad_bt_remember, 1);
-        flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);
-        flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
-        flipper_format_write_uint32(file, "butthurt_timer", &x->butthurt_timer, 1);
-        flipper_format_write_uint32(file, "charge_cap", &x->charge_cap, 1);
-        e = x->spi_cc1101_handle;
-        flipper_format_write_uint32(file, "spi_cc1101_handle", &e, 1);
-        e = x->spi_nrf24_handle;
-        flipper_format_write_uint32(file, "spi_nrf24_handle", &e, 1);
-        e = x->uart_esp_channel;
-        flipper_format_write_uint32(file, "uart_esp_channel", &e, 1);
-        e = x->uart_nmea_channel;
-        flipper_format_write_uint32(file, "uart_nmea_channel", &e, 1);
-        e = x->uart_general_channel;
-        flipper_format_write_uint32(file, "uart_general_channel", &e, 1);
-        flipper_format_write_bool(
-            file, "file_naming_prefix_after", &x->file_naming_prefix_after, 1);
+        uint32_t tmp_enum;
+        for(size_t entry_i = 0; entry_i < COUNT_OF(xtreme_settings_entries); entry_i++) {
+#define entry xtreme_settings_entries[entry_i]
+            switch(entry.type) {
+            case xtreme_settings_type_str:
+                flipper_format_write_string_cstr(file, entry.key, (char*)entry.val);
+                break;
+            case xtreme_settings_type_int:
+                flipper_format_write_int32(file, entry.key, (int32_t*)entry.val, 1);
+                break;
+            case xtreme_settings_type_uint:
+                flipper_format_write_uint32(file, entry.key, (uint32_t*)entry.val, 1);
+                break;
+            case xtreme_settings_type_enum:
+                tmp_enum = *(uint8_t*)entry.val;
+                flipper_format_write_uint32(file, entry.key, &tmp_enum, 1);
+                break;
+            case xtreme_settings_type_bool:
+                flipper_format_write_bool(file, entry.key, (bool*)entry.val, 1);
+                break;
+            default:
+                continue;
+            }
+        }
     }
+
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 }

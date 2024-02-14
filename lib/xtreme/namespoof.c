@@ -4,7 +4,7 @@
 
 #define TAG "NameSpoof"
 
-void NAMESPOOF_INIT() {
+void namespoof_init() {
     FuriString* str = furi_string_alloc();
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);

@@ -394,10 +394,6 @@ Function,-,SK6805_set_led_color,void,"uint8_t, uint8_t, uint8_t, uint8_t"
 Function,-,SK6805_update,void,
 Function,-,SystemCoreClockUpdate,void,
 Function,-,SystemInit,void,
-Function,+,XTREME_ASSETS_FREE,void,
-Function,+,XTREME_ASSETS_LOAD,void,
-Function,-,XTREME_SETTINGS_LOAD,void,
-Function,+,XTREME_SETTINGS_SAVE,void,
 Function,-,_Exit,void,int
 Function,+,__aeabi_uldivmod,void*,"uint64_t, uint64_t"
 Function,-,__assert,void,"const char*, int, const char*"
@@ -3610,6 +3606,10 @@ Function,+,widget_alloc,Widget*,
 Function,+,widget_free,void,Widget*
 Function,+,widget_get_view,View*,Widget*
 Function,+,widget_reset,void,Widget*
+Function,+,xtreme_assets_free,void,
+Function,+,xtreme_assets_init,void,
+Function,-,xtreme_settings_load,void,
+Function,+,xtreme_settings_save,void,
 Function,-,y0,double,double
 Function,-,y0f,float,float
 Function,-,y1,double,double
