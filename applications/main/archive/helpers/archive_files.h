@@ -20,11 +20,13 @@ typedef enum {
     ArchiveFileTypeInfraredRemote,
     ArchiveFileTypeBadKb,
     ArchiveFileTypeU2f,
-    ArchiveFileTypeAppOrJs,
+    ArchiveFileTypeApplication,
+    ArchiveFileTypeJS,
     ArchiveFileTypeSearch,
     ArchiveFileTypeUpdateManifest,
     ArchiveFileTypeFolder,
     ArchiveFileTypeUnknown,
+    ArchiveFileTypeAppOrJs,
     ArchiveFileTypeLoading,
 } ArchiveFileTypeEnum;
 

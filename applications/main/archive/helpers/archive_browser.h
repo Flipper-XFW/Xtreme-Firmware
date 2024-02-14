@@ -33,11 +33,13 @@ static const char* known_ext[] = {
     [ArchiveFileTypeInfraredRemote] = ".txt",
     [ArchiveFileTypeBadKb] = ".txt",
     [ArchiveFileTypeU2f] = "?",
-    [ArchiveFileTypeAppOrJs] = ".fap|.js",
+    [ArchiveFileTypeApplication] = ".fap",
+    [ArchiveFileTypeJS] = ".js",
     [ArchiveFileTypeSearch] = "*",
     [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
+    [ArchiveFileTypeAppOrJs] = ".fap|.js",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
