@@ -101,7 +101,7 @@ With this new system in place, it allows for some cool stuff like locking animat
 <br>
 <h2 align="center">List of changes:</h2>
 
-There are too many to name them all, this is a **non-comprehensive** list of the **most notable from a end-user perspective**. For a more detailed list, read through the [**changelogs**](https://github.com/Flipper-XFW/Xtreme-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://flipper-xtre.me/#features).
+There are too many to name them all, this is a **non-comprehensive** list of the **most notable from an end-user perspective**. For a more detailed list, read through the [**changelogs**](https://github.com/Flipper-XFW/Xtreme-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://flipper-xtre.me/#features).
 
 Note that this repo is always updated with the great work from our friends at [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and the latest changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware). Below are mentioned only **our** changes that we can actually be credited for, so make sure to check their fantastic additions aswell. And a huge thank you to both teams! 
 
