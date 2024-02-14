@@ -5297,6 +5297,7 @@ FRESULT f_forward (
 /*-----------------------------------------------------------------------*/
 /* Create an FAT/exFAT volume                                            */
 /*-----------------------------------------------------------------------*/
+#define _MKFS_ONLY_EXFAT
 
 FRESULT f_mkfs (
 	const TCHAR* path,	/* Logical drive number */
@@ -5369,6 +5370,16 @@ FRESULT f_mkfs (
 	if (sz_vol < 128) return FR_MKFS_ABORTED;	/* Check if volume size is >=128s */
 
 	/* Pre-determine the FAT type */
+#ifdef _MKFS_ONLY_EXFAT
+	(void)sz_dir;
+	(void)sz_rsv;
+	(void)pau;
+	(void)cst32;
+	(void)cst;
+	(void)n_rootdir;
+	(void)n_fats;
+	fmt = FS_EXFAT;
+#else
 	do {
 		if (_FS_EXFAT && (opt & FM_EXFAT)) {	/* exFAT possible? */
 			if ((opt & FM_ANY) == FM_EXFAT || sz_vol >= 0x2000000 || au > 128) {	/* exFAT only, vol >= 32Ms or au > 128s ? */
@@ -5384,6 +5395,7 @@ FRESULT f_mkfs (
 		if (!(opt & FM_FAT)) return FR_INVALID_PARAMETER;	/* no-FAT? */
 		fmt = FS_FAT16;
 	} while (0);
+#endif
 
 #if _FS_EXFAT
 	if (fmt == FS_EXFAT) {	/* Create an exFAT volume */
@@ -5548,6 +5560,11 @@ FRESULT f_mkfs (
 
 	} else
 #endif	/* _FS_EXFAT */
+#ifdef _MKFS_ONLY_EXFAT
+	{
+		return FR_INVALID_PARAMETER;
+	}
+#else
 	{	/* Create an FAT12/16/32 volume */
 		do {
 			pau = au;
@@ -5701,8 +5718,12 @@ FRESULT f_mkfs (
 			sect += n; nsect -= n;
 		} while (nsect);
 	}
+#endif
 
 	/* Determine system ID in the partition table */
+#ifdef _MKFS_ONLY_EXFAT
+	sys = 0x07;			/* HPFS/NTFS/exFAT */
+#else
 	if (_FS_EXFAT && fmt == FS_EXFAT) {
 		sys = 0x07;			/* HPFS/NTFS/exFAT */
 	} else {
@@ -5716,6 +5737,7 @@ FRESULT f_mkfs (
 			}
 		}
 	}
+#endif
 
 	/* Update partition information */
 	if (_MULTI_PARTITION && part != 0) {	/* Created in the existing partition */
