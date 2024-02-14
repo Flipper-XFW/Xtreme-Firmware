@@ -104,33 +104,29 @@ static bool zolotaya_korona_parse(const NfcDevice* device, FuriString* parsed_da
         block_start_ptr = &data->block[start_trip_block_number].data[7];
 
         const uint8_t status = block_start_ptr[0] % 16;
-        const uint16_t sequence_number = nfc_util_bytes2num(block_start_ptr + 1, 2);
-        const uint8_t discount_code = nfc_util_bytes2num(block_start_ptr + 3, 1);
+        const uint16_t sequence_number = bit_lib_bytes_to_num_be(block_start_ptr + 1, 2);
+        const uint8_t discount_code = bit_lib_bytes_to_num_be(block_start_ptr + 3, 1);
 
         // block 1: refill block
         block_start_ptr = &data->block[start_trip_block_number + 1].data[1];
 
-        const uint16_t refill_machine_id = nfc_util_bytes2num_little_endian(block_start_ptr, 2);
-        const uint32_t last_refill_timestamp =
-            nfc_util_bytes2num_little_endian(block_start_ptr + 2, 4);
-        const uint32_t last_refill_amount =
-            nfc_util_bytes2num_little_endian(block_start_ptr + 6, 4);
+        const uint16_t refill_machine_id = bit_lib_bytes_to_num_le(block_start_ptr, 2);
+        const uint32_t last_refill_timestamp = bit_lib_bytes_to_num_le(block_start_ptr + 2, 4);
+        const uint32_t last_refill_amount = bit_lib_bytes_to_num_le(block_start_ptr + 6, 4);
         const uint32_t last_refill_amount_rub = last_refill_amount / 100;
         const uint8_t last_refill_amount_kop = last_refill_amount % 100;
-        const uint16_t refill_counter = nfc_util_bytes2num_little_endian(block_start_ptr + 10, 2);
+        const uint16_t refill_counter = bit_lib_bytes_to_num_le(block_start_ptr + 10, 2);
 
         FuriHalRtcDateTime last_refill_datetime = {0};
         furi_hal_rtc_timestamp_to_datetime(last_refill_timestamp, &last_refill_datetime);
 
         // block 2: trip block
         block_start_ptr = &data->block[start_trip_block_number + 2].data[0];
-        const char validator_first_letter =
-            nfc_util_bytes2num_little_endian(block_start_ptr + 1, 1);
+        const char validator_first_letter = bit_lib_bytes_to_num_le(block_start_ptr + 1, 1);
         const uint32_t validator_id = bytes2num_bcd(block_start_ptr + 2, 3, &verified);
-        const uint32_t last_trip_timestamp =
-            nfc_util_bytes2num_little_endian(block_start_ptr + 6, 4);
-        const uint8_t track_number = nfc_util_bytes2num_little_endian(block_start_ptr + 10, 1);
-        const uint32_t prev_balance = nfc_util_bytes2num_little_endian(block_start_ptr + 11, 4);
+        const uint32_t last_trip_timestamp = bit_lib_bytes_to_num_le(block_start_ptr + 6, 4);
+        const uint8_t track_number = bit_lib_bytes_to_num_le(block_start_ptr + 10, 1);
+        const uint32_t prev_balance = bit_lib_bytes_to_num_le(block_start_ptr + 11, 4);
         const uint32_t prev_balance_rub = prev_balance / 100;
         const uint8_t prev_balance_kop = prev_balance % 100;
 
@@ -143,7 +139,7 @@ static bool zolotaya_korona_parse(const NfcDevice* device, FuriString* parsed_da
         block_start_ptr = &data->block[start_purse_block_number].data[0];
 
         // block 0
-        const uint32_t balance = nfc_util_bytes2num_little_endian(block_start_ptr, 4);
+        const uint32_t balance = bit_lib_bytes_to_num_le(block_start_ptr, 4);
 
         uint32_t balance_rub = balance / 100;
         uint8_t balance_kop = balance % 100;

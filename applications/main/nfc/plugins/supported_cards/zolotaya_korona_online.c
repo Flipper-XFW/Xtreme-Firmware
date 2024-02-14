@@ -121,11 +121,11 @@ static bool zolotaya_korona_online_parse(const NfcDevice* device, FuriString* pa
         FuriString* tariff_name = furi_string_alloc();
 
         block_start_ptr = &data->block[start_info_block_number].data[1];
-        const uint16_t tariff = nfc_util_bytes2num(block_start_ptr, 2);
+        const uint16_t tariff = bit_lib_bytes_to_num_be(block_start_ptr, 2);
         parse_online_card_tariff(tariff, tariff_name);
 
         block_start_ptr = &data->block[start_trip_block_number].data[0];
-        const uint8_t region_number = nfc_util_bytes2num(block_start_ptr, 1);
+        const uint8_t region_number = bit_lib_bytes_to_num_be(block_start_ptr, 1);
 
         furi_string_cat_printf(
             parsed_data,
