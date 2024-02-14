@@ -6,7 +6,7 @@
 
 #include "nfc_supported_card_plugin.h"
 
-#include <nfc/helpers/nfc_util.h>
+#include <lib/bit_lib/bit_lib.h>
 #include <flipper_application/flipper_application.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 

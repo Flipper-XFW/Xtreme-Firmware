@@ -22,7 +22,7 @@
 #include <flipper_application/flipper_application.h>
 
 #include <nfc/nfc_device.h>
-#include <nfc/helpers/nfc_util.h>
+#include <lib/bit_lib/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #include <furi_hal_rtc.h>
