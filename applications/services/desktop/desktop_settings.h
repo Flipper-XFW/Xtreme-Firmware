@@ -53,6 +53,10 @@ typedef struct {
 
 typedef Keybind Keybinds[KeybindTypeCount][KeybindKeyCount];
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);
 
 bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x);
@@ -60,3 +64,7 @@ bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x);
 bool DESKTOP_KEYBINDS_SAVE(Keybinds* x, size_t size);
 
 bool DESKTOP_KEYBINDS_LOAD(Keybinds* x, size_t size);
+
+#ifdef __cplusplus
+}
+#endif

@@ -248,7 +248,6 @@ class AppBuildset:
         FlipperAppType.APP,
         FlipperAppType.DEBUG,
         FlipperAppType.ARCHIVE,
-        FlipperAppType.SETTINGS,
         FlipperAppType.STARTUP,
     )
     EXTERNAL_APP_TYPES_MAP = {
@@ -257,6 +256,7 @@ class AppBuildset:
         FlipperAppType.PLUGIN: True,
         FlipperAppType.DEBUG: True,
         FlipperAppType.MENUEXTERNAL: False,
+        FlipperAppType.SETTINGS: False,
     }
 
     @classmethod

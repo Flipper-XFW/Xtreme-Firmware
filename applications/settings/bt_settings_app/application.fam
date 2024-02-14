@@ -9,4 +9,5 @@ App(
         "gui",
     ],
     order=10,
+    fap_category="assets",
 )

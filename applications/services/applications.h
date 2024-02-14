@@ -62,7 +62,7 @@ extern const FlipperInternalApplication FLIPPER_ARCHIVE;
 /* Settings list
  * Spawned by loader
  */
-extern const FlipperInternalApplication FLIPPER_SETTINGS_APPS[];
+extern const FlipperExternalApplication FLIPPER_SETTINGS_APPS[];
 extern const size_t FLIPPER_SETTINGS_APPS_COUNT;
 
 /* External Menu Apps list

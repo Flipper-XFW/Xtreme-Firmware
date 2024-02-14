@@ -1,5 +1,5 @@
 #include "power_settings_app.h"
-#include "../about/about.h"
+#include <applications/settings/about/about.h>
 
 static bool power_settings_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

@@ -6,4 +6,5 @@ App(
     requires=["storage"],
     stack_size=2 * 1024,
     order=30,
+    fap_category="assets",
 )
