@@ -26,6 +26,9 @@ static void loader_cli_list() {
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
     }
+    for(size_t i = 0; i < FLIPPER_EXTSETTINGS_APPS_COUNT; i++) {
+        printf("\t%s\r\n", FLIPPER_EXTSETTINGS_APPS[i].name);
+    }
 }
 
 static void loader_cli_info(Loader* loader) {

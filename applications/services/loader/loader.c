@@ -26,9 +26,9 @@ static const char* loader_find_external_application_by_name(const char* app_name
         }
     }
 
-    for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_SETTINGS_APPS[i].name, app_name) == 0) {
-            return FLIPPER_SETTINGS_APPS[i].path;
+    for(size_t i = 0; i < FLIPPER_EXTSETTINGS_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTSETTINGS_APPS[i].name, app_name) == 0) {
+            return FLIPPER_EXTSETTINGS_APPS[i].path;
         }
     }
 
@@ -327,6 +327,7 @@ static const FlipperInternalApplication* loader_find_application_by_name(const c
         const uint32_t count;
     } lists[] = {
         {FLIPPER_APPS, FLIPPER_APPS_COUNT},
+        {FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT},
         {FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT},
         {FLIPPER_DEBUG_APPS, FLIPPER_DEBUG_APPS_COUNT},
     };
