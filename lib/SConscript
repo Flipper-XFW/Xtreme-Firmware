@@ -45,6 +45,7 @@ libs = env.BuildModules(
         "xtreme",
         "heatshrink",
         "bit_lib",
+        "datetime",
     ],
 )
 
