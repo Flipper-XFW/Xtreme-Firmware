@@ -69,7 +69,7 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     char second_str[5];
     char date_str[14];
     char meridian_str[3];
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     LocaleTimeFormat time_format = locale_get_time_format();
     LocaleDateFormat date_format = locale_get_date_format();
