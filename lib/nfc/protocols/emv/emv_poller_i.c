@@ -621,84 +621,80 @@ EmvError emv_poller_read_sfi_record(EmvPoller* instance, uint8_t sfi, uint8_t re
     return error;
 }
 
-EmvError emv_poller_read_afl(EmvPoller* instance) {
+EmvError emv_poller_read_afl(EmvPoller* instance, bool bruteforce_sfi, uint16_t* readed_mask) {
     EmvError error = EmvErrorNone;
+    bool pan_fetched = (instance->data->emv_application.pan_len);
+    bool cardholder_name_fetched = strlen(instance->data->emv_application.cardholder_name);
 
-    APDU* afl = &instance->data->emv_application.afl;
+    if(!bruteforce_sfi) {
+        // SEARCH PAN, RETURN WHEN FOUND
+        APDU* afl = &instance->data->emv_application.afl;
 
-    if(afl->size == 0) {
-        return false;
-    }
+        if(afl->size == 0) {
+            return false;
+        }
 
-    FURI_LOG_D(TAG, "Search PAN in SFI");
+        FURI_LOG_D(TAG, "Search PAN in SFI");
 
-    // uint8_t sfi_2_mask = 0;
-    // uint8_t sfi_3_mask = 0;
+        // Iterate through all files
+        for(size_t i = 0; i < instance->data->emv_application.afl.size; i += 4) {
+            uint8_t sfi = afl->data[i] >> 3;
+            uint8_t record_start = afl->data[i + 1];
+            uint8_t record_end = afl->data[i + 2];
+            // Iterate through all records in file
+            for(uint8_t record = record_start; record <= record_end; ++record) {
+                if((sfi <= 3) && (record <= 5))
+                    FURI_BIT_SET(
+                        *readed_mask,
+                        record + ((sfi - 2) * 8)); //black magic: mask 0003333300022222
 
-    // bool pan_fetched = (instance->data->emv_application.pan_len);
+                error = emv_poller_read_sfi_record(instance, sfi, record);
+                if(error != EmvErrorNone) break;
 
-    // Iterate through all files
-    for(size_t i = 0; i < instance->data->emv_application.afl.size; i += 4) {
-        uint8_t sfi = afl->data[i] >> 3;
-        uint8_t record_start = afl->data[i + 1];
-        uint8_t record_end = afl->data[i + 2];
-        // Iterate through all records in file
-        for(uint8_t record = record_start; record <= record_end; ++record) {
-            // if((sfi == 2) && (record < 8)) FURI_BIT_SET(sfi_2_mask, record);
-            // if((sfi == 3) && (record < 8)) FURI_BIT_SET(sfi_3_mask, record);
+                if(!emv_decode_response_tlv(
+                       bit_buffer_get_data(instance->rx_buffer),
+                       bit_buffer_get_size_bytes(instance->rx_buffer),
+                       &instance->data->emv_application)) {
+                    error = EmvErrorProtocol;
+                    FURI_LOG_T(TAG, "Failed to parse SFI 0x%X record %d", sfi, record);
+                }
 
-            error = emv_poller_read_sfi_record(instance, sfi, record);
-            if(error != EmvErrorNone) break;
-
-            if(!emv_decode_response_tlv(
-                   bit_buffer_get_data(instance->rx_buffer),
-                   bit_buffer_get_size_bytes(instance->rx_buffer),
-                   &instance->data->emv_application)) {
-                error = EmvErrorProtocol;
-                FURI_LOG_T(TAG, "Failed to parse SFI 0x%X record %d", sfi, record);
+                if(instance->data->emv_application.pan_len) {
+                    pan_fetched = true;
+                    break;
+                } // Card number fetched
             }
+            if(pan_fetched) break;
+        }
+    } else { // BRUTFORCE FILES 2-3. SEARCH CARDHOLDER NAME
+        FURI_LOG_T(TAG, "Bruteforce files 2-3");
+        for(size_t sfi = 2; sfi <= 3; sfi++) {
+            // Iterate through records 1-5 in file
+            for(size_t record = 1; record <= 5; record++) {
+                // Skip previously readed sfi
+                if((*readed_mask >> (record + ((sfi - 2) * 8))) & (0b1)) continue;
 
-            // Some READ RECORD returns 1 byte response 0x12/0x13 (IDK WTF),
-            // then poller return Timeout to all subsequent requests.
-            // TODO: remove below lines when it was fixed
-            if(instance->data->emv_application.pan_len != 0)
-                return EmvErrorNone; // Card number fetched
-            // if(instance->data->emv_application.pan_len) pan_fetched = true; // Card number fetched
+                error = emv_poller_read_sfi_record(instance, sfi, record);
+                if(error != EmvErrorNone) break;
+
+                if(!emv_decode_response_tlv(
+                       bit_buffer_get_data(instance->rx_buffer),
+                       bit_buffer_get_size_bytes(instance->rx_buffer),
+                       &instance->data->emv_application)) {
+                    error = EmvErrorProtocol;
+                    FURI_LOG_T(TAG, "Failed to parse SFI 0x%X record %d", sfi, record);
+                }
+
+                if(strlen(instance->data->emv_application.cardholder_name))
+                    cardholder_name_fetched = true;
+            }
         }
     }
-    // bool cardholder_name_fetched = strlen(instance->data->emv_application.cardholder_name);
-    // Bruteforse files 2-3
-    // FURI_LOG_T(TAG, "Bruteforce files 2-3");
-    // for(size_t sfi = 2; sfi <= 3; sfi++) {
-    //     // Iterate through records 1-5 in file
-    //     for(size_t record = 1; record <= 5; record++) {
-    //         // Skip previously readed sfi
-    //         // if(sfi == 2) {
-    //         //     if((sfi_2_mask >> record) & (0b1)) continue;
-    //         // }
-    //         // if(sfi == 3) {
-    //         //     if((sfi_3_mask >> record) & (0b1)) continue;
-    //         // }
 
-    //         if(strlen(instance->data->emv_application.cardholder_name))
-    //             cardholder_name_fetched = true;
-    //         error = emv_poller_read_sfi_record(instance, sfi, record);
-    //         if(error != EmvErrorNone) break;
-
-    //         if(!emv_decode_response_tlv(
-    //                bit_buffer_get_data(instance->rx_buffer),
-    //                bit_buffer_get_size_bytes(instance->rx_buffer),
-    //                &instance->data->emv_application)) {
-    //             error = EmvErrorProtocol;
-    //             FURI_LOG_T(TAG, "Failed to parse SFI 0x%X record %d", sfi, record);
-    //         }
-    //     }
-    // }
-    // if(pan_fetched || cardholder_name_fetched)
-    //     return EmvErrorNone;
-    // else
-    //     return error;
-    return error;
+    if((pan_fetched && (!bruteforce_sfi)) || (cardholder_name_fetched && bruteforce_sfi))
+        return EmvErrorNone;
+    else
+        return error;
 }
 
 static EmvError emv_poller_req_get_data(EmvPoller* instance, uint16_t tag) {
