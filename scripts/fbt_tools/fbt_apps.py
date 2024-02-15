@@ -23,10 +23,6 @@ class ApplicationsCGenerator:
         FlipperAppType.SYSTEM: ("FlipperInternalApplication", "FLIPPER_SYSTEM_APPS"),
         FlipperAppType.APP: ("FlipperInternalApplication", "FLIPPER_APPS"),
         FlipperAppType.DEBUG: ("FlipperInternalApplication", "FLIPPER_DEBUG_APPS"),
-        FlipperAppType.SETTINGS: (
-            "FlipperInternalApplication",
-            "FLIPPER_SETTINGS_APPS",
-        ),
         FlipperAppType.STARTUP: (
             "FlipperInternalOnStartHook",
             "FLIPPER_ON_SYSTEM_START",
@@ -38,9 +34,9 @@ class ApplicationsCGenerator:
             "FlipperExternalApplication",
             "FLIPPER_EXTERNAL_APPS",
         ),
-        FlipperAppType.EXTSETTINGS: (
+        FlipperAppType.SETTINGS: (
             "FlipperExternalApplication",
-            "FLIPPER_EXTSETTINGS_APPS",
+            "FLIPPER_SETTINGS_APPS",
         ),
     }
 

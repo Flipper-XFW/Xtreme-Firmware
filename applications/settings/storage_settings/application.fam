@@ -1,7 +1,7 @@
 App(
     appid="storage_settings",
     name="Storage",
-    apptype=FlipperAppType.EXTSETTINGS,
+    apptype=FlipperAppType.SETTINGS,
     entry_point="storage_settings_app",
     requires=["storage"],
     stack_size=2 * 1024,
