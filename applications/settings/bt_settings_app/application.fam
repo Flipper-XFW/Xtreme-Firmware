@@ -8,6 +8,7 @@ App(
         "bt",
         "gui",
     ],
+    flags=["InsomniaSafe"],
     order=10,
     fap_category="assets",
 )
