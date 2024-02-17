@@ -664,7 +664,7 @@ static FS_Error storage_int_common_remove(void* ctx, const char* path) {
     return storage_int_parse_error(result);
 }
 
-static FS_Error storage_int_common_rename(void* ctx, const char* old, const char* new) { // FIXME
+static FS_Error storage_int_common_rename(void* ctx, const char* old, const char* new) {
     StorageData* storage = ctx;
     lfs_t* lfs = lfs_get_from_storage(storage);
     int result = lfs_rename(lfs, old, new);
