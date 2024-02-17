@@ -1,12 +1,19 @@
+#include "../bad_kb_app_i.h"
 #include "bad_kb_view.h"
 #include "../helpers/ducky_script.h"
-#include "../bad_kb_app.h"
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <xtreme/xtreme.h>
+#include <bt/bt_service/bt_i.h>
 
 #define MAX_NAME_LEN 64
+
+struct BadKb {
+    View* view;
+    BadKbButtonCallback callback;
+    void* context;
+};
 
 typedef struct {
     char file_name[MAX_NAME_LEN];
@@ -43,6 +50,8 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_draw_str(
         canvas, 2, 8 + canvas_current_font_height(canvas), furi_string_get_cstr(disp_str));
+
+    furi_string_reset(disp_str);
 
     canvas_draw_icon(canvas, 22, 24, &I_UsbTree_48x22);
 

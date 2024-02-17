@@ -1,4 +1,6 @@
 #include "hid.h"
+#include <extra_profiles/hid_profile.h>
+#include <profiles/serial_profile.h>
 #include "views.h"
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
@@ -18,7 +20,21 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexMouseClicker,
     HidSubmenuIndexMouseJiggler,
     HidSubmenuIndexPushToTalk,
+    HidSubmenuIndexRemovePairing,
 };
+
+static void bt_hid_remove_pairing(Bt* bt) {
+    bt_disconnect(bt);
+
+    // Wait 2nd core to update nvm storage
+    furi_delay_ms(200);
+
+    furi_hal_bt_stop_advertising();
+
+    bt_forget_bonded_devices(bt);
+
+    furi_hal_bt_start_advertising();
+}
 
 static void hid_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -61,6 +77,8 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexPushToTalk) {
         app->view_id = HidViewPushToTalkMenu;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPushToTalkMenu);
+    } else if(index == HidSubmenuIndexRemovePairing) {
+        bt_hid_remove_pairing(app->bt);
     }
 }
 
@@ -68,13 +86,13 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     furi_assert(context);
     Hid* hid = context;
     bool connected = (status == BtStatusConnected);
-    if(hid->transport == HidTransportBle) {
-        if(connected) {
-            notification_internal_message(hid->notifications, &sequence_set_blue_255);
-        } else {
-            notification_internal_message(hid->notifications, &sequence_reset_blue);
-        }
+#ifdef HID_TRANSPORT_BLE
+    if(connected) {
+        notification_internal_message(hid->notifications, &sequence_set_blue_255);
+    } else {
+        notification_internal_message(hid->notifications, &sequence_reset_blue);
     }
+#endif
     hid_keynote_set_connected_status(hid->hid_keynote, connected);
     hid_keyboard_set_connected_status(hid->hid_keyboard, connected);
     hid_numpad_set_connected_status(hid->hid_numpad, connected);
@@ -103,9 +121,8 @@ static uint32_t hid_ptt_menu_view(void* context) {
     return HidViewPushToTalkMenu;
 }
 
-Hid* hid_alloc(HidTransport transport) {
+Hid* hid_alloc() {
     Hid* app = malloc(sizeof(Hid));
-    app->transport = transport;
 
     // Gui
     app->gui = furi_record_open(RECORD_GUI);
@@ -146,14 +163,12 @@ Hid* hid_alloc(HidTransport transport) {
         app->device_type_submenu, "Movie", HidSubmenuIndexMovie, hid_submenu_callback, app);
     submenu_add_item(
         app->device_type_submenu, "Mouse", HidSubmenuIndexMouse, hid_submenu_callback, app);
-    if(app->transport == HidTransportBle) {
-        submenu_add_item(
-            app->device_type_submenu,
-            "TikTok / YT Shorts",
-            HidSubmenuIndexTikShorts,
-            hid_submenu_callback,
-            app);
-    }
+    submenu_add_item(
+        app->device_type_submenu,
+        "TikTok / YT Shorts",
+        HidSubmenuIndexTikShorts,
+        hid_submenu_callback,
+        app);
     submenu_add_item(
         app->device_type_submenu,
         "Mouse Clicker",
@@ -172,6 +187,14 @@ Hid* hid_alloc(HidTransport transport) {
         HidSubmenuIndexPushToTalk,
         hid_submenu_callback,
         app);
+#ifdef HID_TRANSPORT_BLE
+    submenu_add_item(
+        app->device_type_submenu,
+        "Remove Pairing",
+        HidSubmenuIndexRemovePairing,
+        hid_submenu_callback,
+        app);
+#endif
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));
@@ -265,10 +288,9 @@ void hid_free(Hid* app) {
     furi_assert(app);
 
     // Reset notification
-    if(app->transport == HidTransportBle) {
-        notification_internal_message(app->notifications, &sequence_reset_blue);
-    }
-
+#ifdef HID_TRANSPORT_BLE
+    notification_internal_message(app->notifications, &sequence_reset_blue);
+#endif
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
     submenu_free(app->device_type_submenu);
@@ -310,131 +332,9 @@ void hid_free(Hid* app) {
     free(app);
 }
 
-void hid_hal_keyboard_press(Hid* instance, uint16_t event) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_kb_press(event);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_kb_press(event);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_keyboard_release(Hid* instance, uint16_t event) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_kb_release(event);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_kb_release(event);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_keyboard_release_all(Hid* instance) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_kb_release_all();
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_kb_release_all();
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_consumer_key_press(Hid* instance, uint16_t event) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_consumer_key_press(event);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_consumer_key_press(event);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_consumer_key_release(Hid* instance, uint16_t event) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_consumer_key_release(event);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_consumer_key_release(event);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_consumer_key_release_all(Hid* instance) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_consumer_key_release_all();
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_kb_release_all();
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_move(dx, dy);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_mouse_move(dx, dy);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_mouse_scroll(Hid* instance, int8_t delta) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_scroll(delta);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_mouse_scroll(delta);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_mouse_press(Hid* instance, uint16_t event) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_press(event);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_mouse_press(event);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_mouse_release(Hid* instance, uint16_t event) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_release(event);
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_mouse_release(event);
-    } else {
-        furi_crash();
-    }
-}
-
-void hid_hal_mouse_release_all(Hid* instance) {
-    furi_assert(instance);
-    if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_release_all();
-    } else if(instance->transport == HidTransportUsb) {
-        furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
-        furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
-    } else {
-        furi_crash();
-    }
-}
-
 int32_t hid_usb_app(void* p) {
     UNUSED(p);
-    Hid* app = hid_alloc(HidTransportUsb);
+    Hid* app = hid_alloc();
     app = hid_app_alloc_view(app);
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
@@ -455,7 +355,7 @@ int32_t hid_usb_app(void* p) {
 
 int32_t hid_ble_app(void* p) {
     UNUSED(p);
-    Hid* app = hid_alloc(HidTransportBle);
+    Hid* app = hid_alloc();
     app = hid_app_alloc_view(app);
 
     bt_disconnect(app->bt);
@@ -475,7 +375,9 @@ int32_t hid_ble_app(void* p) {
 
     furi_record_close(RECORD_STORAGE);
 
-    furi_check(bt_set_profile(app->bt, BtProfileHidKeyboard));
+    app->ble_hid_profile = bt_profile_start(app->bt, ble_profile_hid, NULL);
+
+    furi_check(app->ble_hid_profile);
 
     furi_hal_bt_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
@@ -493,7 +395,7 @@ int32_t hid_ble_app(void* p) {
 
     bt_keys_storage_set_default_path(app->bt);
 
-    furi_check(bt_set_profile(app->bt, BtProfileSerial));
+    furi_check(bt_profile_restore_default(app->bt));
 
     hid_free(app);
 
