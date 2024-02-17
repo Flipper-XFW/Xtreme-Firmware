@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import pathlib
 
 from flipper.app import App
 from flipper.assets.icon import file2image
@@ -137,6 +138,12 @@ class Main(App):
         )
         icons = []
         paths = []
+        if self.args.filename == "assets_icons":
+            symbols = ""
+        else:
+            symbols = (
+                pathlib.Path(__file__).parent / "../targets/f7/api_symbols.csv"
+            ).read_text()
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
             self.logger.debug(f"Processing directory {dirpath}")
@@ -147,6 +154,11 @@ class Main(App):
             if "frame_rate" in filenames:
                 self.logger.debug("Folder contains animation")
                 icon_name = "A_" + os.path.split(dirpath)[1].replace("-", "_")
+                if f"Variable,+,{icon_name},Icon," in symbols:
+                    self.logger.warning(
+                        f"{self.args.filename}: ignoring duplicate icon {icon_name}"
+                    )
+                    continue
                 width = height = None
                 frame_count = 0
                 frame_rate = 0
@@ -192,6 +204,11 @@ class Main(App):
                     icon_name = "I_" + "_".join(filename.split(".")[:-1]).replace(
                         "-", "_"
                     )
+                    if f"Variable,+,{icon_name},Icon," in symbols:
+                        self.logger.warning(
+                            f"{self.args.filename}: ignoring duplicate icon {icon_name}"
+                        )
+                        continue
                     fullfilename = os.path.join(dirpath, filename)
                     width, height, data = self._icon2header(fullfilename)
                     frame_name = f"_{icon_name}_0"
@@ -258,6 +275,8 @@ extern const IconPath ICON_PATHS[];
 extern const size_t ICON_PATHS_COUNT;
 """
             )
+        else:
+            icons_h.write("#include <assets_icons.h>\n")
         icons_h.close()
         self.logger.debug("Done")
         return 0
