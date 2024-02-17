@@ -779,7 +779,7 @@ Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
 Function,-,bt_open_rpc_connection,void,Bt*
 Function,+,bt_profile_restore_default,_Bool,Bt*
 Function,+,bt_profile_start,FuriHalBleProfileBase*,"Bt*, const FuriHalBleProfileTemplate*, FuriHalBleProfileParams"
-Function,-,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
+Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,-,bt_settings_load,_Bool,BtSettings*
 Function,+,bt_settings_save,_Bool,BtSettings*

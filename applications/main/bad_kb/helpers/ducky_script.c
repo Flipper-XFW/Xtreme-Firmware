@@ -3,7 +3,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <lib/toolbox/args.h>
-#include <furi_hal_bt_hid.h>
+#include "ble_hid.h"
 #include <furi_hal_usb_hid.h>
 #include <bt/bt_service/bt.h>
 #include <storage/storage.h>
@@ -14,10 +14,8 @@
 #include <xtreme/xtreme.h>
 #include "../scenes/bad_kb_scene.h"
 
-const uint8_t BAD_KB_EMPTY_MAC[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
-
 // Adjusts to serial MAC +2 in app init
-uint8_t BAD_KB_BOUND_MAC[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
+uint8_t BAD_KB_BOUND_MAC[GAP_MAC_ADDR_SIZE] = {0};
 
 #define TAG "BadKb"
 #define WORKER_TAG TAG "Worker"
@@ -27,11 +25,11 @@ uint8_t BAD_KB_BOUND_MAC[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
 
 // Delays for waiting between HID key press and key release
 const uint8_t bt_hid_delays[LevelRssiNum] = {
-    45, // LevelRssi122_100
-    38, // LevelRssi99_80
-    30, // LevelRssi79_60
-    26, // LevelRssi59_40
-    21, // LevelRssi39_0
+    60, // LevelRssi122_100
+    55, // LevelRssi99_80
+    50, // LevelRssi79_60
+    47, // LevelRssi59_40
+    34, // LevelRssi39_0
 };
 
 uint8_t bt_timeout = 0;
@@ -120,12 +118,17 @@ bool ducky_get_number(const char* param, uint32_t* val) {
     return false;
 }
 
+uint8_t furi_hal_bt_hid_get_led_state() {
+    // FIXME
+    return 0;
+}
+
 void ducky_numlock_on(BadKbScript* bad_kb) {
     if(bad_kb->bt) {
         if((furi_hal_bt_hid_get_led_state() & HID_KB_LED_NUM) == 0) {
-            furi_hal_bt_hid_kb_press(HID_KEYBOARD_LOCK_NUM_LOCK);
+            ble_profile_hid_kb_press(bad_kb->app->ble_hid, HID_KEYBOARD_LOCK_NUM_LOCK);
             furi_delay_ms(bt_timeout);
-            furi_hal_bt_hid_kb_release(HID_KEYBOARD_LOCK_NUM_LOCK);
+            ble_profile_hid_kb_release(bad_kb->app->ble_hid, HID_KEYBOARD_LOCK_NUM_LOCK);
         }
     } else {
         if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) {
@@ -140,9 +143,9 @@ bool ducky_numpad_press(BadKbScript* bad_kb, const char num) {
 
     uint16_t key = numpad_keys[num - '0'];
     if(bad_kb->bt) {
-        furi_hal_bt_hid_kb_press(key);
+        ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
         furi_delay_ms(bt_timeout);
-        furi_hal_bt_hid_kb_release(key);
+        ble_profile_hid_kb_release(bad_kb->app->ble_hid, key);
     } else {
         furi_hal_hid_kb_press(key);
         furi_hal_hid_kb_release(key);
@@ -156,7 +159,7 @@ bool ducky_altchar(BadKbScript* bad_kb, const char* charcode) {
     bool state = false;
 
     if(bad_kb->bt) {
-        furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT);
+        ble_profile_hid_kb_press(bad_kb->app->ble_hid, KEY_MOD_LEFT_ALT);
     } else {
         furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
     }
@@ -168,7 +171,7 @@ bool ducky_altchar(BadKbScript* bad_kb, const char* charcode) {
     }
 
     if(bad_kb->bt) {
-        furi_hal_bt_hid_kb_release(KEY_MOD_LEFT_ALT);
+        ble_profile_hid_kb_release(bad_kb->app->ble_hid, KEY_MOD_LEFT_ALT);
     } else {
         furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
     }
@@ -213,9 +216,9 @@ bool ducky_string(BadKbScript* bad_kb, const char* param) {
             uint16_t keycode = BADKB_ASCII_TO_KEY(bad_kb, param[i]);
             if(keycode != HID_KEYBOARD_NONE) {
                 if(bad_kb->bt) {
-                    furi_hal_bt_hid_kb_press(keycode);
+                    ble_profile_hid_kb_press(bad_kb->app->ble_hid, keycode);
                     furi_delay_ms(bt_timeout);
-                    furi_hal_bt_hid_kb_release(keycode);
+                    ble_profile_hid_kb_release(bad_kb->app->ble_hid, keycode);
                 } else {
                     furi_hal_hid_kb_press(keycode);
                     furi_hal_hid_kb_release(keycode);
@@ -223,9 +226,9 @@ bool ducky_string(BadKbScript* bad_kb, const char* param) {
             }
         } else {
             if(bad_kb->bt) {
-                furi_hal_bt_hid_kb_press(HID_KEYBOARD_RETURN);
+                ble_profile_hid_kb_press(bad_kb->app->ble_hid, HID_KEYBOARD_RETURN);
                 furi_delay_ms(bt_timeout);
-                furi_hal_bt_hid_kb_release(HID_KEYBOARD_RETURN);
+                ble_profile_hid_kb_release(bad_kb->app->ble_hid, HID_KEYBOARD_RETURN);
             } else {
                 furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
                 furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
@@ -248,9 +251,9 @@ static bool ducky_string_next(BadKbScript* bad_kb) {
         uint16_t keycode = BADKB_ASCII_TO_KEY(bad_kb, print_char);
         if(keycode != HID_KEYBOARD_NONE) {
             if(bad_kb->bt) {
-                furi_hal_bt_hid_kb_press(keycode);
+                ble_profile_hid_kb_press(bad_kb->app->ble_hid, keycode);
                 furi_delay_ms(bt_timeout);
-                furi_hal_bt_hid_kb_release(keycode);
+                ble_profile_hid_kb_release(bad_kb->app->ble_hid, keycode);
             } else {
                 furi_hal_hid_kb_press(keycode);
                 furi_hal_hid_kb_release(keycode);
@@ -258,9 +261,9 @@ static bool ducky_string_next(BadKbScript* bad_kb) {
         }
     } else {
         if(bad_kb->bt) {
-            furi_hal_bt_hid_kb_press(HID_KEYBOARD_RETURN);
+            ble_profile_hid_kb_press(bad_kb->app->ble_hid, HID_KEYBOARD_RETURN);
             furi_delay_ms(bt_timeout);
-            furi_hal_bt_hid_kb_release(HID_KEYBOARD_RETURN);
+            ble_profile_hid_kb_release(bad_kb->app->ble_hid, HID_KEYBOARD_RETURN);
         } else {
             furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
             furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
@@ -302,9 +305,9 @@ static int32_t ducky_parse_line(BadKbScript* bad_kb, FuriString* line) {
         }
     }
     if(bad_kb->bt) {
-        furi_hal_bt_hid_kb_press(key);
+        ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
         furi_delay_ms(bt_timeout);
-        furi_hal_bt_hid_kb_release(key);
+        ble_profile_hid_kb_release(bad_kb->app->ble_hid, key);
     } else {
         furi_hal_hid_kb_press(key);
         furi_hal_hid_kb_release(key);
@@ -313,7 +316,7 @@ static int32_t ducky_parse_line(BadKbScript* bad_kb, FuriString* line) {
 }
 
 static bool ducky_set_usb_id(BadKbScript* bad_kb, const char* line) {
-    FuriHalUsbHidConfig* cfg = &bad_kb->app->id_config.usb_cfg;
+    FuriHalUsbHidConfig* cfg = &bad_kb->app->id_config.usb;
 
     if(sscanf(line, "%lX:%lX", &cfg->vid, &cfg->pid) == 2) {
         cfg->manuf[0] = '\0';
@@ -339,20 +342,20 @@ static bool ducky_set_bt_id(BadKbScript* bad_kb, const char* line) {
     BadKbConfig* cfg = &bad_kb->app->id_config;
 
     size_t line_len = strlen(line);
-    size_t mac_len = BAD_KB_MAC_LEN * 3; // 2 text chars + separator per byte
+    size_t mac_len = sizeof(cfg->ble.mac) * 3; // 2 text chars + separator per byte
     if(line_len < mac_len + 1) return false; // MAC + at least 1 char for name
 
-    for(size_t i = 0; i < BAD_KB_MAC_LEN; i++) {
+    for(size_t i = 0; i < sizeof(cfg->ble.mac); i++) {
         char a = line[i * 3];
         char b = line[i * 3 + 1];
         if((a < 'A' && a > 'F') || (a < '0' && a > '9') || (b < 'A' && b > 'F') ||
-           (b < '0' && b > '9') || !hex_char_to_uint8(a, b, &cfg->bt_mac[i])) {
+           (b < '0' && b > '9') || !hex_char_to_uint8(a, b, &cfg->ble.mac[i])) {
             return false;
         }
     }
-    furi_hal_bt_reverse_mac_addr(cfg->bt_mac);
+    furi_hal_bt_reverse_mac_addr(cfg->ble.mac);
 
-    strlcpy(cfg->bt_name, line + mac_len, BAD_KB_NAME_LEN);
+    strlcpy(cfg->ble.name, line + mac_len, sizeof(cfg->ble.name));
     FURI_LOG_D(WORKER_TAG, "set bt id: %s", line);
     return true;
 }
@@ -515,36 +518,28 @@ static uint32_t bad_kb_flags_get(uint32_t flags_mask, uint32_t timeout) {
 
 int32_t bad_kb_conn_apply(BadKbApp* app) {
     if(app->is_bt) {
-        // Shorthands so this bs is readable
-        BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
-        FuriHalBtProfile kbd = FuriHalBtProfileHidKeyboard;
-
-        // Setup new config
         bt_timeout = bt_hid_delays[LevelRssi39_0];
         bt_disconnect(app->bt);
         furi_delay_ms(200);
         bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
-        furi_hal_bt_set_profile_adv_name(kbd, cfg->bt_name);
+
+        // Setup new config
+        BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
+        memcpy(&app->cur_ble_cfg, &cfg->ble, sizeof(cfg->ble));
+        app->cur_ble_cfg.bonding = app->bt_remember;
         if(app->bt_remember) {
-            furi_hal_bt_set_profile_mac_addr(kbd, BAD_KB_BOUND_MAC);
-            furi_hal_bt_set_profile_pairing_method(kbd, GapPairingPinCodeVerifyYesNo);
+            app->cur_ble_cfg.pairing = GapPairingPinCodeVerifyYesNo;
         } else {
-            furi_hal_bt_set_profile_mac_addr(kbd, cfg->bt_mac);
-            furi_hal_bt_set_profile_pairing_method(kbd, GapPairingNone);
+            app->cur_ble_cfg.pairing = GapPairingNone;
+            memcpy(app->cur_ble_cfg.mac, BAD_KB_BOUND_MAC, sizeof(BAD_KB_BOUND_MAC));
         }
 
-        // Set profile, restart BT, adjust defaults
-        furi_check(bt_set_profile(app->bt, BtProfileHidKeyboard));
+        // Set profile
+        app->ble_hid = bt_profile_start(app->bt, ble_profile_hid, &app->cur_ble_cfg);
+        furi_check(app->ble_hid);
 
         // Advertise even if BT is off in settings
         furi_hal_bt_start_advertising();
-
-        // Toggle key callback after since BT restart resets it
-        if(app->bt_remember) {
-            bt_enable_peer_key_update(app->bt);
-        } else {
-            bt_disable_peer_key_update(app->bt);
-        }
 
         app->conn_mode = BadKbConnModeBt;
 
@@ -553,14 +548,16 @@ int32_t bad_kb_conn_apply(BadKbApp* app) {
         furi_hal_usb_unlock();
 
         // Context will apply with set_config only if pointer address is different, so we use a copy
-        FuriHalUsbHidConfig* hid_cfg = malloc(sizeof(FuriHalUsbHidConfig));
-        memcpy(
-            hid_cfg,
-            app->set_usb_id ? &app->id_config.usb_cfg : &app->config.usb_cfg,
-            sizeof(FuriHalUsbHidConfig));
-        furi_check(furi_hal_usb_set_config(&usb_hid, hid_cfg));
-        if(app->hid_cfg) free(app->hid_cfg);
-        app->hid_cfg = hid_cfg;
+        FuriHalUsbHidConfig* cur_usb_cfg = malloc(sizeof(FuriHalUsbHidConfig));
+
+        // Setup new config
+        BadKbConfig* cfg = app->set_usb_id ? &app->id_config : &app->config;
+        memcpy(cur_usb_cfg, &cfg->usb, sizeof(cfg->usb));
+
+        // Set profile
+        furi_check(furi_hal_usb_set_config(&usb_hid, cur_usb_cfg));
+        if(app->cur_usb_cfg) free(app->cur_usb_cfg);
+        app->cur_usb_cfg = cur_usb_cfg;
 
         app->conn_mode = BadKbConnModeUsb;
     }
@@ -570,17 +567,10 @@ int32_t bad_kb_conn_apply(BadKbApp* app) {
 
 void bad_kb_conn_reset(BadKbApp* app) {
     if(app->conn_mode == BadKbConnModeBt) {
-        // TODO: maybe also restore BT profile?
         bt_disconnect(app->bt);
         furi_delay_ms(200);
         bt_keys_storage_set_default_path(app->bt);
-        FuriHalBtProfile kbd = FuriHalBtProfileHidKeyboard;
-        furi_hal_bt_set_profile_mac_addr(kbd, app->prev_bt_mac);
-        furi_hal_bt_set_profile_adv_name(kbd, app->prev_bt_name);
-        furi_hal_bt_set_profile_pairing_method(kbd, app->prev_bt_mode);
-        furi_check(bt_set_profile(app->bt, BtProfileSerial));
-        bt_enable_peer_key_update(app->bt);
-
+        furi_check(bt_profile_restore_default(app->bt));
     } else if(app->conn_mode == BadKbConnModeUsb) {
         // TODO: maybe also restore USB context?
         furi_check(furi_hal_usb_set_config(app->prev_usb_mode, NULL));
@@ -591,24 +581,24 @@ void bad_kb_conn_reset(BadKbApp* app) {
 
 void bad_kb_config_adjust(BadKbConfig* cfg) {
     // Avoid empty name
-    if(strcmp(cfg->bt_name, "") == 0) {
-        snprintf(cfg->bt_name, BAD_KB_NAME_LEN, "Control %s", furi_hal_version_get_name_ptr());
+    if(cfg->ble.name[0] == '\0') {
+        snprintf(
+            cfg->ble.name, sizeof(cfg->ble.name), "Control %s", furi_hal_version_get_name_ptr());
     }
 
-    // MAC is adjusted by furi_hal_bt, adjust here too so it matches after applying
     const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
-    uint8_t empty_mac[BAD_KB_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
-    uint8_t default_mac[BAD_KB_MAC_LEN] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
-    if(memcmp(cfg->bt_mac, empty_mac, BAD_KB_MAC_LEN) == 0 ||
-       memcmp(cfg->bt_mac, normal_mac, BAD_KB_MAC_LEN) == 0 ||
-       memcmp(cfg->bt_mac, default_mac, BAD_KB_MAC_LEN) == 0) {
-        memcpy(cfg->bt_mac, normal_mac, BAD_KB_MAC_LEN);
-        cfg->bt_mac[2]++;
+    uint8_t empty_mac[sizeof(cfg->ble.mac)] = {0};
+    uint8_t default_mac[sizeof(cfg->ble.mac)] = {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72}; //furi_hal_bt
+    if(memcmp(cfg->ble.mac, empty_mac, sizeof(cfg->ble.mac)) == 0 ||
+       memcmp(cfg->ble.mac, normal_mac, sizeof(cfg->ble.mac)) == 0 ||
+       memcmp(cfg->ble.mac, default_mac, sizeof(cfg->ble.mac)) == 0) {
+        memcpy(cfg->ble.mac, normal_mac, sizeof(cfg->ble.mac));
+        cfg->ble.mac[2]++;
     }
 
     // Use defaults if vid or pid are unset
-    if(cfg->usb_cfg.vid == 0) cfg->usb_cfg.vid = HID_VID_DEFAULT;
-    if(cfg->usb_cfg.pid == 0) cfg->usb_cfg.pid = HID_PID_DEFAULT;
+    if(cfg->usb.vid == 0) cfg->usb.vid = HID_VID_DEFAULT;
+    if(cfg->usb.pid == 0) cfg->usb.pid = HID_PID_DEFAULT;
 }
 
 void bad_kb_config_refresh(BadKbApp* app) {
@@ -630,14 +620,10 @@ void bad_kb_config_refresh(BadKbApp* app) {
             apply = true;
             bad_kb_conn_reset(app);
         } else {
-            apply = apply || strncmp(
-                                 cfg->bt_name,
-                                 furi_hal_bt_get_profile_adv_name(FuriHalBtProfileHidKeyboard),
-                                 BAD_KB_NAME_LEN);
-            apply = apply || memcmp(
-                                 app->bt_remember ? BAD_KB_BOUND_MAC : cfg->bt_mac,
-                                 furi_hal_bt_get_profile_mac_addr(FuriHalBtProfileHidKeyboard),
-                                 BAD_KB_MAC_LEN);
+            BleProfileHidParams* cur = &app->cur_ble_cfg;
+            apply = apply || cfg->ble.bonding != app->bt_remember;
+            apply = apply || strncmp(cfg->ble.name, cur->name, sizeof(cfg->ble.name));
+            apply = apply || memcmp(cfg->ble.mac, cur->mac, sizeof(cfg->ble.mac));
         }
     } else {
         BadKbConfig* cfg = app->set_usb_id ? &app->id_config : &app->config;
@@ -647,17 +633,11 @@ void bad_kb_config_refresh(BadKbApp* app) {
             apply = true;
             bad_kb_conn_reset(app);
         } else {
-            void* ctx;
-            if(furi_hal_usb_get_config() == &usb_hid &&
-               (ctx = furi_hal_usb_get_config_context()) != NULL) {
-                FuriHalUsbHidConfig* cur = ctx;
-                apply = apply || cfg->usb_cfg.vid != cur->vid;
-                apply = apply || cfg->usb_cfg.pid != cur->pid;
-                apply = apply || strncmp(cfg->usb_cfg.manuf, cur->manuf, sizeof(cur->manuf));
-                apply = apply || strncmp(cfg->usb_cfg.product, cur->product, sizeof(cur->product));
-            } else {
-                apply = true;
-            }
+            FuriHalUsbHidConfig* cur = app->cur_usb_cfg;
+            apply = apply || cfg->usb.vid != cur->vid;
+            apply = apply || cfg->usb.pid != cur->pid;
+            apply = apply || strncmp(cfg->usb.manuf, cur->manuf, sizeof(cur->manuf));
+            apply = apply || strncmp(cfg->usb.product, cur->product, sizeof(cur->product));
         }
     }
 
@@ -838,14 +818,14 @@ static int32_t bad_kb_worker(void* context) {
                 } else if(flags & WorkerEvtStartStop) {
                     worker_state = BadKbStateIdle; // Stop executing script
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
@@ -871,7 +851,7 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateScriptError;
                     bad_kb->st.state = worker_state;
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
@@ -880,7 +860,7 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateIdle;
                     bad_kb->st.state = BadKbStateDone;
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
@@ -917,7 +897,7 @@ static int32_t bad_kb_worker(void* context) {
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
@@ -940,7 +920,7 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateIdle; // Stop executing script
                     bad_kb->st.state = worker_state;
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
@@ -948,7 +928,7 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     bad_kb->st.state = worker_state;
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
@@ -983,14 +963,14 @@ static int32_t bad_kb_worker(void* context) {
                 } else if(flags & WorkerEvtStartStop) {
                     worker_state = BadKbStateIdle; // Stop executing script
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     if(bad_kb->bt) {
-                        furi_hal_bt_hid_kb_release_all();
+                        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
                     } else {
                         furi_hal_hid_kb_release_all();
                     }
