@@ -1,4 +1,4 @@
-#include "../bad_kb_app.h"
+#include "../bad_kb_app_i.h"
 
 void bad_kb_scene_config_usb_vidpid_byte_input_callback(void* context) {
     BadKbApp* bad_kb = context;

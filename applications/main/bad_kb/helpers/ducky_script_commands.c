@@ -1,6 +1,7 @@
+#include "../bad_kb_app_i.h"
 #include <furi_hal.h>
-#include "ble_hid.h"
 #include <furi_hal_usb_hid.h>
+#include "ble_hid.h"
 #include "ducky_script.h"
 #include "ducky_script_i.h"
 

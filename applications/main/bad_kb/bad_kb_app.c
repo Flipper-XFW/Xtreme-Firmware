@@ -1,13 +1,15 @@
-#include "bad_kb_app.h"
+#include "bad_kb_app_i.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <xtreme/xtreme.h>
 #include <lib/flipper_format/flipper_format.h>
-
 #include <bt/bt_service/bt_i.h>
-#include <bt/bt_service/bt.h>
+#include "helpers/ducky_script_i.h"
+
+// Adjusts to serial MAC +2 in app init
+uint8_t BAD_KB_BOUND_MAC[GAP_MAC_ADDR_SIZE] = {0};
 
 static bool bad_kb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -111,6 +113,165 @@ void bad_kb_app_show_loading_popup(BadKbApp* app, bool show) {
     } else {
         // Restore default timer priority
         furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
+    }
+}
+
+int32_t bad_kb_conn_apply(BadKbApp* app) {
+    if(app->is_bt) {
+        bt_timeout = bt_hid_delays[LevelRssi39_0];
+        bt_disconnect(app->bt);
+        furi_delay_ms(200);
+        bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
+
+        // Setup new config
+        BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
+        memcpy(&app->cur_ble_cfg, &cfg->ble, sizeof(cfg->ble));
+        app->cur_ble_cfg.bonding = app->bt_remember;
+        if(app->bt_remember) {
+            app->cur_ble_cfg.pairing = GapPairingPinCodeVerifyYesNo;
+        } else {
+            app->cur_ble_cfg.pairing = GapPairingNone;
+            memcpy(app->cur_ble_cfg.mac, BAD_KB_BOUND_MAC, sizeof(BAD_KB_BOUND_MAC));
+        }
+
+        // Set profile
+        app->ble_hid = bt_profile_start(app->bt, ble_profile_hid, &app->cur_ble_cfg);
+        furi_check(app->ble_hid);
+
+        // Advertise even if BT is off in settings
+        furi_hal_bt_start_advertising();
+
+        app->conn_mode = BadKbConnModeBt;
+
+    } else {
+        // Unlock RPC connections
+        furi_hal_usb_unlock();
+
+        // Context will apply with set_config only if pointer address is different, so we use a copy
+        FuriHalUsbHidConfig* cur_usb_cfg = malloc(sizeof(FuriHalUsbHidConfig));
+
+        // Setup new config
+        BadKbConfig* cfg = app->set_usb_id ? &app->id_config : &app->config;
+        memcpy(cur_usb_cfg, &cfg->usb, sizeof(cfg->usb));
+
+        // Set profile
+        furi_check(furi_hal_usb_set_config(&usb_hid, cur_usb_cfg));
+        if(app->cur_usb_cfg) free(app->cur_usb_cfg);
+        app->cur_usb_cfg = cur_usb_cfg;
+
+        app->conn_mode = BadKbConnModeUsb;
+    }
+
+    return 0;
+}
+
+void bad_kb_conn_reset(BadKbApp* app) {
+    if(app->conn_mode == BadKbConnModeBt) {
+        bt_disconnect(app->bt);
+        furi_delay_ms(200);
+        bt_keys_storage_set_default_path(app->bt);
+        furi_check(bt_profile_restore_default(app->bt));
+    } else if(app->conn_mode == BadKbConnModeUsb) {
+        // TODO: maybe also restore USB context?
+        furi_check(furi_hal_usb_set_config(app->prev_usb_mode, NULL));
+    }
+
+    app->conn_mode = BadKbConnModeNone;
+}
+
+void bad_kb_config_adjust(BadKbConfig* cfg) {
+    // Avoid empty name
+    if(cfg->ble.name[0] == '\0') {
+        snprintf(
+            cfg->ble.name, sizeof(cfg->ble.name), "Control %s", furi_hal_version_get_name_ptr());
+    }
+
+    const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
+    uint8_t empty_mac[sizeof(cfg->ble.mac)] = {0};
+    uint8_t default_mac[sizeof(cfg->ble.mac)] = {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72}; //furi_hal_bt
+    if(memcmp(cfg->ble.mac, empty_mac, sizeof(cfg->ble.mac)) == 0 ||
+       memcmp(cfg->ble.mac, normal_mac, sizeof(cfg->ble.mac)) == 0 ||
+       memcmp(cfg->ble.mac, default_mac, sizeof(cfg->ble.mac)) == 0) {
+        memcpy(cfg->ble.mac, normal_mac, sizeof(cfg->ble.mac));
+        cfg->ble.mac[2]++;
+    }
+
+    // Use defaults if vid or pid are unset
+    if(cfg->usb.vid == 0) cfg->usb.vid = HID_VID_DEFAULT;
+    if(cfg->usb.pid == 0) cfg->usb.pid = HID_PID_DEFAULT;
+}
+
+void bad_kb_config_refresh(BadKbApp* app) {
+    bt_set_status_changed_callback(app->bt, NULL, NULL);
+    furi_hal_hid_set_state_callback(NULL, NULL);
+    if(app->bad_kb_script) {
+        furi_thread_flags_set(furi_thread_get_id(app->bad_kb_script->thread), WorkerEvtDisconnect);
+    }
+    if(app->conn_init_thread) {
+        furi_thread_join(app->conn_init_thread);
+    }
+
+    bool apply = false;
+    if(app->is_bt) {
+        BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
+        bad_kb_config_adjust(cfg);
+
+        if(app->conn_mode != BadKbConnModeBt) {
+            apply = true;
+            bad_kb_conn_reset(app);
+        } else {
+            BleProfileHidParams* cur = &app->cur_ble_cfg;
+            apply = apply || cfg->ble.bonding != app->bt_remember;
+            apply = apply || strncmp(cfg->ble.name, cur->name, sizeof(cfg->ble.name));
+            apply = apply || memcmp(cfg->ble.mac, cur->mac, sizeof(cfg->ble.mac));
+        }
+    } else {
+        BadKbConfig* cfg = app->set_usb_id ? &app->id_config : &app->config;
+        bad_kb_config_adjust(cfg);
+
+        if(app->conn_mode != BadKbConnModeUsb) {
+            apply = true;
+            bad_kb_conn_reset(app);
+        } else {
+            FuriHalUsbHidConfig* cur = app->cur_usb_cfg;
+            apply = apply || cfg->usb.vid != cur->vid;
+            apply = apply || cfg->usb.pid != cur->pid;
+            apply = apply || strncmp(cfg->usb.manuf, cur->manuf, sizeof(cur->manuf));
+            apply = apply || strncmp(cfg->usb.product, cur->product, sizeof(cur->product));
+        }
+    }
+
+    if(apply) {
+        bad_kb_conn_apply(app);
+    }
+
+    if(app->bad_kb_script) {
+        BadKbScript* script = app->bad_kb_script;
+        script->st.is_bt = app->is_bt;
+        script->bt = app->is_bt ? app->bt : NULL;
+        bool connected;
+        if(app->is_bt) {
+            bt_set_status_changed_callback(app->bt, bad_kb_bt_hid_state_callback, script);
+            connected = furi_hal_bt_is_connected();
+        } else {
+            furi_hal_hid_set_state_callback(bad_kb_usb_hid_state_callback, script);
+            connected = furi_hal_hid_is_connected();
+        }
+        if(connected) {
+            furi_thread_flags_set(furi_thread_get_id(script->thread), WorkerEvtConnect);
+        }
+    }
+
+    // Reload config page
+    scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
+    scene_manager_previous_scene(app->scene_manager);
+
+    // Update settings
+    if(xtreme_settings.bad_bt != app->is_bt ||
+       xtreme_settings.bad_bt_remember != app->bt_remember) {
+        xtreme_settings.bad_bt = app->is_bt;
+        xtreme_settings.bad_bt_remember = app->bt_remember;
+        xtreme_settings_save();
     }
 }
 
@@ -263,8 +424,8 @@ void bad_kb_app_free(BadKbApp* app) {
     free(app);
 }
 
-int32_t bad_kb_app(char* p) {
-    BadKbApp* bad_kb_app = bad_kb_app_alloc(p);
+int32_t bad_kb_app(void* p) {
+    BadKbApp* bad_kb_app = bad_kb_app_alloc((char*)p);
 
     view_dispatcher_run(bad_kb_app->view_dispatcher);
 

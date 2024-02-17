@@ -1,5 +1,4 @@
-#include "../bad_kb_app.h"
-#include "../helpers/ducky_script.h"
+#include "../bad_kb_app_i.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
 #include <xtreme/xtreme.h>
