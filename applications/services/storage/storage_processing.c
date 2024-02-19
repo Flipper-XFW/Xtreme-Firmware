@@ -89,7 +89,6 @@ FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage)
             storage_path_change_to_real_storage(path, type);
         }
 
-        furi_assert(type == ST_EXT || type == ST_INT);
         *storage = &app->storage[type];
 
         return FSE_OK;
