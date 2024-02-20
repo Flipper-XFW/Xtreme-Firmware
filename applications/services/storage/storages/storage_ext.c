@@ -149,7 +149,9 @@ FS_Error sd_format_card(StorageData* storage) {
         storage->status = StorageStatusNotAccessible;
         if(error != FR_OK) break;
         storage->status = StorageStatusNoFS;
-        error = f_setlabel("Flipper SD");
+        char label[] = "X:Flipper SD";
+        label[0] = sd_data->path[0]; // Drive number
+        error = f_setlabel(label);
         if(error != FR_OK) break;
         storage->status = StorageStatusNotMounted;
         error = f_mount(sd_data->fs, sd_data->path, 1);
@@ -313,6 +315,16 @@ static FS_Error storage_ext_parse_error(SDError error) {
     return result;
 }
 
+static char* storage_ext_drive_path(StorageData* storage, const char* path) {
+    SDData* sd_data = storage->data;
+    size_t path_len = strlen(path) + 3;
+    char* path_drv = malloc(path_len);
+    path_drv[0] = sd_data->path[0];
+    path_drv[1] = ':';
+    strlcpy(path_drv + 2, path, path_len - 2);
+    return path_drv;
+}
+
 /******************* File Functions *******************/
 
 static bool storage_ext_file_open(
@@ -335,7 +347,9 @@ static bool storage_ext_file_open(
     SDFile* file_data = malloc(sizeof(SDFile));
     storage_set_storage_file_data(file, file_data, storage);
 
-    file->internal_error_id = f_open(file_data, path, _mode);
+    char* drive_path = storage_ext_drive_path(storage, path);
+    file->internal_error_id = f_open(file_data, drive_path, _mode);
+    free(drive_path);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }
@@ -478,7 +492,9 @@ static bool storage_ext_dir_open(void* ctx, File* file, const char* path) {
 
     SDDir* file_data = malloc(sizeof(SDDir));
     storage_set_storage_file_data(file, file_data, storage);
-    file->internal_error_id = f_opendir(file_data, path);
+    char* drive_path = storage_ext_drive_path(storage, path);
+    file->internal_error_id = f_opendir(file_data, drive_path);
+    free(drive_path);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }
@@ -535,9 +551,11 @@ static bool storage_ext_dir_rewind(void* ctx, File* file) {
 /******************* Common FS Functions *******************/
 
 static FS_Error storage_ext_common_stat(void* ctx, const char* path, FileInfo* fileinfo) {
-    UNUSED(ctx);
+    StorageData* storage = ctx;
     SDFileInfo _fileinfo;
-    SDError result = f_stat(path, &_fileinfo);
+    char* drive_path = storage_ext_drive_path(storage, path);
+    SDError result = f_stat(drive_path, &_fileinfo);
+    free(drive_path);
 
     if(fileinfo != NULL) {
         fileinfo->size = _fileinfo.fsize;
@@ -550,35 +568,46 @@ static FS_Error storage_ext_common_stat(void* ctx, const char* path, FileInfo* f
 }
 
 static FS_Error storage_ext_common_remove(void* ctx, const char* path) {
-    UNUSED(ctx);
+    StorageData* storage = ctx;
 #ifdef FURI_RAM_EXEC
+    UNUSED(storage);
     UNUSED(path);
     return FSE_NOT_READY;
 #else
-    SDError result = f_unlink(path);
+    char* drive_path = storage_ext_drive_path(storage, path);
+    SDError result = f_unlink(drive_path);
+    free(drive_path);
     return storage_ext_parse_error(result);
 #endif
 }
 
 static FS_Error storage_ext_common_rename(void* ctx, const char* old, const char* new) {
-    UNUSED(ctx);
+    StorageData* storage = ctx;
 #ifdef FURI_RAM_EXEC
+    UNUSED(storage);
     UNUSED(old);
     UNUSED(new);
     return FSE_NOT_READY;
 #else
-    SDError result = f_rename(old, new);
+    char* drive_old = storage_ext_drive_path(storage, old);
+    char* drive_new = storage_ext_drive_path(storage, new);
+    SDError result = f_rename(drive_old, drive_new);
+    free(drive_old);
+    free(drive_new);
     return storage_ext_parse_error(result);
 #endif
 }
 
 static FS_Error storage_ext_common_mkdir(void* ctx, const char* path) {
-    UNUSED(ctx);
+    StorageData* storage = ctx;
 #ifdef FURI_RAM_EXEC
+    UNUSED(storage);
     UNUSED(path);
     return FSE_NOT_READY;
 #else
-    SDError result = f_mkdir(path);
+    char* drive_path = storage_ext_drive_path(storage, path);
+    SDError result = f_mkdir(drive_path);
+    free(drive_path);
     return storage_ext_parse_error(result);
 #endif
 }
@@ -673,7 +702,7 @@ void storage_ext_init(StorageData* storage) {
 
     SDData* sd_data = malloc(sizeof(SDData));
     sd_data->fs = &fatfs_object;
-    sd_data->path = "0:/";
+    sd_data->path = fatfs_path;
     sd_data->sd_was_present = true;
 
     storage->data = sd_data;
