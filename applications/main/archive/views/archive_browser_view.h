@@ -31,6 +31,7 @@ typedef enum {
     ArchiveTabU2f,
     ArchiveTabApplications,
     ArchiveTabSearch,
+    ArchiveTabDiskImage,
     ArchiveTabInternal,
     ArchiveTabBrowser,
     ArchiveTabTotal,
@@ -90,6 +91,7 @@ struct ArchiveBrowserView {
     InputKey last_tab_switch_dir;
     bool is_root;
     FuriTimer* scroll_timer;
+    File* disk_image;
 };
 
 typedef struct {

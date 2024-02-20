@@ -18,6 +18,7 @@ static const char* tab_default_paths[] = {
     [ArchiveTabU2f] = "/app:u2f",
     [ArchiveTabApplications] = EXT_PATH("apps"),
     [ArchiveTabSearch] = "/app:search",
+    [ArchiveTabDiskImage] = STORAGE_MNT_PATH_PREFIX,
     [ArchiveTabInternal] = STORAGE_INT_PATH_PREFIX,
     [ArchiveTabBrowser] = STORAGE_EXT_PATH_PREFIX,
 };
@@ -54,6 +55,7 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
     [ArchiveTabApplications] = ArchiveFileTypeAppOrJs,
     [ArchiveTabSearch] = ArchiveFileTypeSearch,
+    [ArchiveTabDiskImage] = ArchiveFileTypeUnknown,
     [ArchiveTabInternal] = ArchiveFileTypeUnknown,
     [ArchiveTabBrowser] = ArchiveFileTypeUnknown,
 };

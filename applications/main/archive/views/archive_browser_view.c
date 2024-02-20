@@ -19,6 +19,7 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabU2f] = "U2F",
     [ArchiveTabApplications] = "Apps",
     [ArchiveTabSearch] = "Search",
+    [ArchiveTabDiskImage] = "Disk Image",
     [ArchiveTabInternal] = "Internal",
     [ArchiveTabBrowser] = "Browser",
 };
@@ -119,7 +120,7 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 if(selected->type != ArchiveFileTypeFolder) {
                     archive_menu_add_item(
                         menu_array_push_raw(model->context_menu),
-                        "Show",
+                        selected->type == ArchiveFileTypeDiskImage ? "Mount" : "Show",
                         ArchiveBrowserEventFileMenuShow);
                 }
             }
@@ -209,7 +210,8 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             file_type = file->type;
             bool ext = model->tab_idx == ArchiveTabBrowser ||
-                       model->tab_idx == ArchiveTabInternal || model->tab_idx == ArchiveTabSearch;
+                       model->tab_idx == ArchiveTabInternal ||
+                       model->tab_idx == ArchiveTabDiskImage || model->tab_idx == ArchiveTabSearch;
             if(file_type == ArchiveFileTypeApplication) {
                 if(file->custom_icon_data) {
                     custom_icon_data = file->custom_icon_data;
