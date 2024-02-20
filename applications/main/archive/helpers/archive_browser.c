@@ -402,7 +402,11 @@ void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
         ArchiveBrowserViewModel * model,
         {
             model->tab_idx = tab;
-            model->clipboard = NULL;
+            if(!memcmp(archive_get_default_path(tab), "/app:", strlen("/app:")) &&
+               model->clipboard != NULL) {
+                free(model->clipboard);
+                model->clipboard = NULL;
+            }
         },
         false);
 }
