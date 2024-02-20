@@ -24,6 +24,7 @@ typedef enum {
     ArchiveFileTypeJS,
     ArchiveFileTypeSearch,
     ArchiveFileTypeUpdateManifest,
+    ArchiveFileTypeDiskImage,
     ArchiveFileTypeFolder,
     ArchiveFileTypeUnknown,
     ArchiveFileTypeAppOrJs,

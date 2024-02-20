@@ -38,6 +38,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeJS] = &I_js_script_10px,
     [ArchiveFileTypeSearch] = &I_search_10px,
     [ArchiveFileTypeUpdateManifest] = &I_update_10px,
+    [ArchiveFileTypeDiskImage] = &I_floppydisk_10px,
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
     [ArchiveFileTypeLoading] = &I_loading_10px,
