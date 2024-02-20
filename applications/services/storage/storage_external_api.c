@@ -979,6 +979,49 @@ FS_Error storage_sd_status(Storage* storage) {
     return S_RETURN_ERROR;
 }
 
+FS_Error storage_virtual_init(Storage* storage, File* image) {
+    S_API_PROLOGUE;
+    SAData data = {
+        .virtualinit = {
+            .image = image,
+        }};
+    S_API_MESSAGE(StorageCommandVirtualInit);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error storage_virtual_format(Storage* storage) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandVirtualFormat);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error storage_virtual_mount(Storage* storage) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandVirtualMount);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error storage_virtual_unmount(Storage* storage) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandVirtualUnmount);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error storage_virtual_quit(Storage* storage) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandVirtualQuit);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
 File* storage_file_alloc(Storage* storage) {
     File* file = malloc(sizeof(File));
     file->type = FileTypeClosed;

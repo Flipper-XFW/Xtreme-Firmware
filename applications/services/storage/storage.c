@@ -43,6 +43,7 @@ Storage* storage_app_alloc() {
     }
 
 #ifndef FURI_RAM_EXEC
+    storage_mnt_init(&app->storage[ST_MNT]);
     storage_int_init(&app->storage[ST_INT]);
 #endif
     storage_ext_init(&app->storage[ST_EXT]);

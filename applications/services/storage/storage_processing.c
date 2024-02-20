@@ -54,6 +54,8 @@ static StorageType storage_get_type_by_path(FuriString* path) {
         type = ST_EXT;
     } else if(memcmp(path_cstr, STORAGE_INT_PATH_PREFIX, strlen(STORAGE_INT_PATH_PREFIX)) == 0) {
         type = ST_INT;
+    } else if(memcmp(path_cstr, STORAGE_MNT_PATH_PREFIX, strlen(STORAGE_MNT_PATH_PREFIX)) == 0) {
+        type = ST_MNT;
     } else if(memcmp(path_cstr, STORAGE_ANY_PATH_PREFIX, strlen(STORAGE_ANY_PATH_PREFIX)) == 0) {
         type = ST_ANY;
     }
@@ -786,6 +788,25 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         break;
     case StorageCommandSDStatus:
         message->return_data->error_value = storage_process_sd_status(app);
+        break;
+
+    // Virtual operations
+    case StorageCommandVirtualInit:
+        File* image = message->data->virtualinit.image;
+        StorageData* image_storage = get_storage_by_file(image, app->storage);
+        message->return_data->error_value = storage_process_virtual_init(image_storage, image);
+        break;
+    case StorageCommandVirtualFormat:
+        message->return_data->error_value = storage_process_virtual_format(&app->storage[ST_MNT]);
+        break;
+    case StorageCommandVirtualMount:
+        message->return_data->error_value = storage_process_virtual_mount(&app->storage[ST_MNT]);
+        break;
+    case StorageCommandVirtualUnmount:
+        message->return_data->error_value = storage_process_virtual_unmount(&app->storage[ST_MNT]);
+        break;
+    case StorageCommandVirtualQuit:
+        message->return_data->error_value = storage_process_virtual_quit(&app->storage[ST_MNT]);
         break;
     }
 
