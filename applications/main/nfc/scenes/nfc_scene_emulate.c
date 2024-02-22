@@ -4,9 +4,7 @@
 
 #include <xtreme/xtreme.h>
 
-#define NFC_EMULATION_TIME_MAX_MS (5 * 60 * 1000)
-
-FuriTimer* timer_auto_exit;
+FuriTimer* timer_auto_exit = NULL;
 
 void nfc_scene_emulate_timer_callback(void* context) {
     NfcApp* instance = context;
@@ -20,15 +18,12 @@ void nfc_scene_emulate_on_enter(void* context) {
 
     nfc_protocol_support_on_enter(NfcProtocolSupportSceneEmulate, context);
 
-    timer_auto_exit =
-        furi_timer_alloc(nfc_scene_emulate_timer_callback, FuriTimerTypeOnce, instance);
-
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) || instance->fav_timeout)
+    if(instance->fav_timeout) {
+        timer_auto_exit =
+            furi_timer_alloc(nfc_scene_emulate_timer_callback, FuriTimerTypeOnce, instance);
         furi_timer_start(
-            timer_auto_exit,
-            instance->fav_timeout ?
-                xtreme_settings.favorite_timeout * furi_kernel_get_tick_frequency() :
-                NFC_EMULATION_TIME_MAX_MS);
+            timer_auto_exit, xtreme_settings.favorite_timeout * furi_kernel_get_tick_frequency());
+    }
 }
 
 bool nfc_scene_emulate_on_event(void* context, SceneManagerEvent event) {
@@ -49,7 +44,10 @@ bool nfc_scene_emulate_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_emulate_on_exit(void* context) {
-    furi_timer_stop(timer_auto_exit);
-    furi_timer_free(timer_auto_exit);
+    if(timer_auto_exit) {
+        furi_timer_stop(timer_auto_exit);
+        furi_timer_free(timer_auto_exit);
+        timer_auto_exit = NULL;
+    }
     nfc_protocol_support_on_exit(NfcProtocolSupportSceneEmulate, context);
 }
