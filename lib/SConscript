@@ -50,6 +50,4 @@ libs = env.BuildModules(
     ],
 )
 
-env.Append(SDK_HEADERS=[File("#/lib/callback-connector/callback-connector.h")])
-
 Return("libs")
