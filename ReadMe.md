@@ -201,7 +201,7 @@ $ ./fbt launch APPSRC=your_appid
 ----
 <h2 align="center">Stargazers over time</h2>
 
-[![Stargazers over time](https://starchart.cc/Flipper-XFW/Xtreme-Firmware.svg)](https://starchart.cc/Flipper-XFW/Xtreme-Firmware)
+[![Stargazers over time](https://starchart.cc/Flipper-XFW/Xtreme-Firmware.svg?variant=dark)](https://starchart.cc/Flipper-XFW/Xtreme-Firmware)
 
 ----
 <h2 align="center">Contributors</h2>
