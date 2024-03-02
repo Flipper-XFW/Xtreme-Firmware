@@ -56,7 +56,10 @@ def pack_anim(src: pathlib.Path, dst: pathlib.Path):
             shutil.copyfile(src / "meta.txt", dst / "meta.txt")
             continue
         elif frame.name.startswith("frame_"):
-            (dst / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
+            if frame.name.endswith(".bm"):
+                shutil.copyfile(src / frame.name, dst / frame.name)            
+            else:
+                (dst / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
 
 
 def pack_icon_animated(src: pathlib.Path, dst: pathlib.Path):
