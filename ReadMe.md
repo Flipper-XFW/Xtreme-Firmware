@@ -213,11 +213,11 @@ $ ./fbt launch APPSRC=your_appid
 ## ❤️ Support
 If you love what you're seeing, **please consider donating to us**. This will allow us to dedicate more time to the project(s) you love!
 
-- **[Patreon](https://patreon.com/crazyco)**: ❤️ Account needed, subscription with perks
-- **[ko-fi](https://ko-fi.com/crazyco)**: No account needed, subscription or one-time donation
-- **[Wire-transfer](https://bunq.me/ClaraK)**: No account needed, one-time donation
-- **[Paypal](https://paypal.me/ClaraCrazy)**: Account needed, one-time donation
-- **Monero**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`
+- **[Patreon](https://patreon.com/crazyco) (Fee: 8%\*)**: ❤️ Account needed, subscription with perks
+- **[ko-fi](https://ko-fi.com/crazyco) (Fee: 2%\*)**: No account needed, subscription or one-time donation
+- **[Wire-transfer](https://bunq.me/ClaraK) (Fee: 0%\*)**: No account needed, one-time donation
+- **[Paypal](https://paypal.me/ClaraCrazy) (Fee: 2%\*)**: Account needed, one-time donation
+- **Monero (Fee: ~2.5%\*)**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`<br>
 
 **Thanks for all your support <3**
 
