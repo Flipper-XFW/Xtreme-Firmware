@@ -8,7 +8,7 @@
   <a href="https://flipper-xtre.me">Website</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#What-makes-it-special">Intro</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#Install">Install</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#list-of-changes">Changelog</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware/wiki">Wiki</a> | <a href="https://discord.gg/flipper-xtreme">Discord</a> | <a href="https://github.com/Flipper-XFW/Xtreme-Firmware#%EF%B8%8F-support">Donate</a>
 </h2>
 
-This firmware is an extensive overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and also features most of the awesome code-bits from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware).
+This firmware is an extensive overhaul of the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and is also always updated from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware), which is by far the most stable alternative, if this is just too much for you!
 
 -----
 <br>
