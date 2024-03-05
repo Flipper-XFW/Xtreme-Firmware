@@ -7,6 +7,8 @@ on:
       - "**.h"
       - "**.bin"
       - "**.inc"
+      - "assets/**"
+
     branches:
       - dev
       - main
