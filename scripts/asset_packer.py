@@ -57,7 +57,7 @@ def pack_anim(src: pathlib.Path, dst: pathlib.Path):
             continue
         elif frame.name.startswith("frame_"):
             if frame.name.endswith(".bm"):
-                shutil.copyfile(src / frame.name, dst / frame.name)            
+                shutil.copyfile(src / frame.name, dst / frame.name)
             else:
                 (dst / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
 
