@@ -109,3 +109,5 @@ void bad_kb_conn_reset(BadKbApp* app);
 void bad_kb_config_refresh(BadKbApp* app);
 
 void bad_kb_config_adjust(BadKbConfig* cfg);
+
+void bad_kb_load_settings(BadKbApp* app);

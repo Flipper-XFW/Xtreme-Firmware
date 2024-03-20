@@ -29,7 +29,7 @@ static void bad_kb_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-static void bad_kb_load_settings(BadKbApp* app) {
+void bad_kb_load_settings(BadKbApp* app) {
     furi_string_reset(app->keyboard_layout);
     BadKbConfig* cfg = &app->config;
 
