@@ -103,8 +103,10 @@ static void text_box_insert_endline(Canvas* canvas, TextBoxModel* model) {
     uint8_t lines_on_screen = 56 / canvas_current_font_height(canvas);
     if(model->focus == TextBoxFocusEnd && line_num > lines_on_screen) {
         // Set text position to 5th line from the end
-        for(uint8_t i = 0; i < line_num - lines_on_screen; i++) {
-            while(*model->text_pos++ != '\n') {
+        const char* end = model->text + furi_string_size(model->text_formatted);
+        for(size_t i = 0; i < line_num - lines_on_screen; i++) {
+            while(model->text_pos < end) {
+                if(*model->text_pos++ == '\n') break;
             }
         }
         model->scroll_num = line_num - (lines_on_screen - 1);

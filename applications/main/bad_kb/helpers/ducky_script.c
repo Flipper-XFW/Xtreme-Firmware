@@ -576,6 +576,7 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->defdelay = 0;
                 bad_kb->stringdelay = 0;
                 bad_kb->repeat_cnt = 0;
+                bad_kb->defstringdelay = 0;
                 bad_kb->key_hold_nb = 0;
                 bad_kb->file_end = false;
                 storage_file_seek(script_file, 0, true);
@@ -605,6 +606,7 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->defdelay = 0;
                 bad_kb->stringdelay = 0;
                 bad_kb->repeat_cnt = 0;
+                bad_kb->defstringdelay = 0;
                 bad_kb->file_end = false;
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
@@ -779,10 +781,11 @@ static int32_t bad_kb_worker(void* context) {
             }
         } else if(worker_state == BadKbStateStringDelay) { // State: print string with delays
             FURI_LOG_D(WORKER_TAG, "delay wait");
+            uint32_t delay = (bad_kb->stringdelay == 0) ? bad_kb->defstringdelay :
+                                                          bad_kb->stringdelay;
             uint32_t flags = bad_kb_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtConnect |
-                    WorkerEvtDisconnect,
-                bad_kb->stringdelay);
+                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                delay);
             FURI_LOG_D(WORKER_TAG, "delay flags: %lu", flags);
 
             if(!(flags & FuriFlagError)) {
